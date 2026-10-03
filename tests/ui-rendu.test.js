@@ -140,6 +140,38 @@ test('contenus attendus : tableau, détail, produits, réglages', () => {
   assert.match(reg, /hors ligne/i);
 });
 
+test('jour : « Fait » marque fait en un toucher avec la cible ; sans quantité connue, aucun « Fait »', async () => {
+  nettoyerPanneaux();
+  const e = etatVide();
+  prevision(e, S.mercredi, 1, 10);
+  const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
+  const p = principaleDe(e, c);
+  planifier(e, p, S.mardi, 'apres_midi', h());
+  const inconnu = composantValide(e, S.mercredi, 2, J.PRODUIT_SEC_TEST, { nom: 'SANS_PREVISION_TEST' });
+  planifier(e, principaleDe(e, inconnu), S.mardi, 'apres_midi', h());
+  magasin.remplacer(e);
+  const noeud = vues.jour.rendre(magasin.etat(), S.mardi);
+  const faits = boutons(noeud).filter((b) => b.textContent === 'Fait');
+  assert.equal(faits.length, 1, 'l\'élément sans quantité n\'a pas de « Fait » : rien n\'est inventé');
+  await faits[0].click();
+  assert.equal(magasin.etat().productions[p].etat, 'fait', 'un seul toucher');
+  assert.equal(magasin.etat().productions[p].quantiteReelle, 500, 'la cible devient le réel');
+  assert.equal(panneauxOuverts(dom.corps).length, 0, 'aucun panneau');
+  // La jauge du jour suit.
+  const apres = vues.jour.rendre(magasin.etat(), S.mardi);
+  assert.match(apres.textContent, /2 sur 2 fait|1 sur 2 fait/, 'la jauge compte les productions décidées ce jour');
+});
+
+test('jour : la jauge d\'avancement dit « x sur y faits » et s\'efface sans production décidée', () => {
+  const e = etatVide();
+  prevision(e, S.mercredi, 1, 10);
+  const p = principaleDe(e, composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST));
+  planifier(e, p, S.mardi, 'apres_midi', h());
+  magasin.remplacer(e);
+  assert.match(vues.jour.rendre(magasin.etat(), S.mardi).textContent, /0 sur 1 fait/);
+  assert.doesNotMatch(vues.jour.rendre(magasin.etat(), S.lundi).textContent, /sur \d+ fait/);
+});
+
 test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide = une ligne discrète', () => {
   const { e } = etatRiche();
   magasin.remplacer(e);

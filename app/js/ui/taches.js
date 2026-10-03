@@ -6,8 +6,9 @@ import { calculerComposant } from '../domaine/calcul.js';
 import {
   chargeCreneau, cibleProduction, ecartProduction, etatCreneau, etatTache, evaluerAvance, regleDe, suggererCreneau,
 } from '../domaine/planification.js';
-import { ajouterPreparatoire, corrigerReel, deciderEcart, demarrer, marquerFait, planifier, reporter, supprimerProduction }
-  from '../domaine/actions.js';
+import {
+  ajouterPreparatoire, annulerFait, corrigerReel, deciderEcart, demarrer, marquerFait, planifier, reporter, supprimerProduction,
+} from '../domaine/actions.js';
 import { libelle } from '../domaine/statuts.js';
 import { agir, agirStrict, etat as etatCourant } from '../magasin.js';
 import { champs } from './champs.js';
@@ -118,15 +119,15 @@ export function actionsTache(ligne, p) {
       break;
     case 'a_planifier':
       a.push(court('Planifier', () => dialogPlanifier(id, 'planifier')));
-      a.push(court('Fait', () => dialogFait(id)));
+      a.push(court('Fait', () => faireEnUnToucher(id)));
       break;
     case 'a_faire':
       a.push(court('Démarrer', () => agir((e, t) => demarrer(e, id, t))));
-      a.push(court('Fait', () => dialogFait(id)));
+      a.push(court('Fait', () => faireEnUnToucher(id)));
       a.push(court('Reporter', () => dialogPlanifier(id, 'reporter')));
       break;
     case 'en_cours':
-      a.push(court('Fait', () => dialogFait(id)));
+      a.push(court('Fait', () => faireEnUnToucher(id)));
       a.push(court('Reporter', () => dialogPlanifier(id, 'reporter')));
       break;
     case 'fait':
@@ -135,7 +136,7 @@ export function actionsTache(ligne, p) {
     case 'ecart':
       a.push(court('Décider', () => dialogDecider(id)));
       if (fait) a.push(court('Corriger', () => dialogCorriger(id)));
-      else a.push(court('Fait', () => dialogFait(id)));
+      else a.push(court('Fait', () => faireEnUnToucher(id)));
       break;
     default:
   }
@@ -154,7 +155,26 @@ function uniteDe(etat, p) {
   return p.unite ?? calculerComposant(etat, p.composantId).uniteTravail ?? null;
 }
 
-/** « Fait » : propose la cible et permet de saisir le réel. */
+/**
+ * « Fait » en un toucher : la cible devient le réel, un message propose d'annuler (deux minutes) ou de corriger.
+ * Sans cible connue, on garde le panneau : il faut saisir la quantité réellement faite.
+ */
+export function faireEnUnToucher(productionId) {
+  const e = etatCourant();
+  const p = e.productions[productionId];
+  if (p.genre !== 'preparatoire' && cibleProduction(e, productionId) === null) { dialogFait(productionId); return; }
+  const r = agir((x, t) => marquerFait(x, productionId, undefined, t));
+  if (!r.ok) return;
+  try { globalThis.navigator?.vibrate?.(20); } catch { /* sans effet sur iOS */ }
+  const apres = etatCourant().productions[productionId];
+  const detail = p.genre === 'preparatoire' ? '' : ` : ${quantite(apres.quantiteReelle, apres.unite)}`;
+  afficherMessage(`Fait${detail} (${p.libelle})`, 'ok', [
+    { libelle: 'Annuler', action: () => { agir((x, t) => annulerFait(x, productionId, t)); } },
+    ...(p.genre === 'preparatoire' ? [] : [{ libelle: 'Corriger', action: () => dialogCorriger(productionId) }]),
+  ]);
+}
+
+/** « Fait » avec panneau : propose la cible et permet de saisir le réel. */
 export function dialogFait(productionId) {
   const e = etatCourant();
   const p = e.productions[productionId];

@@ -281,6 +281,9 @@ export function feuilleDuJour(etat, date) {
     creneau, etatCreneau: creneau ? etatCreneau(etat, date, creneau) : null,
     charge: creneau ? chargeCreneau(etat, date, creneau) : null, taches,
   }));
+  // Avancement du jour : productions décidées ce jour, faites ou non (la jauge « 3 sur 7 faits »).
+  const decidees = Object.values(etat.productions ?? {}).filter((p) => p.jourDecide === date && etat.composants?.[p.composantId]);
+  const avancement = { faites: decidees.filter((p) => p.etat === 'fait').length, total: decidees.length };
   const aAvancer = estOuvert(date) ? avancesPossibles(etat, date).filter((a) => a.jourDecide !== date && a.etat !== 'a_preciser') : [];
-  return { aFaire, dejaPret, decisions, quantitesManquantes, aAvancer, attendus, revueMiSemaine: jourSemaine(date) === 2 };
+  return { aFaire, dejaPret, decisions, quantitesManquantes, aAvancer, attendus, avancement, revueMiSemaine: jourSemaine(date) === 2 };
 }

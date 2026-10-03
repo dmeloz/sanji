@@ -6,8 +6,10 @@ import { decisionsSansDoublon } from '../domaine/tableau-blanc.js';
 import { libelle } from '../domaine/statuts.js';
 import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
+import { ecranAllumePossible } from './ecran-allume.js';
 import { bouton, encadre, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
 import { formaterHeure } from './format.js';
+import { activerGlisser } from './glisser.js';
 import {
   carteTache, dialogPlanifier, dialogPreparatoire, pastilleCreneau, texteCharge,
 } from './taches.js';
@@ -29,8 +31,12 @@ function evaluationSiAvance(etat, productionId) {
 function rubriqueAFaire(etat, feuille, date, aujourd) {
   const titreTexte = date === aujourd ? "À faire aujourd'hui" : `À faire le ${libelleJour(date)}`;
   const groupes = feuille.aFaire.filter((g) => g.taches.length > 0);
-  if (groupes.length === 0) return rubrique(titreTexte, ligneVide('Aucune tâche décidée pour ce jour.'));
-  return rubrique(titreTexte, groupes.map((g) => h('div', { classe: 'groupe-creneau' },
+  const { faites, total } = feuille.avancement;
+  const jauge = total > 0 ? h('div', { classe: 'avancement' },
+    h('progress', { classe: 'avancement-barre', value: faites, max: total, 'aria-label': 'Avancement du jour' }),
+    h('p', { classe: 'avancement-texte' }, `${faites} sur ${total} fait${faites >= 2 ? 's' : ''}`)) : null;
+  if (groupes.length === 0) return rubrique(titreTexte, jauge, ligneVide(total > 0 ? 'Tout est fait.' : 'Aucune tâche décidée pour ce jour.'));
+  return rubrique(titreTexte, jauge, groupes.map((g) => h('div', { classe: 'groupe-creneau' },
     h('h3', null, g.creneau ? libelle('CRENEAU', g.creneau) : 'Créneau non précisé',
       g.etatCreneau && g.etatCreneau !== 'libre' ? [' ', pastilleCreneau(g.etatCreneau)] : null),
     g.charge ? h('p', { classe: 'meta' }, texteCharge(g.charge)) : null,
@@ -111,6 +117,7 @@ export function rendre(etat, date) {
     { href: `#/jour/${aujourd}`, texte: "Aujourd'hui" },
     { href: `#/jour/${ajouterJours(date, 1)}`, texte: 'Jour suivant ›' }));
   racine.appendChild(h('p', null, lien(`#/detail/${date}`, 'Détail du jour : menus, prévisions, fiches')));
+  if (ecranAllumePossible()) racine.appendChild(h('p', { classe: 'meta' }, 'L\'écran reste allumé sur cette page.'));
   if (!estOuvert(date)) {
     racine.appendChild(h('p', { classe: 'ferme' }, 'fermé'));
     racine.appendChild(h('p', { classe: 'aide' }, 'Le dimanche est non travaillé : aucune tâche. Il reste compté dans le temps de conservation.'));
@@ -124,5 +131,9 @@ export function rendre(etat, date) {
     rubriqueQuantites(feuille), rubriqueAAvancer(etat, feuille, date)]) {
     if (r) racine.appendChild(r);
   }
+  activerGlisser(racine, {
+    suivant: () => { location.hash = `#/jour/${ajouterJours(date, 1)}`; },
+    precedent: () => { location.hash = `#/jour/${ajouterJours(date, -1)}`; },
+  });
   return racine;
 }

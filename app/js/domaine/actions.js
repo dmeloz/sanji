@@ -616,12 +616,38 @@ export function marquerFait(etat, productionId, quantite, h) {
     portions: calc?.portions.total ?? null, cible, formule: calc?.formule ?? '', dependances: calc?.dependances ?? [],
     aValider: calc?.aValider ?? null,
   });
+  p.avantFait = { etat: p.etat, cibleAuDemarrage: p.cibleAuDemarrage };
   if (p.cibleAuDemarrage === null) p.cibleAuDemarrage = cible;
   p.etat = 'fait';
   p.quantiteReelle = reel;
   p.unite = calc?.uniteTravail ?? c?.grammage.unite ?? null;
   p.hFait = h;
   return terminer(etat, h, 'marquerFait', `${p.libelle} : ${reel ?? '—'}`, p);
+}
+
+/** Fenêtre pendant laquelle un marquage « fait » peut être annulé (un toucher par erreur). */
+const FENETRE_ANNULATION_MS = 2 * 60 * 1000;
+
+/**
+ * Annule un marquage « fait » fait par erreur, dans les deux minutes qui suivent : la production redevient ce
+ * qu'elle était (à faire ou en cours), sans quantité réelle ni instantané. Passé ce délai, utiliser corrigerReel.
+ */
+export function annulerFait(etat, productionId, h) {
+  verifierH(h);
+  const p = exigerProduction(etat, productionId);
+  if (p.etat !== 'fait') throw new Error("La production n'est pas faite : rien à annuler.");
+  const ecoule = Date.parse(h) - Date.parse(p.hFait);
+  if (!Number.isFinite(ecoule) || ecoule > FENETRE_ANNULATION_MS) {
+    throw new Error('Trop tard pour annuler : utilisez « Corriger » pour changer la quantité réelle.');
+  }
+  const avant = p.avantFait ?? { etat: 'a_faire', cibleAuDemarrage: null };
+  p.etat = avant.etat;
+  p.cibleAuDemarrage = avant.cibleAuDemarrage;
+  p.quantiteReelle = null;
+  p.hFait = null;
+  p.instantane = null;
+  p.avantFait = null;
+  return terminer(etat, h, 'annulerFait', p.libelle, p);
 }
 
 /** Corrige la quantité réelle d'une production faite (l'instantané reste celui du marquage). */

@@ -3,6 +3,7 @@
 import { estDateValide, lundiDe } from '../domaine/dates.js';
 import { abonner, aujourdhui, etat, statutStockage } from '../magasin.js';
 import { h, parId } from './dom.js';
+import { maintenirAllume } from './ecran-allume.js';
 import { encadre } from './elements.js';
 import * as vueComposant from './vue-composant.js';
 import * as vueDetail from './vue-detail.js';
@@ -73,6 +74,7 @@ export function rendre() {
   const titreVue = parId('barre-titre');
   if (titreVue) titreVue.textContent = VUES[vue].titre(param);
   majOnglets(vue);
+  maintenirAllume(vue === 'jour').catch(() => {});
   dessinerBandeaux();
   window.scrollTo(0, defilement);
   cleCourante = cle;

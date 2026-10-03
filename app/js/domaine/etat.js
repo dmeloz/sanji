@@ -94,6 +94,7 @@ export function productionVide(id) {
     id, composantId: null, dateService: null, genre: 'principale', libelle: '',
     jourDecide: null, creneauDecide: null, etat: 'a_faire', cibleAuDemarrage: null,
     quantiteReelle: null, unite: null, hFait: null, instantane: null, decisionEcart: null,
+    avantFait: null, // { etat, cibleAuDemarrage } avant le marquage « fait », pour pouvoir l'annuler juste après
   };
 }
 
