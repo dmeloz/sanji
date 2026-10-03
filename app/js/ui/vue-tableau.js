@@ -6,6 +6,7 @@ import { tableauBlanc } from '../domaine/tableau-blanc.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { lien } from './elements.js';
+import { dialogPrevision } from './vue-detail.js';
 
 export function titre() { return 'Tableau'; }
 
@@ -66,22 +67,28 @@ function morceaux(menu) {
   return noeuds;
 }
 
-function celluleMenu(jour, numero, lundi) {
+function celluleMenu(jour, numero) {
   const menu = jour.menus.find((m) => m.menu === numero);
   if (!menu) {
     return h('div', { classe: 'tb-cellule tb-menu' },
       numero === 1 ? h('p', { classe: 'tb-discret' }, 'pas de menu du jour') : null);
   }
   if (!menu.saisi) return h('div', { classe: 'tb-cellule tb-menu tb-blanc' });
+  // Sur un vrai tableau, le nombre de couverts s'écrit à côté du menu : le toucher ouvre la prévision, à saisir
+  // ou à réviser quand on veut (le calcul suit). Sans chiffre, un cercle vide invite à la saisir.
   let couverts = null;
+  const ouvrir = () => dialogPrevision(jour.date, numero);
   if (menu.couverts !== null) {
-    couverts = h('span', {
+    couverts = h('button', {
+      type: 'button', onClick: ouvrir,
       classe: `tb-couverts feutre${menu.provisoires ? ' tb-provisoire' : ''}`,
-      'aria-label': `${pluriel(menu.couverts, 'portion', 'portions')}${menu.provisoires ? ', dont des groupes provisoires' : ''}`,
+      'aria-label': `${libelleJour(jour.date)}, menu ${numero} : ${pluriel(menu.couverts, 'portion', 'portions')}${menu.provisoires ? ', dont des groupes provisoires' : ''}, modifier la prévision`,
     }, String(menu.couverts));
   } else if (menu.previsionASaisir) {
-    // Sur un vrai tableau, le nombre de couverts s'écrit à côté du menu : un cercle vide invite à le saisir.
-    couverts = h('a', { href: `#/menus/${lundi}`, classe: 'tb-couverts tb-couverts-vide feutre', 'aria-label': `Menu ${numero} : prévision à saisir` }, '?');
+    couverts = h('button', {
+      type: 'button', onClick: ouvrir, classe: 'tb-couverts tb-couverts-vide feutre',
+      'aria-label': `${libelleJour(jour.date)}, menu ${numero} : saisir la prévision`,
+    }, '?');
   }
   return h('div', { classe: 'tb-cellule tb-menu' },
     h('span', { classe: 'tb-rang', 'aria-label': `Menu ${numero}` }, String(numero)),
@@ -119,7 +126,7 @@ function celluleMiseEnPlace(jour) {
         h('a', { href: `#/composant/${t.composantId}` },
           caseSymbole(t.symbole),
           h('span', { classe: 'mep-nom' }, t.nom),
-          t.quantite ? h('span', { classe: 'mep-quantite' }, t.quantite) : h('span', { classe: 'mep-sans' }, 'quantité à régler'))))));
+          t.quantite ? h('span', { classe: 'mep-quantite' }, t.quantite) : null)))));
     } else {
       enfants.push(h('p', { classe: 'tb-resume' }, lien(`#/jour/${jour.date}`, resumeMiseEnPlace(jour.compte), 'tb-resume-lien')));
     }
@@ -131,7 +138,7 @@ function celluleMiseEnPlace(jour) {
   return h('div', { classe: `tb-cellule tb-miseenplace${enfants.length === 0 ? ' tb-blanc' : ''}` }, enfants);
 }
 
-function jourTableau(jour, i, lundi) {
+function jourTableau(jour, i) {
   return h('article', {
     classe: `tb-jour${jour.estAujourdhui ? ' tb-aujourdhui' : ''}${jour.deplie ? ' tb-deplie' : ''}`,
     'aria-label': libelleJour(jour.date),
@@ -140,8 +147,8 @@ function jourTableau(jour, i, lundi) {
     jour.estAujourdhui ? h('span', { classe: 'aimant', 'aria-hidden': 'true' }) : null,
     h('span', { classe: 'tb-nom-jour' }, JOURS_COURTS[i]),
     h('span', { classe: 'tb-nom-numero' }, String(Number(jour.date.slice(8))))),
-  celluleMenu(jour, 1, lundi),
-  celluleMenu(jour, 2, lundi),
+  celluleMenu(jour, 1),
+  celluleMenu(jour, 2),
   celluleGroupes(jour),
   celluleMiseEnPlace(jour));
 }
@@ -152,7 +159,7 @@ function tableau(tb) {
       h('a', { href: `#/tableau/${tb.semainePrecedente}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
       h('h2', { classe: 'feutre tableau-titre', id: 'titre-tableau' }, `Semaine du ${libelleJour(tb.lundi).replace(/^lundi\s+/, '')}`),
       h('a', { href: `#/tableau/${tb.semaineSuivante}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')),
-    h('div', { classe: 'tableau-grille' }, tb.jours.map((jour, i) => jourTableau(jour, i, tb.lundi))));
+    h('div', { classe: 'tableau-grille' }, tb.jours.map((jour, i) => jourTableau(jour, i))));
 }
 
 export function rendre(etat, lundiAffiche) {

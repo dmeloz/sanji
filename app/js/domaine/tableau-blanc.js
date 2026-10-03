@@ -164,7 +164,7 @@ function joursSansPrevision(etat, dates) {
 }
 
 const ligneTache = (t) => ({
-  genre: 'tache', texte: t.nom, quantite: t.quantite, detail: t.quantite ? null : 'quantité à régler',
+  genre: 'tache', texte: t.nom, quantite: t.quantite, detail: null,
   symbole: t.symbole, lien: `#/composant/${t.composantId}`,
 });
 

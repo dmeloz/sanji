@@ -537,6 +537,7 @@ dialog.panneau::backdrop { background: rgba(8, 12, 16, 0.6); }
   font-variant-numeric: tabular-nums;
 }
 .tb-provisoire { border-style: dashed; }
+button.tb-couverts { background: transparent; cursor: pointer; font-family: inherit; }
 /* Prévision à saisir : un petit cercle vide, discret, là où le nombre de couverts s'écrira. */
 .tb-couverts-vide { min-width: 36px; height: 34px; padding: 0 6px; border: 1.5px dashed var(--bordure); color: var(--texte-doux); font-size: 1.05rem; text-decoration: none; }
 

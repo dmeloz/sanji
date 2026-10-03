@@ -11,7 +11,7 @@ import {
   controlerProduit,
 } from '../app/js/domaine/actions.js';
 import { calculerComposant } from '../app/js/domaine/calcul.js';
-import { exporter } from '../app/js/domaine/etat.js';
+import { exporter, jourOuVide } from '../app/js/domaine/etat.js';
 import { GROUPES, grammageEffectif, lignesStandards, lignesStandardsGroupes } from '../app/js/domaine/savoir.js';
 import { PORTIONS_BASE } from '../app/js/donnees/base-metier.js';
 import { JEU_REPERES as R, JEU_STANDARDS as ST } from './jeux/TEST_ONLY-savoir.js';
@@ -339,7 +339,9 @@ function verifierTableau(noeud, contexte) {
   const texte = verifierTexte(noeud, contexte);
   assert.equal(ERREUR_DE_CODE.test(texte), false, `${contexte} : message d'erreur de code`);
   assert.equal(/·/.test(texte), false, `${contexte} : pas de point médian sur le tableau`);
-  assert.equal(noeud.tous((x) => x.balise === 'button').length, 0, `${contexte} : aucun bouton (liens seulement)`);
+  // Seul le nombre de portions d'un menu est un bouton (il ouvre la prévision) ; tout le reste est un lien.
+  const autres = noeud.tous((x) => x.balise === 'button' && !x.className.split(' ').includes('tb-couverts'));
+  assert.equal(autres.length, 0, `${contexte} : aucun bouton hors prévision (liens seulement)`);
   return texte;
 }
 
@@ -426,6 +428,31 @@ test('tableau : ce qui est au poste est écrit au feutre, le reste en gris ; l\'
   // Une tâche simplement à faire n'est jamais marquée « à décider », et les points déjà dits dans la note ne sont pas répétés.
   assert.equal(classes(noeud, 'mep-a_decider').length, 0);
   assert.doesNotMatch(texte, /5 points à confirmer/);
+});
+
+test('tableau : le « ? » ouvre la prévision sur place, sans « quantité à régler » dans la liste du jour', async () => {
+  nettoyerPanneaux();
+  const e = etatSemaineSaisie();
+  definirStandard(e, 'riz', 'plat_principal', { valeur: 70, unite: 'g', etat: 'sec' }, h());
+  magasin.remplacer(e);
+  const avant = tableau(S.lundi, magasin.etat());
+  assert.doesNotMatch(verifierTableau(avant, 'tableau avant prévision'), /quantité à régler/);
+  const ouvrir = (noeud) => boutons(noeud).find((b) => /menu 1 : (saisir la prévision|\d+ portions?)/.test(b.attributs['aria-label'] ?? '')
+    && /lundi 5 octobre/.test(b.attributs['aria-label']));
+  assert.match(ouvrir(avant).attributs['aria-label'], /saisir la prévision/);
+  await ouvrir(avant).click();
+  const d = panneauOuvert();
+  remplir(d, 'Portions du menu 1, hors groupes', '10');
+  assert.deepEqual(await soumettre(d), []);
+  assert.equal(jourOuVide(magasin.etat(), S.lundi).previsions[1].portions, 10);
+  // Le lendemain, la prévision se réduit au même endroit et le chiffre affiché suit.
+  const apres = tableau(S.lundi, magasin.etat());
+  assert.match(ouvrir(apres).attributs['aria-label'], /10 portions, modifier la prévision/);
+  await ouvrir(apres).click();
+  const d2 = panneauOuvert();
+  remplir(d2, 'Portions du menu 1, hors groupes', '6');
+  assert.deepEqual(await soumettre(d2), []);
+  assert.match(ouvrir(tableau(S.lundi, magasin.etat())).attributs['aria-label'], /6 portions/);
 });
 
 test('tableau : un standard maison fait disparaître la portion à régler et chiffre la tâche', () => {

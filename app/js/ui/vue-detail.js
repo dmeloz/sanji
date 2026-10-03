@@ -167,7 +167,7 @@ function sectionMenus(etat, date) {
 
 // ------------------------------------------------------------------ prévisions
 
-function dialogPrevision(date, menu) {
+export function dialogPrevision(date, menu) {
   const e = etatCourant();
   const p = jourOuVide(e, date).previsions[menu];
   const reperes = repereVentes(e, date, menu);
