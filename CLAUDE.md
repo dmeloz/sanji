@@ -8,7 +8,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 3. Fiche projet : `~/Atelier-Claude/Cerveau-Obsidian/01-Projets/Sanji.md`.
 
 ## Commandes
-- Tests : `npm test` (Node 22, aucun paquet à installer). 494 tests au 2026-10-04.
+- Tests : `npm test` (Node 22, aucun paquet à installer). 504 tests au 2026-10-04.
 - Régénérer la base métier embarquée : `npm run base`.
 - Régénérer les repères de portion validés (`app/js/donnees/savoir-metier.js`, généré depuis `connaissances/savoir-metier.json`) : `npm run savoir`. Ne pas éditer le module à la main.
 - Servir en local : `npm run serve`, puis http://localhost:5173.
@@ -21,7 +21,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
   - `validation.js` + `actions-validation.js` : assistant de validation des portions (une estimation de repère ne devient un standard maison que par la valeur choisie par la propriétaire ; « seulement cette fois » et « plus tard » ne touchent jamais au standard). `actions-achats.js` : liste « à commander » à trois états (suggéré, noté, retiré) ; une ligne fondée sur une estimation ne se note qu'avec une quantité tapée. Interface : `ui/feuille-validation.js`.
   - `feuille.js` : analyse du texte collé d'une feuille de menus.
   - `tableau-blanc.js` : données de l'accueil. `bord` = le tableau de bord (menus du jour et des 2 jours suivants, fiches de fonction, « À confirmer » de 3 lignes au plus sans quantité manquante, production et commandes) ; `contexte` (ancienne note) ne s'affiche plus mais désigne la semaine par défaut.
-  - `planification.js` : `feuilleDuJour(...).lecture` donne l'ordre de lecture de la feuille Jour (menu 1, menu 2, autres, après service, faites). Étapes à avance propre : la règle de préparation (`etat.regles`) peut porter `etapes: [{cle, libelle, avanceMaxJours}]` (la dernière = finition) ; `assurerProductions` crée alors une production `preparatoire` par étape (`etapeCle`, `ordre`), `regleDe(etat, composant, etapeCle)` évalue chaque étape à son propre maximum, `etapesComposant` les liste. Aucune étape ni durée par défaut ; sans étapes, rien ne change.
+  - `planification.js` : `feuilleDuJour(...).lecture` donne l'ordre de lecture de la feuille Jour (menu 1, menu 2, autres, après service, faites). Étapes à avance propre : la règle de préparation (`etat.regles`) peut porter `etapes: [{cle, libelle, avanceMaxJours}]` (la dernière = finition) ; `assurerProductions` crée alors une production `preparatoire` par étape (`etapeCle`, `ordre`), `regleDe(etat, composant, etapeCle)` évalue chaque étape à son propre maximum, `etapesComposant` les liste. Aucune étape ni durée par défaut ; sans étapes, rien ne change. Pâtes et risotto du menu 1 (production principale d'un composant menu 1, féculent, plat_principal) : jour même, jamais proposés en avance (`avancesPossibles`, `lotsPossibles`, « Après service »), sauf `avanceMaxJours` > 0 dans la règle du nom ou production déjà planifiée à la main. `lecture.service1/2` est triée par rôle (base féculent, garnitures féculent puis légumes, composant_recette, herbe, sauce).
 - `app/js/magasin.js` : état courant ; `agir(fn)` copie, applique, enregistre, redessine.
 - `app/js/stockage.js` : IndexedDB (base `sanji`, magasins `etat` et `photos`).
 - `app/js/ui/` : vues et panneaux de saisie. Aucune logique métier ici. Quatre onglets : Tableau (`vue-tableau.js`, tableau de bord à 4 zones), Jour (`vue-jour.js`, une liste de mise en place cochable), Produits, Réglages. `vue-menus.js` saisit toute la semaine.

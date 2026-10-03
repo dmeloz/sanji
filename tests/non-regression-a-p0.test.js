@@ -8,7 +8,7 @@ import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { installerFauxDom } from './aide-dom.js';
 import {
-  corrigerReel, creerFiche, definirMenu, definirPrevision, definirStandard, marquerFait, planifier, reporter, supprimerComposant,
+  corrigerReel, creerFiche, definirMenu, definirPrevision, definirRegle, definirStandard, marquerFait, planifier, reporter, supprimerComposant,
 } from '../app/js/domaine/actions.js';
 import { exporter, importer } from '../app/js/domaine/etat.js';
 import { feuilleDuJour } from '../app/js/domaine/planification.js';
@@ -50,6 +50,8 @@ function semaineComplete() {
   const e = semaineSansQuantites();
   prevision(e, S.lundiSuivant, 1, 40);
   prevision(e, S.lundiSuivant, 2, 20);
+  // Le riz du menu 1 se fait le jour même, sauf exception validée (ici : avance de 2 jours).
+  definirRegle(e, { nom: 'riz', avanceMaxJours: 2 }, h());
   definirStandard(e, 'riz', 'plat_principal', { valeur: 70, unite: 'g', etat: 'sec' }, h());
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   creerFiche(e, { numero: 'F1', date: S.lundiSuivant, service: 'midi', horaire: '12:00', couverts: 12, mode: 'menu_fixe', menuFixe: 1 }, h());

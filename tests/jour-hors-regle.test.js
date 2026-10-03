@@ -5,7 +5,7 @@ import test, { after, before } from 'node:test';
 import { setTimeout as attendre } from 'node:timers/promises';
 import assert from 'node:assert/strict';
 import { installerFauxDom } from './aide-dom.js';
-import { definirMenu, definirPrevision, definirStandard } from '../app/js/domaine/actions.js';
+import { definirMenu, definirPrevision, definirRegle, definirStandard } from '../app/js/domaine/actions.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h } from './aide.js';
 
@@ -25,6 +25,8 @@ function semaine() {
   definirMenu(e, S.mardi, 1, 'carottes', h()); // 3 jours : hors règle
   definirMenu(e, S.mercredi, 1, 'quinoa', h()); // 4 jours : hors règle
   for (const jour of [S.lundi, S.mardi, S.mercredi]) definirPrevision(e, jour, 1, 20, h());
+  // Riz et quinoa (base féculent du menu 1) ne s'avancent que par exception validée : ici, une avance maximale de 4 jours.
+  for (const nom of ['riz', 'quinoa']) definirRegle(e, { nom, avanceMaxJours: 4 }, h());
   definirStandard(e, 'riz', 'plat_principal', { valeur: 70, unite: 'g', etat: 'sec' }, h());
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   definirStandard(e, 'quinoa', 'plat_principal', { valeur: 60, unite: 'g', etat: 'sec' }, h());

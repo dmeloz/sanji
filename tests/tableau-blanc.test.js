@@ -37,6 +37,9 @@ function semaineChiffree() {
     definirStandard(e, famille, role, { valeur: 100, unite: 'g', etat }, h());
   }
   for (const jour of [S.lundi, S.mardi]) { prevision(e, jour, 1, 10); prevision(e, jour, 2, 20); }
+  // Le riz du menu 1 se fait le jour même, sauf exception validée : ici la propriétaire a validé une avance de 2 jours.
+  definirRegle(e, { nom: 'riz et carottes', avanceMaxJours: 2 }, h());
+  definirRegle(e, { nom: 'polenta', avanceMaxJours: 3 }, h()); // sans limite d'utilisation validée : reste « hors règle » à 3 jours
   return e;
 }
 

@@ -250,6 +250,18 @@ export function suggererCreneau(etat, productionId) {
   return null;
 }
 
+/**
+ * Base d'une recette du menu 1 (pâtes, riz à risotto) : production principale d'un composant de menu 1, féculent, plat
+ * principal. Elle se fait le jour même : pas d'avance proposée, sauf si la règle de préparation du nom définit
+ * explicitement une avance maximale supérieure à 0 (exception validée par la propriétaire).
+ */
+function sansAvanceParDefaut(etat, composant, p) {
+  if (!composant || p.genre !== 'principale') return false;
+  if (composant.menu !== 1 || composant.categorie !== 'feculent' || composant.role !== 'plat_principal') return false;
+  const avance = regleDe(etat, composant, p.etapeCle ?? null)?.avanceMaxJours;
+  return !(Number.isInteger(avance) && avance > 0);
+}
+
 /** Ligne d'affichage d'une production (feuille du jour, avances). */
 function ligne(etat, p) {
   const composant = etat.composants?.[p.composantId] ?? null;
@@ -328,6 +340,8 @@ export function avancesPossibles(etat, aujourdhui) {
     if (jours < 1 || jours > HORIZON_AVANCES) continue;
     if (p.jourDecide && p.jourDecide !== aujourdhui) continue;
     const composant = etat.composants[p.composantId];
+    // Pâtes et risotto du menu 1 : jour même. Déjà planifiée ce jour à la main : elle reste affichée, avec son évaluation.
+    if (!p.jourDecide && sansAvanceParDefaut(etat, composant, p)) continue;
     const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null));
     const creneau = creneauxPossibles.find((c) => etatCreneau(etat, aujourdhui, c) === 'libre') ?? null;
     resultat.push({ ...ligne(etat, p), evaluation, creneau });
@@ -351,6 +365,7 @@ export function lotsPossibles(etat, aujourdhui) {
     if (!composant?.famille || p.genre !== 'principale' || p.etat === 'fait') continue;
     if (p.jourDecide && p.jourDecide !== aujourdhui) continue;
     if (joursEntre(aujourdhui, p.dateService) < 0) continue;
+    if (!p.jourDecide && p.dateService > aujourdhui && sansAvanceParDefaut(etat, composant, p)) continue;
     const cible = cibleProduction(etat, p.id);
     const unite = p.unite ?? calculerComposant(etat, composant.id).uniteTravail ?? null;
     if (cible === null || !unite) continue;
@@ -393,6 +408,15 @@ const rangCreneau = (c) => (ORDRE_CRENEAU_LECTURE.includes(c) ? ORDRE_CRENEAU_LE
  * d'où elle vient (`source`) et son écart de service en jours (`avanceJours`). Aucune tâche ne dépend d'une donnée
  * qui manque : une quantité inconnue donne une ligne « à préciser », pas une absence.
  */
+function rangLecture(c) {
+  if (c?.role === 'plat_principal' && c.categorie === 'feculent') return 0;
+  if (c?.role === 'garniture') return c.categorie === 'feculent' ? 1 : c.categorie === 'legume' ? 2 : 3;
+  if (c?.role === 'composant_recette') return 4;
+  if (c?.role === 'herbe') return 5;
+  if (c?.role === 'sauce') return 6;
+  return 7;
+}
+
 function lectureDuJour(etat, date, f) {
   const service1 = [];
   const service2 = [];
@@ -419,7 +443,14 @@ function lectureDuJour(etat, date, f) {
   // À créneau et nom égaux, les étapes d'une même préparation se lisent dans l'ordre de la règle.
   const parNom = (a, b) => rangCreneau(a.creneau) - rangCreneau(b.creneau) || String(a.nom).localeCompare(String(b.nom))
     || (a.ordre ?? 0) - (b.ordre ?? 0);
-  for (const l of [service1, service2, autres]) l.sort(parNom);
+  autres.sort(parNom);
+  // Menus 1 et 2 : lecture par rôle (base féculent, garnitures, protéine ou poisson, herbe, sauce), puis ordre de l'intitulé.
+  for (const [menu, liste] of [[1, service1], [2, service2]]) {
+    const intitule = normaliser(jourOuVide(etat, date).menus?.[menu]?.intitule ?? '');
+    const rang = (l) => rangLecture(etat.composants?.[l.composantId]);
+    const place = (l) => { const i = intitule.indexOf(normaliser(String(l.nom))); return i < 0 ? Infinity : i; };
+    liste.sort((a, b) => rang(a) - rang(b) || (place(a) === place(b) ? 0 : place(a) < place(b) ? -1 : 1) || parNom(a, b));
+  }
   apres.sort((a, b) => a.dateService.localeCompare(b.dateService) || parNom(a, b));
   const faites = [...f.dejaPret];
   const vues = new Set(faites.map((x) => x.productionId));
@@ -468,6 +499,7 @@ export function feuilleDuJour(etat, date) {
     if (['a_preciser', 'a_planifier', 'ecart'].includes(l.etat) && p.dateService >= date && p.dateService <= horizon
       && !(p.etat !== 'fait' && p.jourDecide && p.jourDecide < date)) {
       if (l.etat === 'a_preciser') quantitesManquantes.push(l);
+      else if (l.etat === 'a_planifier' && p.dateService > date && sansAvanceParDefaut(etat, composant, p)) continue;
       else decisions.push({ ...l, motif: l.etat });
     }
   }
