@@ -32,6 +32,8 @@ export function lireMemoire(memoire, nom, menu) {
   if (Object.hasOwn(memoire, propre)) {
     const ancienne = memoire[propre];
     if (menu === 2 && ancienne?.categorie === 'proteine' && ancienne?.attribue === true) return null;
+    // L'ancienne clé a pu être écrite depuis le menu 2 : en menu 1, une protéine « non attribuée » n'est pas reprise (le menu 1 est entièrement au poste).
+    if (menu === 1 && ancienne?.categorie === 'proteine' && ancienne?.attribue === false) return null;
     return ancienne;
   }
   return null;
@@ -236,7 +238,7 @@ function sansClesDangereuses(valeur) {
  * accepte telle quelle. Retourne la valeur nettoyée, ou `undefined` si elle n'a aucun de ces deux formats.
  */
 function lectureValide(valeur) {
-  const estElement = (x) => estObjet(x);
+  const estElement = (x) => estObjet(x) && typeof x.nom === 'string' && x.nom.trim() !== '';
   if (Array.isArray(valeur)) return valeur.every(estElement) ? sansClesDangereuses(valeur) : undefined;
   if (!estObjet(valeur) || !Array.isArray(valeur.elements) || !valeur.elements.every(estElement)) return undefined;
   if (valeur.ambiguites !== undefined && !Array.isArray(valeur.ambiguites)) return undefined;

@@ -192,7 +192,9 @@ function creerComposant(etat, date, menu, champs) {
   const id = nouvelId('comp');
   const c = { ...composantVide(id), date, menu, nom: champs.nom, categorie: champs.categorie ?? 'a_preciser',
     attribue: champs.attribue ?? true, type: champs.type ?? 'a_preciser', valide: champs.valide ?? false };
-  if (champs.implicite === true) c.implicite = true; // sauce issue de la lecture implicite (« à confirmer »)
+  // Sauce issue de la lecture implicite (« à confirmer ») : on garde le NOM D'ORIGINE (« sauce à confirmer » ou « base de risotto à confirmer »)
+  // pour ne conserver une sauce confirmée que si le plat reste de même nature. `true` = ancien marqueur, origine inconnue.
+  if (champs.implicite) c.implicite = typeof champs.implicite === 'string' ? champs.implicite : normaliser(champs.nom ?? '') || true;
   etat.composants[id] = c;
   return c;
 }
@@ -211,9 +213,11 @@ function fusionnerComposants(etat, date, menu, retires = []) {
   const duMenu = () => Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
   // Une sauce issue de la lecture implicite et déjà confirmée (renommée) reste tant que l'intitulé n'écrit pas de sauce :
   // la lecture propose alors encore une sauce implicite, qui n'est pas recréée par-dessus.
-  const sauceImplicitePropose = propositions.some((p) => p.implicite === true);
-  const confirmee = (c) => c.implicite === true && c.categorie === 'sauce' && !estSauceAConfirmer(c);
-  const gardeeConfirmee = sauceImplicitePropose ? duMenu().find(confirmee) : undefined;
+  const implicitePropose = propositions.find((p) => p.implicite);
+  const confirmee = (c) => Boolean(c.implicite) && c.categorie === 'sauce' && !estSauceAConfirmer(c);
+  // Gardée seulement si le plat reste de même nature (la sauce d'un plat de pâtes ne devient pas la base d'un risotto).
+  const memeNature = (c) => c.implicite === true || c.implicite === normaliser(implicitePropose.nom);
+  const gardeeConfirmee = implicitePropose ? duMenu().find((c) => confirmee(c) && memeNature(c)) : undefined;
   for (const c of duMenu()) {
     if (voulus.has(normaliser(c.nom)) || c === gardeeConfirmee) {
       c.valide = true; // plus de validation manuelle : un composant resté non validé par l'ancien parcours l'est désormais
@@ -222,7 +226,7 @@ function fusionnerComposants(etat, date, menu, retires = []) {
     const aProductionFaite = Object.values(etat.productions).some((p) => p.composantId === c.id && p.etat === 'fait');
     if (!aProductionFaite) {
       retires.push({ nom: c.nom, taches: Object.values(etat.productions).filter((p) => p.composantId === c.id).length,
-        sauceConfirmee: confirmee(c) && propositions.some((p) => p.categorie === 'sauce') });
+        sauceConfirmee: confirmee(c) ? (propositions.some((p) => p.categorie === 'sauce' && !p.implicite) ? 'ecrite' : 'nature') : null });
       delete etat.composants[c.id];
     }
   }
@@ -231,7 +235,7 @@ function fusionnerComposants(etat, date, menu, retires = []) {
   for (const p of propositions) {
     const cle = normaliser(p.nom);
     if (presents.has(cle)) continue;
-    if (p.implicite === true && gardeeConfirmee) continue;
+    if (p.implicite && gardeeConfirmee) continue;
     presents.add(cle);
     const c = creerComposant(etat, date, menu, { ...p, valide: true });
     appliquerSavoir(etat, c);
@@ -258,7 +262,7 @@ function enregistrerMenu(etat, date, menu, texte, retires = []) {
 /** « , retiré : carottes (1 tâche) » : ce qu'une modification de menu a fait disparaître, pour le journal. */
 function texteRetires(retires) {
   if (retires.length === 0) return '';
-  const liste = retires.map((r) => `${r.nom}${r.taches > 0 ? ` (${r.taches} tâche${r.taches > 1 ? 's' : ''})` : ''}${r.sauceConfirmee ? ' (sauce confirmée, remplacée par la sauce écrite dans l\'intitulé)' : ''}`).join(', ');
+  const liste = retires.map((r) => `${r.nom}${r.taches > 0 ? ` (${r.taches} tâche${r.taches > 1 ? 's' : ''})` : ''}${r.sauceConfirmee === 'ecrite' ? ' (sauce confirmée, remplacée par la sauce écrite dans l\'intitulé)' : r.sauceConfirmee === 'nature' ? ' (sauce confirmée, retirée : le plat a changé de nature)' : ''}`).join(', ');
   return ` : retiré ${liste}`;
 }
 

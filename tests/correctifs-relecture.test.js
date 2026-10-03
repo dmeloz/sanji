@@ -69,7 +69,7 @@ test('mémoire : repli sur l\'ancienne clé nom, sauf une protéine attribuée a
   assert.equal(parNom(e, S.lundi, 2, 'Poulet').attribue, false);
   definirMenu(e, S.lundi, 1, 'Poulet, carottes', h());
   assert.equal(parNom(e, S.lundi, 1, 'Poulet').attribue, true);
-  assert.equal(typeof pointsAConfirmer(e, S.lundi).length, 'number');
+  assert.ok(Array.isArray(pointsAConfirmer(e, S.lundi)), 'les points à confirmer restent calculables');
 });
 
 // ---------------------------------------------------------------- 7. annulerFait et ordre des étapes
@@ -193,4 +193,43 @@ test('étapes : aucune étape fantôme pour un plat dont la finition est faite o
   e4.regles.r = { ...Object.values(e3.regles)[0] };
   assurerProductions(e4, null, S.mardi);
   assert.equal(Object.values(e4.productions).filter((p) => p.composantId === c4 && p.genre === 'preparatoire').length, 0);
+});
+
+// ---------------------------------------------------------------- 2e relecture : effets de bord des correctifs
+
+const noms = (e, date, menu) => Object.values(e.composants).filter((c) => c.date === date && c.menu === menu).map((c) => c.nom);
+
+test('sauce confirmée : conservée si le plat reste de même nature, retirée (et dite) si le plat change de nature', () => {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'Penne aux courgettes', h(1));
+  const sauce = Object.values(e.composants).find((c) => c.categorie === 'sauce');
+  modifierComposant(e, sauce.id, { nom: 'sauce tomate' }, h(2));
+  definirMenu(e, S.lundi, 1, 'Penne aux courgettes et basilic', h(3));
+  assert.ok(noms(e, S.lundi, 1).includes('sauce tomate'), 'même nature (pâtes) : la sauce confirmée reste');
+  const avant = e.journal.length;
+  definirMenu(e, S.lundi, 1, 'Risotto aux champignons', h(4));
+  const apres = noms(e, S.lundi, 1);
+  assert.equal(apres.includes('sauce tomate'), false, 'une sauce de pâtes ne devient pas la base d\'un risotto');
+  assert.ok(apres.includes('base de risotto à confirmer'), 'le risotto reçoit sa propre base à confirmer');
+  assert.match(e.journal.slice(avant).map((j) => j.detail).join(' | '), /sauce tomate \(1 tâche\) \(sauce confirmée, retirée : le plat a changé de nature\)/);
+});
+
+test('mémoire : en menu 1, une ancienne entrée « protéine non attribuée » n\'est pas reprise (menu 1 = tout au poste)', () => {
+  const e = etatVide();
+  e.memoire.poulet = { nom: 'poulet', attribue: false, type: 'a_preciser', categorie: 'proteine', charge: null, parRole: {}, etapes: {} };
+  definirMenu(e, S.lundi, 1, 'Poulet, carottes', h());
+  assert.equal(parNom(e, S.lundi, 1, 'Poulet').attribue, true);
+  definirMenu(e, S.lundi, 2, 'Poulet, carottes', h());
+  assert.equal(parNom(e, S.lundi, 2, 'Poulet').attribue, false);
+});
+
+test('lectures importées : un élément sans nom est refusé, une lecture valide est conservée', () => {
+  const e = etatVide();
+  e.lectures['penne zorglub|1'] = [{ nom: 'penne', categorie: 'feculent' }];
+  e.lectures['vide|1'] = [{}];
+  e.lectures['nul|1'] = { elements: [{ nom: null }] };
+  const relu = importer(exporter(e, h()));
+  assert.ok(relu.lectures['penne zorglub|1'], 'une lecture valide est conservée');
+  assert.equal(Object.hasOwn(relu.lectures, 'vide|1'), false);
+  assert.equal(Object.hasOwn(relu.lectures, 'nul|1'), false);
 });
