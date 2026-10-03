@@ -123,8 +123,11 @@ export function terminer(etat, h, action, detail, valeur) {
  * attribué, non validé ou supprimé perd ses productions non faites. Les productions faites ne sont jamais touchées.
  * Si la règle du composant a au moins deux étapes : une production « preparatoire » par étape sauf la dernière
  * (la principale est la finition). `h` (facultatif) sert à journaliser ce qu'un changement de règle retire.
+ * Aucune étape n'est créée pour un composant dont la finition est faite ou dont le service est passé : la date du
+ * jour vient de `aujourdhui` (AAAA-MM-JJ, pour les tests) ou, à défaut, de `h` ; sans l'une ni l'autre, seule la finition faite compte.
  */
-export function assurerProductions(etat, h = null) {
+export function assurerProductions(etat, h = null, aujourdhui = null) {
+  const jour = aujourdhui ?? (typeof h === 'string' && /^\d{4}-\d{2}-\d{2}/.test(h) ? h.slice(0, 10) : null);
   for (const p of Object.values(etat.productions)) {
     const c = etat.composants[p.composantId];
     if (p.etat !== 'fait' && (!c || !c.attribue || !c.valide)) delete etat.productions[p.id];
@@ -139,13 +142,13 @@ export function assurerProductions(etat, h = null) {
     } else {
       for (const extra of principales.slice(1)) if (extra.etat !== 'fait') delete etat.productions[extra.id];
     }
-    assurerEtapes(etat, c, h);
+    assurerEtapes(etat, c, h, jour);
   }
   return etat;
 }
 
 /** Productions d'étapes d'un composant selon sa règle (idempotent ; une étape faite n'est jamais supprimée). */
-function assurerEtapes(etat, c, h) {
+function assurerEtapes(etat, c, h, jour = null) {
   const etapes = regleDe(etat, c)?.etapes ?? [];
   const actives = etapes.length >= 2 ? etapes : [];
   const avantFinition = actives.slice(0, -1);
@@ -168,8 +171,10 @@ function assurerEtapes(etat, c, h) {
     p.ordre = i;
     if (p.etat !== 'fait') p.libelle = `${avantFinition[i].libelle} : ${c.nom}`;
   }
+  const finie = Object.values(etat.productions).some((p) => p.composantId === c.id && p.genre === 'principale' && p.etat === 'fait');
+  const passe = jour !== null && c.date < jour;
   avantFinition.forEach((x, i) => {
-    if (vues.has(x.cle)) return;
+    if (vues.has(x.cle) || finie || passe) return;
     const id = nouvelId('prod');
     etat.productions[id] = {
       ...productionVide(id), composantId: c.id, dateService: c.date, genre: 'preparatoire', libelle: `${x.libelle} : ${c.nom}`,
