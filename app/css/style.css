@@ -736,3 +736,18 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 
 .jour-faites, .jour-lots, .jour-charge, .jour-centre { margin-top: 12px; }
 .jour-faites > .mep-liste, .jour-lots > p, .jour-centre > .tache { margin-top: 6px; }
+
+/* Produits : liste compacte, une ligne par produit ; le détail se déplie. */
+.produits-liste { border-top: 1px solid var(--bordure); }
+.produit-compact { border-bottom: 1px solid var(--bordure); }
+.produit-resume { display: block; min-height: var(--cible); padding: 8px 0; cursor: pointer; list-style: none; }
+.produit-resume::-webkit-details-marker { display: none; }
+.produit-ligne { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.produit-nom { font-size: var(--t0); overflow-wrap: anywhere; }
+.produit-besoin { display: inline-flex; align-items: baseline; gap: 4px; flex: none; font-variant-numeric: tabular-nums; }
+.produit-chiffre { font-size: var(--t2); line-height: 1.1; }
+.produit-unite { font-size: var(--t-1); color: var(--texte-doux); }
+.produit-etat { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: var(--t-1); color: var(--texte-doux); }
+.produit-compact[open] > .produit-resume { border-bottom: 1px dashed var(--bordure); }
+.produit-compact > :not(summary) { margin-top: 8px; }
+.produit-compact > .actions { padding-bottom: 12px; }

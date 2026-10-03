@@ -185,11 +185,18 @@ function mondeProduits() {
   magasin.remplacer(e);
 }
 
+/** Texte d'état de la ligne compacte (visible sans déplier). */
+const etatsCompacts = (n) => n.tous((x) => x.className.includes('produit-etat-texte')).map((x) => x.textContent).join('|');
+
 test('produits : l\'état de chaque ligne est écrit en texte, avec « Noter à commander » et « Retirer »', () => {
   nettoyer();
   mondeProduits();
   const page = vues.produits.rendre(magasin.etat(), S.lundi);
-  assert.match(page.textContent, /État : Suggéré/);
+  assert.match(etatsCompacts(page), /^suggéré$/, 'l\'état est écrit dans la ligne compacte');
+  assert.ok(page.tous((x) => x.balise === 'details' && x.className.includes('produit-compact')).length > 0, 'une ligne dépliable par produit');
+  const resume = page.tous((x) => x.balise === 'summary' && x.className.includes('produit-resume'))[0];
+  assert.match(resume.textContent, /estimation à valider/, 'pastille courte dans la ligne repliée');
+  assert.doesNotMatch(resume.textContent, /Noter à commander|Fournisseur/, 'les détails et gestes sont dans le dépliant');
   assert.ok(parTexte(page, 'Noter à commander'));
   assert.ok(parTexte(page, 'Retirer'));
   assert.ok(parTexte(page, 'Contrôler') && parTexte(page, 'Achat'), 'le reste est gardé');
@@ -210,7 +217,7 @@ test('produits : noter une estimation sans quantité est refusé, avec une quant
   const suivi = magasin.etat().produits[`${S.lundi}|riz|g`];
   assert.equal(suivi.etatLigne, 'note');
   assert.equal(suivi.quantiteAcheter, 2400);
-  assert.match(vues.produits.rendre(magasin.etat(), S.lundi).textContent, /État : Noté à commander/);
+  assert.match(etatsCompacts(vues.produits.rendre(magasin.etat(), S.lundi)), /^noté$/);
 });
 
 test('produits : retirer range la ligne dans « Retirées », « Remettre » la rend ; « à relire » si le besoin change', () => {
@@ -223,14 +230,14 @@ test('produits : retirer range la ligne dans « Retirées », « Remettre » la 
   assert.ok(bloc, 'bloc replié « Retirées »');
   assert.equal(bloc.open, false);
   assert.match(bloc.querySelector('summary').textContent, /Retirées \(1\)/);
-  assert.match(bloc.textContent, /État : Retiré/);
+  assert.match(etatsCompacts(bloc), /^retiré$/);
   parTexte(bloc, 'Remettre').click();
   page = vues.produits.rendre(magasin.etat(), S.lundi);
   assert.equal(page.tous((x) => x.balise === 'details' && x.className.includes('lignes-retirees')).length, 0);
-  assert.match(page.textContent, /État : Noté à commander/);
+  assert.match(etatsCompacts(page), /^noté$/);
   assert.doesNotMatch(page.textContent, /à relire/);
   magasin.agir((e, t) => prevision(e, S.lundi, 2, 80));
   const relire = vues.produits.rendre(magasin.etat(), S.lundi);
-  assert.match(relire.textContent, /à relire/);
+  assert.match(etatsCompacts(relire), /^noté · à relire$/);
   assert.equal(magasin.etat().produits[`${S.lundi}|riz|g`].quantiteAcheter, 2400, 'la quantité notée n\'a pas bougé');
 });
