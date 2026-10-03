@@ -300,12 +300,17 @@ export function etapesComposant(etat, composantId) {
  * Contrôle d'ordre entre les étapes d'un même composant ; retourne un message de refus ou null.
  * Planifier (`date`) : une étape ne tombe ni après l'étape suivante, ni avant la précédente.
  * Fait (`fait`) : l'étape précédente doit déjà être faite.
+ * Annuler un « fait » (`annuler`) : aucune étape suivante ne doit être faite.
  */
-export function refusOrdreEtape(etat, p, { date = null, fait = false } = {}) {
+export function refusOrdreEtape(etat, p, { date = null, fait = false, annuler = false } = {}) {
   if (!p.etapeCle || !Number.isInteger(p.ordre)) return null;
   const soeurs = Object.values(etat.productions ?? {}).filter((x) => x.composantId === p.composantId && x.id !== p.id
     && x.etapeCle && Number.isInteger(x.ordre));
   const nom = (x) => String(x.libelle).split(' : ')[0];
+  if (annuler) {
+    const suivante = soeurs.filter((x) => x.ordre > p.ordre && x.etat === 'fait').sort((a, b) => a.ordre - b.ordre)[0];
+    return suivante ? `L'étape « ${nom(suivante)} » est déjà faite : défaites-la d'abord avant d'annuler « ${nom(p)} ».` : null;
+  }
   if (fait) {
     const manquante = soeurs.filter((x) => x.ordre < p.ordre && x.etat !== 'fait').sort((a, b) => a.ordre - b.ordre)[0];
     return manquante ? `L'étape « ${nom(manquante)} » doit être faite avant « ${nom(p)} ».` : null;

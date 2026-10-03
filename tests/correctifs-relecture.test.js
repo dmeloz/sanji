@@ -3,9 +3,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  assurerProductions, definirMenu, definirRegle, marquerFait, memoriser, modifierComposant, planifier, reprendreMemoire,
+  annulerFait, assurerProductions, definirAchat, definirMenu, definirRegle, marquerCommande, marquerFait, memoriser, modifierComposant, planifier, reprendreMemoire,
 } from '../app/js/domaine/actions.js';
 import { feuilleDuJour } from '../app/js/domaine/planification.js';
+import { restaurerAchat, retirerAchat } from '../app/js/domaine/actions-achats.js';
 import { exporter, importer } from '../app/js/domaine/etat.js';
 import { grammageEffectif } from '../app/js/domaine/savoir.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
@@ -69,6 +70,38 @@ test('mémoire : repli sur l\'ancienne clé nom, sauf une protéine attribuée a
   definirMenu(e, S.lundi, 1, 'Poulet, carottes', h());
   assert.equal(parNom(e, S.lundi, 1, 'Poulet').attribue, true);
   assert.equal(typeof pointsAConfirmer(e, S.lundi).length, 'number');
+});
+
+// ---------------------------------------------------------------- 7. annulerFait et ordre des étapes
+
+test('annulerFait : on ne défait pas l\'étape 1 quand l\'étape 2 est faite', () => {
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 40);
+  const c = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'carottes' });
+  definirRegle(e, { nom: 'carottes', etapes: [{ libelle: 'Couper' }, { libelle: 'Blanchir' }, { libelle: 'Finir' }] }, h());
+  const etape = (cle) => Object.values(e.productions).find((p) => p.composantId === c && p.etapeCle === cle);
+  marquerFait(e, etape('couper').id, null, h(1));
+  marquerFait(e, etape('blanchir').id, null, h(2));
+  assert.throws(() => annulerFait(e, etape('couper').id, h(2)), /Blanchir.*déjà faite/);
+  assert.equal(etape('couper').etat, 'fait', 'rien n\'a changé');
+  annulerFait(e, etape('blanchir').id, h(2)); // la dernière faite peut se défaire
+  annulerFait(e, etape('couper').id, h(3)); // puis la précédente
+  assert.equal(etape('couper').etat, 'a_faire');
+});
+
+// ---------------------------------------------------------------- 8. marquerCommande et ligne retirée
+
+test('marquerCommande : une ligne retirée ne se marque pas commandée', () => {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 2, 'riz', h());
+  prevision(e, S.lundi, 2, 40);
+  definirAchat(e, S.lundi, 'riz', 'g', { quantiteAcheter: 500 }, h(1));
+  retirerAchat(e, S.lundi, 'riz', 'g', h(2));
+  assert.throws(() => marquerCommande(e, S.lundi, 'riz', 'g', h(3)), /retirée/);
+  assert.equal(e.produits[`${S.lundi}|riz|g`].commandeLe ?? null, null);
+  restaurerAchat(e, S.lundi, 'riz', 'g', h(4));
+  marquerCommande(e, S.lundi, 'riz', 'g', h(5));
+  assert.equal(e.produits[`${S.lundi}|riz|g`].commandeLe, h(5));
 });
 
 // ---------------------------------------------------------------- 6. lectures corrigées : export puis import

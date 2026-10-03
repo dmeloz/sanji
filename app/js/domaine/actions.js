@@ -732,6 +732,8 @@ export function annulerFait(etat, productionId, h) {
   if (!Number.isFinite(ecoule) || ecoule > FENETRE_ANNULATION_MS) {
     throw new Error('Trop tard pour annuler : utilisez « Corriger » pour changer la quantité réelle.');
   }
+  const refus = refusOrdreEtape(etat, p, { annuler: true });
+  if (refus) throw new Error(refus);
   const avant = p.avantFait ?? { etat: 'a_faire', cibleAuDemarrage: null };
   p.etat = avant.etat;
   p.cibleAuDemarrage = avant.cibleAuDemarrage;
@@ -1105,6 +1107,7 @@ export function definirAchat(etat, lundi, cle, unite, champs, h) {
 export function marquerCommande(etat, lundi, cle, unite, h) {
   verifierH(h);
   const suivi = suiviDe(etat, lundi, cle, unite);
+  if (suivi.etatLigne === 'retire') throw new Error('Cette ligne est retirée de la liste : remettez-la avant de la marquer commandée.');
   if (!Number.isFinite(suivi.quantiteAcheter)) throw new Error("Saisissez d'abord la quantité réellement achetée.");
   suivi.commandeLe = h;
   return terminer(etat, h, 'marquerCommande', cle, suivi);
