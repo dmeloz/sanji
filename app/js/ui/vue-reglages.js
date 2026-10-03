@@ -1,5 +1,6 @@
-// Réglages : standards maison, semaine type, capacité, règles de préparation, recettes, fournisseurs, mémoire maison,
-// journal, sauvegarde, état du stockage et du mode hors ligne.
+// Réglages : une racine courte (quatre rubriques) puis une sous-page par rubrique. Standards maison, références
+// mémorisées, semaine type, capacité, règles de préparation, recettes, fournisseurs, marge de commande, sauvegarde,
+// état de l'application et journal : aucun réglage n'a été retiré, seulement réparti.
 
 import {
   confirmerSemaineType, creerRecette, definirCapacite, definirFournisseur, definirMargeSecurite, definirRegle, definirSemaineType,
@@ -21,8 +22,6 @@ import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { ALLERGENES, libelleAllergene } from './reference.js';
 import { pastilleCreneau } from './taches.js';
-
-export const titre = () => 'Réglages';
 
 const JOURS = ['', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const TAILLE_PAGE_JOURNAL = 25;
@@ -89,21 +88,52 @@ function ligneStandard(l) {
     bouton(action, () => dialogStandard(l), 'court', { 'aria-label': `${action} le standard : ${nom}` }));
 }
 
-/** Une ligne par famille et par rôle, regroupées par grande catégorie ; un groupe est ouvert s'il a un standard ou un plat saisi. */
+/** Minuscules sans accents, pour la recherche locale. */
+const normaliser = (t) => String(t).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
+
+/**
+ * Standards maison : d'abord ceux qui sont réglés ou dont la famille est saisie dans un menu ; les autres sont
+ * regroupés par catégorie et repliés. « À régler » est une information, jamais une alerte. Recherche locale (sans
+ * enregistrement) : elle filtre toutes les lignes, réglées ou non.
+ */
 function sectionStandards(etat) {
   const lignes = lignesStandards(etat);
   const lignesGroupes = lignesStandardsGroupes(etat);
   const utilisees = new Set(Object.values(etat.composants).map((c) => c.famille).filter(Boolean));
+  const parGroupe = GROUPES.map((g) => ({ g, lignes: [...lignesGroupes.filter((l) => l.groupe === g.cle), ...lignes.filter((l) => l.groupe === g.cle)] }));
+  const toutes = parGroupe.flatMap((x) => x.lignes);
+  const enUsage = (l) => l.standard !== null || utilisees.has(l.cleFamille);
+  const enVue = toutes.filter(enUsage);
+  const aRegler = toutes.filter((l) => l.standard === null).length;
+
+  const defaut = () => [
+    h('h3', { classe: 'bloc-titre' }, 'Réglés ou utilisés dans vos menus'),
+    enVue.length === 0 ? ligneVide('Aucun standard réglé, aucune famille saisie dans un menu pour l\'instant.')
+      : h('ul', { classe: 'liste-standards' }, enVue.map(ligneStandard)),
+    h('h3', { classe: 'bloc-titre' }, 'Autres standards, par catégorie'),
+    parGroupe.map(({ g, lignes: duGroupe }) => {
+      const restantes = duGroupe.filter((l) => !enUsage(l));
+      if (restantes.length === 0) return null;
+      return repliable(`${g.libelle} · ${restantes.length} à régler`, false,
+        h('ul', { classe: 'liste-standards' }, restantes.map(ligneStandard)), { classe: 'repliable-groupe' });
+    }),
+  ];
+  const zone = h('div', { classe: 'zone-standards' }, defaut());
+  const chercher = (ev) => {
+    const q = normaliser(ev.target.value);
+    if (q === '') { zone.replaceChildren(...defaut().flat().filter(Boolean)); return; }
+    const trouvees = parGroupe.flatMap(({ g, lignes: duGroupe }) => duGroupe.filter((l) => normaliser(`${l.libelle} ${g.libelle}`).includes(q)));
+    zone.replaceChildren(trouvees.length === 0 ? ligneVide('Aucun standard ne correspond.') : h('ul', { classe: 'liste-standards' }, trouvees.map(ligneStandard)));
+  };
   return h('section', { classe: 'carte' },
     titreSection('Standards maison', 'standards'),
     h('p', { classe: 'aide' }, 'Le standard maison passe avant l\'estimation de la base. Une correction faite sur un plat ne le change pas. '
       + 'Il sert au calcul de tous les plats de cette famille qui n\'ont pas été corrigés. '
       + 'Le standard de toute la catégorie sert aux familles qui n\'ont pas le leur ; pour les légumes, il sert aussi à ceux que l\'application ne reconnaît pas (tomates…).'),
-    GROUPES.map((g) => {
-      const duGroupe = [...lignesGroupes.filter((l) => l.groupe === g.cle), ...lignes.filter((l) => l.groupe === g.cle)];
-      const ouvert = duGroupe.some((l) => l.standard !== null || utilisees.has(l.cleFamille));
-      return repliable(g.libelle, ouvert, h('ul', { classe: 'liste-standards' }, duGroupe.map(ligneStandard)), { classe: 'repliable-groupe' });
-    }));
+    h('p', { classe: 'meta' }, `${aRegler} à régler, à votre rythme : un standard non réglé laisse simplement la base estimer la portion.`),
+    h('input', { type: 'search', classe: 'recherche-standards', 'aria-label': 'Rechercher un standard', placeholder: 'rechercher une famille ou une catégorie',
+      autocomplete: 'off', onInput: chercher }),
+    zone);
 }
 
 // ------------------------------------------------------------------ semaine type et capacité
@@ -453,10 +483,47 @@ function sectionEtat() {
       h('dt', null, 'Version de la base métier'), h('dd', null, VERSION_BASE)));
 }
 
-export function rendre(etat) {
-  return h('div', { classe: 'vue vue-reglages' },
-    h('h1', { classe: 'page-titre' }, 'Réglages'),
-    sectionStandards(etat), sectionSemaineType(etat), sectionMarge(etat), sectionRegles(etat), sectionRecettes(etat), sectionFournisseurs(etat),
-    sectionMemoire(etat), sectionJournal(etat), sectionSauvegarde(), sectionEtat());
-}
+// ------------------------------------------------------------------ racine et sous-pages
 
+const compteStandards = (etat) => {
+  const toutes = [...lignesStandards(etat), ...lignesStandardsGroupes(etat)];
+  const regles = toutes.filter((l) => l.standard !== null).length;
+  return { regles, aRegler: toutes.length - regles };
+};
+
+/** Rubriques de la racine : clé de route, titre, résumé d'une ligne et blocs conservés tels quels. */
+const RUBRIQUES = [
+  { cle: 'standards', titre: 'Standards de production',
+    resume: (e) => { const c = compteStandards(e); return `${pluriel(c.regles, 'standard réglé', 'standards réglés')} · ${c.aRegler} à régler`; },
+    blocs: (e) => [sectionStandards(e), sectionMemoire(e)] },
+  { cle: 'organisation', titre: 'Organisation du poste',
+    resume: (e) => `${e.reglages.semaineTypeConfirmee ? 'semaine type confirmée' : 'semaine type à confirmer'} · ${pluriel(Object.keys(e.regles).length, 'règle')} de préparation`,
+    blocs: (e) => [sectionSemaineType(e), sectionRegles(e)] },
+  { cle: 'produits', titre: 'Produits et commandes',
+    resume: (e) => `${pluriel(Object.keys(e.recettes).length, 'recette')} · ${pluriel(Object.keys(e.fournisseurs).length, 'fournisseur')}`,
+    blocs: (e) => [sectionRecettes(e), sectionFournisseurs(e), sectionMarge(e)] },
+  { cle: 'donnees', titre: 'Données et hors ligne',
+    resume: (e) => (e.reglages.dernierExport ? `dernier export : ${formaterHeure(e.reglages.dernierExport)}` : 'aucun export noté sur cet appareil'),
+    blocs: (e) => [sectionSauvegarde(), sectionEtat(), sectionJournal(e)] },
+];
+
+export const CLES_RUBRIQUES = RUBRIQUES.map((r) => r.cle);
+
+export const titre = (param) => RUBRIQUES.find((r) => r.cle === param)?.titre ?? 'Réglages';
+
+/** Racine (param null ou inconnu) : liste de rubriques ; sinon la sous-page de la rubrique. */
+export function rendre(etat, param = null) {
+  const rubrique = RUBRIQUES.find((r) => r.cle === param);
+  if (!rubrique) {
+    return h('div', { classe: 'vue vue-reglages' },
+      h('h1', { classe: 'page-titre' }, 'Réglages'),
+      h('ul', { classe: 'liste-rubriques-reglages' }, RUBRIQUES.map((r) => h('li', null,
+        h('a', { href: `#/reglages/${r.cle}`, classe: 'reglage-rubrique' },
+          h('span', { classe: 'reglage-rubrique-texte' }, h('strong', null, r.titre), h('span', { classe: 'meta' }, r.resume(etat))),
+          h('span', { classe: 'reglage-fleche', 'aria-hidden': 'true' }, '›'))))));
+  }
+  return h('div', { classe: 'vue vue-reglages' },
+    h('a', { href: '#/reglages', classe: 'reglage-retour' }, '‹ Réglages'),
+    h('h1', { classe: 'page-titre' }, rubrique.titre),
+    rubrique.blocs(etat));
+}

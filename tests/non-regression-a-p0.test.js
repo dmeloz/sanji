@@ -65,6 +65,7 @@ const RENDUS = (e) => {
   return [
     ['tableau', null], ['tableau', S.lundiSuivant], ['menus', S.lundiSuivant], ['detail', S.lundiSuivant], ['detail', S.samedi],
     ['jour', S.samedi], ['jour', S.lundiSuivant], ['produits', S.lundiSuivant], ['reglages', null],
+    ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees'],
     ...composants.slice(0, 4).map((id) => ['composant', id]),
   ];
 };
@@ -177,14 +178,44 @@ test('persistance : un « fait », une correction de réel et une annulation sur
 
 // ---------------------------------------------------------------- inventaire des Réglages
 
-test('inventaire : les dix blocs de Réglages existent (à mettre à jour consciemment en A-P2, jamais en perdre un)', () => {
+const RUBRIQUES_REGLAGES = ['standards', 'organisation', 'produits', 'donnees'];
+
+test('inventaire : les dix blocs de Réglages existent TOUS, répartis sur les sous-pages (jamais en perdre un)', () => {
   magasin.remplacer(etatVide());
-  const noeud = vues.reglages.rendre(magasin.etat());
-  const titres = noeud.tous((x) => x.balise === 'h2').map((x) => x.textContent);
-  for (const attendu of [
-    'Standards maison', 'Semaine type des créneaux', 'Règles de préparation', 'Recettes du restaurant', 'Fournisseurs',
-    'Références maison mémorisées', 'Journal des modifications', 'Commandes', 'Sauvegarde', "État de l'application",
-  ]) assert.ok(titres.includes(attendu), `le bloc « ${attendu} » a disparu des Réglages`);
+  const titresDe = (param) => vues.reglages.rendre(magasin.etat(), param).tous((x) => x.balise === 'h2').map((x) => x.textContent);
+  const parPage = {
+    standards: ['Standards maison', 'Références maison mémorisées'],
+    organisation: ['Semaine type des créneaux', 'Règles de préparation'],
+    produits: ['Recettes du restaurant', 'Fournisseurs', 'Commandes'],
+    donnees: ['Sauvegarde', "État de l'application", 'Journal des modifications'],
+  };
+  assert.equal(Object.values(parPage).flat().length, 10);
+  for (const [rubrique, attendus] of Object.entries(parPage)) {
+    const titres = titresDe(rubrique);
+    for (const attendu of attendus) assert.ok(titres.includes(attendu), `le bloc « ${attendu} » a disparu de la sous-page ${rubrique}`);
+  }
+  // La racine reste courte : elle ne porte aucun bloc, seulement les quatre rubriques.
+  const racine = vues.reglages.rendre(magasin.etat(), null);
+  assert.deepEqual(racine.tous((x) => x.balise === 'h2').map((x) => x.textContent), []);
+  assert.deepEqual(liensDe(racine), RUBRIQUES_REGLAGES.map((c) => `#/reglages/${c}`));
+});
+
+test('routeur : #/reglages est la racine, #/reglages/<rubrique> une sous-page, une clé inconnue retombe sur la racine', () => {
+  assert.deepEqual(routeur.analyserHash('#/reglages', S.samedi), { vue: 'reglages', param: null });
+  for (const c of RUBRIQUES_REGLAGES) {
+    assert.deepEqual(routeur.analyserHash(`#/reglages/${c}`, S.samedi), { vue: 'reglages', param: c });
+    assert.equal(routeur.ONGLET_DE_VUE[routeur.analyserHash(`#/reglages/${c}`, S.samedi).vue], 'reglages');
+  }
+  assert.deepEqual(routeur.analyserHash('#/reglages/inconnue', S.samedi), { vue: 'reglages', param: null });
+  // Chaque sous-page a son titre de barre et un lien de retour « ‹ Réglages ».
+  assert.equal(vues.reglages.titre(null), 'Réglages');
+  magasin.remplacer(etatVide());
+  for (const c of RUBRIQUES_REGLAGES) {
+    assert.notEqual(vues.reglages.titre(c), 'Réglages');
+    const retour = vues.reglages.rendre(magasin.etat(), c).tous((x) => x.balise === 'a' && x.textContent === '‹ Réglages');
+    assert.equal(retour.length, 1, c);
+    assert.equal(retour[0].attributs.href, '#/reglages');
+  }
 });
 
 test('inventaire : les quatre onglets et les sept vues de l\'application sont déclarés', () => {

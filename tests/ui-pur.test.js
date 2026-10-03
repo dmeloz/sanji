@@ -90,6 +90,8 @@ test('analyserHash : routes, défauts et dates invalides', () => {
   assert.deepEqual(analyserHash('#/composant/comp_1abc', j), { vue: 'composant', param: 'comp_1abc' });
   assert.deepEqual(analyserHash('#/composant', j), { vue: 'tableau', param: null });
   assert.deepEqual(analyserHash('#/reglages', j), { vue: 'reglages', param: null });
+  for (const c of ['standards', 'organisation', 'produits', 'donnees']) assert.deepEqual(analyserHash(`#/reglages/${c}`, j), { vue: 'reglages', param: c });
+  assert.deepEqual(analyserHash('#/reglages/inconnue', j), { vue: 'reglages', param: null }, 'clé inconnue : racine');
   assert.deepEqual(analyserHash('#/inconnu', j), { vue: 'tableau', param: null });
 });
 
