@@ -130,6 +130,25 @@ test('feuille depuis le plat : « Plus tard » masque la valeur sans rien change
   assert.equal(d.open, false);
 });
 
+test('« Plus tard » masque vraiment la valeur le même jour (valeursAValider et feuille), elle revient le lendemain', async () => {
+  nettoyer();
+  const id = monde();
+  const { valeursAValider } = await import('../app/js/domaine/validation.js');
+  const cles = (jour) => valeursAValider(magasin.etat(), jour).map((v) => v.cle);
+  const feuilleOuverte = () => ouvert() !== undefined;
+  assert.deepEqual(cles(S.lundi), ['riz|garniture'], 'avant : la valeur est proposée');
+  dateDuJour(S.lundi, () => parTexte(vues.composant.rendre(magasin.etat(), id), 'Valider la portion').click());
+  assert.equal(feuilleOuverte(), true, 'avant : la feuille propose la valeur');
+  await dateDuJour(S.lundi, () => parTexte(ouvert(), 'Plus tard').click());
+  assert.match(magasin.etat().validations['riz|garniture'].h, /^2026-10-0[45]/, 'masquée à la date du clic simulé');
+  assert.equal(feuilleOuverte(), false, 'la feuille se ferme : elle ne propose plus la valeur');
+  assert.deepEqual(cles(S.lundi), [], 'le même jour : valeursAValider ne la propose plus');
+  // Le lendemain du report, la valeur revient (report daté de la veille du jour regardé).
+  magasin.agir((e) => { e.validations['riz|garniture'].h = `${S.samediPrecedent}T09:00:00.000Z`; });
+  assert.deepEqual(cles(S.lundi), ['riz|garniture'], 'le lendemain : elle revient');
+  assert.equal(magasin.etat().composants[id].grammage.valeur, null, 'rien n\'a changé dans le plat');
+});
+
 test('feuille depuis Réglages : « Valider la proposition », puis « Corriger » remplace le standard', async () => {
   nettoyer();
   monde();
