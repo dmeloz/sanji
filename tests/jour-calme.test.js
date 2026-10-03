@@ -3,7 +3,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { definirMenu, definirStandard, planifier } from '../app/js/domaine/actions.js';
+import { definirMenu, definirRegle, definirStandard, planifier } from '../app/js/domaine/actions.js';
 import { feuilleDuJour } from '../app/js/domaine/planification.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h, prevision } from './aide.js';
@@ -26,6 +26,8 @@ test('jour : sans aucune quantité, rien n\'est une décision ni une avance, tou
 
 test('jour : les quantités saisies plus tard font passer chaque élément de la liste aux avances, et la baisse recalcule', () => {
   const e = menuSansQuantites();
+  // Le riz du menu 1 se fait le jour même, sauf exception validée (ici : avance de 2 jours).
+  definirRegle(e, { nom: 'riz', avanceMaxJours: 2 }, h());
   for (const famille of ['riz', 'carottes']) definirStandard(e, famille, 'plat_principal', { valeur: 100, unite: 'g', etat: 'cru_net' }, h());
   assert.equal(feuilleDuJour(e, S.samedi).quantitesManquantes.length, 4, 'portions réglées mais prévision absente : toujours inconnu');
   prevision(e, S.lundiSuivant, 1, 10);
@@ -42,6 +44,7 @@ test('jour : les quantités saisies plus tard font passer chaque élément de la
 
 test('jour : un élément planifié ou déjà décidé n\'est pas dans la liste des quantités manquantes', () => {
   const e = menuSansQuantites();
+  definirRegle(e, { nom: 'riz', avanceMaxJours: 2 }, h());
   definirStandard(e, 'riz', 'plat_principal', { valeur: 100, unite: 'g', etat: 'cru_net' }, h());
   prevision(e, S.lundiSuivant, 1, 10);
   const riz = feuilleDuJour(e, S.samedi).aAvancer.find((a) => a.nom === 'riz');

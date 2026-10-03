@@ -567,7 +567,7 @@ test('17. Un paramètre repris de la base métier est visible, étiqueté estima
 
 test('18. Le tableau blanc met en avant, selon le contexte, ce qui reste à faire avant le service, ce qui peut être avancé après, ou la semaine suivante en fin de semaine', async () => {
   const { tableauBlanc } = await import('../app/js/domaine/tableau-blanc.js');
-  const { definirMenu: saisir, definirStandard: standard, planifier: placer, marquerFait: fait } = await import('../app/js/domaine/actions.js');
+  const { definirMenu: saisir, definirRegle: regle, definirStandard: standard, planifier: placer, marquerFait: fait } = await import('../app/js/domaine/actions.js');
   const e = etatVide();
   // Jeu TEST_ONLY : mots de catégorie génériques, portions arbitraires.
   saisir(e, S.lundi, 1, 'riz et carottes', h());
@@ -576,6 +576,8 @@ test('18. Le tableau blanc met en avant, selon le contexte, ce qui reste à fair
   standard(e, 'pates_seches', 'plat_principal', { valeur: 100, unite: 'g', etat: 'sec' }, h());
   prevision(e, S.lundi, 1, 10);
   prevision(e, S.mardi, 1, 10);
+  // Les pâtes du menu 1 se font le jour même, sauf exception validée : avance de 2 jours validée pour ce nom.
+  regle(e, { nom: 'pâtes', avanceMaxJours: 2 }, h());
   const production = (date) => Object.values(e.productions).find((p) => p.dateService === date).id;
 
   // Avant le service : ce qui reste à faire, avec sa quantité, et la feuille du jour comme action.

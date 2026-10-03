@@ -176,6 +176,7 @@ function ligneTache(etat, ligneBrute, date, options) {
       : null);
 }
 
+const LIGNES_VISIBLES = 8;
 const estHorsRegle = (l) => Boolean(l.evaluation) && l.evaluation.jours > 0 && !l.evaluation.autorisee;
 
 function bloc(titreTexte, lignes, etat, date, groupe) {
@@ -185,9 +186,13 @@ function bloc(titreTexte, lignes, etat, date, groupe) {
   const horsRegle = groupe === 'apres' ? lignes.filter(estHorsRegle) : [];
   const dansLaRegle = groupe === 'apres' ? lignes.filter((l) => !estHorsRegle(l)) : lignes;
   const liste = (ls) => h('ul', { classe: 'mep-liste' }, ls.map((l) => ligneTache(etat, l, date, { groupe })));
+  // Page courte : au-delà de 8 lignes de travail, la suite se replie sous « Voir les N autres » (un compte et un toucher).
+  const visibles = dansLaRegle.slice(0, LIGNES_VISIBLES);
+  const suite = dansLaRegle.slice(LIGNES_VISIBLES);
   return h('section', { classe: 'jour-bloc' },
     h('h2', { classe: 'section-titre' }, titreTexte),
-    dansLaRegle.length > 0 ? liste(dansLaRegle) : null,
+    visibles.length > 0 ? liste(visibles) : null,
+    suite.length > 0 ? repliable(`Voir les ${suite.length} autres`, false, liste(suite), { classe: 'jour-hors-regle' }) : null,
     horsRegle.length > 0 ? repliable(`${horsRegle.length === 1 ? '1 avance hors règle' : `${horsRegle.length} avances hors règle`} (plus de deux jours d'avance)`,
       false, liste(horsRegle), { classe: 'jour-hors-regle' }) : null);
 }
