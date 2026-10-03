@@ -303,3 +303,30 @@ test('Tableau : la sauce implicite est en gris italique (tb-implicite), distinct
   assert.deepEqual(implicites, ['sauce à confirmer']);
   assert.ok(classes(page, 'tb-poste').every((x) => !/à confirmer/.test(x.textContent)));
 });
+
+test('Accessibilité : chaque case « Fait » porte le nom du plat ; le rang de menu n\'a pas d\'aria-label sur un span', () => {
+  const { e } = lundiTravail();
+  const cases = classes(jour(S.lundi, e), 'case-fait').filter((x) => x.balise === 'button');
+  assert.ok(cases.length >= 3);
+  for (const nom of ['ELEMENT_M1_TEST', 'ELEMENT_M2_TEST', 'ELEMENT_MARDI_TEST']) {
+    assert.equal(cases.filter((c) => c.textContent === `Marquer fait : ${nom}`).length, 1, `case de ${nom}`);
+  }
+  assert.ok(cases.every((c) => /^Marquer fait : \S/.test(c.textContent)), 'aucune case ne s\'appelle seulement « Fait »');
+  const noeud = tableau(S.mardi, semaine());
+  const rangs = classes(noeud, 'tb-rang');
+  assert.ok(rangs.length > 0);
+  for (const r of rangs) {
+    assert.equal(r.attributs['aria-label'], undefined, 'pas d\'aria-label sur un span sans rôle');
+    assert.match(r.textContent, /Menu [12]/, 'le nom du menu reste lisible (texte masqué)');
+  }
+  assert.equal(noeud.tous((x) => x.balise === 'span' && x.attributs['aria-label'] !== undefined && !x.attributs.role).length, 0);
+});
+
+test('Tableau : sur une autre semaine, Production dit de quelle semaine elle parle et ne dit pas « Aujourd\'hui »', () => {
+  const e = semaine();
+  const zoneAutre = classes(tableau(S.mardi, e, S.lundiSuivant), 'bord-production')[0];
+  assert.match(zoneAutre.textContent, /Semaine du 12 octobre/);
+  assert.doesNotMatch(zoneAutre.textContent, /Aujourd'hui/);
+  const zoneCourante = classes(tableau(S.mardi, e), 'bord-production')[0];
+  assert.doesNotMatch(zoneCourante.textContent, /Semaine du/);
+});

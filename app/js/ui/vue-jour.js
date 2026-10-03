@@ -96,7 +96,7 @@ function caseFait(l) {
   return h('button', {
     type: 'button', role: 'checkbox', 'aria-checked': 'false', classe: 'case-fait',
     onClick: () => faireEnUnToucher(l.productionId),
-  }, h('span', { classe: 'case-fait-boite', 'aria-hidden': 'true' }), h('span', { classe: 'sr' }, 'Fait'));
+  }, h('span', { classe: 'case-fait-boite', 'aria-hidden': 'true' }), h('span', { classe: 'sr' }, `Marquer fait : ${l.genre === 'principale' ? l.nom : (l.libelle || l.nom)}`));
 }
 
 const caseFaite = () => h('span', { classe: 'case-fait case-fait-ok' },
@@ -126,7 +126,11 @@ function badgesEtMeta(l, ev, { groupe }) {
     meta.unshift(`Pour ${courtJour(l.dateService)}`);
     badges.push(pastille(`Avance J+${l.avanceJours}`, 'gris'));
   }
-  if (ev && ev.jours > 0 && !ev.autorisee) badges.push(pastille('hors règle', 'ambre'));
+  if (ev && ev.jours > 0 && !ev.autorisee) {
+    badges.push(pastille('hors règle', 'ambre'));
+    // La cause est dite sur la ligne : une avance d'un jour peut être hors règle (maximum de l'étape dépassé).
+    meta.push(ev.alertes.some((a) => /plus de deux jours/.test(a)) ? 'plus de deux jours d\'avance' : 'au-delà du maximum de l\'étape');
+  }
   if (l.etat !== 'a_faire' && l.etat !== 'a_preciser') badges.push(pastille(libelle('ETAT_TACHE', l.etat), VARIANTE_ETAT[l.etat] ?? 'gris'));
   return { meta, badges };
 }
@@ -193,7 +197,7 @@ function bloc(titreTexte, lignes, etat, date, groupe) {
     h('h2', { classe: 'section-titre' }, titreTexte),
     visibles.length > 0 ? liste(visibles) : null,
     suite.length > 0 ? repliable(`Voir les ${suite.length} autres`, false, liste(suite), { classe: 'jour-hors-regle' }) : null,
-    horsRegle.length > 0 ? repliable(`${horsRegle.length === 1 ? '1 avance hors règle' : `${horsRegle.length} avances hors règle`} (plus de deux jours d'avance)`,
+    horsRegle.length > 0 ? repliable(`${horsRegle.length === 1 ? '1 avance hors règle' : `${horsRegle.length} avances hors règle`}`,
       false, liste(horsRegle), { classe: 'jour-hors-regle' }) : null);
 }
 

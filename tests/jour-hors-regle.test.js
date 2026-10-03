@@ -42,6 +42,7 @@ test('jour : les avances dans la règle sont dans la liste, les avances hors rè
   assert.match(horsRegle.querySelector('summary').textContent, /2 avances hors règle/);
   assert.equal(horsRegle.open, false, 'repliée par défaut');
   const texteReplie = horsRegle.textContent;
+  assert.match(texteReplie, /plus de deux jours d'avance/, 'chaque ligne dit sa cause');
   assert.match(texteReplie, /carottes/);
   assert.match(texteReplie, /quinoa/);
   assert.doesNotMatch(texteReplie, /riz/, 'le riz du lundi est dans la règle : il reste dans la liste');
@@ -62,4 +63,22 @@ test('jour : la barre des jours amène le jour affiché à l\'écran (le samedi 
   assert.ok(actifs.length >= 1, 'le jour affiché est amené à l\'écran');
   assert.ok(actifs.every((a) => /samedi 3 octobre/.test(a.libelle)), 'et c\'est bien le jour affiché');
   assert.equal(actifs.at(-1).options.inline, 'center');
+});
+
+test('jour : le titre du repli ne prétend pas « plus de deux jours » ; chaque ligne dit sa cause', async () => {
+  const { planifier } = await import('../app/js/domaine/actions.js');
+  const e = etatVide();
+  definirMenu(e, S.mardi, 1, 'carottes', h());
+  definirPrevision(e, S.mardi, 1, 20, h());
+  definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
+  definirRegle(e, { nom: 'carottes', etapes: [{ libelle: 'Couper', avanceMaxJours: 0 }, { libelle: 'Finir', avanceMaxJours: 0 }] }, h());
+  const couper = Object.values(e.productions).find((p) => p.etapeCle === 'couper');
+  planifier(e, couper.id, S.lundi, 'avant_midi', h());
+  magasin.remplacer(e);
+  const noeud = vueJour.rendre(magasin.etat(), S.lundi);
+  const repli = noeud.tous((x) => x.balise === 'details').find((d) => /hors règle/.test(d.querySelector('summary').textContent));
+  assert.ok(repli, 'une avance à J+1 hors règle est repliée');
+  assert.equal(repli.querySelector('summary').textContent, '1 avance hors règle');
+  assert.match(repli.textContent, /au-delà du maximum de l'étape/);
+  assert.doesNotMatch(repli.textContent, /plus de deux jours/);
 });

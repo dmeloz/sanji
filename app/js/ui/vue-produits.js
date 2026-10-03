@@ -138,8 +138,9 @@ function carteLigne(etat, lundi, ligne, aujourd) {
           bouton('Retirer', () => agir((e, t) => retirerAchat(e, lundi, ligne.cle, ligne.unite, t)), 'court')],
       bouton('Contrôler', () => dialogControle(lundi, ligne), 'court'),
       bouton('Achat', () => dialogAchat(lundi, ligne), 'court'),
-      bouton('Marquer commandé', () => agir((e, t) => marquerCommande(e, lundi, ligne.cle, ligne.unite, t)), 'court',
-        { disabled: suivi.quantiteAcheter === null }),
+      suivi.etatLigne === 'retire' ? null
+        : bouton('Marquer commandé', () => agir((e, t) => marquerCommande(e, lundi, ligne.cle, ligne.unite, t)), 'court',
+          { disabled: suivi.quantiteAcheter === null }),
     ));
 }
 
