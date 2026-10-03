@@ -231,6 +231,8 @@ test('produits : retirer range la ligne dans « Retirées », « Remettre » la 
   assert.equal(bloc.open, false);
   assert.match(bloc.querySelector('summary').textContent, /Retirées \(1\)/);
   assert.match(etatsCompacts(bloc), /^retiré$/);
+  assert.ok(parTexte(bloc, 'Remettre'), 'une ligne retirée montre « Remettre »');
+  assert.ok(!parTexte(bloc, 'Marquer commandé'), 'une ligne retirée n\'a pas le geste « Marquer commandé »');
   parTexte(bloc, 'Remettre').click();
   page = vues.produits.rendre(magasin.etat(), S.lundi);
   assert.equal(page.tous((x) => x.balise === 'details' && x.className.includes('lignes-retirees')).length, 0);
