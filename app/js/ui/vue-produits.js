@@ -164,12 +164,18 @@ export function rendre(etat, lundi) {
     racine.appendChild(repliable(`Retirées (${retirees.length})`, false,
       h('div', { classe: 'produits-liste' }, retirees.map((l) => carteLigne(etat, lundi, l, aujourd))), { classe: 'lignes-retirees' }));
   }
-  racine.appendChild(h('h2', { classe: 'section-titre' }, 'Composants non chiffrables : composition à définir'));
-  if (nonChiffrables.length === 0) racine.appendChild(ligneVide('Aucun composant non chiffrable.'));
-  else {
-    racine.appendChild(h('ul', { classe: 'liste-points' }, nonChiffrables.map((n) => h('li', null,
-      h('span', null, `${n.nom} (${libelleJour(n.date)}) : ${n.raison}`),
-      lien(`#/composant/${encodeURIComponent(n.composantId)}`, 'Ouvrir', 'btn btn-court')))));
+  // Composants sans quantité : une seule ligne repliée avec leur compte (information neutre), pas une pile de boutons.
+  if (nonChiffrables.length === 0) {
+    racine.appendChild(h('h2', { classe: 'section-titre' }, 'Composants non chiffrables'));
+    racine.appendChild(ligneVide('Aucun composant non chiffrable.'));
+  } else {
+    racine.appendChild(repliable(
+      `${nonChiffrables.length === 1 ? '1 composant non chiffrable' : `${nonChiffrables.length} composants non chiffrables`} : composition ou quantité à définir`,
+      false,
+      h('ul', { classe: 'liste-points liste-compacte' }, nonChiffrables.map((n) => h('li', null,
+        h('span', null, `${n.nom} (${libelleJour(n.date)}) : ${n.raison}`),
+        lien(`#/composant/${encodeURIComponent(n.composantId)}`, 'Ouvrir', 'btn btn-court')))),
+      { classe: 'carte' }));
   }
   return racine;
 }
