@@ -420,6 +420,7 @@ export function proposerComposants(intitule, menu, memoire = {}, lectures = unde
     const { nom, categorie } = element;
     const attribue = element.propriete === 'poste';
     const proposition = { nom, categorie, attribue, type: 'a_preciser' };
+    if (element.origine === 'implicite') proposition.implicite = true;
     const memorise = lireMemoire(memoire, nom, menu);
     if (memorise) {
       proposition.categorie = memorise.categorie ?? categorie;

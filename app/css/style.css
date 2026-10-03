@@ -751,3 +751,6 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .produit-compact[open] > .produit-resume { border-bottom: 1px dashed var(--bordure); }
 .produit-compact > :not(summary) { margin-top: 8px; }
 .produit-compact > .actions { padding-bottom: 12px; }
+
+/* Tableau : élément implicite (sauce ou base « à confirmer »), distinct de ce que le chef a écrit. */
+.tb-implicite { font-size: var(--t-1); font-style: italic; color: var(--texte-doux); text-decoration: none; }

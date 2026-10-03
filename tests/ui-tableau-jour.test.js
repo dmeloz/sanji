@@ -293,3 +293,13 @@ test('style : aucun texte sous 15 px, état jamais porté par la couleur seule (
     assert.ok(px >= 15, `taille ${valeur}${unite} sous 15 px`);
   }
 });
+
+test('Tableau : la sauce implicite est en gris italique (tb-implicite), distincte des plats écrits', () => {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'pâtes à l\'aneth', h());
+  prevision(e, S.lundi, 1, 40);
+  const page = tableau(S.lundi, e);
+  const implicites = classes(page, 'tb-implicite').map((x) => x.textContent);
+  assert.deepEqual(implicites, ['sauce à confirmer']);
+  assert.ok(classes(page, 'tb-poste').every((x) => !/à confirmer/.test(x.textContent)));
+});

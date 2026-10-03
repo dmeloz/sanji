@@ -67,7 +67,7 @@ test('bord : « À confirmer » ne dépasse jamais 3 lignes et ne contient jamai
   creerFiche(s, { numero: 'FICHE_TEST_1', date: S.mardi, service: 'midi', horaire: '12:00', couverts: 20, mode: 'choix_libre', repartition: { 1: 12, 2: 5 } }, h());
   creerFiche(s, { numero: 'FICHE_TEST_2', date: S.mercredi, service: 'midi', horaire: '12:00', couverts: 20, mode: 'choix_libre', repartition: { 1: 12, 2: 5 } }, h());
   bord = tableauBlanc(s, S.lundi).bord;
-  assert.ok(bord.aConfirmer.total >= 4, 'deux répartitions provisoires, deux incohérentes, la semaine type');
+  assert.ok(bord.aConfirmer.total >= 3, "une ligne de répartitions provisoires, une de points, la semaine type");
   assert.equal(bord.aConfirmer.lignes.length, 3, 'le reste n\'est pas perdu : il est compté, et dit sur le détail du jour');
   assert.match(bord.aConfirmer.lignes.map((l) => l.texte).join(' | '), /répartition provisoire|semaine type/i);
 });
@@ -129,4 +129,32 @@ test('bord : chaque ancienne ligne de la note a une destination (chiffrage, sauv
 
 test('bord : l\'action de l\'en-tête mène à la feuille du jour', () => {
   assert.equal(tableauBlanc(semaine(), S.mardi).bord.entete.lienJour, `#/jour/${S.mardi}`);
+});
+
+test('bord : « À confirmer » compte des lignes distinctes ; les « conservation à confirmer » sont regroupées en une ligne', () => {
+  const e = etatVide();
+  for (const jour of [S.mercredi, S.jeudi]) prevision(e, jour, 1, 10);
+  const ids = [
+    composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST),
+    composantValide(e, S.mercredi, 1, { ...J.PRODUIT_SEC_TEST, nom: 'PRODUIT_SEC_BIS_TEST' }),
+    composantValide(e, S.jeudi, 1, { ...J.PRODUIT_SEC_TEST, nom: 'PRODUIT_SEC_TER_TEST' }),
+  ];
+  for (const id of ids) planifier(e, principaleDe(e, id), S.mardi, 'apres_midi', h());
+  const { aConfirmer } = tableauBlanc(e, S.mardi).bord;
+  const conservation = aConfirmer.lignes.filter((l) => /conservation à confirmer/.test(l.texte));
+  assert.equal(conservation.length, 1, 'une seule ligne pour toutes les préparations');
+  assert.equal(conservation[0].texte, '3 préparations : conservation à confirmer');
+  assert.equal(aConfirmer.total, aConfirmer.lignes.length + aConfirmer.reste, 'le titre compte des lignes, pas des points');
+  assert.ok(aConfirmer.lignes.length <= 3);
+});
+
+test('bord : la sauce implicite d\'un plat de pâtes est marquée implicite et n\'est pas un plat du menu', () => {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'pâtes à l\'aneth', h());
+  prevision(e, S.lundi, 1, 40);
+  const menu = tableauBlanc(e, S.lundi).bord.menus.visibles.find((j) => j.date === S.lundi).menus.find((m) => m.menu === 1);
+  const implicites = menu.morceaux.filter((m) => m.implicite);
+  assert.deepEqual(implicites.map((m) => m.texte), ['sauce à confirmer']);
+  assert.ok(menu.morceaux.filter((m) => !m.implicite).length >= 1, 'ce que le chef a écrit reste distinct');
+  assert.equal(menu.nbPlats, menu.morceaux.filter((m) => !m.implicite).length, 'jamais compté comme un plat');
 });

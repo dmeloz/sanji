@@ -36,7 +36,7 @@ function morceaux(menu) {
   const noeuds = [];
   menu.morceaux.forEach((morceau, i) => {
     if (i > 0) noeuds.push(h('span', { classe: 'tb-virgule' }, ', '));
-    const classe = morceau.auPoste ? 'tb-poste feutre' : 'tb-hors';
+    const classe = morceau.implicite ? 'tb-implicite' : morceau.auPoste ? 'tb-poste feutre' : 'tb-hors';
     noeuds.push(morceau.composantId
       ? h('a', { href: `#/composant/${morceau.composantId}`, classe: `${classe} bord-plat` }, morceau.texte)
       : h('span', { classe }, morceau.texte));
@@ -121,10 +121,9 @@ function zoneFiches(bord, aujourd) {
 // ------------------------------------------------------------------ zone 3 : à confirmer
 
 function zoneAConfirmer(bord) {
-  const { total, lignes } = bord.aConfirmer;
+  const { total, lignes, reste } = bord.aConfirmer;
   const resume = total === 0 ? 'Rien à confirmer'
-    : total === 1 ? '1 décision attend le chef' : `${total} décisions attendent le chef`;
-  const reste = total - lignes.reduce((n, l) => n + l.n, 0);
+    : total === 1 ? '1 sujet attend le chef' : `${total} sujets attendent le chef`;
   return zone('confirmer', 'À confirmer', [
     h('p', { classe: total === 0 ? 'vide' : 'bord-resume' }, resume),
     lignes.length === 0 ? null : h('ul', { classe: 'bord-lignes' }, lignes.map((l) => h('li', null,
