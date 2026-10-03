@@ -13,7 +13,7 @@ import { categoriePropose, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
 import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, regleDe } from './planification.js';
 import { besoinsProduits, cleSuivi } from './produits.js';
-import { appliquerSavoir, familleParCle, grammageEffectif } from './savoir.js';
+import { appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
   CATEGORIE, CHARGE, ETAPE, ETAT_CRENEAU, ETAT_POIDS, PROVENANCE, ROLE, TYPE_COMPOSANT, UNITE, VERIF,
 } from './statuts.js';
@@ -738,12 +738,15 @@ export function reprendreMemoire(etat, composantId, h) {
 // ---------------------------------------------------------------- standards maison
 
 function verifierFamilleEtRole(cleFamille, role) {
-  if (!familleParCle(cleFamille)) throw new Error(`Famille de produits inconnue : « ${cleFamille} ».`);
+  // Une clé « groupe:… » désigne une grande catégorie (standard valable pour toutes ses familles).
+  if (!familleParCle(cleFamille) && !groupeDeCleStandard(cleFamille)) {
+    throw new Error(`Famille de produits inconnue : « ${cleFamille} » (ni catégorie « groupe:… » connue).`);
+  }
   verifierDans(role, ROLE, 'Rôle');
 }
 
 /**
- * Définit le standard maison d'une famille de produits et d'un rôle : la portion que le chef sert, avec l'état de
+ * Définit le standard maison d'une famille de produits (ou d'une grande catégorie, clé « groupe:… ») et d'un rôle : la portion que le chef sert, avec l'état de
  * son poids (sec, cru_net, cuit). `saisie = { valeur, unite, etat }`. Il passe avant le repère de la base ; seule
  * cette action (et supprimerStandard) le modifie, jamais une correction faite sur un plat.
  * Refus : famille ou rôle inconnu, valeur non strictement positive, unité ou état du poids invalide.

@@ -4,7 +4,7 @@
 //    les portions uniquement des standards saisis par le chef ou de PORTIONS_BASE (repères facultatifs de la base).
 //  - Un seul lexique : les mots des familles + MOTS_SANS_FAMILLE (mots qui ne donnent qu'une catégorie).
 //  - lireNom / familleDe : lecture d'un nom ; appliquerSavoir : remplissage d'un composant ; grammageEffectif :
-//    portion à utiliser pour calculer ; lignesStandards : données de l'écran Réglages.
+//    portion à utiliser pour calculer ; lignesStandards et lignesStandardsGroupes : données de l'écran Réglages.
 // Rien n'est inventé : sans famille, sans standard et sans repère, il n'y a pas de portion.
 
 import { BASE_METIER, PORTIONS_BASE } from '../donnees/base-metier.js';
@@ -109,6 +109,16 @@ export const ROLES_STANDARD = Object.freeze([ROLE.plat_principal, ROLE.garniture
 
 const FAMILLES_PAR_CLE = new Map(FAMILLES.map((f) => [f.cle, f]));
 const GROUPES_PAR_CLE = new Map(GROUPES.map((g) => [g.cle, g]));
+
+/** Clé sous laquelle le standard maison d'une grande catégorie est rangé dans état.standards. */
+export const cleStandardGroupe = (cleGroupe) => `groupe:${cleGroupe}`;
+
+/** Clé du groupe d'une clé de standard de catégorie, ou null si ce n'en est pas une ou si le groupe est inconnu. */
+export function groupeDeCleStandard(cle) {
+  if (typeof cle !== 'string' || !cle.startsWith('groupe:')) return null;
+  const g = cle.slice('groupe:'.length);
+  return GROUPES_PAR_CLE.has(g) ? g : null;
+}
 
 /** Famille de clé donnée, ou null. */
 export function familleParCle(cle) {
@@ -240,7 +250,7 @@ function repereDe(f, role, reperes) {
     valeur: (ligne.min + ligne.max) / 2, unite: ligne.unite, etat: ligne.etat, min: ligne.min, max: ligne.max,
     texte: ligne.texte ?? '', sources: ligne.sources ?? '', note: ligne.note ?? '', produit: ligne.produit, portee, groupe,
   });
-  const parFamille = chercher(f.libelle);
+  const parFamille = f.libelle ? chercher(f.libelle) : null;
   if (parFamille) return detail(parFamille, 'famille', f.groupe);
   const groupe = GROUPES_PAR_CLE.get(f.groupe);
   const parGroupe = groupe ? chercher(groupe.libelle) : null;
@@ -253,7 +263,9 @@ function repereDe(f, role, reperes) {
  *  1. la correction faite sur le plat lui-même (composant.grammage.valeur renseignée) : origine « plat » ;
  *  2. la référence mémorisée pour ce nom et ce rôle (geste « mémoriser comme référence maison ») : « reference » ;
  *  3. le standard maison de la famille et du rôle (état.standards) : « standard » ;
- *  4. le repère de la base (PORTIONS_BASE), milieu de la fourchette, par famille puis par groupe : « base ».
+ *  4. le standard maison de la grande catégorie et du rôle (état.standards, clé « groupe:… ») : « standard ».
+ *     Un légume sans famille connue en dépend aussi (catégorie « Légumes ») ;
+ *  5. le repère de la base (PORTIONS_BASE), milieu de la fourchette, par famille puis par groupe : « base ».
  * Une préparation maison se compte en quantité finie : son état est toujours « cuit », et un standard ou un repère
  * exprimé en poids sec ou cru net ne lui est pas appliqué.
  * @param {object} etat
@@ -282,13 +294,20 @@ export function grammageEffectif(etat, composant, reperes = PORTIONS_BASE) {
   }
 
   const f = c.famille ? familleParCle(c.famille) : null;
-  if (f && c.role) {
-    const s = standardDe(etat, f.cle, c.role);
+  // Sans famille, seul un légume a une catégorie de portion (les autres produits sans famille n'en ont pas).
+  const cleGroupe = f ? f.groupe : (c.categorie === 'legume' ? 'legumes' : null);
+  if (cleGroupe && c.role) {
+    const s = f ? standardDe(etat, f.cle, c.role) : null;
     if (s && (!preparation || etatConnu(s.etat) === ETAT_POIDS.cuit)) {
       return { valeur: s.valeur, unite: s.unite, etat: etatConnu(s.etat), statut: 'RESTAURANT_VALIDE',
         source: 'standard maison', origine: 'standard' };
     }
-    const r = repereDe(f, c.role, reperes);
+    const sg = standardDe(etat, cleStandardGroupe(cleGroupe), c.role);
+    if (sg && (!preparation || etatConnu(sg.etat) === ETAT_POIDS.cuit)) {
+      return { valeur: sg.valeur, unite: sg.unite, etat: etatConnu(sg.etat), statut: 'RESTAURANT_VALIDE',
+        source: `standard maison de la catégorie « ${GROUPES_PAR_CLE.get(cleGroupe).libelle} »`, origine: 'standard' };
+    }
+    const r = repereDe(f ?? { libelle: '', groupe: cleGroupe }, c.role, reperes);
     if (r && (!preparation || r.etat === ETAT_POIDS.cuit)) {
       const groupe = r.portee === 'groupe' ? ` (repère du groupe « ${GROUPES_PAR_CLE.get(r.groupe).libelle} »)` : '';
       return { valeur: r.valeur, unite: r.unite, etat: r.etat, statut: 'BASE_METIER_ESTIMATION',
@@ -317,6 +336,22 @@ export function lignesStandards(etat, reperes = PORTIONS_BASE) {
       cleFamille: f.cle, libelle: f.libelle, categorie: f.categorie, groupe: f.groupe, role,
       standard: s ? { valeur: s.valeur, unite: s.unite, etat: etatConnu(s.etat), h: s.h ?? null } : null,
       repereBase: repereDe(f, role, reperes),
+    };
+  }));
+}
+
+/**
+ * Une ligne par grande catégorie et par rôle utile, pour l'écran Réglages. Même forme que lignesStandards :
+ * `cleFamille` porte la clé « groupe:… » (celle de definirStandard), `libelle` nomme toute la catégorie.
+ */
+export function lignesStandardsGroupes(etat, reperes = PORTIONS_BASE) {
+  return GROUPES.flatMap((g) => ROLES_STANDARD.map((role) => {
+    const cle = cleStandardGroupe(g.cle);
+    const s = standardDe(etat, cle, role);
+    return {
+      cleFamille: cle, libelle: `${g.libelle} (toute la catégorie)`, categorie: null, groupe: g.cle, role,
+      standard: s ? { valeur: s.valeur, unite: s.unite, etat: etatConnu(s.etat), h: s.h ?? null } : null,
+      repereBase: repereDe({ libelle: '', groupe: g.cle }, role, reperes),
     };
   }));
 }

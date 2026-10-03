@@ -12,7 +12,7 @@ import {
 } from '../app/js/domaine/actions.js';
 import { calculerComposant } from '../app/js/domaine/calcul.js';
 import { exporter } from '../app/js/domaine/etat.js';
-import { GROUPES, grammageEffectif, lignesStandards } from '../app/js/domaine/savoir.js';
+import { GROUPES, grammageEffectif, lignesStandards, lignesStandardsGroupes } from '../app/js/domaine/savoir.js';
 import { PORTIONS_BASE } from '../app/js/donnees/base-metier.js';
 import { JEU_REPERES as R, JEU_STANDARDS as ST } from './jeux/TEST_ONLY-savoir.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
@@ -556,7 +556,10 @@ test('réglages : « Standards maison » en tête, groupée, repliée sans rien 
   const premierTitre = noeud.tous((x) => x.balise === 'h2')[0];
   assert.equal(premierTitre.textContent, 'Standards maison', 'la section est la première, sous le titre');
   assert.equal(premierTitre.attributs.id, 'standards', 'ancre « standards » sur le titre');
-  assert.equal(classes(noeud, 'ligne-standard').length, lignesStandards(magasin.etat()).length, 'une ligne par famille et par rôle');
+  assert.equal(classes(noeud, 'ligne-standard').length,
+    lignesStandards(magasin.etat()).length + lignesStandardsGroupes(magasin.etat()).length,
+    'une ligne par famille et par rôle, plus une par catégorie et par rôle');
+  assert.match(texte, /Légumes \(toute la catégorie\) en garniture/);
   assert.deepEqual(groupesDe(noeud).map((g) => g.querySelector('summary').textContent), GROUPES.map((g) => g.libelle));
   assert.deepEqual(groupesOuverts(noeud), [], 'rien de réglé, aucun menu saisi : tout est replié');
   assert.match(texte, /non réglé/);

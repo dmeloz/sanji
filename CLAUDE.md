@@ -8,7 +8,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 3. Fiche projet : `~/Atelier-Claude/Cerveau-Obsidian/01-Projets/Sanji.md`.
 
 ## Commandes
-- Tests : `npm test` (Node 22, aucun paquet à installer). 300 tests au 2026-10-02.
+- Tests : `npm test` (Node 22, aucun paquet à installer). 309 tests au 2026-10-03.
 - Régénérer la base métier embarquée : `npm run base`.
 - Servir en local : `npm run serve`, puis http://localhost:5173.
 
@@ -36,10 +36,10 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 - Tester dans un navigateur après un changement d'interface : les tests sous faux DOM ne voient ni la mise en page ni IndexedDB.
 - **Un parcours se vérifie en le suivant à l'écran, comme le ferait le chef** (ouvrir l'écran, saisir, enregistrer), jamais en injectant les données par un script. Un script ne sert qu'à inspecter.
 - Plus aucune validation manuelle : un menu enregistré crée seul ses composants, valides et attribués. Ne jamais réintroduire un bouton « valider ».
-- La portion d'un plat se résout au calcul (`grammageEffectif`) : correction du plat, référence du nom, standard maison, repère de la base. Elle porte toujours son état de poids ; le calcul part de cet état.
+- La portion d'un plat se résout au calcul (`grammageEffectif`) : correction du plat, référence du nom, standard maison de la famille, standard maison de la catégorie (clé `groupe:…` dans `etat.standards` ; un légume sans famille en dépend), repère de la base. Elle porte toujours son état de poids ; le calcul part de cet état.
 - Faux DOM : `querySelector` n'y cherche que par nom de balise. Garder les champs dans une table plutôt que les retrouver par sélecteur.
 - CSS : la classe `.case` est celle des cases à cocher des panneaux ; les cases dessinées du tableau s'appellent `.coche`.
 - Piège du cache : après un changement, le navigateur sert encore l'ancienne version au premier rechargement. Recharger deux fois et vérifier « Version de l'application » dans Réglages avant de tester.
 - Jamais de publication ni d'hébergement sans accord de la propriétaire.
 - `base-officielle-production-stock-hygiene.md` est une donnée de référence : la lire, ne pas la modifier.
-- Le dossier contient un `.obsidian` : à exclure d'un futur dépôt Git.
+- Le dépôt Git local existe depuis le 2026-10-03 (branche `main`, premier commit `76f894b`), sans dépôt distant. Le dossier contient un `.obsidian` et un canvas « Sans titre » : ils sont exclus par `.gitignore`.

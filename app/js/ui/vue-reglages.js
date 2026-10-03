@@ -7,7 +7,7 @@ import {
 } from '../domaine/actions.js';
 import { creneauxDuJourSemaine } from '../domaine/dates.js';
 import { exporter, importer } from '../domaine/etat.js';
-import { FAMILLES, GROUPES, lignesStandards } from '../domaine/savoir.js';
+import { FAMILLES, GROUPES, lignesStandards, lignesStandardsGroupes } from '../domaine/savoir.js';
 import { ETAT_CRENEAU, ETAT_POIDS, UNITE, libelle } from '../domaine/statuts.js';
 import { VERSION_BASE } from '../donnees/base-metier.js';
 import { VERSION_APP } from '../version.js';
@@ -92,13 +92,15 @@ function ligneStandard(l) {
 /** Une ligne par famille et par rôle, regroupées par grande catégorie ; un groupe est ouvert s'il a un standard ou un plat saisi. */
 function sectionStandards(etat) {
   const lignes = lignesStandards(etat);
+  const lignesGroupes = lignesStandardsGroupes(etat);
   const utilisees = new Set(Object.values(etat.composants).map((c) => c.famille).filter(Boolean));
   return h('section', { classe: 'carte' },
     titreSection('Standards maison', 'standards'),
     h('p', { classe: 'aide' }, 'Le standard maison passe avant l\'estimation de la base. Une correction faite sur un plat ne le change pas. '
-      + 'Il sert au calcul de tous les plats de cette famille qui n\'ont pas été corrigés.'),
+      + 'Il sert au calcul de tous les plats de cette famille qui n\'ont pas été corrigés. '
+      + 'Le standard de toute la catégorie sert aux familles qui n\'ont pas le leur ; pour les légumes, il sert aussi à ceux que l\'application ne reconnaît pas (tomates…).'),
     GROUPES.map((g) => {
-      const duGroupe = lignes.filter((l) => l.groupe === g.cle);
+      const duGroupe = [...lignesGroupes.filter((l) => l.groupe === g.cle), ...lignes.filter((l) => l.groupe === g.cle)];
       const ouvert = duGroupe.some((l) => l.standard !== null || utilisees.has(l.cleFamille));
       return repliable(g.libelle, ouvert, h('ul', { classe: 'liste-standards' }, duGroupe.map(ligneStandard)), { classe: 'repliable-groupe' });
     }));

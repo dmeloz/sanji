@@ -7,7 +7,7 @@ import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, libelleJour, lundiDe
 import { jourOuVide, normaliser } from './etat.js';
 import { avancesPossibles, cibleProduction, etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
-import { grammageEffectif, lignesStandards } from './savoir.js';
+import { cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes } from './savoir.js';
 
 /** Ordre d'affichage d'une mise en place : ce qui demande une action d'abord, ce qui est prêt à la fin. */
 export const ORDRE_SYMBOLES = Object.freeze(['a_decider', 'a_faire', 'en_cours', 'non_couvert', 'pret']);
@@ -128,11 +128,22 @@ function jourDuTableau(etat, date, aujourdhui, deplie) {
 
 /** Familles et rôles sans portion parmi les composants au poste de ces dates : à régler dans les standards maison. */
 function portionsARegler(etat, dates) {
-  const libelles = new Map(lignesStandards(etat).map((l) => [`${l.cleFamille}|${l.role}`, l]));
+  const libelles = new Map([...lignesStandards(etat), ...lignesStandardsGroupes(etat)].map((l) => [`${l.cleFamille}|${l.role}`, l]));
   const vues = new Map();
   const sansFamille = [];
   for (const c of Object.values(etat.composants ?? {})) {
-    if (!dates.includes(c.date) || !c.attribue || c.type === 'generique' || c.type === 'preparation_maison') continue;
+    if (!dates.includes(c.date) || !c.attribue || c.type === 'preparation_maison') continue;
+    if (c.type === 'generique') {
+      // Seul un légume sans famille a une catégorie de portion : sans standard « Légumes », sa portion est à régler.
+      if (c.categorie !== 'legume' || !c.role || grammageEffectif(etat, c)) continue;
+      const cleLegumes = `${cleStandardGroupe('legumes')}|${c.role}`;
+      if (!vues.has(cleLegumes)) {
+        vues.set(cleLegumes, { cleFamille: cleStandardGroupe('legumes'), role: c.role,
+          libelle: 'Légumes', nb: 0 });
+      }
+      vues.get(cleLegumes).nb += 1;
+      continue;
+    }
     if (grammageEffectif(etat, c)) continue;
     if (!c.famille) { sansFamille.push(c.id); continue; }
     const cle = `${c.famille}|${c.role}`;

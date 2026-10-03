@@ -136,6 +136,21 @@ export function calculerComposant(etat, composantId) {
       res.formule = 'Quantité inconnue : prévision hors groupes à saisir.';
       return res;
     }
+    // Un légume sans famille peut avoir une portion par le standard de sa catégorie : quantité servie seulement,
+    // la perte de parage reste inconnue (aucune étape n'est connue pour lui).
+    const gg = c.categorie === 'legume' ? grammageEffectif(etat, c) : null;
+    if (gg) {
+      const servie = portions.total * gg.valeur;
+      dependances.push({ parametre: 'grammage', valeur: gg.valeur, statut: gg.statut, unite: gg.unite, etat: gg.etat, origine: gg.origine });
+      res.unite = gg.unite;
+      res.uniteTravail = gg.unite;
+      res.quantiteServie = servie;
+      res.quantiteTravail = servie;
+      res.libelleQuantite = 'quantité servie, perte de parage inconnue';
+      res.statut = 'CALCULE';
+      res.formule = `${nPortions} × ${formaterExact(gg.valeur, gg.unite)} = ${formaterQuantite(servie, gg.unite)}, perte de parage inconnue`;
+      return res;
+    }
     res.quantiteTravail = portions.total;
     res.statut = 'CALCULE';
     res.formule = `${nPortions}, composition à définir`;
