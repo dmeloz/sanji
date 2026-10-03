@@ -194,9 +194,7 @@ test('inventaire : les quatre onglets et les sept vues de l\'application sont d�
 
 // ---------------------------------------------------------------- défaut connu, à corriger en A-P1 (test « rouge » assumé)
 
-test('tâches : modifier un menu qui retire un plat non fait supprime sa tâche SANS trace dans le journal', {
-  todo: 'défaut constaté en A-P0 : le journal ne dit que « definirMenu » ; à corriger en A-P1 (critère : aucune disparition silencieuse)',
-}, () => {
+test('tâches : modifier un menu qui retire un plat non fait le dit dans le journal (correctif A-P1a)', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'riz, carottes', h(1));
   prevision(e, S.lundi, 1, 40);
@@ -205,9 +203,9 @@ test('tâches : modifier un menu qui retire un plat non fait supprime sa tâche 
   planifier(e, carottes.id, S.samediPrecedent, 'apres_midi', h(3));
   const avant = e.journal.length;
   definirMenu(e, S.lundi, 1, 'riz, courgettes', h(4));
-  assert.equal(Object.values(e.composants).some((c) => c.nom === 'carottes'), false, 'comportement actuel : le composant retiré disparaît');
+  assert.equal(Object.values(e.composants).some((c) => c.nom === 'carottes'), false, 'le composant retiré disparaît du menu');
   const ajoute = e.journal.slice(avant).map((j) => `${j.action} ${j.detail}`).join(' | ');
-  assert.match(ajoute, /carottes/, 'le journal doit dire quelle tâche a été retirée');
+  assert.match(ajoute, /retiré carottes \(1 tâche\)/, 'le journal dit quelle tâche a été retirée');
 });
 
 test('tâches : modifier un menu ne supprime jamais une tâche déjà faite', () => {

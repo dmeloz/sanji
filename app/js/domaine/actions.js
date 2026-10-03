@@ -157,7 +157,8 @@ function creerComposant(etat, date, menu, champs) {
  * sauf s'il a une production faite ; un nom nouveau crée un composant « valide » qui reçoit le savoir de
  * l'application (appliquerSavoir). Aucune validation manuelle. Retourne les identifiants créés.
  */
-function fusionnerComposants(etat, date, menu) {
+/** `retires` (facultatif) reçoit { nom, taches } pour chaque composant retiré : le journal doit dire ce qui disparaît. */
+function fusionnerComposants(etat, date, menu, retires = []) {
   const m = etat.jours[date].menus[menu];
   const propositions = proposerComposants(m.intitule, menu, etat.memoire);
   const voulus = new Set(propositions.map((p) => normaliser(p.nom)));
@@ -168,7 +169,10 @@ function fusionnerComposants(etat, date, menu) {
       continue;
     }
     const aProductionFaite = Object.values(etat.productions).some((p) => p.composantId === c.id && p.etat === 'fait');
-    if (!aProductionFaite) delete etat.composants[c.id];
+    if (!aProductionFaite) {
+      retires.push({ nom: c.nom, taches: Object.values(etat.productions).filter((p) => p.composantId === c.id).length });
+      delete etat.composants[c.id];
+    }
   }
   const presents = new Set(duMenu().map((c) => normaliser(c.nom)));
   const ids = [];
@@ -190,12 +194,19 @@ function fusionnerComposants(etat, date, menu) {
  * Enregistre l'intitulé d'un menu (sans journal). Les composants sont régénérés par fusion si l'intitulé a changé, ou
  * s'il est saisi mais pas encore validé (donnée d'avant la section 16) ; un intitulé identique ne change rien.
  */
-function enregistrerMenu(etat, date, menu, texte) {
+function enregistrerMenu(etat, date, menu, texte, retires = []) {
   const m = assurerJour(etat, date).menus[menu];
   const change = m.intitule !== texte;
   m.intitule = texte;
-  if (change || (texte.trim() !== '' && !m.transcriptionValidee)) fusionnerComposants(etat, date, menu);
+  if (change || (texte.trim() !== '' && !m.transcriptionValidee)) fusionnerComposants(etat, date, menu, retires);
   return m;
+}
+
+/** « , retiré : carottes (1 tâche) » : ce qu'une modification de menu a fait disparaître, pour le journal. */
+function texteRetires(retires) {
+  if (retires.length === 0) return '';
+  const liste = retires.map((r) => `${r.nom}${r.taches > 0 ? ` (${r.taches} tâche${r.taches > 1 ? 's' : ''})` : ''}`).join(', ');
+  return ` : retiré ${liste}`;
 }
 
 /**
@@ -206,8 +217,9 @@ function enregistrerMenu(etat, date, menu, texte) {
 export function definirMenu(etat, date, menu, intitule, h) {
   verifierH(h);
   verifierMenuDuJour(date, menu);
-  const m = enregistrerMenu(etat, date, menu, String(intitule ?? ''));
-  return terminer(etat, h, 'definirMenu', `${date} menu ${menu}`, m);
+  const retires = [];
+  const m = enregistrerMenu(etat, date, menu, String(intitule ?? ''), retires);
+  return terminer(etat, h, 'definirMenu', `${date} menu ${menu}${texteRetires(retires)}`, m);
 }
 
 /**
@@ -231,8 +243,9 @@ export function genererComposants(etat, date, menu, h) {
   verifierH(h);
   verifierMenuDuJour(date, menu);
   assurerJour(etat, date);
-  const ids = fusionnerComposants(etat, date, menu);
-  return terminer(etat, h, 'genererComposants', `${date} menu ${menu} : ${ids.length} créé(s)`, ids);
+  const retires = [];
+  const ids = fusionnerComposants(etat, date, menu, retires);
+  return terminer(etat, h, 'genererComposants', `${date} menu ${menu} : ${ids.length} créé(s)${texteRetires(retires).replace(' : retiré', ', retiré')}`, ids);
 }
 
 /**
@@ -262,15 +275,16 @@ export function saisirMenusSemaine(etat, lundi, saisie, h) {
   }
   let menus = 0;
   let previsions = 0;
+  const retires = [];
   for (const date of jours) {
     if (!Object.hasOwn(saisie, date)) continue;
     for (const menu of [1, 2]) {
       const intitule = saisie[date][`menu${menu}`];
       if (typeof intitule === 'string' && intitule.trim() !== '') {
-        enregistrerMenu(etat, date, menu, intitule.trim());
+        enregistrerMenu(etat, date, menu, intitule.trim(), retires);
         menus += 1;
       } else if (intitule === null && etat.jours[date] && etat.jours[date].menus[menu].intitule !== '') {
-        enregistrerMenu(etat, date, menu, '');
+        enregistrerMenu(etat, date, menu, '', retires);
         menus += 1;
       }
       const prevision = saisie[date][`prevision${menu}`];
@@ -280,7 +294,7 @@ export function saisirMenusSemaine(etat, lundi, saisie, h) {
       }
     }
   }
-  return terminer(etat, h, 'saisirMenusSemaine', `${lundi} : ${menus} menu(s), ${previsions} prévision(s)`, { menus, previsions });
+  return terminer(etat, h, 'saisirMenusSemaine', `${lundi} : ${menus} menu(s), ${previsions} prévision(s)${texteRetires(retires).replace(' : retiré', ' ; retiré')}`, { menus, previsions });
 }
 
 /** Ajoute un composant à la main (non validé). champs : nom, categorie, attribue, type. */
