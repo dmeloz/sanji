@@ -1,0 +1,133 @@
+/* ------------------------------------------------------------ accueil : tableau de bord */
+
+.accueil-grille { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.accueil-grille > * { margin-top: 0; }
+.accueil-grille p a:not(.btn), .accueil-grille li > a.ligne-nom { display: inline-flex; align-items: center; min-height: var(--cible); }
+.lien-discret { font-weight: 700; }
+.ferme-annonce { font-size: var(--t0); font-weight: 700; padding: 12px 14px; border: 1px solid var(--bordure); border-radius: 12px; background: var(--carte-2); }
+
+/* Réglette de mise en place : un bac par tâche, lisible par la forme avant la couleur. */
+/* Le rail : une bande d'inox sur laquelle les bacs sont posés côte à côte. */
+.reglette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 4px;
+  padding: 8px;
+  background: var(--carte-2);
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+}
+.bac-lien {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: var(--cible);
+  min-height: var(--cible);
+  padding: 6px 4px;
+  border-radius: 10px;
+  color: var(--texte);
+  text-decoration: none;
+}
+.bac-nom {
+  font-size: var(--t-1);
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  max-width: 100%;
+}
+.bac { display: block; width: 48px; height: 36px; flex: none; }
+.bac-mini { display: inline-block; width: 24px; height: 18px; margin-right: 6px; vertical-align: -3px; }
+.bac-bord { fill: var(--carte); stroke: var(--texte-doux); stroke-width: 2.5; }
+.bac-corps { stroke: none; }
+.bac-signe { fill: none; stroke: var(--texte); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.bac-point { stroke: none; fill: var(--texte); }
+.bac-pret .bac-corps { fill: var(--vert-texte); }
+.bac-pret .bac-signe { stroke: var(--carte); stroke-width: 3.5; }
+.bac-en_cours .bac-bord { fill: none; stroke: var(--bleu); }
+.bac-en_cours .bac-corps { fill: var(--bleu); }
+.bac-a_faire .bac-bord { fill: var(--carte); stroke: var(--texte-doux); }
+.bac-a_decider .bac-bord { fill: var(--rouge-fond); stroke: var(--rouge); stroke-width: 3.5; }
+.bac-a_decider .bac-signe { stroke: var(--rouge-texte); stroke-width: 3.5; }
+.bac-a_decider .bac-point { fill: var(--rouge-texte); }
+.bac-non_couvert .bac-bord { fill: var(--ambre-fond); stroke: var(--ambre-texte); }
+.bac-non_couvert .bac-signe { stroke: var(--ambre-texte); stroke-width: 2; }
+.legende { margin-top: 12px; font-weight: 700; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.legende-item { display: inline-flex; align-items: center; white-space: nowrap; }
+.carte-mise-en-place .actions { margin-top: 14px; }
+
+.carte-en-avant { border: 2px solid var(--bleu); padding: 15px; }
+
+/* Menus */
+.menu-bloc > * + * { margin-top: 4px; }
+.menu-bloc + .menu-bloc { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--bordure); }
+.menu-numero { font-size: var(--t0); color: var(--texte-doux); }
+.portions { display: flex; align-items: baseline; gap: 6px; }
+.chiffre-grand { font-family: var(--police-titre); font-size: var(--t3); font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+
+/* Créneaux */
+.liste-creneaux > li { padding: 10px 0; border-top: 1px solid var(--bordure); }
+.liste-creneaux > li:first-child { border-top: 0; padding-top: 0; }
+.liste-creneaux > li > * + * { margin-top: 6px; }
+.creneau-tete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
+.creneau-charge { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-variant-numeric: tabular-nums; }
+.blocs-charge { display: inline-flex; align-items: center; gap: 4px; font-weight: 800; }
+.bloc-charge { display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: var(--bleu); }
+
+/* Listes de lignes (décisions, avances, fiches), icônes d'alerte */
+.liste-lignes > li { padding: 6px 0; border-top: 1px solid var(--bordure); }
+.liste-lignes > li:first-child { border-top: 0; padding-top: 0; }
+.ligne-nom { font-weight: 700; color: var(--texte); text-decoration: none; overflow-wrap: anywhere; }
+.ligne-fiche { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: var(--cible); padding: 6px 0; color: var(--texte); text-decoration: none; }
+.etiquette-allergie { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; color: var(--rouge-texte); }
+.picto { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; }
+.alerte-icone { display: flex; align-items: flex-start; gap: 8px; }
+.alerte-icone .picto { margin-top: 2px; }
+
+/* Semaine en bandeau : initiale + numéro, lundi à samedi */
+.bandeau-semaine + .bandeau-semaine { margin-top: 12px; }
+.bandeau-semaine .bloc-titre { margin-top: 0; }
+.bandeau-jours { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.case-jour {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+  padding: 6px 2px;
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  background: var(--carte-2);
+  color: var(--texte);
+  text-decoration: none;
+}
+.case-initiale { font-size: var(--t-1); font-weight: 700; color: var(--texte-doux); line-height: 1.2; }
+.case-numero { font-family: var(--police-titre); font-size: var(--t1); font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.case-aujourdhui { background: var(--bleu); border-color: var(--bleu); color: var(--sur-bleu); }
+.case-aujourdhui .case-initiale { color: var(--sur-bleu); }
+.case-points {
+  position: absolute;
+  top: -9px;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border: 2px solid var(--ambre);
+  border-radius: 999px;
+  background: var(--ambre-fond);
+  color: var(--ambre-texte);
+  font-size: var(--t-1);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sanji — Copilote entremétier</title>
+  <meta name="description" content="Menus du jour, prévisions, fiches de fonction, quantités et feuille de travail du poste entremétier.">
+  <meta name="theme-color" content="#17212b" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#182027" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Sanji">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icones/icone-180.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="barre" class="barre">
+    <span class="barre-app">Sanji</span>
+    <h1 id="barre-titre" class="barre-titre">Tableau</h1>
+  </header>
+  <div id="bandeaux" class="bandeaux"></div>
+  <main id="vue" class="contenu" tabindex="-1">
+    <noscript><p class="encadre encadre-erreur">Cette application a besoin de JavaScript pour fonctionner.</p></noscript>
+    <p class="vide">Chargement…</p>
+  </main>
+  <nav id="onglets" class="onglets" aria-label="Navigation principale">
+    <a href="#/tableau" data-onglet="tableau">
+      <span class="onglet-pastille"><svg class="onglet-icone" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M9 4v13M15 4v13M3 9h18M8 21l1.5-4M16 21l-1.5-4"/></svg></span>
+      <span class="onglet-libelle">Tableau</span>
+    </a>
+    <a href="#/jour" data-onglet="jour">
+      <span class="onglet-pastille"><svg class="onglet-icone" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/><path d="M9 6h12M9 12h12M9 18h12"/></svg></span>
+      <span class="onglet-libelle">Jour</span>
+    </a>
+    <a href="#/produits" data-onglet="produits">
+      <span class="onglet-pastille"><svg class="onglet-icone" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="m3 7.5 9 4.5 9-4.5M12 12v9"/></svg></span>
+      <span class="onglet-libelle">Produits</span>
+    </a>
+    <a href="#/reglages" data-onglet="reglages">
+      <span class="onglet-pastille"><svg class="onglet-icone" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h9M18 6h3M3 12h3M12 12h9M3 18h11M20 18h1"/><circle cx="15" cy="6" r="3"/><circle cx="9" cy="12" r="3"/><circle cx="17" cy="18" r="3"/></svg></span>
+      <span class="onglet-libelle">Réglages</span>
+    </a>
+  </nav>
+  <div id="messages" class="messages" aria-live="polite"></div>
+  <div id="panneaux"></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
