@@ -10,3 +10,6 @@ Sans titre.canvas
 
 # Sauvegardes d essai fabriquées par outils/creer-semaine-test.mjs
 outils/sorties/
+
+# Espaces de travail temporaires des agents
+.claude/
