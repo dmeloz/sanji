@@ -18,7 +18,7 @@ import {
 } from '../app/js/domaine/planification.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
 import { besoinsProduits, echeanceCommande, suiviProduit } from '../app/js/domaine/produits.js';
-import { BASE_METIER, PORTIONS_BASE } from '../app/js/donnees/base-metier.js';
+import { BASE_METIER } from '../app/js/donnees/base-metier.js';
 import { grammageEffectif } from '../app/js/domaine/savoir.js';
 import { libelle } from '../app/js/domaine/statuts.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
@@ -511,6 +511,7 @@ test('16. La saisie des menus d\'une semaine ne demande aucune validation : les 
   assert.equal(composantDe(etat, S.lundiSuivant, 1, 'poulet').attribue, true);
 });
 
+// Adapté B-P0 : le riz reçoit son repère validé ; l'orge reste le cas « sans donnée, rien d'inventé ».
 test('17. Un paramètre repris de la base métier est visible, étiqueté estimation, et ne devient jamais une commande sans validation ; sans donnée dans la base, aucune valeur n\'est inventée', () => {
   const etat = etatVide();
   saisirMenusSemaine(etat, S.lundi, { [S.lundi]: { menu2: 'riz, carottes, orge, ELEMENT_INCONNU_TEST', prevision2: 40 } }, h());
@@ -551,13 +552,15 @@ test('17. Un paramètre repris de la base métier est visible, étiqueté estima
   const inconnu = composantDe(etat, S.lundi, 2, 'ELEMENT_INCONNU_TEST');
   assert.deepEqual([inconnu.famille, inconnu.etapes, inconnu.grammage.valeur], [null, [], null]);
   const sansValeur = [riz, orge, inconnu].map((c) => calculerComposant(etat, c.id));
-  if (PORTIONS_BASE.length === 0) {
-    // Aucun repère de portion dans la base aujourd'hui : ni standard, ni repère, donc aucune portion ni quantité.
-    assert.equal(grammageEffectif(etat, riz), null);
-    assert.equal(grammageEffectif(etat, orge), null);
-    assert.ok(sansValeur.slice(0, 2).every((c) => c.statut === 'INCONNU' && c.quantiteTravail === null && c.brut === null));
-    assert.deepEqual(besoins.lignes.map((l) => l.cle), ['carottes'], 'seul le composant chiffrable figure au besoin');
-  }
+  // B-P0 : le riz a un repère validé (estimation à valider, jamais une commande) ; l'orge n'en a pas : rien d'inventé.
+  assert.equal(grammageEffectif(etat, riz).origine, 'repere_valide');
+  assert.equal(sansValeur[0].statut, 'CALCULE');
+  assert.equal(sansValeur[0].aValider, true);
+  assert.equal(grammageEffectif(etat, orge), null);
+  assert.ok(sansValeur[1].statut === 'INCONNU' && sansValeur[1].quantiteTravail === null && sansValeur[1].brut === null);
+  assert.deepEqual(besoins.lignes.map((l) => l.cle).sort(), ['carottes', 'riz'], 'seuls les composants chiffrables figurent au besoin');
+  assert.equal(besoins.lignes.find((l) => l.cle === 'riz').aValider, true);
+  assert.equal(besoins.nonChiffrables.some((x) => x.composantId === orge.id && /grammage/.test(x.raison)), true);
   assert.equal(sansValeur[2].quantiteTravail, null);
   assert.equal(sansValeur[2].statut, 'INCONNU');
 });

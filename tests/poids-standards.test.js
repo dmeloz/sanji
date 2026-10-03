@@ -4,7 +4,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BASE_METIER, PORTIONS_BASE } from '../app/js/donnees/base-metier.js';
+import { BASE_METIER } from '../app/js/donnees/base-metier.js';
 import {
   definirMenu, definirStandard, marquerFait, modifierComposant, supprimerStandard,
 } from '../app/js/domaine/actions.js';
@@ -24,8 +24,6 @@ const milieu = (etape, produit) => {
   const l = BASE_METIER.find((x) => x.etape === etape && x.produit === produit);
   return (l.coefMin + l.coefMax) / 2;
 };
-// Ces tests supposent qu'aucun repère de portion n'est embarqué (section 11.4 absente de la source aujourd'hui).
-const SANS_REPERES = PORTIONS_BASE.length === 0 ? false : 'PORTIONS_BASE n\'est plus vide : la source a une section 11.4';
 
 // ---------------------------------------------------------------- état du poids
 
@@ -207,36 +205,38 @@ test('supprimerStandard : supprime, refuse une famille ou un rôle inconnu, sans
   assert.equal(supprimerStandard(ancien, 'riz', 'garniture', h()), false);
 });
 
-test('le standard donne la portion d\'un plat de sa famille ; sans standard ni base, aucune quantité n\'est inventée', { skip: SANS_REPERES }, () => {
+// Adapté B-P0 : le riz a maintenant un repère validé. Ce test porte sur « sans standard ni repère, aucune quantité
+// inventée » : il utilise la polenta, famille sans repère. Le riz est couvert par savoir-metier.test.js.
+test('le standard donne la portion d\'un plat de sa famille ; sans standard ni base, aucune quantité n\'est inventée', () => {
   const e = etatVide();
   prevision(e, S.lundi, 2, 40);
-  definirMenu(e, S.lundi, 2, M.unSeul, h());
-  const riz = parNom(e, S.lundi, 'riz');
-  let c = calculerComposant(e, riz.id);
+  definirMenu(e, S.lundi, 2, 'polenta', h());
+  const polenta = parNom(e, S.lundi, 'polenta');
+  let c = calculerComposant(e, polenta.id);
   assert.deepEqual([c.statut, c.quantiteTravail, c.brut, c.quantiteServie], ['INCONNU', null, null, null]);
   assert.ok(c.manquants.includes('grammage'));
-  assert.equal(grammageEffectif(e, riz), null);
-  assert.equal(etatTache(e, principaleDe(e, riz.id)), 'a_preciser');
+  assert.equal(grammageEffectif(e, polenta), null);
+  assert.equal(etatTache(e, principaleDe(e, polenta.id)), 'a_preciser');
   // Standard en poids sec : la portion est celle d'avant cuisson, le gain estimé de la base n'est pas appliqué.
-  definirStandard(e, 'riz', 'garniture', ST.sec, h());
-  c = calculerComposant(e, riz.id);
+  definirStandard(e, 'polenta', 'garniture', ST.sec, h());
+  c = calculerComposant(e, polenta.id);
   assert.equal(c.statut, 'CALCULE');
   assert.equal(c.quantiteTravail, 4000);
   assert.equal(c.aValider, false, 'portion du chef, étape estimée non appliquée');
   assert.deepEqual([c.dependances[0].origine, c.dependances[0].etat, c.dependances[0].statut], ['standard', 'sec', 'RESTAURANT_VALIDE']);
-  presque(c.quantiteCuiteEstimee, 4000 * milieu('cuisson', 'Riz'));
+  presque(c.quantiteCuiteEstimee, 4000 * milieu('cuisson', 'Polenta'));
   // Le même standard en poids cuit remonte la cuisson, estimée : à valider.
-  definirStandard(e, 'riz', 'garniture', ST.cuit, h());
-  c = calculerComposant(e, riz.id);
-  presque(c.quantiteTravail, 4000 / milieu('cuisson', 'Riz'));
+  definirStandard(e, 'polenta', 'garniture', ST.cuit, h());
+  c = calculerComposant(e, polenta.id);
+  presque(c.quantiteTravail, 4000 / milieu('cuisson', 'Polenta'));
   assert.equal(c.aValider, true);
   // Supprimer le standard : on retombe sur « aucune portion », pas sur une valeur par défaut.
-  supprimerStandard(e, 'riz', 'garniture', h());
-  assert.equal(calculerComposant(e, riz.id).statut, 'INCONNU');
+  supprimerStandard(e, 'polenta', 'garniture', h());
+  assert.equal(calculerComposant(e, polenta.id).statut, 'INCONNU');
   // Le standard est par famille et par rôle : un autre rôle ou une autre famille n'en profite pas.
-  definirStandard(e, 'riz', 'plat_principal', ST.sec, h());
+  definirStandard(e, 'polenta', 'plat_principal', ST.sec, h());
   definirStandard(e, 'carottes', 'garniture', ST.sec, h());
-  assert.equal(calculerComposant(e, riz.id).statut, 'INCONNU');
+  assert.equal(calculerComposant(e, polenta.id).statut, 'INCONNU');
 });
 
 test('le standard passe avant le repère de la base, par famille et par rôle', () => {
@@ -288,15 +288,17 @@ test('une correction sur un plat ne change ni le standard ni les autres plats, e
   assert.equal(calculerComposant(e, lundi.id).quantiteTravail, 4000);
 });
 
+// Adapté B-P0 : polenta (sans repère) au lieu du riz, pour que « plus de standard = plus de portion » reste vrai
+// maintenant que le riz a un repère validé.
 test('changer un standard recalcule les plats non corrigés et non faits, sans toucher à une production faite', () => {
   const e = etatVide();
   const jours = [S.lundi, S.mardi, S.mercredi, S.jeudi];
   for (const d of jours) {
     prevision(e, d, 2, 40);
-    definirMenu(e, d, 2, M.unSeul, h());
+    definirMenu(e, d, 2, 'polenta', h());
   }
-  definirStandard(e, 'riz', 'garniture', ST.sec, h(1));
-  const [libre, corrige, fait, enCours] = jours.map((d) => parNom(e, d, 'riz'));
+  definirStandard(e, 'polenta', 'garniture', ST.sec, h(1));
+  const [libre, corrige, fait, enCours] = jours.map((d) => parNom(e, d, 'polenta'));
   modifierComposant(e, corrige.id, { grammage: portion(120, 'sec') }, h(2));
   const prodFaite = principaleDe(e, fait.id);
   marquerFait(e, prodFaite, undefined, h(3));
@@ -310,7 +312,7 @@ test('changer un standard recalcule les plats non corrigés et non faits, sans t
   const avant = copie({ reel: p.quantiteReelle, instantane: p.instantane, hFait: p.hFait, cibleDemarrage: e.productions[prodEnCours].cibleAuDemarrage });
   assert.equal(cibleProduction(e, principaleDe(e, libre.id)), 4000);
 
-  definirStandard(e, 'riz', 'garniture', { valeur: 150, unite: 'g', etat: 'sec' }, h(4));
+  definirStandard(e, 'polenta', 'garniture', { valeur: 150, unite: 'g', etat: 'sec' }, h(4));
   assert.equal(cibleProduction(e, principaleDe(e, libre.id)), 6000, 'plat non corrigé et non fait : recalculé');
   assert.equal(cibleProduction(e, principaleDe(e, corrige.id)), 4800, 'plat corrigé : inchangé');
   assert.equal(cibleProduction(e, principaleDe(e, enCours.id)), 6000);
@@ -318,12 +320,13 @@ test('changer un standard recalcule les plats non corrigés et non faits, sans t
   assert.deepEqual({ reel: p.quantiteReelle, instantane: p.instantane, hFait: p.hFait, cibleDemarrage: e.productions[prodEnCours].cibleAuDemarrage }, avant);
   assert.equal(etatTache(e, prodFaite), 'ecart');
   // Supprimer le standard : les plats non corrigés n'ont plus de portion, le plat corrigé et la production faite restent.
-  supprimerStandard(e, 'riz', 'garniture', h(5));
+  supprimerStandard(e, 'polenta', 'garniture', h(5));
   assert.equal(calculerComposant(e, corrige.id).quantiteTravail, 4800);
   assert.deepEqual({ reel: p.quantiteReelle, instantane: p.instantane, hFait: p.hFait, cibleDemarrage: e.productions[prodEnCours].cibleAuDemarrage }, avant);
-  if (SANS_REPERES === false) assert.equal(calculerComposant(e, libre.id).statut, 'INCONNU');
+  assert.equal(calculerComposant(e, libre.id).statut, 'INCONNU');
 });
 
+// Adapté B-P0 : le contrôle négatif porte sur les carottes (sans repère) ; le riz retombe maintenant sur le repère validé.
 test('les standards survivent à exporter puis importer, et le calcul qui en dépend redonne le même résultat', () => {
   const e = etatVide();
   prevision(e, S.lundi, 2, 40);
@@ -348,7 +351,7 @@ test('les standards survivent à exporter puis importer, et le calcul qui en dé
   delete doc.etat.standards;
   const sans = importer(JSON.stringify(doc));
   assert.deepEqual(sans.standards, {});
-  if (SANS_REPERES === false) assert.equal(calculerComposant(sans, parNom(e, S.lundi, 'riz').id).statut, 'INCONNU');
+  assert.equal(calculerComposant(sans, parNom(e, S.lundi, 'carottes').id).statut, 'INCONNU');
 });
 
 test('importer complète et protège les standards', () => {

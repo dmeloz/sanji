@@ -483,6 +483,7 @@ test('tableau : en fin de semaine, la semaine prochaine s\'affiche ; mercredi, l
   assert.ok(liens(vide).some((a) => a.attributs.href === `#/menus/${S.lundi}` && /Saisir les menus de la semaine/.test(a.textContent)));
 });
 
+// Adapté B-P0 : le repère validé du riz en garniture retire une portion à régler (3 -> 2 : riz en plat principal, carottes).
 test('tableau : ce qui est au poste est écrit au feutre, le reste en gris ; l\'inconnu est signalé', () => {
   const noeud = tableau(S.lundi, etatSemaineSaisie());
   const texte = verifierTableau(noeud, 'tableau semaine saisie');
@@ -492,7 +493,7 @@ test('tableau : ce qui est au poste est écrit au feutre, le reste en gris ; l\'
   assert.ok(auPoste.includes('riz') && auPoste.includes('carottes'), 'menu 2 : féculent et légume au poste');
   assert.deepEqual(horsPoste, ['poulet'], 'menu 2 : la protéine n\'est pas au poste');
   // Aucune portion connue : le tableau le dit et renvoie aux standards maison, sans inventer de quantité.
-  assert.match(texte, /3 portions à régler dans les standards maison/);
+  assert.match(texte, /2 portions à régler dans les standards maison/);
   assert.match(texte, /1 élément du menu à préciser/);
   assert.match(texte, /Prévisions à saisir pour 2 jours/);
   // Sans prévision ni groupe, aucun chiffre : un cercle vide invite à saisir la prévision.
@@ -651,7 +652,6 @@ test('menus de la semaine : champs préremplis, texte incohérent signalé, pré
 
 // La table des repères de portion embarquée est vide aujourd'hui : les tests qui en ont besoin la remplissent le temps
 // d'une fonction avec des lignes TEST_ONLY, puis la rétablissent. Si elle cesse d'être vide, ces tests le disent.
-const SANS_REPERES = PORTIONS_BASE.length === 0 ? false : 'PORTIONS_BASE n\'est plus vide : la source a une section 11.4';
 
 async function avecReperes(lignes, fonction) {
   const embarques = [...PORTIONS_BASE];
@@ -693,6 +693,7 @@ const portionAffichee = (noeud) => classes(noeud, 'portion')[0]?.querySelector('
 
 // ---------------------------------------------------------------- réglages : standards maison
 
+// Adapté B-P0 : les quatre repères validés applicables (pâtes ×2, riz, légumineuses) sont indiqués ; il n'y en a pas d'autre.
 test('réglages : « Standards maison » en tête, groupée, repliée sans rien de réglé ni de saisi', () => {
   nettoyerPanneaux();
   magasin.remplacer(etatVide());
@@ -720,7 +721,7 @@ test('réglages : « Standards maison » en tête, groupée, repliée sans rien 
   assert.match(texte, /non réglé/);
   assert.match(texte, /riz en garniture/);
   assert.match(texte, /riz en plat principal/);
-  if (PORTIONS_BASE.length === 0) assert.doesNotMatch(texte, /repère de la base/, 'aucun repère embarqué : rien à indiquer');
+  assert.equal(texte.match(/repère de la base/g).length, 4, 'seuls les quatre repères validés applicables sont indiqués');
   for (const b of classes(noeud, 'ligne-standard').map((l) => l.querySelector('button'))) {
     assert.equal(b.textContent, 'Régler');
     assert.match(b.attributs['aria-label'], /^Régler le standard : .+, en (plat principal|garniture)$/);
@@ -768,20 +769,21 @@ test('réglages : la recherche locale filtre les standards sans accent ni casse,
   assert.deepEqual(magasin.etat(), instantane, 'la recherche n\'enregistre rien');
 });
 
-test('réglages : le repère de la base est indiqué à côté du standard, jamais copié comme valeur', { skip: SANS_REPERES }, async () => {
+// Adapté B-P0 : le riz en garniture a déjà un repère validé (50–70 g), qui passe avant le repère de test (50 g).
+test('réglages : le repère de la base est indiqué à côté du standard, jamais copié comme valeur', async () => {
   nettoyerPanneaux();
   await avecReperes([R.familleRiz, R.groupeCereales, R.groupeCerealesPrincipal, R.familleCarottes], async () => {
     magasin.remplacer(etatVide());
     const noeud = vues.reglages.rendre(magasin.etat(), 'standards');
     const texte = verifierTexte(noeud, 'réglages avec repères');
-    assert.match(texte, /repère de la base : 50 g, poids sec/, 'repère de la famille');
+    assert.match(texte, /repère de la base : 50–70 g, poids sec/, 'repère de la famille (validé)');
     assert.match(texte, /repère de la base : 60–80 g, poids sec \(repère du groupe\)/, 'repère du groupe, signalé comme tel');
     assert.match(texte, /repère de la base : 200–240 g, poids cru net/);
     assert.match(texte, /non réglé/, 'un repère n\'est pas un standard');
     // Panneau d'une ligne sans standard : l'état du repère est proposé, la valeur reste vide.
     await parAria(noeud, 'Régler le standard : riz, en garniture').click();
     const d = panneauOuvert();
-    assert.match(d.textContent, /Repère de la base, à titre indicatif : 50 g, poids sec/);
+    assert.match(d.textContent, /Repère de la base, à titre indicatif : 50–70 g, poids sec/);
     assert.equal(controleDe(d, 'Valeur de la portion').value, '');
     assert.equal(choisi(d, 'État du poids'), 'sec');
     d.close();
@@ -797,14 +799,16 @@ test('réglages : le repère de la base est indiqué à côté du standard, jama
   });
 });
 
+// Adapté B-P0 : polenta (sans repère) au lieu du riz (qui propose maintenant l'état de son repère validé) : le choix
+// d'état reste obligatoire sans repère ni standard.
 test('réglages : régler puis effacer un standard par le panneau modifie etat.standards', async () => {
   nettoyerPanneaux();
   magasin.remplacer(etatVide());
   const page = () => vues.reglages.rendre(magasin.etat(), 'standards');
 
-  await parAria(page(), 'Régler le standard : riz, en garniture').click();
+  await parAria(page(), 'Régler le standard : polenta, en garniture').click();
   let d = panneauOuvert();
-  assert.match(d.textContent, /Standard maison : riz, en garniture/);
+  assert.match(d.textContent, /Standard maison : polenta, en garniture/);
   assert.equal(choisi(d, 'État du poids'), 'choisir…', 'aucun état proposé sans repère ni standard : le choix est obligatoire');
   assert.equal(boutonNomme(d, 'Effacer ce standard'), undefined, 'rien à effacer tant que le standard n\'existe pas');
   assert.ok(boutonNomme(d, 'Annuler') && d.tous((x) => x.attributs.type === 'submit').length === 1);
@@ -814,25 +818,25 @@ test('réglages : régler puis effacer un standard par le panneau modifie etat.s
   assert.deepEqual(await soumettre(d), []);
   assert.equal(d.open, false, 'le panneau se ferme après l\'enregistrement');
   const s = magasin.etat().standards;
-  assert.deepEqual(Object.keys(s), ['riz']);
-  assert.deepEqual([s.riz.garniture.valeur, s.riz.garniture.unite, s.riz.garniture.etat], [110.5, 'g', 'sec'], 'la virgule est acceptée');
-  assert.equal(s.riz.plat_principal, undefined, 'l\'autre rôle n\'est pas touché');
+  assert.deepEqual(Object.keys(s), ['polenta']);
+  assert.deepEqual([s.polenta.garniture.valeur, s.polenta.garniture.unite, s.polenta.garniture.etat], [110.5, 'g', 'sec'], 'la virgule est acceptée');
+  assert.equal(s.polenta.plat_principal, undefined, 'l\'autre rôle n\'est pas touché');
 
   const apres = verifierTexte(page(), 'réglages après réglage');
   assert.match(apres, /110,5 g, poids sec/);
-  assert.deepEqual(nomsEnVue(page()), ['riz'], 'le standard réglé passe en tête de liste');
-  assert.ok(parAria(page(), 'Modifier le standard : riz, en garniture'), 'la ligne propose désormais « Modifier »');
+  assert.deepEqual(nomsEnVue(page()), ['polenta'], 'le standard réglé passe en tête de liste');
+  assert.ok(parAria(page(), 'Modifier le standard : polenta, en garniture'), 'la ligne propose désormais « Modifier »');
 
-  await parAria(page(), 'Modifier le standard : riz, en garniture').click();
+  await parAria(page(), 'Modifier le standard : polenta, en garniture').click();
   d = panneauOuvert();
   assert.equal(controleDe(d, 'Valeur de la portion').value, '110,5', 'le panneau reprend le standard');
   assert.equal(choisi(d, 'État du poids'), 'sec');
   remplir(d, 'État du poids', 'cuit');
   remplir(d, 'Unité', 'ml');
   assert.deepEqual(await soumettre(d), []);
-  assert.deepEqual([magasin.etat().standards.riz.garniture.unite, magasin.etat().standards.riz.garniture.etat], ['ml', 'cuit']);
+  assert.deepEqual([magasin.etat().standards.polenta.garniture.unite, magasin.etat().standards.polenta.garniture.etat], ['ml', 'cuit']);
 
-  await parAria(page(), 'Modifier le standard : riz, en garniture').click();
+  await parAria(page(), 'Modifier le standard : polenta, en garniture').click();
   d = panneauOuvert();
   await boutonNomme(d, 'Effacer ce standard').click();
   assert.equal(d.open, false);
@@ -1032,39 +1036,44 @@ test('détail : « Aller aux prévisions » ouvre la rubrique repliée avant d\'
 
 // ---------------------------------------------------------------- composant : la portion et son origine
 
-/** Semaine saisie : « riz » (menu 2, garniture) avec une prévision de 20 portions. */
+/**
+ * Adapté B-P0 : toute cette section (portion d'un composant) utilisait le riz comme « plat sans portion connue ».
+ * Le riz a maintenant un repère validé : elle utilise la polenta, famille sans repère, pour garder son intention.
+ * Semaine saisie : « polenta » (menu 2, garniture) avec une prévision de 20 portions.
+ */
 function etatPourPortion() {
   const e = etatSemaineSaisie();
+  definirMenu(e, S.lundi, 2, 'poulet, polenta, carottes', h());
   prevision(e, S.lundi, 2, 20);
   return e;
 }
-const pageComposant = (nom = 'riz') => vues.composant.rendre(magasin.etat(), composantNomme(magasin.etat(), nom).id);
+const pageComposant = (nom = 'polenta') => vues.composant.rendre(magasin.etat(), composantNomme(magasin.etat(), nom).id);
 
-test('composant : la portion affiche son état de poids et son origine, pour chaque origine', { skip: SANS_REPERES }, async () => {
-  const portionDe = (e, nom = 'riz') => { magasin.remplacer(e); return portionAffichee(pageComposant(nom)); };
-  const origineDe = (e, nom = 'riz') => grammageEffectif(e, composantNomme(e, nom)).origine;
+test('composant : la portion affiche son état de poids et son origine, pour chaque origine', async () => {
+  const portionDe = (e, nom = 'polenta') => { magasin.remplacer(e); return portionAffichee(pageComposant(nom)); };
+  const origineDe = (e, nom = 'polenta') => grammageEffectif(e, composantNomme(e, nom)).origine;
 
   // 4. estimation de la base métier
-  await avecReperes([R.familleRiz], () => {
+  await avecReperes([{ ...R.familleRiz, produit: 'polenta' }], () => {
     const e = etatPourPortion();
     assert.equal(origineDe(e), 'base');
     assert.equal(portionDe(e), 'Portion : 50 g, poids sec, estimation de la base métier');
     assert.ok(pastilleTexte(pageComposant(), 'estimation à valider'), 'une estimation reste à valider');
     // 3. le standard maison passe avant la base
-    definirStandard(e, 'riz', 'garniture', ST.cruNet, h());
+    definirStandard(e, 'polenta', 'garniture', ST.cruNet, h());
     assert.equal(portionDe(e), 'Portion : 150 g, poids cru net, standard maison');
   });
   // 3. standard maison, sans base
   const e = etatPourPortion();
-  definirStandard(e, 'riz', 'garniture', ST.sec, h());
+  definirStandard(e, 'polenta', 'garniture', ST.sec, h());
   assert.equal(portionDe(e), 'Portion : 100 g, poids sec, standard maison');
   // 2. référence mémorisée pour ce nom : elle passe avant le standard
-  e.memoire.riz = { nom: 'riz', attribue: true, type: 'a_preciser', categorie: 'feculent', charge: null, etapes: {},
+  e.memoire.polenta = { nom: 'polenta', attribue: true, type: 'a_preciser', categorie: 'feculent', charge: null, etapes: {},
     parRole: { garniture: { grammage: { valeur: 77, unite: 'g', statut: 'SAISI_SERVICE', source: 'TEST_ONLY', etat: 'cru_net' } } } };
   assert.equal(origineDe(e), 'reference');
   assert.equal(portionDe(e), 'Portion : 77 g, poids cru net, référence de ce nom');
   // 1. correction sur le plat : elle passe avant tout
-  modifierComposant(e, composantNomme(e, 'riz').id, { grammage: { valeur: 55, unite: 'ml', etat: 'cuit', statut: 'RESTAURANT_VALIDE', source: 'TEST_ONLY' } }, h());
+  modifierComposant(e, composantNomme(e, 'polenta').id, { grammage: { valeur: 55, unite: 'ml', etat: 'cuit', statut: 'RESTAURANT_VALIDE', source: 'TEST_ONLY' } }, h());
   assert.equal(origineDe(e), 'plat');
   assert.equal(portionDe(e), 'Portion : 55 ml, poids cuit, corrigée pour ce plat');
   // Une préparation maison se compte en quantité finie : pas de « poids cuit » pour une sauce.
@@ -1089,7 +1098,7 @@ test('composant : sans portion, un encadré propose deux gestes ; avec une porti
   assert.equal(boutonNomme(encadre, 'Revenir au standard'), undefined, 'rien à retirer : pas de correction sur ce plat');
 
   const e = etatPourPortion();
-  definirStandard(e, 'riz', 'garniture', ST.sec, h());
+  definirStandard(e, 'polenta', 'garniture', ST.sec, h());
   magasin.remplacer(e);
   const connue = classes(pageComposant(), 'portion')[0];
   assert.ok(!connue.className.split(' ').includes('encadre-alerte'));
@@ -1101,10 +1110,10 @@ test('composant : sans portion, un encadré propose deux gestes ; avec une porti
 test('composant : corriger un plat ne modifie pas le standard maison ; « Revenir au standard » rétablit son calcul', async () => {
   nettoyerPanneaux();
   const e = etatPourPortion();
-  definirStandard(e, 'riz', 'garniture', ST.sec, h());
+  definirStandard(e, 'polenta', 'garniture', ST.sec, h());
   magasin.remplacer(e);
-  const riz = composantNomme(magasin.etat(), 'riz').id;
-  const calc = () => calculerComposant(magasin.etat(), riz);
+  const polenta = composantNomme(magasin.etat(), 'polenta').id;
+  const calc = () => calculerComposant(magasin.etat(), polenta);
   const standardsAvant = structuredClone(magasin.etat().standards);
   const quantiteStandard = calc().quantiteTravail;
   assert.equal(quantiteStandard, 2000, '20 portions × 100 g secs : la portion est déjà celle d\'avant cuisson');
@@ -1118,19 +1127,19 @@ test('composant : corriger un plat ne modifie pas le standard maison ; « Reveni
   remplir(d, 'Valeur de la portion', '55,5');
   remplir(d, 'État du poids', 'cuit');
   assert.deepEqual(await soumettre(d), []);
-  const c = magasin.etat().composants[riz];
+  const c = magasin.etat().composants[polenta];
   assert.deepEqual(c.grammage, { valeur: 55.5, unite: 'g', etat: 'cuit', statut: 'RESTAURANT_VALIDE', source: 'corrigé pour ce plat' });
   assert.deepEqual(magasin.etat().standards, standardsAvant, 'le standard maison n\'a pas bougé');
   assert.equal(portionAffichee(pageComposant()), 'Portion : 55,5 g, poids cuit, corrigée pour ce plat');
   assert.notEqual(calc().quantiteTravail, quantiteStandard);
   // Un autre plat de la même famille garde le standard.
   const suite = structuredClone(magasin.etat());
-  definirMenu(suite, S.mardi, 2, 'riz', h());
-  assert.equal(grammageEffectif(suite, composantNomme(suite, 'riz', S.mardi)).origine, 'standard');
-  assert.equal(grammageEffectif(suite, composantNomme(suite, 'riz', S.mardi)).valeur, 100);
+  definirMenu(suite, S.mardi, 2, 'polenta', h());
+  assert.equal(grammageEffectif(suite, composantNomme(suite, 'polenta', S.mardi)).origine, 'standard');
+  assert.equal(grammageEffectif(suite, composantNomme(suite, 'polenta', S.mardi)).valeur, 100);
 
   await boutonNomme(pageComposant(), 'Revenir au standard').click();
-  assert.equal(magasin.etat().composants[riz].grammage.valeur, null, 'la correction est retirée');
+  assert.equal(magasin.etat().composants[polenta].grammage.valeur, null, 'la correction est retirée');
   assert.deepEqual(magasin.etat().standards, standardsAvant);
   assert.equal(calc().quantiteTravail, quantiteStandard, 'le calcul du standard est rétabli');
   assert.equal(calc().dependances[0].origine, 'standard');
@@ -1141,8 +1150,8 @@ test('composant : corriger un plat ne modifie pas le standard maison ; « Reveni
 test('composant : sans portion, corriger ce plat exige l\'état du poids et rend le calcul possible', async () => {
   nettoyerPanneaux();
   magasin.remplacer(etatPourPortion());
-  const riz = composantNomme(magasin.etat(), 'riz').id;
-  assert.equal(calculerComposant(magasin.etat(), riz).statut, 'INCONNU');
+  const polenta = composantNomme(magasin.etat(), 'polenta').id;
+  assert.equal(calculerComposant(magasin.etat(), polenta).statut, 'INCONNU');
   await boutonNomme(pageComposant(), 'Corriger pour ce plat seulement').click();
   const d = panneauOuvert();
   assert.equal(choisi(d, 'État du poids'), 'choisir…');
@@ -1151,26 +1160,26 @@ test('composant : sans portion, corriger ce plat exige l\'état du poids et rend
   remplir(d, 'Valeur de la portion', '0');
   remplir(d, 'État du poids', 'cru net');
   assert.deepEqual(await soumettre(d), ['Le grammage doit être un nombre strictement positif (ou vide).'], 'refus du domaine, panneau ouvert');
-  assert.equal(magasin.etat().composants[riz].grammage.valeur, null, 'rien n\'est enregistré');
+  assert.equal(magasin.etat().composants[polenta].grammage.valeur, null, 'rien n\'est enregistré');
   remplir(d, 'Valeur de la portion', '80');
   assert.deepEqual(await soumettre(d), []);
   assert.equal(portionAffichee(pageComposant()), 'Portion : 80 g, poids cru net, corrigée pour ce plat');
-  assert.equal(calculerComposant(magasin.etat(), riz).statut, 'CALCULE');
+  assert.equal(calculerComposant(magasin.etat(), polenta).statut, 'CALCULE');
   assert.deepEqual(magasin.etat().standards, {}, 'aucun standard créé par une correction');
 });
 
 test('composant : une étape non appliquée est signalée, avec la quantité cuite à titre d\'information', () => {
   const e = etatPourPortion();
-  definirStandard(e, 'riz', 'garniture', ST.sec, h());
+  definirStandard(e, 'polenta', 'garniture', ST.sec, h());
   magasin.remplacer(e);
   const sec = verifierTexte(pageComposant(), 'composant en poids sec');
   assert.match(sec, /cuisson/);
   assert.match(sec, /non appliquée : la portion est déjà exprimée avant cuisson/);
   assert.match(sec, /soit environ .+ une fois cuit, estimation/);
   assert.match(sec, /poids sec/);
-  assert.equal(calculerComposant(magasin.etat(), composantNomme(magasin.etat(), 'riz').id).etapes[0].appliquee, false);
+  assert.equal(calculerComposant(magasin.etat(), composantNomme(magasin.etat(), 'polenta').id).etapes[0].appliquee, false);
 
-  definirStandard(e, 'riz', 'garniture', ST.cuit, h());
+  definirStandard(e, 'polenta', 'garniture', ST.cuit, h());
   magasin.remplacer(e);
   const cuit = verifierTexte(pageComposant(), 'composant en poids cuit');
   assert.match(cuit, /cuisson/);
@@ -1180,7 +1189,7 @@ test('composant : une étape non appliquée est signalée, avec la quantité cui
 
 test('composant : plus aucun bouton ni pastille de validation, même pour un composant resté non validé', () => {
   const e = etatPourPortion();
-  composantNomme(e, 'riz').valide = false; // donnée d'avant le lot : plus rien ne la fait valider à l'écran
+  composantNomme(e, 'polenta').valide = false; // donnée d'avant le lot : plus rien ne la fait valider à l'écran
   magasin.remplacer(e);
   const noeud = pageComposant();
   verifierTexte(noeud, 'composant non validé');
@@ -1192,7 +1201,7 @@ test('composant : plus aucun bouton ni pastille de validation, même pour un com
 test('composant : le formulaire « Modifier » garde ses champs et son grammage gagne l\'état du poids', async () => {
   nettoyerPanneaux();
   magasin.remplacer(etatPourPortion());
-  const riz = composantNomme(magasin.etat(), 'riz').id;
+  const polenta = composantNomme(magasin.etat(), 'polenta').id;
   await boutonNomme(pageComposant(), 'Modifier').click();
   const d = panneauOuvert();
   for (const libelle of ['Nom', 'Nom du produit acheté', 'Catégorie', 'Type', 'Rôle dans le plat', 'Charge de travail', 'Grammage par portion',
@@ -1205,7 +1214,7 @@ test('composant : le formulaire « Modifier » garde ses champs et son grammage 
   remplir(d, 'État du poids du grammage', 'sec');
   remplir(d, 'Provenance du grammage', 'validé restaurant');
   assert.deepEqual(await soumettre(d), []);
-  const g = magasin.etat().composants[riz].grammage;
+  const g = magasin.etat().composants[polenta].grammage;
   assert.deepEqual([g.valeur, g.etat, g.statut], [90, 'sec', 'RESTAURANT_VALIDE']);
   assert.equal(portionAffichee(pageComposant()), 'Portion : 90 g, poids sec, corrigée pour ce plat');
 });

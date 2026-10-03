@@ -52,6 +52,9 @@ export function etatInitial() {
     memoire: {},
     standards: {},
     produits: {},
+    // Lectures corrigées par le chef (clé « intitulé normalisé|menu ») et validations reportées.
+    lectures: {},
+    validations: {},
     journal: [],
   };
 }
@@ -181,6 +184,7 @@ const COLLECTIONS = {
   jours: jourVide, fiches: ficheVide, composants: composantVide, productions: productionVide,
   regles: regleVide, recettes: recetteVide, fournisseurs: fournisseurVide,
   memoire: () => memoireVide(), produits: () => suiviProduitVide(),
+  lectures: () => ({}), validations: () => ({}),
 };
 
 /**

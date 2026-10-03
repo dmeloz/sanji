@@ -236,12 +236,13 @@ test('appliquerSavoir : ne remplit que les champs vides, et respecte une catégo
   assert.deepEqual([e.famille, e.type, e.etapes], [null, 'generique', []]);
 });
 
+// Adapté B-P0 : le jeu de repères par défaut contient désormais les repères validés (riz, pâtes, légumineuses).
+// Le « sans aucune source » se teste donc avec `reperes = []` explicite ; le défaut est vérifié dans savoir-metier.test.js.
 test('grammageEffectif : plat, référence du nom, standard maison, base, sinon null (dans cet ordre)', () => {
   const etat = etatInitial();
   const c = appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'feculent' }));
   const reperes = [R.groupeCereales];
-  assert.equal(grammageEffectif(etat, c), null, 'aucune source : null, rien n\'est inventé');
-  assert.equal(grammageEffectif(etat, c, []), null);
+  assert.equal(grammageEffectif(etat, c, []), null, 'aucune source : null, rien n\'est inventé');
   // 4. repère de la base : milieu de la fourchette, estimation.
   assert.deepEqual(grammageEffectif(etat, c, reperes), {
     valeur: 70, unite: 'g', etat: 'sec', statut: 'BASE_METIER_ESTIMATION',
@@ -276,13 +277,14 @@ test('grammageEffectif : plat, référence du nom, standard maison, base, sinon 
   assert.equal(grammageEffectif(etat, c, reperes).origine, 'base');
 });
 
+// Adapté B-P0 : `reperes = []` explicite quand on vérifie « aucune portion » (le défaut contient les repères validés).
 test('grammageEffectif : sources invalides ignorées, état ancien sans standards, clés dangereuses', () => {
   const etat = etatInitial();
   const c = appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'feculent' }));
   for (const standard of [{ valeur: 0, unite: 'g', etat: 'sec' }, { valeur: -5, unite: 'g', etat: 'sec' },
     { valeur: '100', unite: 'g', etat: 'sec' }, { valeur: 100, unite: 'kg', etat: 'sec' }, null, 'texte']) {
     etat.standards = { riz: { garniture: standard } };
-    assert.equal(grammageEffectif(etat, c), null, JSON.stringify(standard));
+    assert.equal(grammageEffectif(etat, c, []), null, JSON.stringify(standard));
   }
   // Un standard sans état connu se lit « cuit ».
   etat.standards = { riz: { garniture: { valeur: 100, unite: 'g' } } };
@@ -293,8 +295,8 @@ test('grammageEffectif : sources invalides ignorées, état ancien sans standard
   delete etat.standards;
   for (const ligne of mauvais) assert.equal(grammageEffectif(etat, c, [ligne]), null, JSON.stringify(ligne));
   // État sans `standards` ni `memoire` (ancien état) : pas d'erreur.
-  assert.equal(grammageEffectif({}, c), null);
-  assert.equal(grammageEffectif(null, c), null);
+  assert.equal(grammageEffectif({}, c, []), null);
+  assert.equal(grammageEffectif(null, c, []), null);
   assert.equal(grammageEffectif(etat, null), null);
   // Un nom comme « constructor » ou « __proto__ » ne lit rien dans l'héritage des objets.
   for (const nom of ['constructor', '__proto__', 'toString']) {

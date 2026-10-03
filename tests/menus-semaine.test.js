@@ -3,7 +3,6 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PORTIONS_BASE } from '../app/js/donnees/base-metier.js';
 import {
   ajouterComposant, definirMenu, definirStandard, genererComposants, marquerFait, memoriser, modifierComposant, planifier,
   saisirMenusSemaine, supprimerComposant, supprimerStandard,
@@ -23,7 +22,6 @@ const parNom = (etat, date, nom, menu) => Object.values(etat.composants)
 const duMenu = (etat, date, menu) => Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
 const noms = (composants) => composants.map((c) => c.nom).sort();
 const types = (etat, date) => pointsAConfirmer(etat, date).map((p) => p.type);
-const SANS_REPERES = PORTIONS_BASE.length === 0 ? false : 'PORTIONS_BASE n\'est plus vide : la source a une section 11.4';
 
 // ---------------------------------------------------------------- fusion des composants
 
@@ -179,35 +177,37 @@ test('composant inconnu : en menu 1 il est au poste ; le chef peut aussi le dés
   assert.deepEqual(types(e, S.lundi), []);
 });
 
-test('portion absente : point « grammage » et aucune quantité inventée', { skip: SANS_REPERES }, () => {
+// Adapté B-P0 : la polenta (famille sans repère) remplace le riz, qui a maintenant un repère validé : l'intention
+// « portion absente = point grammage, aucune quantité inventée » est conservée.
+test('portion absente : point « grammage » et aucune quantité inventée', () => {
   const e = etatVide();
   prevision(e, S.lundi, 1, 40);
   prevision(e, S.lundi, 2, 40);
-  definirMenu(e, S.lundi, 2, M.garnitures, h()); // riz et carottes : familles connues ; poulet : générique (non au poste)
+  definirMenu(e, S.lundi, 2, 'polenta, carottes, poulet', h()); // polenta et carottes : familles connues ; poulet : générique (non au poste)
   definirMenu(e, S.lundi, 1, M.principal, h()); // poulet : générique au poste ; carottes
-  const riz = parNom(e, S.lundi, 'riz');
+  const polenta = parNom(e, S.lundi, 'polenta');
   const carottes2 = parNom(e, S.lundi, 'carottes', 2);
   const poulet1 = parNom(e, S.lundi, 'poulet', 1);
   assert.equal(poulet1.type, 'generique');
   const grammage = pointsAConfirmer(e, S.lundi).filter((p) => p.type === 'grammage');
-  assert.deepEqual(grammage.map((p) => p.composantId).sort(), [riz.id, carottes2.id, parNom(e, S.lundi, 'carottes', 1).id].sort());
+  assert.deepEqual(grammage.map((p) => p.composantId).sort(), [polenta.id, carottes2.id, parNom(e, S.lundi, 'carottes', 1).id].sort());
   assert.ok(grammage.every((p) => /portion à saisir/.test(p.texte)));
   assert.equal(grammage.some((p) => p.composantId === poulet1.id), false, 'hors générique : un composant générique n\'a pas de point grammage');
   // Aucune quantité inventée : ni calcul, ni cible, ni besoin chiffré.
-  const c = calculerComposant(e, riz.id);
+  const c = calculerComposant(e, polenta.id);
   assert.deepEqual([c.statut, c.quantiteTravail, c.brut, c.quantiteServie, c.ingredients], ['INCONNU', null, null, null, null]);
   assert.match(c.formule, /il manque grammage/);
-  assert.equal(cibleProduction(e, principaleDe(e, riz.id)), null);
-  assert.equal(etatTache(e, principaleDe(e, riz.id)), 'a_preciser');
+  assert.equal(cibleProduction(e, principaleDe(e, polenta.id)), null);
+  assert.equal(etatTache(e, principaleDe(e, polenta.id)), 'a_preciser');
   const besoins = besoinsProduits(e, S.lundi);
   assert.equal(besoins.lignes.length, 0, 'aucune ligne chiffrée à commander');
-  assert.ok(besoins.nonChiffrables.some((x) => x.composantId === riz.id && /grammage/.test(x.raison)));
+  assert.ok(besoins.nonChiffrables.some((x) => x.composantId === polenta.id && /grammage/.test(x.raison)));
   // Le chef saisit un standard : le point disparaît et la quantité apparaît ; sans standard, il revient.
-  definirStandard(e, 'riz', 'garniture', ST.sec, h());
-  assert.equal(pointsAConfirmer(e, S.lundi).some((p) => p.composantId === riz.id && p.type === 'grammage'), false);
-  assert.equal(calculerComposant(e, riz.id).quantiteTravail, 4000);
-  supprimerStandard(e, 'riz', 'garniture', h());
-  assert.equal(pointsAConfirmer(e, S.lundi).some((p) => p.composantId === riz.id && p.type === 'grammage'), true);
+  definirStandard(e, 'polenta', 'garniture', ST.sec, h());
+  assert.equal(pointsAConfirmer(e, S.lundi).some((p) => p.composantId === polenta.id && p.type === 'grammage'), false);
+  assert.equal(calculerComposant(e, polenta.id).quantiteTravail, 4000);
+  supprimerStandard(e, 'polenta', 'garniture', h());
+  assert.equal(pointsAConfirmer(e, S.lundi).some((p) => p.composantId === polenta.id && p.type === 'grammage'), true);
   // Un composant déjà dans l'ancien parcours avec un grammage saisi n'a pas de point.
   const saisi = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST);
   assert.equal(pointsAConfirmer(e, S.lundi).some((p) => p.composantId === saisi), false);
