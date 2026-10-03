@@ -1,6 +1,7 @@
 // Sert app/ en HTTPS sur le réseau local, pour essayer Sanji sur un iPhone ou un iPad. Rien n'est publié.
 //  - https://<IP du Mac>:5443 : l'application ;
-//  - http://<IP du Mac>:5174/ca.crt : le certificat de l'autorité locale, à installer une fois sur l'appareil.
+//  - http://<IP du Mac>:5174/ca.crt : le certificat de l'autorité locale, à installer une fois sur l'appareil ;
+//  - http://<IP du Mac>:5174/semaine-test.json : la sauvegarde d'essai fabriquée par outils/creer-semaine-test.mjs (si elle existe).
 // Prérequis : sh outils/creer-certificat-local.sh. Arrêt : Ctrl+C.
 import { createServer as http } from 'node:http';
 import { createServer as https } from 'node:https';
@@ -36,6 +37,9 @@ http((req, rep) => {
   if (req.url === '/ca.crt') {
     rep.writeHead(200, { 'content-type': 'application/x-x509-ca-cert', 'content-disposition': 'attachment; filename="sanji-essai-local.crt"' });
     rep.end(readFileSync(join(certs, 'ca.crt')));
+  } else if (req.url === '/semaine-test.json' && existsSync(join(racine, 'outils', 'sorties', 'semaine-test.json'))) {
+    rep.writeHead(200, { 'content-type': 'application/json', 'content-disposition': 'attachment; filename="sanji-semaine-test.json"' });
+    rep.end(readFileSync(join(racine, 'outils', 'sorties', 'semaine-test.json')));
   } else {
     rep.writeHead(404);
     rep.end();

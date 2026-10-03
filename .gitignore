@@ -7,3 +7,6 @@ Sans titre.canvas
 
 # Clés de l essai HTTPS local : jamais dans Git
 .certificats-locaux/
+
+# Sauvegardes d essai fabriquées par outils/creer-semaine-test.mjs
+outils/sorties/
