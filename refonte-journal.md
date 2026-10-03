@@ -38,3 +38,6 @@ Ensuite, après fusion des branches : B-P0 et B-P1 construits à partir de la sp
 - Les tests sous faux DOM ne voient ni IndexedDB réelle ni le service worker.
 - « 1 changement depuis le dernier calcul » (maquette A) n'existe pas : aucun mécanisme de comparaison n'est construit.
 - Le menu 2 : une sauce ou une garniture attribuée au poste par exception reste à la décision du chef.
+
+## B-P2 étapes à avance propre (2026-10-04)
+FAIT dans la branche de travail : modèle `etapes` des règles, productions d'étapes, évaluation par étape, ordre planifier/fait, éditeur dans Réglages, blocs Composant et Jour. Aucune étape ni durée par défaut (rien de validé) : la propriétaire les définit. Version non incrémentée ici (à faire à la fusion).

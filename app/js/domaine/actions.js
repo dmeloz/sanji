@@ -11,7 +11,7 @@ import {
 } from './etat.js';
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
-import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, regleDe } from './planification.js';
+import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, refusOrdreEtape, regleDe } from './planification.js';
 import { besoinsProduits, cleSuivi } from './produits.js';
 import { GROUPES, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
@@ -112,7 +112,7 @@ function normaliserEtapes(etapes) {
 
 export function terminer(etat, h, action, detail, valeur) {
   ajouterJournal(etat, h, action, detail);
-  assurerProductions(etat);
+  assurerProductions(etat, h);
   return valeur;
 }
 
@@ -121,8 +121,10 @@ export function terminer(etat, h, action, detail, valeur) {
 /**
  * Invariant : tout composant attribué ET validé a exactement une production « principale » ; un composant non
  * attribué, non validé ou supprimé perd ses productions non faites. Les productions faites ne sont jamais touchées.
+ * Si la règle du composant a au moins deux étapes : une production « preparatoire » par étape sauf la dernière
+ * (la principale est la finition). `h` (facultatif) sert à journaliser ce qu'un changement de règle retire.
  */
-export function assurerProductions(etat) {
+export function assurerProductions(etat, h = null) {
   for (const p of Object.values(etat.productions)) {
     const c = etat.composants[p.composantId];
     if (p.etat !== 'fait' && (!c || !c.attribue || !c.valide)) delete etat.productions[p.id];
@@ -137,8 +139,46 @@ export function assurerProductions(etat) {
     } else {
       for (const extra of principales.slice(1)) if (extra.etat !== 'fait') delete etat.productions[extra.id];
     }
+    assurerEtapes(etat, c, h);
   }
   return etat;
+}
+
+/** Productions d'étapes d'un composant selon sa règle (idempotent ; une étape faite n'est jamais supprimée). */
+function assurerEtapes(etat, c, h) {
+  const etapes = regleDe(etat, c)?.etapes ?? [];
+  const actives = etapes.length >= 2 ? etapes : [];
+  const avantFinition = actives.slice(0, -1);
+  const finition = actives.length > 0 ? actives[actives.length - 1] : null;
+  const retires = [];
+  const vues = new Set();
+  for (const p of Object.values(etat.productions)) {
+    if (p.composantId !== c.id) continue;
+    if (p.genre === 'principale') {
+      if (p.etat !== 'fait') { p.etapeCle = finition?.cle ?? null; p.ordre = finition ? actives.length - 1 : null; }
+      continue;
+    }
+    if (p.genre !== 'preparatoire' || !p.etapeCle) continue;
+    const i = avantFinition.findIndex((x) => x.cle === p.etapeCle);
+    if (i < 0 || vues.has(p.etapeCle)) {
+      if (p.etat !== 'fait') { retires.push(p.libelle); delete etat.productions[p.id]; }
+      continue;
+    }
+    vues.add(p.etapeCle);
+    p.ordre = i;
+    if (p.etat !== 'fait') p.libelle = `${avantFinition[i].libelle} : ${c.nom}`;
+  }
+  avantFinition.forEach((x, i) => {
+    if (vues.has(x.cle)) return;
+    const id = nouvelId('prod');
+    etat.productions[id] = {
+      ...productionVide(id), composantId: c.id, dateService: c.date, genre: 'preparatoire', libelle: `${x.libelle} : ${c.nom}`,
+      etapeCle: x.cle, ordre: i,
+    };
+  });
+  if (retires.length > 0 && h) {
+    ajouterJournal(etat, h, 'etapesRetirees', `${c.nom} : étape retirée de la règle de préparation : ${retires.join(', ')}`);
+  }
 }
 
 // ---------------------------------------------------------------- menus et composants
@@ -594,8 +634,10 @@ function deplacer(etat, productionId, date, creneau, h, action) {
   if (!estOuvert(date)) throw new Error('Le dimanche est un jour non travaillé : aucune tâche.');
   if (!creneauxDuJour(date).includes(creneau)) throw new Error("Créneau impossible ce jour-là : lundi et mardi n'ont pas de créneau avant le service du soir.");
   if (date > p.dateService) throw new Error('La production ne peut pas être décidée après son service.');
+  const refus = refusOrdreEtape(etat, p, { date });
+  if (refus) throw new Error(refus);
   const c = etat.composants[p.composantId];
-  const evaluation = evaluerAvance(date, p.dateService, regleDe(etat, c));
+  const evaluation = evaluerAvance(date, p.dateService, regleDe(etat, c, p.etapeCle ?? null));
   p.jourDecide = date;
   p.creneauDecide = creneau;
   const alertes = [...evaluation.alertes, ...chargeCreneau(etat, date, creneau).alertes];
@@ -634,6 +676,8 @@ export function marquerFait(etat, productionId, quantite, h) {
   verifierH(h);
   const p = exigerProduction(etat, productionId);
   if (p.etat === 'fait') throw new Error('Déjà fait : utilisez corrigerReel pour changer la quantité réelle.');
+  const refus = refusOrdreEtape(etat, p, { fait: true });
+  if (refus) throw new Error(refus);
   const c = etat.composants[p.composantId];
   const cible = cibleProduction(etat, productionId);
   const reel = quantite === undefined || quantite === null ? cible : quantite;
@@ -738,6 +782,7 @@ export function supprimerProduction(etat, productionId, h) {
   const p = exigerProduction(etat, productionId);
   if (p.etat === 'fait') throw new Error("Production déjà faite : elle reste dans l'historique.");
   if (p.genre === 'principale') throw new Error("La production principale ne se supprime pas : rendez le composant non attribué.");
+  if (p.etapeCle) throw new Error("Cette tâche est une étape de la règle de préparation : modifiez les étapes dans les règles de préparation.");
   delete etat.productions[productionId];
   return terminer(etat, h, 'supprimerProduction', p.libelle, true);
 }
@@ -850,10 +895,34 @@ export function supprimerStandard(etat, cleFamille, role, h) {
 
 // ---------------------------------------------------------------- règles, recettes, fournisseurs
 
+/** Étapes d'une règle : libellés non vides, clés uniques sans accent, avances entières ≥ 0 ou nulles, 6 au plus. */
+function normaliserEtapesRegle(etapes, existantes) {
+  if (etapes === undefined) return structuredClone(existantes ?? []);
+  if (!Array.isArray(etapes)) throw new Error('Étapes : liste attendue.');
+  if (etapes.length > 6) throw new Error('Une préparation a au plus 6 étapes.');
+  const vues = new Set();
+  return etapes.map((x, i) => {
+    const libelle = String(x?.libelle ?? '').trim();
+    if (libelle === '') throw new Error(`Étape ${i + 1} : le libellé est obligatoire.`);
+    let cle;
+    if (x.cle !== undefined && x.cle !== null && x.cle !== '') {
+      cle = String(x.cle);
+      if (!/^[a-z0-9-]+$/.test(cle)) throw new Error(`Étape « ${libelle} » : la clé s'écrit sans accent, sans espace ni caractère spécial.`);
+    } else {
+      cle = normaliser(libelle).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      if (cle === '') throw new Error(`Étape « ${libelle} » : le libellé doit contenir une lettre ou un chiffre.`);
+    }
+    if (vues.has(cle)) throw new Error(`Les clés des étapes doivent être uniques : « ${cle} » apparaît deux fois.`);
+    vues.add(cle);
+    const avanceMaxJours = verifierEntierOuNul(x.avanceMaxJours ?? null, `Avance maximale de l'étape « ${libelle} »`);
+    return { cle, libelle, avanceMaxJours };
+  });
+}
+
 /**
  * Crée ou met à jour la règle de préparation d'un nom (clé = nom normalisé, unique). champs : nom, cle,
- * avanceMaxJours, limiteUtilisationJours, note, id (mise à jour). `valideLe` est renseigné quand la limite
- * d'utilisation l'est. Retourne l'identifiant.
+ * avanceMaxJours, limiteUtilisationJours, note, id (mise à jour), etapes (facultatif : absent = étapes conservées).
+ * `valideLe` est renseigné quand la limite d'utilisation l'est. Retourne l'identifiant.
  */
 export function definirRegle(etat, champs, h) {
   verifierH(h);
@@ -863,9 +932,10 @@ export function definirRegle(etat, champs, h) {
   const avanceMaxJours = verifierEntierOuNul(champs.avanceMaxJours ?? null, "Avance maximale");
   const limiteUtilisationJours = verifierEntierOuNul(champs.limiteUtilisationJours ?? null, "Limite d'utilisation");
   const existante = (champs.id && etat.regles[champs.id]) || Object.values(etat.regles).find((r) => r.cle === cle);
+  const etapes = normaliserEtapesRegle(champs.etapes, existante?.etapes);
   const id = existante?.id ?? nouvelId('regle');
   etat.regles[id] = { ...regleVide(id), nom, cle, avanceMaxJours, limiteUtilisationJours,
-    valideLe: limiteUtilisationJours !== null ? h : null, note: String(champs.note ?? '') };
+    valideLe: limiteUtilisationJours !== null ? h : null, note: String(champs.note ?? ''), etapes };
   return terminer(etat, h, 'definirRegle', nom, id);
 }
 

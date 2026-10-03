@@ -203,14 +203,49 @@ function dialogRegle(r) {
       aide: 'Durée fixée par l\'établissement. L\'application ne certifie aucune conservation.' },
     { cle: 'note', type: 'zone', libelle: 'Note', valeur: r?.note ?? '', placeholder: 'note facultative' },
   ]);
+  const existantes = r?.etapes ?? [];
+  const defsEtapes = [];
+  for (let i = 1; i <= MAX_ETAPES; i += 1) {
+    defsEtapes.push({ cle: `etape${i}`, type: 'texte', libelle: `Étape ${i} : libellé`, valeur: existantes[i - 1]?.libelle ?? '',
+      placeholder: i === 1 ? 'première étape (facultatif)' : 'facultatif' });
+    defsEtapes.push({ cle: `avanceEtape${i}`, type: 'entier', libelle: `Étape ${i} : avance maximale (jours)`,
+      valeur: existantes[i - 1]?.avanceMaxJours ?? null, placeholder: 'vide = non définie' });
+  }
+  const fe = champs(defsEtapes);
+  const aideEtapes = h('div', { classe: 'aide' },
+    h('strong', null, 'Étapes (facultatif)'),
+    h('p', null, 'Dans l\'ordre du travail ; la dernière étape est la finition (0 jour d\'avance si vous ne dites rien). '
+      + 'Laissez l\'avance vide si elle n\'est pas définie : elle n\'est alors jamais autorisée au-delà de deux jours. '
+      + 'L\'avance d\'une étape n\'est pas une durée de conservation de la préparation finie. Sans étape (ou avec une seule), rien ne change.'));
   panneau({
     titre: r ? `Règle : ${r.nom}` : 'Nouvelle règle de préparation',
-    corps: f.noeuds,
+    corps: [...f.noeuds, aideEtapes, ...fe.noeuds],
     surEnregistrer: () => {
       const v = f.lire();
-      agirStrict((e, t) => definirRegle(e, { id: r?.id, nom: v.nom, avanceMaxJours: v.avance, limiteUtilisationJours: v.limite, note: v.note }, t));
+      const ve = fe.lire();
+      const etapes = [];
+      for (let i = 1; i <= MAX_ETAPES; i += 1) {
+        const libelleEtape = String(ve[`etape${i}`] ?? '').trim();
+        const avance = ve[`avanceEtape${i}`];
+        if (libelleEtape === '' && avance === null) continue;
+        // Une étape reconnue à son libellé garde sa clé : ses productions (et ce qui est déjà fait) lui restent attachées.
+        const connue = existantes.find((x) => normaliser(x.libelle) === normaliser(libelleEtape));
+        etapes.push({ ...(connue ? { cle: connue.cle } : {}), libelle: libelleEtape, avanceMaxJours: avance });
+      }
+      agirStrict((e, t) => definirRegle(e, { id: r?.id, nom: v.nom, avanceMaxJours: v.avance, limiteUtilisationJours: v.limite, note: v.note, etapes }, t));
     },
   });
+}
+
+const MAX_ETAPES = 6;
+
+/** « Couper (avance max 3 jours) → Blanchir (avance non définie) → Finir (0 jour) » */
+function texteEtapes(etapes) {
+  return etapes.map((x, i) => {
+    const derniere = i === etapes.length - 1;
+    const avance = x.avanceMaxJours === null ? (derniere ? '0 jour par défaut' : 'avance non définie') : `avance max ${pluriel(x.avanceMaxJours, 'jour')}`;
+    return `${x.libelle} (${avance})`;
+  }).join(' → ');
 }
 
 function sectionRegles(etat) {
@@ -220,6 +255,8 @@ function sectionRegles(etat) {
     regles.length === 0 ? ligneVide('Aucune règle de préparation.') : regles.map((r) => h('article', { classe: 'ligne-reglage' },
       h('strong', null, r.nom),
       h('p', { classe: 'meta' }, `avance maximale validée : ${r.avanceMaxJours === null ? 'non renseignée' : pluriel(r.avanceMaxJours, 'jour')} · limite d'utilisation validée : ${r.limiteUtilisationJours === null ? 'non renseignée' : pluriel(r.limiteUtilisationJours, 'jour')}`),
+      (r.etapes ?? []).length > 0 ? h('p', { classe: 'meta' }, `étapes : ${texteEtapes(r.etapes)}`) : null,
+      (r.etapes ?? []).length > 0 ? h('p', { classe: 'aide' }, 'L\'avance d\'une étape n\'est pas une durée de conservation de la préparation finie.') : null,
       r.note ? h('p', { classe: 'meta' }, r.note) : null,
       h('div', { classe: 'actions' },
         bouton('Modifier', () => dialogRegle(r), 'court'),
@@ -351,7 +388,7 @@ const LIBELLE_ACTION = {
   definirCapacite: 'Capacité modifiée', planifier: 'Tâche planifiée', reporter: 'Tâche reportée', demarrer: 'Tâche démarrée',
   marquerFait: 'Tâche faite', corrigerReel: 'Quantité réelle corrigée', deciderEcart: 'Écart arbitré',
   ajouterPreparatoire: 'Action préparatoire notée', supprimerProduction: 'Tâche supprimée', enregistrerPesee: 'Pesée enregistrée',
-  memoriser: 'Référence maison mémorisée', reprendreMemoire: 'Référence maison reprise', definirRegle: 'Règle de préparation enregistrée',
+  memoriser: 'Référence maison mémorisée', reprendreMemoire: 'Référence maison reprise', definirRegle: 'Règle de préparation enregistrée', etapesRetirees: 'Étape retirée (règle modifiée)',
   supprimerRegle: 'Règle de préparation supprimée', creerRecette: 'Recette créée', modifierRecette: 'Recette modifiée',
   validerRecette: 'Recette validée', definirFournisseur: 'Fournisseur enregistré', supprimerFournisseur: 'Fournisseur supprimé',
   controlerProduit: 'Produit contrôlé', definirAchat: 'Achat renseigné', marquerCommande: 'Commande marquée passée',

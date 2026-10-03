@@ -31,6 +31,7 @@ export function ligneProduction(etat, p) {
     dateService: p.dateService, genre: p.genre, libelle: p.libelle, jourDecide: p.jourDecide,
     creneauDecide: p.creneauDecide, etat: etatTache(etat, p.id), cible: cibleProduction(etat, p.id),
     unite: p.unite ?? calc?.uniteTravail ?? null, quantiteReelle: p.quantiteReelle, charge: composant?.charge ?? null,
+    etapeCle: p.etapeCle ?? null, ordre: p.ordre ?? null,
   };
 }
 
@@ -140,7 +141,7 @@ export function actionsTache(ligne, p) {
       break;
     default:
   }
-  if (!fait && ligne.genre !== 'principale') {
+  if (!fait && ligne.genre !== 'principale' && !ligne.etapeCle) {
     a.push(court('Retirer', () => confirmer({
       titre: 'Retirer cette tâche ?', texte: ligne.libelle || ligne.nom, libelleOk: 'Retirer', danger: true,
       action: () => agirStrict((e, t) => supprimerProduction(e, id, t)),

@@ -8,6 +8,7 @@ import { chercherBase } from '../domaine/base.js';
 import { calculerComposant } from '../domaine/calcul.js';
 import { libelleJour } from '../domaine/dates.js';
 import { normaliser } from '../domaine/etat.js';
+import { etapesComposant } from '../domaine/planification.js';
 import { cleStandardDe, valeurPour } from '../domaine/validation.js';
 import {
   CHARGE, ETAPE, ETAT_POIDS, LIBELLE_ESTIMATION_A_VALIDER, ROLE, TYPE_COMPOSANT, UNITE, CATEGORIE, libelle,
@@ -393,6 +394,23 @@ function sectionAllergenes(etat, c) {
     h('div', { classe: 'actions' }, bouton('Renseigner les allergènes', () => dialogAllergenes(c), 'court')));
 }
 
+/** « ven. 2 » : jour abrégé et numéro. */
+const courtJour = (date) => `${libelleJour(date).slice(0, 3)}. ${Number(date.slice(8))}`;
+
+/** Étapes de préparation de la règle (liste ordonnée) ; rien si le composant n'a pas d'étapes. */
+function sectionEtapesPreparation(etat, c) {
+  const etapes = etapesComposant(etat, c.id);
+  if (etapes.length === 0) return null;
+  const VARIANTE = { fait: 'vert', en_cours: 'vert', a_planifier: 'ambre', ecart: 'rouge' };
+  return h('section', { classe: 'carte' },
+    h('h2', { classe: 'section-titre' }, 'Étapes de préparation'),
+    h('ol', { classe: 'liste-simple' }, etapes.map((x) => h('li', null,
+      h('strong', null, x.libelle), ' ', pastille(libelle('ETAT_TACHE', x.etat), VARIANTE[x.etat] ?? 'gris'),
+      x.faitLe && x.faitLe < c.date ? h('span', { classe: 'meta' }, ` · déjà avancé ${courtJour(x.faitLe)}`)
+        : (x.jourDecide && x.etat !== 'fait' ? h('span', { classe: 'meta' }, ` · prévu ${courtJour(x.jourDecide)}`) : null)))),
+    h('p', { classe: 'aide' }, 'La dernière étape est la finition. L\'avance d\'une étape n\'est pas une durée de conservation de la préparation finie.'));
+}
+
 function sectionProductions(etat, c) {
   const ordre = { principale: 0, complement: 1, preparatoire: 2 };
   const lignes = Object.values(etat.productions).filter((p) => p.composantId === c.id)
@@ -438,7 +456,7 @@ export function rendre(etat, id) {
   }
   const calc = calculerComposant(etat, id);
   racine.appendChild(h('p', null, lien(`#/detail/${c.date}`, '‹ Détail du jour'), ' · ', lien(`#/jour/${c.date}`, 'Feuille du jour')));
-  for (const s of [sectionEntete(etat, c, calc), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionProductions(etat, c),
+  for (const s of [sectionEntete(etat, c, calc), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionEtapesPreparation(etat, c), sectionProductions(etat, c),
     sectionIngredients(etat, c, calc), sectionMemoire(etat, c), sectionAllergenes(etat, c), sectionApresService(c, calc)]) {
     if (s) racine.appendChild(s);
   }
