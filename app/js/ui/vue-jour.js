@@ -96,7 +96,7 @@ function caseFait(l) {
   return h('button', {
     type: 'button', role: 'checkbox', 'aria-checked': 'false', classe: 'case-fait',
     onClick: () => faireEnUnToucher(l.productionId),
-  }, h('span', { classe: 'case-fait-boite', 'aria-hidden': 'true' }), h('span', { classe: 'sr' }, 'Fait'));
+  }, h('span', { classe: 'case-fait-boite', 'aria-hidden': 'true' }), h('span', { classe: 'sr' }, `Marquer fait : ${l.genre === 'principale' ? l.nom : (l.libelle || l.nom)}`));
 }
 
 const caseFaite = () => h('span', { classe: 'case-fait case-fait-ok' },

@@ -65,7 +65,7 @@ function couvertsDuMenu(jour, menu) {
 
 function ligneMenu(jour, menu) {
   return h('div', { classe: 'bord-menu' },
-    h('span', { classe: 'tb-rang', 'aria-label': `Menu ${menu.menu}` }, `M${menu.menu}`),
+    h('span', { classe: 'tb-rang' }, h('span', { 'aria-hidden': 'true' }, `M${menu.menu}`), h('span', { classe: 'sr' }, `Menu ${menu.menu}`)),
     h('p', { classe: 'tb-intitule' }, morceaux(menu)),
     couvertsDuMenu(jour, menu));
 }

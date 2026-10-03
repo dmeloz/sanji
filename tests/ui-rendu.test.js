@@ -152,7 +152,7 @@ test('jour : « Fait » marque fait en un toucher avec la cible ; sans quantité
   planifier(e, principaleDe(e, inconnu), S.mardi, 'apres_midi', h());
   magasin.remplacer(e);
   const noeud = vues.jour.rendre(magasin.etat(), S.mardi);
-  const faits = boutons(noeud).filter((b) => b.textContent === 'Fait');
+  const faits = boutons(noeud).filter((b) => /^Marquer fait : /.test(b.textContent));
   assert.equal(faits.length, 1, 'l\'élément sans quantité n\'a pas de « Fait » : rien n\'est inventé');
   await faits[0].click();
   assert.equal(magasin.etat().productions[p].etat, 'fait', 'un seul toucher');
