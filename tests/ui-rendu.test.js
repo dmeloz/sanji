@@ -721,7 +721,7 @@ test('réglages : « Standards maison » en tête, groupée, repliée sans rien 
   assert.match(texte, /non réglé/);
   assert.match(texte, /riz en garniture/);
   assert.match(texte, /riz en plat principal/);
-  assert.equal(texte.match(/repère de la base/g).length, 4, 'seuls les quatre repères validés applicables sont indiqués');
+  assert.equal(texte.match(/repère validé/g).length, 4, 'seuls les quatre repères validés applicables sont indiqués');
   for (const b of classes(noeud, 'ligne-standard').map((l) => l.querySelector('button'))) {
     assert.equal(b.textContent, 'Régler');
     assert.match(b.attributs['aria-label'], /^Régler le standard : .+, en (plat principal|garniture)$/);
@@ -776,7 +776,7 @@ test('réglages : le repère de la base est indiqué à côté du standard, jama
     magasin.remplacer(etatVide());
     const noeud = vues.reglages.rendre(magasin.etat(), 'standards');
     const texte = verifierTexte(noeud, 'réglages avec repères');
-    assert.match(texte, /repère de la base : 50–70 g, poids sec/, 'repère de la famille (validé)');
+    assert.match(texte, /repère validé : 50–70 g, poids sec/, 'repère de la famille (validé par la propriétaire)');
     assert.match(texte, /repère de la base : 60–80 g, poids sec \(repère du groupe\)/, 'repère du groupe, signalé comme tel');
     assert.match(texte, /repère de la base : 200–240 g, poids cru net/);
     assert.match(texte, /non réglé/, 'un repère n\'est pas un standard');

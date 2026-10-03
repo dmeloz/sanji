@@ -84,7 +84,7 @@ function ligneStandard(l) {
       h('p', null, h('strong', null, l.libelle), ` ${ROLE_EN_CLAIR[l.role]}`),
       l.standard ? h('p', { classe: 'standard-valeur' }, texteStandard(l.standard)) : h('p', { classe: 'standard-valeur discret' }, 'non réglé'),
       l.repereBase ? h('p', { classe: 'meta' },
-        `repère de la base : ${texteRepere(l.repereBase)}${l.repereBase.portee === 'groupe' ? ' (repère du groupe)' : ''}`) : null),
+        `repère ${l.repereBase.valide ? 'validé' : 'de la base'} : ${texteRepere(l.repereBase)}${l.repereBase.portee === 'groupe' ? ' (repère du groupe)' : ''}`) : null),
     bouton(action, () => dialogStandard(l), 'court', { 'aria-label': `${action} le standard : ${nom}` }));
 }
 

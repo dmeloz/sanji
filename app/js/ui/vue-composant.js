@@ -37,6 +37,7 @@ const optionsEtatPoids = () => Object.keys(ETAT_POIDS).map((x) => [x, libelle('E
 
 const ORIGINE_PORTION = {
   plat: 'corrigée pour ce plat', reference: 'référence de ce nom', standard: 'standard maison', base: 'estimation de la base métier',
+  repere_valide: 'repère validé par la propriétaire (estimation, à confirmer par un standard maison)',
 };
 /** « poids sec » ; une préparation maison se compte en quantité finie par portion. */
 const libelleEtat = (d, c) => (c.type === 'preparation_maison' ? 'quantité finie' : `poids ${libelle('ETAT_POIDS', d.etat)}`);
