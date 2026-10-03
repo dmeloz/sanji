@@ -13,6 +13,13 @@ Garde-fous maintenus : aucun `git push`, rien de publié, rien de supprimé sans
 7. A-P2 Réglages en sous-menus, pages secondaires harmonisées : à faire.
 8. Vérification finale, documentation, fiche Sanji : à faire.
 
+## Agents lancés (2026-10-04)
+- Conception du volet B (Opus, lecture seule) : spécification d'implémentation dans l'architecture existante.
+- A-P1 Tableau et feuille Jour (Sonnet, espace Git isolé).
+- A-P2 Réglages en sous-menus (Sonnet, espace Git isolé).
+- 30 cas de lecture transcrits en jeu de test (Haiku, espace Git isolé).
+Ensuite, après fusion des branches : B-P0 et B-P1 construits à partir de la spécification d'Opus, puis B-P2, puis relecture finale (Opus).
+
 ## Choix par défaut appliqués par délégation (à confirmer)
 (à remplir au fil des lots)
 
