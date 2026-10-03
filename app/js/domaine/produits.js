@@ -65,11 +65,14 @@ export function suiviProduit(etat, lundi, ligne) {
   const besoinChange = !Number.isFinite(suivi.besoinAuControle)
     || Math.round(suivi.besoinAuControle) !== Math.round(ligne.besoinBrut);
   const statutAffiche = suivi.statut !== 'a_verifier' && besoinChange ? 'a_reverifier' : suivi.statut;
+  // La marge de sécurité ne majore que la quantité proposée, après vérification : ni le besoin ni l'achat.
+  const margePourcent = Number.isInteger(etat.reglages?.margeSecurite) ? etat.reglages.margeSecurite : null;
+  const besoinMajore = Math.round(ligne.besoinBrut * (1 + (margePourcent ?? 0) / 100));
   const proposeeACommander = Number.isFinite(suivi.quantiteVerifiee)
-    ? Math.max(0, Math.round(ligne.besoinBrut) - Math.round(suivi.quantiteVerifiee)) : null;
+    ? Math.max(0, besoinMajore - Math.round(suivi.quantiteVerifiee)) : null;
   return {
     statutAffiche, statut: suivi.statut, besoinBrut: ligne.besoinBrut, besoinAuControle: suivi.besoinAuControle,
-    quantiteVerifiee: suivi.quantiteVerifiee, proposeeACommander, estimationAValider: ligne.aValider,
+    quantiteVerifiee: suivi.quantiteVerifiee, proposeeACommander, margePourcent, estimationAValider: ligne.aValider,
     quantiteAcheter: suivi.quantiteAcheter, conditionnement: suivi.conditionnement,
     fournisseurId: suivi.fournisseurId, commandeLe: suivi.commandeLe,
   };

@@ -58,3 +58,12 @@ test('glissement : un geste net et horizontal change de jour, un défilement ver
   assert.equal(directionDuGeste({ dx: -150, dy: 5, dt: 1500 }), null, 'trop lent : pas un geste de feuilletage');
   assert.equal(directionDuGeste({ dx: 0, dy: 0, dt: 0 }), null);
 });
+
+test('impression : une feuille de style d\'impression masque la navigation et les boutons, pas les mentions d\'incertitude', async () => {
+  const { readFileSync } = await import('node:fs');
+  const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
+  const bloc = css.slice(css.indexOf('@media print'));
+  assert.match(bloc, /\.onglets/);
+  assert.match(bloc, /button/);
+  assert.doesNotMatch(bloc, /\.pastille[^{]*\{[^}]*display:\s*none/, 'les pastilles « estimation à valider » restent imprimées');
+});

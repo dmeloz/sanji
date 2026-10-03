@@ -544,6 +544,26 @@ export function definirCapacite(etat, points, h) {
   return terminer(etat, h, 'definirCapacite', String(points ?? 'non renseignée'), points);
 }
 
+/**
+ * Marge de sécurité (en %, entier de 0 à 50, ou null = aucune) : elle majore la seule quantité PROPOSÉE à commander
+ * après une vérification chiffrée. Jamais le besoin brut, jamais la cible de production, jamais la quantité à acheter.
+ */
+export function definirMargeSecurite(etat, pourcent, h) {
+  verifierH(h);
+  if (pourcent !== null && (!Number.isInteger(pourcent) || pourcent < 0 || pourcent > 50)) {
+    throw new Error('Marge de sécurité : un entier de 0 à 50 (en %) ou rien.');
+  }
+  etat.reglages.margeSecurite = pourcent;
+  return terminer(etat, h, 'definirMargeSecurite', pourcent === null ? 'aucune' : `${pourcent} %`, pourcent);
+}
+
+/** Note la date du dernier export (pour le rappel de sauvegarde). Ne fait pas partie du fichier exporté lui-même. */
+export function noterExport(etat, h) {
+  verifierH(h);
+  etat.reglages.dernierExport = h;
+  return terminer(etat, h, 'noterExport', h, h);
+}
+
 // ---------------------------------------------------------------- productions
 
 function deplacer(etat, productionId, date, creneau, h, action) {

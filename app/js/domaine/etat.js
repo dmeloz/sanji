@@ -41,7 +41,7 @@ export function etatInitial() {
   return {
     application: APPLICATION,
     schema: SCHEMA,
-    reglages: { semaineTypeConfirmee: false, semaineType: semaineTypeVide(), capaciteCreneau: null },
+    reglages: { semaineTypeConfirmee: false, semaineType: semaineTypeVide(), capaciteCreneau: null, margeSecurite: null, dernierExport: null },
     jours: {},
     fiches: {},
     composants: {},

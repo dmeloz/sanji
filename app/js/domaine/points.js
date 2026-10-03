@@ -126,3 +126,9 @@ export function repereVentes(etat, date, menu) {
     .slice(0, 3)
     .map((x) => ({ date: x.date, ventes: x.ventes[menu] }));
 }
+
+/** Moyenne (arrondie) des ventes d'un repère, ou null sans vente. Un repère de plus, jamais une prévision. */
+export function moyenneVentes(repere) {
+  if (!repere || repere.length === 0) return null;
+  return Math.round(repere.reduce((somme, r) => somme + r.ventes, 0) / repere.length);
+}

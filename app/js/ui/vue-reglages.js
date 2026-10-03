@@ -2,8 +2,8 @@
 // journal, sauvegarde, état du stockage et du mode hors ligne.
 
 import {
-  confirmerSemaineType, creerRecette, definirCapacite, definirFournisseur, definirRegle, definirSemaineType, definirStandard,
-  modifierRecette, supprimerFournisseur, supprimerRegle, supprimerStandard, validerRecette,
+  confirmerSemaineType, creerRecette, definirCapacite, definirFournisseur, definirMargeSecurite, definirRegle, definirSemaineType,
+  definirStandard, modifierRecette, noterExport, supprimerFournisseur, supprimerRegle, supprimerStandard, validerRecette,
 } from '../domaine/actions.js';
 import { creneauxDuJourSemaine } from '../domaine/dates.js';
 import { exporter, importer } from '../domaine/etat.js';
@@ -320,6 +320,7 @@ const LIBELLE_ACTION = {
   controlerProduit: 'Produit contrôlé', definirAchat: 'Achat renseigné', marquerCommande: 'Commande marquée passée',
   saisirVentes: 'Ventes saisies', saisirApresService: 'Après service saisi',
   definirStandard: 'Standard maison réglé', supprimerStandard: 'Standard maison effacé',
+  annulerFait: 'Marquage « fait » annulé', noterExport: 'Sauvegarde exportée', definirMargeSecurite: 'Marge de sécurité réglée',
   saisirMenusSemaine: 'Menus de la semaine enregistrés',
 };
 const MOTS_TECHNIQUES = [
@@ -374,15 +375,17 @@ function lancerExport() {
   const partageable = fichier && typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && navigator.canShare({ files: [fichier] });
   if (partageable) {
     navigator.share({ files: [fichier], title: nom }).then(
-      () => afficherMessage('Sauvegarde partagée.', 'ok'),
+      () => { agir((e, t) => noterExport(e, t), { afficher: false }); afficherMessage('Sauvegarde partagée.', 'ok'); },
       (erreur) => {
         if (erreur?.name === 'AbortError') return;
         telecharger(fichier, nom);
+        agir((e, t) => noterExport(e, t), { afficher: false });
         afficherMessage('Partage impossible : la sauvegarde a été téléchargée.', 'alerte');
       });
     return;
   }
   telecharger(fichier ?? new Blob([texte], { type: 'application/json' }), nom);
+  agir((e, t) => noterExport(e, t), { afficher: false });
   afficherMessage(`Sauvegarde ${nom} téléchargée.`, 'ok');
 }
 
@@ -405,10 +408,29 @@ async function lireFichierRestauration(evenement) {
   });
 }
 
+function dialogMarge() {
+  const f = champs([{ cle: 'marge', type: 'entier', libelle: 'Marge de sécurité (%)', valeur: etatCourant().reglages.margeSecurite,
+    aide: 'Facultative, de 0 à 50. Elle majore seulement la quantité proposée à commander, après une vérification chiffrée. Vide : aucune marge.' }]);
+  panneau({
+    titre: 'Marge de sécurité',
+    corps: f.noeuds,
+    surEnregistrer: () => { agirStrict((e, t) => definirMargeSecurite(e, f.valeur('marge'), t)); },
+  });
+}
+
+function sectionMarge(etat) {
+  const m = etat.reglages.margeSecurite;
+  return carte('Commandes',
+    h('p', null, Number.isInteger(m) ? `Marge de sécurité : ${m} % sur la quantité proposée à commander` : 'Marge de sécurité : aucune'),
+    h('p', { classe: 'aide' }, 'Elle ne change ni le besoin calculé, ni la cible de production, ni la quantité à acheter, qui reste à votre main.'),
+    h('div', { classe: 'actions' }, bouton('Modifier la marge', () => dialogMarge(), 'court')));
+}
+
 function sectionSauvegarde() {
   const entree = h('input', { type: 'file', accept: '.json,application/json', classe: 'cache', onChange: lireFichierRestauration });
   return carte('Sauvegarde',
     h('p', { classe: 'aide' }, 'Le fichier contient toutes les données saisies. Les photos de menus ne sont pas incluses.'),
+    h('p', { classe: 'meta' }, etatCourant().reglages.dernierExport ? `Dernier export : ${formaterHeure(etatCourant().reglages.dernierExport)}` : 'Aucun export noté sur cet appareil.'),
     h('div', { classe: 'actions' },
       bouton('Exporter', lancerExport, 'principal'),
       h('label', { classe: 'btn' }, 'Restaurer', entree)));
@@ -434,7 +456,7 @@ function sectionEtat() {
 export function rendre(etat) {
   return h('div', { classe: 'vue vue-reglages' },
     h('h1', { classe: 'page-titre' }, 'Réglages'),
-    sectionStandards(etat), sectionSemaineType(etat), sectionRegles(etat), sectionRecettes(etat), sectionFournisseurs(etat),
+    sectionStandards(etat), sectionSemaineType(etat), sectionMarge(etat), sectionRegles(etat), sectionRecettes(etat), sectionFournisseurs(etat),
     sectionMemoire(etat), sectionJournal(etat), sectionSauvegarde(), sectionEtat());
 }
 

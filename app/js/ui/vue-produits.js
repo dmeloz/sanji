@@ -8,7 +8,7 @@ import { LIBELLE_ESTIMATION_A_VALIDER, VERIF, libelle } from '../domaine/statuts
 import { agir, agirStrict, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
-import { bouton, encadre, ligneVide, lien, navigationPeriode, pastille } from './elements.js';
+import { bouton, imprimer, encadre, ligneVide, lien, navigationPeriode, pastille } from './elements.js';
 import { formaterHeure, quantite } from './format.js';
 import { panneau } from './panneau.js';
 
@@ -80,7 +80,8 @@ function carteLigne(etat, lundi, ligne, aujourd) {
     h('dl', { classe: 'definitions' },
       h('dt', null, 'Besoin brut calculé'), h('dd', null, quantite(ligne.besoinBrut, ligne.unite)),
       h('dt', null, 'Vérifié disponible'), h('dd', null, suivi.quantiteVerifiee === null ? 'non vérifié' : quantite(suivi.quantiteVerifiee, ligne.unite)),
-      h('dt', null, 'Proposé à commander'), h('dd', null, suivi.proposeeACommander === null ? '— (après vérification)' : quantite(suivi.proposeeACommander, ligne.unite)),
+      h('dt', null, 'Proposé à commander'), h('dd', null, suivi.proposeeACommander === null ? '— (après vérification)'
+        : `${quantite(suivi.proposeeACommander, ligne.unite)}${suivi.margePourcent ? ` (dont ${suivi.margePourcent} % de marge)` : ''}`),
       h('dt', null, 'À acheter'), h('dd', null, suivi.quantiteAcheter === null ? 'à saisir' : quantite(suivi.quantiteAcheter, ligne.unite)),
       h('dt', null, 'Conditionnement'), h('dd', null, suivi.conditionnement || 'non précisé'),
       h('dt', null, 'Fournisseur'), h('dd', null, fournisseur ? fournisseur.nom : 'non précisé'),
@@ -106,6 +107,7 @@ export function rendre(etat, lundi) {
     { href: `#/produits/${lundiDe(aujourd)}`, texte: "Aujourd'hui" },
     { href: `#/produits/${ajouterJours(lundi, 7)}`, texte: 'Semaine suivante ›' }));
   racine.appendChild(encadre('info', 'Aucun stock théorique, aucun approvisionnement garanti.'));
+  racine.appendChild(h('div', { classe: 'actions pas-imprime' }, bouton('Imprimer la liste', imprimer, 'court')));
   racine.appendChild(h('h2', { classe: 'section-titre' }, 'Besoins chiffrés'));
   if (lignes.length === 0) racine.appendChild(ligneVide('Aucun besoin chiffré cette semaine : il faut des composants attribués, validés et calculables.'));
   for (const l of lignes) racine.appendChild(carteLigne(etat, lundi, l, aujourd));

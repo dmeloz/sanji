@@ -7,7 +7,7 @@ import { libelle } from '../domaine/statuts.js';
 import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
 import { ecranAllumePossible } from './ecran-allume.js';
-import { bouton, encadre, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
+import { bouton, imprimer, encadre, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
 import { formaterHeure } from './format.js';
 import { activerGlisser } from './glisser.js';
 import {
@@ -117,6 +117,7 @@ export function rendre(etat, date) {
     { href: `#/jour/${aujourd}`, texte: "Aujourd'hui" },
     { href: `#/jour/${ajouterJours(date, 1)}`, texte: 'Jour suivant ›' }));
   racine.appendChild(h('p', null, lien(`#/detail/${date}`, 'Détail du jour : menus, prévisions, fiches')));
+  racine.appendChild(h('div', { classe: 'actions pas-imprime' }, bouton('Imprimer la feuille du jour', imprimer, 'court')));
   if (ecranAllumePossible()) racine.appendChild(h('p', { classe: 'meta' }, 'L\'écran reste allumé sur cette page.'));
   if (!estOuvert(date)) {
     racine.appendChild(h('p', { classe: 'ferme' }, 'fermé'));

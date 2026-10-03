@@ -3,7 +3,7 @@
 
 import { proposerComposants } from './analyse-menu.js';
 import { calculerComposant, formaterQuantite, portionsMenu } from './calcul.js';
-import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, libelleJour, lundiDe } from './dates.js';
+import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, libelleJour, lundiDe } from './dates.js';
 import { jourOuVide, normaliser } from './etat.js';
 import { avancesPossibles, cibleProduction, etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
@@ -330,8 +330,29 @@ function contexteDe(etat, aujourdhui) {
  * @param {string} aujourdhui AAAA-MM-JJ
  * @param {string} [lundiAffiche] force la semaine affichée (navigation) ; sinon la semaine que le contexte désigne
  */
+const JOURS_AVANT_RAPPEL = 7;
+
+/**
+ * Rappel de sauvegarde, discret : une semaine après le dernier export, ou après les premières données si rien n'a
+ * jamais été exporté. Sans donnée, aucun rappel.
+ */
+function rappelSauvegarde(etat, aujourdhui) {
+  const premier = etat.journal?.[0]?.h ?? null;
+  const reference = etat.reglages?.dernierExport ?? premier;
+  if (!reference) return null;
+  const jours = joursEntre(reference.slice(0, 10), aujourdhui);
+  if (!(jours > JOURS_AVANT_RAPPEL)) return null;
+  const jamais = !etat.reglages?.dernierExport;
+  return {
+    genre: 'besoin', symbole: 'a_faire', lien: '#/reglages', texte: 'Sauvegarde à faire',
+    detail: jamais ? `jamais exportée, données depuis ${jours} jours` : `dernier export il y a ${jours} jours`,
+  };
+}
+
 export function tableauBlanc(etat, aujourdhui, lundiAffiche) {
   const contexte = contexteDe(etat, aujourdhui);
+  const rappel = rappelSauvegarde(etat, aujourdhui);
+  if (rappel) contexte.lignes.push(rappel);
   const lundi = lundiAffiche ? lundiDe(lundiAffiche) : contexte.semaine;
   // Le jour déplié : aujourd'hui s'il est dans la semaine affichée et ouvert, sinon le premier jour à menu saisi.
   const dates = [0, 1, 2, 3, 4, 5].map((i) => ajouterJours(lundi, i));

@@ -7,7 +7,7 @@ import { ajouterJours, aMenuDuJour, creneauxDuJour, estOuvert, libelleJour, lund
 import { jourOuVide } from '../domaine/etat.js';
 import { alertesAllergenes } from '../domaine/allergenes.js';
 import { chargeCreneau } from '../domaine/planification.js';
-import { pointsAConfirmer, repereVentes } from '../domaine/points.js';
+import { moyenneVentes, pointsAConfirmer, repereVentes } from '../domaine/points.js';
 import { CATEGORIE, ETAT_CRENEAU, libelle } from '../domaine/statuts.js';
 import { agir, agirStrict, etat as etatCourant, redessiner } from '../magasin.js';
 import { champs } from './champs.js';
@@ -180,6 +180,8 @@ export function dialogPrevision(date, menu) {
       : h('ul', { classe: 'liste-simple' }, reperes.map((r) => h('li', { classe: 'ligne-repere' },
         h('span', null, `${libelleJour(r.date)} : ${pluriel(r.ventes, 'portion vendue', 'portions vendues')}`),
         bouton('reprendre ce chiffre', () => f.fixer('portions', r.ventes), 'court')))),
+    moyenneVentes(reperes) !== null
+      ? h('p', null, `Moyenne de ces ${reperes.length} jours : ${moyenneVentes(reperes)} portions (repère seulement).`) : null,
     h('p', { classe: 'aide' }, 'Un repère n\'est pas une prévision : reprendre le chiffre remplit seulement le champ, rien n\'est enregistré avant « Enregistrer ».'));
   panneau({
     titre: `Prévision hors groupes : menu ${menu}`,

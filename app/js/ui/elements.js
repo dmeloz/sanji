@@ -59,3 +59,8 @@ export function definitions(lignes) {
   }
   return dl;
 }
+
+/** Ouvre la fenêtre d'impression du navigateur (sans effet là où elle n'existe pas). */
+export function imprimer() {
+  if (typeof window !== 'undefined' && typeof window.print === 'function') window.print();
+}
