@@ -444,86 +444,46 @@ dialog.panneau::backdrop { background: rgba(8, 12, 16, 0.5); }
 .coche-a_decider .coche-point { fill: var(--rouge-texte); }
 .coche-non_couvert .coche-bord { stroke: var(--ambre-texte); }
 
-/* La note du contexte : un panneau net en haut du tableau, filet d'encre à gauche. */
-.note {
-  margin: 4px 0 18px;
-  padding: 18px 18px 16px;
-  background: var(--carte);
-  border: 1px solid var(--bordure);
-  border-left: 4px solid var(--encre);
-  border-radius: 10px;
-}
-.note-date { font-size: var(--t-1); color: var(--texte-doux); }
-.note-titre { font-size: 1.6rem; line-height: 1.2; margin: 2px 0 8px; color: var(--texte); }
-.note-lignes { display: grid; }
-.note-ligne + .note-ligne { border-top: 1px solid var(--bordure); }
-.note-lien { display: flex; align-items: center; gap: 10px; min-height: var(--cible); padding: 4px 0; color: var(--texte); text-decoration: none; }
-.note-texte { flex: 1; min-width: 0; }
-.note-detail { display: block; font-size: var(--t-1); color: var(--texte-doux); }
-.note-quantite { font-size: 1.15rem; color: var(--bleu-texte); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.note-decision .note-texte { color: var(--rouge-texte); font-weight: 600; }
-.note-besoin .note-texte { font-weight: 600; }
-.note-besoin .note-detail, .note-decision .note-detail { font-weight: 400; }
-.note-autres { margin-top: 6px; font-size: var(--t-1); color: var(--texte-doux); }
-.note-action { margin-top: 12px; }
-
-/* Le tableau de la semaine : un panneau net, des filets fins. */
-.tableau {
-  background: var(--carte);
-  border: 1px solid var(--bordure);
-  border-radius: 12px;
-  overflow: hidden;
-}
-.tableau-tete { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--bordure); }
-.tableau-titre { flex: 1; text-align: center; font-size: 1.15rem; line-height: 1.2; }
+/* Tableau de bord (A-P1) : en-tête compact, quatre zones séparées par des filets, chaque ligne est une cible ≥ 44 px. */
+.note-detail { display: block; font-size: var(--t-1); color: var(--texte-doux); font-weight: 400; }
 .btn-fleche { min-width: var(--haut-btn, 48px); padding: 0; font-size: 1.5rem; line-height: 1; justify-content: center; }
 .tableau-pied { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 
-.tb-jour { display: grid; grid-template-columns: 62px minmax(0, 1fr); border-bottom: 1px solid var(--bordure); }
-.tb-jour:last-child { border-bottom: 0; }
-.tb-nom {
-  grid-row: 1 / span 4;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  padding: 10px 2px;
-  border-right: 1px solid var(--bordure);
-  color: var(--texte);
-  text-decoration: none;
-}
-.tb-nom-jour { font-size: var(--t-1); line-height: 1.1; color: var(--texte-doux); font-weight: 600; }
-.tb-nom-numero { font-size: 1.7rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
-.aimant { width: 8px; height: 8px; margin-bottom: 4px; border-radius: 50%; background: var(--bleu); }
-.tb-aujourdhui .tb-nom { background: var(--bleu-fond); }
-.tb-aujourdhui .tb-nom-jour { color: var(--bleu-texte); }
-.tb-aujourdhui .tb-nom-numero { color: var(--bleu-texte); }
+.bord-tete { display: grid; gap: 6px; margin: 4px 0 12px; }
+.bord-semaine-nav { display: flex; align-items: center; gap: 8px; }
+.bord-semaine { flex: 1; min-width: 0; text-align: center; }
+.bord-titre { font-size: 1.25rem; line-height: 1.2; margin: 0; }
+.bord-sous-titre { margin: 0; font-size: var(--t-1); color: var(--texte-doux); }
+.bord-aujourdhui-ligne { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.bord-date { margin: 0; font-weight: 650; }
+.bord-rappel { margin: 0; }
 
-.tb-cellule { min-width: 0; padding: 8px 10px; border-bottom: 1px solid var(--bordure); }
-.tb-jour > .tb-cellule:last-child { border-bottom: 0; }
-.tb-blanc { padding: 0; border-bottom: 0; }
-.tb-menu { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 8px; align-items: start; }
-.tb-rang {
-  width: 24px;
-  height: 24px;
-  margin-top: 2px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1.5px solid var(--bordure-forte);
-  border-radius: 50%;
-  font-size: var(--t-1);
-  font-weight: 600;
-  color: var(--texte-doux);
-}
-.tb-intitule { line-height: 1.3; overflow-wrap: break-word; }
-.tb-poste { font-size: 1.08rem; color: var(--texte); text-decoration: none; }
+.bord-zone { padding: 10px 0 12px; border-top: 1px solid var(--bordure); }
+.bord-zone-titre { font-size: var(--t1); line-height: 1.2; margin: 0 0 6px; }
+.bord-resume { margin: 0 0 4px; font-weight: 650; }
+.bord-actions { margin: 8px 0 0; }
+.bord-jours, .bord-lignes { display: grid; margin: 0; padding: 0; list-style: none; }
+
+/* Un jour : la ligne entière est cliquable (le lien d'en-tête est étiré sur la ligne) ; plats et cercle passent au-dessus. */
+.bord-jour { position: relative; padding: 0 0 8px; border-bottom: 1px solid var(--bordure); }
+.bord-jour:last-child { border-bottom: 0; }
+.bord-jour-lien { display: flex; align-items: center; gap: 8px; min-height: var(--cible); color: var(--texte); text-decoration: none; font-size: var(--t0); }
+.bord-jour-lien::after { content: ""; position: absolute; inset: 0; }
+.bord-aujourdhui { background: var(--bleu-fond); border-radius: 8px; padding: 0 8px 8px; }
+.bord-badge { font-size: var(--t-1); font-weight: 600; color: var(--bleu-texte); border: 1px solid var(--bleu); border-radius: 999px; padding: 0 8px; }
+.bord-menu { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 8px; align-items: center; min-height: var(--cible); }
+.bord-menu a, .bord-menu button { position: relative; z-index: 1; }
+.tb-rang { font-size: var(--t-1); font-weight: 600; color: var(--texte-doux); }
+.tb-intitule { margin: 0; line-height: 1.3; overflow-wrap: break-word; }
+.tb-poste { font-size: var(--t0); color: var(--texte); text-decoration: none; }
 .tb-hors { font-size: var(--t-1); color: var(--texte-doux); text-decoration: none; }
+.bord-plat { display: inline-block; padding: 10px 0; }
 .tb-virgule { color: var(--texte-doux); }
-.tb-discret { font-size: var(--t-1); color: var(--texte-doux); grid-column: 1 / -1; }
+.tb-discret { margin: 0; font-size: var(--t-1); color: var(--texte-doux); }
+/* Le cercle de prévision : au moins 44 × 44 px. */
 .tb-couverts {
-  min-width: 44px;
-  height: 40px;
+  min-width: var(--cible);
+  min-height: var(--cible);
   padding: 0 8px;
   display: inline-flex;
   align-items: center;
@@ -536,42 +496,21 @@ dialog.panneau::backdrop { background: rgba(8, 12, 16, 0.5); }
 }
 .tb-provisoire { border-style: dashed; }
 button.tb-couverts { background: transparent; cursor: pointer; font-family: inherit; }
-/* Prévision à saisir : un petit cercle vide, discret, là où le nombre de couverts s'écrira. */
-.tb-couverts-vide { min-width: 36px; height: 34px; padding: 0 6px; border: 1.5px dashed var(--bordure); color: var(--texte-doux); font-size: 1.05rem; text-decoration: none; }
-
-.tb-liste { display: grid; }
-.tb-groupe { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-height: var(--cible); color: var(--texte); text-decoration: none; }
-.tb-groupe-couverts { font-size: 1.1rem; color: var(--vert-texte); }
-.tb-groupe-detail { font-size: var(--t-1); color: var(--texte-doux); }
+/* Prévision à saisir : un cercle vide en pointillés, discret, là où le nombre de couverts s'écrira. */
+.tb-couverts-vide { border-color: var(--bordure-forte); border-style: dashed; color: var(--texte-doux); }
+.bord-reste { margin-top: 6px; }
 .tb-allergie { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: var(--rouge-texte); }
 
-.tb-mep { display: grid; }
-.mep a { display: flex; align-items: center; gap: 10px; min-height: var(--cible); color: var(--texte); text-decoration: none; }
-.mep-nom { flex: 1; min-width: 0; font-weight: 600; font-size: 1.05rem; line-height: 1.25; overflow-wrap: break-word; }
-.mep-quantite { font-weight: 650; font-size: 1.05rem; color: var(--bleu-texte); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.mep-sans { font-size: var(--t-1); color: var(--texte-doux); white-space: nowrap; }
-.mep-pret .mep-nom { color: var(--texte-doux); text-decoration: line-through; text-decoration-color: var(--vert-texte); text-decoration-thickness: 2px; }
-.mep-a_decider .mep-nom { color: var(--rouge-texte); }
-.tb-resume-lien, .tb-points-lien { display: inline-flex; align-items: center; min-height: var(--cible); font-size: var(--t-1); }
-.tb-points-lien { color: var(--ambre-texte); font-weight: 600; }
+.bord-fiche { display: grid; gap: 2px; min-height: var(--cible); padding: 8px 0; color: var(--texte); text-decoration: none; border-bottom: 1px solid var(--bordure); }
+.bord-fiche-ligne:last-child .bord-fiche { border-bottom: 0; }
+.bord-fiche-tete { font-size: var(--t0); font-variant-numeric: tabular-nums; }
+.bord-fiche-suite { font-size: var(--t-1); color: var(--texte-doux); }
 
-/* iPad : une colonne par jour, comme sur le vrai tableau ; les lignes restent alignées d'un jour à l'autre. */
-@media (min-width: 820px) {
-  .tableau-grille { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: auto auto auto auto 1fr; }
-  .tb-jour { grid-template-columns: minmax(0, 1fr); grid-row: 1 / span 5; grid-template-rows: subgrid; border-bottom: 0; border-right: 1px solid var(--bordure); }
-  .tb-jour:last-child { border-right: 0; }
-  .tb-nom { grid-row: auto; flex-direction: row; align-items: baseline; justify-content: center; gap: 8px; padding: 8px 4px; border-right: 0; border-bottom: 1px solid var(--bordure); }
-  .tb-nom-numero { font-size: 1.4rem; }
-  .aimant { margin-bottom: 0; align-self: center; }
-  .tb-blanc { padding: 8px 10px; border-bottom: 1px solid var(--bordure); }
-  .tb-menu { grid-template-columns: 24px minmax(0, 1fr); }
-  .tb-couverts { grid-column: 2; justify-self: start; }
-  .tb-poste { font-size: 1.02rem; }
-  /* Colonnes étroites : la quantité passe sous le nom au lieu de déborder dans la colonne voisine. */
-  .mep a { flex-wrap: wrap; gap: 2px 8px; align-content: center; padding: 4px 0; }
-  .mep-nom { flex: 1 1 60%; font-size: 1rem; }
-  .mep-quantite, .mep-sans { flex: 1 0 100%; padding-left: 34px; white-space: normal; }
-}
+.bord-ligne { display: flex; align-items: center; gap: 10px; min-height: var(--cible); padding: 4px 0; color: var(--texte); text-decoration: none; border-bottom: 1px solid var(--bordure); }
+.bord-lignes > li:last-child > .bord-ligne { border-bottom: 0; }
+.bord-ligne-texte { flex: 1; min-width: 0; }
+.bord-neutre { color: var(--texte-doux); }
+.bord-jauge .avancement-barre { flex: 0 0 96px; }
 
 /* Menus de la semaine */
 .saisie-jour-titre { font-size: var(--t1); margin-bottom: 8px; }
@@ -732,3 +671,68 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .reglage-fleche { font-size: var(--t1); color: var(--texte-doux); flex: none; }
 .reglage-retour { display: inline-flex; align-items: center; min-height: var(--cible); padding-right: 12px; font-weight: 600; }
 .recherche-standards { width: 100%; min-height: var(--cible); box-sizing: border-box; margin: 8px 0 12px; font-size: var(--t0); }
+
+/* ------------------------------------------------------------ feuille Jour (A-P1) : une liste de mise en place */
+
+.jour-barre { display: flex; align-items: center; gap: 4px; margin: 0 -14px 8px; padding: 0 14px; overflow-x: auto; border-bottom: 1px solid var(--bordure); }
+.jour-puce {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--cible);
+  min-width: var(--cible);
+  padding: 0 10px;
+  color: var(--texte);
+  text-decoration: none;
+  font-size: var(--t0);
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+.jour-puce-aujourdhui { color: var(--bleu-texte); font-weight: 650; }
+.jour-puce-actif { border-bottom-color: var(--encre); font-weight: 700; background: var(--carte-2); }
+.jour-puce-fleche { color: var(--texte-doux); font-size: 1.4rem; }
+.jour-tete { margin-bottom: 8px; }
+.jour-tete .page-titre { margin-bottom: 2px; }
+.jour-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 6px; }
+.jour-couverts { font-size: var(--t0); }
+.jour-lien { display: inline-flex; align-items: center; min-height: var(--cible); font-size: var(--t-1); }
+.jour-menus { display: grid; margin: 0 0 8px; padding: 0; list-style: none; border-top: 1px solid var(--bordure); }
+.jour-menu { display: flex; align-items: center; gap: 10px; min-height: var(--cible); padding: 4px 0; color: var(--texte); text-decoration: none; border-bottom: 1px solid var(--bordure); }
+.jour-menu-rang { flex: none; min-width: 34px; font-size: var(--t-1); color: var(--texte-doux); }
+.jour-menu-texte { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.jour-bloc { margin-top: 14px; }
+.jour-bloc > .section-titre { margin-bottom: 4px; }
+.jour-neutre p { margin: 4px 0; }
+.jour-decisions { margin-top: 10px; padding: 8px 12px 10px; border: 1px solid var(--bordure-forte); border-left: 4px solid var(--encre); border-radius: 8px; background: var(--carte); }
+.jour-decisions .section-titre { margin: 0 0 4px; }
+.jour-decisions-lignes { margin: 0 0 6px; padding-left: 18px; }
+
+.mep-liste { display: grid; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--bordure); }
+.mep-ligne { border-bottom: 1px solid var(--bordure); }
+.mep-principal { display: grid; grid-template-columns: var(--cible) minmax(0, 1fr) auto; align-items: center; gap: 6px; min-height: 56px; padding: 4px 0; }
+.mep-corps { min-width: 0; }
+.mep-nom { font-weight: 600; font-size: var(--t0); }
+.mep-meta { margin: 0; font-size: var(--t-1); color: var(--texte-doux); }
+.mep-meta .pastille { margin-right: 6px; }
+.mep-quantite { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+.mep-qte { font-size: var(--t1); line-height: 1.15; font-variant-numeric: tabular-nums; color: var(--texte); white-space: nowrap; }
+.mep-poids { font-size: var(--t-1); color: var(--texte-doux); }
+.mep-neutre { font-size: var(--t-1); color: var(--texte-doux); }
+.mep-fait .mep-nom { color: var(--texte-doux); }
+.mep-plus { margin: 0 0 6px var(--cible); }
+.mep-plus > summary { display: flex; align-items: center; min-height: var(--cible); cursor: pointer; font-size: var(--t-1); color: var(--bleu-texte); list-style: none; }
+.mep-plus > summary::-webkit-details-marker { display: none; }
+.mep-plus > summary::before { content: "▸ "; }
+.mep-plus[open] > summary::before { content: "▾ "; }
+
+/* Case à cocher : un carré dessiné dans une cible de 44 px ; cochée, elle porte un trait (la forme dit l'état). */
+.case-fait { display: inline-flex; align-items: center; justify-content: center; min-width: var(--cible); min-height: var(--cible); padding: 0; background: transparent; border: 0; cursor: pointer; font: inherit; color: var(--texte); }
+.case-fait-boite { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 2px solid var(--bordure-forte); border-radius: 6px; background: var(--carte); font-weight: 800; line-height: 1; }
+.case-fait-ok .case-fait-boite { border-color: var(--vert-texte); color: var(--vert-texte); background: var(--vert-fond); }
+.case-fait-vide { cursor: default; }
+.case-fait-vide::before { content: ""; width: 12px; height: 2px; background: var(--bordure-forte); }
+.case-fait:focus-visible { outline: 3px solid var(--focus); outline-offset: -4px; }
+
+.jour-faites, .jour-lots, .jour-charge, .jour-centre { margin-top: 12px; }
+.jour-faites > .mep-liste, .jour-lots > p, .jour-centre > .tache { margin-top: 6px; }

@@ -1,59 +1,36 @@
-// Tableau blanc : l'écran d'accueil. Il ressemble au tableau blanc d'une cuisine et commence par la note du
-// contexte (« que dois-je savoir maintenant »). La vue ne calcule rien : tout vient de `tableauBlanc`.
+// Tableau : un tableau de bord, pas une note générale. Quatre zones sous un en-tête compact : Menus de la semaine,
+// Fiches de fonction, À confirmer (3 lignes au plus), Production et commandes. La vue ne calcule rien : tout vient
+// de `tableauBlanc(...).bord`. Chaque ligne est un lien (ou le cercle de prévision) ; aucun bouton « valider ».
 
 import { libelleJour } from '../domaine/dates.js';
 import { tableauBlanc } from '../domaine/tableau-blanc.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { lien } from './elements.js';
+import { libelleHorsLigne } from './horsligne.js';
 import { dialogPrevision } from './vue-detail.js';
 
 export function titre() { return 'Tableau'; }
 
-const JOURS_COURTS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-const ETAT_SYMBOLE = {
-  pret: 'prêt', en_cours: 'en cours', a_faire: 'à faire', a_decider: 'à décider', non_couvert: 'fait, non couvert',
-};
-
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 const pluriel = (n, un, plusieurs) => `${n} ${n >= 2 ? plusieurs : un}`;
 
-/** Case dessinée (classe « coche ») : l'état se lit par la forme (vide, à moitié, cochée, point d'exclamation, hachurée). */
+/** Case dessinée (classe « coche ») : l'état se lit par la forme, jamais par la couleur seule. */
 function caseSymbole(symbole) {
+  const mots = { a_decider: 'à décider', a_faire: 'à faire' };
   const enfants = [svg('rect', { classe: 'coche-bord', x: 2, y: 2, width: 20, height: 20, rx: 3 })];
-  if (symbole === 'en_cours') enfants.push(svg('rect', { classe: 'coche-plein', x: 3, y: 12, width: 18, height: 9, rx: 1 }));
-  if (symbole === 'pret') enfants.push(svg('path', { classe: 'coche-trait', d: 'M6 12.5l4.2 4.2L18.5 7.5' }));
   if (symbole === 'a_decider') {
     enfants.push(svg('path', { classe: 'coche-trait', d: 'M12 6.5v7' }), svg('circle', { classe: 'coche-point', cx: 12, cy: 17.5, r: 1.4 }));
   }
-  if (symbole === 'non_couvert') enfants.push(svg('path', { classe: 'coche-hachure', d: 'M4 12L12 4M4 20L20 4M12 20l8-8' }));
   return h('span', { classe: `coche-boite coche-${symbole}` },
     svg('svg', { classe: 'coche', viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' }, enfants),
-    h('span', { classe: 'sr' }, `${ETAT_SYMBOLE[symbole]} : `));
+    h('span', { classe: 'sr' }, `${mots[symbole]} : `));
 }
 
-// ------------------------------------------------------------------ la note du contexte
+/** « Lun 5 », « Mar 6 » : abréviation du jour et numéro. */
+const etiquetteJour = (date) => `${majuscule(libelleJour(date).slice(0, 3))} ${Number(date.slice(8))}`;
 
-function ligneNote(ligne) {
-  const contenu = [
-    ligne.symbole ? caseSymbole(ligne.symbole) : null,
-    h('span', { classe: 'note-texte' }, ligne.texte, ligne.detail ? h('span', { classe: 'note-detail' }, ligne.detail) : null),
-    ligne.quantite ? h('span', { classe: 'note-quantite feutre' }, ligne.quantite) : null,
-  ];
-  return h('li', { classe: `note-ligne note-${ligne.genre}` },
-    ligne.lien ? h('a', { href: ligne.lien, classe: 'note-lien' }, contenu) : h('span', { classe: 'note-lien' }, contenu));
-}
-
-function noteContexte(contexte) {
-  return h('section', { classe: `note note-${contexte.type}`, 'aria-labelledby': 'titre-note' },
-    h('p', { classe: 'note-date' }, majuscule(libelleJour(contexte.date))),
-    h('h1', { classe: 'feutre note-titre', id: 'titre-note' }, contexte.titre),
-    h('ul', { classe: 'note-lignes' }, contexte.lignes.map(ligneNote)),
-    contexte.autres > 0 ? h('p', { classe: 'note-autres' }, `et ${pluriel(contexte.autres, 'autre ligne', 'autres lignes')} sur la feuille du jour`) : null,
-    contexte.action ? h('p', { classe: 'note-action' }, lien(contexte.action.lien, contexte.action.libelle, 'btn btn-principal')) : null);
-}
-
-// ------------------------------------------------------------------ le tableau
+// ------------------------------------------------------------------ zone 1 : menus de la semaine
 
 function morceaux(menu) {
   const noeuds = [];
@@ -61,114 +38,160 @@ function morceaux(menu) {
     if (i > 0) noeuds.push(h('span', { classe: 'tb-virgule' }, ', '));
     const classe = morceau.auPoste ? 'tb-poste feutre' : 'tb-hors';
     noeuds.push(morceau.composantId
-      ? h('a', { href: `#/composant/${morceau.composantId}`, classe }, morceau.texte)
+      ? h('a', { href: `#/composant/${morceau.composantId}`, classe: `${classe} bord-plat` }, morceau.texte)
       : h('span', { classe }, morceau.texte));
   });
   return noeuds;
 }
 
-function celluleMenu(jour, numero) {
-  const menu = jour.menus.find((m) => m.menu === numero);
-  if (!menu) {
-    return h('div', { classe: 'tb-cellule tb-menu' },
-      numero === 1 ? h('p', { classe: 'tb-discret' }, 'pas de menu du jour') : null);
-  }
-  if (!menu.saisi) return h('div', { classe: 'tb-cellule tb-menu tb-blanc' });
-  // Sur un vrai tableau, le nombre de couverts s'écrit à côté du menu : le toucher ouvre la prévision, à saisir
-  // ou à réviser quand on veut (le calcul suit). Sans chiffre, un cercle vide invite à la saisir.
-  let couverts = null;
-  const ouvrir = () => dialogPrevision(jour.date, numero);
+/** Le chiffre des couverts est le seul bouton : il ouvre la prévision, à saisir ou à réviser quand on veut. */
+function couvertsDuMenu(jour, menu) {
+  const ouvrir = () => dialogPrevision(jour.date, menu.menu);
   if (menu.couverts !== null) {
-    couverts = h('button', {
+    return h('button', {
       type: 'button', onClick: ouvrir,
       classe: `tb-couverts feutre${menu.provisoires ? ' tb-provisoire' : ''}`,
-      'aria-label': `${libelleJour(jour.date)}, menu ${numero} : ${pluriel(menu.couverts, 'portion', 'portions')}${menu.provisoires ? ', dont des groupes provisoires' : ''}, modifier la prévision`,
+      'aria-label': `${libelleJour(jour.date)}, menu ${menu.menu} : ${pluriel(menu.couverts, 'portion', 'portions')}${menu.provisoires ? ', dont des groupes provisoires' : ''}, modifier la prévision`,
     }, String(menu.couverts));
-  } else if (menu.previsionASaisir) {
-    couverts = h('button', {
+  }
+  if (menu.previsionASaisir) {
+    return h('button', {
       type: 'button', onClick: ouvrir, classe: 'tb-couverts tb-couverts-vide feutre',
-      'aria-label': `${libelleJour(jour.date)}, menu ${numero} : saisir la prévision`,
+      'aria-label': `${libelleJour(jour.date)}, menu ${menu.menu} : saisir la prévision`,
     }, '?');
   }
-  return h('div', { classe: 'tb-cellule tb-menu' },
-    h('span', { classe: 'tb-rang', 'aria-label': `Menu ${numero}` }, String(numero)),
+  return null;
+}
+
+function ligneMenu(jour, menu) {
+  return h('div', { classe: 'bord-menu' },
+    h('span', { classe: 'tb-rang', 'aria-label': `Menu ${menu.menu}` }, `M${menu.menu}`),
     h('p', { classe: 'tb-intitule' }, morceaux(menu)),
-    couverts);
+    couvertsDuMenu(jour, menu));
 }
 
-function celluleGroupes(jour) {
-  if (jour.groupes.length === 0) return h('div', { classe: 'tb-cellule tb-groupes tb-blanc' });
-  return h('div', { classe: 'tb-cellule tb-groupes' }, h('ul', { classe: 'tb-liste' }, jour.groupes.map((g) => h('li', null,
-    h('a', { href: `#/detail/${jour.date}`, classe: 'tb-groupe' },
-      h('span', { classe: 'feutre tb-groupe-couverts' }, `${g.couverts} pers.`),
-      h('span', { classe: 'tb-groupe-detail' }, [g.service === 'soir' ? 'le soir' : null, g.horaire || null, g.numero ? `fiche ${g.numero}` : null]
-        .filter(Boolean).join(', ')),
-      g.aAllergies ? h('span', { classe: 'tb-allergie' }, caseSymbole('a_decider'), 'allergie') : null)))));
+/** Un jour : la ligne entière mène au détail du jour (l'en-tête est étiré sur la ligne), un plat à sa fiche. */
+function jourDuBord(jour) {
+  const saisis = jour.menus.filter((m) => m.saisi);
+  const couverts = jour.couvertsTotal !== null ? ` · ${pluriel(jour.couvertsTotal, 'couvert', 'couverts')}` : '';
+  return h('li', { classe: `bord-jour${jour.estAujourdhui ? ' bord-aujourdhui' : ''}` },
+    h('a', { href: `#/detail/${jour.date}`, classe: 'bord-jour-lien feutre',
+      'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''} : ouvrir le détail du jour` },
+    `${etiquetteJour(jour.date)}${couverts} `,
+    jour.estAujourdhui ? h('span', { classe: 'bord-badge' }, "aujourd'hui") : null),
+    saisis.length === 0 ? h('p', { classe: 'tb-discret' }, 'Menus non saisis') : saisis.map((m) => ligneMenu(jour, m)));
 }
 
-function resumeMiseEnPlace(compte) {
-  const morceauxResume = [];
-  if (compte.a_decider > 0) morceauxResume.push(`${compte.a_decider} à décider`);
-  if (compte.a_faire > 0) morceauxResume.push(`${compte.a_faire} à faire`);
-  if (compte.en_cours > 0) morceauxResume.push(`${compte.en_cours} en cours`);
-  if (compte.non_couvert > 0) morceauxResume.push(pluriel(compte.non_couvert, 'non couverte', 'non couvertes'));
-  if (compte.pret > 0) morceauxResume.push(pluriel(compte.pret, 'prête', 'prêtes'));
-  return morceauxResume.join(', ');
-}
-
-function celluleMiseEnPlace(jour) {
-  const enfants = [];
-  // Un jour replié ne résume sa mise en place que s'il s'y passe quelque chose : une liste de « à faire » n'apprend rien.
-  const notable = jour.compte.total > jour.compte.a_faire;
-  if (jour.miseEnPlace.length > 0 && (jour.deplie || notable)) {
-    if (jour.deplie) {
-      enfants.push(h('ul', { classe: 'tb-mep' }, jour.miseEnPlace.map((t) => h('li', { classe: `mep mep-${t.symbole}` },
-        h('a', { href: `#/composant/${t.composantId}` },
-          caseSymbole(t.symbole),
-          h('span', { classe: 'mep-nom' }, t.nom),
-          t.quantite ? h('span', { classe: 'mep-quantite' }, t.quantite) : null)))));
-    } else {
-      enfants.push(h('p', { classe: 'tb-resume' }, lien(`#/jour/${jour.date}`, resumeMiseEnPlace(jour.compte), 'tb-resume-lien')));
+function zoneMenus(bord, lundi) {
+  const { visibles, reste, aucunMenu } = bord.menus;
+  const contenu = [];
+  if (aucunMenu) {
+    contenu.push(h('p', { classe: 'vide' }, 'Aucun menu saisi cette semaine.'));
+  } else {
+    contenu.push(h('ul', { classe: 'bord-jours' }, visibles.map(jourDuBord)));
+    if (reste.length > 0) {
+      contenu.push(h('details', { classe: 'repliable bord-reste' },
+        h('summary', null, 'Afficher le reste de la semaine'),
+        h('ul', { classe: 'bord-jours' }, reste.map(jourDuBord))));
     }
   }
-  if (jour.nbPoints > 0) {
-    enfants.push(h('p', { classe: 'tb-points' },
-      lien(`#/detail/${jour.date}`, pluriel(jour.nbPoints, 'point à confirmer', 'points à confirmer'), 'tb-points-lien')));
+  contenu.push(h('p', { classe: 'bord-actions' },
+    lien(`#/menus/${lundi}`, aucunMenu ? 'Saisir les menus de la semaine' : 'Menus de la semaine', 'btn btn-court')));
+  return zone('menus', 'Menus de la semaine', contenu);
+}
+
+// ------------------------------------------------------------------ zone 2 : fiches de fonction
+
+function ficheDuBord(fiche, aujourd) {
+  const entete = [fiche.date !== aujourd ? etiquetteJour(fiche.date) : null, fiche.horaire || null,
+    fiche.numero ? `fiche ${fiche.numero}` : null, pluriel(Number(fiche.couverts) || 0, 'couvert', 'couverts')].filter(Boolean).join(' · ');
+  return h('li', { classe: 'bord-fiche-ligne' },
+    h('a', { href: fiche.lien, classe: 'bord-fiche', 'aria-label': `Fiche de fonction, ${libelleJour(fiche.date)} : ouvrir le détail du jour` },
+      h('span', { classe: 'bord-fiche-tete feutre' }, entete),
+      h('span', { classe: 'bord-fiche-suite' }, fiche.modeTexte,
+        fiche.aAllergies ? [' · ', h('span', { classe: 'tb-allergie' }, caseSymbole('a_decider'), 'allergies')] : null)));
+}
+
+function zoneFiches(bord, aujourd) {
+  return zone('fiches', 'Fiches de fonction', bord.fiches.length === 0
+    ? h('p', { classe: 'vide' }, 'Aucun banquet prévu')
+    : h('ul', { classe: 'bord-lignes' }, bord.fiches.map((f) => ficheDuBord(f, aujourd))));
+}
+
+// ------------------------------------------------------------------ zone 3 : à confirmer
+
+function zoneAConfirmer(bord) {
+  const { total, lignes } = bord.aConfirmer;
+  const resume = total === 0 ? 'Rien à confirmer'
+    : total === 1 ? '1 décision attend le chef' : `${total} décisions attendent le chef`;
+  const reste = total - lignes.reduce((n, l) => n + l.n, 0);
+  return zone('confirmer', 'À confirmer', [
+    h('p', { classe: total === 0 ? 'vide' : 'bord-resume' }, resume),
+    lignes.length === 0 ? null : h('ul', { classe: 'bord-lignes' }, lignes.map((l) => h('li', null,
+      h('a', { href: l.lien, classe: 'bord-ligne' }, caseSymbole('a_decider'),
+        h('span', { classe: 'bord-ligne-texte' }, l.texte, l.detail ? h('span', { classe: 'note-detail' }, l.detail) : null))))),
+    reste > 0 ? h('p', { classe: 'meta' }, `et ${pluriel(reste, 'autre sujet', 'autres sujets')}, à voir sur le détail des jours`) : null,
+  ]);
+}
+
+// ------------------------------------------------------------------ zone 4 : production et commandes
+
+function zoneProduction(bord) {
+  const p = bord.production;
+  const { faites, total } = p.avancement;
+  const lignes = [];
+  lignes.push(h('li', null, h('a', { href: p.lien, classe: 'bord-ligne bord-jauge' },
+    total > 0 ? h('progress', { classe: 'avancement-barre', value: faites, max: total, 'aria-hidden': 'true' }) : null,
+    h('span', { classe: 'bord-ligne-texte feutre' }, total > 0 ? `Aujourd'hui ${faites}/${total} fait` : "Aujourd'hui : aucune tâche décidée"))));
+  if (p.avances > 0) {
+    lignes.push(h('li', null, h('a', { href: p.lien, classe: 'bord-ligne' },
+      h('span', { classe: 'bord-ligne-texte' }, `${pluriel(p.avances, 'avance possible', 'avances possibles')} après le service`))));
   }
-  return h('div', { classe: `tb-cellule tb-miseenplace${enfants.length === 0 ? ' tb-blanc' : ''}` }, enfants);
+  if (p.commande) {
+    lignes.push(h('li', null, h('a', { href: p.commande.lien, classe: 'bord-ligne' }, h('span', { classe: 'bord-ligne-texte' }, p.commande.texte))));
+  }
+  // Pas encore chiffré : information neutre, jamais une alerte ni une décision.
+  for (const l of p.chiffrage) {
+    lignes.push(h('li', null, h('a', { href: l.lien, classe: 'bord-ligne bord-neutre' },
+      h('span', { classe: 'bord-ligne-texte' }, l.texte, l.detail ? h('span', { classe: 'note-detail' }, l.detail) : null))));
+  }
+  return zone('production', 'Production et commandes', h('ul', { classe: 'bord-lignes' }, lignes));
 }
 
-function jourTableau(jour, i) {
-  return h('article', {
-    classe: `tb-jour${jour.estAujourdhui ? ' tb-aujourdhui' : ''}${jour.deplie ? ' tb-deplie' : ''}`,
-    'aria-label': libelleJour(jour.date),
-  },
-  h('a', { classe: 'tb-nom feutre', href: `#/detail/${jour.date}`, 'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''} : ouvrir le détail` },
-    jour.estAujourdhui ? h('span', { classe: 'aimant', 'aria-hidden': 'true' }) : null,
-    h('span', { classe: 'tb-nom-jour' }, JOURS_COURTS[i]),
-    h('span', { classe: 'tb-nom-numero' }, String(Number(jour.date.slice(8))))),
-  celluleMenu(jour, 1),
-  celluleMenu(jour, 2),
-  celluleGroupes(jour),
-  celluleMiseEnPlace(jour));
+// ------------------------------------------------------------------ assemblage
+
+function zone(id, titreTexte, contenu) {
+  return h('section', { classe: `bord-zone bord-${id}`, 'aria-labelledby': `bord-titre-${id}` },
+    h('h2', { classe: 'bord-zone-titre', id: `bord-titre-${id}` }, titreTexte), contenu);
 }
 
-function tableau(tb) {
-  return h('section', { classe: 'tableau', 'aria-labelledby': 'titre-tableau' },
-    h('header', { classe: 'tableau-tete' },
+function entete(tb) {
+  const e = tb.bord.entete;
+  return h('header', { classe: 'bord-tete' },
+    h('div', { classe: 'bord-semaine-nav' },
       h('a', { href: `#/tableau/${tb.semainePrecedente}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
-      h('h2', { classe: 'feutre tableau-titre', id: 'titre-tableau' }, `Semaine du ${libelleJour(tb.lundi).replace(/^lundi\s+/, '')}`),
+      h('div', { classe: 'bord-semaine' },
+        h('h1', { classe: 'bord-titre feutre' }, `Semaine du ${libelleJour(tb.lundi).replace(/^lundi\s+/, '')}`),
+        h('p', { classe: 'bord-sous-titre' }, `Semaine ${e.semaine} · ${libelleHorsLigne()}`)),
       h('a', { href: `#/tableau/${tb.semaineSuivante}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')),
-    h('div', { classe: 'tableau-grille' }, tb.jours.map((jour, i) => jourTableau(jour, i))));
+    h('div', { classe: 'bord-aujourdhui-ligne' },
+      h('p', { classe: 'bord-date' }, `Aujourd'hui, ${libelleJour(e.date)}`),
+      lien(e.lienJour, 'Ouvrir Jour →', 'btn btn-principal')),
+    e.sauvegarde ? h('p', { classe: 'bord-rappel' }, h('a', { href: e.sauvegarde.lien, classe: 'bord-ligne bord-neutre' },
+      h('span', { classe: 'bord-ligne-texte' }, e.sauvegarde.texte, h('span', { classe: 'note-detail' }, e.sauvegarde.detail)))) : null);
 }
 
 export function rendre(etat, lundiAffiche) {
-  const tb = tableauBlanc(etat, aujourdhui(), lundiAffiche ?? undefined);
-  const racine = h('div', { classe: 'vue vue-tableau' });
-  racine.appendChild(noteContexte(tb.contexte));
-  racine.appendChild(tableau(tb));
-  racine.appendChild(h('p', { classe: 'tableau-pied' },
-    lien(`#/menus/${tb.lundi}`, 'Menus de la semaine', 'btn'),
-    tb.estSemaineCourante ? null : lien('#/tableau', "Revenir à aujourd'hui", 'btn')));
+  const aujourd = aujourdhui();
+  const tb = tableauBlanc(etat, aujourd, lundiAffiche ?? undefined);
+  const racine = h('div', { classe: 'vue vue-tableau vue-bord' });
+  racine.appendChild(entete(tb));
+  racine.appendChild(zoneMenus(tb.bord, tb.lundi));
+  racine.appendChild(zoneFiches(tb.bord, aujourd));
+  racine.appendChild(zoneAConfirmer(tb.bord));
+  racine.appendChild(zoneProduction(tb.bord));
+  if (!tb.estSemaineCourante) {
+    racine.appendChild(h('p', { classe: 'tableau-pied' }, lien('#/tableau', "Revenir à aujourd'hui", 'btn')));
+  }
   return racine;
 }

@@ -7,6 +7,7 @@ import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, libelleJ
 import { jourOuVide, normaliser } from './etat.js';
 import { avancesPossibles, cibleProduction, etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
+import { besoinsProduits, echeanceCommande, suiviProduit } from './produits.js';
 import { cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes } from './savoir.js';
 
 /** Ordre d'affichage d'une mise en place : ce qui demande une action d'abord, ce qui est prêt à la fin. */
@@ -122,6 +123,8 @@ function jourDuTableau(etat, date, aujourdhui, deplie) {
   return {
     date, estAujourdhui: date === aujourdhui, aMenu, deplie,
     menus, groupes: groupesDuJour(etat, date), miseEnPlace: taches, compte: compter(taches),
+    // Couverts du jour : somme des menus chiffrés ; null quand aucun menu n'a de chiffre (jamais un « 0 » inventé).
+    couvertsTotal: menus.some((m) => m.couverts !== null) ? menus.reduce((n, m) => n + (m.couverts ?? 0), 0) : null,
     nbPoints: pointsDuJour(etat, date).length,
   };
 }
@@ -349,6 +352,126 @@ function rappelSauvegarde(etat, aujourdhui) {
   };
 }
 
+// ------------------------------------------------------------------ le tableau de bord (A-P1)
+
+const MENUS_VISIBLES = 3;
+const LIGNES_A_CONFIRMER = 3;
+const MODE_FICHE = Object.freeze({ menu_fixe: 'Menu fixe', choix_libre: 'Choix libre', hors_menu: 'Hors menu' });
+/** Points qui ne sont pas des décisions mais des quantités ou des données à compléter : dits dans « Production ». */
+const POINTS_DE_CHIFFRAGE = new Set(['grammage', 'prevision_manquante', 'composant_a_preciser']);
+
+/** Numéro de semaine ISO du lundi donné. */
+function numeroSemaine(lundi) {
+  const jeudi = ajouterJours(lundi, 3);
+  const premierJanvier = `${jeudi.slice(0, 4)}-01-01`;
+  return Math.floor(joursEntre(premierJanvier, jeudi) / 7) + 1;
+}
+
+/** Menus : aujourd'hui et les 2 jours suivants (jours à menu) ; le reste de la semaine reste à une touche. */
+function menusDuBord(jours, aujourdhui) {
+  const avecMenu = jours.filter((j) => j.aMenu);
+  const aVenir = avecMenu.filter((j) => j.date >= aujourdhui);
+  const dansLaSemaine = jours.some((j) => j.date === aujourdhui);
+  const depart = dansLaSemaine && aVenir.length > 0 ? aVenir : avecMenu;
+  const visibles = depart.slice(0, MENUS_VISIBLES);
+  const reste = avecMenu.filter((j) => !visibles.includes(j));
+  const aucunMenu = !avecMenu.some((j) => j.menus.some((m) => m.saisi)) && jours.every((j) => j.groupes.length === 0);
+  return { visibles, reste, aucunMenu };
+}
+
+function fichesDuBord(etat, dates, lundi) {
+  return Object.values(etat.fiches ?? {})
+    .filter((f) => f.statut === 'active' && dates.includes(f.date))
+    .sort((a, b) => a.date.localeCompare(b.date) || String(a.service).localeCompare(String(b.service))
+      || String(a.horaire).localeCompare(String(b.horaire)))
+    .map((f) => ({
+      id: f.id, date: f.date, numero: f.numero, service: f.service, horaire: f.horaire, couverts: f.couverts,
+      mode: f.mode, modeTexte: MODE_FICHE[f.mode] ?? '', aAllergies: String(f.allergies ?? '').trim() !== '',
+      lien: `#/detail/${f.date}`, semaine: lundi,
+    }));
+}
+
+/**
+ * « À confirmer » : seulement de vraies décisions (écarts à arbitrer, répartition provisoire, autres points,
+ * semaine type). Une quantité ou une portion manquante n'y entre jamais : elle est dite dans « Production ».
+ * Trois lignes au plus ; le total compte tout, le détail complet reste sur la feuille du jour et le détail du jour.
+ */
+function aConfirmerDuBord(etat, dates, aujourdhui) {
+  const categories = [];
+  const feuille = estOuvert(aujourdhui) ? feuilleDuJour(etat, aujourdhui) : null;
+  const ecarts = feuille ? decisionsSansDoublon(feuille).filter((d) => d.motif === 'ecart') : [];
+  if (ecarts.length > 0) {
+    categories.push({ genre: 'ecart', n: ecarts.length, lien: `#/jour/${aujourdhui}`,
+      texte: ecarts.length === 1 ? '1 écart à arbitrer' : `${ecarts.length} écarts à arbitrer` });
+  }
+  const points = dates.map((date) => ({ date, liste: pointsAConfirmer(etat, date).filter((p) => p.type !== 'ecart') }));
+  const classe = (filtre) => points.map((x) => ({ date: x.date, liste: x.liste.filter(filtre) })).filter((x) => x.liste.length > 0);
+  const repartitions = classe((p) => p.type === 'repartition_provisoire');
+  const autres = classe((p) => p.type !== 'repartition_provisoire' && !POINTS_DE_CHIFFRAGE.has(p.type));
+  const compte = (x) => x.reduce((n, y) => n + y.liste.length, 0);
+  if (repartitions.length > 0) {
+    const n = compte(repartitions);
+    categories.push({ genre: 'repartition', n, lien: `#/detail/${repartitions[0].date}`,
+      texte: n === 1 ? '1 répartition provisoire à confirmer' : `${n} répartitions provisoires à confirmer` });
+  }
+  if (autres.length > 0) {
+    const n = compte(autres);
+    categories.push({ genre: 'points', n, lien: `#/detail/${autres[0].date}`,
+      texte: n === 1 ? '1 point à confirmer' : `${n} points à confirmer`, detail: autres[0].liste[0].texte });
+  }
+  for (const point of pointsGlobaux(etat)) categories.push({ genre: 'global', n: 1, lien: '#/reglages', texte: point.texte });
+  return {
+    total: categories.reduce((n, c) => n + c.n, 0),
+    lignes: categories.slice(0, LIGNES_A_CONFIRMER),
+  };
+}
+
+/** Commande à relire : besoin changé depuis le contrôle, ou échéance du jour ou dépassée. Rien sans donnée de commande. */
+function commandeARelire(etat, lundi, aujourdhui) {
+  const { lignes } = besoinsProduits(etat, lundi);
+  let arevoir = 0;
+  let echeance = 0;
+  for (const ligne of lignes) {
+    const suivi = suiviProduit(etat, lundi, ligne);
+    if (suivi.statutAffiche === 'a_reverifier') arevoir += 1;
+    const fournisseur = suivi.fournisseurId ? etat.fournisseurs?.[suivi.fournisseurId] ?? null : null;
+    const ech = echeanceCommande(ligne, fournisseur, aujourdhui);
+    if (!suivi.commandeLe && (ech.statut === 'aujourdhui' || ech.statut === 'depassee')) echeance += 1;
+  }
+  const morceaux = [];
+  if (arevoir > 0) morceaux.push(arevoir === 1 ? '1 produit à revérifier' : `${arevoir} produits à revérifier`);
+  if (echeance > 0) morceaux.push(echeance === 1 ? '1 échéance de commande atteinte' : `${echeance} échéances de commande atteintes`);
+  return morceaux.length > 0 ? { texte: `Commande à relire : ${morceaux.join(', ')}`, lien: `#/produits/${lundi}` } : null;
+}
+
+/** Production et commandes en résumé pour le jour désigné. */
+function productionDuBord(etat, aujourdhui, lundi) {
+  const feuille = estOuvert(aujourdhui) ? feuilleDuJour(etat, aujourdhui) : null;
+  const avances = feuille ? feuille.aAvancer.filter((a) => Number.isFinite(a.cible) && a.evaluation.autorisee).length : 0;
+  return {
+    date: aujourdhui, lien: `#/jour/${aujourdhui}`,
+    avancement: feuille ? feuille.avancement : { faites: 0, total: 0 },
+    avances, commande: commandeARelire(etat, lundi, aujourdhui),
+    // Ce qui n'est pas encore chiffré : information neutre, jamais une alerte ni une décision.
+    chiffrage: besoinsDe(etat, lundi).lignes,
+  };
+}
+
+function bordDe(etat, aujourdhui, lundi, jours, contexte, rappel) {
+  const datesSemaine = jours.map((j) => j.date);
+  const aVenir = datesSemaine.includes(aujourdhui) ? datesSemaine.filter((d) => d >= aujourdhui) : datesSemaine;
+  return {
+    entete: {
+      date: aujourdhui, semaine: numeroSemaine(lundi), lundi, lienJour: `#/jour/${aujourdhui}`, sauvegarde: rappel,
+      aucunMenuCetteSemaine: contexte.type === 'vide',
+    },
+    menus: menusDuBord(jours, aujourdhui),
+    fiches: fichesDuBord(etat, aVenir, lundi),
+    aConfirmer: aConfirmerDuBord(etat, aVenir, aujourdhui),
+    production: productionDuBord(etat, aujourdhui, lundi),
+  };
+}
+
 export function tableauBlanc(etat, aujourdhui, lundiAffiche) {
   const contexte = contexteDe(etat, aujourdhui);
   const rappel = rappelSauvegarde(etat, aujourdhui);
@@ -360,14 +483,16 @@ export function tableauBlanc(etat, aujourdhui, lundiAffiche) {
   if (!deplie) {
     deplie = dates.find((d) => [1, 2].some((m) => String(jourOuVide(etat, d).menus[m]?.intitule ?? '').trim() !== '')) ?? dates[0];
   }
+  const joursDuTableau = dates.map((date) => jourDuTableau(etat, date, aujourdhui, date === deplie));
   return {
     date: aujourdhui,
     lundi,
+    bord: bordDe(etat, aujourdhui, lundi, joursDuTableau, contexte, rappel),
     estSemaineCourante: lundi === lundiDe(aujourdhui),
     semainePrecedente: ajouterJours(lundi, -7),
     semaineSuivante: ajouterJours(lundi, 7),
     contexte,
-    jours: dates.map((date) => jourDuTableau(etat, date, aujourdhui, date === deplie)),
+    jours: joursDuTableau,
     pointsGlobaux: pointsGlobaux(etat),
   };
 }

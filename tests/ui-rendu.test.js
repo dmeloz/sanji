@@ -219,25 +219,30 @@ test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide
   const { e } = etatRiche();
   magasin.remplacer(e);
   const texte = vues.jour.rendre(magasin.etat(), S.mardi).textContent;
-  const ordre = ['À faire', "Attendu d'un autre jour", 'Déjà prêt pour le service', 'Décisions nécessaires', 'À avancer si possible'];
+  // Ordre de lecture A-P1 : menu 1, menu 2, autres tâches, après service, puis les faites repliées ; les décisions
+  // sont résumées avant la liste et détaillées dans le centre « À confirmer » en fin de page.
+  const lundi = vues.jour.rendre(magasin.etat(), S.lundi).textContent;
+  const ordre = ['Menu 1 · pour le service du jour', 'Menu 2 · pour le service du jour', 'Autres tâches',
+    'Après service · avances pour les jours suivants', 'Terminé'];
   // Une rubrique vide n'est plus affichée (page moins chargée) : seules les rubriques présentes gardent leur ordre.
-  const presentes = ordre.filter((r) => texte.includes(r));
-  assert.equal(presentes[0], 'À faire', '« À faire » est toujours là, en tête');
+  const presentes = ordre.filter((r) => lundi.includes(r));
+  assert.ok(presentes.length >= 3, `plusieurs rubriques présentes dans cet état riche : ${lundi.slice(0, 900)}`);
   let position = -1;
   for (const r of presentes) {
-    const p = texte.indexOf(r);
+    const p = lundi.indexOf(r);
     assert.ok(p > position, `rubrique « ${r} » dans le mauvais ordre`);
     position = p;
   }
+  assert.ok(lundi.indexOf('À confirmer') < lundi.indexOf(presentes[0]), 'le résumé des décisions précède la liste');
   const vide = vues.jour.rendre(magasin.etat(), S.jeudi).textContent;
-  for (const r of ["Attendu d'un autre jour", 'Déjà prêt pour le service', 'Décisions nécessaires']) {
+  for (const r of ['Terminé', 'À confirmer', 'Après service']) {
     assert.doesNotMatch(vide, new RegExp(r), `la rubrique vide « ${r} » n'est pas affichée`);
   }
   assert.match(texte, /revue de mi-semaine/);
   assert.doesNotMatch(vues.jour.rendre(magasin.etat(), S.lundi).textContent, /revue de mi-semaine/);
   assert.match(vues.jour.rendre(magasin.etat(), S.jeudi).textContent, /Aucune tâche décidée pour ce jour/);
   // Le samedi : tâche avancée pour lundi visible sur le samedi et, comme « attendu », sur le lundi.
-  assert.match(vues.jour.rendre(magasin.etat(), S.samediPrecedent).textContent, /pour le service du lundi 5 octobre/);
+  assert.match(vues.jour.rendre(magasin.etat(), S.samediPrecedent).textContent, /Pour lun\. 5/);
   assert.match(vues.jour.rendre(magasin.etat(), S.lundi).textContent, /prévu samedi 3 octobre/);
 });
 
@@ -415,10 +420,11 @@ const textes = (noeuds) => noeuds.map((n) => n.textContent);
 function verifierTableau(noeud, contexte) {
   const texte = verifierTexte(noeud, contexte);
   assert.equal(ERREUR_DE_CODE.test(texte), false, `${contexte} : message d'erreur de code`);
-  assert.equal(/·/.test(texte), false, `${contexte} : pas de point médian sur le tableau`);
   // Seul le nombre de portions d'un menu est un bouton (il ouvre la prévision) ; tout le reste est un lien.
   const autres = noeud.tous((x) => x.balise === 'button' && !x.className.split(' ').includes('tb-couverts'));
   assert.equal(autres.length, 0, `${contexte} : aucun bouton hors prévision (liens seulement)`);
+  assert.ok(classes(noeud, 'bord-zone').length <= 5, `${contexte} : au plus 5 zones primaires`);
+  assert.equal(classes(noeud, 'note').length, 0, `${contexte} : la note multi-sujets n'existe plus`);
   return texte;
 }
 
@@ -441,49 +447,39 @@ test('tableau : base vide un lundi, invitation à saisir les menus, rien de vide
   assert.match(texte, /Aucun menu saisi cette semaine/);
   assert.match(texte, /Saisir les menus de la semaine/);
   assert.match(texte, /Semaine du 5 octobre/);
-  assert.doesNotMatch(texte, /aucune fiche|menu non saisi|0 portion/);
-  assert.equal(classes(noeud, 'tb-jour').length, 6, 'six jours, du lundi au samedi');
-  assert.equal(classes(noeud, 'aimant').length, 1, 'un aimant marque aujourd\'hui');
+  assert.doesNotMatch(texte, /menu non saisi|0 portion/);
+  assert.match(texte, /Aucun banquet prévu/, 'ligne calme sans fiche');
+  assert.equal(classes(noeud, 'bord-zone').length, 4, 'quatre zones sous l\'en-tête');
   assert.ok(liens(noeud).some((a) => a.attributs.href === `#/menus/${S.lundi}`));
-  for (const jour of classes(noeud, 'tb-nom')) assert.match(jour.attributs.href, /^#\/detail\/2026-10-/);
+  assert.ok(liens(noeud).some((a) => a.attributs.href === `#/jour/${S.lundi}` && /Ouvrir Jour/.test(a.textContent)));
 });
 
-test('tableau : avant le service, la note liste ce qui reste à faire, avec une case par état', () => {
+test('tableau : le jour du service, la jauge de production et l\'écart à arbitrer mènent à Jour', () => {
   const { e, jour } = etatReglette(); // service du vendredi 2 octobre
   const noeud = tableau(jour, e);
   const texte = verifierTableau(noeud, 'tableau avant service');
-  assert.match(texte, /Avant le service de midi/);
-  assert.match(texte, /ELEMENT_A_FAIRE_TEST/);
-  assert.match(texte, /Ouvrir la feuille du jour/);
   assert.match(texte, /Semaine du 28 septembre/, 'un vendredi avec des tâches à faire reste sur la semaine en cours');
-  for (const symbole of ['pret', 'en_cours', 'a_faire', 'a_decider', 'non_couvert']) {
-    assert.ok(classes(noeud, `coche-${symbole}`).length > 0, `case ${symbole}`);
-  }
-  // L'état de chaque case est aussi écrit pour un lecteur d'écran.
-  assert.ok(textes(classes(noeud, 'sr')).some((t) => /à faire/.test(t)));
-  // Le jour du service est déplié : ses tâches sont des liens vers leur composant.
-  const taches = classes(noeud, 'mep');
-  assert.ok(taches.length >= 5);
-  for (const tache of taches) assert.match(tache.querySelector('a').attributs.href, /^#\/composant\//);
-  // Une seule action principale dans la note.
+  assert.match(texte, /Aujourd'hui \d+\/\d+ fait/);
+  assert.ok(liens(noeud).some((a) => a.attributs.href === `#/jour/${jour}` && /fait/.test(a.textContent)), 'la jauge mène à Jour');
+  assert.match(texte, /écart[s]? à arbitrer/);
+  // Une seule action principale : ouvrir Jour. La mise en place détaillée vit sur Jour, plus sur le Tableau.
   assert.equal(classes(noeud, 'btn-principal').length, 1);
+  assert.doesNotMatch(texte, /ELEMENT_A_FAIRE_TEST/);
 });
 
-test('tableau : vendredi sans tâche, samedi et dimanche montrent la semaine prochaine ; mercredi, la semaine en cours', () => {
+test('tableau : en fin de semaine, la semaine prochaine s\'affiche ; mercredi, la semaine en cours', () => {
   const e = etatSemaineSaisie();
-  for (const [jour, titre] of [[S.veille, 'Semaine prochaine'], [S.samediPrecedent, 'Semaine prochaine'], [S.dimanchePrecedent, "Fermé aujourd'hui"]]) {
+  for (const jour of [S.veille, S.samediPrecedent, S.dimanchePrecedent]) {
     const texte = verifierTableau(tableau(jour, structuredClone(e)), `tableau ${jour}`);
-    assert.match(texte, new RegExp(titre));
     assert.match(texte, /Semaine du 5 octobre/, `${jour} : la semaine affichée est la suivante`);
     assert.match(texte, /Revenir à aujourd'hui/);
   }
   const mercredi = verifierTableau(tableau(S.mercredi, structuredClone(e)), 'tableau mercredi');
-  assert.match(mercredi, /Après le service/);
   assert.match(mercredi, /Semaine du 5 octobre/);
   assert.doesNotMatch(mercredi, /Revenir à aujourd'hui/);
-  // Semaine prochaine non saisie : l'action principale invite à la saisir.
+  // Semaine prochaine non saisie : l'invitation à saisir les menus mène à Menus de la semaine.
   const vide = tableau(S.samediPrecedent, etatVide());
-  assert.match(verifierTableau(vide, 'tableau samedi vide'), /ne sont pas saisis/);
+  assert.match(verifierTableau(vide, 'tableau samedi vide'), /Aucun menu saisi cette semaine/);
   assert.ok(liens(vide).some((a) => a.attributs.href === `#/menus/${S.lundi}` && /Saisir les menus de la semaine/.test(a.textContent)));
 });
 
@@ -502,8 +498,9 @@ test('tableau : ce qui est au poste est écrit au feutre, le reste en gris ; l\'
   // Sans prévision ni groupe, aucun chiffre : un cercle vide invite à saisir la prévision.
   assert.deepEqual(textes(classes(noeud, 'tb-couverts')), ['?', '?', '?']);
   assert.equal(classes(noeud, 'tb-couverts-vide').length, 3);
-  // Une tâche simplement à faire n'est jamais marquée « à décider », et les points déjà dits dans la note ne sont pas répétés.
-  assert.equal(classes(noeud, 'mep-a_decider').length, 0);
+  // Une quantité manquante n'est jamais une décision : ni « à confirmer », ni « à décider » ; elle reste dite, calmement.
+  const confirmer = classes(noeud, 'bord-confirmer')[0].textContent;
+  assert.doesNotMatch(confirmer, /portion|prévision|quantité|préciser/);
   assert.doesNotMatch(texte, /5 points à confirmer/);
 });
 
@@ -532,7 +529,7 @@ test('tableau : le « ? » ouvre la prévision sur place, sans « quantité à r
   assert.match(ouvrir(tableau(S.lundi, magasin.etat())).attributs['aria-label'], /6 portions/);
 });
 
-test('tableau : un standard maison fait disparaître la portion à régler et chiffre la tâche', () => {
+test('tableau : un standard maison fait disparaître la portion à régler ; la quantité se lit sur Jour', () => {
   const e = etatSemaineSaisie();
   definirStandard(e, 'riz', 'plat_principal', { valeur: 70, unite: 'g', etat: 'sec' }, h());
   definirStandard(e, 'riz', 'garniture', { valeur: 50, unite: 'g', etat: 'sec' }, h());
@@ -544,7 +541,10 @@ test('tableau : un standard maison fait disparaître la portion à régler et ch
   assert.doesNotMatch(texte, /portions? à régler/);
   assert.deepEqual(textes(classes(noeud, 'tb-couverts')), ['10', '20', '?']);
   // 10 portions × 70 g secs = 700 g : la portion est déjà en poids sec, le gain de cuisson n'est pas appliqué.
-  assert.match(texte, /700 g/);
+  // Le détail des quantités n'est plus sur le Tableau : il est sur la feuille du jour.
+  const feuille = aDate(S.lundi, () => vues.jour.rendre(magasin.etat(), S.lundi)).textContent;
+  assert.doesNotMatch(texte, /700 g/);
+  assert.match(feuille, /700 g/);
 });
 
 test('tableau : navigation de semaine et retour à aujourd\'hui', () => {

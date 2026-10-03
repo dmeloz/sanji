@@ -6,7 +6,9 @@ Garde-fous maintenus : aucun `git push`, rien de publié, rien de supprimé sans
 ## Ordre d'exécution
 1. A-P0 inventaire et tests de non-régression : FAIT (`ee435ae`).
 2. A-P1a défaut du journal (tâche retirée par une modification de menu) : FAIT (v24).
-3. B-P0 schéma de connaissances, données sources, migration, moteur explicable : à faire.
+3. (fait avant) A-P2 Réglages en sous-menus : FAIT (v25). 30 cas de lecture (Haiku) : FAIT. Conception du volet B (Opus) : FAIT.
+3b. A-P1b Tableau et feuille Jour : FAIT (v26, 403 tests).
+3c. B-P0 schéma de connaissances, données sources, migration, moteur explicable : à faire.
 4. A-P1b nouveau Tableau (dashboard) et nouvelle feuille Jour : à faire.
 5. B-P1 lecture de plats (menu 1 / menu 2, « X aux Y », sauce implicite), étapes à avance propre, liste « à commander » à trois états, assistant de validation : à faire.
 6. B-P2 journée réelle (banquets, restes, changements, journal de recalcul), 30 cas de lecture à 90 % : à faire.
