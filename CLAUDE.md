@@ -8,7 +8,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 3. Fiche projet : `~/Atelier-Claude/Cerveau-Obsidian/01-Projets/Sanji.md`.
 
 ## Commandes
-- Tests : `npm test` (Node 22, aucun paquet à installer). 441 tests au 2026-10-04.
+- Tests : `npm test` (Node 22, aucun paquet à installer). 476 tests au 2026-10-04.
 - Régénérer la base métier embarquée : `npm run base`.
 - Régénérer les repères de portion validés (`app/js/donnees/savoir-metier.js`, généré depuis `connaissances/savoir-metier.json`) : `npm run savoir`. Ne pas éditer le module à la main.
 - Servir en local : `npm run serve`, puis http://localhost:5173.
@@ -18,6 +18,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 - `app/js/domaine/` : logique métier pure, sans DOM, testée. Les signatures réelles du code font foi sur la conception.
   - `savoir.js` : le savoir culinaire (familles de produits, groupes, portion effective, standards maison). Un seul lexique, aucun chiffre : les coefficients viennent de `donnees/base-metier.js`.
   - `analyse-menu.js` + `vocabulaire-plats.js` : lecture des intitulés (`lirePlat`) : éléments au poste, hors poste ou à confirmer selon le menu ; sauce implicite du menu 1 proposée « à confirmer », jamais choisie ; mémoire d'attribution par `nom|menu`. Vocabulaire générique, sans chiffre.
+  - `validation.js` + `actions-validation.js` : assistant de validation des portions (une estimation de repère ne devient un standard maison que par la valeur choisie par la propriétaire ; « seulement cette fois » et « plus tard » ne touchent jamais au standard). `actions-achats.js` : liste « à commander » à trois états (suggéré, noté, retiré) ; une ligne fondée sur une estimation ne se note qu'avec une quantité tapée. Interface : `ui/feuille-validation.js`.
   - `feuille.js` : analyse du texte collé d'une feuille de menus.
   - `tableau-blanc.js` : données de l'accueil. `bord` = le tableau de bord (menus du jour et des 2 jours suivants, fiches de fonction, « À confirmer » de 3 lignes au plus sans quantité manquante, production et commandes) ; `contexte` (ancienne note) ne s'affiche plus mais désigne la semaine par défaut.
   - `planification.js` : `feuilleDuJour(...).lecture` donne l'ordre de lecture de la feuille Jour (menu 1, menu 2, autres, après service, faites).

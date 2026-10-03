@@ -7,13 +7,15 @@ import {
   definirStandard, modifierRecette, noterExport, supprimerFournisseur, supprimerRegle, supprimerStandard, validerRecette,
 } from '../domaine/actions.js';
 import { creneauxDuJourSemaine } from '../domaine/dates.js';
+import { valeurPour } from '../domaine/validation.js';
 import { exporter, importer } from '../domaine/etat.js';
 import { FAMILLES, GROUPES, lignesStandards, lignesStandardsGroupes } from '../domaine/savoir.js';
 import { ETAT_CRENEAU, ETAT_POIDS, UNITE, libelle } from '../domaine/statuts.js';
 import { VERSION_BASE } from '../donnees/base-metier.js';
 import { VERSION_APP } from '../version.js';
-import { agir, agirStrict, etat as etatCourant, maintenant, redessiner, remplacer, statutStockage } from '../magasin.js';
+import { agir, agirStrict, aujourdhui, etat as etatCourant, maintenant, redessiner, remplacer, statutStockage } from '../magasin.js';
 import { champs } from './champs.js';
+import { ouvrirValidation } from './feuille-validation.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, pastille, repliable, titreSection } from './elements.js';
 import { formaterHeure, formaterNombre, nomFichierSauvegarde, parseNombre, pluriel } from './format.js';
@@ -85,7 +87,12 @@ function ligneStandard(l) {
       l.standard ? h('p', { classe: 'standard-valeur' }, texteStandard(l.standard)) : h('p', { classe: 'standard-valeur discret' }, 'non réglé'),
       l.repereBase ? h('p', { classe: 'meta' },
         `repère ${l.repereBase.valide ? 'validé' : 'de la base'} : ${texteRepere(l.repereBase)}${l.repereBase.portee === 'groupe' ? ' (repère du groupe)' : ''}`) : null),
-    bouton(action, () => dialogStandard(l), 'court', { 'aria-label': `${action} le standard : ${nom}` }));
+    h('div', { classe: 'actions' },
+      l.repereBase ? bouton('Valider la proposition', () => {
+        const v = valeurPour(etatCourant(), l.cleFamille, l.role, aujourdhui());
+        if (v) ouvrirValidation(v);
+      }, 'court', { 'aria-label': `Valider la proposition : ${nom}` }) : null,
+      bouton(action, () => dialogStandard(l), 'court', { 'aria-label': `${action} le standard : ${nom}` })));
 }
 
 /** Minuscules sans accents, pour la recherche locale. */
@@ -352,6 +359,9 @@ const LIBELLE_ACTION = {
   definirStandard: 'Standard maison réglé', supprimerStandard: 'Standard maison effacé',
   annulerFait: 'Marquage « fait » annulé', composerMelange: 'Mélange composé', noterExport: 'Sauvegarde exportée', definirMargeSecurite: 'Marge de sécurité réglée',
   saisirMenusSemaine: 'Menus de la semaine enregistrés',
+  validerStandard: 'Portion validée comme standard maison', corrigerStandard: 'Standard maison corrigé',
+  reporterValidation: 'Validation reportée à plus tard',
+  noterAchat: 'Ligne notée à commander', retirerAchat: 'Ligne retirée de la liste', restaurerAchat: 'Ligne remise dans la liste',
 };
 const MOTS_TECHNIQUES = [
   ['avant_midi', 'avant midi'], ['apres_midi', 'après midi'], ['avant_soir', 'avant soir'], ['->', '→'],
