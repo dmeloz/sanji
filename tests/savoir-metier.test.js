@@ -123,7 +123,7 @@ test('viande et œufs : validés mais appliquee:false, non utilisés par le calc
 test('état : lectures et validations existent, survivent à export puis import, un ancien export s\'importe', () => {
   const e = etatInitial();
   assert.deepEqual([e.lectures, e.validations, e.schema], [{}, {}, 1]);
-  e.lectures['riz et carottes|1'] = { exemple: 'TEST_ONLY' };
+  e.lectures['riz et carottes|1'] = { elements: [{ nom: 'TEST_ONLY' }], ambiguites: [] };
   e.validations['a|2'] = { exemple: 'TEST_ONLY2' };
   const relu = importer(exporter(e, h()));
   assert.deepEqual(relu.lectures, e.lectures);

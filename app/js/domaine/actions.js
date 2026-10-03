@@ -6,7 +6,7 @@ import {
   aMenuDuJour, creneauxDuJour, creneauxDuJourSemaine, datesDeLaSemaine, estOuvert, estDateValide, jourSemaine,
 } from './dates.js';
 import {
-  ajouterJournal, assurerJour, composantVide, ficheVide, fournisseurVide, memoireVide, normaliser, nouvelId,
+  ajouterJournal, assurerJour, composantVide, estSauceAConfirmer, ficheVide, fournisseurVide, memoireVide, normaliser, nouvelId,
   productionVide, recetteVide, regleVide, suiviProduitVide,
 } from './etat.js';
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
@@ -123,8 +123,11 @@ export function terminer(etat, h, action, detail, valeur) {
  * attribué, non validé ou supprimé perd ses productions non faites. Les productions faites ne sont jamais touchées.
  * Si la règle du composant a au moins deux étapes : une production « preparatoire » par étape sauf la dernière
  * (la principale est la finition). `h` (facultatif) sert à journaliser ce qu'un changement de règle retire.
+ * Aucune étape n'est créée pour un composant dont la finition est faite ou dont le service est passé : la date du
+ * jour vient de `aujourdhui` (AAAA-MM-JJ, pour les tests) ou, à défaut, de `h` ; sans l'une ni l'autre, seule la finition faite compte.
  */
-export function assurerProductions(etat, h = null) {
+export function assurerProductions(etat, h = null, aujourdhui = null) {
+  const jour = aujourdhui ?? (typeof h === 'string' && /^\d{4}-\d{2}-\d{2}/.test(h) ? h.slice(0, 10) : null);
   for (const p of Object.values(etat.productions)) {
     const c = etat.composants[p.composantId];
     if (p.etat !== 'fait' && (!c || !c.attribue || !c.valide)) delete etat.productions[p.id];
@@ -139,13 +142,13 @@ export function assurerProductions(etat, h = null) {
     } else {
       for (const extra of principales.slice(1)) if (extra.etat !== 'fait') delete etat.productions[extra.id];
     }
-    assurerEtapes(etat, c, h);
+    assurerEtapes(etat, c, h, jour);
   }
   return etat;
 }
 
 /** Productions d'étapes d'un composant selon sa règle (idempotent ; une étape faite n'est jamais supprimée). */
-function assurerEtapes(etat, c, h) {
+function assurerEtapes(etat, c, h, jour = null) {
   const etapes = regleDe(etat, c)?.etapes ?? [];
   const actives = etapes.length >= 2 ? etapes : [];
   const avantFinition = actives.slice(0, -1);
@@ -168,8 +171,10 @@ function assurerEtapes(etat, c, h) {
     p.ordre = i;
     if (p.etat !== 'fait') p.libelle = `${avantFinition[i].libelle} : ${c.nom}`;
   }
+  const finie = Object.values(etat.productions).some((p) => p.composantId === c.id && p.genre === 'principale' && p.etat === 'fait');
+  const passe = jour !== null && c.date < jour;
   avantFinition.forEach((x, i) => {
-    if (vues.has(x.cle)) return;
+    if (vues.has(x.cle) || finie || passe) return;
     const id = nouvelId('prod');
     etat.productions[id] = {
       ...productionVide(id), composantId: c.id, dateService: c.date, genre: 'preparatoire', libelle: `${x.libelle} : ${c.nom}`,
@@ -187,6 +192,7 @@ function creerComposant(etat, date, menu, champs) {
   const id = nouvelId('comp');
   const c = { ...composantVide(id), date, menu, nom: champs.nom, categorie: champs.categorie ?? 'a_preciser',
     attribue: champs.attribue ?? true, type: champs.type ?? 'a_preciser', valide: champs.valide ?? false };
+  if (champs.implicite === true) c.implicite = true; // sauce issue de la lecture implicite (« à confirmer »)
   etat.composants[id] = c;
   return c;
 }
@@ -203,14 +209,20 @@ function fusionnerComposants(etat, date, menu, retires = []) {
   const propositions = proposerComposants(m.intitule, menu, etat.memoire);
   const voulus = new Set(propositions.map((p) => normaliser(p.nom)));
   const duMenu = () => Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
+  // Une sauce issue de la lecture implicite et déjà confirmée (renommée) reste tant que l'intitulé n'écrit pas de sauce :
+  // la lecture propose alors encore une sauce implicite, qui n'est pas recréée par-dessus.
+  const sauceImplicitePropose = propositions.some((p) => p.implicite === true);
+  const confirmee = (c) => c.implicite === true && c.categorie === 'sauce' && !estSauceAConfirmer(c);
+  const gardeeConfirmee = sauceImplicitePropose ? duMenu().find(confirmee) : undefined;
   for (const c of duMenu()) {
-    if (voulus.has(normaliser(c.nom))) {
+    if (voulus.has(normaliser(c.nom)) || c === gardeeConfirmee) {
       c.valide = true; // plus de validation manuelle : un composant resté non validé par l'ancien parcours l'est désormais
       continue;
     }
     const aProductionFaite = Object.values(etat.productions).some((p) => p.composantId === c.id && p.etat === 'fait');
     if (!aProductionFaite) {
-      retires.push({ nom: c.nom, taches: Object.values(etat.productions).filter((p) => p.composantId === c.id).length });
+      retires.push({ nom: c.nom, taches: Object.values(etat.productions).filter((p) => p.composantId === c.id).length,
+        sauceConfirmee: confirmee(c) && propositions.some((p) => p.categorie === 'sauce') });
       delete etat.composants[c.id];
     }
   }
@@ -219,6 +231,7 @@ function fusionnerComposants(etat, date, menu, retires = []) {
   for (const p of propositions) {
     const cle = normaliser(p.nom);
     if (presents.has(cle)) continue;
+    if (p.implicite === true && gardeeConfirmee) continue;
     presents.add(cle);
     const c = creerComposant(etat, date, menu, { ...p, valide: true });
     appliquerSavoir(etat, c);
@@ -245,7 +258,7 @@ function enregistrerMenu(etat, date, menu, texte, retires = []) {
 /** « , retiré : carottes (1 tâche) » : ce qu'une modification de menu a fait disparaître, pour le journal. */
 function texteRetires(retires) {
   if (retires.length === 0) return '';
-  const liste = retires.map((r) => `${r.nom}${r.taches > 0 ? ` (${r.taches} tâche${r.taches > 1 ? 's' : ''})` : ''}`).join(', ');
+  const liste = retires.map((r) => `${r.nom}${r.taches > 0 ? ` (${r.taches} tâche${r.taches > 1 ? 's' : ''})` : ''}${r.sauceConfirmee ? ' (sauce confirmée, remplacée par la sauce écrite dans l\'intitulé)' : ''}`).join(', ');
   return ` : retiré ${liste}`;
 }
 
@@ -719,6 +732,8 @@ export function annulerFait(etat, productionId, h) {
   if (!Number.isFinite(ecoule) || ecoule > FENETRE_ANNULATION_MS) {
     throw new Error('Trop tard pour annuler : utilisez « Corriger » pour changer la quantité réelle.');
   }
+  const refus = refusOrdreEtape(etat, p, { annuler: true });
+  if (refus) throw new Error(refus);
   const avant = p.avantFait ?? { etat: 'a_faire', cibleAuDemarrage: null };
   p.etat = avant.etat;
   p.cibleAuDemarrage = avant.cibleAuDemarrage;
@@ -807,7 +822,8 @@ export function memoriser(etat, composantId, h) {
   verifierH(h);
   const c = exigerComposant(etat, composantId);
   if (!c.valide) throw new Error("Seul un composant validé peut être mémorisé.");
-  const cle = cleSure(normaliser(c.nom));
+  cleSure(normaliser(c.nom));
+  const cle = cleMemoire(c.nom, c.menu); // par menu : une référence du menu 1 ne vaut pas pour le menu 2
   const m = Object.hasOwn(etat.memoire, cle) ? etat.memoire[cle] : memoireVide();
   Object.assign(m, { nom: c.nom, attribue: c.attribue, type: c.type, categorie: c.categorie, charge: c.charge });
   if (c.role && c.grammage.valeur !== null && c.grammage.statut !== 'INCONNU') m.parRole[c.role] = { grammage: structuredClone(c.grammage) };
@@ -1091,6 +1107,7 @@ export function definirAchat(etat, lundi, cle, unite, champs, h) {
 export function marquerCommande(etat, lundi, cle, unite, h) {
   verifierH(h);
   const suivi = suiviDe(etat, lundi, cle, unite);
+  if (suivi.etatLigne === 'retire') throw new Error('Cette ligne est retirée de la liste : remettez-la avant de la marquer commandée.');
   if (!Number.isFinite(suivi.quantiteAcheter)) throw new Error("Saisissez d'abord la quantité réellement achetée.");
   suivi.commandeLe = h;
   return terminer(etat, h, 'marquerCommande', cle, suivi);

@@ -15,6 +15,33 @@ export function normaliser(nom) {
     .toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
+/** Clé de la mémoire : nom normalisé et numéro de menu (« nom|1 »). */
+export const cleMemoire = (nom, menu) => `${normaliser(nom)}|${menu}`;
+
+/**
+ * Entrée de mémoire d'un nom pour un menu : la clé « nom|menu » d'abord ; à défaut l'ancienne clé « nom » (données
+ * enregistrées avant la clé par menu), mais seulement si elle ne contredit pas le menu : en menu 2, une protéine
+ * attribuée au poste par l'ancienne clé n'est jamais reprise par repli.
+ */
+export function lireMemoire(memoire, nom, menu) {
+  if (!memoire || typeof memoire !== 'object') return null;
+  const propre = normaliser(nom);
+  if (propre === '') return null;
+  const cle = cleMemoire(nom, menu);
+  if (Object.hasOwn(memoire, cle)) return memoire[cle];
+  if (Object.hasOwn(memoire, propre)) {
+    const ancienne = memoire[propre];
+    if (menu === 2 && ancienne?.categorie === 'proteine' && ancienne?.attribue === true) return null;
+    return ancienne;
+  }
+  return null;
+}
+
+const NOMS_IMPLICITES = new Set(['sauce a confirmer', 'base de risotto a confirmer']);
+
+/** Vrai pour la sauce implicite d'un menu 1 encore non confirmée (nom d'origine « sauce à confirmer » ou « base de risotto à confirmer »). */
+export const estSauceAConfirmer = (c) => c?.categorie === 'sauce' && NOMS_IMPLICITES.has(normaliser(c.nom));
+
 let compteur = 0;
 
 /** Identifiant « prefixe_compteur+aléa », indépendant de l'heure. */
@@ -192,8 +219,29 @@ const COLLECTIONS = {
   jours: jourVide, fiches: ficheVide, composants: composantVide, productions: productionVide,
   regles: regleVide, recettes: recetteVide, fournisseurs: fournisseurVide,
   memoire: () => memoireVide(), produits: () => suiviProduitVide(),
-  lectures: () => ({}), validations: () => ({}),
+  validations: () => ({}),
 };
+
+/** Copie profonde sans clé dangereuse (`__proto__`, `constructor`, `prototype`). */
+function sansClesDangereuses(valeur) {
+  if (Array.isArray(valeur)) return valeur.map(sansClesDangereuses);
+  if (!estObjet(valeur)) return valeur;
+  const res = {};
+  for (const [k, v] of Object.entries(valeur)) if (!CLES_INTERDITES.has(k)) res[k] = sansClesDangereuses(v);
+  return res;
+}
+
+/**
+ * Une lecture corrigée (collection `lectures`) : une liste d'éléments ou un objet { elements, ambiguites }, que `lirePlat`
+ * accepte telle quelle. Retourne la valeur nettoyée, ou `undefined` si elle n'a aucun de ces deux formats.
+ */
+function lectureValide(valeur) {
+  const estElement = (x) => estObjet(x);
+  if (Array.isArray(valeur)) return valeur.every(estElement) ? sansClesDangereuses(valeur) : undefined;
+  if (!estObjet(valeur) || !Array.isArray(valeur.elements) || !valeur.elements.every(estElement)) return undefined;
+  if (valeur.ambiguites !== undefined && !Array.isArray(valeur.ambiguites)) return undefined;
+  return sansClesDangereuses(valeur);
+}
 
 /**
  * Lit un fichier d'export. Refuse un autre document, un schéma inconnu et tout fichier portant
@@ -217,6 +265,14 @@ export function importer(texte) {
   const source = doc.etat;
   const etat = etatInitial();
   etat.reglages = fusionner(etat.reglages, source.reglages);
+  if (source.lectures !== undefined) {
+    if (!estObjet(source.lectures)) throw new Error('Export corrompu : « lectures » est invalide.');
+    for (const [cle, lecture] of Object.entries(source.lectures)) {
+      if (CLES_INTERDITES.has(cle)) continue;
+      const retenue = lectureValide(lecture);
+      if (retenue !== undefined) etat.lectures[cle] = retenue;
+    }
+  }
   for (const [nom, fabrique] of Object.entries(COLLECTIONS)) {
     if (source[nom] === undefined) continue;
     if (!estObjet(source[nom])) throw new Error(`Export corrompu : « ${nom} » est invalide.`);

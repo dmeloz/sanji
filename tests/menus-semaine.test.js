@@ -257,12 +257,12 @@ test('mémoire automatique : seule l\'attribution et la catégorie sont mémoris
   // Une mémoire explicite (geste « mémoriser ») garde ses autres champs quand l'attribution change ensuite.
   modifierComposant(e, riz.id, { attribue: true, categorie: 'feculent' }, h());
   memoriser(e, riz.id, h());
-  assert.equal(e.memoire.riz.parRole.plat_principal.grammage.valeur, 120);
-  assert.equal(e.memoire.riz.etapes.cuisson.coefficient, 3);
+  assert.equal(e.memoire['riz|2'].parRole.plat_principal.grammage.valeur, 120);
+  assert.equal(e.memoire['riz|2'].etapes.cuisson.coefficient, 3);
   modifierComposant(e, riz.id, { attribue: false }, h());
-  assert.equal(e.memoire.riz.parRole.plat_principal.grammage.valeur, 120, 'la référence mémorisée n\'est pas effacée');
-  assert.equal(e.memoire.riz.etapes.cuisson.coefficient, 3);
-  assert.equal(e.memoire['riz|2'].attribue, false, 'la mémoire d\'attribution est par menu, la référence mémorisée garde son nom seul');
+  assert.equal(e.memoire['riz|2'].parRole.plat_principal.grammage.valeur, 120, 'la référence mémorisée n\'est pas effacée');
+  assert.equal(e.memoire['riz|2'].etapes.cuisson.coefficient, 3);
+  assert.equal(e.memoire['riz|2'].attribue, false, 'attribution et référence mémorisée partagent l\'entrée du menu');
   // Un nom dangereux n'écrit rien dans l'héritage des objets.
   const dangereux = ajouterComposant(e, S.lundi, 2, { nom: 'constructor', categorie: 'legume', attribue: false }, h());
   assert.doesNotThrow(() => modifierComposant(e, dangereux, { attribue: true }, h()));

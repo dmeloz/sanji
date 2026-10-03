@@ -9,7 +9,7 @@
 // un autre mot, riz = risotto, toute forme de pâtes = « pâte » ; un élément plus long que l'attendu correspond, pas l'inverse.
 // Les entrées d'aConfirmer qui ne parlent pas de sauce/base/recette/fiche/choix (ex. une préparation inconnue) ne sont pas contrôlées en (c).
 //
-// Ce test PASSE TOUJOURS : les seuils sont en `todo` avec le score réel tant qu'ils ne sont pas atteints.
+// Les seuils (90 % de cas corrects, zéro élément inventé) sont des assertions dures : un échec fait échouer `npm test`.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -112,11 +112,9 @@ test('jeu neuf : 30 cas bien formés', () => {
 const SEUIL = Math.ceil(N * 0.9);
 const okTotal = compte((r) => r.ok);
 test(`seuil : au moins 90 % de cas entièrement corrects (${SEUIL} sur ${N})`,
-  { todo: okTotal >= SEUIL ? false : `score obtenu ${okTotal}/${N}` },
-  () => { assert.ok(okTotal >= SEUIL, rapport()); });
+  () => { assert.ok(okTotal >= SEUIL, `score obtenu ${okTotal}/${N}\n${rapport()}`); });
 
 test('seuil : zéro élément inventé',
-  { todo: nbInventes === 0 ? false : `${nbInventes} élément(s) inventé(s)` },
   () => { assert.equal(nbInventes, 0, rapport()); });
 
 test('rapport des trois dimensions sur les cas neufs (information)', () => {

@@ -123,8 +123,7 @@ test('les 30 cas : aucun élément hors poste mis au poste (dimension poste)', (
 const SEUIL = Math.ceil(reels.length * 0.9);
 const atteint = compte((r) => r.ok, reels) >= SEUIL;
 test(`seuil : au moins 90 % des cas non provisoires entièrement corrects (${SEUIL} sur ${reels.length})`,
-  { todo: atteint ? false : `score obtenu ${compte((r) => r.ok, reels)}/${reels.length}` },
-  () => { assert.ok(atteint, rapport()); });
+  () => { assert.ok(atteint, `score obtenu ${compte((r) => r.ok, reels)}/${reels.length}\n${rapport()}`); });
 
 test('rapport des trois dimensions (information)', () => {
   console.log(`# lecture des plats : ${rapport()}`.split('\n').map((l, i) => (i === 0 ? l : `# ${l}`)).join('\n'));
@@ -277,7 +276,10 @@ test('une attribution mémorisée en menu 1 ne contamine pas le menu 2', () => {
 });
 
 test('une ancienne clé de mémoire (nom seul) est lue en repli ; la clé par menu prime', () => {
-  assert.equal(proposerComposants('Poulet', 2, { poulet: { attribue: true, categorie: 'proteine' } })[0].attribue, true);
+  // Le repli ne contredit pas le menu : une protéine ne s'attribue jamais au poste en menu 2 par l'ancienne clé.
+  assert.equal(proposerComposants('Poulet', 2, { poulet: { attribue: true, categorie: 'proteine' } })[0].attribue, false);
+  assert.equal(proposerComposants('Riz', 2, { riz: { attribue: false, categorie: 'autre' } })[0].attribue, false);
+  assert.equal(proposerComposants('Poulet', 1, { poulet: { attribue: false, categorie: 'proteine' } })[0].attribue, false);
   const les2 = { poulet: { attribue: true, categorie: 'proteine' }, 'poulet|2': { attribue: false, categorie: 'proteine' } };
   assert.equal(proposerComposants('Poulet', 2, les2)[0].attribue, false);
 });
