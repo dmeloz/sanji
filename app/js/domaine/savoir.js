@@ -9,7 +9,7 @@
 
 import { BASE_METIER, PORTIONS_BASE } from '../donnees/base-metier.js';
 import { REPERES_VALIDES } from '../donnees/savoir-metier.js';
-import { normaliser } from './etat.js';
+import { lireMemoire, normaliser } from './etat.js';
 import { ETAT_POIDS, ROLE, UNITE, libelle } from './statuts.js';
 import { canonique, estHerbe } from './vocabulaire-plats.js';
 
@@ -302,7 +302,7 @@ export function grammageEffectif(etat, composant, reperes = reperesParDefaut()) 
   }
 
   if (c.role) {
-    const ref = propre(propre(etat?.memoire, normaliser(c.nom))?.parRole, c.role)?.grammage;
+    const ref = propre(propre(lireMemoire(etat?.memoire, c.nom, c.menu), 'parRole'), c.role)?.grammage;
     if (positif(ref?.valeur)) {
       return { valeur: ref.valeur, unite: ref.unite ?? 'g', etat: etatDe(ref.etat), statut: ref.statut ?? 'INCONNU',
         source: String(ref.source ?? ''), origine: 'reference' };

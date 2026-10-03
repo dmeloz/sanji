@@ -807,7 +807,8 @@ export function memoriser(etat, composantId, h) {
   verifierH(h);
   const c = exigerComposant(etat, composantId);
   if (!c.valide) throw new Error("Seul un composant validé peut être mémorisé.");
-  const cle = cleSure(normaliser(c.nom));
+  cleSure(normaliser(c.nom));
+  const cle = cleMemoire(c.nom, c.menu); // par menu : une référence du menu 1 ne vaut pas pour le menu 2
   const m = Object.hasOwn(etat.memoire, cle) ? etat.memoire[cle] : memoireVide();
   Object.assign(m, { nom: c.nom, attribue: c.attribue, type: c.type, categorie: c.categorie, charge: c.charge });
   if (c.role && c.grammage.valeur !== null && c.grammage.statut !== 'INCONNU') m.parRole[c.role] = { grammage: structuredClone(c.grammage) };

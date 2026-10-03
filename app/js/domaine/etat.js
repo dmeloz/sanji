@@ -15,6 +15,28 @@ export function normaliser(nom) {
     .toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
+/** Clé de la mémoire : nom normalisé et numéro de menu (« nom|1 »). */
+export const cleMemoire = (nom, menu) => `${normaliser(nom)}|${menu}`;
+
+/**
+ * Entrée de mémoire d'un nom pour un menu : la clé « nom|menu » d'abord ; à défaut l'ancienne clé « nom » (données
+ * enregistrées avant la clé par menu), mais seulement si elle ne contredit pas le menu : en menu 2, une protéine
+ * attribuée au poste par l'ancienne clé n'est jamais reprise par repli.
+ */
+export function lireMemoire(memoire, nom, menu) {
+  if (!memoire || typeof memoire !== 'object') return null;
+  const propre = normaliser(nom);
+  if (propre === '') return null;
+  const cle = cleMemoire(nom, menu);
+  if (Object.hasOwn(memoire, cle)) return memoire[cle];
+  if (Object.hasOwn(memoire, propre)) {
+    const ancienne = memoire[propre];
+    if (menu === 2 && ancienne?.categorie === 'proteine' && ancienne?.attribue === true) return null;
+    return ancienne;
+  }
+  return null;
+}
+
 let compteur = 0;
 
 /** Identifiant « prefixe_compteur+aléa », indépendant de l'heure. */

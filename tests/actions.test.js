@@ -298,7 +298,7 @@ test('mémoire : mémoriser exige un composant validé ; reprendre est explicite
   assert.deepEqual(A.reprendreMemoire(e, brouillon, h()), { applique: false, champs: [] });
   const c = composantValide(e, S.lundi, 1, J.PRODUIT_CRU_TEST);
   A.memoriser(e, c, h());
-  const m = e.memoire.produit_cru_test;
+  const m = e.memoire['produit_cru_test|1'];
   assert.equal(m.parRole.plat_principal.grammage.valeur, 200);
   assert.deepEqual(Object.keys(m.etapes).sort(), ['cuisson', 'parage', 'portionnement']);
   const d = A.ajouterComposant(e, S.mardi, 1, { nom: 'Produit_Cru_Test' }, h());
@@ -309,8 +309,8 @@ test('mémoire : mémoriser exige un composant validé ; reprendre est explicite
   // Un paramètre inconnu n'est pas mémorisé comme une valeur.
   const x = composantValide(e, S.mardi, 2, { ...J.PRODUIT_SEC_TEST, nom: 'SANS_VALEUR_TEST', grammage: { valeur: null, unite: 'g', statut: 'INCONNU', source: '' }, etapes: [{ etape: 'cuisson', coefficient: 2, statut: 'INCONNU' }] });
   A.memoriser(e, x, h());
-  assert.deepEqual(e.memoire.sans_valeur_test.parRole, {});
-  assert.deepEqual(e.memoire.sans_valeur_test.etapes, {});
+  assert.deepEqual(e.memoire['sans_valeur_test|2'].parRole, {});
+  assert.deepEqual(e.memoire['sans_valeur_test|2'].etapes, {});
 });
 
 test('règles : clé = nom normalisé, unique, valideLe seulement avec une limite', () => {

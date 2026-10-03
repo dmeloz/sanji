@@ -2,7 +2,7 @@
 // Le lexique (savoir.js) et le vocabulaire générique (vocabulaire-plats.js) servent uniquement à classer des mots :
 // ils ne portent aucun chiffre. Rien n'est inventé : un mot inconnu reste « à préciser », une sauce implicite reste « à confirmer ».
 
-import { normaliser } from './etat.js';
+import { cleMemoire, lireMemoire, normaliser } from './etat.js';
 import { FAMILLES, MOTS_SANS_FAMILLE, lireNom } from './savoir.js';
 import {
   ALIAS, CHAMPIGNONS, EPICES, FORMES_PATES, HERBES, MOTS_DE_LIAISON, PRODUITS, SAUCES,
@@ -10,17 +10,7 @@ import {
 
 // ---------------------------------------------------------------- mémoire d'attribution
 
-/** Clé de la mémoire d'attribution : nom normalisé et numéro de menu (« poulet|1 »). */
-export const cleMemoire = (nom, menu) => `${normaliser(nom)}|${menu}`;
-
-/** Entrée de mémoire d'un nom pour un menu : la clé « nom|menu » d'abord, à défaut l'ancienne clé « nom ». */
-export function lireMemoire(memoire, nom, menu) {
-  if (!memoire || typeof memoire !== 'object') return null;
-  for (const cle of [cleMemoire(nom, menu), normaliser(nom)]) {
-    if (cle !== '' && cle !== `|${menu}` && Object.hasOwn(memoire, cle)) return memoire[cle];
-  }
-  return null;
-}
+export { cleMemoire, lireMemoire };
 
 // ---------------------------------------------------------------- jetons
 

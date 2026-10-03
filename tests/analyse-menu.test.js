@@ -43,7 +43,7 @@ test('jamais validé, type à préciser', () => {
 });
 
 test('la mémoire (exception mémorisée) prime sur le lexique et le menu', () => {
-  const memoire = { poulet: { attribue: true, categorie: 'proteine' }, riz: { attribue: false, categorie: 'autre' } };
+  const memoire = { 'poulet|2': { attribue: true, categorie: 'proteine' }, riz: { attribue: false, categorie: 'autre' } };
   const m2 = proposerComposants('Poulet, riz, carottes', 2, memoire);
   assert.deepEqual(m2[0], { nom: 'Poulet', categorie: 'proteine', attribue: true, type: 'a_preciser', depuisMemoire: true });
   assert.deepEqual(m2[1], { nom: 'riz', categorie: 'autre', attribue: false, type: 'a_preciser', depuisMemoire: true });

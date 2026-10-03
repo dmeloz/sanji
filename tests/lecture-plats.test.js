@@ -277,7 +277,10 @@ test('une attribution mémorisée en menu 1 ne contamine pas le menu 2', () => {
 });
 
 test('une ancienne clé de mémoire (nom seul) est lue en repli ; la clé par menu prime', () => {
-  assert.equal(proposerComposants('Poulet', 2, { poulet: { attribue: true, categorie: 'proteine' } })[0].attribue, true);
+  // Le repli ne contredit pas le menu : une protéine ne s'attribue jamais au poste en menu 2 par l'ancienne clé.
+  assert.equal(proposerComposants('Poulet', 2, { poulet: { attribue: true, categorie: 'proteine' } })[0].attribue, false);
+  assert.equal(proposerComposants('Riz', 2, { riz: { attribue: false, categorie: 'autre' } })[0].attribue, false);
+  assert.equal(proposerComposants('Poulet', 1, { poulet: { attribue: false, categorie: 'proteine' } })[0].attribue, false);
   const les2 = { poulet: { attribue: true, categorie: 'proteine' }, 'poulet|2': { attribue: false, categorie: 'proteine' } };
   assert.equal(proposerComposants('Poulet', 2, les2)[0].attribue, false);
 });

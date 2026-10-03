@@ -7,7 +7,7 @@ import { statutAllergenes } from '../domaine/allergenes.js';
 import { chercherBase } from '../domaine/base.js';
 import { calculerComposant } from '../domaine/calcul.js';
 import { libelleJour } from '../domaine/dates.js';
-import { normaliser } from '../domaine/etat.js';
+import { lireMemoire } from '../domaine/etat.js';
 import { etapesComposant } from '../domaine/planification.js';
 import { cleStandardDe, valeurPour } from '../domaine/validation.js';
 import {
@@ -364,7 +364,7 @@ function sectionEtapes(c, calc) {
 }
 
 function sectionMemoire(etat, c) {
-  const memorise = Object.hasOwn(etat.memoire, normaliser(c.nom));
+  const memorise = lireMemoire(etat.memoire, c.nom, c.menu) !== null;
   return h('section', { classe: 'carte' },
     h('h2', { classe: 'section-titre' }, 'Référence maison'),
     memorise ? h('p', null, `Une référence maison est mémorisée pour « ${c.nom} ».`) : ligneVide('Aucune référence maison mémorisée pour ce nom.'),
