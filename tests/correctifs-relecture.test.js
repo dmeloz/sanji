@@ -3,13 +3,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  assurerProductions, definirMenu, definirRegle, marquerFait, memoriser, modifierComposant, reprendreMemoire,
+  assurerProductions, definirMenu, definirRegle, marquerFait, memoriser, modifierComposant, planifier, reprendreMemoire,
 } from '../app/js/domaine/actions.js';
+import { feuilleDuJour } from '../app/js/domaine/planification.js';
 import { grammageEffectif } from '../app/js/domaine/savoir.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { composantValide, etatVide, h, principaleDe } from './aide.js';
+import { composantValide, etatVide, h, prevision, principaleDe } from './aide.js';
 
 const parNom = (etat, date, menu, nom) => Object.values(etat.composants).find((c) => c.date === date && c.menu === menu && c.nom.toLowerCase() === nom.toLowerCase());
 
@@ -67,6 +68,19 @@ test('mémoire : repli sur l\'ancienne clé nom, sauf une protéine attribuée a
   definirMenu(e, S.lundi, 1, 'Poulet, carottes', h());
   assert.equal(parNom(e, S.lundi, 1, 'Poulet').attribue, true);
   assert.equal(typeof pointsAConfirmer(e, S.lundi).length, 'number');
+});
+
+// ---------------------------------------------------------------- 3. feuille Jour : pas de doublon
+
+test('feuille Jour : une tâche planifiée aujourd\'hui à quantité inconnue n\'est classée qu\'une fois', () => {
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 10);
+  const c = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { grammage: { valeur: null, unite: 'g', statut: 'INCONNU', source: '' } });
+  planifier(e, principaleDe(e, c), S.lundi, 'avant_midi', h());
+  const { lecture } = feuilleDuJour(e, S.lundi);
+  const lignes = [...lecture.service1, ...lecture.service2, ...lecture.autres, ...lecture.apres].filter((l) => l.productionId === principaleDe(e, c));
+  assert.equal(lignes.length, 1, 'une seule ligne');
+  assert.equal(lignes[0].source, 'decidee');
 });
 
 // ---------------------------------------------------------------- 2. étapes : ni plat passé ni plat fini

@@ -422,7 +422,9 @@ function lectureDuJour(etat, date, f) {
   const service2 = [];
   const autres = [];
   const apres = [];
+  const classees = new Set();
   const classer = (l, source, creneau = l.creneauDecide ?? null) => {
+    classees.add(l.productionId);
     const ligneLue = { ...l, source, creneau, avanceJours: Math.max(0, joursEntre(date, l.dateService)) };
     if (l.dateService > date) apres.push(ligneLue);
     else if (l.genre === 'preparatoire') autres.push(ligneLue);
@@ -438,7 +440,8 @@ function lectureDuJour(etat, date, f) {
     if (d.motif === 'a_planifier' && d.dateService <= date) { classer(d, 'a_planifier'); dejaPlacees.add(d.productionId); }
   }
   // Une quantité inconnue ne retire pas la ligne d'un service du jour : « quantité à compléter », sans alerte.
-  for (const q of f.quantitesManquantes) if (q.dateService <= date) classer(q, 'a_preciser');
+  // Une tâche déjà classée (planifiée aujourd'hui, quantité inconnue) n'est pas reprise : une seule ligne, comptée une fois.
+  for (const q of f.quantitesManquantes) if (q.dateService <= date && !classees.has(q.productionId)) classer(q, 'a_preciser');
   for (const a of f.aAvancer) classer(a, 'suggestion', a.creneau);
   // À créneau et nom égaux, les étapes d'une même préparation se lisent dans l'ordre de la règle.
   const parNom = (a, b) => rangCreneau(a.creneau) - rangCreneau(b.creneau) || String(a.nom).localeCompare(String(b.nom))
