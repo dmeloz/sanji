@@ -82,7 +82,7 @@ function morceauxDuMenu(etat, date, menu, intitule) {
   }
   return proposerComposants(intitule, menu, {}).map((p) => {
     const composant = parNom.get(normaliser(p.nom)) ?? null;
-    return { texte: p.nom, auPoste: Boolean(composant?.attribue), composantId: composant?.id ?? null };
+    return { texte: p.nom, auPoste: Boolean(composant?.attribue), composantId: composant?.id ?? null, implicite: Boolean(p.implicite) };
   });
 }
 
@@ -110,9 +110,11 @@ function jourDuTableau(etat, date, aujourdhui, deplie) {
   const menus = aMenu ? [1, 2].map((menu) => {
     const intitule = String(jour.menus[menu].intitule ?? '').trim();
     const portions = portionsMenu(etat, date, menu);
+    const morceaux = intitule === '' ? [] : morceauxDuMenu(etat, date, menu, intitule);
     return {
       menu, intitule, saisi: intitule !== '',
-      morceaux: intitule === '' ? [] : morceauxDuMenu(etat, date, menu, intitule),
+      // Un élément implicite (sauce ou base « à confirmer ») n'est pas écrit dans l'intitulé : jamais compté comme un plat.
+      morceaux, nbPlats: morceaux.filter((m) => !m.implicite).length,
       // Sans prévision ni groupe, aucun chiffre : un « 0 » laisserait croire à zéro portion.
       couverts: portions.total > 0 || !portions.previsionManquante ? Math.round(portions.total) : null,
       previsionASaisir: intitule !== '' && portions.previsionManquante,
@@ -407,7 +409,8 @@ function aConfirmerDuBord(etat, dates, aujourdhui) {
   const points = dates.map((date) => ({ date, liste: pointsAConfirmer(etat, date).filter((p) => p.type !== 'ecart') }));
   const classe = (filtre) => points.map((x) => ({ date: x.date, liste: x.liste.filter(filtre) })).filter((x) => x.liste.length > 0);
   const repartitions = classe((p) => p.type === 'repartition_provisoire');
-  const autres = classe((p) => p.type !== 'repartition_provisoire' && !POINTS_DE_CHIFFRAGE.has(p.type));
+  const conservations = classe((p) => p.type === 'conservation');
+  const autres = classe((p) => p.type !== 'repartition_provisoire' && p.type !== 'conservation' && !POINTS_DE_CHIFFRAGE.has(p.type));
   const compte = (x) => x.reduce((n, y) => n + y.liste.length, 0);
   if (repartitions.length > 0) {
     const n = compte(repartitions);
@@ -420,10 +423,14 @@ function aConfirmerDuBord(etat, dates, aujourdhui) {
       texte: n === 1 ? '1 point à confirmer' : `${n} points à confirmer`, detail: autres[0].liste[0].texte });
   }
   for (const point of pointsGlobaux(etat)) categories.push({ genre: 'global', n: 1, lien: '#/reglages', texte: point.texte });
-  return {
-    total: categories.reduce((n, c) => n + c.n, 0),
-    lignes: categories.slice(0, LIGNES_A_CONFIRMER),
-  };
+  if (conservations.length > 0) {
+    const n = compte(conservations);
+    categories.push({ genre: 'conservation', n, lien: `#/detail/${conservations[0].date}`,
+      texte: n === 1 ? '1 préparation : conservation à confirmer' : `${n} préparations : conservation à confirmer` });
+  }
+  // Le total compte des lignes distinctes (jamais des points répétés) ; `reste` = lignes non affichées.
+  const lignes = categories.slice(0, LIGNES_A_CONFIRMER);
+  return { total: categories.length, lignes, reste: categories.length - lignes.length };
 }
 
 /** Commande à relire : besoin changé depuis le contrôle, ou échéance du jour ou dépassée. Rien sans donnée de commande. */

@@ -131,6 +131,17 @@ export function calculerComposant(etat, composantId) {
     res.libelleQuantite = 'portions, composition à définir';
     res.aValider = true;
     manquants.push('composition');
+    // Une herbe va à la botte ou à la pièce, une sauce implicite n'a pas de portion avant d'être confirmée :
+    // aucune quantité en portions, information neutre (ni bloquante ni alerte).
+    const herbe = c.role === 'herbe';
+    if (herbe || (c.role === 'sauce' && /à confirmer\s*$/i.test(String(c.nom ?? '')))) {
+      res.unite = null;
+      res.uniteTravail = null;
+      res.libelleQuantite = herbe ? 'à la botte ou à la pièce : quantité à définir' : 'sauce à confirmer';
+      res.formule = herbe ? 'Quantité à définir : une herbe se compte à la botte ou à la pièce, pas à la portion.'
+        : "Sauce à confirmer : pas de portion tant qu'elle n'est pas choisie.";
+      return res;
+    }
     if (portions.previsionManquante && portions.total === 0) {
       bloquants.push('prévision hors groupes');
       res.formule = 'Quantité inconnue : prévision hors groupes à saisir.';

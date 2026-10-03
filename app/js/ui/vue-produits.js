@@ -70,7 +70,7 @@ function dialogAchat(lundi, ligne) {
 }
 
 const ETAT_LIGNE = { suggere: 'Suggéré', note: 'Noté à commander', retire: 'Retiré' };
-const VARIANTE_ETAT_LIGNE = { suggere: 'gris', note: 'vert', retire: 'gris' };
+const ETAT_COURT = { suggere: 'suggéré', note: 'noté', retire: 'retiré' };
 
 /** Noter à commander : une ligne qui repose sur une estimation exige une quantité tapée ; l'application ne la remplit jamais. */
 function dialogNoter(lundi, ligne) {
@@ -91,29 +91,45 @@ function dialogNoter(lundi, ligne) {
   });
 }
 
+/** « 2 400 g » : le chiffre en gros, l'unité à côté (le texte complet reste lu par les lecteurs d'écran). */
+function besoinEnGros(ligne) {
+  const texte = quantite(ligne.besoinBrut, ligne.unite);
+  const i = texte.lastIndexOf(' ');
+  return h('span', { classe: 'produit-besoin', 'aria-label': `besoin brut ${texte}` },
+    h('span', { classe: 'produit-chiffre feutre', 'aria-hidden': 'true' }, i < 0 ? texte : texte.slice(0, i)),
+    i < 0 ? null : h('span', { classe: 'produit-unite', 'aria-hidden': 'true' }, texte.slice(i + 1)));
+}
+
+/** Une ligne par produit ; un toucher déplie les détails et les gestes. L'état est écrit en toutes lettres. */
 function carteLigne(etat, lundi, ligne, aujourd) {
   const suivi = suiviProduit(etat, lundi, ligne);
   const fournisseur = suivi.fournisseurId ? etat.fournisseurs[suivi.fournisseurId] ?? null : null;
   const ech = echeanceCommande(ligne, fournisseur, aujourd);
-  return h('article', { classe: 'carte ligne-produit' },
-    h('div', { classe: 'composant-tete' },
-      h('strong', { classe: 'tache-nom' }, ligne.nom),
-      pastille(libelleVerif(suivi.statutAffiche), VARIANTE_VERIF[suivi.statutAffiche] ?? 'gris')),
-    // L'état de la ligne est écrit en toutes lettres : la couleur ne le porte jamais seule.
-    h('p', null, h('strong', null, `État : ${ETAT_LIGNE[suivi.etatLigne] ?? ETAT_LIGNE.suggere}`),
-      suivi.aRelire ? [' ', pastille('à relire', 'ambre'), h('span', { classe: 'meta' }, ' le besoin a changé depuis que vous l\'avez noté ; la quantité notée n\'a pas bougé')] : null),
-    ligne.aValider ? h('p', null, pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre'), h('span', { classe: 'meta' }, ' le besoin repose sur une estimation non validée')) : null,
+  const detail = (cle, valeur) => [h('dt', null, cle), h('dd', null, valeur)];
+  return h('details', { classe: 'produit-compact' },
+    h('summary', { classe: 'produit-resume' },
+      h('span', { classe: 'produit-ligne' },
+        h('strong', { classe: 'produit-nom' }, ligne.nom),
+        besoinEnGros(ligne)),
+      h('span', { classe: 'produit-etat' },
+        h('span', { classe: 'produit-etat-texte' }, ETAT_COURT[suivi.etatLigne] ?? ETAT_COURT.suggere,
+          suivi.aRelire ? ' · à relire' : ''),
+        ligne.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre') : null)),
+    suivi.aRelire ? h('p', { classe: 'meta' }, 'À relire : le besoin a changé depuis que vous l\'avez noté ; la quantité notée n\'a pas bougé.') : null,
+    ligne.aValider ? h('p', { classe: 'meta' }, 'Le besoin repose sur une estimation non validée.') : null,
     h('dl', { classe: 'definitions' },
-      h('dt', null, 'Besoin brut calculé'), h('dd', null, quantite(ligne.besoinBrut, ligne.unite)),
-      h('dt', null, 'Vérifié disponible'), h('dd', null, suivi.quantiteVerifiee === null ? 'non vérifié' : quantite(suivi.quantiteVerifiee, ligne.unite)),
-      h('dt', null, 'Proposé à commander'), h('dd', null, suivi.proposeeACommander === null ? '— (après vérification)'
+      detail('Contrôle', pastille(libelleVerif(suivi.statutAffiche), VARIANTE_VERIF[suivi.statutAffiche] ?? 'gris')),
+      detail('État', ETAT_LIGNE[suivi.etatLigne] ?? ETAT_LIGNE.suggere),
+      detail('Besoin brut calculé', quantite(ligne.besoinBrut, ligne.unite)),
+      detail('Vérifié disponible', suivi.quantiteVerifiee === null ? 'non vérifié' : quantite(suivi.quantiteVerifiee, ligne.unite)),
+      detail('Proposé à commander', suivi.proposeeACommander === null ? '— (après vérification)'
         : `${quantite(suivi.proposeeACommander, ligne.unite)}${suivi.margePourcent ? ` (dont ${suivi.margePourcent} % de marge)` : ''}`),
-      h('dt', null, 'À acheter'), h('dd', null, suivi.quantiteAcheter === null ? 'à saisir' : quantite(suivi.quantiteAcheter, ligne.unite)),
-      h('dt', null, 'Conditionnement'), h('dd', null, suivi.conditionnement || 'non précisé'),
-      h('dt', null, 'Fournisseur'), h('dd', null, fournisseur ? fournisseur.nom : 'non précisé'),
-      h('dt', null, 'Première utilisation'), h('dd', null, libelleJour(ligne.premiereUtilisation)),
-      h('dt', null, 'Échéance de commande'), h('dd', null, pastille(texteEcheance(ech), VARIANTE_ECHEANCE[ech.statut] ?? 'gris')),
-      h('dt', null, 'Commande passée'), h('dd', null, suivi.commandeLe ? `oui, le ${formaterHeure(suivi.commandeLe)}` : 'non')),
+      detail('À acheter', suivi.quantiteAcheter === null ? 'à saisir' : quantite(suivi.quantiteAcheter, ligne.unite)),
+      detail('Conditionnement', suivi.conditionnement || 'non précisé'),
+      detail('Fournisseur', fournisseur ? fournisseur.nom : 'non précisé'),
+      detail('Première utilisation', libelleJour(ligne.premiereUtilisation)),
+      detail('Échéance de commande', pastille(texteEcheance(ech), VARIANTE_ECHEANCE[ech.statut] ?? 'gris')),
+      detail('Commande passée', suivi.commandeLe ? `oui, le ${formaterHeure(suivi.commandeLe)}` : 'non')),
     suivi.statutAffiche === 'a_reverifier' ? h('p', { classe: 'alerte-texte' }, 'Le besoin a changé depuis le contrôle : à revérifier.') : null,
     h('div', { classe: 'actions' },
       suivi.etatLigne === 'retire'
@@ -141,11 +157,12 @@ export function rendre(etat, lundi) {
   racine.appendChild(h('h2', { classe: 'section-titre' }, 'Besoins chiffrés'));
   if (lignes.length === 0) racine.appendChild(ligneVide('Aucun besoin chiffré cette semaine : il faut des composants attribués, validés et calculables.'));
   const retiree = (l) => suiviProduit(etat, lundi, l).etatLigne === 'retire';
-  for (const l of lignes.filter((x) => !retiree(x))) racine.appendChild(carteLigne(etat, lundi, l, aujourd));
+  const actives = lignes.filter((x) => !retiree(x));
+  if (actives.length > 0) racine.appendChild(h('div', { classe: 'produits-liste' }, actives.map((l) => carteLigne(etat, lundi, l, aujourd))));
   const retirees = lignes.filter(retiree);
   if (retirees.length > 0) {
     racine.appendChild(repliable(`Retirées (${retirees.length})`, false,
-      h('div', null, retirees.map((l) => carteLigne(etat, lundi, l, aujourd))), { classe: 'lignes-retirees' }));
+      h('div', { classe: 'produits-liste' }, retirees.map((l) => carteLigne(etat, lundi, l, aujourd))), { classe: 'lignes-retirees' }));
   }
   racine.appendChild(h('h2', { classe: 'section-titre' }, 'Composants non chiffrables : composition à définir'));
   if (nonChiffrables.length === 0) racine.appendChild(ligneVide('Aucun composant non chiffrable.'));

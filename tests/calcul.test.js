@@ -236,3 +236,27 @@ test('une prévision modifiée ne change que le calcul, jamais la structure', ()
   definirPrevision(e, S.lundi, 1, 20, h());
   assert.equal(calculerComposant(e, id).quantiteTravail, a * 2);
 });
+
+test('herbe et sauce implicite d\'un plat de pâtes du menu 1 : aucune fausse quantité en portions', async () => {
+  const { definirMenu } = await import('../app/js/domaine/actions.js');
+  const { feuilleDuJour } = await import('../app/js/domaine/planification.js');
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'pâtes à l\'aneth', h());
+  prevision(e, S.lundi, 1, 40);
+  const comps = Object.values(e.composants);
+  const aneth = comps.find((c) => c.role === 'herbe');
+  const sauce = comps.find((c) => c.role === 'sauce');
+  assert.ok(aneth && sauce, 'herbe et sauce implicite créées');
+  const a = calculerComposant(e, aneth.id);
+  assert.equal(a.statut, 'INCONNU');
+  assert.equal(a.quantiteTravail, null);
+  assert.equal(a.libelleQuantite, 'à la botte ou à la pièce : quantité à définir');
+  assert.equal(a.formule.includes('40 portions'), false);
+  const s = calculerComposant(e, sauce.id);
+  assert.equal(s.statut, 'INCONNU');
+  assert.equal(s.quantiteTravail, null);
+  assert.equal(s.libelleQuantite, 'sauce à confirmer');
+  // Jamais bloquant ni alerte : ils retombent dans les quantités manquantes (neutres).
+  const manquants = feuilleDuJour(e, S.lundi).quantitesManquantes.map((q) => q.composantId);
+  assert.ok(manquants.includes(aneth.id) && manquants.includes(sauce.id));
+});
