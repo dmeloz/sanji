@@ -6,6 +6,7 @@ import {
   assurerProductions, definirMenu, definirRegle, marquerFait, memoriser, modifierComposant, planifier, reprendreMemoire,
 } from '../app/js/domaine/actions.js';
 import { feuilleDuJour } from '../app/js/domaine/planification.js';
+import { exporter, importer } from '../app/js/domaine/etat.js';
 import { grammageEffectif } from '../app/js/domaine/savoir.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
@@ -68,6 +69,29 @@ test('mémoire : repli sur l\'ancienne clé nom, sauf une protéine attribuée a
   definirMenu(e, S.lundi, 1, 'Poulet, carottes', h());
   assert.equal(parNom(e, S.lundi, 1, 'Poulet').attribue, true);
   assert.equal(typeof pointsAConfirmer(e, S.lundi).length, 'number');
+});
+
+// ---------------------------------------------------------------- 6. lectures corrigées : export puis import
+
+test('lectures : le format liste et le format objet survivent à un export puis un import', () => {
+  const e = etatVide();
+  const liste = [{ nom: 'penne', categorie: 'feculent', propriete: 'poste', statut: 'reconnu' }];
+  const objet = { elements: [{ nom: 'riz', categorie: 'feculent', propriete: 'poste', statut: 'reconnu' }], ambiguites: [{ type: 'choix', texte: 'riz' }] };
+  e.lectures['penne zorglub|1'] = liste;
+  e.lectures['riz zorglub|1'] = objet;
+  const apres = importer(exporter(e, h()));
+  assert.deepEqual(apres.lectures['penne zorglub|1'], liste);
+  assert.deepEqual(apres.lectures['riz zorglub|1'], objet);
+  assert.deepEqual(importer(exporter(apres, h())).lectures, e.lectures, 'stable au second passage');
+  // Une valeur d'un autre format est écartée ; une clé dangereuse ne passe pas.
+  const doc = JSON.parse(exporter(e, h()));
+  doc.etat.lectures['texte|1'] = 'pas une lecture';
+  doc.etat.lectures['__proto__'] = liste;
+  doc.etat.lectures['sale|1'] = [{ nom: 'x', constructor: 1 }];
+  const sale = importer(JSON.stringify(doc));
+  assert.equal(Object.hasOwn(sale.lectures, 'texte|1'), false);
+  assert.equal(Object.hasOwn(sale.lectures, '__proto__'), false);
+  assert.deepEqual(sale.lectures['sale|1'], [{ nom: 'x' }]);
 });
 
 // ---------------------------------------------------------------- 4. sauce confirmée conservée

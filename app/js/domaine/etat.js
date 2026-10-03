@@ -219,8 +219,29 @@ const COLLECTIONS = {
   jours: jourVide, fiches: ficheVide, composants: composantVide, productions: productionVide,
   regles: regleVide, recettes: recetteVide, fournisseurs: fournisseurVide,
   memoire: () => memoireVide(), produits: () => suiviProduitVide(),
-  lectures: () => ({}), validations: () => ({}),
+  validations: () => ({}),
 };
+
+/** Copie profonde sans clé dangereuse (`__proto__`, `constructor`, `prototype`). */
+function sansClesDangereuses(valeur) {
+  if (Array.isArray(valeur)) return valeur.map(sansClesDangereuses);
+  if (!estObjet(valeur)) return valeur;
+  const res = {};
+  for (const [k, v] of Object.entries(valeur)) if (!CLES_INTERDITES.has(k)) res[k] = sansClesDangereuses(v);
+  return res;
+}
+
+/**
+ * Une lecture corrigée (collection `lectures`) : une liste d'éléments ou un objet { elements, ambiguites }, que `lirePlat`
+ * accepte telle quelle. Retourne la valeur nettoyée, ou `undefined` si elle n'a aucun de ces deux formats.
+ */
+function lectureValide(valeur) {
+  const estElement = (x) => estObjet(x);
+  if (Array.isArray(valeur)) return valeur.every(estElement) ? sansClesDangereuses(valeur) : undefined;
+  if (!estObjet(valeur) || !Array.isArray(valeur.elements) || !valeur.elements.every(estElement)) return undefined;
+  if (valeur.ambiguites !== undefined && !Array.isArray(valeur.ambiguites)) return undefined;
+  return sansClesDangereuses(valeur);
+}
 
 /**
  * Lit un fichier d'export. Refuse un autre document, un schéma inconnu et tout fichier portant
@@ -244,6 +265,14 @@ export function importer(texte) {
   const source = doc.etat;
   const etat = etatInitial();
   etat.reglages = fusionner(etat.reglages, source.reglages);
+  if (source.lectures !== undefined) {
+    if (!estObjet(source.lectures)) throw new Error('Export corrompu : « lectures » est invalide.');
+    for (const [cle, lecture] of Object.entries(source.lectures)) {
+      if (CLES_INTERDITES.has(cle)) continue;
+      const retenue = lectureValide(lecture);
+      if (retenue !== undefined) etat.lectures[cle] = retenue;
+    }
+  }
   for (const [nom, fabrique] of Object.entries(COLLECTIONS)) {
     if (source[nom] === undefined) continue;
     if (!estObjet(source[nom])) throw new Error(`Export corrompu : « ${nom} » est invalide.`);
