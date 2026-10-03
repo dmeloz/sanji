@@ -152,7 +152,13 @@ function ligneTache(etat, ligneBrute, date, options) {
   // L'évaluation de l'avance (limite d'utilisation, règle) reste lisible, derrière « Actions ».
   const ev = l.evaluation ?? evaluationProduction(etat, l.productionId);
   const { meta, badges } = badgesEtMeta(l, ev, options);
-  if (fait && l.hFait) meta.push(`fait le ${formaterHeure(l.hFait)}${l.hFait.slice(0, 10) < date && l.dateService === date ? ', déjà avancé' : ''}`);
+  if (fait && l.hFait) {
+    const avantAujourdhui = l.hFait.slice(0, 10) < date;
+    // Une étape faite avant ce jour : « déjà avancé sam. 3 » (le jour où elle a été faite).
+    const dejaAvance = l.etapeCle && avantAujourdhui ? `, déjà avancé ${courtJour(l.hFait.slice(0, 10))}`
+      : (avantAujourdhui && l.dateService === date ? ', déjà avancé' : '');
+    meta.push(`fait le ${formaterHeure(l.hFait)}${dejaAvance}`);
+  }
   const poids = poidsDe(l);
   const actions = actionsDeLigne(etat, l, date).filter(Boolean);
   const evaluation = ev && ev.jours > 0 ? noeudEvaluation(ev) : null;

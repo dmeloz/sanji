@@ -19,11 +19,32 @@ export function etatCreneau(etat, date, creneau) {
   return etat.reglages?.semaineType?.[jourSemaine(date)]?.[creneau] ?? 'libre';
 }
 
-/** Règle de préparation du composant (clé = nom normalisé), ou null. */
-export function regleDe(etat, composant) {
+/** Règle de préparation du nom du composant (clé = nom normalisé), ou null. */
+function regleDuNom(etat, composant) {
   if (!composant) return null;
   const cle = normaliser(composant.nom);
   return Object.values(etat.regles ?? {}).find((r) => r.cle === cle) ?? null;
+}
+
+/**
+ * Règle de préparation du composant (clé = nom normalisé), ou null. Avec `etapeCle` et une règle d'au moins deux
+ * étapes : la règle de cette étape (`etape: true`, avance maximale de l'étape ; la finition vaut 0 jour à défaut).
+ * Une avance d'étape n'est jamais une durée de conservation : seule la finition garde la limite d'utilisation du nom.
+ * Sans étapes définies, ou pour une clé inconnue : la règle du nom, inchangée.
+ */
+export function regleDe(etat, composant, etapeCle = null) {
+  const regle = regleDuNom(etat, composant);
+  const etapes = regle?.etapes ?? [];
+  if (!etapeCle || etapes.length < 2) return regle;
+  const index = etapes.findIndex((x) => x.cle === etapeCle);
+  if (index < 0) return regle;
+  const finition = index === etapes.length - 1;
+  const avance = Number.isInteger(etapes[index].avanceMaxJours) ? etapes[index].avanceMaxJours : null;
+  return {
+    ...regle, etape: true, etapeCle, finition,
+    avanceMaxJours: avance ?? (finition ? 0 : null),
+    limiteUtilisationJours: finition ? regle.limiteUtilisationJours : null,
+  };
 }
 
 /**
@@ -42,6 +63,7 @@ export function evaluerAvance(dateProduction, dateService, regle) {
   if (!estOuvert(dateProduction)) { res.alertes.push('dimanche : jour non travaillé'); return res; }
   if (res.jours === 0) { res.autorisee = true; res.couvre = true; return res; }
   const limite = Number.isFinite(regle?.limiteUtilisationJours) ? regle.limiteUtilisationJours : null;
+  if (regle?.etape) return evaluerEtape(res, regle, limite);
   if (limite === null) res.conservation = 'a_confirmer';
   else res.conservation = limite >= res.jours ? 'validee' : 'depassee';
   if (res.jours <= AVANCE_HABITUELLE) {
@@ -60,6 +82,27 @@ export function evaluerAvance(dateProduction, dateService, regle) {
   return res;
 }
 
+/** Avance d'une étape : son propre maximum (jamais la règle générale de deux jours seule, jamais une conservation). */
+function evaluerEtape(res, regle, limite) {
+  const maximum = Number.isFinite(regle.avanceMaxJours) ? regle.avanceMaxJours : null;
+  res.exception = res.jours > AVANCE_HABITUELLE;
+  if (maximum === null) {
+    res.conservation = 'a_confirmer';
+    res.autorisee = res.jours <= AVANCE_HABITUELLE;
+    if (!res.autorisee) res.alertes.push("hors règle : avance de l'étape non définie, plus de deux jours");
+    res.alertes.push('conservation à confirmer');
+  } else {
+    res.autorisee = res.jours <= maximum;
+    if (regle.finition) res.conservation = limite === null ? 'a_confirmer' : (limite >= res.jours ? 'validee' : 'depassee');
+    if (!res.autorisee) res.alertes.push(`hors règle : avance de ${res.jours} jours, maximum ${maximum} pour cette étape`);
+    else if (res.exception) res.alertes.push("avance exceptionnelle autorisée par la règle de l'étape");
+    if (res.conservation === 'a_confirmer') res.alertes.push('conservation à confirmer');
+    if (res.conservation === 'depassee') res.alertes.push("limite d'utilisation dépassée : le besoin n'est pas couvert");
+  }
+  res.couvre = res.autorisee && res.conservation !== 'depassee';
+  return res;
+}
+
 /** Date de production d'une production : le jour décidé, à défaut la date du marquage « fait ». */
 function dateProduction(prod) {
   return prod.jourDecide ?? (prod.hFait ? String(prod.hFait).slice(0, 10) : null);
@@ -67,7 +110,7 @@ function dateProduction(prod) {
 
 function evaluationDe(etat, prod, composant) {
   const date = dateProduction(prod);
-  return date ? evaluerAvance(date, prod.dateService, regleDe(etat, composant)) : null;
+  return date ? evaluerAvance(date, prod.dateService, regleDe(etat, composant, prod.etapeCle ?? null)) : null;
 }
 
 /** Évaluation de l'avance d'une production (null si sa date de production est inconnue). */
@@ -193,7 +236,7 @@ export function suggererCreneau(etat, productionId) {
   const p = etat.productions?.[productionId];
   if (!p || p.etat === 'fait') return null;
   const composant = etat.composants?.[p.composantId] ?? null;
-  const regle = regleDe(etat, composant);
+  const regle = regleDe(etat, composant, p.etapeCle ?? null);
   const avanceMax = Number.isInteger(regle?.avanceMaxJours) && regle.avanceMaxJours >= 0 ? regle.avanceMaxJours : AVANCE_HABITUELLE;
   const points = POINTS_CHARGE[composant?.charge] ?? 0;
   for (const { date, creneau } of candidatsAvance(p.dateService, avanceMax)) {
@@ -216,8 +259,52 @@ function ligne(etat, p) {
     dateService: p.dateService, genre: p.genre, libelle: p.libelle, jourDecide: p.jourDecide,
     creneauDecide: p.creneauDecide, etat: etatTache(etat, p.id), cible: cibleProduction(etat, p.id),
     unite: p.unite ?? calc?.uniteTravail ?? null, quantiteReelle: p.quantiteReelle, charge: composant?.charge ?? null,
-    etatPoids: etatPoidsDe(composant, calc), hFait: p.hFait ?? null,
+    etatPoids: etatPoidsDe(composant, calc), hFait: p.hFait ?? null, etapeCle: p.etapeCle ?? null, ordre: p.ordre ?? null,
   };
+}
+
+/**
+ * Étapes d'un composant pour l'affichage, dans l'ordre : les préparatoires d'étape puis la finition (production
+ * principale). Vide si le composant n'a pas de règle d'étapes (ni étape déjà faite).
+ * @returns {{etapeCle:string, libelle:string, ordre:number, etat:string, faitLe:string|null, jourDecide:string|null}[]}
+ */
+export function etapesComposant(etat, composantId) {
+  const composant = etat.composants?.[composantId];
+  if (!composant) return [];
+  const etapes = regleDuNom(etat, composant)?.etapes ?? [];
+  const libelleDe = (cle, repli) => etapes.find((x) => x.cle === cle)?.libelle ?? repli;
+  const lignes = [];
+  for (const p of Object.values(etat.productions ?? {})) {
+    if (p.composantId !== composantId || !p.etapeCle) continue;
+    lignes.push({
+      etapeCle: p.etapeCle, libelle: libelleDe(p.etapeCle, p.libelle), ordre: p.ordre ?? 0, etat: etatTache(etat, p.id),
+      faitLe: p.etat === 'fait' && p.hFait ? String(p.hFait).slice(0, 10) : null, jourDecide: p.jourDecide ?? null,
+    });
+  }
+  return lignes.sort((a, b) => a.ordre - b.ordre);
+}
+
+/**
+ * Contrôle d'ordre entre les étapes d'un même composant ; retourne un message de refus ou null.
+ * Planifier (`date`) : une étape ne tombe ni après l'étape suivante, ni avant la précédente.
+ * Fait (`fait`) : l'étape précédente doit déjà être faite.
+ */
+export function refusOrdreEtape(etat, p, { date = null, fait = false } = {}) {
+  if (!p.etapeCle || !Number.isInteger(p.ordre)) return null;
+  const soeurs = Object.values(etat.productions ?? {}).filter((x) => x.composantId === p.composantId && x.id !== p.id
+    && x.etapeCle && Number.isInteger(x.ordre));
+  const nom = (x) => String(x.libelle).split(' : ')[0];
+  if (fait) {
+    const manquante = soeurs.filter((x) => x.ordre < p.ordre && x.etat !== 'fait').sort((a, b) => a.ordre - b.ordre)[0];
+    return manquante ? `L'étape « ${nom(manquante)} » doit être faite avant « ${nom(p)} ».` : null;
+  }
+  for (const x of soeurs) {
+    const jour = dateProduction(x);
+    if (!jour || !date) continue;
+    if (x.ordre > p.ordre && jour < date) return `« ${nom(p)} » ne peut pas se faire après l'étape suivante « ${nom(x)} » (${jour}).`;
+    if (x.ordre < p.ordre && jour > date) return `« ${nom(p)} » ne peut pas se faire avant l'étape précédente « ${nom(x)} » (${jour}).`;
+  }
+  return null;
 }
 
 /** État du poids de la quantité affichée : `sec`, `cru_net`, `cuit`, `fini` (préparation maison) ou null si inconnu. */
@@ -241,7 +328,7 @@ export function avancesPossibles(etat, aujourdhui) {
     if (jours < 1 || jours > HORIZON_AVANCES) continue;
     if (p.jourDecide && p.jourDecide !== aujourdhui) continue;
     const composant = etat.composants[p.composantId];
-    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant));
+    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null));
     const creneau = creneauxPossibles.find((c) => etatCreneau(etat, aujourdhui, c) === 'libre') ?? null;
     resultat.push({ ...ligne(etat, p), evaluation, creneau });
   }
@@ -267,7 +354,7 @@ export function lotsPossibles(etat, aujourdhui) {
     const cible = cibleProduction(etat, p.id);
     const unite = p.unite ?? calculerComposant(etat, composant.id).uniteTravail ?? null;
     if (cible === null || !unite) continue;
-    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant));
+    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null));
     if (!evaluation.autorisee || !evaluation.couvre) continue;
     const cle = `${composant.famille}|${unite}`;
     if (!groupes.has(cle)) groupes.set(cle, { famille: composant.famille, unite, productions: [] });
@@ -329,7 +416,9 @@ function lectureDuJour(etat, date, f) {
   // Une quantité inconnue ne retire pas la ligne d'un service du jour : « quantité à compléter », sans alerte.
   for (const q of f.quantitesManquantes) if (q.dateService <= date) classer(q, 'a_preciser');
   for (const a of f.aAvancer) classer(a, 'suggestion', a.creneau);
-  const parNom = (a, b) => rangCreneau(a.creneau) - rangCreneau(b.creneau) || String(a.nom).localeCompare(String(b.nom));
+  // À créneau et nom égaux, les étapes d'une même préparation se lisent dans l'ordre de la règle.
+  const parNom = (a, b) => rangCreneau(a.creneau) - rangCreneau(b.creneau) || String(a.nom).localeCompare(String(b.nom))
+    || (a.ordre ?? 0) - (b.ordre ?? 0);
   for (const l of [service1, service2, autres]) l.sort(parNom);
   apres.sort((a, b) => a.dateService.localeCompare(b.dateService) || parNom(a, b));
   const faites = [...f.dejaPret];

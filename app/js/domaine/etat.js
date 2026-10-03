@@ -98,11 +98,14 @@ export function productionVide(id) {
     jourDecide: null, creneauDecide: null, etat: 'a_faire', cibleAuDemarrage: null,
     quantiteReelle: null, unite: null, hFait: null, instantane: null, decisionEcart: null,
     avantFait: null, // { etat, cibleAuDemarrage } avant le marquage « fait », pour pouvoir l'annuler juste après
+    // Étape d'une préparation (clé de l'étape de la règle et rang, 0 = première) ; null hors règle d'étapes.
+    etapeCle: null, ordre: null,
   };
 }
 
 export function regleVide(id) {
-  return { id, nom: '', cle: '', avanceMaxJours: null, limiteUtilisationJours: null, valideLe: null, note: '' };
+  // `etapes` : [{ cle, libelle, avanceMaxJours }] ordonnées ; la dernière est la finition. Vide = aucune étape.
+  return { id, nom: '', cle: '', avanceMaxJours: null, limiteUtilisationJours: null, valideLe: null, note: '', etapes: [] };
 }
 
 export function recetteVide(id) {
