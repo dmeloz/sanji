@@ -17,10 +17,11 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 - `app/js/domaine/` : logique métier pure, sans DOM, testée. Les signatures réelles du code font foi sur la conception.
   - `savoir.js` : le savoir culinaire (familles de produits, groupes, portion effective, standards maison). Un seul lexique, aucun chiffre : les coefficients viennent de `donnees/base-metier.js`.
   - `feuille.js` : analyse du texte collé d'une feuille de menus.
-  - `tableau-blanc.js` : données de l'accueil et note du contexte.
+  - `tableau-blanc.js` : données de l'accueil. `bord` = le tableau de bord (menus du jour et des 2 jours suivants, fiches de fonction, « À confirmer » de 3 lignes au plus sans quantité manquante, production et commandes) ; `contexte` (ancienne note) ne s'affiche plus mais désigne la semaine par défaut.
+  - `planification.js` : `feuilleDuJour(...).lecture` donne l'ordre de lecture de la feuille Jour (menu 1, menu 2, autres, après service, faites).
 - `app/js/magasin.js` : état courant ; `agir(fn)` copie, applique, enregistre, redessine.
 - `app/js/stockage.js` : IndexedDB (base `sanji`, magasins `etat` et `photos`).
-- `app/js/ui/` : vues et panneaux de saisie. Aucune logique métier ici. Quatre onglets : Tableau (`vue-tableau.js`, l'accueil), Jour, Produits, Réglages. `vue-menus.js` saisit toute la semaine.
+- `app/js/ui/` : vues et panneaux de saisie. Aucune logique métier ici. Quatre onglets : Tableau (`vue-tableau.js`, tableau de bord à 4 zones), Jour (`vue-jour.js`, une liste de mise en place cochable), Produits, Réglages. `vue-menus.js` saisit toute la semaine.
 - Identité visuelle (décision du 2026-10-03, remplace le « tableau blanc » de la section 16) : épurée et professionnelle. Surfaces claires et opaques, filets fins plutôt que cadres et ombres, un seul accent (bleu) et une encre (`--encre`) pour l'action principale, police système, pas de dégradé, pas de police téléchargée. `.feutre` ne désigne plus qu'une graisse (le nom est resté). Ne jamais réintroduire écriture manuscrite, post-it ni cadre d'aluminium.
 - `app/sw.js` : cache hors ligne. `VERSION` y est égale à `VERSION_APP` de `app/js/version.js`.
 - `tests/aide-dom.js` : faux DOM qui fait tourner les vues sous Node.

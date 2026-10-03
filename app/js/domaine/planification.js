@@ -2,7 +2,7 @@
 // Les valeurs de charge sont des points (1, 2, 3), jamais des minutes.
 
 import { ajouterJours, creneauxDuJour, estOuvert, joursEntre, jourSemaine } from './dates.js';
-import { calculerComposant, arrondirQuantite } from './calcul.js';
+import { calculerComposant, arrondirQuantite, portionsMenu } from './calcul.js';
 import { normaliser, jourOuVide } from './etat.js';
 import { familleParCle } from './savoir.js';
 import { POINTS_CHARGE } from './statuts.js';
@@ -216,7 +216,15 @@ function ligne(etat, p) {
     dateService: p.dateService, genre: p.genre, libelle: p.libelle, jourDecide: p.jourDecide,
     creneauDecide: p.creneauDecide, etat: etatTache(etat, p.id), cible: cibleProduction(etat, p.id),
     unite: p.unite ?? calc?.uniteTravail ?? null, quantiteReelle: p.quantiteReelle, charge: composant?.charge ?? null,
+    etatPoids: etatPoidsDe(composant, calc), hFait: p.hFait ?? null,
   };
+}
+
+/** État du poids de la quantité affichée : `sec`, `cru_net`, `cuit`, `fini` (préparation maison) ou null si inconnu. */
+function etatPoidsDe(composant, calc) {
+  if (!composant || !calc) return null;
+  if (composant.type === 'preparation_maison') return 'fini';
+  return calc.dependances.find((d) => d.parametre === 'grammage')?.etat ?? null;
 }
 
 /**
@@ -288,6 +296,66 @@ export function lotsPossibles(etat, aujourdhui) {
  * - aAvancer : avances possibles non déjà décidées ce jour, seulement pour les éléments dont la quantité est connue ;
  *   revueMiSemaine : vrai le mardi.
  */
+const ORDRE_CRENEAU_LECTURE = ['avant_midi', 'apres_midi', 'avant_soir'];
+const rangCreneau = (c) => (ORDRE_CRENEAU_LECTURE.includes(c) ? ORDRE_CRENEAU_LECTURE.indexOf(c) : ORDRE_CRENEAU_LECTURE.length);
+
+/**
+ * Ordre de lecture de la feuille Jour (une seule liste, aucun filtre) : tâches pour le service du jour du menu 1,
+ * du menu 2, autres tâches (préparatoires), puis « après service » = tout ce qui sert un jour suivant (avances
+ * décidées ou seulement possibles). Les tâches faites sont à part (`faites`, repliées par la vue). Chaque ligne dit
+ * d'où elle vient (`source`) et son écart de service en jours (`avanceJours`). Aucune tâche ne dépend d'une donnée
+ * qui manque : une quantité inconnue donne une ligne « à préciser », pas une absence.
+ */
+function lectureDuJour(etat, date, f) {
+  const service1 = [];
+  const service2 = [];
+  const autres = [];
+  const apres = [];
+  const classer = (l, source, creneau = l.creneauDecide ?? null) => {
+    const ligneLue = { ...l, source, creneau, avanceJours: Math.max(0, joursEntre(date, l.dateService)) };
+    if (l.dateService > date) apres.push(ligneLue);
+    else if (l.genre === 'preparatoire') autres.push(ligneLue);
+    else if (l.menu === 1) service1.push(ligneLue);
+    else if (l.menu === 2) service2.push(ligneLue);
+    else autres.push(ligneLue);
+  };
+  for (const g of f.aFaire) for (const t of g.taches) classer(t, 'decidee', g.creneau);
+  for (const t of f.attendus) classer(t, 'attendue');
+  // Un service du jour pas encore planifié reste dans la liste de travail (jamais seulement dans les décisions).
+  const dejaPlacees = new Set();
+  for (const d of f.decisions) {
+    if (d.motif === 'a_planifier' && d.dateService <= date) { classer(d, 'a_planifier'); dejaPlacees.add(d.productionId); }
+  }
+  // Une quantité inconnue ne retire pas la ligne d'un service du jour : « quantité à compléter », sans alerte.
+  for (const q of f.quantitesManquantes) if (q.dateService <= date) classer(q, 'a_preciser');
+  for (const a of f.aAvancer) classer(a, 'suggestion', a.creneau);
+  const parNom = (a, b) => rangCreneau(a.creneau) - rangCreneau(b.creneau) || String(a.nom).localeCompare(String(b.nom));
+  for (const l of [service1, service2, autres]) l.sort(parNom);
+  apres.sort((a, b) => a.dateService.localeCompare(b.dateService) || parNom(a, b));
+  const faites = [...f.dejaPret];
+  const vues = new Set(faites.map((x) => x.productionId));
+  for (const p of Object.values(etat.productions ?? {})) {
+    if (p.etat === 'fait' && p.jourDecide === date && !vues.has(p.id) && etat.composants?.[p.composantId]) faites.push(ligne(etat, p));
+  }
+  const aAvancerIds = new Set(f.aAvancer.map((a) => a.productionId));
+  const decisions = f.decisions.filter((d) => !dejaPlacees.has(d.productionId)
+    && !(d.motif === 'a_planifier' && aAvancerIds.has(d.productionId)));
+  const jour = jourOuVide(etat, date);
+  const menus = [1, 2].map((menu) => ({ menu, intitule: String(jour.menus?.[menu]?.intitule ?? '').trim() }));
+  const couverts = {};
+  for (const menu of [1, 2]) {
+    const portions = portionsMenu(etat, date, menu);
+    couverts[menu] = menus[menu - 1].intitule !== '' && (portions.total > 0 || !portions.previsionManquante) ? Math.round(portions.total) : null;
+  }
+  const connus = [couverts[1], couverts[2]].filter((n) => n !== null);
+  const fiches = Object.values(etat.fiches ?? {}).filter((x) => x.statut === 'active' && x.date === date)
+    .sort((a, b) => String(a.horaire).localeCompare(String(b.horaire)));
+  return {
+    service1, service2, autres, apres, faites, decisions, menus, fiches,
+    couverts: { 1: couverts[1], 2: couverts[2], total: connus.length > 0 ? connus.reduce((s, n) => s + n, 0) : null },
+  };
+}
+
 export function feuilleDuJour(etat, date) {
   const dejaPret = [];
   const attendus = [];
@@ -323,5 +391,7 @@ export function feuilleDuJour(etat, date) {
   const avancement = { faites: decidees.filter((p) => p.etat === 'fait').length, total: decidees.length };
   const aAvancer = estOuvert(date) ? avancesPossibles(etat, date).filter((a) => a.jourDecide !== date && a.etat !== 'a_preciser') : [];
   const lots = estOuvert(date) ? lotsPossibles(etat, date) : [];
-  return { aFaire, dejaPret, decisions, quantitesManquantes, aAvancer, lots, attendus, avancement, revueMiSemaine: jourSemaine(date) === 2 };
+  const resultat = { aFaire, dejaPret, decisions, quantitesManquantes, aAvancer, lots, attendus, avancement, revueMiSemaine: jourSemaine(date) === 2 };
+  resultat.lecture = lectureDuJour(etat, date, resultat);
+  return resultat;
 }

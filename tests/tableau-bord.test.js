@@ -1,0 +1,132 @@
+// A-P1 : le Tableau comme tableau de bord (domaine). Menus du jour et des deux jours suivants, fiches de fonction,
+// « À confirmer » de 3 lignes au plus (jamais une quantité simplement manquante), production et commandes en résumé.
+// Jeux TEST_ONLY.
+
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { controlerProduit, creerFiche, definirMenu, marquerFait, planifier } from '../app/js/domaine/actions.js';
+import { tableauBlanc } from '../app/js/domaine/tableau-blanc.js';
+import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
+import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
+import { composantValide, etatVide, h, menuValide, prevision, principaleDe } from './aide.js';
+
+function semaine() {
+  const e = etatVide();
+  for (const jour of [S.lundi, S.mardi, S.mercredi, S.jeudi, S.vendredi]) {
+    menuValide(e, jour, 1, 'INTITULE_TEST_1');
+    menuValide(e, jour, 2, 'INTITULE_TEST_2');
+    prevision(e, jour, 1, 40);
+    prevision(e, jour, 2, 10);
+  }
+  return e;
+}
+
+test('bord : menus = aujourd\'hui et les 2 jours suivants, le reste de la semaine à part, rien n\'est perdu', () => {
+  const { menus } = tableauBlanc(semaine(), S.mardi).bord;
+  assert.deepEqual(menus.visibles.map((j) => j.date), [S.mardi, S.mercredi, S.jeudi]);
+  assert.deepEqual(menus.reste.map((j) => j.date), [S.lundi, S.vendredi], 'les autres jours à menu restent à une touche');
+  assert.equal(menus.visibles[0].estAujourdhui, true);
+});
+
+test('bord : une autre semaine commence par son premier jour ; la fin de semaine reste lisible', () => {
+  const e = semaine();
+  assert.deepEqual(tableauBlanc(e, S.mardi, S.lundiSuivant).bord.menus.visibles.map((j) => j.date), ['2026-10-12', '2026-10-13', '2026-10-14']);
+  const vendredi = tableauBlanc(e, S.vendredi, S.lundi).bord.menus;
+  assert.deepEqual(vendredi.visibles.map((j) => j.date), [S.vendredi]);
+  const samedi = tableauBlanc(e, S.samedi, S.lundi).bord.menus;
+  assert.equal(samedi.visibles.length, 3, 'semaine forcée passée : on repart du lundi');
+});
+
+test('bord : base vide, aucun menu : une invitation, pas de zone vide trompeuse', () => {
+  const bord = tableauBlanc(etatVide(), S.lundi).bord;
+  assert.equal(bord.menus.aucunMenu, true);
+  assert.deepEqual(bord.fiches, []);
+  assert.equal(bord.aConfirmer.lignes.length <= 3, true);
+});
+
+test('bord : fiches de fonction = horaire, numéro, couverts, mode, allergies, lien vers le détail du jour', () => {
+  const e = semaine();
+  creerFiche(e, { numero: 'FICHE_TEST_1', date: S.mardi, service: 'midi', horaire: '12:00', couverts: 24, mode: 'menu_fixe', menuFixe: 1, allergies: 'ALLERGIE_TEST' }, h());
+  creerFiche(e, { numero: 'FICHE_TEST_2', date: S.lundi, service: 'midi', horaire: '12:00', couverts: 8, mode: 'hors_menu' }, h());
+  const { fiches } = tableauBlanc(e, S.mardi).bord;
+  assert.deepEqual(fiches.map((f) => f.numero), ['FICHE_TEST_1'], 'les fiches passées de la semaine ne sont pas à venir');
+  assert.deepEqual([fiches[0].horaire, fiches[0].couverts, fiches[0].mode, fiches[0].aAllergies, fiches[0].lien],
+    ['12:00', 24, 'menu_fixe', true, `#/detail/${S.mardi}`]);
+  assert.match(fiches[0].modeTexte, /Menu fixe/);
+});
+
+test('bord : « À confirmer » ne dépasse jamais 3 lignes et ne contient jamais une quantité simplement manquante', () => {
+  const e = etatVide();
+  // Beaucoup de menus sans aucune quantité : une quantité inconnue n'est pas une décision.
+  for (const jour of [S.lundi, S.mardi, S.mercredi]) definirMenu(e, jour, 1, 'riz, carottes', h());
+  let bord = tableauBlanc(e, S.lundi).bord;
+  assert.equal(bord.aConfirmer.lignes.some((l) => /quantité|portion à saisir|prévision/i.test(l.texte)), false);
+  assert.equal(bord.aConfirmer.lignes.every((l) => !/portion|préciser/.test(l.texte)), true);
+  // Plusieurs vraies décisions : écart, répartition provisoire, allergènes, semaine type : 3 lignes au plus.
+  const s = semaine();
+  creerFiche(s, { numero: 'FICHE_TEST_1', date: S.mardi, service: 'midi', horaire: '12:00', couverts: 20, mode: 'choix_libre', repartition: { 1: 12, 2: 5 } }, h());
+  creerFiche(s, { numero: 'FICHE_TEST_2', date: S.mercredi, service: 'midi', horaire: '12:00', couverts: 20, mode: 'choix_libre', repartition: { 1: 12, 2: 5 } }, h());
+  bord = tableauBlanc(s, S.lundi).bord;
+  assert.ok(bord.aConfirmer.total >= 4, 'deux répartitions provisoires, deux incohérentes, la semaine type');
+  assert.equal(bord.aConfirmer.lignes.length, 3, 'le reste n\'est pas perdu : il est compté, et dit sur le détail du jour');
+  assert.match(bord.aConfirmer.lignes.map((l) => l.texte).join(' | '), /répartition provisoire|semaine type/i);
+});
+
+test('bord : un écart à arbitrer est une ligne de « À confirmer » qui mène à la feuille du jour', () => {
+  const e = etatVide();
+  prevision(e, S.mercredi, 1, 10);
+  const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
+  planifier(e, principaleDe(e, c), S.mardi, 'apres_midi', h());
+  marquerFait(e, principaleDe(e, c), undefined, h(1));
+  prevision(e, S.mercredi, 1, 20);
+  const ligne = tableauBlanc(e, S.mardi).bord.aConfirmer.lignes.find((l) => /écart/.test(l.texte));
+  assert.ok(ligne, 'écart à arbitrer');
+  assert.equal(ligne.lien, `#/jour/${S.mardi}`);
+});
+
+test('bord : production = jauge « x/y fait » vers Jour ; une avance possible et le chiffrage restent dits calmement', () => {
+  const e = etatVide();
+  prevision(e, S.mercredi, 1, 10);
+  const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
+  const p = principaleDe(e, c);
+  planifier(e, p, S.mardi, 'apres_midi', h());
+  let { production } = tableauBlanc(e, S.mardi).bord;
+  assert.deepEqual(production.avancement, { faites: 0, total: 1 });
+  assert.equal(production.lien, `#/jour/${S.mardi}`);
+  marquerFait(e, p, undefined, h(1));
+  production = tableauBlanc(e, S.mardi).bord.production;
+  assert.deepEqual(production.avancement, { faites: 1, total: 1 });
+  const sansTache = tableauBlanc(etatVide(), S.mardi).bord.production;
+  assert.deepEqual(sansTache.avancement, { faites: 0, total: 0 });
+});
+
+test('bord : une commande à revérifier mène à Produits', () => {
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 10);
+  composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST);
+  assert.equal(tableauBlanc(e, S.lundi).bord.production.commande, null, 'rien à relire sans contrôle');
+  controlerProduit(e, S.lundi, 'produit_sec_test', 'g', 'a_commander', 100, h());
+  prevision(e, S.lundi, 1, 50);
+  const commande = tableauBlanc(e, S.lundi).bord.production.commande;
+  assert.ok(commande, 'le besoin a changé depuis le contrôle');
+  assert.equal(commande.lien, `#/produits/${S.lundi}`);
+});
+
+test('bord : chaque ancienne ligne de la note a une destination (chiffrage, sauvegarde, semaine type)', () => {
+  const e = semaine();
+  const bord = tableauBlanc(e, S.lundi).bord;
+  assert.ok(bord.aConfirmer.lignes.some((l) => /semaine type/i.test(l.texte)) || bord.aConfirmer.total >= 3);
+  const vieux = tableauBlanc(e, '2026-10-30');
+  assert.ok(vieux.bord.entete.sauvegarde, 'le rappel de sauvegarde garde une place (en-tête)');
+  assert.equal(vieux.bord.entete.sauvegarde.lien, '#/reglages');
+  const e2 = etatVide();
+  definirMenu(e2, S.lundi, 1, 'riz, carottes', h());
+  prevision(e2, S.lundi, 1, 10);
+  const sansPortion = tableauBlanc(e2, S.lundi).bord.production.chiffrage;
+  assert.ok(sansPortion.length >= 1, 'portions à régler : dites comme information neutre');
+  assert.ok(sansPortion.every((l) => l.lien.startsWith('#/')));
+});
+
+test('bord : l\'action de l\'en-tête mène à la feuille du jour', () => {
+  assert.equal(tableauBlanc(semaine(), S.mardi).bord.entete.lienJour, `#/jour/${S.mardi}`);
+});
