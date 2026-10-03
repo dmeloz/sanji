@@ -23,7 +23,17 @@ Garde-fous maintenus : aucun `git push`, rien de publié, rien de supprimé sans
 Ensuite, après fusion des branches : B-P0 et B-P1 construits à partir de la spécification d'Opus, puis B-P2, puis relecture finale (Opus).
 
 ## Choix par défaut appliqués par délégation (à confirmer)
-(à remplir au fil des lots)
+1. **Prompt B réduit** (recommandation de la conception, Opus) : retirés ou reportés buffet, cocktail et repas du personnel, dimensions « moment » et « type de service » des portions, fusion hors ligne, capacités d'équipement, contamination croisée structurée, heures limites fournisseurs, substitutions, DLC et conservation générique, arrondis de conditionnement, restes affectés, portée des corrections à cinq niveaux (ramenée à deux : cette fois / standard), identifiant produit canonique, sous-familles, vague 2.
+2. **Les six repères validés** sont créés dans une source versionnée du projet (`connaissances/savoir-metier.json`, générée vers `app/js/donnees/savoir-metier.js`), jamais dans la base officielle, que la propriétaire seule modifie. Viande sans os et œufs y sont stockés mais non utilisés tant que l'application n'a pas de famille protéine.
+3. **Pas de quatrième état de poids « brut »** (la décision du 2026-10-03 « cru brut reporté » est maintenue) : la viande sans os est lue comme `cru_net`, les œufs comme `cru_net` en pièces.
+4. **Fourchettes** : le calcul garde le milieu de la fourchette comme ESTIMATION étiquetée (comportement validé en amont pour les repères et les coefficients) ; ce n'est pas une valeur du restaurant. Le standard maison, qui passe avant, se règle ligne par ligne.
+5. **Brouillon de données de Perplexity** : aucune valeur n'entre dans le calcul. Raisons : états de poids différents entre les deux « sources » (légumes cuits contre cru paré), sources non indépendantes ou secondaires, parages qui contredisent la base embarquée. Il reste un document de comparaison.
+6. **Vocabulaire générique** (formes de pâtes, herbes, sauces candidates, sans quantité) autorisé sous `app/` : ce n'est pas un nom de plat du restaurant, comme le lexique existant.
+7. **Feuille Jour** : les avances « hors règle » (plus de deux jours) sont repliées en une ligne avec leur compte, jamais cachées. Le jour affiché est amené à l'écran dans la barre des jours.
+8. **Tableau** : « Tout » de la barre de jours n'existe pas (ce serait un filtre) ; le centre « À confirmer » est une section de la feuille Jour, faute de route dédiée.
 
 ## Limites connues
-(à remplir au fil des lots)
+- Aucune vérification sur un vrai iPhone. L'extension Chrome n'est pas connectée : les écrans ont été relus avec des captures Chrome sans fenêtre à 390 px (rendu réel de la mise en page, mais sans interaction ni tactile).
+- Les tests sous faux DOM ne voient ni IndexedDB réelle ni le service worker.
+- « 1 changement depuis le dernier calcul » (maquette A) n'existe pas : aucun mécanisme de comparaison n'est construit.
+- Le menu 2 : une sauce ou une garniture attribuée au poste par exception reste à la décision du chef.
