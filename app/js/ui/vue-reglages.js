@@ -320,7 +320,7 @@ const LIBELLE_ACTION = {
   controlerProduit: 'Produit contrôlé', definirAchat: 'Achat renseigné', marquerCommande: 'Commande marquée passée',
   saisirVentes: 'Ventes saisies', saisirApresService: 'Après service saisi',
   definirStandard: 'Standard maison réglé', supprimerStandard: 'Standard maison effacé',
-  annulerFait: 'Marquage « fait » annulé', noterExport: 'Sauvegarde exportée', definirMargeSecurite: 'Marge de sécurité réglée',
+  annulerFait: 'Marquage « fait » annulé', composerMelange: 'Mélange composé', noterExport: 'Sauvegarde exportée', definirMargeSecurite: 'Marge de sécurité réglée',
   saisirMenusSemaine: 'Menus de la semaine enregistrés',
 };
 const MOTS_TECHNIQUES = [

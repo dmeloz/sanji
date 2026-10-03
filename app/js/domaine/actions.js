@@ -885,6 +885,33 @@ export function creerRecette(etat, champs, h) {
   return terminer(etat, h, 'creerRecette', etat.recettes[id].nom, id);
 }
 
+/**
+ * Compositeur de mélange : « 2 parts de carottes, 1 part de courgettes ». Crée une recette maison EN PARTS (rendement =
+ * total des parts, en grammes), la lie au composant et le passe en préparation maison. La recette n'est pas validée : le
+ * chef la valide, comme n'importe quelle recette. Les ingrédients sont des proportions de la quantité finie : la perte de
+ * parage de chaque légume n'y est pas appliquée (à compléter par le chef).
+ * @param {{nom:string, parts:number}[]} parts au moins deux lignes, parts strictement positives
+ * @returns {string} l'identifiant de la recette
+ */
+export function composerMelange(etat, composantId, parts, h) {
+  verifierH(h);
+  const c = exigerComposant(etat, composantId);
+  if (!Array.isArray(parts) || parts.length < 2) throw new Error('Un mélange compte au moins deux composants.');
+  for (const l of parts) {
+    if (String(l?.nom ?? '').trim() === '') throw new Error('Chaque composant du mélange doit avoir un nom.');
+    if (!Number.isFinite(l.parts) || l.parts <= 0) throw new Error(`Part de « ${l.nom} » : un nombre strictement positif est attendu.`);
+  }
+  const total = parts.reduce((somme, l) => somme + l.parts, 0);
+  const recetteId = creerRecette(etat, {
+    nom: `Mélange ${c.nom}`, rendement: { valeur: total, unite: 'g' },
+    ingredients: parts.map((l) => ({ nom: String(l.nom).trim(), quantite: l.parts, unite: 'g' })),
+  }, h);
+  c.recetteId = recetteId;
+  c.recetteVersion = etat.recettes[recetteId].version;
+  c.type = 'preparation_maison';
+  return terminer(etat, h, 'composerMelange', `${c.nom} : ${parts.map((l) => `${l.parts} ${l.nom}`).join(', ')}`, recetteId);
+}
+
 /** Nouvelle version : l'ancienne passe dans l'historique et la recette doit être revalidée. */
 export function modifierRecette(etat, recetteId, champs, h) {
   verifierH(h);

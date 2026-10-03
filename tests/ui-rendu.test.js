@@ -6,7 +6,7 @@ import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import {
-  ajouterAdaptation, ajouterPreparatoire, creerFiche, definirCapacite, definirCreneau, definirFournisseur, definirMenu, definirRegle,
+  ajouterAdaptation, ajouterComposant, ajouterPreparatoire, creerFiche, definirCapacite, definirCreneau, definirFournisseur, definirMenu, definirRegle,
   definirStandard, marquerFait, memoriser, modifierComposant, planifier, saisirMenusSemaine, saisirVentes, supprimerStandard,
   controlerProduit,
 } from '../app/js/domaine/actions.js';
@@ -171,6 +171,37 @@ test('jour : deux services du même produit proposent un lot, sans rien planifie
   assert.match(texte, /À faire en une fois/);
   assert.match(texte, /riz : 1 000 g en une fois, pour mardi 6 octobre et mercredi 7 octobre/);
   assert.equal(Object.values(magasin.etat().productions).every((p) => p.jourDecide === null), true, 'rien n\'est planifié seul');
+});
+
+test('composant : « Composer un mélange » crée une recette en parts, non validée, depuis la fiche', async () => {
+  nettoyerPanneaux();
+  const e = etatVide();
+  prevision(e, S.lundi, 2, 10);
+  const id = ajouterComposant(e, S.lundi, 2, { nom: 'légumes du jour', categorie: 'legume', attribue: true }, h());
+  magasin.remplacer(e);
+  const noeud = vues.composant.rendre(magasin.etat(), id);
+  await boutonNomme(noeud, 'Composer un mélange').click();
+  const d = panneauOuvert();
+  remplir(d, 'Composant 1', 'carottes'); remplir(d, 'Parts du composant 1', '2');
+  remplir(d, 'Composant 2', 'courgettes'); remplir(d, 'Parts du composant 2', '1');
+  assert.deepEqual(await soumettre(d), []);
+  const c = magasin.etat().composants[id];
+  assert.equal(c.type, 'preparation_maison');
+  const r = magasin.etat().recettes[c.recetteId];
+  assert.deepEqual(r.ingredients.map((i) => [i.nom, i.quantite]), [['carottes', 2], ['courgettes', 1]]);
+  assert.equal(r.valide, false);
+  // Un seul composant renseigné : refusé dans le panneau, rien n'est créé.
+  const e2 = etatVide();
+  const id2 = ajouterComposant(e2, S.lundi, 2, { nom: 'autre mélange', categorie: 'legume', attribue: true }, h());
+  magasin.remplacer(e2);
+  const noeud2 = vues.composant.rendre(magasin.etat(), id2);
+  nettoyerPanneaux();
+  await boutonNomme(noeud2, 'Composer un mélange').click();
+  const d2 = panneauOuvert();
+  remplir(d2, 'Composant 1', 'carottes'); remplir(d2, 'Parts du composant 1', '2');
+  assert.match((await soumettre(d2)).join(' '), /au moins deux composants/);
+  assert.equal(Object.keys(magasin.etat().recettes).length, 0);
+  nettoyerPanneaux();
 });
 
 test('jour : la jauge d\'avancement dit « x sur y faits » et s\'efface sans production décidée', () => {

@@ -1,7 +1,7 @@
 // Composant : calcul, formule, paramètres et provenance, étapes, pesée, mémoire maison, allergènes, productions.
 
 import {
-  enregistrerPesee, memoriser, modifierComposant, reprendreMemoire, saisirApresService, supprimerComposant,
+  composerMelange, enregistrerPesee, memoriser, modifierComposant, reprendreMemoire, saisirApresService, supprimerComposant,
 } from '../domaine/actions.js';
 import { statutAllergenes } from '../domaine/allergenes.js';
 import { chercherBase } from '../domaine/base.js';
@@ -42,6 +42,37 @@ const ORIGINE_PORTION = {
 const libelleEtat = (d, c) => (c.type === 'preparation_maison' ? 'quantité finie' : `poids ${libelle('ETAT_POIDS', d.etat)}`);
 /** « 110 g, poids sec, standard maison » : la portion utilisée, l'état de son poids, d'où elle vient. */
 const textePortion = (d, c) => `${formaterNombre(d.valeur)} ${nomUnite(d.unite)}, ${libelleEtat(d, c)}, ${ORIGINE_PORTION[d.origine] ?? 'origine non précisée'}`;
+
+// ------------------------------------------------------------------ mélange en parts
+
+const LIGNES_MELANGE = 4;
+
+/** Compositeur : jusqu'à quatre composants avec leurs parts. Crée une recette maison non validée (voir composerMelange). */
+function dialogMelange(c) {
+  const defs = [];
+  for (let i = 1; i <= LIGNES_MELANGE; i += 1) {
+    defs.push({ cle: `nom${i}`, type: 'texte', libelle: `Composant ${i}`, valeur: null, placeholder: i <= 2 ? 'obligatoire' : 'facultatif' });
+    defs.push({ cle: `parts${i}`, type: 'nombre', libelle: `Parts du composant ${i}`, valeur: null });
+  }
+  const f = champs(defs);
+  panneau({
+    titre: `Composer un mélange : ${c.nom}`,
+    corps: [h('p', { classe: 'aide' }, 'Exemple : 2 parts de carottes, 1 part de courgettes. L\'application calcule les proportions de la quantité finie. '
+      + 'La recette créée n\'est pas validée : vous la validez dans Réglages. La perte de parage de chaque légume n\'est pas appliquée.'),
+    ...f.noeuds],
+    libelleEnregistrer: 'Créer la recette',
+    surEnregistrer: () => {
+      const lignes = [];
+      for (let i = 1; i <= LIGNES_MELANGE; i += 1) {
+        const nom = String(f.valeur(`nom${i}`) ?? '').trim();
+        const parts = f.valeur(`parts${i}`);
+        if (nom === '' && parts === null) continue;
+        lignes.push({ nom, parts: parts ?? 0 });
+      }
+      agirStrict((x, t) => composerMelange(x, c.id, lignes, t));
+    },
+  });
+}
 
 // ------------------------------------------------------------------ modifier
 
@@ -274,6 +305,7 @@ function sectionEntete(etat, c, calc) {
     h('p', { classe: 'meta' }, `Portions : ${pluriel(p.total, 'portion')} (hors groupes ${p.prevision}${p.previsionManquante ? ', non saisie' : ''} ; groupes confirmés ${p.groupesConfirmes} ; groupes provisoires ${p.groupesProvisoires})`),
     h('div', { classe: 'actions' },
       bouton('Modifier', () => dialogModifier(c), 'court'),
+      c.recetteId ? null : bouton('Composer un mélange', () => dialogMelange(c), 'court'),
       bouton('Supprimer', () => confirmer({
         titre: 'Supprimer ce composant ?', texte: `${c.nom} et ses tâches non faites seront supprimés.`, libelleOk: 'Supprimer', danger: true,
         action: () => { agirStrict((e, t) => supprimerComposant(e, c.id, t)); location.hash = `#/detail/${c.date}`; },
