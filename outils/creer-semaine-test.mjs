@@ -21,11 +21,11 @@ const e = etatInitial();
 
 // Menus de la semaine (menu 1 = plat complet, menu 2 = légumes et féculent).
 const MENUS = {
-  [L]: ['Poulet, riz, carottes', 'Risotto aux courgettes, tomates'],
-  [MA]: ['Poisson, pommes de terre, épinards', 'Pâtes aux poireaux, quinoa'],
-  [ME]: ['Boeuf braisé, polenta, blettes', 'Lentilles, riz pilaf, endives'],
-  [J]: ['Escalope, pâtes, brocoli', 'Gnocchi, courge'],
-  [V]: ['Saumon, riz, fenouil', 'Haricots blancs, carottes'],
+  [L]: ['Trofie au saumon fumé et à l’aneth', 'Suprême de poulet, purée mousseline, carottes étuvées'],
+  [MA]: ['Risotto aux bolets', 'Filet de bœuf, pommes de terre grenailles, haricots verts'],
+  [ME]: ['Tagliatelles aux morilles', 'Escalope de veau, polenta, blettes'],
+  [J]: ['Penne aux crevettes sauce curry', 'Filet de bar, riz, brocoli'],
+  [V]: ['Spaghetti carbonara', 'Saumon, quinoa, fenouil'],
 };
 for (const [date, [m1, m2]] of Object.entries(MENUS)) {
   definirMenu(e, date, 1, m1, h(SAMEDI, 8));
@@ -41,14 +41,10 @@ for (const [date, [p1, p2]] of Object.entries(PREVISIONS)) {
 
 // Standards maison de la semaine d'essai (valeurs arbitraires, états du poids explicites).
 const S = (valeur, etat) => ({ valeur, unite: 'g', etat });
-definirStandard(e, 'riz', 'plat_principal', S(70, 'sec'), h(SAMEDI, 8));
-definirStandard(e, 'riz', 'garniture', S(50, 'sec'), h(SAMEDI, 8));
-definirStandard(e, 'pates_seches', 'plat_principal', S(90, 'sec'), h(SAMEDI, 8));
-definirStandard(e, 'pates_seches', 'garniture', S(60, 'sec'), h(SAMEDI, 8));
-definirStandard(e, 'quinoa', 'garniture', S(50, 'sec'), h(SAMEDI, 8));
+definirStandard(e, 'pommes_de_terre', 'garniture', S(200, 'cru_net'), h(SAMEDI, 8));
+definirStandard(e, 'carottes', 'garniture', S(120, 'cru_net'), h(SAMEDI, 8));
 definirStandard(e, 'polenta', 'garniture', S(50, 'sec'), h(SAMEDI, 8));
-definirStandard(e, 'pommes_de_terre', 'plat_principal', S(200, 'cru_net'), h(SAMEDI, 8));
-definirStandard(e, 'legumineuses', 'garniture', S(60, 'sec'), h(SAMEDI, 8));
+definirStandard(e, 'quinoa', 'garniture', S(50, 'sec'), h(SAMEDI, 8));
 // Un standard de catégorie « Légumes » : il sert aux légumes de toutes les familles sans standard, et à ceux sans famille.
 definirStandard(e, 'groupe:legumes', 'garniture', S(120, 'cru_net'), h(SAMEDI, 8));
 definirStandard(e, 'groupe:legumes', 'plat_principal', S(120, 'cru_net'), h(SAMEDI, 8));
@@ -68,19 +64,16 @@ for (const [date, v1, v2] of [['2026-09-14', 38, 21], ['2026-09-21', 41, 26], ['
 //  - carottes du lundi : planifiées et FAITES cet après-midi (2 jours d'avance : dans la règle) ;
 //  - pommes de terre du mardi : faites aussi, mais c'est 3 jours d'avance (samedi, dimanche non travaillé, lundi, mardi) :
 //    hors règle, donc non couvertes et un écart à arbitrer. Cas limite voulu pour essayer l'écran ;
-//  - riz du lundi : planifié pour ce soir, pas encore fait (forme un lot avec le risotto du lundi).
-const production = (date, nom) => Object.values(e.productions).find((p) => {
+const production = (date, famille) => Object.values(e.productions).find((p) => {
   const c = e.composants[p.composantId];
-  return p.genre === 'principale' && p.dateService === date && c?.nom === nom;
+  return p.genre === 'principale' && p.dateService === date && c?.famille === famille;
 });
 const carottesLundi = production(L, 'carottes');
 planifier(e, carottesLundi.id, SAMEDI, 'apres_midi', h(SAMEDI, 13));
 marquerFait(e, carottesLundi.id, undefined, h(SAMEDI, 15));
-const pdtMardi = production(MA, 'pommes de terre');
+const pdtMardi = production(MA, 'pommes_de_terre');
 planifier(e, pdtMardi.id, SAMEDI, 'apres_midi', h(SAMEDI, 13));
 marquerFait(e, pdtMardi.id, undefined, h(SAMEDI, 16));
-const rizLundi = production(L, 'riz');
-planifier(e, rizLundi.id, SAMEDI, 'avant_soir', h(SAMEDI, 17));
 
 const dossier = join(dirname(fileURLToPath(import.meta.url)), 'sorties');
 mkdirSync(dossier, { recursive: true });
