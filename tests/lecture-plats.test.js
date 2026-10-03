@@ -123,8 +123,7 @@ test('les 30 cas : aucun élément hors poste mis au poste (dimension poste)', (
 const SEUIL = Math.ceil(reels.length * 0.9);
 const atteint = compte((r) => r.ok, reels) >= SEUIL;
 test(`seuil : au moins 90 % des cas non provisoires entièrement corrects (${SEUIL} sur ${reels.length})`,
-  { todo: atteint ? false : `score obtenu ${compte((r) => r.ok, reels)}/${reels.length}` },
-  () => { assert.ok(atteint, rapport()); });
+  () => { assert.ok(atteint, `score obtenu ${compte((r) => r.ok, reels)}/${reels.length}\n${rapport()}`); });
 
 test('rapport des trois dimensions (information)', () => {
   console.log(`# lecture des plats : ${rapport()}`.split('\n').map((l, i) => (i === 0 ? l : `# ${l}`)).join('\n'));
