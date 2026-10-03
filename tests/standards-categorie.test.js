@@ -84,6 +84,9 @@ test('actions : définir, refuser et supprimer un standard de catégorie', () =>
   assert.equal(e.standards[cle].garniture.etat, 'cru_net');
   assert.throws(() => definirStandard(e, 'groupe:inconnu', 'garniture', { valeur: 1, unite: 'g', etat: 'sec' }, h()), /Famille de produits inconnue/);
   assert.throws(() => definirStandard(e, cle, 'role_inconnu', { valeur: 1, unite: 'g', etat: 'sec' }, h()), /Rôle/);
+  const journal = JSON.stringify(e.journal);
+  assert.match(journal, /Légumes \(catégorie\) garniture : 130 g/, 'le journal parle en clair');
+  assert.doesNotMatch(journal, /groupe:/);
   assert.equal(supprimerStandard(e, cle, 'garniture', h()), true);
   assert.equal(Object.hasOwn(e.standards, cle), false);
   assert.equal(supprimerStandard(e, cle, 'garniture', h()), false);

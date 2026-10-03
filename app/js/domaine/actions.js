@@ -13,7 +13,7 @@ import { categoriePropose, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
 import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, regleDe } from './planification.js';
 import { besoinsProduits, cleSuivi } from './produits.js';
-import { appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
+import { GROUPES, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
   CATEGORIE, CHARGE, ETAPE, ETAT_CRENEAU, ETAT_POIDS, PROVENANCE, ROLE, TYPE_COMPOSANT, UNITE, VERIF,
 } from './statuts.js';
@@ -737,6 +737,12 @@ export function reprendreMemoire(etat, composantId, h) {
 
 // ---------------------------------------------------------------- standards maison
 
+/** Nom lisible d'une famille ou d'une catégorie de standard, pour le journal. */
+function nomStandard(cle) {
+  const g = groupeDeCleStandard(cle);
+  return g ? `${GROUPES.find((x) => x.cle === g).libelle} (catégorie)` : cle;
+}
+
 function verifierFamilleEtRole(cleFamille, role) {
   // Une clé « groupe:… » désigne une grande catégorie (standard valable pour toutes ses familles).
   if (!familleParCle(cleFamille) && !groupeDeCleStandard(cleFamille)) {
@@ -764,7 +770,7 @@ export function definirStandard(etat, cleFamille, role, saisie, h) {
   if (!Object.hasOwn(etat.standards, cleFamille)) etat.standards[cleFamille] = {};
   const standard = { valeur, unite, etat: etatPoids, h };
   etat.standards[cleFamille][role] = standard;
-  return terminer(etat, h, 'definirStandard', `${cleFamille} ${role} : ${valeur} ${unite} (${etatPoids})`, standard);
+  return terminer(etat, h, 'definirStandard', `${nomStandard(cleFamille)} ${role} : ${valeur} ${unite} (${etatPoids})`, standard);
 }
 
 /**
@@ -779,7 +785,7 @@ export function supprimerStandard(etat, cleFamille, role, h) {
   if (!roles || !Object.hasOwn(roles, role)) return false;
   delete roles[role];
   if (Object.keys(roles).length === 0) delete etat.standards[cleFamille];
-  return terminer(etat, h, 'supprimerStandard', `${cleFamille} ${role}`, true);
+  return terminer(etat, h, 'supprimerStandard', `${nomStandard(cleFamille)} ${role}`, true);
 }
 
 // ---------------------------------------------------------------- règles, recettes, fournisseurs
