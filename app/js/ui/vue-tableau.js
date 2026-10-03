@@ -139,9 +139,14 @@ function zoneProduction(bord) {
   const p = bord.production;
   const { faites, total } = p.avancement;
   const lignes = [];
+  if (p.autreSemaine) {
+    lignes.push(h('li', null, h('p', { classe: 'meta' }, `Semaine du ${libelleJour(p.lundi).replace(/^lundi\s+/, '')}`)));
+  }
   lignes.push(h('li', null, h('a', { href: p.lien, classe: 'bord-ligne bord-jauge' },
     total > 0 ? h('progress', { classe: 'avancement-barre', value: faites, max: total, 'aria-hidden': 'true' }) : null,
-    h('span', { classe: 'bord-ligne-texte feutre' }, total > 0 ? `Aujourd'hui ${faites}/${total} fait` : "Aujourd'hui : aucune tâche décidée"))));
+    h('span', { classe: 'bord-ligne-texte feutre' }, p.autreSemaine
+      ? (total > 0 ? `${faites}/${total} fait cette semaine` : 'Aucune tâche décidée cette semaine')
+      : (total > 0 ? `Aujourd'hui ${faites}/${total} fait` : "Aujourd'hui : aucune tâche décidée")))));
   if (p.avances > 0) {
     lignes.push(h('li', null, h('a', { href: p.lien, classe: 'bord-ligne' },
       h('span', { classe: 'bord-ligne-texte' }, `${pluriel(p.avances, 'avance possible', 'avances possibles')} après le service`))));

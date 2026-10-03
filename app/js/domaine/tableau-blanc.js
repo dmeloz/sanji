@@ -374,7 +374,9 @@ function menusDuBord(jours, aujourdhui) {
   const avecMenu = jours.filter((j) => j.aMenu);
   const aVenir = avecMenu.filter((j) => j.date >= aujourdhui);
   const dansLaSemaine = jours.some((j) => j.date === aujourdhui);
-  const depart = dansLaSemaine && aVenir.length > 0 ? aVenir : avecMenu;
+  // Une autre semaine que la courante : ses trois premiers jours à menu saisi (à défaut, ses jours à menu).
+  const saisis = avecMenu.filter((j) => j.menus.some((m) => m.saisi));
+  const depart = dansLaSemaine && aVenir.length > 0 ? aVenir : (!dansLaSemaine && saisis.length > 0 ? saisis : avecMenu);
   const visibles = depart.slice(0, MENUS_VISIBLES);
   const reste = avecMenu.filter((j) => !visibles.includes(j));
   const aucunMenu = !avecMenu.some((j) => j.menus.some((m) => m.saisi)) && jours.every((j) => j.groupes.length === 0);
@@ -451,16 +453,30 @@ function commandeARelire(etat, lundi, aujourdhui) {
   return morceaux.length > 0 ? { texte: `Commande à relire : ${morceaux.join(', ')}`, lien: `#/produits/${lundi}` } : null;
 }
 
-/** Production et commandes en résumé pour le jour désigné. */
+/**
+ * Production et commandes en résumé. Semaine courante : le jour désigné. Autre semaine affichée : l'avancement de CETTE
+ * semaine (`autreSemaine`), jamais celui d'aujourd'hui ; les avances possibles ne parlent que d'aujourd'hui et sont tues.
+ */
 function productionDuBord(etat, aujourdhui, lundi) {
+  const autreSemaine = lundi !== lundiDe(aujourdhui);
+  const commande = commandeARelire(etat, lundi, aujourdhui);
+  // Ce qui n'est pas encore chiffré : information neutre, jamais une alerte ni une décision.
+  const chiffrage = besoinsDe(etat, lundi).lignes;
+  if (autreSemaine) {
+    const avancement = { faites: 0, total: 0 };
+    for (let i = 0; i < 6; i += 1) {
+      const date = ajouterJours(lundi, i);
+      const a = estOuvert(date) ? feuilleDuJour(etat, date).avancement : null;
+      if (a) { avancement.faites += a.faites; avancement.total += a.total; }
+    }
+    return { autreSemaine, lundi, date: lundi, lien: `#/jour/${lundi}`, avancement, avances: 0, commande, chiffrage };
+  }
   const feuille = estOuvert(aujourdhui) ? feuilleDuJour(etat, aujourdhui) : null;
   const avances = feuille ? feuille.aAvancer.filter((a) => Number.isFinite(a.cible) && a.evaluation.autorisee).length : 0;
   return {
-    date: aujourdhui, lien: `#/jour/${aujourdhui}`,
+    autreSemaine, lundi, date: aujourdhui, lien: `#/jour/${aujourdhui}`,
     avancement: feuille ? feuille.avancement : { faites: 0, total: 0 },
-    avances, commande: commandeARelire(etat, lundi, aujourdhui),
-    // Ce qui n'est pas encore chiffré : information neutre, jamais une alerte ni une décision.
-    chiffrage: besoinsDe(etat, lundi).lignes,
+    avances, commande, chiffrage,
   };
 }
 

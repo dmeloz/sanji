@@ -321,3 +321,12 @@ test('Accessibilité : chaque case « Fait » porte le nom du plat ; le rang de 
   }
   assert.equal(noeud.tous((x) => x.balise === 'span' && x.attributs['aria-label'] !== undefined && !x.attributs.role).length, 0);
 });
+
+test('Tableau : sur une autre semaine, Production dit de quelle semaine elle parle et ne dit pas « Aujourd\'hui »', () => {
+  const e = semaine();
+  const zoneAutre = classes(tableau(S.mardi, e, S.lundiSuivant), 'bord-production')[0];
+  assert.match(zoneAutre.textContent, /Semaine du 12 octobre/);
+  assert.doesNotMatch(zoneAutre.textContent, /Aujourd'hui/);
+  const zoneCourante = classes(tableau(S.mardi, e), 'bord-production')[0];
+  assert.doesNotMatch(zoneCourante.textContent, /Semaine du/);
+});

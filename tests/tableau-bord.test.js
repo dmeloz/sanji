@@ -158,3 +158,27 @@ test('bord : la sauce implicite d\'un plat de pâtes est marquée implicite et n
   assert.ok(menu.morceaux.filter((m) => !m.implicite).length >= 1, 'ce que le chef a écrit reste distinct');
   assert.equal(menu.nbPlats, menu.morceaux.filter((m) => !m.implicite).length, 'jamais compté comme un plat');
 });
+
+test('bord : une autre semaine affichée a sa propre production, jamais les chiffres d\'aujourd\'hui', () => {
+  const e = etatVide();
+  prevision(e, S.mercredi, 1, 10);
+  planifier(e, principaleDe(e, composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST)), S.mardi, 'apres_midi', h());
+  prevision(e, '2026-10-14', 1, 10);
+  planifier(e, principaleDe(e, composantValide(e, '2026-10-14', 1, J.PRODUIT_SEC_TEST)), '2026-10-13', 'apres_midi', h());
+  const courante = tableauBlanc(e, S.mardi).bord.production;
+  assert.equal(courante.autreSemaine, false);
+  assert.deepEqual(courante.avancement, { faites: 0, total: 1 });
+  const autre = tableauBlanc(e, S.mardi, S.lundiSuivant).bord.production;
+  assert.equal(autre.autreSemaine, true);
+  assert.equal(autre.lundi, S.lundiSuivant);
+  assert.deepEqual(autre.avancement, { faites: 0, total: 1 }, 'la tâche de la semaine affichée, pas celle d\'aujourd\'hui');
+  assert.equal(autre.avances, 0);
+  assert.equal(autre.lien, `#/jour/${S.lundiSuivant}`);
+});
+
+test('bord : les menus d\'une autre semaine sont les trois premiers jours à menu saisi de cette semaine', () => {
+  const e = etatVide();
+  for (const jour of ['2026-10-14', '2026-10-15', '2026-10-16']) { menuValide(e, jour, 1, 'INTITULE_TEST_1'); prevision(e, jour, 1, 10); }
+  const { menus } = tableauBlanc(e, S.mardi, S.lundiSuivant).bord;
+  assert.deepEqual(menus.visibles.map((j) => j.date), ['2026-10-14', '2026-10-15', '2026-10-16'], 'les jours sans menu saisi ne prennent pas la place');
+});
