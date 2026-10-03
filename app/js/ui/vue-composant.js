@@ -7,7 +7,8 @@ import { statutAllergenes } from '../domaine/allergenes.js';
 import { chercherBase } from '../domaine/base.js';
 import { calculerComposant } from '../domaine/calcul.js';
 import { libelleJour } from '../domaine/dates.js';
-import { lireMemoire } from '../domaine/etat.js';
+import { estSauceAConfirmer, lireMemoire } from '../domaine/etat.js';
+import { SAUCES } from '../domaine/vocabulaire-plats.js';
 import { etapesComposant } from '../domaine/planification.js';
 import { cleStandardDe, valeurPour } from '../domaine/validation.js';
 import {
@@ -74,6 +75,30 @@ function dialogMelange(c) {
         lignes.push({ nom, parts: parts ?? 0 });
       }
       agirStrict((x, t) => composerMelange(x, c.id, lignes, t));
+    },
+  });
+}
+
+// ------------------------------------------------------------------ choisir la sauce
+
+/**
+ * Sauce implicite « à confirmer » : le chef choisit parmi les sauces du vocabulaire (aucune présélectionnée : la crème
+ * n'est jamais le défaut) ou tape la sienne. Valider renomme le composant ; la saisie libre prime sur la liste.
+ */
+function dialogChoisirSauce(c) {
+  const f = champs([
+    { cle: 'choix', type: 'radio', libelle: 'Sauces possibles', valeur: null, options: SAUCES.map((s) => [s.nom, s.nom]) },
+    { cle: 'libre', type: 'texte', libelle: 'Une autre sauce', valeur: '', placeholder: 'nom de la sauce' },
+  ]);
+  panneau({
+    titre: `Choisir la sauce : ${c.nom}`,
+    corps: [h('p', { classe: 'aide' }, 'Rien n\'est choisi à votre place : cochez une sauce ou tapez la vôtre.'), ...f.noeuds],
+    libelleEnregistrer: 'Valider la sauce',
+    surEnregistrer: () => {
+      const libre = String(f.valeur('libre') ?? '').trim();
+      const nom = libre !== '' ? libre : f.valeur('choix');
+      if (!nom) throw new Error('Choisissez une sauce dans la liste ou tapez son nom.');
+      agirStrict((x, t) => modifierComposant(x, c.id, { nom }, t));
     },
   });
 }
@@ -316,6 +341,7 @@ function sectionEntete(etat, c, calc) {
     h('p', { classe: 'meta' }, `Portions : ${pluriel(p.total, 'portion')} (hors groupes ${p.prevision}${p.previsionManquante ? ', non saisie' : ''} ; groupes confirmés ${p.groupesConfirmes} ; groupes provisoires ${p.groupesProvisoires})`),
     h('div', { classe: 'actions' },
       bouton('Modifier', () => dialogModifier(c), 'court'),
+      estSauceAConfirmer(c) ? bouton('Choisir la sauce', () => dialogChoisirSauce(c), 'court') : null,
       c.recetteId ? null : bouton('Composer un mélange', () => dialogMelange(c), 'court'),
       bouton('Supprimer', () => confirmer({
         titre: 'Supprimer ce composant ?', texte: `${c.nom} et ses tâches non faites seront supprimés.`, libelleOk: 'Supprimer', danger: true,

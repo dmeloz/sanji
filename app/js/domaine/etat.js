@@ -37,6 +37,11 @@ export function lireMemoire(memoire, nom, menu) {
   return null;
 }
 
+const NOMS_IMPLICITES = new Set(['sauce a confirmer', 'base de risotto a confirmer']);
+
+/** Vrai pour la sauce implicite d'un menu 1 encore non confirmée (nom d'origine « sauce à confirmer » ou « base de risotto à confirmer »). */
+export const estSauceAConfirmer = (c) => c?.categorie === 'sauce' && NOMS_IMPLICITES.has(normaliser(c.nom));
+
 let compteur = 0;
 
 /** Identifiant « prefixe_compteur+aléa », indépendant de l'heure. */

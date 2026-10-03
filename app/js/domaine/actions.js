@@ -6,7 +6,7 @@ import {
   aMenuDuJour, creneauxDuJour, creneauxDuJourSemaine, datesDeLaSemaine, estOuvert, estDateValide, jourSemaine,
 } from './dates.js';
 import {
-  ajouterJournal, assurerJour, composantVide, ficheVide, fournisseurVide, memoireVide, normaliser, nouvelId,
+  ajouterJournal, assurerJour, composantVide, estSauceAConfirmer, ficheVide, fournisseurVide, memoireVide, normaliser, nouvelId,
   productionVide, recetteVide, regleVide, suiviProduitVide,
 } from './etat.js';
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
@@ -192,6 +192,7 @@ function creerComposant(etat, date, menu, champs) {
   const id = nouvelId('comp');
   const c = { ...composantVide(id), date, menu, nom: champs.nom, categorie: champs.categorie ?? 'a_preciser',
     attribue: champs.attribue ?? true, type: champs.type ?? 'a_preciser', valide: champs.valide ?? false };
+  if (champs.implicite === true) c.implicite = true; // sauce issue de la lecture implicite (« à confirmer »)
   etat.composants[id] = c;
   return c;
 }
@@ -208,14 +209,20 @@ function fusionnerComposants(etat, date, menu, retires = []) {
   const propositions = proposerComposants(m.intitule, menu, etat.memoire);
   const voulus = new Set(propositions.map((p) => normaliser(p.nom)));
   const duMenu = () => Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
+  // Une sauce issue de la lecture implicite et déjà confirmée (renommée) reste tant que l'intitulé n'écrit pas de sauce :
+  // la lecture propose alors encore une sauce implicite, qui n'est pas recréée par-dessus.
+  const sauceImplicitePropose = propositions.some((p) => p.implicite === true);
+  const confirmee = (c) => c.implicite === true && c.categorie === 'sauce' && !estSauceAConfirmer(c);
+  const gardeeConfirmee = sauceImplicitePropose ? duMenu().find(confirmee) : undefined;
   for (const c of duMenu()) {
-    if (voulus.has(normaliser(c.nom))) {
+    if (voulus.has(normaliser(c.nom)) || c === gardeeConfirmee) {
       c.valide = true; // plus de validation manuelle : un composant resté non validé par l'ancien parcours l'est désormais
       continue;
     }
     const aProductionFaite = Object.values(etat.productions).some((p) => p.composantId === c.id && p.etat === 'fait');
     if (!aProductionFaite) {
-      retires.push({ nom: c.nom, taches: Object.values(etat.productions).filter((p) => p.composantId === c.id).length });
+      retires.push({ nom: c.nom, taches: Object.values(etat.productions).filter((p) => p.composantId === c.id).length,
+        sauceConfirmee: confirmee(c) && propositions.some((p) => p.categorie === 'sauce') });
       delete etat.composants[c.id];
     }
   }
@@ -224,6 +231,7 @@ function fusionnerComposants(etat, date, menu, retires = []) {
   for (const p of propositions) {
     const cle = normaliser(p.nom);
     if (presents.has(cle)) continue;
+    if (p.implicite === true && gardeeConfirmee) continue;
     presents.add(cle);
     const c = creerComposant(etat, date, menu, { ...p, valide: true });
     appliquerSavoir(etat, c);
@@ -250,7 +258,7 @@ function enregistrerMenu(etat, date, menu, texte, retires = []) {
 /** « , retiré : carottes (1 tâche) » : ce qu'une modification de menu a fait disparaître, pour le journal. */
 function texteRetires(retires) {
   if (retires.length === 0) return '';
-  const liste = retires.map((r) => `${r.nom}${r.taches > 0 ? ` (${r.taches} tâche${r.taches > 1 ? 's' : ''})` : ''}`).join(', ');
+  const liste = retires.map((r) => `${r.nom}${r.taches > 0 ? ` (${r.taches} tâche${r.taches > 1 ? 's' : ''})` : ''}${r.sauceConfirmee ? ' (sauce confirmée, remplacée par la sauce écrite dans l\'intitulé)' : ''}`).join(', ');
   return ` : retiré ${liste}`;
 }
 

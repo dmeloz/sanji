@@ -70,6 +70,34 @@ test('mémoire : repli sur l\'ancienne clé nom, sauf une protéine attribuée a
   assert.equal(typeof pointsAConfirmer(e, S.lundi).length, 'number');
 });
 
+// ---------------------------------------------------------------- 4. sauce confirmée conservée
+
+function penneConfirmee() {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'Penne aux courgettes', h());
+  const implicite = parNom(e, S.lundi, 1, 'sauce à confirmer');
+  assert.ok(implicite, 'la sauce implicite est proposée « à confirmer »');
+  modifierComposant(e, implicite.id, { nom: 'sauce tomate' }, h(1));
+  return { e, id: implicite.id };
+}
+
+test('sauce : une sauce implicite confirmée (renommée) survit à une modification de l\'intitulé sans sauce écrite', () => {
+  const { e, id } = penneConfirmee();
+  definirMenu(e, S.lundi, 1, 'Penne aux courgettes et basilic', h(2));
+  assert.equal(e.composants[id]?.nom, 'sauce tomate', 'la sauce confirmée est conservée');
+  assert.equal(parNom(e, S.lundi, 1, 'sauce à confirmer'), undefined, 'aucune nouvelle sauce à confirmer');
+  assert.equal(Object.values(e.composants).filter((c) => c.menu === 1 && c.categorie === 'sauce').length, 1);
+});
+
+test('sauce : avec une sauce écrite, l\'ancienne sauce confirmée est retirée et le journal le dit', () => {
+  const { e, id } = penneConfirmee();
+  definirMenu(e, S.lundi, 1, 'Penne aux courgettes, sauce pesto', h(2));
+  assert.equal(e.composants[id], undefined);
+  const derniere = e.journal.filter((j) => j.action === 'definirMenu').at(-1).detail;
+  assert.match(derniere, /sauce tomate/);
+  assert.match(derniere, /sauce confirmée/);
+});
+
 // ---------------------------------------------------------------- 3. feuille Jour : pas de doublon
 
 test('feuille Jour : une tâche planifiée aujourd\'hui à quantité inconnue n\'est classée qu\'une fois', () => {
