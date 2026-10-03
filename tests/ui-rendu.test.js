@@ -145,11 +145,18 @@ test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide
   magasin.remplacer(e);
   const texte = vues.jour.rendre(magasin.etat(), S.mardi).textContent;
   const ordre = ['À faire', "Attendu d'un autre jour", 'Déjà prêt pour le service', 'Décisions nécessaires', 'À avancer si possible'];
+  // Une rubrique vide n'est plus affichée (page moins chargée) : seules les rubriques présentes gardent leur ordre.
+  const presentes = ordre.filter((r) => texte.includes(r));
+  assert.equal(presentes[0], 'À faire', '« À faire » est toujours là, en tête');
   let position = -1;
-  for (const r of ordre) {
+  for (const r of presentes) {
     const p = texte.indexOf(r);
-    assert.ok(p > position, `rubrique « ${r} » absente ou dans le mauvais ordre`);
+    assert.ok(p > position, `rubrique « ${r} » dans le mauvais ordre`);
     position = p;
+  }
+  const vide = vues.jour.rendre(magasin.etat(), S.jeudi).textContent;
+  for (const r of ["Attendu d'un autre jour", 'Déjà prêt pour le service', 'Décisions nécessaires']) {
+    assert.doesNotMatch(vide, new RegExp(r), `la rubrique vide « ${r} » n'est pas affichée`);
   }
   assert.match(texte, /revue de mi-semaine/);
   assert.doesNotMatch(vues.jour.rendre(magasin.etat(), S.lundi).textContent, /revue de mi-semaine/);

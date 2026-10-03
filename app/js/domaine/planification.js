@@ -245,13 +245,17 @@ export function avancesPossibles(etat, aujourdhui) {
  * - dejaPret : productions faites dont le service est ce jour ou plus tard, avec l'évaluation d'avance
  *   (couvre faux : affiché « non couvert ») ;
  * - attendus : productions non faites décidées un jour antérieur pour un service à venir (« prévu samedi ») ;
- * - decisions : à préciser, à planifier ou écart à arbitrer, pour un service dans les 4 jours ;
- * - aAvancer : avances possibles non déjà décidées ce jour ; revueMiSemaine : vrai le mardi.
+ * - decisions : à planifier ou écart à arbitrer, pour un service dans les 4 jours ;
+ * - quantitesManquantes : les éléments « à préciser » (quantité inconnue) dans la même fenêtre. Ce n'est pas une
+ *   décision : le chef saisit ou révise les quantités quand il veut, et tout se recalcule ;
+ * - aAvancer : avances possibles non déjà décidées ce jour, seulement pour les éléments dont la quantité est connue ;
+ *   revueMiSemaine : vrai le mardi.
  */
 export function feuilleDuJour(etat, date) {
   const dejaPret = [];
   const attendus = [];
   const decisions = [];
+  const quantitesManquantes = [];
   const parCreneau = new Map(creneauxDuJour(date).map((c) => [c, []]));
   const horizon = ajouterJours(date, HORIZON_AVANCES);
   for (const p of Object.values(etat.productions ?? {})) {
@@ -269,13 +273,14 @@ export function feuilleDuJour(etat, date) {
     }
     if (['a_preciser', 'a_planifier', 'ecart'].includes(l.etat) && p.dateService >= date && p.dateService <= horizon
       && !(p.etat !== 'fait' && p.jourDecide && p.jourDecide < date)) {
-      decisions.push({ ...l, motif: l.etat });
+      if (l.etat === 'a_preciser') quantitesManquantes.push(l);
+      else decisions.push({ ...l, motif: l.etat });
     }
   }
   const aFaire = [...parCreneau.entries()].map(([creneau, taches]) => ({
     creneau, etatCreneau: creneau ? etatCreneau(etat, date, creneau) : null,
     charge: creneau ? chargeCreneau(etat, date, creneau) : null, taches,
   }));
-  const aAvancer = estOuvert(date) ? avancesPossibles(etat, date).filter((a) => a.jourDecide !== date) : [];
-  return { aFaire, dejaPret, decisions, aAvancer, attendus, revueMiSemaine: jourSemaine(date) === 2 };
+  const aAvancer = estOuvert(date) ? avancesPossibles(etat, date).filter((a) => a.jourDecide !== date && a.etat !== 'a_preciser') : [];
+  return { aFaire, dejaPret, decisions, quantitesManquantes, aAvancer, attendus, revueMiSemaine: jourSemaine(date) === 2 };
 }

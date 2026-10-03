@@ -250,7 +250,7 @@ test('feuilleDuJour : rubriques, créneaux, décisions, revue de mi-semaine', ()
   assert.deepEqual(feuilleDuJour(e, S.mardi), {
     aFaire: [{ creneau: 'avant_midi', etatCreneau: 'libre', charge: chargeCreneau(e, S.mardi, 'avant_midi'), taches: [] },
       { creneau: 'apres_midi', etatCreneau: 'libre', charge: chargeCreneau(e, S.mardi, 'apres_midi'), taches: [] }],
-    dejaPret: [], decisions: [], aAvancer: [], attendus: [], revueMiSemaine: true,
+    dejaPret: [], decisions: [], quantitesManquantes: [], aAvancer: [], attendus: [], revueMiSemaine: true,
   });
   assert.equal(feuilleDuJour(e, S.lundi).revueMiSemaine, false);
   assert.deepEqual(feuilleDuJour(e, S.dimanche).aFaire, []);

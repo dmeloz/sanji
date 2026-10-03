@@ -1,12 +1,12 @@
 // Jour (feuille quotidienne) : à faire, attendu, déjà prêt, décisions, à avancer.
 
-import { ajouterJours, estOuvert, libelleJour } from '../domaine/dates.js';
+import { ajouterJours, estOuvert, libelleJour, lundiDe } from '../domaine/dates.js';
 import { evaluationProduction, feuilleDuJour } from '../domaine/planification.js';
 import { decisionsSansDoublon } from '../domaine/tableau-blanc.js';
 import { libelle } from '../domaine/statuts.js';
 import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
-import { bouton, encadre, ligneVide, lien, navigationPeriode, pastille } from './elements.js';
+import { bouton, encadre, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
 import { formaterHeure } from './format.js';
 import {
   carteTache, dialogPlanifier, dialogPreparatoire, pastilleCreneau, texteCharge,
@@ -15,7 +15,6 @@ import {
 export const titre = () => 'Jour';
 
 const MOTIF = {
-  a_preciser: 'Quantité à préciser.',
   a_planifier: 'Jour et créneau à décider.',
   ecart: 'Écart à arbitrer : complément, ajustement ou aucune production supplémentaire.',
 };
@@ -40,15 +39,15 @@ function rubriqueAFaire(etat, feuille, date, aujourd) {
 }
 
 function rubriqueAttendus(etat, feuille) {
-  return rubrique("Attendu d'un autre jour", feuille.attendus.length === 0
-    ? ligneVide('Rien d\'attendu d\'un autre jour.')
-    : feuille.attendus.map((t) => carteTache(etat, t, { evaluation: evaluationSiAvance(etat, t.productionId) })));
+  if (feuille.attendus.length === 0) return null;
+  return rubrique("Attendu d'un autre jour",
+    feuille.attendus.map((t) => carteTache(etat, t, { evaluation: evaluationSiAvance(etat, t.productionId) })));
 }
 
 function rubriqueDejaPret(etat, feuille) {
-  return rubrique('Déjà prêt pour le service', feuille.dejaPret.length === 0
-    ? ligneVide('Rien de prêt pour l\'instant.')
-    : feuille.dejaPret.map((t) => {
+  if (feuille.dejaPret.length === 0) return null;
+  return rubrique('Déjà prêt pour le service',
+    feuille.dejaPret.map((t) => {
       const p = etat.productions[t.productionId];
       return carteTache(etat, t, {
         evaluation: t.evaluation && t.evaluation.jours > 0 ? t.evaluation : null,
@@ -60,28 +59,47 @@ function rubriqueDejaPret(etat, feuille) {
 function rubriqueDecisions(etat, feuille) {
   // Une tâche seulement « à planifier » déjà proposée dans « À avancer si possible » n'est pas répétée ici.
   const decisions = decisionsSansDoublon(feuille);
-  return rubrique('Décisions nécessaires', decisions.length === 0
-    ? ligneVide('Aucune décision en attente.')
-    : decisions.map((t) => carteTache(etat, t, { motif: MOTIF[t.motif] })));
+  if (decisions.length === 0) return null;
+  return rubrique('Décisions nécessaires', decisions.map((t) => carteTache(etat, t, { motif: MOTIF[t.motif] })));
+}
+
+/** Une quantité inconnue n'est pas une décision : une seule rubrique calme, sans obligation, qui renvoie aux saisies. */
+function rubriqueQuantites(feuille) {
+  const manquants = feuille.quantitesManquantes;
+  if (manquants.length === 0) return null;
+  const noms = [...new Set(manquants.map((q) => q.nom))];
+  const apercu = `${noms.slice(0, 6).join(', ')}${noms.length > 6 ? `, et ${noms.length - 6} autres` : ''}`;
+  const premier = manquants.map((q) => q.dateService).sort()[0];
+  return rubrique('Pas encore chiffré',
+    h('p', null, `${noms.length === 1 ? '1 élément n\'a' : `${noms.length} éléments n'ont`} pas encore de quantité : ${apercu}.`),
+    h('p', { classe: 'aide' }, 'Rien d\'obligatoire : saisissez les prévisions et les portions quand vous voulez, ou modifiez-les le lendemain. Tout se recalcule.'),
+    h('div', { classe: 'actions' },
+      lien(`#/menus/${lundiDe(premier)}`, 'Saisir les prévisions', 'btn btn-court'),
+      lien('#/reglages', 'Régler les standards maison', 'btn btn-court')));
+}
+
+function carteAvance(etat, a, date, horsRegle) {
+  return carteTache(etat, a, {
+    evaluation: a.evaluation,
+    actions: [
+      bouton(horsRegle ? 'Planifier quand même' : 'Planifier', () => dialogPlanifier(a.productionId, 'planifier', { date, creneau: a.creneau ?? undefined }), 'court'),
+      horsRegle ? bouton('Noter une action préparatoire', () => dialogPreparatoire(a.composantId), 'court') : null,
+    ],
+  });
 }
 
 function rubriqueAAvancer(etat, feuille, date) {
-  if (feuille.aAvancer.length === 0) return rubrique('À avancer si possible', ligneVide('Rien à avancer pour le moment.'));
-  return rubrique('À avancer si possible', feuille.aAvancer.map((a) => {
-    const ev = a.evaluation;
-    const horsRegle = !ev.autorisee;
-    return carteTache(etat, a, {
-      evaluation: ev,
-      contenu: [
-        h('p', { classe: 'meta' }, a.creneau ? `Créneau libre aujourd'hui : ${libelle('CRENEAU', a.creneau)}.` : 'Aucun créneau libre ce jour après le service.'),
-        horsRegle ? h('p', { classe: 'aide' }, 'Hors règle : cette avance ne couvre pas le besoin. Notez une action préparatoire, ou laissez la tâche à décider.') : null,
-      ],
-      actions: [
-        bouton(horsRegle ? 'Planifier quand même' : 'Planifier', () => dialogPlanifier(a.productionId, 'planifier', { date, creneau: a.creneau ?? undefined }), 'court'),
-        horsRegle ? bouton('Noter une action préparatoire', () => dialogPreparatoire(a.composantId), 'court') : null,
-      ],
-    });
-  }));
+  if (feuille.aAvancer.length === 0) return null;
+  const autorisees = feuille.aAvancer.filter((a) => a.evaluation.autorisee);
+  const horsRegle = feuille.aAvancer.filter((a) => !a.evaluation.autorisee);
+  const creneau = feuille.aAvancer[0].creneau;
+  return rubrique('À avancer si possible',
+    h('p', { classe: 'meta' }, creneau ? `Créneau libre aujourd'hui : ${libelle('CRENEAU', creneau)}.` : 'Aucun créneau libre ce jour après le service.'),
+    autorisees.map((a) => carteAvance(etat, a, date, false)),
+    horsRegle.length === 0 ? null : repliable(
+      `${horsRegle.length === 1 ? '1 avance hors règle' : `${horsRegle.length} avances hors règle`} (plus de deux jours d'avance)`, false,
+      [h('p', { classe: 'aide' }, 'Hors règle : l\'avance ne couvre pas le besoin. Planifiez quand même, ou notez une action préparatoire.'),
+        horsRegle.map((a) => carteAvance(etat, a, date, true))]));
 }
 
 export function rendre(etat, date) {
@@ -102,9 +120,9 @@ export function rendre(etat, date) {
     racine.appendChild(encadre('info', 'Mardi : revue de mi-semaine après le service, pour les préparations de mercredi à vendredi.'));
   }
   racine.appendChild(rubriqueAFaire(etat, feuille, date, aujourd));
-  racine.appendChild(rubriqueAttendus(etat, feuille));
-  racine.appendChild(rubriqueDejaPret(etat, feuille));
-  racine.appendChild(rubriqueDecisions(etat, feuille));
-  racine.appendChild(rubriqueAAvancer(etat, feuille, date));
+  for (const r of [rubriqueAttendus(etat, feuille), rubriqueDejaPret(etat, feuille), rubriqueDecisions(etat, feuille),
+    rubriqueQuantites(feuille), rubriqueAAvancer(etat, feuille, date)]) {
+    if (r) racine.appendChild(r);
+  }
   return racine;
 }
