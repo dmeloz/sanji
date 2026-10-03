@@ -24,7 +24,7 @@ function semaineSaisie() {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'riz et carottes', h());
   definirMenu(e, S.lundi, 2, 'poulet, riz, carottes', h());
-  definirMenu(e, S.mardi, 1, 'pâtes aux courgettes', h());
+  definirMenu(e, S.mardi, 1, 'polenta', h());
   definirMenu(e, S.mardi, 2, 'poisson, quinoa, poireaux', h());
   return e;
 }
@@ -33,7 +33,7 @@ function semaineSaisie() {
 function semaineChiffree() {
   const e = semaineSaisie();
   for (const [famille, role, etat] of [['riz', 'plat_principal', 'sec'], ['riz', 'garniture', 'sec'], ['carottes', 'garniture', 'cru_net'],
-    ['pates_seches', 'plat_principal', 'sec'], ['quinoa', 'garniture', 'sec'], ['poireaux', 'garniture', 'cru_net']]) {
+    ['polenta', 'plat_principal', 'sec'], ['quinoa', 'garniture', 'sec'], ['poireaux', 'garniture', 'cru_net']]) {
     definirStandard(e, famille, role, { valeur: 100, unite: 'g', etat }, h());
   }
   for (const jour of [S.lundi, S.mardi]) { prevision(e, jour, 1, 10); prevision(e, jour, 2, 20); }
@@ -109,7 +109,7 @@ test('besoins : portions à régler, éléments inconnus et prévisions sont dit
   assert.deepEqual(jeudi.action, { libelle: 'Régler les standards maison', lien: '#/reglages' });
   // Une fois les standards réglés, il reste les prévisions.
   for (const [famille, role, etat] of [['riz', 'plat_principal', 'sec'], ['riz', 'garniture', 'sec'], ['carottes', 'garniture', 'cru_net'],
-    ['pates_seches', 'plat_principal', 'sec'], ['quinoa', 'garniture', 'sec'], ['poireaux', 'garniture', 'cru_net']]) {
+    ['polenta', 'plat_principal', 'sec'], ['quinoa', 'garniture', 'sec'], ['poireaux', 'garniture', 'cru_net']]) {
     definirStandard(e, famille, role, { valeur: 100, unite: 'g', etat }, h());
   }
   const apres = tableauBlanc(e, S.jeudi).contexte;
@@ -136,7 +136,7 @@ test('contexte « service » : ce qui reste à faire avant le service, avec la q
   assert.equal(tb.contexte.titre, 'Après le service');
   assert.deepEqual(tb.jours[0].compte, { a_decider: 0, a_faire: 0, en_cours: 0, non_couvert: 0, pret: 3, total: 3 });
   // Mardi sans tâche du jour à faire : rappel de la revue de mi-semaine.
-  for (const nom of ['pâtes aux courgettes', 'quinoa', 'poireaux']) faireLeJourMeme(e, S.mardi, nom);
+  for (const nom of ['polenta', 'quinoa', 'poireaux']) faireLeJourMeme(e, S.mardi, nom);
   assert.ok(textes(tableauBlanc(e, S.mardi).contexte).some((t) => /Revue de mi-semaine/.test(t)));
 });
 

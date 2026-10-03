@@ -8,7 +8,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 3. Fiche projet : `~/Atelier-Claude/Cerveau-Obsidian/01-Projets/Sanji.md`.
 
 ## Commandes
-- Tests : `npm test` (Node 22, aucun paquet à installer). 405 tests au 2026-10-04.
+- Tests : `npm test` (Node 22, aucun paquet à installer). 426 tests au 2026-10-04.
 - Régénérer la base métier embarquée : `npm run base`.
 - Servir en local : `npm run serve`, puis http://localhost:5173.
 - Essai sur iPhone ou iPad, sur le réseau de la maison seulement : `sh outils/creer-certificat-local.sh` (une fois), puis `node outils/serveur-https-local.mjs`. Les clés vivent dans `.certificats-locaux/` (hors Git). Rien n'est publié.
@@ -16,6 +16,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 ## Structure
 - `app/js/domaine/` : logique métier pure, sans DOM, testée. Les signatures réelles du code font foi sur la conception.
   - `savoir.js` : le savoir culinaire (familles de produits, groupes, portion effective, standards maison). Un seul lexique, aucun chiffre : les coefficients viennent de `donnees/base-metier.js`.
+  - `analyse-menu.js` + `vocabulaire-plats.js` : lecture des intitulés (`lirePlat`) : éléments au poste, hors poste ou à confirmer selon le menu ; sauce implicite du menu 1 proposée « à confirmer », jamais choisie ; mémoire d'attribution par `nom|menu`. Vocabulaire générique, sans chiffre.
   - `feuille.js` : analyse du texte collé d'une feuille de menus.
   - `tableau-blanc.js` : données de l'accueil. `bord` = le tableau de bord (menus du jour et des 2 jours suivants, fiches de fonction, « À confirmer » de 3 lignes au plus sans quantité manquante, production et commandes) ; `contexte` (ancienne note) ne s'affiche plus mais désigne la semaine par défaut.
   - `planification.js` : `feuilleDuJour(...).lecture` donne l'ordre de lecture de la feuille Jour (menu 1, menu 2, autres, après service, faites).

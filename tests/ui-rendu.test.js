@@ -931,14 +931,14 @@ test('détail : l\'interrupteur « au poste » change l\'attribution et la mémo
   const poulet = composantNomme(magasin.etat(), 'poulet').id;
   const interrupteur = () => champ(vues.detail.rendre(magasin.etat(), S.lundi), `poste-${poulet}`);
   assert.equal(interrupteur().checked, false);
-  assert.equal(magasin.etat().memoire.poulet, undefined, 'rien n\'est mémorisé avant le geste');
+  assert.equal(magasin.etat().memoire['poulet|2'], undefined, 'rien n\'est mémorisé avant le geste');
   assert.equal(principaleDe(magasin.etat(), poulet), undefined);
 
   const allume = interrupteur();
   allume.checked = true;
   await allume.declencher('change');
   assert.equal(magasin.etat().composants[poulet].attribue, true);
-  assert.equal(magasin.etat().memoire.poulet.attribue, true, 'le choix est mémorisé par nom, sans autre geste');
+  assert.equal(magasin.etat().memoire['poulet|2'].attribue, true, 'le choix est mémorisé par nom, sans autre geste');
   assert.equal(interrupteur().checked, true, 'la page reflète le nouvel état');
   assert.ok(principaleDe(magasin.etat(), poulet), 'le composant est pris en compte : sa production existe');
   // La saisie suivante réapplique le choix mémorisé.
@@ -950,7 +950,7 @@ test('détail : l\'interrupteur « au poste » change l\'attribution et la mémo
   eteint.checked = false;
   await eteint.declencher('change');
   assert.equal(magasin.etat().composants[poulet].attribue, false);
-  assert.equal(magasin.etat().memoire.poulet.attribue, false);
+  assert.equal(magasin.etat().memoire['poulet|2'].attribue, false);
   assert.equal(principaleDe(magasin.etat(), poulet), undefined);
 });
 

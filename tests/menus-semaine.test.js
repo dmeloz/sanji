@@ -124,7 +124,7 @@ test('composants créés par l\'analyse : valides d\'emblée, attribués selon l
   definirMenu(e, S.lundi, 1, M.principal, h()); // poulet, carottes
   definirMenu(e, S.lundi, 2, M.garnitures, h()); // riz, carottes, poulet
   assert.ok(Object.values(e.composants).every((c) => c.valide === true));
-  assert.deepEqual(duMenu(e, S.lundi, 1).map((c) => [c.nom, c.attribue, c.role]), [['poulet', true, 'plat_principal'], ['carottes', true, 'plat_principal']]);
+  assert.deepEqual(duMenu(e, S.lundi, 1).map((c) => [c.nom, c.attribue, c.role]), [['poulet', true, 'composant_recette'], ['carottes', true, 'plat_principal']]);
   assert.deepEqual(duMenu(e, S.lundi, 2).map((c) => [c.nom, c.attribue, c.role]), [['riz', true, 'garniture'], ['carottes', true, 'garniture'], ['poulet', false, 'garniture']]);
   assert.deepEqual(duMenu(e, S.lundi, 1).map((c) => c.type), ['generique', 'produit_simple']);
   // Une production pour chaque composant attribué, aucune pour le non attribué.
@@ -151,7 +151,7 @@ test('composant inconnu : point « à classer », jusqu\'au choix du chef, mémo
   // Le chef dit « pas au poste » : plus de point, le choix est mémorisé, rien d'autre n'est mémorisé.
   modifierComposant(e, inconnu.id, { categorie: 'autre' }, h());
   assert.deepEqual(types(e, S.lundi), []);
-  assert.deepEqual(e.memoire.element_inconnu_test, { ...memoireVide(), nom: 'ELEMENT_INCONNU_TEST', attribue: false, categorie: 'autre' });
+  assert.deepEqual(e.memoire['element_inconnu_test|2'], { ...memoireVide(), nom: 'ELEMENT_INCONNU_TEST', attribue: false, categorie: 'autre' });
 
   // Même nom, autre jour : le point ne revient pas, la catégorie mémorisée est reprise, le type devient générique.
   prevision(e, S.mardi, 2, 10);
@@ -222,7 +222,7 @@ test('mémoire automatique : une attribution corrigée par le chef est mémoris�
   assert.equal(poulet.attribue, false);
   assert.deepEqual(e.memoire, {}, 'rien n\'est mémorisé tant que le chef ne corrige rien');
   modifierComposant(e, poulet.id, { attribue: true }, h());
-  assert.deepEqual(e.memoire.poulet, { ...memoireVide(), nom: 'poulet', attribue: true, categorie: 'proteine' });
+  assert.deepEqual(e.memoire['poulet|2'], { ...memoireVide(), nom: 'poulet', attribue: true, categorie: 'proteine' });
   assert.ok(principaleDe(e, poulet.id));
   // Saisie suivante : le même nom (casse et accents ignorés) reçoit le choix, sans geste.
   definirMenu(e, S.mardi, 2, 'Riz, POULET', h());
@@ -231,7 +231,7 @@ test('mémoire automatique : une attribution corrigée par le chef est mémoris�
   modifierComposant(e, parNom(e, S.lundi, 'riz').id, { attribue: false }, h());
   definirMenu(e, S.mercredi, 2, 'riz', h());
   assert.equal(parNom(e, S.mercredi, 'riz').attribue, false);
-  assert.deepEqual(Object.keys(e.memoire).sort(), ['poulet', 'riz']);
+  assert.deepEqual(Object.keys(e.memoire).sort(), ['poulet|2', 'riz|2']);
 });
 
 test('mémoire automatique : seule l\'attribution et la catégorie sont mémorisées, rien d\'autre', () => {
@@ -249,11 +249,11 @@ test('mémoire automatique : seule l\'attribution et la catégorie sont mémoris
   assert.deepEqual(e.memoire, {});
   // Un changement d'attribution crée l'entrée : nom, attribution, catégorie ; le reste garde ses valeurs vides.
   modifierComposant(e, riz.id, { attribue: false }, h());
-  assert.deepEqual(e.memoire.riz, { ...memoireVide(), nom: 'riz', attribue: false, categorie: 'feculent' });
-  assert.deepEqual([e.memoire.riz.parRole, e.memoire.riz.etapes, e.memoire.riz.type, e.memoire.riz.charge], [{}, {}, 'a_preciser', null]);
+  assert.deepEqual(e.memoire['riz|2'], { ...memoireVide(), nom: 'riz', attribue: false, categorie: 'feculent' });
+  assert.deepEqual([e.memoire['riz|2'].parRole, e.memoire['riz|2'].etapes, e.memoire['riz|2'].type, e.memoire['riz|2'].charge], [{}, {}, 'a_preciser', null]);
   // Un changement de catégorie la met à jour.
   modifierComposant(e, riz.id, { categorie: 'autre' }, h());
-  assert.deepEqual([e.memoire.riz.attribue, e.memoire.riz.categorie], [false, 'autre']);
+  assert.deepEqual([e.memoire['riz|2'].attribue, e.memoire['riz|2'].categorie], [false, 'autre']);
   // Une mémoire explicite (geste « mémoriser ») garde ses autres champs quand l'attribution change ensuite.
   modifierComposant(e, riz.id, { attribue: true, categorie: 'feculent' }, h());
   memoriser(e, riz.id, h());
@@ -262,7 +262,7 @@ test('mémoire automatique : seule l\'attribution et la catégorie sont mémoris
   modifierComposant(e, riz.id, { attribue: false }, h());
   assert.equal(e.memoire.riz.parRole.plat_principal.grammage.valeur, 120, 'la référence mémorisée n\'est pas effacée');
   assert.equal(e.memoire.riz.etapes.cuisson.coefficient, 3);
-  assert.equal(e.memoire.riz.attribue, false);
+  assert.equal(e.memoire['riz|2'].attribue, false, 'la mémoire d\'attribution est par menu, la référence mémorisée garde son nom seul');
   // Un nom dangereux n'écrit rien dans l'héritage des objets.
   const dangereux = ajouterComposant(e, S.lundi, 2, { nom: 'constructor', categorie: 'legume', attribue: false }, h());
   assert.doesNotThrow(() => modifierComposant(e, dangereux, { attribue: true }, h()));

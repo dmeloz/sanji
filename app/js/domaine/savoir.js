@@ -10,6 +10,7 @@
 import { BASE_METIER, PORTIONS_BASE } from '../donnees/base-metier.js';
 import { normaliser } from './etat.js';
 import { ETAT_POIDS, ROLE, UNITE } from './statuts.js';
+import { canonique, estHerbe } from './vocabulaire-plats.js';
 
 function geler(valeur) {
   if (valeur !== null && typeof valeur === 'object') {
@@ -206,13 +207,18 @@ function etapesDeBase(f) {
  */
 export function appliquerSavoir(etat, composant) {
   const c = composant;
-  const lue = familleDe(c.nom);
+  const lue = familleDe(c.nom) ?? familleDe(canonique(c.nom)); // « pdt » se lit comme « pomme de terre »
   const compatible = lue && (c.categorie === 'a_preciser' || c.categorie === lue.categorie) ? lue : null;
   const f = c.famille ? familleParCle(c.famille) : compatible;
   if (!c.famille) c.famille = f?.cle ?? null;
   if (!c.produitNom && f) c.produitNom = f.libelle;
   if (c.role === null || c.role === undefined) {
-    c.role = c.menu === 1 ? ROLE.plat_principal : c.categorie === 'sauce' ? ROLE.sauce : ROLE.garniture;
+    // Une sauce est une sauce ; une herbe va à la botte ; en menu 1, la protéine ou le poisson d'une recette de pâtes
+    // ou de risotto est un composant de la recette (pas « le plat principal »).
+    if (c.categorie === 'sauce') c.role = ROLE.sauce;
+    else if (c.categorie === 'autre' && estHerbe(c.nom)) c.role = ROLE.herbe;
+    else if (c.menu === 1) c.role = c.categorie === 'proteine' ? ROLE.composant_recette : ROLE.plat_principal;
+    else c.role = ROLE.garniture;
   }
   if (c.type === 'a_preciser') {
     if (f) c.type = 'produit_simple';
