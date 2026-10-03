@@ -8,12 +8,14 @@ import { chercherBase } from '../domaine/base.js';
 import { calculerComposant } from '../domaine/calcul.js';
 import { libelleJour } from '../domaine/dates.js';
 import { normaliser } from '../domaine/etat.js';
+import { cleStandardDe, valeurPour } from '../domaine/validation.js';
 import {
   CHARGE, ETAPE, ETAT_POIDS, LIBELLE_ESTIMATION_A_VALIDER, ROLE, TYPE_COMPOSANT, UNITE, CATEGORIE, libelle,
 } from '../domaine/statuts.js';
 import { VERSION_BASE } from '../donnees/base-metier.js';
-import { agir, agirStrict, etat as etatCourant } from '../magasin.js';
+import { agir, agirStrict, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { champs } from './champs.js';
+import { ouvrirValidation } from './feuille-validation.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, lien, pastille } from './elements.js';
 import {
@@ -274,7 +276,14 @@ function dialogApresService(c, unite) {
 function blocPortion(c, calc) {
   if (c.type === 'generique') return null;
   const d = calc.dependances.find((x) => x.parametre === 'grammage');
+  // Une portion qui vient d'un repère est une estimation : la fiche de validation propose de la valider (ou de la corriger).
+  const cleStandard = cleStandardDe(c);
+  const validable = cleStandard && (d?.origine === 'repere_valide' || d?.origine === 'base');
   const gestes = h('div', { classe: 'actions' },
+    validable ? bouton('Valider la portion', () => {
+      const v = valeurPour(etatCourant(), cleStandard, c.role, aujourdhui(), { composantId: c.id });
+      if (v) ouvrirValidation(v);
+    }, 'court principal') : null,
     bouton('Corriger pour ce plat seulement', () => dialogPortionPlat(c, d), 'court'),
     lien('#/reglages/standards', 'Régler le standard maison', 'btn btn-court'),
     d?.origine === 'plat' ? bouton('Revenir au standard', () => agir((e, t) => modifierComposant(e, c.id,

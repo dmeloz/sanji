@@ -722,10 +722,13 @@ test('réglages : « Standards maison » en tête, groupée, repliée sans rien 
   assert.match(texte, /riz en garniture/);
   assert.match(texte, /riz en plat principal/);
   assert.equal(texte.match(/repère validé/g).length, 4, 'seuls les quatre repères validés applicables sont indiqués');
-  for (const b of classes(noeud, 'ligne-standard').map((l) => l.querySelector('button'))) {
+  // Adapté B-P1b : « Valider la proposition » s'ajoute à « Régler » sur les seules lignes qui ont un repère.
+  for (const l of classes(noeud, 'ligne-standard')) {
+    const b = l.tous((x) => x.balise === 'button' && /^Régler le standard/.test(x.attributs['aria-label'] ?? ''))[0];
     assert.equal(b.textContent, 'Régler');
     assert.match(b.attributs['aria-label'], /^Régler le standard : .+, en (plat principal|garniture)$/);
   }
+  assert.equal(boutons(noeud).filter((b) => b.textContent === 'Valider la proposition').length, 4, 'une par ligne qui a un repère');
 });
 
 test('réglages : un standard réglé ou une famille saisie dans un menu est montré d\'emblée, le reste reste replié', () => {

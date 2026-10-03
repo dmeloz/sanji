@@ -70,7 +70,11 @@ export function suiviProduit(etat, lundi, ligne) {
   const besoinMajore = Math.round(ligne.besoinBrut * (1 + (margePourcent ?? 0) / 100));
   const proposeeACommander = Number.isFinite(suivi.quantiteVerifiee)
     ? Math.max(0, besoinMajore - Math.round(suivi.quantiteVerifiee)) : null;
+  // « À relire » : la ligne est notée et le besoin a changé depuis. La quantité notée n'est jamais modifiée.
+  const aRelire = suivi.etatLigne === 'note'
+    && (!Number.isFinite(suivi.besoinAuNote) || Math.round(suivi.besoinAuNote) !== Math.round(ligne.besoinBrut));
   return {
+    etatLigne: suivi.etatLigne, besoinAuNote: suivi.besoinAuNote, historique: suivi.historique, aRelire,
     statutAffiche, statut: suivi.statut, besoinBrut: ligne.besoinBrut, besoinAuControle: suivi.besoinAuControle,
     quantiteVerifiee: suivi.quantiteVerifiee, proposeeACommander, margePourcent, estimationAValider: ligne.aValider,
     quantiteAcheter: suivi.quantiteAcheter, conditionnement: suivi.conditionnement,

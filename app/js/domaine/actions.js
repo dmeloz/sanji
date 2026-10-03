@@ -110,7 +110,7 @@ function normaliserEtapes(etapes) {
   });
 }
 
-function terminer(etat, h, action, detail, valeur) {
+export function terminer(etat, h, action, detail, valeur) {
   ajouterJournal(etat, h, action, detail);
   assurerProductions(etat);
   return valeur;
