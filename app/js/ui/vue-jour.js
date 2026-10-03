@@ -167,11 +167,20 @@ function ligneTache(etat, ligneBrute, date, options) {
       : null);
 }
 
+const estHorsRegle = (l) => Boolean(l.evaluation) && l.evaluation.jours > 0 && !l.evaluation.autorisee;
+
 function bloc(titreTexte, lignes, etat, date, groupe) {
   if (lignes.length === 0) return null;
+  // Avances : celles qui sont dans la règle (J+1, J+2) restent dans la liste ; celles qui la dépassent sont repliées en une
+  // ligne avec leur compte (jamais cachées, jamais décidées à la place du chef), pour ne pas allonger la feuille de travail.
+  const horsRegle = groupe === 'apres' ? lignes.filter(estHorsRegle) : [];
+  const dansLaRegle = groupe === 'apres' ? lignes.filter((l) => !estHorsRegle(l)) : lignes;
+  const liste = (ls) => h('ul', { classe: 'mep-liste' }, ls.map((l) => ligneTache(etat, l, date, { groupe })));
   return h('section', { classe: 'jour-bloc' },
     h('h2', { classe: 'section-titre' }, titreTexte),
-    h('ul', { classe: 'mep-liste' }, lignes.map((l) => ligneTache(etat, l, date, { groupe }))));
+    dansLaRegle.length > 0 ? liste(dansLaRegle) : null,
+    horsRegle.length > 0 ? repliable(`${horsRegle.length === 1 ? '1 avance hors règle' : `${horsRegle.length} avances hors règle`} (plus de deux jours d'avance)`,
+      false, liste(horsRegle), { classe: 'jour-hors-regle' }) : null);
 }
 
 // ------------------------------------------------------------------ décisions, quantités, lots, charge
