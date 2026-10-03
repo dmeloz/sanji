@@ -162,6 +162,17 @@ test('jour : « Fait » marque fait en un toucher avec la cible ; sans quantité
   assert.match(apres.textContent, /2 sur 2 fait|1 sur 2 fait/, 'la jauge compte les productions décidées ce jour');
 });
 
+test('jour : deux services du même produit proposent un lot, sans rien planifier ni fusionner', () => {
+  const e = etatVide();
+  const riz = { ...J.PRODUIT_SEC_TEST, nom: 'riz' };
+  for (const jour of [S.mardi, S.mercredi]) { prevision(e, jour, 1, 10); composantValide(e, jour, 1, riz); }
+  magasin.remplacer(e);
+  const texte = vues.jour.rendre(magasin.etat(), S.lundi).textContent;
+  assert.match(texte, /À faire en une fois/);
+  assert.match(texte, /riz : 1 000 g en une fois, pour mardi 6 octobre et mercredi 7 octobre/);
+  assert.equal(Object.values(magasin.etat().productions).every((p) => p.jourDecide === null), true, 'rien n\'est planifié seul');
+});
+
 test('jour : la jauge d\'avancement dit « x sur y faits » et s\'efface sans production décidée', () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
@@ -537,6 +548,24 @@ test('menus de la semaine : répartir sur des intitulés déjà écrits prévien
   champ(propre, 'feuille-texte').value = 'Lundi 05 octobre\nriz et carottes\npoulet, riz, carottes';
   await boutonNomme(propre, 'Répartir dans la semaine').click();
   assert.doesNotMatch(propre.textContent, /déjà écrits/);
+});
+
+test('menus de la semaine : une ligne laissée de côté se remet dans un menu, sans rien enregistrer', async () => {
+  nettoyerPanneaux();
+  magasin.remplacer(etatVide());
+  const noeud = vues.menus.rendre(magasin.etat(), S.lundi);
+  champ(noeud, 'feuille-texte').value = 'Lundi 05 octobre\nriz et carottes\npoulet, riz\n+ pas de gluten';
+  await boutonNomme(noeud, 'Répartir dans la semaine').click();
+  const restaurer = boutons(noeud).find((b) => b.attributs['aria-label'] === 'Ajouter « + pas de gluten » à un menu');
+  assert.ok(restaurer, 'chaque ligne écartée propose de la remettre');
+  await restaurer.click();
+  const d = panneauOuvert();
+  assert.equal(choisi(d, 'Ajouter à'), 'Lundi 5 octobre, menu 1');
+  remplir(d, 'Ajouter à', 'Lundi 5 octobre, menu 2');
+  assert.deepEqual(await soumettre(d), []);
+  assert.equal(champ(noeud, `menu-${S.lundi}-2`).value, 'poulet, riz, + pas de gluten');
+  assert.equal(Object.keys(magasin.etat().composants).length, 0, 'rien n\'est enregistré');
+  nettoyerPanneaux();
 });
 
 test('menus de la semaine : coller, répartir, enregistrer, sans aucune étape de validation', async () => {

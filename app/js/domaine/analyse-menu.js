@@ -12,6 +12,27 @@ const SEPARATEURS = new RegExp([
   "\\s+sur\\s+(?:un\\s+)?lit\\s+(?:de\\s+|d['’])",
 ].join('|'), 'i');
 
+// Mots de liaison : on ne coupe jamais juste après (ni juste avant) l'un d'eux (« poulet au riz », « sauce aux carottes »).
+const LIAISONS = new Set(['de', 'du', 'des', 'd', 'au', 'aux', 'a', 'la', 'le', 'les', 'l', 'en', 'sur', 'sous', 'avec', 'et', 'sauce', 'jus', 'façon', 'facon']);
+const mot = (m) => normaliser(m).replace(/[^a-z0-9]/g, '');
+
+/**
+ * Coupe « <protéine> <féculent ou légume connu> » écrit sans virgule (« Escalope pommes frites »). Prudent : le début
+ * doit être une protéine, la suite doit nommer un produit connu (famille), et aucune coupure n'est faite après ou avant
+ * un mot de liaison. En cas de doute, le nom reste entier.
+ */
+function couperProteine(nom) {
+  const mots = nom.split(/\s+/);
+  if (mots.length < 2 || lireNom(nom).categorie !== 'proteine') return [nom];
+  for (let i = 1; i < mots.length; i += 1) {
+    if (LIAISONS.has(mot(mots[i - 1])) || LIAISONS.has(mot(mots[i]))) continue;
+    const gauche = mots.slice(0, i).join(' ');
+    const droite = mots.slice(i).join(' ');
+    if (lireNom(gauche).categorie === 'proteine' && lireNom(droite).famille !== null) return [gauche, droite];
+  }
+  return [nom];
+}
+
 /**
  * Catégorie proposée pour un nom (`a_preciser` si rien n'est reconnu).
  * Règle : le premier mot reconnu décide (« <protéine> sauce … » reste une protéine). Exception : un mot de
@@ -34,6 +55,7 @@ export function proposerComposants(intitule, menu, memoire = {}) {
   return String(intitule ?? '').split(SEPARATEURS)
     .map((p) => (p ?? '').trim())
     .filter((p) => p.length > 0)
+    .flatMap(couperProteine)
     .map((nom) => {
       let categorie = categoriePropose(nom);
       let attribue = menu === 1 ? true : categorie === 'legume' || categorie === 'feculent';

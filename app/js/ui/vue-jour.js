@@ -8,7 +8,7 @@ import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
 import { ecranAllumePossible } from './ecran-allume.js';
 import { bouton, imprimer, encadre, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
-import { formaterHeure } from './format.js';
+import { formaterHeure, quantite } from './format.js';
 import { activerGlisser } from './glisser.js';
 import {
   carteTache, dialogPlanifier, dialogPreparatoire, pastilleCreneau, texteCharge,
@@ -84,6 +84,15 @@ function rubriqueQuantites(feuille) {
       lien('#/reglages', 'Régler les standards maison', 'btn btn-court')));
 }
 
+/** Suggestion seulement : une même préparation pour plusieurs services. Chaque service garde sa part, sa cible et son réel. */
+function rubriqueLots(feuille) {
+  if (feuille.lots.length === 0) return null;
+  return rubrique('À faire en une fois',
+    h('p', { classe: 'aide' }, 'Suggestion : la même préparation peut servir plusieurs services dans la limite d\'avance autorisée. Chaque tâche garde sa part et se marque faite séparément.'),
+    h('ul', { classe: 'liste-lots' }, feuille.lots.map((l) => h('li', null,
+      h('strong', null, l.libelle), ` : ${quantite(l.total, l.unite)} en une fois, pour ${l.productions.map((x) => libelleJour(x.dateService)).join(' et ')}`))));
+}
+
 function carteAvance(etat, a, date, horsRegle) {
   return carteTache(etat, a, {
     evaluation: a.evaluation,
@@ -129,7 +138,7 @@ export function rendre(etat, date) {
   }
   racine.appendChild(rubriqueAFaire(etat, feuille, date, aujourd));
   for (const r of [rubriqueAttendus(etat, feuille), rubriqueDejaPret(etat, feuille), rubriqueDecisions(etat, feuille),
-    rubriqueQuantites(feuille), rubriqueAAvancer(etat, feuille, date)]) {
+    rubriqueQuantites(feuille), rubriqueLots(feuille), rubriqueAAvancer(etat, feuille, date)]) {
     if (r) racine.appendChild(r);
   }
   activerGlisser(racine, {

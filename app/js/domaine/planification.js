@@ -4,6 +4,7 @@
 import { ajouterJours, creneauxDuJour, estOuvert, joursEntre, jourSemaine } from './dates.js';
 import { calculerComposant, arrondirQuantite } from './calcul.js';
 import { normaliser, jourOuVide } from './etat.js';
+import { familleParCle } from './savoir.js';
 import { POINTS_CHARGE } from './statuts.js';
 
 const AVANCE_HABITUELLE = 2;
@@ -240,6 +241,42 @@ export function avancesPossibles(etat, aujourdhui) {
 }
 
 /**
+ * Lots possibles : productions non faites d'une même famille de produits et d'une même unité, que l'on peut toutes
+ * faire `aujourdhui` dans la limite d'avance autorisée (jamais hors règle), et dont la cible est connue. Une SUGGESTION
+ * (une casserole pour plusieurs services) : chaque production garde sa cible, son réel et son service, et se marque
+ * faite séparément. Il faut au moins deux productions pour former un lot.
+ * @returns {{famille:string, libelle:string, unite:string, total:number,
+ *   productions:{productionId:string, composantId:string, nom:string, dateService:string, cible:number, evaluation:object}[]}[]}
+ */
+export function lotsPossibles(etat, aujourdhui) {
+  if (!estOuvert(aujourdhui)) return [];
+  const groupes = new Map();
+  for (const p of Object.values(etat.productions ?? {})) {
+    const composant = etat.composants?.[p.composantId];
+    if (!composant?.famille || p.genre !== 'principale' || p.etat === 'fait') continue;
+    if (p.jourDecide && p.jourDecide !== aujourdhui) continue;
+    if (joursEntre(aujourdhui, p.dateService) < 0) continue;
+    const cible = cibleProduction(etat, p.id);
+    const unite = p.unite ?? calculerComposant(etat, composant.id).uniteTravail ?? null;
+    if (cible === null || !unite) continue;
+    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant));
+    if (!evaluation.autorisee || !evaluation.couvre) continue;
+    const cle = `${composant.famille}|${unite}`;
+    if (!groupes.has(cle)) groupes.set(cle, { famille: composant.famille, unite, productions: [] });
+    groupes.get(cle).productions.push({ productionId: p.id, composantId: composant.id, nom: composant.nom, dateService: p.dateService, cible, evaluation });
+  }
+  return [...groupes.values()]
+    .filter((g) => g.productions.length >= 2)
+    .map((g) => ({
+      ...g,
+      libelle: familleParCle(g.famille)?.libelle ?? g.famille,
+      productions: g.productions.sort((a, b) => a.dateService.localeCompare(b.dateService)),
+      total: g.productions.reduce((somme, x) => somme + x.cible, 0),
+    }))
+    .sort((a, b) => a.libelle.localeCompare(b.libelle));
+}
+
+/**
  * Feuille quotidienne.
  * - aFaire : par créneau du jour, productions non faites décidées ce jour (créneau null si non précisé) ;
  * - dejaPret : productions faites dont le service est ce jour ou plus tard, avec l'évaluation d'avance
@@ -285,5 +322,6 @@ export function feuilleDuJour(etat, date) {
   const decidees = Object.values(etat.productions ?? {}).filter((p) => p.jourDecide === date && etat.composants?.[p.composantId]);
   const avancement = { faites: decidees.filter((p) => p.etat === 'fait').length, total: decidees.length };
   const aAvancer = estOuvert(date) ? avancesPossibles(etat, date).filter((a) => a.jourDecide !== date && a.etat !== 'a_preciser') : [];
-  return { aFaire, dejaPret, decisions, quantitesManquantes, aAvancer, attendus, avancement, revueMiSemaine: jourSemaine(date) === 2 };
+  const lots = estOuvert(date) ? lotsPossibles(etat, date) : [];
+  return { aFaire, dejaPret, decisions, quantitesManquantes, aAvancer, lots, attendus, avancement, revueMiSemaine: jourSemaine(date) === 2 };
 }

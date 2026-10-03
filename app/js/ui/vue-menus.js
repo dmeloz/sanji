@@ -6,10 +6,12 @@ import { ajouterJours, libelleJour } from '../domaine/dates.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { analyserFeuille, repartirSurSemaine } from '../domaine/feuille.js';
 import { agir } from '../magasin.js';
+import { champs as construireChamps } from './champs.js';
 import { h } from './dom.js';
 import { bouton, encadre, lien, repliable } from './elements.js';
 import { parseEntier } from './format.js';
 import { afficherMessage } from './messages.js';
+import { panneau } from './panneau.js';
 
 const JOURS_A_MENU = [0, 1, 2, 3, 4]; // lundi à vendredi
 
@@ -48,6 +50,24 @@ function blocJour(champs, etat, date) {
     blocMenu(champs, date, 2, jour));
 }
 
+/** Remet une ligne laissée de côté dans l'intitulé d'un menu choisi (dans le champ seulement : rien n'est enregistré). */
+function dialogRestaurer(champs, lundi, ligne) {
+  const options = JOURS_A_MENU.flatMap((decalage) => [1, 2].map((menu) => {
+    const date = ajouterJours(lundi, decalage);
+    return [`menu-${date}-${menu}`, `${majuscule(libelleJour(date))}, menu ${menu}`];
+  }));
+  const f = construireChamps([{ cle: 'cible', type: 'choix', libelle: 'Ajouter à', options, valeur: options[0][0] }]);
+  panneau({
+    titre: `Ajouter « ${ligne} » à un menu`,
+    corps: [h('p', { classe: 'aide' }, 'La ligne est ajoutée à la fin de l\'intitulé, dans le champ. Relisez-le, puis enregistrez la semaine.'), ...f.noeuds],
+    libelleEnregistrer: 'Ajouter',
+    surEnregistrer: () => {
+      const champ = champs.get(f.valeur('cible'));
+      champ.value = champ.value.trim() === '' ? ligne : `${champ.value.trim()}, ${ligne}`;
+    },
+  });
+}
+
 /** Remplit les champs à partir du texte collé. N'enregistre rien. */
 function repartir(champs, lundi) {
   const retour = champs.get('feuille-retour');
@@ -74,7 +94,10 @@ function repartir(champs, lundi) {
   }
   for (const texte of avertissements) messages.push(encadre('alerte', texte));
   if (analyse.ignorees.length > 0) {
-    messages.push(h('p', { classe: 'aide' }, `Lignes laissées de côté (prix, titre, annotations) : ${analyse.ignorees.join(' ; ')}`));
+    messages.push(h('p', { classe: 'aide' }, 'Lignes laissées de côté (prix, titre, annotations). Une ligne utile peut être remise dans un menu :'),
+      h('ul', { classe: 'liste-simple lignes-ecartees' }, analyse.ignorees.map((ligne) => h('li', null,
+        h('span', null, ligne),
+        bouton('Ajouter à un menu', () => dialogRestaurer(champs, lundi, ligne), 'court', { 'aria-label': `Ajouter « ${ligne} » à un menu` })))));
   }
   if (jours.length === 0 && avertissements.length === 0) messages.push(encadre('alerte', 'Aucun menu reconnu dans ce texte.'));
   retour.replaceChildren(...messages);
