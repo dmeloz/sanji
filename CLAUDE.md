@@ -21,7 +21,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 - `app/js/magasin.js` : état courant ; `agir(fn)` copie, applique, enregistre, redessine.
 - `app/js/stockage.js` : IndexedDB (base `sanji`, magasins `etat` et `photos`).
 - `app/js/ui/` : vues et panneaux de saisie. Aucune logique métier ici. Quatre onglets : Tableau (`vue-tableau.js`, l'accueil), Jour, Produits, Réglages. `vue-menus.js` saisit toute la semaine.
-- Identité visuelle : un tableau blanc de cuisine (sections 14 et 16 de la conception). Écriture au feutre (`.feutre`), surfaces opaques, pas de dégradé, pas de capitales, pas de police téléchargée.
+- Identité visuelle (décision du 2026-10-03, remplace le « tableau blanc » de la section 16) : épurée et professionnelle. Surfaces claires et opaques, filets fins plutôt que cadres et ombres, un seul accent (bleu) et une encre (`--encre`) pour l'action principale, police système, pas de dégradé, pas de police téléchargée. `.feutre` ne désigne plus qu'une graisse (le nom est resté). Ne jamais réintroduire écriture manuscrite, post-it ni cadre d'aluminium.
 - `app/sw.js` : cache hors ligne. `VERSION` y est égale à `VERSION_APP` de `app/js/version.js`.
 - `tests/aide-dom.js` : faux DOM qui fait tourner les vues sous Node.
 - `archives/` : anciennes versions du plan et anciens écrans. Rien n'y fait foi.

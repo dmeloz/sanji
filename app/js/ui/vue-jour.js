@@ -125,9 +125,10 @@ export function rendre(etat, date) {
     { href: `#/jour/${ajouterJours(date, -1)}`, texte: '‹ Jour précédent' },
     { href: `#/jour/${aujourd}`, texte: "Aujourd'hui" },
     { href: `#/jour/${ajouterJours(date, 1)}`, texte: 'Jour suivant ›' }));
-  racine.appendChild(h('p', null, lien(`#/detail/${date}`, 'Détail du jour : menus, prévisions, fiches')));
-  racine.appendChild(h('div', { classe: 'actions pas-imprime' }, bouton('Imprimer la feuille du jour', imprimer, 'court')));
-  if (ecranAllumePossible()) racine.appendChild(h('p', { classe: 'meta' }, 'L\'écran reste allumé sur cette page.'));
+  racine.appendChild(h('div', { classe: 'barre-jour' },
+    lien(`#/detail/${date}`, 'Détail du jour : menus, prévisions, fiches'),
+    bouton('Imprimer la feuille du jour', imprimer, 'court'),
+    ecranAllumePossible() ? h('span', { classe: 'meta pas-imprime' }, 'L\'écran reste allumé sur cette page.') : null));
   if (!estOuvert(date)) {
     racine.appendChild(h('p', { classe: 'ferme' }, 'fermé'));
     racine.appendChild(h('p', { classe: 'aide' }, 'Le dimanche est non travaillé : aucune tâche. Il reste compté dans le temps de conservation.'));
