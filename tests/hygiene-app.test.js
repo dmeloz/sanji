@@ -63,7 +63,7 @@ test('le domaine ne dépend que de lui-même et de la base générée', () => {
     for (const m of texte(f).matchAll(/\bfrom\s*['"]([^'"]+)['"]/g)) {
       const cible = resolve(dirname(f), m[1]);
       const dansDomaine = cible.startsWith(join(APP, 'js', 'domaine') + sep);
-      const base = cible === join(APP, 'js', 'donnees', 'base-metier.js');
+      const base = [join(APP, "js", "donnees", "base-metier.js"), join(APP, "js", "donnees", "savoir-metier.js")].includes(cible);
       assert.ok(dansDomaine || base, `${relative(RACINE, f)} -> ${m[1]}`);
     }
   }

@@ -27,6 +27,7 @@ const FICHIERS = [
   'js/domaine/statuts.js',
   'js/domaine/tableau-blanc.js',
   'js/donnees/base-metier.js',
+  'js/donnees/savoir-metier.js',
   'js/magasin.js',
   'js/main.js',
   'js/stockage.js',

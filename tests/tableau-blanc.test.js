@@ -91,13 +91,15 @@ test('couverts : aucun chiffre sans prévision ni groupe, prévision à saisir s
   assert.deepEqual(lundi.groupes.map((g) => [g.numero, g.couverts, g.aAllergies]), [['FICHE_TEST', 12, true]]);
 });
 
+// Adapté B-P0 : les repères validés couvrent maintenant « riz en garniture » et « pâtes en plat principal » : ces deux
+// portions ne sont plus « à régler » (6 -> 4). Le reste du test est inchangé.
 test('besoins : portions à régler, éléments inconnus et prévisions sont dits une fois, avec l\'action qui les règle', () => {
   const e = semaineSaisie();
   definirMenu(e, S.mercredi, 1, 'ELEMENT_INCONNU_TEST', h());
   const tb = tableauBlanc(e, S.mercredi);
   assert.equal(tb.contexte.type, 'service');
   const lignes = textes(tb.contexte);
-  assert.ok(lignes.includes('6 portions à régler dans les standards maison'), lignes.join(' | '));
+  assert.ok(lignes.includes('4 portions à régler dans les standards maison'), lignes.join(' | '));
   assert.ok(lignes.includes('1 élément du menu à préciser'));
   // Les points déjà dits dans la note ne sont pas comptés jour par jour.
   assert.equal(tb.jours[0].nbPoints, 0);
