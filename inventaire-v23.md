@@ -27,19 +27,21 @@ Rubriques, dans l'ordre : À faire (par créneau, avec jauge « x sur y faits »
 
 ## 5. Réglages : dix blocs (une seule page longue)
 Standards maison (par catégorie puis famille ; environ 56 lignes), Semaine type des créneaux (avec capacité), Règles de préparation, Recettes du restaurant, Fournisseurs, Références maison mémorisées, Journal des modifications, Commandes (marge de sécurité), Sauvegarde (export, restauration, dernier export), État de l'application.
-**PROPOSITION de destinations (A-P2), à valider** :
-| Bloc actuel | Destination proposée |
-|---|---|
-| Standards maison | Standards de production > Portions maison |
-| Références maison mémorisées | Standards de production > Références mémorisées |
-| Règles de préparation | Organisation du poste > Règles d'avance |
-| Semaine type des créneaux, capacité | Organisation du poste > Créneaux |
-| Recettes du restaurant | Produits et commandes > Recettes |
-| Fournisseurs | Produits et commandes > Fournisseurs |
-| Commandes (marge) | Produits et commandes > Règles de proposition |
-| Sauvegarde | Données et hors ligne > Sauvegarde |
-| État de l'application | Données et hors ligne > État ; À propos > Version |
-| Journal des modifications | Données et hors ligne > Journal |
+**Table réalisée (A-P2)** : la page `#/reglages` est une racine de quatre rubriques ; chaque rubrique est une sous-page `#/reglages/<clé>`, avec lien « ‹ Réglages ». Aucun réglage supprimé ni allégé.
+| Ancien réglage (bloc) | Nouveau chemin | Touches depuis l'onglet |
+|---|---|---|
+| Standards maison | Réglages > Standards de production (`#/reglages/standards`) : réglés ou utilisés d'emblée, autres par catégorie repliés avec compteur « à régler », recherche locale | 2 |
+| Références maison mémorisées | Réglages > Standards de production | 2 |
+| Semaine type des créneaux, capacité | Réglages > Organisation du poste (`#/reglages/organisation`) | 2 |
+| Règles de préparation | Réglages > Organisation du poste | 2 |
+| Recettes du restaurant | Réglages > Produits et commandes (`#/reglages/produits`) | 2 |
+| Fournisseurs | Réglages > Produits et commandes | 2 |
+| Commandes (marge de sécurité) | Réglages > Produits et commandes | 2 |
+| Sauvegarde (export, restauration, dernier export) | Réglages > Données et hors ligne (`#/reglages/donnees`) | 2 |
+| État de l'application (version, hors ligne) | Réglages > Données et hors ligne | 2 |
+| Journal des modifications | Réglages > Données et hors ligne | 2 |
+
+Une clé de rubrique inconnue retombe sur la racine. Les liens existants vers `#/reglages` (note du Tableau, feuille Jour) mènent à la racine ; le lien « Régler le standard maison » de la fiche d'un plat mène à `#/reglages/standards`. Rien n'est supprimé ni redirigé définitivement : les rubriques « Menus et services », « Allergènes et sécurité », « Interface et accessibilité » et « À propos » du cahier des charges n'existent pas encore (aucun réglage actuel à y mettre).
 
 ## 6. Stockage et hors ligne
 - **FAIT** : tout l'état est un seul document dans IndexedDB (base `sanji`, magasin `etat`, clé `principal`), réécrit en entier à chaque action ; les photos sont dans un magasin séparé. Si IndexedDB est indisponible, l'application passe en mémoire et affiche un bandeau « données non enregistrées ».

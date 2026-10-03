@@ -22,6 +22,7 @@ export const ONGLET_DE_VUE = { tableau: 'tableau', menus: 'tableau', detail: 'ta
  * Analyse un hash (« #/tableau/2026-10-05 ») : { vue, param }. Fonction pure, sans DOM.
  * Défauts : le tableau blanc quand le hash est vide ou inconnu, sur la semaine que le contexte désigne (param null) ;
  * menus et produits = lundi de la semaine en cours ; jour et détail = aujourd'hui.
+ * Réglages : « #/reglages » est la racine, « #/reglages/<rubrique> » une sous-page ; une clé inconnue donne la racine.
  * Les anciennes adresses « #/accueil » et « #/semaine/… » mènent au tableau.
  */
 export function analyserHash(hash, aujourd) {
@@ -33,7 +34,7 @@ export function analyserHash(hash, aujourd) {
   if (vue === 'menus' || vue === 'produits') return { vue, param: lundiDe(dateValide ? param : aujourd) };
   if (vue === 'jour' || vue === 'detail') return { vue, param: dateValide ? param : aujourd };
   if (vue === 'composant' && param) return { vue, param };
-  if (vue === 'reglages') return { vue, param: null };
+  if (vue === 'reglages') return { vue, param: vueReglages.CLES_RUBRIQUES.includes(morceaux[1]) ? morceaux[1] : null };
   return { vue: 'tableau', param: null };
 }
 

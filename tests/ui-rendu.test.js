@@ -94,7 +94,8 @@ function verifierTexte(noeud, contexte) {
 const pages = (ids) => [
   ['tableau', null], ['tableau', S.lundi], ['tableau', S.lundiSuivant], ['menus', S.lundi], ['detail', S.lundi], ['detail', S.mardi], ['detail', S.samedi],
   ['detail', S.dimanche], ['jour', S.lundi], ['jour', S.mardi], ['jour', S.samediPrecedent], ['jour', S.dimanchePrecedent],
-  ['produits', S.lundi], ['reglages', null], ['composant', 'inconnu'],
+  ['produits', S.lundi], ['reglages', null],
+  ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees'], ['composant', 'inconnu'],
   ...Object.values(ids).map((id) => ['composant', id]),
 ];
 
@@ -134,7 +135,7 @@ test('contenus attendus : tableau, détail, produits, réglages', () => {
   const prod = vues.produits.rendre(magasin.etat(), S.lundi).textContent;
   assert.match(prod, /Aucun stock théorique, aucun approvisionnement garanti\./);
   assert.match(prod, /composition à définir/);
-  const reg = vues.reglages.rendre(magasin.etat()).textContent;
+  const reg = ['organisation', 'donnees'].map((r) => vues.reglages.rendre(magasin.etat(), r).textContent).join(' ');
   assert.match(reg, /Journal des modifications/);
   assert.match(reg, /ne certifie aucune conservation/);
   assert.match(reg, /hors ligne/i);
@@ -285,13 +286,14 @@ async function parcourir(nomVue, param) {
 
 test('chaque bouton de chaque vue s\'active sans erreur de code (état riche)', async () => {
   const pagesParcourues = [['menus', S.lundi], ['detail', S.lundi], ['detail', S.mardi], ['jour', S.samediPrecedent],
-    ['jour', S.lundi], ['jour', S.mardi], ['produits', S.lundi], ['reglages', null]];
+    ['jour', S.lundi], ['jour', S.mardi], ['produits', S.lundi], ['reglages', null],
+    ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees']];
   for (const [vue, param] of pagesParcourues) {
     const { e } = etatRiche();
     magasin.remplacer(e);
     const n = await parcourir(vue, param);
-    // Le mardi n'a aucune tâche dans cet état : seule la navigation (liens) s'y trouve.
-    if (!(vue === 'jour' && param === S.mardi)) assert.ok(n > 0, `${vue} ${param} : aucun bouton`);
+    // Le mardi n'a aucune tâche dans cet état : seule la navigation (liens) s'y trouve. La racine de Réglages n'a que des liens.
+    if (!(vue === 'jour' && param === S.mardi) && !(vue === 'reglages' && param === null)) assert.ok(n > 0, `${vue} ${param} : aucun bouton`);
   }
   const { e, ids } = etatRiche();
   for (const id of Object.values(ids)) {
@@ -301,7 +303,8 @@ test('chaque bouton de chaque vue s\'active sans erreur de code (état riche)', 
 });
 
 test('chaque bouton s\'active aussi avec une base vide', async () => {
-  for (const [vue, param] of [['menus', S.lundi], ['detail', S.lundi], ['jour', S.lundi], ['produits', S.lundi], ['reglages', null]]) {
+  for (const [vue, param] of [['menus', S.lundi], ['detail', S.lundi], ['jour', S.lundi], ['produits', S.lundi], ['reglages', null],
+    ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees']]) {
     magasin.remplacer(etatVide());
     await parcourir(vue, param);
   }
@@ -348,7 +351,7 @@ test('restauration : un fichier valide demande confirmation, un fichier TEST_ONL
   const { e } = etatRiche();
   nettoyerPanneaux();
   magasin.remplacer(etatVide());
-  const racine = vues.reglages.rendre(magasin.etat());
+  const racine = vues.reglages.rendre(magasin.etat(), 'donnees');
   const entree = racine.tous((x) => x.balise === 'input' && x.attributs.type === 'file')[0];
   assert.ok(entree, 'champ fichier de restauration');
   const fichier = (nom, texte) => ({ name: nom, text: async () => texte });
@@ -681,6 +684,9 @@ const parAria = (noeud, texte) => boutons(noeud).find((b) => b.attributs['aria-l
 const composantNomme = (etat, nom, date = S.lundi, menu = 2) => Object.values(etat.composants).find((c) => c.date === date && c.menu === menu && c.nom === nom);
 const groupesDe = (noeud) => noeud.tous((x) => x.balise === 'details' && x.className.split(' ').includes('repliable-groupe'));
 const groupesOuverts = (noeud) => groupesDe(noeud).filter((g) => g.open).map((g) => g.querySelector('summary').textContent);
+const dansRepliable = (n) => { for (let p = n.parent; p; p = p.parent) if (p.balise === 'details') return true; return false; };
+/** Noms des standards montrés d'emblée (hors catégories repliées), sans doublon, dans l'ordre. */
+const nomsEnVue = (noeud) => [...new Set(classes(noeud, 'ligne-standard').filter((l) => !dansRepliable(l)).map((l) => l.querySelector('strong').textContent))];
 const pastilleTexte = (noeud, texte) => classes(noeud, 'pastille').find((p) => p.textContent === texte);
 /** Texte de la portion annoncée en tête d'un composant. */
 const portionAffichee = (noeud) => classes(noeud, 'portion')[0]?.querySelector('strong').textContent;
@@ -690,7 +696,7 @@ const portionAffichee = (noeud) => classes(noeud, 'portion')[0]?.querySelector('
 test('réglages : « Standards maison » en tête, groupée, repliée sans rien de réglé ni de saisi', () => {
   nettoyerPanneaux();
   magasin.remplacer(etatVide());
-  const noeud = vues.reglages.rendre(magasin.etat());
+  const noeud = vues.reglages.rendre(magasin.etat(), 'standards');
   const texte = verifierTexte(noeud, 'réglages base vide');
   assert.match(texte, /Standards maison/);
   assert.match(texte, /Le standard maison passe avant l'estimation de la base/);
@@ -703,8 +709,14 @@ test('réglages : « Standards maison » en tête, groupée, repliée sans rien 
     lignesStandards(magasin.etat()).length + lignesStandardsGroupes(magasin.etat()).length,
     'une ligne par famille et par rôle, plus une par catégorie et par rôle');
   assert.match(texte, /Légumes \(toute la catégorie\) en garniture/);
-  assert.deepEqual(groupesDe(noeud).map((g) => g.querySelector('summary').textContent), GROUPES.map((g) => g.libelle));
+  const resumes = groupesDe(noeud).map((g) => g.querySelector('summary').textContent);
+  assert.equal(resumes.length, GROUPES.length);
+  GROUPES.forEach((g, i) => assert.match(resumes[i], new RegExp(`^${g.libelle} · \\d+ à régler$`)));
   assert.deepEqual(groupesOuverts(noeud), [], 'rien de réglé, aucun menu saisi : tout est replié');
+  assert.deepEqual(nomsEnVue(noeud), [], 'rien de réglé ni de saisi : rien d\'emblée');
+  const total = lignesStandards(magasin.etat()).length + lignesStandardsGroupes(magasin.etat()).length;
+  assert.match(texte, new RegExp(`${total} à régler`), 'compteur neutre');
+  assert.equal(noeud.tous((x) => x.attributs.role === 'alert').length, 0, '« à régler » n\'est jamais une alerte');
   assert.match(texte, /non réglé/);
   assert.match(texte, /riz en garniture/);
   assert.match(texte, /riz en plat principal/);
@@ -715,25 +727,52 @@ test('réglages : « Standards maison » en tête, groupée, repliée sans rien 
   }
 });
 
-test('réglages : les groupes d\'un standard réglé ou d\'une famille saisie dans un menu sont ouverts', () => {
+test('réglages : un standard réglé ou une famille saisie dans un menu est montré d\'emblée, le reste reste replié', () => {
   const e = etatSemaineSaisie(); // riz, carottes, poulet
   magasin.remplacer(e);
-  const noeud = vues.reglages.rendre(magasin.etat());
+  const noeud = vues.reglages.rendre(magasin.etat(), 'standards');
   verifierTexte(noeud, 'réglages menus saisis');
-  assert.deepEqual(groupesOuverts(noeud), ['Pâtes, riz, céréales', 'Légumes'], 'riz et carottes sont dans un menu ; le poulet n\'a pas de famille');
+  assert.deepEqual(groupesOuverts(noeud), []);
+  const noms = nomsEnVue(noeud);
+  assert.ok(noms.includes('riz') && noms.includes('carottes'), 'riz et carottes sont dans un menu');
+  assert.ok(!noms.includes('pommes de terre'));
   definirStandard(e, 'pommes_de_terre', 'garniture', ST.cuit, h());
   magasin.remplacer(e);
-  const avecStandard = vues.reglages.rendre(magasin.etat());
-  assert.deepEqual(groupesOuverts(avecStandard), ['Pâtes, riz, céréales', 'Pommes de terre', 'Légumes']);
+  const avecStandard = vues.reglages.rendre(magasin.etat(), 'standards');
+  assert.ok(nomsEnVue(avecStandard).includes('pommes de terre'));
   assert.match(avecStandard.textContent, /100 g, poids cuit/);
-  assert.deepEqual(groupesOuverts(vues.reglages.rendre(etatVide())), [], 'sans menu ni standard : replié');
+  assert.deepEqual(nomsEnVue(vues.reglages.rendre(etatVide(), 'standards')), [], 'sans menu ni standard : rien d\'emblée');
+});
+
+test('réglages : la recherche locale filtre les standards sans accent ni casse, et revient à la liste', async () => {
+  magasin.remplacer(etatVide());
+  const noeud = vues.reglages.rendre(magasin.etat(), 'standards');
+  const instantane = structuredClone(magasin.etat());
+  const champ = noeud.tous((x) => x.balise === 'input' && x.attributs['aria-label'] === 'Rechercher un standard')[0];
+  assert.ok(champ, 'champ de recherche');
+  const avant = classes(noeud, 'ligne-standard').length;
+  assert.ok(avant > 20, 'toutes les lignes existent avant la recherche');
+  champ.value = 'CAROTTES';
+  await champ.declencher('input', { target: champ });
+  const trouvees = classes(noeud, 'ligne-standard');
+  assert.ok(trouvees.length >= 2 && trouvees.length < avant);
+  assert.ok(trouvees.every((l) => /carottes/i.test(l.textContent)), 'ne reste que ce qui correspond');
+  assert.equal(groupesDe(noeud).length, 0, 'pendant la recherche, une seule liste');
+  champ.value = 'zzzz';
+  await champ.declencher('input', { target: champ });
+  assert.match(noeud.textContent, /Aucun standard ne correspond/);
+  champ.value = '';
+  await champ.declencher('input', { target: champ });
+  assert.equal(classes(noeud, 'ligne-standard').length, avant, 'recherche vidée : tout revient');
+  assert.equal(groupesDe(noeud).length, GROUPES.length);
+  assert.deepEqual(magasin.etat(), instantane, 'la recherche n\'enregistre rien');
 });
 
 test('réglages : le repère de la base est indiqué à côté du standard, jamais copié comme valeur', { skip: SANS_REPERES }, async () => {
   nettoyerPanneaux();
   await avecReperes([R.familleRiz, R.groupeCereales, R.groupeCerealesPrincipal, R.familleCarottes], async () => {
     magasin.remplacer(etatVide());
-    const noeud = vues.reglages.rendre(magasin.etat());
+    const noeud = vues.reglages.rendre(magasin.etat(), 'standards');
     const texte = verifierTexte(noeud, 'réglages avec repères');
     assert.match(texte, /repère de la base : 50 g, poids sec/, 'repère de la famille');
     assert.match(texte, /repère de la base : 60–80 g, poids sec \(repère du groupe\)/, 'repère du groupe, signalé comme tel');
@@ -750,7 +789,7 @@ test('réglages : le repère de la base est indiqué à côté du standard, jama
     const e = etatVide();
     definirStandard(e, 'riz', 'garniture', ST.cuit, h());
     magasin.remplacer(e);
-    await parAria(vues.reglages.rendre(magasin.etat()), 'Modifier le standard : riz, en garniture').click();
+    await parAria(vues.reglages.rendre(magasin.etat(), 'standards'), 'Modifier le standard : riz, en garniture').click();
     const modif = panneauOuvert();
     assert.equal(controleDe(modif, 'Valeur de la portion').value, '100');
     assert.equal(choisi(modif, 'État du poids'), 'cuit');
@@ -761,7 +800,7 @@ test('réglages : le repère de la base est indiqué à côté du standard, jama
 test('réglages : régler puis effacer un standard par le panneau modifie etat.standards', async () => {
   nettoyerPanneaux();
   magasin.remplacer(etatVide());
-  const page = () => vues.reglages.rendre(magasin.etat());
+  const page = () => vues.reglages.rendre(magasin.etat(), 'standards');
 
   await parAria(page(), 'Régler le standard : riz, en garniture').click();
   let d = panneauOuvert();
@@ -781,7 +820,7 @@ test('réglages : régler puis effacer un standard par le panneau modifie etat.s
 
   const apres = verifierTexte(page(), 'réglages après réglage');
   assert.match(apres, /110,5 g, poids sec/);
-  assert.deepEqual(groupesOuverts(page()), ['Pâtes, riz, céréales']);
+  assert.deepEqual(nomsEnVue(page()), ['riz'], 'le standard réglé passe en tête de liste');
   assert.ok(parAria(page(), 'Modifier le standard : riz, en garniture'), 'la ligne propose désormais « Modifier »');
 
   await parAria(page(), 'Modifier le standard : riz, en garniture').click();
@@ -799,14 +838,14 @@ test('réglages : régler puis effacer un standard par le panneau modifie etat.s
   assert.equal(d.open, false);
   assert.deepEqual(magasin.etat().standards, {}, 'le standard est effacé, sans trace vide');
   assert.match(page().textContent, /non réglé/);
-  assert.deepEqual(groupesOuverts(page()), []);
+  assert.deepEqual(nomsEnVue(page()), []);
 });
 
 test('réglages : une saisie invalide affiche l\'erreur sans rien enregistrer', async () => {
   nettoyerPanneaux();
   magasin.remplacer(etatVide());
   const avant = structuredClone(magasin.etat());
-  await parAria(vues.reglages.rendre(magasin.etat()), 'Régler le standard : carottes, en garniture').click();
+  await parAria(vues.reglages.rendre(magasin.etat(), 'standards'), 'Régler le standard : carottes, en garniture').click();
   const d = panneauOuvert();
   remplir(d, 'État du poids', 'cru net');
   remplir(d, 'Valeur de la portion', '0');
@@ -836,7 +875,7 @@ test('réglages : le journal nomme en clair les nouvelles actions', () => {
   supprimerStandard(e, 'riz', 'garniture', h());
   saisirMenusSemaine(e, S.lundi, { [S.lundi]: { menu1: 'riz et carottes' } }, h());
   magasin.remplacer(e);
-  const texte = verifierTexte(vues.reglages.rendre(magasin.etat()), 'journal');
+  const texte = verifierTexte(vues.reglages.rendre(magasin.etat(), 'donnees'), 'journal');
   assert.match(texte, /Standard maison réglé/);
   assert.match(texte, /Standard maison effacé/);
   assert.match(texte, /Menus de la semaine enregistrés/);
@@ -1046,7 +1085,7 @@ test('composant : sans portion, un encadré propose deux gestes ; avec une porti
   assert.match(encadre.textContent, /Portion : absente/);
   assert.ok(boutonNomme(encadre, 'Corriger pour ce plat seulement'));
   const lienReglages = liens(encadre).find((a) => a.textContent === 'Régler le standard maison');
-  assert.equal(lienReglages.attributs.href, '#/reglages');
+  assert.equal(lienReglages.attributs.href, '#/reglages/standards');
   assert.equal(boutonNomme(encadre, 'Revenir au standard'), undefined, 'rien à retirer : pas de correction sur ce plat');
 
   const e = etatPourPortion();
@@ -1055,7 +1094,7 @@ test('composant : sans portion, un encadré propose deux gestes ; avec une porti
   const connue = classes(pageComposant(), 'portion')[0];
   assert.ok(!connue.className.split(' ').includes('encadre-alerte'));
   assert.ok(boutonNomme(connue, 'Corriger pour ce plat seulement'));
-  assert.ok(liens(connue).some((a) => a.attributs.href === '#/reglages' && a.textContent === 'Régler le standard maison'));
+  assert.ok(liens(connue).some((a) => a.attributs.href === '#/reglages/standards' && a.textContent === 'Régler le standard maison'));
   assert.equal(boutonNomme(connue, 'Revenir au standard'), undefined, 'la portion vient du standard, pas d\'une correction');
 });
 

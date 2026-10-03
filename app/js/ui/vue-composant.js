@@ -275,7 +275,7 @@ function blocPortion(c, calc) {
   const d = calc.dependances.find((x) => x.parametre === 'grammage');
   const gestes = h('div', { classe: 'actions' },
     bouton('Corriger pour ce plat seulement', () => dialogPortionPlat(c, d), 'court'),
-    lien('#/reglages', 'Régler le standard maison', 'btn btn-court'),
+    lien('#/reglages/standards', 'Régler le standard maison', 'btn btn-court'),
     d?.origine === 'plat' ? bouton('Revenir au standard', () => agir((e, t) => modifierComposant(e, c.id,
       { grammage: { valeur: null, statut: 'INCONNU', source: '' } }, t)), 'court') : null);
   if (!d) {
