@@ -8,7 +8,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 3. Fiche projet : `~/Atelier-Claude/Cerveau-Obsidian/01-Projets/Sanji.md`.
 
 ## Commandes
-- Tests : `npm test` (Node 22, aucun paquet à installer). 357 tests au 2026-10-03.
+- Tests : `npm test` (Node 22, aucun paquet à installer). 370 tests au 2026-10-03.
 - Régénérer la base métier embarquée : `npm run base`.
 - Servir en local : `npm run serve`, puis http://localhost:5173.
 - Essai sur iPhone ou iPad, sur le réseau de la maison seulement : `sh outils/creer-certificat-local.sh` (une fois), puis `node outils/serveur-https-local.mjs`. Les clés vivent dans `.certificats-locaux/` (hors Git). Rien n'est publié.
