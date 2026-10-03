@@ -54,6 +54,11 @@ function repartir(champs, lundi) {
   const analyse = analyserFeuille(champs.get('feuille-texte').value);
   const { saisie, avertissements } = repartirSurSemaine(analyse, lundi);
   const jours = Object.keys(saisie);
+  // Des intitulés déjà écrits qui vont être remplacés dans les champs : on le dit (rien n'est enregistré avant « Enregistrer »).
+  const remplaces = jours.filter((date) => [1, 2].some((m) => {
+    const actuel = champs.get(`menu-${date}-${m}`).value.trim();
+    return actuel !== '' && actuel !== saisie[date][`menu${m}`];
+  }));
   for (const date of jours) {
     champs.get(`menu-${date}-1`).value = saisie[date].menu1;
     champs.get(`menu-${date}-2`).value = saisie[date].menu2;
@@ -62,6 +67,10 @@ function repartir(champs, lundi) {
   if (jours.length > 0) {
     messages.push(encadre('info', `${jours.length} jour${jours.length > 1 ? 's' : ''} rempli${jours.length > 1 ? 's' : ''}. `
       + 'Relisez les intitulés, puis enregistrez la semaine.'));
+  }
+  if (remplaces.length > 0) {
+    messages.push(encadre('alerte', `Des intitulés déjà écrits ont été remplacés dans les champs (${remplaces.map(libelleJour).join(', ')}). `
+      + 'Rien n\'est enregistré avant « Enregistrer la semaine » : « Annuler » garde la semaine telle qu\'elle était.'));
   }
   for (const texte of avertissements) messages.push(encadre('alerte', texte));
   if (analyse.ignorees.length > 0) {

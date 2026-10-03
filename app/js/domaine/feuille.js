@@ -15,8 +15,21 @@ const MOTIF_DATE = new RegExp(
 
 // Prix en fin ou en début de ligne : « 19.- », « 24.– », « CHF 19.50 », « 21 fr. ».
 const PRIX = '(?:chf\\s*)?\\d{1,3}(?:[.,]\\d{1,2})?\\s*(?:\\.?\\s*[-–—]+|chf|fr\\.?|francs?)';
-const MOTIF_PRIX_SEUL = new RegExp(`^(?:${PRIX}\\s*)+$`, 'i');
-const MOTIF_PRIX_FIN = new RegExp(`\\s+(?:${PRIX})\\s*$`, 'i');
+// Un prix décimal sans devise (« 19.50 », « 24,50 ») compte aussi : il n'a pas sa place dans un intitulé.
+const PRIX_DECIMAL = '\\d{1,3}[.,]\\d{2}';
+const MOTIF_PRIX_SEUL = new RegExp(`^(?:(?:${PRIX}|${PRIX_DECIMAL})\\s*)+$`, 'i');
+const MOTIF_PRIX_FIN = new RegExp(`\\s+(?:${PRIX}|${PRIX_DECIMAL})\\s*$`, 'i');
+// Étiquette de rang : « Menu 1 », « Menu 2 19.50 » : ce n'est pas un plat.
+const MOTIF_ETIQUETTE = new RegExp(`^menus?\\s*\\d+\\s*[:.\\-–]?\\s*(?:(?:${PRIX}|${PRIX_DECIMAL})\\s*)*$`, 'i');
+// Formules de politesse ou de service en pied de feuille.
+const MOTIF_POLITESSE = /^(?:bon appetit|bonne (?:degustation|journee)|merci|a votre service|sur place|a emporter)\b/;
+// Nom de l'établissement : seulement en toute première ligne, en capitales ou précédé d'un mot d'enseigne.
+const MOTIF_ENSEIGNE = /^(?:restaurant|brasserie|bistrot|bistro|cafe|auberge|hotel|chez)\b/;
+function estEnseigne(ligne) {
+  if (MOTIF_ENSEIGNE.test(sansAccent(ligne))) return true;
+  const lettres = (ligne.match(/\p{L}/gu) ?? []).length;
+  return lettres >= 3 && !/\p{Ll}/u.test(ligne) && !ligne.includes(',') && ligne.split(' ').length <= 5;
+}
 
 // Titre de la feuille : « Menu du marché », « Menus de la semaine »…
 const MOTIF_TITRE = /^menus?\s+(?:du|de la|de|des)\s+\S+(?:\s+\S+)?$/i;
@@ -42,11 +55,15 @@ export function analyserFeuille(texte) {
   const lignes = [];
   const ignorees = [];
   const avertissements = [];
+  let premiere = true;
   for (const brute of String(texte ?? '').split(/\r?\n/)) {
     // Forme composée (NFC) : une lettre accentuée compte pour un caractère, comme dans le texte sans accent.
     let ligne = brute.normalize('NFC').replace(/\s+/g, ' ').trim();
     if (ligne === '') continue;
+    const estPremiere = premiere;
+    premiere = false;
     const date = MOTIF_DATE.exec(sansAccent(ligne));
+    if (!date && estPremiere && estEnseigne(ligne)) { ignorees.push(ligne); continue; }
     if (date) {
       const debut = date.index + date[0].length - date[0].replace(/^[^a-z]/i, '').length;
       const longueur = date[0].replace(/^[^a-z]/i, '').length;
@@ -65,7 +82,10 @@ export function analyserFeuille(texte) {
     // Coche, puce ou tiret en tête de ligne : on retire la marque, on garde le texte.
     ligne = ligne.replace(/^[^\p{L}\p{N}]+/u, '').trim();
     if (ligne === '') continue;
-    if (MOTIF_PRIX_SEUL.test(ligne)) { ignorees.push(ligne); continue; }
+    if (MOTIF_PRIX_SEUL.test(ligne) || MOTIF_ETIQUETTE.test(ligne) || MOTIF_POLITESSE.test(sansAccent(ligne))) {
+      ignorees.push(ligne);
+      continue;
+    }
     while (MOTIF_PRIX_FIN.test(ligne)) ligne = ligne.replace(MOTIF_PRIX_FIN, '').trim();
     if (MOTIF_TITRE.test(ligne) || estAnnotation(ligne)) { ignorees.push(ligne); continue; }
     lignes.push(ligne);

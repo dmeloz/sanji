@@ -490,6 +490,23 @@ test('tableau : se dessine chaque jour de la semaine, base vide et état riche',
 const champ = (noeud, id) => noeud.tous((x) => x.attributs.id === id)[0];
 const boutonNomme = (noeud, libelle) => boutons(noeud).find((b) => b.textContent === libelle);
 
+test('menus de la semaine : répartir sur des intitulés déjà écrits prévient qu\'ils sont remplacés dans les champs', async () => {
+  magasin.remplacer(etatVide());
+  const noeud = vues.menus.rendre(magasin.etat(), S.lundi);
+  champ(noeud, `menu-${S.lundi}-1`).value = 'ancien intitulé TEST';
+  champ(noeud, 'feuille-texte').value = 'Lundi 05 octobre\nriz et carottes\npoulet, riz, carottes';
+  await boutonNomme(noeud, 'Répartir dans la semaine').click();
+  const texte = noeud.textContent;
+  assert.match(texte, /Des intitulés déjà écrits ont été remplacés dans les champs \(lundi 5 octobre\)/);
+  assert.match(texte, /Rien n'est enregistré avant « Enregistrer la semaine »/);
+  assert.equal(champ(noeud, `menu-${S.lundi}-1`).value, 'riz et carottes');
+  // Sans intitulé déjà écrit : pas d'avertissement.
+  const propre = vues.menus.rendre(etatVide(), S.lundi);
+  champ(propre, 'feuille-texte').value = 'Lundi 05 octobre\nriz et carottes\npoulet, riz, carottes';
+  await boutonNomme(propre, 'Répartir dans la semaine').click();
+  assert.doesNotMatch(propre.textContent, /déjà écrits/);
+});
+
 test('menus de la semaine : coller, répartir, enregistrer, sans aucune étape de validation', async () => {
   magasin.remplacer(etatVide());
   const noeud = vues.menus.rendre(magasin.etat(), S.lundi);

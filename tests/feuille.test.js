@@ -89,3 +89,47 @@ test('semaine : mauvaise semaine signalée, samedi ignoré, lundi exigé', () =>
   assert.match(samedi.avertissements[0], /samedi ni le dimanche/);
   assert.throws(() => repartirSurSemaine(analyserFeuille(''), '2026-10-06'), /lundi/);
 });
+
+// ---------------------------------------------------------------- feuille réaliste (2026-10-03)
+
+const FEUILLE_REALISTE = `LE BISTROT TEST
+Menu du marché
+Lundi 05 octobre
+Menu 1 19.50
+poulet, riz, carottes
+Menu 2 24.50
+pâtes aux courgettes
+Mardi 06 octobre
+Menu 1 19.50
+poisson, pommes vapeur, poireaux
+Menu 2 24.50
+risotto, courgettes
+Bon appétit !`;
+
+test('feuille : nom de l\'établissement, étiquettes « Menu N » avec prix et formule de politesse sont écartés', () => {
+  const r = analyserFeuille(FEUILLE_REALISTE);
+  assert.deepEqual(r.avertissements, []);
+  assert.deepEqual(r.jours.map((j) => [j.menu1, j.menu2]), [
+    ['poulet, riz, carottes', 'pâtes aux courgettes'],
+    ['poisson, pommes vapeur, poireaux', 'risotto, courgettes'],
+  ]);
+  assert.ok(r.ignorees.includes('LE BISTROT TEST'));
+  assert.ok(r.ignorees.includes('Menu 1 19.50'));
+  assert.ok(r.ignorees.includes('Bon appétit !'));
+});
+
+test('feuille : un prix décimal en fin de plat est retiré, sans toucher au reste du nom', () => {
+  const r = analyserFeuille('lundi 5 octobre\npoulet, riz 19.50\npâtes 24,50\nmardi 6 octobre\nsoupe de 2 légumes\npoisson 18.-');
+  assert.deepEqual(r.jours.map((j) => [j.menu1, j.menu2]), [['poulet, riz', 'pâtes'], ['soupe de 2 légumes', 'poisson']]);
+});
+
+test('feuille : un enseigne en deuxième ligne ou un plat en majuscules après une date reste un plat', () => {
+  const r = analyserFeuille('lundi 5 octobre\nPOULET RÔTI\nriz');
+  assert.deepEqual(r.jours.map((j) => [j.menu1, j.menu2]), [['POULET RÔTI', 'riz']]);
+});
+
+test('feuille : la date reste obligatoire, « lundi » seul n\'est pas reconnu', () => {
+  const r = analyserFeuille('lundi\nriz\npoulet');
+  assert.equal(r.jours.length, 0);
+  assert.match(r.avertissements[0], /Aucun jour reconnu/);
+});
