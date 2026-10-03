@@ -33,6 +33,7 @@ Ensuite, après fusion des branches : B-P0 et B-P1 construits à partir de la sp
 8. **Tableau** : « Tout » de la barre de jours n'existe pas (ce serait un filtre) ; le centre « À confirmer » est une section de la feuille Jour, faute de route dédiée.
 
 ## Limites connues
+- **Lecture des plats** : 30/30 sur les 30 cas d'origine, mais l'auteur avait enrichi le vocabulaire avec leurs mots. Sur 30 cas NEUFS écrits sans lire le code, le premier score était 27/30 (90 %) : les trois échecs venaient de formes de pâtes inconnues (casarecce, tagliolini, fettuccine). Le vocabulaire a ensuite été étendu ; le 30/30 qui suit n'est plus indépendant. La lecture reste bornée par son vocabulaire : un mot de plat inconnu reste « à préciser », jamais inventé. Une règle de repli (« en menu 1, le premier mot inconnu est la pâte ») n'est pas construite.
 - Aucune vérification sur un vrai iPhone. L'extension Chrome n'est pas connectée : les écrans ont été relus avec des captures Chrome sans fenêtre à 390 px (rendu réel de la mise en page, mais sans interaction ni tactile).
 - Les tests sous faux DOM ne voient ni IndexedDB réelle ni le service worker.
 - « 1 changement depuis le dernier calcul » (maquette A) n'existe pas : aucun mécanisme de comparaison n'est construit.

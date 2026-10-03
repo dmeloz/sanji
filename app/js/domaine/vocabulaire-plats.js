@@ -26,6 +26,11 @@ export const FORMES_PATES = geler([
   'trofie', 'penne', 'tagliatelle', 'spaghetti', 'linguine', 'pappardelle', 'mezze maniche', 'strigoli', 'farfalle',
   'fusilli', 'rigatoni', 'macaroni', 'orecchiette', 'nouille', 'pate', 'tortiglioni', 'bucatini', 'conchiglie',
   'cavatappi', 'gnocchi', 'ravioli', 'tortellini', 'cannelloni', 'lasagne', 'spatzli', 'vermicelle', 'capellini',
+  // Autres formes courantes (le menu 1 étant toujours des pâtes ou un risotto, une forme inconnue ne doit pas empêcher la lecture).
+  'casarecce', 'tagliolini', 'tagliolino', 'tagliarini', 'fettuccine', 'fettucine', 'paccheri', 'gemelli', 'garganelli',
+  'cavatelli', 'strozzapreti', 'trenette', 'mafalde', 'reginette', 'scialatielli', 'pici', 'bigoli', 'ditalini', 'fregola',
+  'orzo', 'risoni', 'ziti', 'calamarata', 'mezzelune', 'agnolotti', 'cappelletti', 'tortelloni', 'maltagliati', 'sedanini',
+  'cresta di gallo', 'radiatori', 'gnocchetti', 'malloreddus', 'chitarra', 'spaghettini', 'spaghettoni', 'rigatoncini',
 ]);
 
 /** Herbes aromatiques : elles vont à la botte ou à la pièce, jamais à la portion. */
