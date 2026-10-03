@@ -224,13 +224,24 @@ function dialogRegle(r) {
       const v = f.lire();
       const ve = fe.lire();
       const etapes = [];
+      // Une étape garde la clé de SA POSITION dans l'éditeur : renommée, elle reste attachée à ses productions
+      // (planification, état « fait »). Une ligne sans étape existante reçoit une clé nouvelle et unique.
+      const prises = new Set();
       for (let i = 1; i <= MAX_ETAPES; i += 1) {
         const libelleEtape = String(ve[`etape${i}`] ?? '').trim();
         const avance = ve[`avanceEtape${i}`];
         if (libelleEtape === '' && avance === null) continue;
-        // Une étape reconnue à son libellé garde sa clé : ses productions (et ce qui est déjà fait) lui restent attachées.
-        const connue = existantes.find((x) => normaliser(x.libelle) === normaliser(libelleEtape));
-        etapes.push({ ...(connue ? { cle: connue.cle } : {}), libelle: libelleEtape, avanceMaxJours: avance });
+        const cle = existantes[i - 1]?.cle;
+        if (cle) prises.add(cle);
+        etapes.push({ cle, libelle: libelleEtape, avanceMaxJours: avance });
+      }
+      for (const x of etapes) {
+        if (x.cle) continue;
+        const base = normaliser(x.libelle).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'etape';
+        let cle = base;
+        for (let n = 2; prises.has(cle); n += 1) cle = `${base}-${n}`;
+        prises.add(cle);
+        x.cle = cle;
       }
       agirStrict((e, t) => definirRegle(e, { id: r?.id, nom: v.nom, avanceMaxJours: v.avance, limiteUtilisationJours: v.limite, note: v.note, etapes }, t));
     },

@@ -290,3 +290,30 @@ test('Réglages : l\'éditeur d\'étapes enregistre une règle à trois étapes,
   ]);
   if (dialogue.open) dialogue.close();
 });
+
+test('Réglages : renommer « Couper » en « Tailler » garde la clé, la production et son état « fait »', async () => {
+  const { e, c } = scenario();
+  const couper = etape(e, c, 'couper');
+  planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
+  marquerFait(e, couper.id, null, SAMEDI);
+  magasin.remplacer(e);
+  const noeud = vueReglages.rendre(magasin.etat(), 'organisation');
+  const tous = boutons(noeud);
+  await tous[tous.findIndex((b) => b.textContent === 'Supprimer') - 1].click();
+  const [dialogue] = panneauxOuverts(dom.corps);
+  const champsTexte = dialogue.tous((x) => x.balise === 'input');
+  champsTexte[3].value = 'Tailler';
+  // Une nouvelle ligne (4e étape) reçoit une clé nouvelle et unique, même si son libellé ressemble à une clé existante.
+  champsTexte[9].value = 'Couper';
+  await dialogue.enfants[0].declencher('submit');
+  const regle = Object.values(magasin.etat().regles)[0];
+  assert.deepEqual(regle.etapes.map((x) => x.cle).slice(0, 3), ['couper', 'blanchir', 'finir']);
+  assert.equal(regle.etapes[0].libelle, 'Tailler');
+  assert.equal(new Set(regle.etapes.map((x) => x.cle)).size, regle.etapes.length, 'clés uniques');
+  const prods = Object.values(magasin.etat().productions).filter((p) => p.composantId === c);
+  const tailler = prods.filter((p) => p.etapeCle === 'couper');
+  assert.equal(tailler.length, 1, 'pas de doublon');
+  assert.equal(tailler[0].id, couper.id);
+  assert.equal(tailler[0].etat, 'fait');
+  if (dialogue.open) dialogue.close();
+});
