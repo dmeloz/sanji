@@ -12,7 +12,10 @@ export const ETAT_CRENEAU = enumeration(['libre', 'charge', 'indisponible']);
 export const CHARGE = enumeration(['courte', 'moyenne', 'longue']);
 export const TYPE_COMPOSANT = enumeration(['produit_simple', 'preparation_maison', 'generique', 'a_preciser']);
 export const CATEGORIE = enumeration(['legume', 'feculent', 'proteine', 'sauce', 'autre', 'a_preciser']);
-export const ROLE = enumeration(['plat_principal', 'garniture', 'sauce', 'autre']);
+// composant_recette : protéine, poisson ou autre ingrédient d'une recette de pâtes ou de risotto (menu 1), produit par le
+// poste mais qui n'est pas « le plat principal » (un repère de portion de viande ne s'y applique pas). herbe : herbe aromatique,
+// qui va à la botte ou à la pièce et non à la portion.
+export const ROLE = enumeration(['plat_principal', 'garniture', 'sauce', 'autre', 'composant_recette', 'herbe']);
 export const ETAPE = enumeration(['portionnement', 'cuisson', 'parage']);
 /** État du poids d'une portion : sec (produit sec), cru net (cru, déjà paré) ou cuit (poids servi). */
 export const ETAT_POIDS = enumeration(['sec', 'cru_net', 'cuit']);
@@ -53,7 +56,7 @@ export const LIBELLES = Object.freeze({
     legume: 'légume', feculent: 'féculent', proteine: 'protéine', sauce: 'sauce',
     autre: 'autre', a_preciser: 'à préciser',
   }),
-  ROLE: Object.freeze({ plat_principal: 'plat principal', garniture: 'garniture', sauce: 'sauce', autre: 'autre' }),
+  ROLE: Object.freeze({ plat_principal: 'plat principal', garniture: 'garniture', sauce: 'sauce', autre: 'autre', composant_recette: 'composant de la recette', herbe: 'herbe aromatique' }),
   ETAPE: Object.freeze({ portionnement: 'portionnement', cuisson: 'cuisson', parage: 'parage' }),
   ETAT_POIDS: Object.freeze({ sec: 'sec', cru_net: 'cru net', cuit: 'cuit' }),
   UNITE: Object.freeze({ g: 'g', ml: 'ml', piece: 'pièce' }),

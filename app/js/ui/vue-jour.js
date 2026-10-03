@@ -44,9 +44,12 @@ function barreDeJours(date, aujourd) {
     'aria-label': `${libelleJour(d)}${d === aujourd ? ", aujourd'hui" : ''}${d === date ? ', jour affiché' : ''}`,
     'aria-current': d === date ? 'date' : null,
   }, puceJour(d));
+  const puces = dates.map(puce);
+  // Sur un petit écran la barre défile : le jour affiché doit être visible, pas caché à droite (le samedi).
+  setTimeout(() => puces[dates.indexOf(date)]?.scrollIntoView?.({ inline: 'center', block: 'nearest' }), 0);
   return h('nav', { classe: 'jour-barre', 'aria-label': 'Jours de la semaine' },
     h('a', { href: `#/jour/${ajouterJours(lundi, -7)}`, classe: 'jour-puce jour-puce-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
-    dates.map(puce),
+    puces,
     h('a', { href: `#/jour/${ajouterJours(lundi, 7)}`, classe: 'jour-puce jour-puce-fleche', 'aria-label': 'Semaine suivante' }, '›'));
 }
 

@@ -11,7 +11,7 @@ test('énumérations fermées conformes à la conception', () => {
   assert.deepEqual(Object.values(st.CHARGE), ['courte', 'moyenne', 'longue']);
   assert.deepEqual(Object.values(st.TYPE_COMPOSANT), ['produit_simple', 'preparation_maison', 'generique', 'a_preciser']);
   assert.deepEqual(Object.values(st.CATEGORIE), ['legume', 'feculent', 'proteine', 'sauce', 'autre', 'a_preciser']);
-  assert.deepEqual(Object.values(st.ROLE), ['plat_principal', 'garniture', 'sauce', 'autre']);
+  assert.deepEqual(Object.values(st.ROLE), ['plat_principal', 'garniture', 'sauce', 'autre', 'composant_recette', 'herbe']);
   assert.deepEqual(Object.values(st.ETAPE), ['portionnement', 'cuisson', 'parage']);
   assert.deepEqual(Object.values(st.UNITE), ['g', 'ml', 'piece']);
   assert.deepEqual(Object.values(st.VERIF), ['a_verifier', 'suffisant', 'a_commander']);

@@ -2,6 +2,7 @@
 // pour ne pas allonger la liste de travail. Constaté sur le rendu réel à 390 px : 13 lignes hors règle empilées.
 
 import test, { after, before } from 'node:test';
+import { setTimeout as attendre } from 'node:timers/promises';
 import assert from 'node:assert/strict';
 import { installerFauxDom } from './aide-dom.js';
 import { definirMenu, definirPrevision, definirStandard } from '../app/js/domaine/actions.js';
@@ -44,4 +45,19 @@ test('jour : les avances dans la règle sont dans la liste, les avances hors rè
   assert.doesNotMatch(texteReplie, /riz/, 'le riz du lundi est dans la règle : il reste dans la liste');
   const texteTotal = noeud.textContent;
   for (const nom of ['riz', 'carottes', 'quinoa']) assert.match(texteTotal, new RegExp(nom), `${nom} reste visible quelque part`);
+});
+
+test('jour : la barre des jours amène le jour affiché à l\'écran (le samedi n\'est pas caché à droite)', async () => {
+  const { Element } = await import('./aide-dom.js');
+  const appels = [];
+  Element.prototype.scrollIntoView = function scrollIntoView(options) { appels.push({ libelle: this.attributs['aria-label'], options }); };
+  try {
+    magasin.remplacer(semaine());
+    vueJour.rendre(magasin.etat(), S.samediPrecedent);
+    await attendre(20); // le faux DOM ne garde pas les minuteries en vie : on attend avec le minuteur de Node
+  } finally { delete Element.prototype.scrollIntoView; }
+  const actifs = appels.filter((a) => /jour affiché/.test(a.libelle));
+  assert.ok(actifs.length >= 1, 'le jour affiché est amené à l\'écran');
+  assert.ok(actifs.every((a) => /samedi 3 octobre/.test(a.libelle)), 'et c\'est bien le jour affiché');
+  assert.equal(actifs.at(-1).options.inline, 'center');
 });
