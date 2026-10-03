@@ -4,3 +4,6 @@ Sans titre.canvas
 
 # macOS
 .DS_Store
+
+# Clés de l essai HTTPS local : jamais dans Git
+.certificats-locaux/
