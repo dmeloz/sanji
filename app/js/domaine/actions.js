@@ -9,7 +9,7 @@ import {
   ajouterJournal, assurerJour, composantVide, ficheVide, fournisseurVide, memoireVide, normaliser, nouvelId,
   productionVide, recetteVide, regleVide, suiviProduitVide,
 } from './etat.js';
-import { categoriePropose, proposerComposants } from './analyse-menu.js';
+import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
 import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, regleDe } from './planification.js';
 import { besoinsProduits, cleSuivi } from './produits.js';
@@ -307,7 +307,7 @@ export function ajouterComposant(etat, date, menu, champs, h) {
   // Sans catégorie donnée, l'application la déduit du nom ; une exception mémorisée pour ce nom prime sur la règle du menu.
   const nomPropre = champs.nom.trim();
   const categorie = champs.categorie ?? categoriePropose(nomPropre);
-  const memorise = etat.memoire && Object.hasOwn(etat.memoire, normaliser(nomPropre)) ? etat.memoire[normaliser(nomPropre)] : null;
+  const memorise = lireMemoire(etat.memoire, nomPropre, menu);
   const attribue = typeof champs.attribue === 'boolean' ? champs.attribue
     : typeof memorise?.attribue === 'boolean' ? memorise.attribue
       : menu === 1 || categorie === 'legume' || categorie === 'feculent';
@@ -323,8 +323,9 @@ const CHAMPS_COMPOSANT = ['nom', 'categorie', 'attribue', 'type', 'role', 'produ
 
 /** Mémorise par nom, sans geste supplémentaire, l'attribution et la catégorie choisies par le chef (rien d'autre). */
 function memoriserAttribution(etat, c) {
-  const cle = normaliser(c.nom);
-  if (cle === '' || CLES_INTERDITES.has(cle)) return;
+  const nom = normaliser(c.nom);
+  if (nom === '' || CLES_INTERDITES.has(nom)) return;
+  const cle = cleMemoire(c.nom, c.menu); // par menu : un choix fait en menu 1 ne vaut pas pour le menu 2
   const m = Object.hasOwn(etat.memoire, cle) ? etat.memoire[cle] : memoireVide();
   Object.assign(m, { nom: c.nom, attribue: c.attribue, categorie: c.categorie });
   etat.memoire[cle] = m;
@@ -778,9 +779,8 @@ export function memoriser(etat, composantId, h) {
 export function reprendreMemoire(etat, composantId, h) {
   verifierH(h);
   const c = exigerComposant(etat, composantId);
-  const cle = normaliser(c.nom);
-  if (!Object.hasOwn(etat.memoire, cle)) return { applique: false, champs: [] };
-  const m = etat.memoire[cle];
+  const m = lireMemoire(etat.memoire, c.nom, c.menu);
+  if (!m) return { applique: false, champs: [] };
   const champs = ['attribue', 'categorie'];
   c.attribue = m.attribue;
   c.categorie = m.categorie;

@@ -5,7 +5,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { proposerComposants } from '../app/js/domaine/analyse-menu.js';
 
-const noms = (intitule, menu = 1) => proposerComposants(intitule, menu).map((c) => c.nom);
+// La sauce implicite (« à confirmer ») n'est pas un morceau de l'intitulé : elle est testée dans lecture-plats.test.js.
+const noms = (intitule, menu = 1) => proposerComposants(intitule, menu).map((c) => c.nom).filter((n) => !/ à confirmer$/.test(n));
 
 test('coupure : une protéine suivie directement d\'un féculent ou d\'un légume connu se coupe', () => {
   assert.deepEqual(noms('Suprême de volaille risotto'), ['Suprême de volaille', 'risotto']);
@@ -17,8 +18,9 @@ test('coupure : jamais après un mot de liaison, dans une forme « de », ni qua
   assert.deepEqual(noms('Poulet au riz'), ['Poulet au riz']);
   assert.deepEqual(noms('Poulet rôti sauce aux carottes'), ['Poulet rôti sauce aux carottes']);
   assert.deepEqual(noms('Tagliatelle de courgette'), ['Tagliatelle de courgette']);
-  assert.deepEqual(noms('Pâtes aux poireaux'), ['Pâtes aux poireaux']);
-  assert.deepEqual(noms('Risotto aux courgettes'), ['Risotto aux courgettes']);
+  // Une préparation de féculent + un ingrédient donne deux éléments (« X aux Y ») ; « de » ne coupe jamais.
+  assert.deepEqual(noms('Pâtes aux poireaux'), ['Pâtes', 'poireaux']);
+  assert.deepEqual(noms('Risotto aux courgettes'), ['Risotto', 'courgettes']);
   assert.deepEqual(noms('Saumon sauce vierge tomates'), ['Saumon sauce vierge tomates'], 'tomates n\'a pas de famille : rien n\'est deviné');
 });
 

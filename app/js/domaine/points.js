@@ -6,6 +6,7 @@ import { jourOuVide, normaliser } from './etat.js';
 import { etatCreneau, etatTache, evaluationProduction } from './planification.js';
 import { statutAllergenes } from './allergenes.js';
 import { grammageEffectif } from './savoir.js';
+import { lireMemoire } from './analyse-menu.js';
 
 const somme = (r) => (Number(r?.[1]) || 0) + (Number(r?.[2]) || 0);
 
@@ -36,7 +37,7 @@ export function pointsAConfirmer(etat, date) {
 
   // Inconnu = catégorie non reconnue ET aucun choix du chef mémorisé pour ce nom (attribution ou catégorie).
   const memoire = etat.memoire ?? {};
-  const estInconnu = (c) => c.categorie === 'a_preciser' && !Object.hasOwn(memoire, normaliser(c.nom));
+  const estInconnu = (c) => c.categorie === 'a_preciser' && lireMemoire(memoire, c.nom, c.menu) === null;
   for (const c of composants.filter(estInconnu)) {
     points.push({ type: 'composant_inconnu', composantId: c.id, texte: `${c.nom} : à classer : au poste ou non ?` });
   }

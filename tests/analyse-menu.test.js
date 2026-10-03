@@ -3,13 +3,15 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { categoriePropose, proposerComposants } from '../app/js/domaine/analyse-menu.js';
 
-const noms = (r) => r.map((c) => c.nom);
+// La sauce implicite (« à confirmer ») d'un plat de pâtes ou de risotto n'est pas un morceau de l'intitulé : elle est testée dans lecture-plats.test.js.
+const noms = (r) => r.map((c) => c.nom).filter((n) => !/ à confirmer$/.test(n));
 
-test('découpe sur virgule, accompagné de, sur lit de ; « et », « & », « avec » ne séparent pas', () => {
+test('découpe sur virgule, accompagné de, sur lit de ; « et » et « & » seuls ne séparent pas, « avec » sépare deux expressions connues', () => {
   const r = proposerComposants('riz, carottes accompagné de pâtes sur lit de salade', 1);
   assert.deepEqual(noms(r), ['riz', 'carottes', 'pâtes', 'salade']);
-  // Dans un menu réel, « et » relie les éléments d'un même plat : un seul composant.
-  assert.deepEqual(noms(proposerComposants('riz et carottes & poulet avec jus', 1)), ['riz et carottes & poulet avec jus']);
+  // Dans un menu réel, « et » relie les éléments d'un même plat : un seul composant. « avec » coupe quand les deux côtés sont connus.
+  assert.deepEqual(noms(proposerComposants('riz et carottes & poulet avec jus', 1)), ['riz et carottes & poulet', 'jus']);
+  assert.deepEqual(noms(proposerComposants('riz et carottes & poulet', 1)), ['riz et carottes & poulet']);
   assert.deepEqual(noms(proposerComposants('riz et carottes, poulet', 2)), ['riz et carottes', 'poulet']);
   assert.deepEqual(noms(proposerComposants('  riz ,, carottes  ', 1)), ['riz', 'carottes']);
   assert.deepEqual(proposerComposants('', 1), []);

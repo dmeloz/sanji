@@ -494,7 +494,7 @@ test('16. La saisie des menus d\'une semaine ne demande aucune validation : les 
   modifierComposant(etat, composantDe(etat, S.lundi, 2, 'poulet').id, { attribue: true }, h());
   modifierComposant(etat, inconnu.id, { categorie: 'legume', attribue: true }, h());
   assert.deepEqual(pointsAConfirmer(etat, S.mardi).filter((p) => p.type === 'composant_inconnu'), []);
-  assert.deepEqual(Object.keys(etat.memoire).sort(), ['element_inconnu_test', 'poulet'], 'seuls les noms corrigés sont mémorisés');
+  assert.deepEqual(Object.keys(etat.memoire).sort(), ['element_inconnu_test|2', 'poulet|2'], 'seuls les noms corrigés sont mémorisés');
 
   // Saisie suivante : les mêmes noms reçoivent la correction, sans geste.
   saisirMenusSemaine(etat, S.lundiSuivant, {
@@ -589,8 +589,9 @@ test('18. Le tableau blanc met en avant, selon le contexte, ce qui reste à fair
   fait(e, production(S.lundi), null, h());
   const apres = tableauBlanc(e, S.lundi).contexte;
   assert.equal(apres.type, 'apres_service');
-  assert.deepEqual(apres.lignes.filter((l) => l.genre === 'avance').map((l) => [l.texte, l.quantite]),
-    [['pâtes aux courgettes, pour mardi 6 octobre', '1 000 g']]);
+  // « pâtes aux courgettes » se lit en deux éléments (pâtes, courgettes) et une sauce à confirmer : on suit la ligne des pâtes.
+  assert.deepEqual(apres.lignes.filter((l) => l.genre === 'avance' && /^pâtes,/.test(l.texte)).map((l) => [l.texte, l.quantite]),
+    [['pâtes, pour mardi 6 octobre', '1 000 g']]);
 
   // En fin de semaine : le tableau affiche la semaine suivante.
   const samedi = tableauBlanc(e, S.samediPrecedent);
