@@ -524,3 +524,125 @@ export function tableauBlanc(etat, aujourdhui, lundiAffiche) {
     pointsGlobaux: pointsGlobaux(etat),
   };
 }
+
+// ------------------------------------------------------------------ l'écran Aujourd'hui (refonte 1)
+
+const ORDRE_CERTITUDES = Object.freeze(['estimee', 'provisoire', 'confirmee']);
+const A_CONSOMMER_MAX = 3;
+
+/** Certitude d'une fiche de fonction : menu fixe = confirmée ; choix libre selon sa répartition ; hors menu : aucune (jamais inventée). */
+function certitudeFiche(f) {
+  if (f.mode === 'menu_fixe') return 'confirmee';
+  if (f.mode === 'choix_libre') return f.statutRepartition === 'confirmee' ? 'confirmee' : 'provisoire';
+  return null;
+}
+
+/** Couverts d'un menu du jour et leur certitude : prévision = estimée ; fiches = confirmée ou provisoire. Jamais un « 0 » inventé. */
+function couvertsDuMenu(etat, date, menu) {
+  const jour = jourOuVide(etat, date);
+  const intitule = String(jour.menus[menu].intitule ?? '').trim();
+  const portions = portionsMenu(etat, date, menu);
+  const parCertitude = new Map();
+  for (const d of portions.details) parCertitude.set(d.certitude, (parCertitude.get(d.certitude) ?? 0) + d.portions);
+  return {
+    menu, saisi: intitule !== '',
+    couverts: portions.total > 0 || !portions.previsionManquante ? Math.round(portions.total) : null,
+    previsionASaisir: intitule !== '' && portions.previsionManquante === true,
+    certitudes: ORDRE_CERTITUDES.filter((c) => parCertitude.has(c)).map((c) => ({ certitude: c, portions: Math.round(parCertitude.get(c)) })),
+  };
+}
+
+/** Fiches de fonction actives du jour : couverts annoncés par certitude (la fiche hors menu n'a pas de certitude). */
+function fichesDuJour(etat, date) {
+  const actives = Object.values(etat.fiches ?? {}).filter((f) => f.statut === 'active' && f.date === date);
+  const parCertitude = new Map();
+  for (const f of actives) {
+    const cle = certitudeFiche(f) ?? 'hors_menu';
+    parCertitude.set(cle, (parCertitude.get(cle) ?? 0) + (Number(f.couverts) || 0));
+  }
+  return {
+    nombre: actives.length,
+    total: actives.length > 0 ? actives.reduce((n, f) => n + (Number(f.couverts) || 0), 0) : null,
+    certitudes: [...ORDRE_CERTITUDES, 'hors_menu'].filter((c) => parCertitude.has(c)).map((c) => ({ certitude: c, couverts: parCertitude.get(c) })),
+  };
+}
+
+/** Prochaine fiche de fonction (aujourd'hui ou plus tard) : allergies et certitude de ses couverts. */
+function prochaineFiche(etat, aujourd) {
+  const f = Object.values(etat.fiches ?? {})
+    .filter((x) => x.statut === 'active' && x.date >= aujourd)
+    .sort((a, b) => a.date.localeCompare(b.date) || String(a.horaire).localeCompare(String(b.horaire)) || String(a.service).localeCompare(String(b.service)))[0];
+  if (!f) return null;
+  return {
+    id: f.id, date: f.date, numero: f.numero, service: f.service, horaire: f.horaire, couverts: Number(f.couverts) || 0,
+    mode: f.mode, modeTexte: MODE_FICHE[f.mode] ?? '', certitude: certitudeFiche(f),
+    allergies: String(f.allergies ?? '').trim(), lien: `#/semaine/${f.date}`,
+  };
+}
+
+/** Prochaine tâche à faire : première ligne non faite de la lecture du jour (service 1, service 2, autres, après service) ; une simple suggestion d'avance n'est pas une tâche décidée. */
+function maintenantDe(feuille) {
+  if (!feuille) return null;
+  const { service1, service2, autres, apres } = feuille.lecture;
+  const l = [...service1, ...service2, ...autres, ...apres].find((x) => !x.fait && x.source !== 'suggestion');
+  if (!l) return null;
+  const ev = l.evaluation ?? null;
+  return {
+    productionId: l.productionId, composantId: l.composantId, genre: l.genre,
+    nom: l.genre === 'principale' ? l.nom : (l.libelle || l.nom), menu: l.menu ?? null, dateService: l.dateService,
+    cible: l.cible ?? null, unite: l.unite ?? null, creneau: l.creneau ?? null,
+    horsRegle: Boolean(ev) && ev.jours > 0 && !ev.autorisee,
+  };
+}
+
+/**
+ * Productions faites pour un service à venir (jour même compris, si faites avant), avec l'avertissement de conservation
+ * existant (`evaluationProduction` : `evaluerAvance` + `repereConservation`). Les avertissements d'abord, puis le service le plus proche.
+ * Une quantité absente n'est jamais un avertissement.
+ */
+function aConsommerDe(etat, aujourd) {
+  const lignes = [];
+  for (const p of Object.values(etat.productions ?? {})) {
+    if (p.etat !== 'fait' || p.genre === 'preparatoire' || p.dateService < aujourd) continue;
+    const composant = etat.composants?.[p.composantId];
+    const ev = composant ? evaluationProduction(etat, p.id) : null;
+    if (!ev || !(ev.jours > 0)) continue;
+    lignes.push({
+      productionId: p.id, composantId: composant.id, nom: p.genre === 'complement' ? `Complément : ${composant.nom}` : composant.nom,
+      dateService: p.dateService, dateFait: p.hFait ? String(p.hFait).slice(0, 10) : null, avanceJours: ev.jours,
+      quantite: Number.isFinite(p.quantiteReelle) ? p.quantiteReelle : null, unite: p.unite ?? null,
+      horsRegle: !ev.autorisee,
+      limiteDepassee: ev.conservation === 'depassee',
+      conservation: ev.repere?.depasse ? { texte: ev.repere.texte, provenance: ev.repere.provenance } : null,
+    });
+  }
+  const alerte = (x) => (x.horsRegle || x.limiteDepassee || x.conservation ? 0 : 1);
+  lignes.sort((a, b) => alerte(a) - alerte(b) || a.dateService.localeCompare(b.dateService) || a.nom.localeCompare(b.nom));
+  return { total: lignes.length, lignes: lignes.slice(0, A_CONSOMMER_MAX) };
+}
+
+/**
+ * Données de l'écran Aujourd'hui : couverts des menus 1 et 2 et des fiches avec leur certitude, prochaine tâche
+ * (« Maintenant »), décisions en attente (points « À confirmer » existants, sans quantité manquante), à consommer en
+ * priorité, prochaine fiche de fonction, et ce que l'ancien tableau montrait encore (production, commande à relire,
+ * rappel de sauvegarde). Pure : ni DOM ni heure courante.
+ */
+export function aujourdhuiDe(etat, aujourd) {
+  const lundi = lundiDe(aujourd);
+  const ouvert = estOuvert(aujourd);
+  const feuille = ouvert ? feuilleDuJour(etat, aujourd) : null;
+  const datesSemaine = [0, 1, 2, 3, 4, 5].map((i) => ajouterJours(lundi, i)).filter((d) => d >= aujourd);
+  return {
+    date: aujourd, lundi, ouvert,
+    menus: aMenuDuJour(aujourd) ? [1, 2].map((m) => couvertsDuMenu(etat, aujourd, m)) : [],
+    fiches: fichesDuJour(etat, aujourd),
+    maintenant: maintenantDe(feuille),
+    avancement: feuille ? feuille.avancement : { faites: 0, total: 0 },
+    decisions: aConfirmerDuBord(etat, datesSemaine, aujourd),
+    aConsommer: aConsommerDe(etat, aujourd),
+    prochaineFiche: prochaineFiche(etat, aujourd),
+    production: productionDuBord(etat, aujourd, lundi),
+    sauvegarde: rappelSauvegarde(etat, aujourd),
+    semaineSansMenu: semaineSansMenu(etat, lundi),
+  };
+}

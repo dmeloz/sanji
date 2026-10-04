@@ -817,3 +817,95 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .mep-ligne.mep-fait .mep-nom { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--texte-doux); }
 .mep-ligne.mep-fait .mep-qte { color: var(--texte-doux); }
 .mep-ligne.mep-fait .mep-meta { color: var(--texte-doux); }
+
+/* ------------------------------------------------------------ Écran Aujourd'hui (refonte 1, maquette Main) */
+/* Quantités en var(--police-qte) ; un état se dit toujours par un mot écrit, la couleur ne fait que l'appuyer. */
+.vue-aujourdhui { display: flex; flex-direction: column; gap: 14px; }
+.vue-aujourdhui > * + * { margin-top: 0; }
+.au-tete { display: flex; flex-direction: column; gap: 4px; }
+.au-date { font-size: var(--t-legende); font-weight: 500; color: var(--texte-doux); }
+.au-titre { font-size: var(--t-titre); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+.au-hors-ligne { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; min-height: 28px; padding: 2px 10px; border: 1px solid var(--bordure); border-radius: 999px; background: var(--carte); color: var(--texte-doux); font-size: var(--t-legende); font-weight: 500; }
+.au-point { width: 8px; height: 8px; border-radius: 4px; background: var(--exception-point); flex: none; }
+.au-hors-ligne[data-pret="oui"] .au-point { background: var(--action); }
+.au-qte { font-family: var(--police-qte); font-variant-numeric: tabular-nums; }
+.au-neutre, .au-sous { color: var(--texte-doux); font-size: var(--t-legende); }
+.au-sous { display: block; overflow-wrap: anywhere; }
+.au-neutre { font-size: var(--t-corps); }
+.au-etiquette { font-size: var(--t-legende); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texte-doux); }
+.au-icone { flex: none; width: 20px; height: 20px; }
+.au-chevron { color: var(--texte-doux); width: 16px; height: 16px; }
+
+/* Couverts : menu 1, menu 2, fiches, chacun avec la certitude écrite (estimée, provisoire, confirmée) */
+.au-couverts-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px; }
+.au-tuile { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: var(--r-carte-petite); background: var(--carte); min-width: 0; }
+.au-tuile-titre { font-size: var(--t-legende); font-weight: 600; color: var(--texte-doux); }
+.au-couverts { font-size: 18px; font-weight: 600; }
+.au-unite { font-size: var(--t-legende); color: var(--texte-doux); }
+.au-tuile-suite { display: flex; flex-direction: column; font-size: var(--t-legende); color: var(--texte-moyen); }
+.au-certitude-mot { font-weight: 600; }
+.au-certitude-provisoire .au-certitude-mot { color: var(--exception); }
+.au-certitude-provisoire .au-certitude-mot::before { content: "\25B3\00A0"; }
+.au-ferme { padding: 12px 14px; border-radius: var(--r-carte-petite); background: var(--carte); }
+
+/* Maintenant : carte d'encre */
+.au-maintenant { --jauge-trait: #7CC28F; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: var(--r-carte); background: var(--encre); color: var(--sur-encre); }
+@media (prefers-color-scheme: dark) { .au-maintenant { --jauge-trait: #2C6A3E; } }
+.au-maintenant-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.au-maintenant .au-etiquette, .au-jauge-texte { color: var(--sur-encre); opacity: 0.85; }
+.au-jauge-texte { font-size: var(--t-legende); }
+.au-maintenant-ligne { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.au-maintenant-nom { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; overflow-wrap: anywhere; }
+.au-maintenant-qte { font-size: 24px; font-weight: 600; flex: none; }
+.au-maintenant-neutre, .au-maintenant-vide { font-size: var(--t-corps); opacity: 0.85; }
+.au-maintenant-dest { font-size: var(--t-corps); opacity: 0.9; }
+.au-maintenant .au-hors-regle { opacity: 1; }
+.au-jauge { width: 100%; height: 8px; border: 0; border-radius: 4px; overflow: hidden; background: transparent; appearance: none; -webkit-appearance: none; }
+.au-jauge::-webkit-progress-bar { background: var(--sur-encre); opacity: 0.25; border-radius: 4px; }
+.au-jauge::-webkit-progress-value { background: var(--jauge-trait); border-radius: 4px; }
+.au-jauge::-moz-progress-bar { background: var(--jauge-trait); border-radius: 4px; }
+.au-maintenant-actions { display: flex; gap: 8px; }
+.au-btn { display: flex; align-items: center; justify-content: center; min-height: var(--haut-bouton); border-radius: var(--r-bouton); font: inherit; font-size: var(--t-ligne); font-weight: 600; text-decoration: none; cursor: pointer; }
+.au-btn-clair { flex: 2; background: var(--sur-encre); color: var(--encre); border: 1px solid var(--sur-encre); }
+.au-btn-contour { flex: 1; background: transparent; color: var(--sur-encre); border: 1px solid var(--sur-encre); }
+.au-btn:focus-visible { outline: 3px solid var(--sur-encre); outline-offset: 2px; }
+
+/* Décisions en attente : bandeau ambre, mot écrit et icône */
+.au-decisions { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 8px 14px; border: 1px solid var(--exception-bord); border-radius: 16px; background: var(--exception-fond); color: var(--exception); font: inherit; text-align: left; cursor: pointer; }
+.au-decisions-texte { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.au-decisions-titre { font-size: var(--t-corps); font-weight: 600; }
+.au-decisions-detail { font-size: var(--t-legende); overflow-wrap: anywhere; }
+.au-decisions .au-chevron { color: currentColor; }
+
+/* Cartes et lignes */
+.au-carte { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 6px; border-radius: var(--r-carte); background: var(--carte); }
+.au-carte-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.au-lien-court { display: inline-flex; align-items: center; min-height: var(--cible); padding: 0 4px; font-size: var(--t-corps); font-weight: 600; color: var(--action); }
+.au-lignes { display: flex; flex-direction: column; }
+.au-ligne { display: flex; align-items: center; gap: 10px; width: 100%; min-height: var(--cible); padding: 6px 0; border: 0; border-bottom: 1px solid var(--bordure); background: none; color: var(--texte); font: inherit; font-size: var(--t-corps); text-align: left; text-decoration: none; }
+.au-lignes > li:last-child > .au-ligne, .au-liens > .au-ligne:last-child { border-bottom: 0; }
+.au-ligne-bouton { cursor: pointer; }
+.au-ligne-lien { color: var(--action); font-weight: 600; }
+.au-confirmer-mot { flex: none; padding: 1px 6px; border-radius: var(--r-etiquette); background: var(--exception-fond); color: var(--exception); font-size: var(--t-legende); font-weight: 600; }
+.au-confirmer-texte { flex: 1; min-width: 0; }
+.au-repli { padding: 0 16px; border-radius: var(--r-carte); background: var(--carte); }
+.au-repli > summary { display: flex; align-items: center; min-height: var(--cible); font-size: var(--t-corps); font-weight: 600; cursor: pointer; }
+.au-conso { padding: 2px 0; border-bottom: 1px solid var(--bordure); }
+.au-conso:last-child { border-bottom: 0; }
+.au-conso-lien { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--cible); color: var(--texte); text-decoration: none; font-size: var(--t-corps); }
+.au-conso-corps { display: flex; flex-direction: column; min-width: 0; }
+.au-conso-nom { font-weight: 500; overflow-wrap: anywhere; }
+.au-conso-droite { display: flex; flex-direction: column; align-items: flex-end; flex: none; }
+.au-etiquette-statut { padding: 1px 6px; border-radius: var(--r-etiquette); background: var(--carte-2); color: var(--texte-moyen); font-size: var(--t-legende); font-weight: 600; }
+.au-attention { padding-bottom: 6px; font-size: var(--t-legende); color: var(--texte); }
+.au-hors-regle { padding: 1px 6px; border-radius: var(--r-etiquette); background: var(--exception-fond); color: var(--exception); font-size: var(--t-legende); font-weight: 600; }
+.au-hors-regle::before { content: "\25B3\00A0"; }
+.au-allergie { font-weight: 600; }
+.au-statut { font-weight: 600; }
+
+/* Prochaine fiche de fonction */
+.au-fiche { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 14px; border: 1px solid var(--bordure); border-radius: 16px; background: var(--carte); color: var(--texte); text-decoration: none; }
+.au-fiche-corps { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.au-fiche-titre { font-size: var(--t-corps); font-weight: 600; }
+.au-liens { padding-bottom: 8px; }
+.au-liens .au-etiquette { margin-bottom: 2px; }
