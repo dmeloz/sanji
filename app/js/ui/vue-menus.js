@@ -1,4 +1,5 @@
-// Menus de la semaine : les dix intitulés (et les prévisions) saisis en une fois, sans étape de validation.
+// Menus de la semaine (ancienne page, toujours disponible par `rendre`) ; ses morceaux sont réutilisés par l'écran Import (vue-import.js).
+// Les dix intitulés (et les prévisions) saisis en une fois, sans étape de validation.
 // La page ne se redessine pas pendant la frappe : rien ne change dans l'état avant « Enregistrer la semaine ».
 
 import { saisirMenusSemaine } from '../domaine/actions.js';
@@ -13,14 +14,14 @@ import { parseEntier } from './format.js';
 import { afficherMessage } from './messages.js';
 import { panneau } from './panneau.js';
 
-const JOURS_A_MENU = [0, 1, 2, 3, 4]; // lundi à vendredi
+export const JOURS_A_MENU = [0, 1, 2, 3, 4]; // lundi à vendredi
 
 export function titre() { return 'Menus de la semaine'; }
 
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 
 /** Crée un champ de saisie et le range dans la table des champs, sous son identifiant. */
-function champSaisi(champs, balise, attributs) {
+export function champSaisi(champs, balise, attributs) {
   const el = h(balise, attributs);
   champs.set(attributs.id, el);
   return el;
@@ -42,7 +43,7 @@ function blocMenu(champs, date, menu, jour) {
         value: Number.isFinite(prevision) ? String(prevision) : '' })));
 }
 
-function blocJour(champs, etat, date) {
+export function blocJour(champs, etat, date) {
   const jour = jourOuVide(etat, date);
   return h('section', { classe: 'carte saisie-jour', 'aria-label': libelleJour(date) },
     h('h2', { classe: 'feutre saisie-jour-titre' }, majuscule(libelleJour(date))),
@@ -69,7 +70,7 @@ function dialogRestaurer(champs, lundi, ligne) {
 }
 
 /** Remplit les champs à partir du texte collé. N'enregistre rien. */
-function repartir(champs, lundi) {
+export function repartir(champs, lundi) {
   const retour = champs.get('feuille-retour');
   const analyse = analyserFeuille(champs.get('feuille-texte').value);
   const { saisie, avertissements } = repartirSurSemaine(analyse, lundi);
@@ -128,7 +129,7 @@ function lireSaisie(champs, etat, lundi) {
   return saisie;
 }
 
-function enregistrer(champs, etat, lundi) {
+export function enregistrer(champs, etat, lundi) {
   let saisie;
   try {
     saisie = lireSaisie(champs, etat, lundi);

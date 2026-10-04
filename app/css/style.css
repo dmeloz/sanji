@@ -1110,3 +1110,29 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .dec-icone-vide { color: var(--action); }
 .dec-vide-titre { margin: 0; font-size: var(--t-section); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { dialog.panneau.feuille-decisions[open] { animation: none; } }
+/* ============================ Import des menus (refonte 1) ============================ */
+.imp-retour { display: inline-flex; align-items: center; min-height: var(--cible); font-size: var(--t-ligne); font-weight: 600; text-decoration: none; color: var(--action); }
+.imp-tete { display: grid; gap: 4px; }
+.imp-legende { font-size: var(--t-legende); font-weight: 500; color: var(--texte-doux); }
+.imp-titre-section { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); margin: 0; }
+.imp-titre-hors { margin-top: 20px; }
+.imp-photo > summary, .imp-lecture-jours .imp-jour > summary { min-height: var(--cible); display: flex; align-items: center; cursor: pointer; }
+.imp-lecture { display: grid; gap: 10px; }
+.imp-lecture-jours { display: flex; flex-direction: column; }
+.imp-jour { border-top: 1px solid var(--bordure); }
+.imp-jour-tete { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--cible); }
+.imp-jour-nom { font-size: var(--t-corps); font-weight: 600; }
+.imp-jour-etat { font-size: var(--t-legende); color: var(--texte-doux); }
+.imp-jour-etat-doute { font-weight: 700; color: var(--exception); }
+.imp-jour-etat-doute::before { content: "! "; }
+.imp-jour-corps { display: grid; gap: 10px; padding: 4px 0 12px; }
+.imp-menu { display: grid; gap: 4px; padding: 8px 10px; border-radius: var(--r-carte-petite); background: var(--carte-2); }
+.imp-menu-doute { background: var(--exception-fond); border: 1.5px solid var(--exception-point); }
+.imp-menu-nom { font-size: var(--t-legende); font-weight: 600; color: var(--texte-moyen); }
+.imp-menu-doute .imp-menu-nom { color: var(--exception); }
+.imp-elements { display: flex; flex-wrap: wrap; gap: 6px; }
+.imp-elements li { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 2px 10px; border-radius: var(--r-etiquette); background: var(--carte); border: 1px solid var(--bordure); font-size: var(--t-corps); }
+.imp-etiquette { font-size: var(--t-legende); font-weight: 600; color: var(--texte-moyen); }
+.imp-doutes { display: grid; gap: 2px; font-size: var(--t-legende); font-weight: 600; color: var(--exception); }
+.imp-neutre { font-size: var(--t-legende); color: var(--texte-doux); }
+@media (prefers-reduced-motion: reduce) { .imp-jour, .imp-jour > summary { transition: none; scroll-behavior: auto; } }
