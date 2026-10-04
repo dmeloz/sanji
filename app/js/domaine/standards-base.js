@@ -6,7 +6,8 @@
 //
 // API (domaine pur, sans DOM) :
 //  - USAGES : 'rendement_parage' | 'rendement_cuisson' | 'conservation' | 'cuisson_temps' | 'temperature'
-//    | 'buffet_couvert' | 'allergene'.
+//    | 'buffet_couvert' | 'refroidissement' (h, règle générale) | 'limite_duree' (h, règle générale)
+//    | 'duree_stockage' (h, semaines ou mois, jamais converties) | 'allergene'.
 //  - standardDeBase(sujet, usage, { etatPoids?, regle? }) -> Standard | null
 //      sujet : clé de famille (FAMILLES de savoir.js), « groupe:<clé> », « categorie:<clé> » ou null (règles générales).
 //      etatPoids : 'sec' | 'cru_net' | 'cuit' : écarte les entrées d'un autre état (une entrée sans état convient).
@@ -38,7 +39,7 @@ import { FAMILLES, familleParCle } from './savoir.js';
 import { LIBELLE_STANDARD_BASE } from './statuts.js';
 
 export const USAGES = Object.freeze(['rendement_parage', 'rendement_cuisson', 'conservation', 'cuisson_temps',
-  'temperature', 'buffet_couvert', 'allergene']);
+  'temperature', 'buffet_couvert', 'refroidissement', 'limite_duree', 'duree_stockage', 'allergene']);
 export const STATUT_STANDARD_BASE = 'STANDARD_BASE';
 export { LIBELLE_STANDARD_BASE, REGLES_GENERALES, VERSION_REFERENTIEL };
 

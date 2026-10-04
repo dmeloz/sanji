@@ -15,6 +15,8 @@
   { "cle": "sauces_cuites", "libelle": "Sauces cuites", "categories": ["sauce"] },
   { "cle": "viandes_cuites", "libelle": "Plats de viande cuits", "categories": ["proteine"] },
   { "cle": "buffet_viandes", "libelle": "Viandes d'un buffet", "categories": ["proteine"] },
+  { "cle": "refroidissement", "libelle": "Refroidissement après cuisson" },
+  { "cle": "hors_froid", "libelle": "Denrées périssables hors du froid" },
   { "cle": "allergenes", "libelle": "Allergènes" }
  ],
  "rattachements": [
@@ -33,6 +35,7 @@
 
   { "id": "feculents.pates.conservation.cuites", "usage": "conservation", "cible": { "famille": "pates_seches" }, "unite": "jours", "sens": "prudent_min" },
   { "id": "feculents.riz.conservation.cuit", "usage": "conservation", "cible": { "famille": "riz" }, "unite": "jours", "sens": "prudent_min" },
+  { "id": "feculents.leg.conservation.cuites", "usage": "conservation", "cible": { "famille": "legumineuses" }, "unite": "jours", "sens": "prudent_min" },
   { "id": "hygiene.duree.feculents-legumes-cuits", "usage": "conservation", "cible": { "regle_generale": "feculents_legumes_cuits", "etat": "cuit" }, "unite": "jours", "sens": "prudent_min" },
   { "id": "hygiene.duree.sauces-cuites", "usage": "conservation", "cible": { "regle_generale": "sauces_cuites", "etat": "cuit" }, "unite": "jours", "sens": "prudent_min" },
   { "id": "hygiene.duree.viande-cuite-salades", "usage": "conservation", "cible": { "regle_generale": "viandes_cuites", "etat": "cuit" }, "unite": "jours", "sens": "prudent_min" },
@@ -43,6 +46,13 @@
   { "id": "legumes.blanchir.brocoli", "usage": "cuisson_temps", "cible": { "famille": "brocoli" }, "unite": "min" },
   { "id": "legumes.blanchir.chou-fleur", "usage": "cuisson_temps", "cible": { "famille": "chou_fleur" }, "unite": "min" },
   { "id": "legumes.braiser.endives-duree", "usage": "cuisson_temps", "cible": { "famille": "endives" }, "unite": "min" },
+
+  { "id": "hygiene.temperature.refroidissement", "usage": "refroidissement", "cible": { "regle_generale": "refroidissement" }, "unite": "h", "sens": "prudent_max" },
+  { "id": "hygiene.temperature.maintien-chaud-duree", "usage": "limite_duree", "cible": { "regle_generale": "maintien_chaud" }, "unite": "h", "sens": "prudent_max" },
+  { "id": "hygiene.temperature.hors-froid-3h", "usage": "limite_duree", "cible": { "regle_generale": "hors_froid" }, "unite": "h", "sens": "prudent_max" },
+  { "id": "feculents.pdt.stockage.duree", "usage": "duree_stockage", "cible": { "famille": "pommes_de_terre" }, "unite": "semaines", "sens": "prudent_min" },
+  { "id": "feculents.pates.sec.stockage", "usage": "duree_stockage", "cible": { "famille": "pates_seches", "etat": "sec" }, "unite": "mois", "sens": "prudent_min" },
+  { "id": "legumes.avance.legumes-epluches", "usage": "duree_stockage", "cible": { "groupe": "legumes", "etat": "cru_net" }, "unite": "h", "sens": "prudent_min" },
 
   { "id": "feculents.pdt.stockage.temperature", "usage": "temperature", "cible": { "famille": "pommes_de_terre" }, "unite": "°C" },
   { "id": "hygiene.temperature.froid-denrees-perissables", "usage": "temperature", "cible": { "regle_generale": "stockage_froid" }, "unite": "°C", "sens": "prudent_min" },
@@ -68,7 +78,6 @@
   { "id": "feculents.pdt.famille-farineuse.usage", "famille": "pommes_de_terre" },
   { "id": "feculents.pdt.ligne-haute-temperature", "famille": "pommes_de_terre" },
   { "id": "feculents.pdt.choix.puree-gratin", "famille": "pommes_de_terre" },
-  { "id": "feculents.pdt.stockage.duree", "famille": "pommes_de_terre" },
   { "id": "feculents.pdt.perte.epluchage", "famille": "pommes_de_terre" },
   { "id": "feculents.pdt.perte.friture", "famille": "pommes_de_terre" },
   { "id": "feculents.pdt.cuisson.salees-gschwellti", "famille": "pommes_de_terre" },
@@ -100,7 +109,6 @@
   { "id": "feculents.pates.sel.moment", "famille": "pates_seches" },
   { "id": "feculents.pates.cuisson.al-dente", "famille": "pates_seches" },
   { "id": "feculents.pates.portion", "famille": "pates_seches" },
-  { "id": "feculents.pates.sec.stockage", "famille": "pates_seches" },
   { "id": "feculents.pates.cuites.tenue-chaud", "famille": "pates_seches" },
   { "id": "feculents.pates.rechauffage", "famille": "pates_seches" },
 
@@ -129,7 +137,6 @@
   { "id": "feculents.leg.cuisson.lentilles", "famille": "legumineuses" },
   { "id": "feculents.leg.eau", "famille": "legumineuses" },
   { "id": "feculents.leg.haricots-rouges.securite", "famille": "legumineuses" },
-  { "id": "feculents.leg.sel", "famille": "legumineuses" },
-  { "id": "feculents.leg.conservation.cuites", "famille": "legumineuses" }
+  { "id": "feculents.leg.sel", "famille": "legumineuses" }
  ]
 }
