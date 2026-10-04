@@ -60,24 +60,27 @@ test('les données générées sont gelées et identiques à ce que produit le g
   assert.ok(Object.isFrozen(REPERES_VALIDES) && Object.isFrozen(REPERES_VALIDES[0]) && Object.isFrozen(REPERES_VALIDES[0].sources[0]));
 });
 
-test('pâtes en plat principal, 40 portions : 40 × milieu de 80–100 g = 3 600 g secs, estimation à valider', () => {
+// Adapté le 2026-10-04 (décision « Standards de base ») : un repère validé est un standard de base, utilisé directement
+// (milieu de la fourchette, étiqueté « standard de base »), plus « à valider ».
+test('pâtes en plat principal, 40 portions : 40 × milieu de 80–100 g = 3 600 g secs, standard de base', () => {
   const { e, c } = menu('pâtes', 'plat_principal');
   const g = grammageEffectif(e, c);
-  assert.deepEqual([g.valeur, g.unite, g.etat, g.statut, g.origine], [90, 'g', 'sec', 'BASE_METIER_ESTIMATION', 'repere_valide']);
-  assert.equal(g.source, 'repère validé par la propriétaire (fourchette 80–100 g, état sec)');
+  assert.deepEqual([g.valeur, g.unite, g.etat, g.statut, g.origine, g.repere], [90, 'g', 'sec', 'STANDARD_BASE', 'standard_base', 'valide']);
+  assert.equal(g.source, 'standard de base : repère validé par la propriétaire (fourchette 80–100 g, état sec)');
   const calc = calculerComposant(e, c.id);
   assert.equal(calc.quantiteTravail, 3600);
-  assert.equal(calc.aValider, true, LIBELLE_ESTIMATION_A_VALIDER);
+  assert.equal(calc.aValider, false, `jamais « ${LIBELLE_ESTIMATION_A_VALIDER} »`);
+  assert.equal(calc.standardBase, true);
 });
 
-test('riz en garniture, 40 portions : 40 × milieu de 50–70 g = 2 400 g secs, estimation à valider', () => {
+test('riz en garniture, 40 portions : 40 × milieu de 50–70 g = 2 400 g secs, standard de base', () => {
   const { e, c } = menu('riz', 'garniture');
   const g = grammageEffectif(e, c);
-  assert.deepEqual([g.valeur, g.etat, g.statut, g.origine], [60, 'sec', 'BASE_METIER_ESTIMATION', 'repere_valide']);
+  assert.deepEqual([g.valeur, g.etat, g.statut, g.origine], [60, 'sec', 'STANDARD_BASE', 'standard_base']);
   assert.match(g.source, /fourchette 50–70 g, état sec/);
   const calc = calculerComposant(e, c.id);
   assert.equal(calc.quantiteTravail, 2400);
-  assert.equal(calc.aValider, true);
+  assert.equal(calc.aValider, false);
 });
 
 test('lignesStandards : le repère validé est proposé à côté du standard, sans en créer un', () => {
@@ -99,8 +102,8 @@ test('un standard maison prime sur le repère validé, une correction sur un pla
 test('les validés passent avant les repères de la base ; un jeu explicite remplace le défaut', () => {
   const { e, c } = menu('riz', 'garniture');
   const base = { produit: 'riz', role: 'garniture', etat: 'sec', min: 10, max: 20, unite: 'g', texte: '10–20 g' };
-  assert.equal(grammageEffectif(e, c, [...REPERES_VALIDES, base]).origine, 'repere_valide');
-  assert.deepEqual([grammageEffectif(e, c, [base]).origine, grammageEffectif(e, c, [base]).valeur], ['base', 15]);
+  assert.equal(grammageEffectif(e, c, [...REPERES_VALIDES, base]).repere, 'valide');
+  assert.deepEqual(['origine', 'repere', 'valeur'].map((k) => grammageEffectif(e, c, [base])[k]), ['standard_base', 'base', 15]);
   assert.equal(grammageEffectif(e, c, []), null);
 });
 

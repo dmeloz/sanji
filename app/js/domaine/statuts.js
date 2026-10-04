@@ -4,7 +4,10 @@
 
 const enumeration = (valeurs) => Object.freeze(Object.fromEntries(valeurs.map((v) => [v, v])));
 
-export const PROVENANCE = enumeration(['RESTAURANT_VALIDE', 'BASE_METIER_ESTIMATION', 'SAISI_SERVICE', 'CALCULE', 'INCONNU']);
+// STANDARD_BASE : valeur issue des standards de base (base métier, repères de portion validés, référentiel culinaire),
+// utilisée directement (décision du 2026-10-04). BASE_METIER_ESTIMATION : ancien nom, encore présent dans les données
+// enregistrées avant cette décision ; il se lit comme STANDARD_BASE.
+export const PROVENANCE = enumeration(['RESTAURANT_VALIDE', 'STANDARD_BASE', 'BASE_METIER_ESTIMATION', 'SAISI_SERVICE', 'CALCULE', 'INCONNU']);
 export const CERTITUDE = enumeration(['estimee', 'provisoire', 'confirmee']);
 export const ETAT_TACHE = enumeration(['a_preciser', 'a_planifier', 'a_faire', 'en_cours', 'fait', 'ecart']);
 export const CRENEAU = enumeration(['avant_midi', 'apres_midi', 'avant_soir']);
@@ -25,13 +28,23 @@ export const VERIF = enumeration(['a_verifier', 'suffisant', 'a_commander']);
 /** Points de charge d'une production (1, 2, 3). Ce n'est jamais une durée. */
 export const POINTS_CHARGE = Object.freeze({ courte: 1, moyenne: 2, longue: 3 });
 
-/** Le mot « provisoire » ne désigne que la répartition d'un groupe ; ceci est le libellé d'un calcul sur estimation. */
-export const LIBELLE_ESTIMATION_A_VALIDER = 'estimation à valider';
+/** Une valeur de provenance standard de base (ou son ancien nom) : utilisée directement, jamais « à valider ». */
+export const estStandardBase = (statut) => statut === 'STANDARD_BASE' || statut === 'BASE_METIER_ESTIMATION';
+
+/** Libellé d'une valeur issue des standards de base. */
+export const LIBELLE_STANDARD_BASE = 'standard de base';
+
+/**
+ * Libellé d'un calcul qui dépend d'une valeur de provenance inconnue (ou d'une recette non validée) : il reste à préciser
+ * et n'est jamais commandable sans quantité tapée. Le mot « provisoire » ne désigne que la répartition d'un groupe.
+ */
+export const LIBELLE_ESTIMATION_A_VALIDER = 'valeur inconnue à préciser';
 
 export const LIBELLES = Object.freeze({
   PROVENANCE: Object.freeze({
     RESTAURANT_VALIDE: 'validé restaurant',
-    BASE_METIER_ESTIMATION: 'estimation base métier',
+    STANDARD_BASE: 'standard de base',
+    BASE_METIER_ESTIMATION: 'standard de base',
     SAISI_SERVICE: 'saisi au service',
     CALCULE: 'calculé',
     INCONNU: 'inconnu',

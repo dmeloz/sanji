@@ -30,4 +30,4 @@ export const LIBELLE_MODE = Object.freeze({
 });
 
 /** Libellé court des sources de provenance proposées à la saisie (CALCULE exclu : jamais saisi). */
-export const PROVENANCES_SAISIE = Object.freeze(['RESTAURANT_VALIDE', 'BASE_METIER_ESTIMATION', 'SAISI_SERVICE', 'INCONNU']);
+export const PROVENANCES_SAISIE = Object.freeze(['RESTAURANT_VALIDE', 'STANDARD_BASE', 'SAISI_SERVICE', 'INCONNU']);

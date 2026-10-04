@@ -59,16 +59,31 @@ test('besoinsProduits : préparation avec recette validée → ingrédients ; si
   assert.equal(r.nonChiffrables.length, 0);
 });
 
-test('besoinsProduits : une estimation non validée reste « à valider », jamais une commande automatique', () => {
+// Adapté le 2026-10-04 (décision « Standards de base ») : l'intention de sécurité est gardée pour ce qui est inconnu.
+test('besoinsProduits : une valeur inconnue reste « à valider », jamais une commande automatique', () => {
   const e = monde();
-  composantValide(e, S.lundi, 1, J.PRODUIT_CRU_TEST, { etapes: [{ etape: 'parage', coefficient: 0.8, statut: 'BASE_METIER_ESTIMATION' }] });
+  composantValide(e, S.lundi, 1, J.PRODUIT_CRU_TEST, { etapes: [{ etape: 'parage', coefficient: 0.8, statut: 'INCONNU' }] });
   const ligne = besoinsProduits(e, S.lundi).lignes[0];
-  assert.equal(ligne.aValider, true);
+  assert.deepEqual([ligne.aValider, ligne.standardBase], [true, false]);
   const s = suiviProduit(e, S.lundi, ligne);
   assert.equal(s.estimationAValider, true);
   assert.equal(s.quantiteAcheter, null);
   assert.equal(s.proposeeACommander, null, 'rien à proposer avant une vérification chiffrée');
+  assert.deepEqual([s.quantiteCalculee, s.quantiteCommandable], [null, null], 'aucune quantité calculée commandable');
   assert.equal(s.statutAffiche, 'a_verifier');
+});
+
+test('besoinsProduits : un standard de base donne une ligne calculée, marquée « standard de base », majorée de la marge', () => {
+  const e = monde();
+  e.reglages.margeSecurite = 10;
+  composantValide(e, S.lundi, 1, J.PRODUIT_CRU_TEST, { etapes: [{ etape: 'parage', coefficient: 0.8, statut: 'STANDARD_BASE' }] });
+  const ligne = besoinsProduits(e, S.lundi).lignes[0];
+  assert.deepEqual([ligne.aValider, ligne.standardBase], [false, true]);
+  const s = suiviProduit(e, S.lundi, ligne);
+  assert.equal(s.quantiteAcheter, null, 'la quantité achetée n\'est jamais remplie par le calcul');
+  assert.equal(s.quantiteCalculee, Math.round(ligne.besoinBrut * 1.1), 'besoin majoré de la marge');
+  assert.equal(s.quantiteCommandable, null, 'commandable seulement une fois notée');
+  assert.equal(s.standardBase, true);
 });
 
 test('suiviProduit : à vérifier, suffisant, à commander, à revérifier ; trois quantités distinctes', () => {

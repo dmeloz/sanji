@@ -1,6 +1,9 @@
 # Savoir culinaire — format des données
 
-Référentiel de savoir culinaire de niveau chef de cuisine avec brevet fédéral (Suisse), construit le 2026-10-04 pour Sanji. **Rien ici n'est branché sur l'application** et **rien n'est validé** : tout est une proposition à valider par la propriétaire.
+Référentiel de savoir culinaire de niveau chef de cuisine avec brevet fédéral (Suisse), construit le 2026-10-04 pour Sanji, contenu validé par la propriétaire le 2026-10-04. Depuis la décision du 2026-10-04 « Standards de base et ajustement terrain », les entrées listées dans `rattachements.json` sont des standards de base utilisés par les calculs (via `app/js/donnees/savoir-culinaire.js`, généré par `npm run culinaire`) ; `usage_calcul` reste `false` dans les données : c'est le fichier de rattachements qui branche, pas l'entrée.
+
+## Rattachements (`rattachements.json`)
+Choisis à la main, sans chiffre. `{ id, usage, cible, unite, sens? }` : `usage` parmi `rendement_parage`, `rendement_cuisson`, `conservation`, `cuisson_temps`, `temperature`, `buffet_couvert`, `allergene` ; `cible` = une `famille` ou un `groupe` du lexique de `app/js/domaine/savoir.js`, ou une `regle_generale` de la liste du fichier (avec `etat` facultatif) ; `unite` normalisée (`%` = perte pour un rendement, `jours`, `min`, `°C`, `x`, `g/couvert`, `null` sans valeur), égale à l'unité réellement écrite dans l'entrée, sans conversion ; `sens` (hygiène) : `prudent_min` = on retient le minimum, `prudent_max` = le maximum, obligatoire pour une conservation (`prudent_min`) et une température d'hygiène. Une seule valeur par usage, cible et état. `reperes_aide` range par famille les aides évidentes ; les autres entrées non rattachées sont des aides par thème. Une entrée qu'on ne peut pas rattacher honnêtement ne l'est pas.
 
 ## Deux pièces par thème
 - `donnees/<theme>.json` : la source de vérité, lue par le générateur et les tests.

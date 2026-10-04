@@ -107,19 +107,21 @@ test('état du poids : une préparation maison est toujours « cuit », quantit�
   assert.equal(grammageEffectif(e, e.composants[prep]).etat, 'cuit');
 });
 
+// Adapté le 2026-10-04 : une étape de standard de base appliquée n'est plus « à valider » (décision « Standards de base ») ;
+// elle reste « à mesurer » (information) ; une portion de provenance inconnue reste « à valider ».
 test('état du poids : une étape non appliquée ne rend pas le calcul « à valider » ni « à mesurer »', () => {
   const e = etatVide();
   prevision(e, S.lundi, 1, 40);
-  const estimee = [{ etape: 'cuisson', coefficient: 2, statut: 'BASE_METIER_ESTIMATION', source: 'TEST_ONLY' }];
+  const estimee = [{ etape: 'cuisson', coefficient: 2, statut: 'STANDARD_BASE', source: 'TEST_ONLY' }];
   const sec = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { grammage: portion(100, 'sec'), etapes: estimee });
   const cuit = composantValide(e, S.lundi, 1, { ...J.PRODUIT_SEC_TEST, nom: 'PRODUIT_CUIT_TEST' }, { grammage: portion(100, 'cuit'), etapes: estimee });
   const s = calculerComposant(e, sec);
-  assert.deepEqual([s.aValider, s.aMesurer], [false, false], 'la cuisson estimée n\'entre pas dans la quantité');
+  assert.deepEqual([s.aValider, s.aMesurer, s.standardBase], [false, false, false], 'la cuisson de base n\'entre pas dans la quantité');
   assert.equal(s.quantiteCuiteEstimee, 8000, 'mais l\'information reste donnée');
   const c = calculerComposant(e, cuit);
-  assert.deepEqual([c.aValider, c.aMesurer], [true, true], 'appliquée : estimation à valider, écart ≥ 0,15 à mesurer');
-  // Une portion estimée reste « à valider », quel que soit l'état.
-  modifierComposant(e, sec, { grammage: { statut: 'BASE_METIER_ESTIMATION' } }, h());
+  assert.deepEqual([c.aValider, c.aMesurer, c.standardBase], [false, true, true], 'appliquée : standard de base utilisé, écart ≥ 0,15 à mesurer');
+  // Une portion de provenance inconnue reste « à valider », quel que soit l'état.
+  modifierComposant(e, sec, { grammage: { statut: 'INCONNU' } }, h());
   assert.equal(calculerComposant(e, sec).aValider, true);
 });
 
@@ -225,11 +227,11 @@ test('le standard donne la portion d\'un plat de sa famille ; sans standard ni b
   assert.equal(c.aValider, false, 'portion du chef, étape estimée non appliquée');
   assert.deepEqual([c.dependances[0].origine, c.dependances[0].etat, c.dependances[0].statut], ['standard', 'sec', 'RESTAURANT_VALIDE']);
   presque(c.quantiteCuiteEstimee, 4000 * milieu('cuisson', 'Polenta'));
-  // Le même standard en poids cuit remonte la cuisson, estimée : à valider.
+  // Le même standard en poids cuit remonte la cuisson, standard de base (base métier) : utilisé directement.
   definirStandard(e, 'polenta', 'garniture', ST.cuit, h());
   c = calculerComposant(e, polenta.id);
   presque(c.quantiteTravail, 4000 / milieu('cuisson', 'Polenta'));
-  assert.equal(c.aValider, true);
+  assert.deepEqual([c.aValider, c.standardBase], [false, true]);
   // Supprimer le standard : on retombe sur « aucune portion », pas sur une valeur par défaut.
   supprimerStandard(e, 'polenta', 'garniture', h());
   assert.equal(calculerComposant(e, polenta.id).statut, 'INCONNU');
@@ -246,10 +248,10 @@ test('le standard passe avant le repère de la base, par famille et par rôle', 
   const riz = parNom(e, S.lundi, 'riz');
   const carottes = parNom(e, S.lundi, 'carottes');
   const reperes = [R.groupeCereales, R.groupeLegumes];
-  assert.equal(grammageEffectif(e, riz, reperes).origine, 'base');
+  assert.deepEqual(['origine', 'repere'].map((k) => grammageEffectif(e, riz, reperes)[k]), ['standard_base', 'base']);
   definirStandard(e, 'riz', 'garniture', { valeur: 33, unite: 'g', etat: 'cuit' }, h());
   assert.deepEqual([grammageEffectif(e, riz, reperes).origine, grammageEffectif(e, riz, reperes).valeur], ['standard', 33]);
-  assert.equal(grammageEffectif(e, carottes, reperes).origine, 'base', 'le standard du riz ne sert pas aux carottes');
+  assert.equal(grammageEffectif(e, carottes, reperes).origine, 'standard_base', 'le standard du riz ne sert pas aux carottes');
   definirStandard(e, 'riz', 'plat_principal', { valeur: 44, unite: 'g', etat: 'cuit' }, h());
   assert.equal(grammageEffectif(e, riz, reperes).valeur, 33, 'le standard d\'un autre rôle ne sert pas au rôle garniture');
 });

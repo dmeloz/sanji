@@ -7,7 +7,8 @@ import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { definirMenu } from '../app/js/domaine/actions.js';
 import { noterAchat } from '../app/js/domaine/actions-achats.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { etatVide, h, prevision } from './aide.js';
+import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
+import { composantValide, etatVide, h, prevision } from './aide.js';
 
 let dom;
 let magasin;
@@ -214,7 +215,7 @@ test('produits : l\'état de chaque ligne est écrit en texte, avec « Noter à 
   assert.match(etatsCompacts(page), /^suggéré$/, 'l\'état est écrit dans la ligne compacte');
   assert.ok(page.tous((x) => x.balise === 'details' && x.className.includes('produit-compact')).length > 0, 'une ligne dépliable par produit');
   const resume = page.tous((x) => x.balise === 'summary' && x.className.includes('produit-resume'))[0];
-  assert.match(resume.textContent, /estimation à valider/, 'pastille courte dans la ligne repliée');
+  assert.match(resume.textContent, /standard de base/, 'pastille courte dans la ligne repliée (adapté le 2026-10-04)');
   assert.doesNotMatch(resume.textContent, /Noter à commander|Fournisseur/, 'les détails et gestes sont dans le dépliant');
   assert.ok(parTexte(page, 'Noter à commander'));
   assert.ok(parTexte(page, 'Retirer'));
@@ -223,20 +224,41 @@ test('produits : l\'état de chaque ligne est écrit en texte, avec « Noter à 
   assert.doesNotMatch(page.textContent, /Retirées|à relire/);
 });
 
-test('produits : noter une estimation sans quantité est refusé, avec une quantité tapée c\'est noté', async () => {
+// Adapté le 2026-10-04 (décision « Standards de base ») : le refus sans quantité tapée vaut pour une valeur inconnue ;
+// une ligne sur standards de base se note sans quantité, pour la quantité calculée marquée « standard de base ».
+test('produits : noter une valeur inconnue sans quantité est refusé, avec une quantité tapée c\'est noté', async () => {
+  nettoyer();
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 40);
+  composantValide(e, S.lundi, 1, { ...J.PRODUIT_CRU_TEST, nom: 'PRODUIT_INCONNU_TEST' },
+    { etapes: [{ etape: 'parage', coefficient: 0.8, statut: 'INCONNU', source: 'TEST_ONLY' }] });
+  magasin.remplacer(e);
+  parTexte(vues.produits.rendre(magasin.etat(), S.lundi), 'Noter à commander').click();
+  const d = ouvert();
+  await d.enfants[0].declencher('submit');
+  assert.match(alertes(d).join(' '), /inconnue/);
+  assert.equal(magasin.etat().produits[`${S.lundi}|produit_inconnu_test|g`], undefined);
+  controleDe(d, 'Quantité à commander (g)').value = '2400';
+  await d.enfants[0].declencher('submit');
+  const suivi = magasin.etat().produits[`${S.lundi}|produit_inconnu_test|g`];
+  assert.equal(suivi.etatLigne, 'note');
+  assert.equal(suivi.quantiteAcheter, 2400);
+  assert.match(etatsCompacts(vues.produits.rendre(magasin.etat(), S.lundi)), /^noté$/);
+});
+
+test('produits : une ligne sur standards de base se note sans quantité tapée, quantité calculée marquée « standard de base »', async () => {
   nettoyer();
   mondeProduits();
   parTexte(vues.produits.rendre(magasin.etat(), S.lundi), 'Noter à commander').click();
   const d = ouvert();
+  assert.match(d.textContent, /calculée sur les standards de base \(2 400 g\)/);
   await d.enfants[0].declencher('submit');
-  assert.match(alertes(d).join(' '), /estimation/);
-  assert.equal(magasin.etat().produits[`${S.lundi}|riz|g`], undefined);
-  controleDe(d, 'Quantité à commander (g)').value = '2400';
-  await d.enfants[0].declencher('submit');
+  assert.deepEqual(alertes(d), []);
   const suivi = magasin.etat().produits[`${S.lundi}|riz|g`];
-  assert.equal(suivi.etatLigne, 'note');
-  assert.equal(suivi.quantiteAcheter, 2400);
-  assert.match(etatsCompacts(vues.produits.rendre(magasin.etat(), S.lundi)), /^noté$/);
+  assert.deepEqual([suivi.etatLigne, suivi.quantiteAcheter], ['note', null], 'noter est la confirmation ; rien n\'est écrit dans la quantité achetée');
+  const page = vues.produits.rendre(magasin.etat(), S.lundi);
+  assert.match(etatsCompacts(page), /^noté$/);
+  assert.match(page.textContent, /À acheter2 400 g \(calculée, standard de base\)/);
 });
 
 test('produits : retirer range la ligne dans « Retirées », « Remettre » la rend ; « à relire » si le besoin change', () => {

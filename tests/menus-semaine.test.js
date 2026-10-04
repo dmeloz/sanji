@@ -51,7 +51,7 @@ test('fusion : un intitulé modifié garde les composants inchangés avec leurs 
   const courgettes = parNom(e, S.lundi, 'courgettes');
   assert.deepEqual([courgettes.valide, courgettes.famille, courgettes.type, courgettes.role, courgettes.attribue, courgettes.produitNom],
     [true, 'courgettes', 'produit_simple', 'garniture', true, 'courgettes'], 'nouveau composant : valide d\'emblée, savoir appliqué');
-  assert.deepEqual(courgettes.etapes.map((x) => [x.etape, x.statut]), [['parage', 'BASE_METIER_ESTIMATION']]);
+  assert.deepEqual(courgettes.etapes.map((x) => [x.etape, x.statut]), [['parage', 'STANDARD_BASE']]);
   assert.ok(principaleDe(e, courgettes.id), 'attribué : il reçoit sa production');
   assert.deepEqual(noms(duMenu(e, S.lundi, 2)), ['courgettes', 'poulet', 'riz']);
   assert.equal(e.jours[S.lundi].menus[2].transcriptionValidee, true);
@@ -369,7 +369,7 @@ test('ajout manuel : le composant est valide d\'emblée et reçoit le savoir de 
   const id = ajouterComposant(e, S.lundi, 2, { nom: 'riz' }, h());
   const c = e.composants[id];
   assert.deepEqual([c.valide, c.famille, c.type, c.role], [true, 'riz', 'produit_simple', 'garniture']);
-  assert.deepEqual(c.etapes.map((x) => [x.etape, x.statut]), [['cuisson', 'BASE_METIER_ESTIMATION']]);
+  assert.deepEqual(c.etapes.map((x) => [x.etape, x.statut]), [['cuisson', 'STANDARD_BASE']]);
   assert.equal(Object.values(e.productions).filter((p) => p.composantId === id).length, 1, 'sa tâche existe sans autre geste');
   // Un type demandé explicitement est respecté.
   const explicite = ajouterComposant(e, S.lundi, 1, { nom: 'ELEMENT_TEST', categorie: 'legume', type: 'preparation_maison' }, h());

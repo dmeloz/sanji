@@ -11,6 +11,7 @@ import {
   FAMILLES, GROUPES, MOTS_SANS_FAMILLE, ROLES_STANDARD, appliquerSavoir, familleDe, familleParCle, grammageEffectif,
   lignesStandards, lireNom,
 } from '../app/js/domaine/savoir.js';
+import { rendementDeBase } from '../app/js/domaine/standards-base.js';
 import { CATEGORIE, ETAT_POIDS, ROLE } from '../app/js/domaine/statuts.js';
 import { JEU_REPERES as R } from './jeux/TEST_ONLY-savoir.js';
 
@@ -182,7 +183,9 @@ test('familleDe : même règle de lecture que categoriePropose (premier mot, exp
   assert.equal(lireNom('riz').famille, FAMILLES.find((f) => f.cle === 'riz'));
 });
 
-test('appliquerSavoir : remplit famille, produit, rôle, type et étapes (milieu de la base), jamais le grammage', () => {
+// Adapté le 2026-10-04 (décision « Standards de base ») : les étapes viennent des standards de base (référentiel culinaire
+// confirmé à la source, sinon base métier), statut STANDARD_BASE, provenance dans la source.
+test('appliquerSavoir : remplit famille, produit, rôle, type et étapes (standards de base), jamais le grammage', () => {
   const etat = etatInitial();
   etat.standards = { riz: { garniture: { valeur: 100, unite: 'g', etat: 'sec', h: null } } };
   const c = composant({ nom: 'riz', categorie: 'feculent' });
@@ -191,12 +194,18 @@ test('appliquerSavoir : remplit famille, produit, rôle, type et étapes (milieu
   assert.equal(c.produitNom, 'riz');
   assert.equal(c.role, 'garniture');
   assert.equal(c.type, 'produit_simple');
-  const ligne = ligneBase('cuisson', 'Riz');
-  assert.deepEqual(c.etapes, [{ etape: 'cuisson', coefficient: milieu(ligne), statut: 'BASE_METIER_ESTIMATION', source: `base métier : ${ligne.texte}` }]);
+  // Riz : référentiel « 2 à 3 fois le poids sec », confirmé à la source, milieu 2,5 (la base métier dit ×2,5–3 : écart gardé).
+  assert.deepEqual(c.etapes, [{ etape: 'cuisson', coefficient: 2.5, statut: 'STANDARD_BASE',
+    source: 'référentiel culinaire : 2–3 × poids sec (feculents.riz.rendement.cuit, confirmé à la source)' }]);
+  assert.deepEqual(rendementDeBase('riz', 'cuisson').ecart, { referentiel: { min: 2, max: 3 }, base_metier: { min: 2.5, max: 3 } });
   assert.deepEqual(c.grammage, composantVide('x').grammage, 'le grammage n\'est pas copié, même avec un standard défini');
   // Parage : une famille de légumes.
   const carottes = appliquerSavoir(etat, composant({ nom: 'Carottes', categorie: 'legume' }));
-  assert.deepEqual(carottes.etapes.map((e) => [e.etape, e.coefficient, e.statut]), [['parage', milieu(ligneBase('parage', 'Carottes')), 'BASE_METIER_ESTIMATION']]);
+  assert.deepEqual(carottes.etapes.map((e) => [e.etape, e.coefficient, e.statut]), [['parage', 0.815, 'STANDARD_BASE']]);
+  // Une famille sans valeur confirmée au référentiel garde la base métier.
+  const navets = appliquerSavoir(etat, composant({ nom: 'navets', categorie: 'legume' }));
+  assert.deepEqual(navets.etapes, [{ etape: 'parage', coefficient: milieu(ligneBase('parage', 'Navets')), statut: 'STANDARD_BASE',
+    source: `base métier : Navets ${ligneBase('parage', 'Navets').texte}` }]);
   // Rôles : menu 1 -> plat principal ; menu 2 -> garniture, ou sauce pour une sauce.
   assert.equal(appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'feculent', menu: 1 })).role, 'plat_principal');
   assert.equal(appliquerSavoir(etat, composant({ nom: 'sauce TEST', categorie: 'sauce', menu: 2 })).role, 'sauce');
@@ -207,12 +216,13 @@ test('appliquerSavoir : remplit famille, produit, rôle, type et étapes (milieu
   // Une famille sans ligne de cuisson dans la base est reconnue, sans étape inventée.
   const orge = appliquerSavoir(etat, composant({ nom: 'orge', categorie: 'feculent' }));
   assert.deepEqual([orge.famille, orge.type, orge.etapes], ['orge', 'produit_simple', []]);
-  // Toutes les familles : une étape par ligne de base trouvée.
+  // Toutes les familles : une étape par standard de base trouvé, avec le coefficient du standard.
   for (const f of FAMILLES) {
     const x = appliquerSavoir(etat, composant({ nom: f.mots[0], categorie: f.categorie }));
     assert.equal(x.famille, f.cle);
     assert.deepEqual(x.etapes.map((e) => e.etape), f.etapes.map((e) => e.etape), f.cle);
-    assert.ok(x.etapes.every((e) => e.statut === 'BASE_METIER_ESTIMATION' && /^base métier : /.test(e.source)));
+    assert.ok(x.etapes.every((e) => e.statut === 'STANDARD_BASE' && /^(base métier|référentiel culinaire) : /.test(e.source)));
+    assert.deepEqual(x.etapes.map((e) => e.coefficient), x.etapes.map((e) => rendementDeBase(f.cle, e.etape).coefficient), f.cle);
   }
 });
 
@@ -243,10 +253,10 @@ test('grammageEffectif : plat, référence du nom, standard maison, base, sinon 
   const c = appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'feculent' }));
   const reperes = [R.groupeCereales];
   assert.equal(grammageEffectif(etat, c, []), null, 'aucune source : null, rien n\'est inventé');
-  // 4. repère de la base : milieu de la fourchette, estimation.
+  // 4. repère de la base : milieu de la fourchette, standard de base (adapté le 2026-10-04).
   assert.deepEqual(grammageEffectif(etat, c, reperes), {
-    valeur: 70, unite: 'g', etat: 'sec', statut: 'BASE_METIER_ESTIMATION',
-    source: 'base métier : 60–80 g (repère du groupe « Pâtes, riz, céréales »)', origine: 'base',
+    valeur: 70, unite: 'g', etat: 'sec', statut: 'STANDARD_BASE',
+    source: 'standard de base : base métier 60–80 g (repère du groupe « Pâtes, riz, céréales »)', origine: 'standard_base', repere: 'base',
   });
   // 3. standard maison : avant la base ; il reprend l'état de son poids.
   etat.standards = { riz: { garniture: { valeur: 90, unite: 'g', etat: 'cuit', h: null } } };
@@ -274,7 +284,7 @@ test('grammageEffectif : plat, référence du nom, standard maison, base, sinon 
   delete etat.memoire.riz;
   assert.equal(grammageEffectif(etat, c, reperes).origine, 'standard');
   delete etat.standards.riz;
-  assert.equal(grammageEffectif(etat, c, reperes).origine, 'base');
+  assert.equal(grammageEffectif(etat, c, reperes).origine, 'standard_base');
 });
 
 // Adapté B-P0 : `reperes = []` explicite quand on vérifie « aucune portion » (le défaut contient les repères validés).
@@ -317,7 +327,7 @@ test('grammageEffectif : une préparation maison se compte en quantité finie, �
   etat.standards.riz.garniture.etat = 'cuit';
   assert.equal(grammageEffectif(etat, prep({}), [R.groupeCereales]).origine, 'standard');
   delete etat.standards.riz;
-  assert.equal(grammageEffectif(etat, prep({ famille: 'carottes' }), [R.groupeLegumesCuit]).origine, 'base');
+  assert.equal(grammageEffectif(etat, prep({ famille: 'carottes' }), [R.groupeLegumesCuit]).origine, 'standard_base');
 });
 
 test('repères de la base par groupe : une ligne de groupe sert toutes les familles du groupe, la ligne de famille passe avant', () => {
@@ -329,7 +339,7 @@ test('repères de la base par groupe : une ligne de groupe sert toutes les famil
   assert.ok(cereales.length >= 8);
   for (const f of cereales) {
     const g = grammageEffectif(etat, plat(f.cle), groupe);
-    assert.deepEqual([g.valeur, g.etat, g.origine, g.statut], [70, 'sec', 'base', 'BASE_METIER_ESTIMATION'], f.cle);
+    assert.deepEqual([g.valeur, g.etat, g.origine, g.statut], [70, 'sec', 'standard_base', 'STANDARD_BASE'], f.cle);
     assert.match(g.source, /groupe « Pâtes, riz, céréales »/);
   }
   // Une famille d'un autre groupe, ou un autre rôle, ne la reçoit pas.
@@ -338,7 +348,7 @@ test('repères de la base par groupe : une ligne de groupe sert toutes les famil
   // Ligne de famille ET ligne de groupe : la famille passe avant, même placée après dans la table.
   const deux = [R.groupeCereales, R.familleRiz];
   const riz = grammageEffectif(etat, plat('riz'), deux);
-  assert.deepEqual([riz.valeur, riz.origine, riz.source], [50, 'base', 'base métier : 50 g']);
+  assert.deepEqual([riz.valeur, riz.origine, riz.source], [50, 'standard_base', 'standard de base : base métier 50 g']);
   assert.equal(grammageEffectif(etat, plat('semoule'), deux).valeur, 70, 'les autres familles du groupe gardent la ligne de groupe');
   assert.equal(grammageEffectif(etat, plat('pates_seches'), deux).valeur, 70);
   // Le rôle plat principal a sa propre ligne de groupe.
@@ -351,7 +361,7 @@ test('repères de la base par groupe : une ligne de groupe sert toutes les famil
   // Le standard maison reste par famille et par rôle, et passe avant les deux niveaux de la base.
   etat.standards = { courgettes: { garniture: { valeur: 33, unite: 'g', etat: 'cuit', h: null } } };
   assert.deepEqual([grammageEffectif(etat, plat('courgettes'), legumes).origine, grammageEffectif(etat, plat('courgettes'), legumes).valeur], ['standard', 33]);
-  assert.equal(grammageEffectif(etat, plat('carottes'), legumes).origine, 'base', 'le standard d\'une famille ne sert pas aux autres');
+  assert.equal(grammageEffectif(etat, plat('carottes'), legumes).origine, 'standard_base', 'le standard d\'une famille ne sert pas aux autres');
   // Libellé comparé sans accent ni casse ; une ligne dont le produit n'est ni une famille ni un groupe n'est jamais prise.
   assert.equal(grammageEffectif(etatInitial(), plat('riz'), [{ ...R.groupeCereales, produit: '  PATES, riz, CEREALES ' }]).valeur, 70);
   assert.equal(grammageEffectif(etatInitial(), plat('riz'), [{ ...R.groupeCereales, produit: 'Céréales' }]), null);

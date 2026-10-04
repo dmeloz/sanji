@@ -1,11 +1,13 @@
 // Liste « à commander » à trois états : suggéré (calculé), noté par la propriétaire, retiré.
-// Garde-fou : une ligne qui repose sur une estimation ne se note qu'avec une quantité tapée par le chef.
+// Garde-fou : une ligne qui repose sur une valeur inconnue ne se note qu'avec une quantité tapée par le chef. Une ligne
+// calculée sur les standards de base se note sans quantité tapée (décision du 2026-10-04) : le geste « noter » est la
+// confirmation, la quantité commandable est le besoin majoré de la marge de sécurité, marquée « standard de base ».
 // `quantiteAcheter` n'est jamais remplie automatiquement ; une ligne retirée reste dans l'historique et se remet.
 
 import { terminer } from './actions.js';
 import { estDateValide, jourSemaine } from './dates.js';
 import { suiviProduitVide } from './etat.js';
-import { besoinsProduits, cleSuivi } from './produits.js';
+import { besoinsProduits, cleSuivi, suiviProduit } from './produits.js';
 
 function verifierH(h) {
   if (typeof h !== 'string' || Number.isNaN(Date.parse(h))) {
@@ -28,8 +30,10 @@ function ligneEtSuivi(etat, lundi, cle, unite) {
 
 /**
  * Note la ligne « à commander ». `saisie.quantite` : la quantité tapée par le chef (nombre positif). Elle est
- * OBLIGATOIRE quand le besoin repose sur une estimation non validée ; sinon elle est facultative. Une quantité tapée
- * devient la quantité à acheter ; sans quantité, rien n'est rempli. Le besoin du moment est mémorisé (`besoinAuNote`).
+ * OBLIGATOIRE quand le besoin repose sur une valeur inconnue ; sinon elle est facultative. Une quantité tapée devient la
+ * quantité à acheter ; sans quantité, `quantiteAcheter` reste vide et la ligne est commandable pour la quantité calculée
+ * (besoin majoré de la marge, voir suiviProduit), gardée dans l'historique (`calculee`, `standardBase`).
+ * Le besoin du moment est mémorisé (`besoinAuNote`).
  */
 export function noterAchat(etat, lundi, cle, unite, saisie, h) {
   verifierH(h);
@@ -38,14 +42,18 @@ export function noterAchat(etat, lundi, cle, unite, saisie, h) {
   const tapee = quantite !== undefined && quantite !== null;
   const valide = typeof quantite === 'number' && Number.isFinite(quantite) && quantite > 0;
   if (ligne.aValider && !valide) {
-    throw new Error("Ce besoin repose sur une estimation : saisissez vous-même la quantité à commander (nombre positif), l'application ne la remplit pas.");
+    throw new Error("Ce besoin repose sur une valeur inconnue : saisissez vous-même la quantité à commander (nombre positif), l'application ne la remplit pas.");
   }
   if (tapee && !valide) throw new Error('La quantité à commander doit être un nombre strictement positif.');
+  const calculee = tapee ? null : suiviProduit(etat, lundi, ligne).quantiteCalculee;
   if (tapee) suivi.quantiteAcheter = quantite;
   suivi.etatLigne = 'note';
   suivi.besoinAuNote = ligne.besoinBrut;
-  suivi.historique.push({ h, action: 'note', besoin: ligne.besoinBrut, quantite: tapee ? quantite : null });
-  return terminer(etat, h, 'noterAchat', `${cle}${tapee ? ` : ${quantite} ${unite}` : ''}`, suivi);
+  suivi.historique.push({ h, action: 'note', besoin: ligne.besoinBrut, quantite: tapee ? quantite : null, calculee,
+    standardBase: Boolean(ligne.standardBase) });
+  const detail = tapee ? ` : ${quantite} ${unite}`
+    : calculee !== null ? ` : ${calculee} ${unite} calculés${ligne.standardBase ? ' (standard de base)' : ''}` : '';
+  return terminer(etat, h, 'noterAchat', `${cle}${detail}`, suivi);
 }
 
 /** Retire la ligne de la liste : rien n'est effacé, la ligne reste dans l'historique et peut être remise. */

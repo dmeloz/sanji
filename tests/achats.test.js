@@ -10,13 +10,18 @@ import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, etatVide, h, prevision } from './aide.js';
 
-/** Une ligne « riz » qui repose sur une estimation (repère validé) et une ligne de produit à portion validée. */
+/**
+ * Une ligne « riz » calculée sur les standards de base (repère validé, rendement du référentiel), une ligne de produit
+ * à portion validée et une ligne qui dépend d'une valeur de provenance inconnue.
+ */
 function monde() {
   const e = etatVide();
   definirMenu(e, S.lundi, 2, 'riz', h());
   prevision(e, S.lundi, 2, 40);
   prevision(e, S.lundi, 1, 40);
   composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST);
+  composantValide(e, S.lundi, 1, { ...J.PRODUIT_CRU_TEST, nom: 'PRODUIT_INCONNU_TEST' },
+    { etapes: [{ etape: 'parage', coefficient: 0.8, statut: 'INCONNU', source: 'TEST_ONLY' }] });
   return e;
 }
 const ligne = (e, cle) => besoinsProduits(e, S.lundi).lignes.find((l) => l.cle === cle);
@@ -41,15 +46,40 @@ test('un ancien suivi (sans les nouveaux champs) se lit « suggéré »', () => 
   assert.deepEqual(s.historique, []);
 });
 
-test('noter une ligne qui repose sur une estimation sans quantité tapée est refusé', () => {
+// Adapté le 2026-10-04 (décision « Standards de base et ajustement terrain ») : le refus sans quantité tapée vaut pour
+// une valeur INCONNUE ; une ligne calculée sur les standards de base se note sans quantité tapée (voir le test suivant).
+test('noter une ligne qui repose sur une valeur inconnue sans quantité tapée est refusé', () => {
   const e = monde();
-  assert.equal(ligne(e, 'riz').aValider, true);
+  assert.equal(ligne(e, 'produit_inconnu_test').aValider, true);
   for (const q of [undefined, null, 0, -4, Number.NaN, '40']) {
-    assert.throws(() => noterAchat(e, S.lundi, 'riz', 'g', { quantite: q }, h()), /estimation/, String(q));
+    assert.throws(() => noterAchat(e, S.lundi, 'produit_inconnu_test', 'g', { quantite: q }, h()), /inconnue/, String(q));
   }
-  assert.throws(() => noterAchat(e, S.lundi, 'riz', 'g', {}, h()), /estimation/);
-  assert.equal(suivi(e, 'riz').etatLigne, 'suggere');
-  assert.equal(suivi(e, 'riz').quantiteAcheter, null);
+  assert.throws(() => noterAchat(e, S.lundi, 'produit_inconnu_test', 'g', {}, h()), /inconnue/);
+  const s = suivi(e, 'produit_inconnu_test');
+  assert.deepEqual([s.etatLigne, s.quantiteAcheter, s.quantiteCalculee, s.quantiteCommandable], ['suggere', null, null, null]);
+  noterAchat(e, S.lundi, 'produit_inconnu_test', 'g', { quantite: 900 }, h());
+  assert.deepEqual(['quantiteCommandable', 'origineQuantite'].map((k) => suivi(e, 'produit_inconnu_test')[k]), [900, 'tapee']);
+});
+
+test('noter une ligne calculée sur les standards de base sans quantité tapée : commandable, marge comprise, « standard de base »', () => {
+  const e = monde();
+  e.reglages.margeSecurite = 10;
+  const l = ligne(e, 'riz');
+  assert.deepEqual([l.aValider, l.standardBase], [false, true]);
+  assert.equal(suivi(e, 'riz').quantiteCommandable, null, 'rien n\'est commandable avant le geste « noter »');
+  for (const q of [0, -4, Number.NaN, '40']) {
+    assert.throws(() => noterAchat(e, S.lundi, 'riz', 'g', { quantite: q }, h()), /strictement positif/, String(q));
+  }
+  noterAchat(e, S.lundi, 'riz', 'g', {}, h());
+  const s = suivi(e, 'riz');
+  const attendu = Math.round(l.besoinBrut * 1.1);
+  assert.deepEqual([s.etatLigne, s.quantiteAcheter, s.quantiteCommandable, s.origineQuantite, s.standardBase],
+    ['note', null, attendu, 'standard_base', true], 'la quantité achetée reste vide ; la quantité commandable est calculée');
+  assert.deepEqual([s.historique[0].quantite, s.historique[0].calculee, s.historique[0].standardBase], [null, attendu, true]);
+  assert.match(e.journal.at(-1).detail ?? JSON.stringify(e.journal.at(-1)), /standard de base/);
+  // La valeur de la propriétaire passe devant : une quantité tapée remplace la quantité calculée.
+  noterAchat(e, S.lundi, 'riz', 'g', { quantite: 3000 }, h(1));
+  assert.deepEqual(['quantiteAcheter', 'quantiteCommandable', 'origineQuantite'].map((k) => suivi(e, 'riz')[k]), [3000, 3000, 'tapee']);
 });
 
 test('noter avec une quantité tapée : état « noté », besoin mémorisé, quantité = celle du chef', () => {
@@ -65,13 +95,14 @@ test('noter avec une quantité tapée : état « noté », besoin mémorisé, qu
   assert.equal(e.journal.at(-1).action, 'noterAchat');
 });
 
-test('noter une ligne sans estimation ne demande pas de quantité et ne remplit jamais quantiteAcheter', () => {
+test('noter une ligne sans valeur inconnue ne demande pas de quantité et ne remplit jamais quantiteAcheter', () => {
   const e = monde();
-  assert.equal(ligne(e, 'produit_sec_test').aValider, false);
+  assert.deepEqual([ligne(e, 'produit_sec_test').aValider, ligne(e, 'produit_sec_test').standardBase], [false, false]);
   noterAchat(e, S.lundi, 'produit_sec_test', 'g', {}, h());
   const s = suivi(e, 'produit_sec_test');
   assert.equal(s.etatLigne, 'note');
   assert.equal(s.quantiteAcheter, null);
+  assert.deepEqual([s.quantiteCommandable, s.origineQuantite], [ligne(e, 'produit_sec_test').besoinBrut, 'calculee'], 'sans marge réglée');
   assert.throws(() => noterAchat(e, S.lundi, 'absent', 'g', {}, h()), /besoin/);
 });
 
@@ -113,7 +144,7 @@ test('un changement de besoin passe la ligne notée à « à relire » sans touc
   assert.equal(suivi(e, 'riz').aRelire, false);
 });
 
-test('aucune estimation n\'atteint quantiteAcheter seule', () => {
+test('aucune quantité calculée n\'atteint quantiteAcheter seule', () => {
   const e = monde();
   retirerAchat(e, S.lundi, 'riz', 'g', h(1));
   restaurerAchat(e, S.lundi, 'riz', 'g', h(2));

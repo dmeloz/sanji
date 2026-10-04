@@ -512,39 +512,45 @@ test('16. La saisie des menus d\'une semaine ne demande aucune validation : les 
 });
 
 // Adapté B-P0 : le riz reçoit son repère validé ; l'orge reste le cas « sans donnée, rien d'inventé ».
-test('17. Un paramètre repris de la base métier est visible, étiqueté estimation, et ne devient jamais une commande sans validation ; sans donnée dans la base, aucune valeur n\'est inventée', () => {
+// Adapté le 2026-10-04 (décision « Standards de base et ajustement terrain ») : un paramètre repris des standards de base
+// est utilisé directement, étiqueté « standard de base » avec sa provenance ; il n'est plus « à valider ». Ce qui reste :
+// rien n'est jamais rempli dans la quantité achetée par le calcul, et sans donnée, rien n'est inventé.
+test('17. Un paramètre repris des standards de base est visible, étiqueté « standard de base » avec sa provenance, et la quantité achetée n\'est jamais remplie par le calcul ; sans donnée, aucune valeur n\'est inventée', () => {
   const etat = etatVide();
   saisirMenusSemaine(etat, S.lundi, { [S.lundi]: { menu2: 'riz, carottes, orge, ELEMENT_INCONNU_TEST', prevision2: 40 } }, h());
   const riz = composantDe(etat, S.lundi, 2, 'riz');
   const carottes = composantDe(etat, S.lundi, 2, 'carottes');
 
-  // 1. Le paramètre repris de la base est visible dans le composant, avec sa provenance et sa source.
+  // 1. Le paramètre repris des standards de base est visible dans le composant, avec sa provenance et sa source.
+  // Carottes : le référentiel culinaire (12–25 % de perte, confirmé à la source) prime sur la base métier (12–15 %).
   const ligne = BASE_METIER.find((l) => l.etape === 'parage' && l.produit === 'Carottes');
+  assert.equal(ligne.texte, '12–15 %', 'la base métier reste lisible, l\'écart est gardé');
   const etape = carottes.etapes[0];
-  assert.deepEqual([etape.etape, etape.statut, etape.coefficient], ['parage', 'BASE_METIER_ESTIMATION', (ligne.coefMin + ligne.coefMax) / 2]);
-  assert.equal(etape.source, `base métier : ${ligne.texte}`);
-  assert.equal(libelle('PROVENANCE', etape.statut), 'estimation base métier');
-  assert.equal(riz.etapes[0].statut, 'BASE_METIER_ESTIMATION');
+  assert.deepEqual([etape.etape, etape.statut, etape.coefficient], ['parage', 'STANDARD_BASE', 0.815]);
+  assert.equal(etape.source, 'référentiel culinaire : 12–25 % de perte du poids brut (legumes.parage.carotte, confirmé à la source)');
+  assert.equal(libelle('PROVENANCE', etape.statut), 'standard de base');
+  assert.equal(riz.etapes[0].statut, 'STANDARD_BASE');
 
-  // 2. Le calcul qui s'en sert est « à valider », et le besoin n'est jamais transformé en commande.
-  definirStandard(etat, 'carottes', 'garniture', ST.cruNet, h()); // portion saisie par le chef : le seul paramètre qui ne vient pas de la base
+  // 2. Le calcul s'en sert directement (« standard de base », plus « à valider ») ; la quantité achetée n'est jamais remplie.
+  definirStandard(etat, 'carottes', 'garniture', ST.cruNet, h()); // portion saisie par le chef : elle passe devant
   const calc = calculerComposant(etat, carottes.id);
   assert.equal(calc.statut, 'CALCULE');
-  assert.equal(calc.aValider, true, 'le parage repris de la base est une estimation à valider');
-  assert.deepEqual(calc.dependances.map((d) => [d.parametre, d.statut]), [['grammage', 'RESTAURANT_VALIDE'], ['parage', 'BASE_METIER_ESTIMATION']]);
-  assert.match(calc.formule, /÷ 0,865 \(parage\)/);
+  assert.equal(calc.aValider, false, 'un standard de base n\'est pas « à valider »');
+  assert.equal(calc.standardBase, true);
+  assert.deepEqual(calc.dependances.map((d) => [d.parametre, d.statut]), [['grammage', 'RESTAURANT_VALIDE'], ['parage', 'STANDARD_BASE']]);
+  assert.match(calc.formule, /÷ 0,815 \(parage\)/);
   const besoins = besoinsProduits(etat, S.lundi);
   const ligneCarottes = besoins.lignes.find((l) => l.cle === 'carottes');
-  assert.equal(ligneCarottes.aValider, true);
-  assert.ok(Math.abs(ligneCarottes.besoinBrut - 6000 / ((ligne.coefMin + ligne.coefMax) / 2)) < 1e-6);
+  assert.deepEqual([ligneCarottes.aValider, ligneCarottes.standardBase], [false, true]);
+  assert.ok(Math.abs(ligneCarottes.besoinBrut - 6000 / 0.815) < 1e-6);
   const suivi = suiviProduit(etat, S.lundi, ligneCarottes);
-  assert.equal(suivi.estimationAValider, true);
-  assert.deepEqual([suivi.quantiteAcheter, suivi.proposeeACommander, suivi.commandeLe], [null, null, null], 'rien n\'est proposé ni commandé');
+  assert.equal(suivi.estimationAValider, false);
+  assert.deepEqual([suivi.quantiteAcheter, suivi.proposeeACommander, suivi.commandeLe, suivi.quantiteCommandable], [null, null, null, null],
+    'rien n\'est commandé tant que la ligne n\'est pas notée');
   assert.throws(() => marquerCommande(etat, S.lundi, 'carottes', 'g', h()), /quantité réellement achetée/);
   controlerProduit(etat, S.lundi, 'carottes', 'g', 'a_commander', 100, h());
   const apres = suiviProduit(etat, S.lundi, ligneCarottes);
   assert.equal(apres.quantiteAcheter, null, 'même après un contrôle : la quantité achetée n\'est jamais remplie par le calcul');
-  assert.equal(apres.estimationAValider, true);
 
   // 3. Sans donnée dans la base, aucune valeur n'est inventée.
   const orge = composantDe(etat, S.lundi, 2, 'orge');
@@ -552,14 +558,14 @@ test('17. Un paramètre repris de la base métier est visible, étiqueté estima
   const inconnu = composantDe(etat, S.lundi, 2, 'ELEMENT_INCONNU_TEST');
   assert.deepEqual([inconnu.famille, inconnu.etapes, inconnu.grammage.valeur], [null, [], null]);
   const sansValeur = [riz, orge, inconnu].map((c) => calculerComposant(etat, c.id));
-  // B-P0 : le riz a un repère validé (estimation à valider, jamais une commande) ; l'orge n'en a pas : rien d'inventé.
-  assert.equal(grammageEffectif(etat, riz).origine, 'repere_valide');
+  // Le riz a un repère validé (standard de base, utilisé directement) ; l'orge n'en a pas : rien d'inventé.
+  assert.equal(grammageEffectif(etat, riz).origine, 'standard_base');
   assert.equal(sansValeur[0].statut, 'CALCULE');
-  assert.equal(sansValeur[0].aValider, true);
+  assert.equal(sansValeur[0].aValider, false);
   assert.equal(grammageEffectif(etat, orge), null);
   assert.ok(sansValeur[1].statut === 'INCONNU' && sansValeur[1].quantiteTravail === null && sansValeur[1].brut === null);
   assert.deepEqual(besoins.lignes.map((l) => l.cle).sort(), ['carottes', 'riz'], 'seuls les composants chiffrables figurent au besoin');
-  assert.equal(besoins.lignes.find((l) => l.cle === 'riz').aValider, true);
+  assert.deepEqual(['aValider', 'standardBase'].map((k) => besoins.lignes.find((l) => l.cle === 'riz')[k]), [false, true]);
   assert.equal(besoins.nonChiffrables.some((x) => x.composantId === orge.id && /grammage/.test(x.raison)), true);
   assert.equal(sansValeur[2].quantiteTravail, null);
   assert.equal(sansValeur[2].statut, 'INCONNU');

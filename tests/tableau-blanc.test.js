@@ -131,7 +131,8 @@ test('contexte « service » : ce qui reste à faire avant le service, avec la q
   assert.equal(tb.contexte.titre, 'Avant le service de midi');
   const taches = tb.contexte.lignes.filter((l) => l.genre === 'tache');
   assert.deepEqual(taches.map((l) => [l.texte, l.quantite, l.symbole]),
-    [['riz et carottes', '1 000 g', 'a_faire'], ['riz', '2 000 g', 'a_faire'], ['carottes', '2 312 g', 'a_faire']]);
+    // Carottes : 2 000 g ÷ 0,815 (parage, standard de base du référentiel confirmé à la source ; 0,865 avant le 2026-10-04).
+    [['riz et carottes', '1 000 g', 'a_faire'], ['riz', '2 000 g', 'a_faire'], ['carottes', '2 454 g', 'a_faire']]);
   assert.deepEqual(tb.contexte.action, { libelle: 'Ouvrir la feuille du jour', lien: `#/jour/${S.lundi}` });
   // Une tâche démarrée puis toutes faites : le contexte bascule sur l'après-service.
   demarrer(e, principaleDe(e, composantNomme(e, S.lundi, 'riz')), h());

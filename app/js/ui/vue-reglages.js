@@ -86,7 +86,7 @@ function ligneStandard(l) {
       h('p', null, h('strong', null, l.libelle), ` ${ROLE_EN_CLAIR[l.role]}`),
       l.standard ? h('p', { classe: 'standard-valeur' }, texteStandard(l.standard)) : h('p', { classe: 'standard-valeur discret' }, 'non réglé'),
       l.repereBase ? h('p', { classe: 'meta' },
-        `repère ${l.repereBase.valide ? 'validé' : 'de la base'} : ${texteRepere(l.repereBase)}${l.repereBase.portee === 'groupe' ? ' (repère du groupe)' : ''}`) : null),
+        `standard de base (${l.repereBase.valide ? 'repère validé' : 'base métier'}) : ${texteRepere(l.repereBase)}${l.repereBase.portee === 'groupe' ? ' (repère du groupe)' : ''}`) : null),
     h('div', { classe: 'actions' },
       l.repereBase ? bouton('Valider la proposition', () => {
         const v = valeurPour(etatCourant(), l.cleFamille, l.role, aujourdhui());
@@ -134,10 +134,10 @@ function sectionStandards(etat) {
   };
   return h('section', { classe: 'carte' },
     titreSection('Standards maison', 'standards'),
-    h('p', { classe: 'aide' }, 'Le standard maison passe avant l\'estimation de la base. Une correction faite sur un plat ne le change pas. '
+    h('p', { classe: 'aide' }, 'Le standard maison passe avant le standard de base. Une correction faite sur un plat ne le change pas. '
       + 'Il sert au calcul de tous les plats de cette famille qui n\'ont pas été corrigés. '
       + 'Le standard de toute la catégorie sert aux familles qui n\'ont pas le leur ; pour les légumes, il sert aussi à ceux que l\'application ne reconnaît pas (tomates…).'),
-    h('p', { classe: 'meta' }, `${aRegler} à régler, à votre rythme : un standard non réglé laisse simplement la base estimer la portion.`),
+    h('p', { classe: 'meta' }, `${aRegler} à régler, à votre rythme : un standard non réglé laisse simplement le standard de base donner la portion.`),
     h('input', { type: 'search', classe: 'recherche-standards', 'aria-label': 'Rechercher un standard', placeholder: 'rechercher une famille ou une catégorie',
       autocomplete: 'off', onInput: chercher }),
     zone);

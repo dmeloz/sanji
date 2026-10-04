@@ -14,6 +14,7 @@ import { calculerComposant } from '../app/js/domaine/calcul.js';
 import { exporter, jourOuVide } from '../app/js/domaine/etat.js';
 import { GROUPES, grammageEffectif, lignesStandards, lignesStandardsGroupes } from '../app/js/domaine/savoir.js';
 import { PORTIONS_BASE } from '../app/js/donnees/base-metier.js';
+import { LIBELLE_ESTIMATION_A_VALIDER } from '../app/js/domaine/statuts.js';
 import { JEU_REPERES as R, JEU_STANDARDS as ST } from './jeux/TEST_ONLY-savoir.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
@@ -700,7 +701,7 @@ test('réglages : « Standards maison » en tête, groupée, repliée sans rien 
   const noeud = vues.reglages.rendre(magasin.etat(), 'standards');
   const texte = verifierTexte(noeud, 'réglages base vide');
   assert.match(texte, /Standards maison/);
-  assert.match(texte, /Le standard maison passe avant l'estimation de la base/);
+  assert.match(texte, /Le standard maison passe avant le standard de base/);
   assert.match(texte, /Une correction faite sur un plat ne le change pas/);
   assert.match(texte, /tous les plats de cette famille qui n'ont pas été corrigés/);
   const premierTitre = noeud.tous((x) => x.balise === 'h2')[0];
@@ -721,7 +722,7 @@ test('réglages : « Standards maison » en tête, groupée, repliée sans rien 
   assert.match(texte, /non réglé/);
   assert.match(texte, /riz en garniture/);
   assert.match(texte, /riz en plat principal/);
-  assert.equal(texte.match(/repère validé/g).length, 4, 'seuls les quatre repères validés applicables sont indiqués');
+  assert.equal(texte.match(/standard de base \(repère validé\)/g).length, 4, 'seuls les quatre repères validés applicables sont indiqués');
   // Adapté B-P1b : « Valider la proposition » s'ajoute à « Régler » sur les seules lignes qui ont un repère.
   for (const l of classes(noeud, 'ligne-standard')) {
     const b = l.tous((x) => x.balise === 'button' && /^Régler le standard/.test(x.attributs['aria-label'] ?? ''))[0];
@@ -779,9 +780,9 @@ test('réglages : le repère de la base est indiqué à côté du standard, jama
     magasin.remplacer(etatVide());
     const noeud = vues.reglages.rendre(magasin.etat(), 'standards');
     const texte = verifierTexte(noeud, 'réglages avec repères');
-    assert.match(texte, /repère validé : 50–70 g, poids sec/, 'repère de la famille (validé par la propriétaire)');
-    assert.match(texte, /repère de la base : 60–80 g, poids sec \(repère du groupe\)/, 'repère du groupe, signalé comme tel');
-    assert.match(texte, /repère de la base : 200–240 g, poids cru net/);
+    assert.match(texte, /standard de base \(repère validé\) : 50–70 g, poids sec/, 'repère de la famille (validé par la propriétaire)');
+    assert.match(texte, /standard de base \(base métier\) : 60–80 g, poids sec \(repère du groupe\)/, 'repère du groupe, signalé comme tel');
+    assert.match(texte, /standard de base \(base métier\) : 200–240 g, poids cru net/);
     assert.match(texte, /non réglé/, 'un repère n\'est pas un standard');
     // Panneau d'une ligne sans standard : l'état du repère est proposé, la valeur reste vide.
     await parAria(noeud, 'Régler le standard : riz, en garniture').click();
@@ -1056,12 +1057,12 @@ test('composant : la portion affiche son état de poids et son origine, pour cha
   const portionDe = (e, nom = 'polenta') => { magasin.remplacer(e); return portionAffichee(pageComposant(nom)); };
   const origineDe = (e, nom = 'polenta') => grammageEffectif(e, composantNomme(e, nom)).origine;
 
-  // 4. estimation de la base métier
+  // 4. standard de base (repère de la base métier) : utilisé directement, étiqueté, jamais « à valider » (adapté le 2026-10-04)
   await avecReperes([{ ...R.familleRiz, produit: 'polenta' }], () => {
     const e = etatPourPortion();
-    assert.equal(origineDe(e), 'base');
-    assert.equal(portionDe(e), 'Portion : 50 g, poids sec, estimation de la base métier');
-    assert.ok(pastilleTexte(pageComposant(), 'estimation à valider'), 'une estimation reste à valider');
+    assert.equal(origineDe(e), 'standard_base');
+    assert.equal(portionDe(e), 'Portion : 50 g, poids sec, standard de base (modifiable dans Réglages, votre valeur passe devant)');
+    assert.ok(!pastilleTexte(pageComposant(), LIBELLE_ESTIMATION_A_VALIDER), 'un standard de base n\'est pas « à valider »');
     // 3. le standard maison passe avant la base
     definirStandard(e, 'polenta', 'garniture', ST.cruNet, h());
     assert.equal(portionDe(e), 'Portion : 150 g, poids cru net, standard maison');
@@ -1178,7 +1179,7 @@ test('composant : une étape non appliquée est signalée, avec la quantité cui
   const sec = verifierTexte(pageComposant(), 'composant en poids sec');
   assert.match(sec, /cuisson/);
   assert.match(sec, /non appliquée : la portion est déjà exprimée avant cuisson/);
-  assert.match(sec, /soit environ .+ une fois cuit, estimation/);
+  assert.match(sec, /soit environ .+ une fois cuit, à titre indicatif/);
   assert.match(sec, /poids sec/);
   assert.equal(calculerComposant(magasin.etat(), composantNomme(magasin.etat(), 'polenta').id).etapes[0].appliquee, false);
 
@@ -1187,7 +1188,7 @@ test('composant : une étape non appliquée est signalée, avec la quantité cui
   const cuit = verifierTexte(pageComposant(), 'composant en poids cuit');
   assert.match(cuit, /cuisson/);
   assert.doesNotMatch(cuit, /non appliquée/);
-  assert.doesNotMatch(cuit, /une fois cuit, estimation/);
+  assert.doesNotMatch(cuit, /une fois cuit, à titre indicatif/);
 });
 
 test('composant : plus aucun bouton ni pastille de validation, même pour un composant resté non validé', () => {
