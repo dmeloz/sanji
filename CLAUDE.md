@@ -37,7 +37,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 ## Règles du projet
 - Aucune dépendance, aucun build. Ne pas lancer `npm install`.
 - Rien sous `app/` n'importe de fichier hors de `app/`. `js/domaine/` reste sans DOM.
-- Aucune donnée de restaurant, aucun nom de plat, aucun grammage d'exemple dans `app/`.
+- Aucune donnée de restaurant, aucun plat de la carte, aucun grammage d'exemple « maison » dans `app/`. Le vocabulaire culinaire général (formes de pâtes, risotto, rösti…) et le référentiel généré `app/js/donnees/savoir-culinaire.js` sont permis.
 - Les jeux de test vivent dans `tests/jeux/`, portent l'étiquette `TEST_ONLY` et ne sont jamais importés par l'application.
 - `app/js/donnees/base-metier.js` est généré : ne pas l'éditer à la main.
 - Tout nouveau fichier de `app/` doit être ajouté à la liste de cache de `app/sw.js` (un test le vérifie).
