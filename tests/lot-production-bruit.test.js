@@ -136,11 +136,17 @@ test('ligne : une préparation au standard de base dit « provenance : standard 
   definirPrevision(e, S.lundi, 1, 10, h());
   definirStandard(e, 'riz', 'plat_principal', { valeur: 70, unite: 'g', etat: 'sec' }, h());
   const riz = Object.values(e.composants).find((c) => c.nom === 'riz');
-  const calc = vueJour.provenanceQuantite(e, riz.id);
-  const noeud = production(e);
-  const texte = texteVisible(ligneDe(noeud, 'riz'));
-  if (vueJour.provenanceAMontrer(calc)) assert.match(texte, /provenance : /);
-  else assert.doesNotMatch(texte, /provenance : /);
+  const valide = vueJour.provenanceQuantite(e, riz.id);
+  assert.notEqual(valide, 'standard de base');
+  assert.equal(vueJour.provenanceAMontrer(valide), null, 'un grammage validé ne se répète pas sur la ligne');
+  assert.doesNotMatch(texteVisible(ligneDe(production(e), 'riz')), /provenance : /);
+  // Sans standard maison : la portion vient du standard de base, et la ligne le dit.
+  const b = etatVide();
+  prevision(b, S.lundi, 1, 10);
+  const grammageBase = { valeur: 50, unite: 'ml', statut: 'STANDARD_BASE', source: 'TEST_ONLY' };
+  const prepBase = composantValide(b, S.lundi, 1, { ...J.PREPARATION_TEST, grammage: grammageBase }, { nom: 'PREP_BASE_TEST' });
+  assert.equal(vueJour.provenanceQuantite(b, prepBase), 'standard de base');
+  assert.match(texteVisible(ligneDe(production(b), 'PREP_BASE_TEST')), /provenance : standard de base/);
 });
 
 test('page : la phrase de refroidissement tient en une ligne courte ; plus de « Rien d\'obligatoire » ni d\'écran allumé sur la page', () => {
@@ -341,7 +347,8 @@ test('choisir la sauce : pour un risotto, le safran est habituel et la tomate es
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'Risotto aux champignons', h());
   const sauce = sauceDe(e);
-  if (!sauce || sauce.categorie !== 'sauce') return;
+  assert.ok(sauce, 'un risotto au menu 1 propose une sauce à confirmer');
+  assert.equal(sauce.categorie, 'sauce');
   magasin.remplacer(e);
   vueComposant.dialogChoisirSauce(magasin.etat().composants[sauce.id]);
   const [dialogue] = panneauxOuverts(dom.corps);

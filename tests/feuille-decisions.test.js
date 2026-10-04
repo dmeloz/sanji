@@ -340,16 +340,19 @@ test('B1 : le dimanche, une avance hors règle pour le lundi suivant apparaît',
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   const p = Object.values(e.productions).find((x) => x.genre === 'principale');
   planifier(e, p.id, S.veille, 'avant_midi', h());
-  // même carte qu'en semaine : visible seulement si l'avance est hors règle
-  const brut = pointsAConfirmer(e, S.mardi).some((x) => x.type === 'avance_hors_regle');
-  assert.equal(genres(e, S.dimanchePrecedent).includes('avance_hors_regle'), brut);
+  // Même carte qu'en semaine : le point existe (avance de 4 jours, sans règle), et le dimanche la montre aussi.
+  assert.equal(pointsAConfirmer(e, S.mardi).some((x) => x.type === 'avance_hors_regle'), true, 'le cas est bien une avance hors règle');
+  const carte = decisionsDe(e, S.dimanchePrecedent).cartes.find((c) => c.genre === 'avance_hors_regle');
+  assert.ok(carte, 'le dimanche voit la carte');
+  assert.equal(carte.productionId, p.id);
+  assert.equal(carte.jours, 4);
 });
 
 test('B1 bis : un écart à arbitrer est une décision, aussi le dimanche et pour un jour passé ; décidé, il disparaît', () => {
   const { e, p } = avecEcart();
   for (const jour of [S.lundi, S.mardi, S.dimanche]) {
     const cartes = decisionsDe(e, jour).cartes.filter((c) => c.genre === 'ecart');
-    assert.equal(cartes.length, jour === S.dimanche ? 1 : 1, jour);
+    assert.equal(cartes.length, 1, jour);
   }
   assert.equal(decisionsDe(e, S.lundi).total, 1);
   deciderEcart(e, p.id, 'ajustement', h());
@@ -441,7 +444,7 @@ test('compte unique : decisionsDuJour = les cartes datées du jour, texteDecisio
 test('feuille : un écart compte, la feuille ne dit pas « Tout est réglé » ; elle reste ouverte après une décision jusqu\'à OK', () => {
   nettoyer();
   const { e } = avecEcart();
-  definirMenu(e, S.lundi, 2, 'Penne aux courgettes', h());
+  definirMenu(e, S.mardi, 1, 'Penne aux courgettes', h());
   magasin.remplacer(e);
   aDate(S.lundi, () => feuille.ouvrirDecisions());
   const d = ouverts()[0];
@@ -450,9 +453,10 @@ test('feuille : un écart compte, la feuille ne dit pas « Tout est réglé » ;
   assert.match(d.textContent, /ajustement \(/);
   // une décision (sauce choisie) : la feuille reste ouverte et se met à jour
   const sauce = classes(d, 'dec-carte').find((c) => c.dataset.genre === 'sauce');
-  if (sauce) {
-    magasin.agir((x) => { Object.values(x.composants).forEach((c) => { c.sauceAConfirmer = false; }); });
-  }
+  assert.ok(sauce, 'la sauce implicite du menu 1 est une décision de la feuille');
+  const idSauce = Object.values(magasin.etat().composants).find((c) => c.categorie === 'sauce').id;
+  aDate(S.lundi, () => magasin.agir((x, t) => modifierComposant(x, idSauce, { nom: 'sauce tomate' }, t)));
+  assert.equal(classes(d, 'dec-carte').filter((c) => c.dataset.genre === 'sauce').length, 0, 'choisie, la carte disparaît');
   const p = Object.values(magasin.etat().productions).find((x) => x.genre === 'principale' && x.etat === 'fait');
   aDate(S.lundi, () => magasin.agir((x, t) => deciderEcart(x, p.id, 'aucune', t)));
   assert.equal(ouverts().length, 1, 'toujours ouverte');
