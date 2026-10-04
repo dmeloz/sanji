@@ -642,16 +642,50 @@ export const CLES_RUBRIQUES = RUBRIQUES.map((r) => r.cle);
 
 export const titre = (param) => RUBRIQUES.find((r) => r.cle === param)?.titre ?? 'Réglages';
 
-/** Racine (param null ou inconnu) : liste de rubriques ; sinon la sous-page de la rubrique. */
+// Racine (refonte 1) : sections de lignes ; aucune règle métier n'est réglable ici.
+
+const rubriqueDe = (cle) => RUBRIQUES.find((r) => r.cle === cle);
+
+/** Ligne qui mène quelque part : titre, résumé et chevron. Toute la ligne est la cible (44 px au moins). */
+function ligneLien(href, titreTexte, resumeTexte, pastilleLigne = null) {
+  return h('li', null,
+    h('a', { href, classe: 'reglage-rubrique' },
+      h('span', { classe: 'reglage-rubrique-texte' }, h('strong', null, titreTexte), resumeTexte ? h('span', { classe: 'meta' }, resumeTexte) : null, pastilleLigne),
+      h('span', { classe: 'reglage-fleche', 'aria-hidden': 'true' }, '›')));
+}
+
+const ligneRubrique = (cle, etat, pastilleLigne = null) => ligneLien(`#/reglages/${cle}`, rubriqueDe(cle).titre, rubriqueDe(cle).resume(etat), pastilleLigne);
+
+/** Ligne d'information, sans réglage : ce n'est pas un lien. */
+const ligneInfo = (titreTexte, valeur) => h('li', { classe: 'reglage-info' },
+  h('span', { classe: 'reglage-rubrique-texte' }, h('strong', null, titreTexte), h('span', { classe: 'meta' }, valeur)));
+
+const groupe = (titreTexte, ...lignes) => h('section', { classe: 'reglages-groupe' },
+  h('h2', { classe: 'reglages-groupe-titre' }, titreTexte),
+  h('ul', { classe: 'liste-rubriques-reglages' }, lignes));
+
+/** Racine (param null ou inconnu) : sections de lignes ; sinon la sous-page de la rubrique. */
 export function rendre(etat, param = null) {
   const rubrique = RUBRIQUES.find((r) => r.cle === param);
   if (!rubrique) {
-    return h('div', { classe: 'vue vue-reglages' },
+    const hl = situationHorsLigne();
+    return h('div', { classe: 'vue vue-reglages vue-reglages-racine' },
+      h('a', { href: '#/aujourdhui', classe: 'reglage-retour' }, '‹ Aujourd\'hui'),
       h('h1', { classe: 'page-titre' }, 'Réglages'),
-      h('ul', { classe: 'liste-rubriques-reglages' }, RUBRIQUES.map((r) => h('li', null,
-        h('a', { href: `#/reglages/${r.cle}`, classe: 'reglage-rubrique' },
-          h('span', { classe: 'reglage-rubrique-texte' }, h('strong', null, r.titre), h('span', { classe: 'meta' }, r.resume(etat))),
-          h('span', { classe: 'reglage-fleche', 'aria-hidden': 'true' }, '›'))))));
+      groupe('Règles de production',
+        ligneInfo('Avance normale', '2 jours (règle)'),
+        ligneRubrique('standards', etat),
+        ligneRubrique('standards-base', etat)),
+      groupe('Repères', ligneRubrique('reperes', etat)),
+      groupe('Poste et commandes',
+        ligneRubrique('organisation', etat, etat.reglages.semaineTypeConfirmee ? null : pastille('à confirmer', 'ambre')),
+        ligneRubrique('produits', etat),
+        ligneLien('#/import', 'Import des menus', 'saisie de la semaine')),
+      groupe('Affichage',
+        ligneInfo('Apparence', 'suit le réglage du téléphone (clair / sombre)'),
+        ligneInfo('Écran allumé', 'en Production et en mode poste')),
+      groupe('Données', ligneRubrique('donnees', etat)),
+      h('p', { classe: 'reglages-pied' }, pastille('Fonctionne hors ligne', 'vert'), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
   }
   return h('div', { classe: 'vue vue-reglages' },
     h('a', { href: '#/reglages', classe: 'reglage-retour' }, '‹ Réglages'),

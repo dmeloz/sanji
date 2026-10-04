@@ -209,10 +209,11 @@ test('inventaire : les dix blocs de Réglages existent TOUS, répartis sur les s
     const titres = titresDe(rubrique);
     for (const attendu of attendus) assert.ok(titres.includes(attendu), `le bloc « ${attendu} » a disparu de la sous-page ${rubrique}`);
   }
-  // La racine reste courte : elle ne porte aucun bloc, seulement les quatre rubriques.
+  // La racine reste courte : aucun des dix blocs, seulement des titres de section et les six rubriques (plus retour et Import des menus).
   const racine = vues.reglages.rendre(magasin.etat(), null);
-  assert.deepEqual(racine.tous((x) => x.balise === 'h2').map((x) => x.textContent), []);
-  assert.deepEqual(liensDe(racine), RUBRIQUES_REGLAGES.map((c) => `#/reglages/${c}`));
+  const blocs = Object.values(parPage).flat();
+  assert.deepEqual(racine.tous((x) => x.balise === 'h2').map((x) => x.textContent).filter((t) => blocs.includes(t)), []);
+  assert.deepEqual(liensDe(racine).filter((l) => l.startsWith('#/reglages/')), RUBRIQUES_REGLAGES.map((c) => `#/reglages/${c}`));
 });
 
 test('routeur : #/reglages est la racine, #/reglages/<rubrique> une sous-page, une clé inconnue retombe sur la racine', () => {
