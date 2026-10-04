@@ -25,6 +25,7 @@ import { libelleHorsLigne, situationHorsLigne } from './horsligne.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { ALLERGENES, libelleAllergene } from './reference.js';
+import { pageReperesMetier } from './reperes-metier.js';
 import { pastilleCreneau } from './taches.js';
 
 const JOURS = ['', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
@@ -622,6 +623,9 @@ const RUBRIQUES = [
   { cle: 'standards-base', titre: 'Standards de base',
     resume: (e) => { const n = Object.keys(e.ajustements ?? {}).length; return `${pluriel(n, 'valeur changée', 'valeurs changées')} par vous`; },
     blocs: (e) => [sectionStandardsBase(e)] },
+  { cle: 'reperes', titre: 'Repères métier',
+    resume: () => 'temps, températures, conservation, techniques : consultation',
+    blocs: () => { const c = h('div'); pageReperesMetier(c, { sansTitre: true }); return [c]; } },
   { cle: 'organisation', titre: 'Organisation du poste',
     resume: (e) => `${e.reglages.semaineTypeConfirmee ? 'semaine type confirmée' : 'semaine type à confirmer'} · ${pluriel(Object.keys(e.regles).length, 'règle')} de préparation`,
     blocs: (e) => [sectionSemaineType(e), sectionRegles(e)] },

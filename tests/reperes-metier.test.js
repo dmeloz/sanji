@@ -154,3 +154,11 @@ test('source légale des allergènes : une ligne, avec « à valider localement 
   assert.equal(t.includes('\n'), false);
   assert.doesNotMatch(t, /compatible|sans allergène|garanti/i);
 });
+
+test('Réglages : la rubrique « Repères métier » affiche la page de consultation, sans second titre', async () => {
+  const { rendre } = await import('../app/js/ui/vue-reglages.js');
+  const { etatVide } = await import('./aide.js');
+  const page = rendre(etatVide(), 'reperes');
+  assert.equal(page.tous((x) => x.balise === 'h1').length, 1);
+  assert.ok(page.tous((x) => x.balise === 'button').length >= 2, 'les thèmes sont proposés');
+});

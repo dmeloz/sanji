@@ -107,15 +107,15 @@ export function blocReperes(cle) {
 }
 
 /** Page de consultation d'un thème (tous les repères) ; le thème par défaut est le premier. Remplit `conteneur`. */
-export function pageReperesMetier(conteneur, { theme } = {}) {
+export function pageReperesMetier(conteneur, { theme, sansTitre = false } = {}) {
   const actif = THEMES.some(([c]) => c === theme) ? theme : THEMES[0][0];
   const { blocs } = rubriques(reperesPour(actif));
   conteneur.replaceChildren(h('div', { classe: 'vue vue-reperes' },
-    h('h1', { classe: 'page-titre' }, 'Repères métier'),
+    sansTitre ? null : h('h1', { classe: 'page-titre' }, 'Repères métier'),
     h('p', { classe: 'aide' }, 'Consultation seulement : fourchettes et provenance du référentiel culinaire. Votre valeur passe toujours devant.'),
     h('div', { classe: 'actions' }, THEMES.map(([c, nom]) => h('button', {
       type: 'button', classe: `btn btn-court${c === actif ? ' principal' : ''}`, 'aria-pressed': c === actif ? 'true' : 'false',
-      onClick: () => pageReperesMetier(conteneur, { theme: c }),
+      onClick: () => pageReperesMetier(conteneur, { theme: c, sansTitre }),
     }, nom))),
     h('h2', { classe: 'section-titre' }, THEMES.find(([c]) => c === actif)[1]),
     blocs));
