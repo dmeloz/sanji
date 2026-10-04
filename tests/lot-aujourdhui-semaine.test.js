@@ -125,7 +125,10 @@ test('Semaine : « Attribution au poste » repliée quand tout est au poste, dé
   assert.ok(reglesPoste.length >= 1);
   assert.ok(reglesPoste.every((d) => d.open === false), 'tout est au poste : replié');
   assert.match(reglesPoste[0].textContent, /Attribution au poste : (\d+) sur \1/);
-  assert.doesNotMatch(classes(n, 'sem-carte')[0].textContent, /au poste(?! :)/, 'plus de « au poste » répété à côté de chaque interrupteur');
+  // Chaque interrupteur écrit son état dans les deux sens (jamais une coche seule).
+  const etiquettes = classes(n, 'interrupteur-etat');
+  assert.ok(etiquettes.length >= 1);
+  assert.ok(etiquettes.every((x) => x.textContent === 'au poste'), 'tout est au poste : « au poste » est écrit à côté de chaque interrupteur');
   assert.doesNotMatch(classes(n, 'sem-carte')[0].textContent, /hors poste/);
 
   const poulet = Object.values(e.composants).find((c) => c.nom === 'poulet');
@@ -154,7 +157,7 @@ test('Semaine : le nom accessible de l\'interrupteur porte l\'état et le suit',
   sw.checked = true;
   await sw.declencher('change');
   assert.equal(sw.attributs['aria-label'], 'poulet, au poste');
-  assert.equal(etiquette.textContent, '');
+  assert.equal(etiquette.textContent, 'au poste');
 });
 
 test('Semaine : l\'attribution n\'est pas répétée dans « Tout le détail du jour » (les interrupteurs sont dans Services)', () => {
