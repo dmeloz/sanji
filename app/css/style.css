@@ -957,3 +957,72 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .fiche-actions .fiche-poste { flex: 2 1 200px; }
 .fiche-reglages > :not(summary) { margin-top: 12px; }
 @media (prefers-reduced-motion: reduce) { .fiche-actions .btn:active { transform: none; } }
+/* ============================================================ Écran Semaine (refonte 1, onglet 3)
+   Jetons seulement : le mode sombre les redéfinit. Un état (hors règle, fermé, jour off, certitude) est toujours écrit en texte. */
+.sem-tete { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.sem-tete-texte { display: grid; gap: 4px; min-width: 0; }
+.sem-legende { font-size: var(--t-legende); font-weight: 500; color: var(--texte-doux); }
+.sem-titre { font-size: var(--t-titre); line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; }
+.sem-importer { flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: var(--cible); min-height: var(--cible); padding: 0 14px; border: 1px solid var(--bordure); border-radius: 22px; background: var(--carte); color: var(--texte); font-size: var(--t-corps); font-weight: 600; text-decoration: none; }
+.sem-bandeau-jours { display: grid; gap: 8px; }
+.sem-puces { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.sem-puce { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 62px; padding: 0; border: 1px solid var(--bordure); border-radius: var(--r-bouton); background: var(--carte); color: var(--texte); text-decoration: none; }
+.sem-puce-nom { font-size: var(--t-legende); font-weight: 600; }
+.sem-puce-aujourdhui .sem-puce-nom { text-decoration: underline; text-underline-offset: 3px; }
+.sem-puce-actif { background: var(--encre); border-color: var(--encre); color: var(--sur-encre); }
+.sem-puce-ferme { border-style: dashed; border-color: var(--bordure-forte); background: var(--carte-2); color: var(--texte-doux); }
+.sem-puce-ferme.sem-puce-actif { background: var(--carte-2); border-color: var(--encre); color: var(--texte); }
+.sem-puce-mot { font-size: var(--t-legende); }
+.sem-point { display: inline-block; width: 8px; height: 8px; border-radius: 4px; background: transparent; box-sizing: border-box; }
+.sem-point-regle { background: var(--exception-point); }
+.sem-point-off { border: 1.5px solid currentColor; }
+.sem-cle { display: flex; gap: 14px; flex-wrap: wrap; }
+.sem-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.sem-nav .btn { flex: 1 1 auto; }
+.sem-jour { font-size: var(--t-section); line-height: 1.25; }
+.sem-bandeaux { display: grid; gap: 8px; }
+.sem-banniere { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 8px 8px 14px; border-radius: var(--r-carte-petite); background: var(--carte-2); color: var(--texte-moyen); font-size: var(--t-corps); }
+.sem-banniere-rythme { background: var(--action-fond); color: var(--action-fonce); }
+.sem-banniere-off { background: var(--carte); border: 1px dashed var(--bordure-forte); }
+.sem-banniere-confirmer { background: var(--exception-fond); border: 1px solid var(--exception-bord); color: var(--exception); font-weight: 600; }
+.sem-banniere-texte { flex: 1; min-width: 0; }
+.sem-carte, .sem-aproduire { background: var(--carte); border-radius: var(--r-carte); padding: 12px 16px; display: grid; gap: 8px; }
+.sem-aproduire { background: transparent; padding: 0; }
+.sem-section { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); margin: 0 4px; }
+.sem-carte > .sem-section { margin: 0; }
+.sem-sous-titre { font-size: var(--t-corps); }
+.sem-menu { display: grid; gap: 4px; }
+.sem-ligne { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: var(--t-corps); }
+.sem-rang { color: var(--texte-doux); flex: none; }
+.sem-intitule { text-align: right; min-width: 0; overflow-wrap: anywhere; }
+.sem-neutre { color: var(--texte-doux); font-style: italic; }
+.sem-qte, .sem-qte-ligne { font-family: var(--police-qte); font-weight: 600; font-size: var(--t-qte); white-space: nowrap; }
+.sem-qte-absente { font-family: var(--police); font-size: var(--t-legende); white-space: normal; text-align: right; }
+.sem-couverts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: var(--t-corps); }
+.sem-certitudes { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.sem-composants { display: grid; }
+.sem-composant { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--cible); border-top: 1px solid var(--bordure); }
+.sem-fiches { display: grid; gap: 6px; padding-top: 8px; border-top: 1px solid var(--bordure); }
+.sem-liste { display: grid; gap: 8px; }
+.sem-fiche { display: grid; gap: 4px; }
+.sem-fiche-titre { font-weight: 600; }
+.sem-allergies { font-size: var(--t-corps); }
+.sem-prod { display: grid; gap: 6px; padding: 8px 8px 8px 14px; background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--r-carte-petite); }
+.sem-prod-hors-regle { background: var(--exception-fond); border-color: var(--exception-bord); }
+.sem-prod-fait .tache-nom { text-decoration: line-through; color: var(--texte-doux); }
+.sem-prod-ligne { display: flex; align-items: center; gap: 10px; min-height: 52px; }
+.sem-prod-corps { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.sem-prod-sous { font-size: var(--t-legende); color: var(--texte-doux); }
+.sem-hors-regle { color: var(--exception); font-weight: 700; }
+.sem-prod-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.sem-prod-actions .btn { min-height: var(--cible); }
+.sem-plus > summary { min-height: var(--cible); display: flex; align-items: center; cursor: pointer; font-size: var(--t-corps); }
+.sem-detail { background: var(--carte); border-radius: var(--r-carte); padding: 4px 16px; }
+.sem-detail[open] { padding-bottom: 16px; }
+.sem-detail > * + * { margin-top: 10px; }
+/* Semaine globale : l'ancien tableau de la semaine, restylé (mêmes données, mêmes liens). */
+.sem-globale-outils { display: flex; justify-content: flex-end; margin: 4px 0 0; }
+.vue-semaine-globale .bord-zone { background: var(--carte); border: 0; border-radius: var(--r-carte); padding: 12px 16px; margin-top: 12px; }
+.vue-semaine-globale .bord-zone-titre { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); }
+.vue-semaine-globale .bord-titre { font-size: var(--t-titre); font-weight: 700; letter-spacing: -0.02em; }
+.vue-semaine-globale .bord-aujourdhui { border-radius: var(--r-carte-petite); }
