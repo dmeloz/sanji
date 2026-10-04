@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Production</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2C6A3E}a:hover{color:#1F4E2D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F3F4F1; color: #15171A; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; box-sizing: border-box">
+<div style="padding: 56px 20px 100px; display: flex; flex-direction: column; gap: 14px">
+
+<header style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: center; gap: 8px">
+<p style="margin: 0; font-size: 13px; font-weight: 500; color: #5B6168">[Jour date] · [x] / [n] faites</p>
+<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 500; color: #5B6168; background: #FFFFFF; border: 1px solid #E2E4DF; border-radius: 999px; padding: 2px 8px"><span style="width: 6px; height: 6px; border-radius: 3px; border: 1.5px solid #5B6168; box-sizing: border-box"></span>Hors ligne · 2 en attente</span>
+</div>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Production</h1>
+</header>
+
+<div role="group" aria-label="Jour" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 12px; background: #E2E4DF">
+<button onClick="{{ showToday }}" aria-pressed="{{ todayPressed }}" style="{{ todayTab }}">Aujourd'hui</button>
+<button onClick="{{ showTomorrow }}" aria-pressed="{{ tomorrowPressed }}" style="{{ tomorrowTab }}">Demain</button>
+</div>
+
+<section style="background: #FFFFFF; border-radius: 18px; display: flex; flex-direction: column; overflow: hidden">
+<sc-for list="{{ items }}" as="item" hint-placeholder-count="5">
+<sc-if value="{{ item.normal }}" hint-placeholder-val="{{ true }}">
+<div style="min-height: 76px; padding: 8px 12px 8px 6px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #E2E4DF">
+<button aria-label="{{ item.checkLabel }}" aria-pressed="{{ item.pressed }}" onClick="{{ item.toggle }}" style="width: 44px; height: 44px; flex-shrink: 0; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center">
+<span style="{{ item.boxStyle }}">
+<sc-if value="{{ item.done }}" hint-placeholder-val="{{ false }}">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>
+</sc-if>
+</span>
+</button>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<span style="{{ item.nameStyle }}">{{ item.name }}<sc-if value="{{ item.shared }}" hint-placeholder-val="{{ false }}"><svg aria-label="Préparation partagée" style="margin-left: 6px; vertical-align: -2px" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6168" stroke-width="2"><circle cx="8.5" cy="12" r="4.5"></circle><circle cx="15.5" cy="12" r="4.5"></circle></svg></sc-if></span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5B6168"><span style="{{ item.tagStyle }}">{{ item.type }}</span>{{ item.uses }}</span>
+<span style="{{ item.originStyle }}">{{ item.origin }}</span>
+</div>
+<span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600; white-space: nowrap">{{ item.qty }}</span>
+<sc-if value="{{ item.isRecipe }}" hint-placeholder-val="{{ true }}">
+<a href="Fiche.dc.html" aria-label="Ouvrir la fiche" style="width: 28px; height: 44px; display: flex; align-items: center; justify-content: center; color: #5B6168">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg>
+</a>
+</sc-if>
+<sc-if value="{{ item.isRaw }}" hint-placeholder-val="{{ false }}">
+<span style="width: 28px"></span>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ item.swiped }}" hint-placeholder-val="{{ false }}">
+<div style="min-height: 76px; display: flex; align-items: stretch; border-bottom: 1px solid #E2E4DF; background: #F3F4F1">
+<div style="flex: 1; min-width: 0; padding: 8px 12px 8px 16px; display: flex; align-items: center; gap: 8px; background: #FFFFFF; overflow: hidden">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<span style="font-size: 16px; font-weight: 600; white-space: nowrap">{{ item.name }}</span>
+<span style="font-size: 13px; color: #5B6168; white-space: nowrap">{{ item.uses }}</span>
+</div>
+<span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600">{{ item.qty }}</span>
+</div>
+<a href="Semaine.dc.html" style="width: 76px; background: #5B6168; color: #FFFFFF; font-size: 13px; font-weight: 600; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h12l-3-3M17 17H5l3 3"></path></svg>Déplacer</a>
+<a href="Production.dc.html" style="width: 76px; background: #2C6A3E; color: #FFFFFF; font-size: 13px; font-weight: 600; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>Fait</a>
+</div>
+</sc-if>
+</sc-for>
+</section>
+
+<p style="margin: 0; font-size: 13px; color: #5B6168; text-align: center; line-height: 1.4">Balaie une ligne : Fait ou Déplacer · appui long sur la quantité : ajuster.<br>Un produit brut n'affiche que la quantité à cuire.</p>
+</div>
+
+<div style="position: absolute; left: 0; bottom: 0; width: 390px; height: 84px">
+<dc-import name="TabBar" active="production" hint-size="390px,84px"></dc-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { day: "today", done: { penne: true } };
+}
+renderVals() {
+var self = this;
+var lists = {
+today: [
+{ id: "pesto", name: "Pesto", qty: "500 g", type: "Recette", uses: "carte + menu 2", origin: "après midi · fiche × [n] couv. · pour mercredi", shared: true },
+{ id: "penne", name: "Penne", qty: "[qté] kg", type: "Brut", uses: "menu 1 · midi", origin: "avant midi" },
+{ id: "p3", name: "[Préparation]", qty: "[qté]", type: "Recette", uses: "carte · soir", origin: "avant soir · estimation fragile, à confirmer", uncertain: true },
+{ id: "p4", name: "[Préparation]", qty: "[qté]", type: "Recette", uses: "menu 1 + menu 2", origin: "", swiped: true },
+{ id: "p5", name: "[Produit brut]", qty: "[qté]", type: "Brut", uses: "carte · midi + soir", origin: "avant midi" }
+],
+tomorrow: [
+{ id: "t1", name: "[Préparation]", qty: "[qté]", type: "Recette", uses: "menu 1", origin: "avant midi · fiche × [n] couv." },
+{ id: "t2", name: "[Produit brut]", qty: "[qté]", type: "Brut", uses: "menu 2", origin: "avant midi" },
+{ id: "t3", name: "[Préparation]", qty: "[qté]", type: "Recette", uses: "carte + menu 1", origin: "après midi · fiche × [n] couv. · pour jeudi", shared: true }
+]
+};
+var tabOn = "height: 40px; border: 0; border-radius: 9px; background: #FFFFFF; color: #15171A; font-size: 14px; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.08)";
+var tabOff = "height: 40px; border: 0; border-radius: 9px; background: transparent; color: #5B6168; font-size: 14px; font-weight: 500";
+var items = lists[this.state.day].map(function (x) {
+var done = !!self.state.done[x.id];
+var recipe = x.type === "Recette";
+return Object.assign({}, x, {
+done: done,
+pressed: done ? "true" : "false",
+shared: !!x.shared,
+swiped: !!x.swiped,
+normal: !x.swiped,
+isRecipe: recipe,
+isRaw: !recipe,
+checkLabel: (done ? "Marquer à faire : " : "Marquer comme fait : ") + x.name,
+boxStyle: "width: 26px; height: 26px; border-radius: 8px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; " + (done ? "background: #2C6A3E; border: 0" : "background: #FFFFFF; border: 2px solid #9AA09A"),
+nameStyle: "font-size: 16px; font-weight: 600; display: flex; align-items: center; " + (done ? "color: #5B6168; text-decoration: line-through" : "color: #15171A"),
+tagStyle: "font-size: 13px; font-weight: 600; padding: 2px 6px; border-radius: 6px; " + (recipe ? "background: #E3EEE6; color: #1F4E2D" : "background: #ECEDEF; color: #3A3F45"),
+originStyle: "font-size: 13px; " + (x.uncertain ? "color: #8A4108; font-weight: 600" : "color: #5B6168"),
+toggle: function () { var d = Object.assign({}, self.state.done); d[x.id] = !d[x.id]; self.setState({ done: d }); }
+});
+});
+var today = this.state.day === "today";
+return {
+items: items,
+todayTab: today ? tabOn : tabOff,
+tomorrowTab: today ? tabOff : tabOn,
+todayPressed: today ? "true" : "false",
+tomorrowPressed: today ? "false" : "true",
+showToday: function () { self.setState({ day: "today" }); },
+showTomorrow: function () { self.setState({ day: "tomorrow" }); }
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Réglages</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2C6A3E}a:hover{color:#1F4E2D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F3F4F1; color: #15171A; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; box-sizing: border-box">
+<div style="padding: 48px 20px 100px; display: flex; flex-direction: column; gap: 6px">
+
+<a href="Main.dc.html" style="align-self: flex-start; min-height: 44px; display: flex; align-items: center; gap: 2px; font-size: 16px; text-decoration: none; margin-left: -6px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Aujourd'hui</a>
+<h1 style="margin: 0 0 4px; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Réglages</h1>
+
+<h2 style="margin: 8px 16px 2px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5B6168">Règles de production</h2>
+<section style="background: #FFFFFF; border-radius: 14px; padding: 0 14px">
+<div style="min-height: 48px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #E2E4DF">
+<span style="font-size: 15px">Avance maximale</span>
+<span style="display: flex; align-items: center; gap: 6px">
+<button onClick="{{ less }}" aria-label="Moins" style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid #E2E4DF; background: #F3F4F1; color: #15171A; font-size: 18px; font-weight: 600">−</button>
+<span style="min-width: 64px; text-align: center; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600">{{ max }} jours</span>
+<button onClick="{{ more }}" aria-label="Plus" style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid #E2E4DF; background: #F3F4F1; color: #15171A; font-size: 18px; font-weight: 600">+</button>
+</span>
+</div>
+<a href="Semaine.dc.html" style="min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 8px; text-decoration: none; color: #15171A">
+<span style="font-size: 15px">Semaine type des créneaux</span>
+<span style="font-size: 13px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: #FBEEE2; color: #8A4108">à confirmer</span>
+</a>
+</section>
+
+<h2 style="margin: 8px 16px 2px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5B6168">Mon planning</h2>
+<section style="background: #FFFFFF; border-radius: 14px; padding: 0 14px">
+<div style="min-height: 48px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #E2E4DF"><span style="font-size: 15px">Taux d'activité</span><span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600; color: #5B6168">80 %</span></div>
+<div style="min-height: 48px; display: flex; align-items: center; justify-content: space-between"><span style="display: flex; flex-direction: column"><span style="font-size: 15px">Jours off</span><span style="font-size: 13px; color: #5B6168">planning de [mois]</span></span><button style="height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #E2E4DF; background: #FFFFFF; color: #2C6A3E; font-size: 14px; font-weight: 600">Importer</button></div>
+</section>
+
+<h2 style="margin: 8px 16px 2px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5B6168">Sources</h2>
+<section style="background: #FFFFFF; border-radius: 14px; padding: 0 14px">
+<a href="Fiche.dc.html" style="min-height: 48px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: #15171A; border-bottom: 1px solid #E2E4DF"><span style="font-size: 15px">Fiches techniques</span><span style="display: flex; align-items: center; gap: 6px; font-size: 14px; color: #5B6168">[n]<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></span></a>
+<div style="min-height: 48px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #E2E4DF"><span style="font-size: 15px">Fournisseurs</span><span style="display: flex; align-items: center; gap: 6px; font-size: 14px; color: #5B6168">[n]<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></span></div>
+<a href="Import.dc.html" style="min-height: 48px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: #15171A"><span style="font-size: 15px">Import des menus</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6168" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></a>
+</section>
+
+<h2 style="margin: 8px 16px 2px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5B6168">Affichage</h2>
+<section style="background: #FFFFFF; border-radius: 14px; padding: 0 14px">
+<div style="min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid #E2E4DF">
+<span style="font-size: 15px">Apparence</span>
+<div role="group" aria-label="Apparence" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; padding: 3px; border-radius: 10px; background: #E2E4DF; width: 200px">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="3">
+<button onClick="{{ t.pick }}" aria-pressed="{{ t.pressed }}" style="{{ t.style }}">{{ t.label }}</button>
+</sc-for>
+</div>
+</div>
+<div style="min-height: 52px; display: flex; align-items: center; justify-content: space-between">
+<span style="font-size: 15px">Écran allumé en mode poste</span>
+<button onClick="{{ toggleAwake }}" aria-label="Écran allumé en mode poste" aria-pressed="{{ awakePressed }}" style="{{ trackStyle }}"><span style="{{ knobStyle }}"></span></button>
+</div>
+</section>
+
+<p style="margin: 8px 16px 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5B6168"><span style="width: 6px; height: 6px; border-radius: 3px; background: #2C6A3E"></span>Fonctionne hors ligne · dernière synchro [heure]</p>
+</div>
+
+<div style="position: absolute; left: 0; bottom: 0; width: 390px; height: 84px">
+<dc-import name="TabBar" active="main" hint-size="390px,84px"></dc-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { max: 2, theme: "auto", awake: true };
+}
+renderVals() {
+var self = this;
+var on = "height: 32px; border: 0; border-radius: 8px; background: #FFFFFF; color: #15171A; font-size: 13px; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.08)";
+var off = "height: 32px; border: 0; border-radius: 8px; background: transparent; color: #5B6168; font-size: 13px; font-weight: 500";
+var themes = [["auto", "Auto"], ["clair", "Clair"], ["sombre", "Sombre"]].map(function (t) {
+var sel = self.state.theme === t[0];
+return { label: t[1], pressed: sel ? "true" : "false", style: sel ? on : off, pick: function () { self.setState({ theme: t[0] }); } };
+});
+var aw = this.state.awake;
+return {
+max: String(this.state.max),
+less: function () { self.setState({ max: Math.max(1, self.state.max - 1) }); },
+more: function () { self.setState({ max: Math.min(5, self.state.max + 1) }); },
+themes: themes,
+awakePressed: aw ? "true" : "false",
+toggleAwake: function () { self.setState({ awake: !self.state.awake }); },
+trackStyle: "width: 51px; height: 31px; border-radius: 16px; border: 0; padding: 2px; display: flex; box-sizing: border-box; justify-content: " + (aw ? "flex-end; background: #2C6A3E" : "flex-start; background: #C9CCC6"),
+knobStyle: "width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.2)"
+};
+}
+}
+</script>
+</body>
+</html>

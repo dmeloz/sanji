@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Semaine</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2C6A3E}a:hover{color:#1F4E2D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F3F4F1; color: #15171A; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; box-sizing: border-box">
+<div style="padding: 56px 20px 100px; display: flex; flex-direction: column; gap: 12px">
+
+<header style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<p style="margin: 0; font-size: 13px; font-weight: 500; color: #5B6168">Semaine [n°] · ouvert lun → sam</p>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Semaine</h1>
+</div>
+<a href="Import.dc.html" aria-label="Importer les menus" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #E2E4DF; background: #FFFFFF; color: #15171A; display: flex; align-items: center; justify-content: center; box-sizing: border-box">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+</a>
+</header>
+
+<div role="group" aria-label="Jour" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+<sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+<button onClick="{{ d.pick }}" aria-label="{{ d.full }}" aria-pressed="{{ d.pressed }}" disabled="{{ d.closed }}" style="{{ d.chipStyle }}">
+<span style="font-size: 13px; font-weight: 600">{{ d.short }}</span>
+<span style="{{ d.dotStyle }}"></span>
+</button>
+</sc-for>
+</div>
+<div aria-hidden="true" style="display: flex; gap: 14px; font-size: 13px; color: #5B6168">
+<span style="display: flex; align-items: center; gap: 5px"><span style="width: 7px; height: 7px; border-radius: 4px; background: #C2600F"></span>hors règle</span>
+<span style="display: flex; align-items: center; gap: 5px"><span style="width: 7px; height: 7px; border-radius: 4px; border: 1.5px solid #5B6168; box-sizing: border-box"></span>jour off</span>
+</div>
+
+<sc-if value="{{ banner.show }}" hint-placeholder-val="{{ true }}">
+<div style="{{ banner.style }}">
+<span style="flex: 1; font-size: 14px; line-height: 1.35">{{ banner.text }}</span>
+<sc-if value="{{ banner.hasLink }}" hint-placeholder-val="{{ false }}">
+<a href="{{ banner.href }}" style="min-height: 36px; padding: 0 12px; border-radius: 10px; background: #FFFFFF; font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center; white-space: nowrap">{{ banner.cta }}</a>
+</sc-if>
+</div>
+</sc-if>
+
+<section style="background: #FFFFFF; border-radius: 18px; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px">
+<h2 style="margin: 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5B6168">Services · {{ dayName }}</h2>
+<sc-if value="{{ hasMenus }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; justify-content: space-between; font-size: 15px"><span style="color: #5B6168">Menu 1 · midi</span><span>[Plat]</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 15px"><span style="color: #5B6168">Menu 2 · midi</span><span>[Plat]</span></div>
+</sc-if>
+<div style="display: flex; justify-content: space-between; font-size: 15px"><span style="color: #5B6168">Carte</span><span>midi + soir</span></div>
+<sc-if value="{{ hasFiche }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 4px; padding-top: 6px; border-top: 1px solid #E2E4DF">
+<span style="font-size: 15px; font-weight: 600">{{ ficheText }}</span>
+<span style="align-self: flex-start; font-size: 13px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: #FBEEE2; color: #8A4108">allergènes à confirmer</span>
+</div>
+</sc-if>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0 4px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5B6168">À produire ce jour</h2>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="3">
+<div style="{{ r.cardStyle }}">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<span style="font-size: 16px; font-weight: 600">{{ r.name }}</span>
+<span style="{{ r.subStyle }}">{{ r.sub }}</span>
+</div>
+<span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600; white-space: nowrap">{{ r.qty }}</span>
+<button aria-label="Déplacer à un autre jour" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #E2E4DF; background: #FFFFFF; color: #15171A; padding: 0; display: flex; align-items: center; justify-content: center">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h12l-3-3M17 17H5l3 3"></path></svg>
+</button>
+</div>
+</sc-for>
+</section>
+</div>
+
+<div style="position: absolute; left: 0; bottom: 0; width: 390px; height: 84px">
+<dc-import name="TabBar" active="semaine" hint-size="390px,84px"></dc-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { day: 1 };
+}
+renderVals() {
+var self = this;
+var R = function (name, qty, sub, alert) { return { name: name, qty: qty, sub: sub, alert: !!alert }; };
+var week = [
+{ full: "Lundi", mark: "", menus: true,
+banner: { kind: "neutre", text: "Avancé vendredi ou samedi, selon les créneaux confirmés : [n] préparations prêtes." },
+rows: [R("[Préparation]", "[qté]", "avant midi · jour même"), R("[Produit brut]", "[qté]", "avant midi · menu 1")] },
+{ full: "Mardi", mark: "alerte", menus: true,
+banner: { kind: "rythme", text: "Après le service : revue de mi-semaine, avances pour mercredi et jeudi (2 jours au plus)." },
+rows: [R("Pesto", "500 g", "après midi · pour mercredi · J-1 · carte + menu 2"), R("[Préparation]", "[qté]", "après midi · pour vendredi · 3 jours, hors règle", true), R("[Préparation]", "[qté]", "après midi · pour jeudi · J-2")] },
+{ full: "Mercredi", mark: "", menus: true, banner: null,
+rows: [R("[Préparation]", "[qté]", "avant midi · jour même"), R("[Préparation]", "[qté]", "avant midi · jour même")] },
+{ full: "Jeudi", mark: "off", menus: true, fiche: "Fiche [n°] · midi · [n] personnes · allergies : [allergie]",
+banner: { kind: "off", text: "Jour off selon ton planning : tout est prêt la veille." },
+rows: [R("[Préparation]", "[qté]", "faite mercredi · à finir avant midi")] },
+{ full: "Vendredi", mark: "alerte", menus: true,
+banner: { kind: "rythme", text: "Menus de la semaine prochaine à saisir. Avance pour lundi seulement avec une règle validée.", href: "Import.dc.html", cta: "Importer" },
+rows: [R("[Préparation]", "[qté]", "avant midi · jour même"), R("[Préparation]", "[qté]", "après midi · pour lundi · 3 jours, hors règle", true)] },
+{ full: "Samedi", mark: "alerte", menus: false,
+banner: { kind: "neutre", text: "Créneaux du samedi à confirmer dans la semaine type. Pas de menu du jour." },
+rows: [R("[Préparation]", "[qté]", "après midi · pour lundi · J-2 · conservation à confirmer"), R("[Préparation]", "[qté]", "après midi · pour mardi · 3 jours, hors règle", true)] },
+{ full: "Dimanche", closed: true }
+];
+var dotColor = { alerte: "background: #C2600F", avance: "background: #2C6A3E", off: "border: 1.5px solid #5B6168; box-sizing: border-box", "": "background: transparent" };
+var days = week.map(function (d, i) {
+var on = self.state.day === i;
+var chip = "height: 62px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0; ";
+if (d.closed) chip += "background: repeating-linear-gradient(45deg, #E6E8E3 0 4px, #F3F4F1 4px 8px); color: #5B6168; border: 1px dashed #C9CCC6";
+else chip += on ? "background: #15171A; color: #FFFFFF; border: 0" : "background: #FFFFFF; color: #15171A; border: 1px solid #E2E4DF";
+return {
+short: d.full.slice(0, 3),
+full: d.closed ? "Dimanche, fermé" : d.full,
+closed: !!d.closed,
+pressed: on ? "true" : "false",
+pick: function () { if (!d.closed) self.setState({ day: i }); },
+chipStyle: chip,
+dotStyle: "width: 7px; height: 7px; border-radius: 4px; " + (d.closed ? "background: transparent" : (on && d.mark === "off" ? "border: 1.5px solid #FFFFFF; box-sizing: border-box" : dotColor[d.mark || ""]))
+};
+});
+var cur = week[this.state.day];
+var b = cur.banner;
+var bStyle = { neutre: "background: #ECEDEF; color: #3A3F45", rythme: "background: #E3EEE6; color: #1F4E2D", off: "background: #FFFFFF; color: #3A3F45; border: 1px dashed #9AA09A" };
+var banner = b ? { show: true, text: b.text, hasLink: !!b.href, href: b.href || "", cta: b.cta || "", style: "min-height: 52px; padding: 8px 8px 8px 14px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-sizing: border-box; " + bStyle[b.kind] } : { show: false };
+var rows = cur.rows.map(function (r) {
+return Object.assign({}, r, {
+cardStyle: "min-height: 68px; padding: 8px 8px 8px 14px; border-radius: 16px; display: flex; align-items: center; gap: 10px; box-sizing: border-box; " + (r.alert ? "background: #FBEEE2; border: 1px solid #E9C7A6" : "background: #FFFFFF; border: 1px solid #FFFFFF"),
+subStyle: "font-size: 13px; " + (r.alert ? "color: #8A4108; font-weight: 600" : "color: #5B6168")
+});
+});
+return { days: days, rows: rows, banner: banner, hasMenus: cur.menus, dayName: cur.full.toLowerCase(), hasFiche: !!cur.fiche, ficheText: cur.fiche || "" };
+}
+}
+</script>
+</body>
+</html>

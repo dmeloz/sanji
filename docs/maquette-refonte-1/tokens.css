@@ -1,0 +1,77 @@
+/* Sanji — tokens de la refonte 1.
+   Décision : « Direction visuelle de la refonte 1 » (2026-10-04).
+   À fusionner dans app/css/style.css en gardant les noms de variables existants quand c'est possible
+   (--fond, --carte, --texte, --texte-doux, --bordure…) : seules les VALEURS changent, puis on ajoute ce qui manque. */
+
+/* Police des quantités : IBM Plex Mono (licence OFL), EMBARQUÉE dans app/polices/ (woff2, graisses 500 et 600).
+   Jamais chargée depuis Google Fonts ou un CDN. Sans le fichier, le repli ui-monospace s'applique. */
+@font-face { font-family: "Sanji Mono"; src: url("../polices/IBMPlexMono-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Sanji Mono"; src: url("../polices/IBMPlexMono-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+
+:root {
+  /* Surfaces et texte */
+  --fond: #F3F4F1;
+  --carte: #FFFFFF;
+  --carte-2: #ECEDEF;          /* étiquette neutre (« Brut ») */
+  --encre: #15171A;            /* texte principal, carte « Maintenant », bouton décision */
+  --texte: #15171A;
+  --texte-doux: #5B6168;
+  --texte-moyen: #3A3F45;
+  --bordure: #E2E4DF;
+  --case: #9AA09A;             /* case à cocher vide */
+
+  /* Action (« basilic ») */
+  --action: #2C6A3E;           /* bouton principal, onglet actif, fait */
+  --action-fonce: #1F4E2D;
+  --action-fond: #E3EEE6;      /* étiquette « Recette » */
+
+  /* Exception (ambre) : uniquement pour ce que le chef doit trancher */
+  --exception: #8A4108;
+  --exception-fond: #FBEEE2;
+  --exception-bord: #E9C7A6;
+  --exception-point: #C2600F;
+
+  /* Police */
+  --police: -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --police-qte: "Sanji Mono", ui-monospace, monospace;
+
+  /* Tailles : texte courant 15 px et plus, légendes et étiquettes 13 px minimum */
+  --t-legende: 13px;
+  --t-corps: 15px;
+  --t-ligne: 16px;
+  --t-section: 17px;
+  --t-titre: 28px;
+  --t-qte: 15px;
+  --t-qte-grande: 34px;
+
+  /* Formes */
+  --r-etiquette: 6px;
+  --r-case: 8px;
+  --r-bouton: 12px;
+  --r-carte: 18px;
+  --r-carte-petite: 14px;
+  --r-feuille: 24px;
+  --cible: 44px;
+  --haut-bouton: 48px;
+  --marge-ecran: 20px;
+  --haut-onglets: 84px;        /* zone d'accueil iPhone incluse */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fond: #0F1112;
+    --carte: #1A1D1F;
+    --carte-2: #23272A;
+    --encre: #F1F2EF;
+    --texte: #F1F2EF;
+    --texte-doux: #A3A9AF;
+    --texte-moyen: #C9CDD1;
+    --bordure: #2A2E31;
+    --action: #7CC28F;         /* texte posé dessus : #0F1112 */
+    --action-fonce: #A6D9B3;
+    --action-fond: #1F3326;
+    --exception: #F0A766;
+    --exception-fond: #2A1E14;
+    --exception-bord: #4A3420;
+  }
+}

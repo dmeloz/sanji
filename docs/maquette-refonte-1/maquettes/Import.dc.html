@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Importer les menus</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#2C6A3E}a:hover{color:#1F4E2D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F3F4F1; color: #15171A; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; box-sizing: border-box">
+<div style="padding: 48px 20px 100px; display: flex; flex-direction: column; gap: 12px">
+
+<a href="Semaine.dc.html" style="align-self: flex-start; min-height: 44px; display: flex; align-items: center; gap: 2px; font-size: 16px; text-decoration: none; margin-left: -6px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Semaine</a>
+
+<header style="display: flex; flex-direction: column; gap: 4px">
+<p style="margin: 0; font-size: 13px; font-weight: 500; color: #5B6168">Semaine [n°] · source : menu affiché</p>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Importer les menus</h1>
+</header>
+
+<section style="background: #FFFFFF; border-radius: 18px; padding: 12px; display: flex; gap: 12px; align-items: center">
+<div role="img" aria-label="Aperçu de la photo du menu" style="width: 88px; height: 112px; flex-shrink: 0; border-radius: 10px; background: repeating-linear-gradient(-45deg, #E6E8E3 0 6px, #F3F4F1 6px 12px); border: 1px solid #E2E4DF; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #5B6168; text-align: center">[photo]</div>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 15px; font-weight: 600">1 page lue · 10 plats trouvés</span>
+<span style="align-self: flex-start; font-size: 13px; font-weight: 600; padding: 2px 6px; border-radius: 6px; background: #ECEDEF; color: #3A3F45">Écriture manuscrite ignorée</span>
+<div style="display: flex; gap: 6px">
+<button style="flex: 1; height: 40px; border-radius: 10px; border: 1px solid #E2E4DF; background: #FFFFFF; color: #15171A; font-size: 14px; font-weight: 600">Reprendre</button>
+<button style="flex: 1; height: 40px; border-radius: 10px; border: 1px solid #E2E4DF; background: #FFFFFF; color: #15171A; font-size: 14px; font-weight: 600">+ Page</button>
+</div>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border-radius: 18px; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5B6168">Ce que Sanji a lu · vérifie</h2>
+<span style="font-size: 15px; font-weight: 600">Lundi</span>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="l1" style="font-size: 13px; color: #5B6168">Menu 1</label>
+<input id="l1" value="[Plat lu]" style="height: 44px; border-radius: 10px; border: 1px solid #E2E4DF; background: #F3F4F1; padding: 0 12px; font-size: 15px; color: #15171A; box-sizing: border-box">
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="l2" style="font-size: 13px; font-weight: 600; color: #8A4108">Menu 2 · lecture incertaine</label>
+<input id="l2" value="[Plat lu]" style="height: 44px; border-radius: 10px; border: 1.5px solid #C2600F; background: #FBEEE2; padding: 0 12px; font-size: 15px; color: #15171A; box-sizing: border-box">
+</div>
+<div style="display: flex; flex-direction: column">
+<div style="min-height: 44px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #E2E4DF"><span style="font-size: 15px">Mardi</span><span style="font-size: 13px; color: #5B6168">2 plats · ok</span></div>
+<div style="min-height: 44px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #E2E4DF"><span style="font-size: 15px">Mercredi</span><span style="font-size: 13px; color: #5B6168">2 plats · ok</span></div>
+<div style="min-height: 44px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #E2E4DF"><span style="font-size: 15px">Jeudi</span><span style="font-size: 13px; font-weight: 600; color: #8A4108">1 à vérifier</span></div>
+<div style="min-height: 44px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #E2E4DF"><span style="font-size: 15px">Vendredi</span><span style="font-size: 13px; color: #5B6168">2 plats · ok</span></div>
+</div>
+</section>
+
+<a href="Semaine.dc.html" style="height: 52px; border-radius: 14px; background: #2C6A3E; color: #FFFFFF; font-size: 17px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center">Valider et planifier la semaine</a>
+</div>
+
+<div style="position: absolute; left: 0; bottom: 0; width: 390px; height: 84px">
+<dc-import name="TabBar" active="semaine" hint-size="390px,84px"></dc-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — À décider</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#2C6A3E}a:hover{color:#1F4E2D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #5E6266; color: #15171A; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; box-sizing: border-box">
+<div aria-hidden="true" style="position: absolute; left: 14px; right: 14px; top: 42px; height: 30px; border-radius: 16px 16px 0 0; background: #A9ADA8"></div>
+<section aria-label="À décider" style="position: absolute; left: 0; right: 0; top: 54px; bottom: 0; background: #F3F4F1; border-radius: 24px 24px 0 0; padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box">
+<div style="align-self: center; width: 36px; height: 5px; border-radius: 3px; background: #C9CCC6"></div>
+<header style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em">À décider <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 600; color: #8A4108">{{ count }}</span></h1>
+<p style="margin: 0; font-size: 13px; color: #5B6168">Sanji a tranché le reste. Ici, c'est toi qui décides.</p>
+</div>
+<a href="Main.dc.html" style="min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: flex-end; font-size: 17px; font-weight: 600; text-decoration: none">OK</a>
+</header>
+
+<sc-for list="{{ items }}" as="it" hint-placeholder-count="4">
+<article style="background: #FFFFFF; border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 6px; color: #8A4108">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18v.5"></path></svg>
+<span style="font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase">{{ it.kind }}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 3px">
+<span style="font-size: 16px; font-weight: 600">{{ it.title }}</span>
+<span style="font-size: 14px; color: #3A3F45; line-height: 1.35">{{ it.detail }}</span>
+</div>
+<div style="display: flex; gap: 8px">
+<button onClick="{{ it.resolve }}" style="flex: 1; height: 44px; border-radius: 12px; border: 0; background: #15171A; color: #FFFFFF; font-size: 15px; font-weight: 600">{{ it.primary }}</button>
+<button onClick="{{ it.resolve }}" style="flex: 1; height: 44px; border-radius: 12px; border: 1px solid #E2E4DF; background: #FFFFFF; color: #15171A; font-size: 15px; font-weight: 600">{{ it.secondary }}</button>
+</div>
+</article>
+</sc-for>
+
+<sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #5B6168">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2C6A3E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg>
+<span style="font-size: 17px; font-weight: 600; color: #15171A">Tout est réglé</span>
+<span style="font-size: 14px">Sanji continue avec tes décisions.</span>
+</div>
+</sc-if>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { gone: {} };
+}
+renderVals() {
+var self = this;
+var all = [
+{ id: "a", kind: "Avance > 2 jours", title: "[Préparation] pour vendredi", detail: "Proposée mardi après le service : 3 jours calendaires. Hors règle tant qu'aucune règle de préparation ne le permet.", primary: "Accepter", secondary: "Replanifier" },
+{ id: "b", kind: "Couverts incertains", title: "Soir : [n] couverts estimés", detail: "Peu de réservations ; estimation tirée de l'historique. Les quantités de la carte en dépendent.", primary: "Confirmer", secondary: "Corriger" },
+{ id: "c", kind: "Quantité manquante", title: "[Préparation] : rendement absent", detail: "La fiche n'a pas de rendement. Sanji n'invente pas de quantité.", primary: "Compléter la fiche", secondary: "Plus tard" },
+{ id: "d", kind: "Rupture", title: "[Produit] indisponible", detail: "Signalé chez [fournisseur] pour la livraison de [jour].", primary: "Remplacer", secondary: "Reporter" }
+];
+var items = all.filter(function (x) { return !self.state.gone[x.id]; }).map(function (x) {
+return Object.assign({}, x, { resolve: function () { var g = Object.assign({}, self.state.gone); g[x.id] = true; self.setState({ gone: g }); } });
+});
+return { items: items, count: String(items.length), empty: items.length === 0 };
+}
+}
+</script>
+</body>
+</html>

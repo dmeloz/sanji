@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Stock</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2C6A3E}a:hover{color:#1F4E2D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F3F4F1; color: #15171A; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; box-sizing: border-box">
+<div style="padding: 56px 20px 100px; display: flex; flex-direction: column; gap: 12px">
+
+<header style="display: flex; flex-direction: column; gap: 4px">
+<p style="margin: 0; font-size: 13px; font-weight: 500; color: #5B6168">{{ sub }}</p>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Stock</h1>
+</header>
+
+<div role="group" aria-label="Vue" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 12px; background: #E2E4DF">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+<button onClick="{{ t.pick }}" aria-pressed="{{ t.pressed }}" style="{{ t.style }}">{{ t.label }}</button>
+</sc-for>
+</div>
+
+<sc-if value="{{ isRestes }}" hint-placeholder-val="{{ true }}">
+<section style="background: #FFFFFF; border-radius: 18px; padding: 4px 14px; display: flex; flex-direction: column">
+<sc-for list="{{ restes }}" as="r" hint-placeholder-count="4">
+<div style="padding: 10px 0; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #E2E4DF">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 16px; font-weight: 600">{{ r.name }}</span><span style="font-size: 13px; color: #5B6168">prévu <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 600; color: #15171A">{{ r.qty }}</span></span></div>
+<div role="group" aria-label="{{ r.groupLabel }}" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px">
+<sc-for list="{{ r.opts }}" as="o" hint-placeholder-count="5">
+<button onClick="{{ o.pick }}" aria-pressed="{{ o.pressed }}" style="{{ o.style }}">{{ o.label }}</button>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</section>
+<a href="Production.dc.html" style="height: 52px; border-radius: 14px; background: #2C6A3E; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center">Valider · recalculer demain</a>
+</sc-if>
+
+<sc-if value="{{ isDlc }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 6px">
+<h2 style="margin: 0 4px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #8A4108">Aujourd'hui</h2>
+<div style="background: #FBEEE2; border: 1px solid #E9C7A6; border-radius: 16px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center"><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">[Préparation]</span><span style="font-size: 13px; color: #6B3606">Frigo du poste · produit [date]</span></span><span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600">[qté]</span></div>
+<h2 style="margin: 6px 4px 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5B6168">Demain</h2>
+<div style="background: #FFFFFF; border-radius: 16px; padding: 4px 14px; display: flex; flex-direction: column">
+<div style="min-height: 56px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E4DF"><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">[Préparation]</span><span style="font-size: 13px; color: #5B6168">Chambre froide · lot [n°]</span></span><span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600">[qté]</span></div>
+<div style="min-height: 56px; display: flex; justify-content: space-between; align-items: center"><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">[Préparation]</span><span style="font-size: 13px; color: #5B6168">Chambre froide · lot [n°]</span></span><span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600">[qté]</span></div>
+</div>
+</section>
+<section style="background: #FFFFFF; border-radius: 18px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15171A" stroke-width="1.8" stroke-linecap="round"><path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z"></path></svg>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Relevé des températures</span><span style="font-size: 13px; color: #5B6168">Chambre froide 1 · avant [heure]</span></span>
+<button style="height: 44px; padding: 0 16px; border-radius: 12px; border: 0; background: #15171A; color: #FFFFFF; font-size: 15px; font-weight: 600">Relever</button>
+</section>
+</sc-if>
+
+<sc-if value="{{ isAchats }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ suppliers }}" as="s" hint-placeholder-count="2">
+<section style="background: #FFFFFF; border-radius: 18px; padding: 4px 14px 4px 6px; display: flex; flex-direction: column">
+<div style="padding: 10px 0 4px 8px; display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 700">{{ s.name }}</h2><span style="font-size: 13px; color: #5B6168">{{ s.deadline }}</span></div>
+<sc-for list="{{ s.lines }}" as="l" hint-placeholder-count="2">
+<div style="min-height: 56px; display: flex; align-items: center; gap: 4px; border-top: 1px solid #E2E4DF">
+<button onClick="{{ l.toggle }}" aria-label="{{ l.label }}" aria-pressed="{{ l.pressed }}" style="width: 44px; height: 44px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center"><span style="{{ l.box }}"></span></button>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">{{ l.name }}</span><span style="font-size: 13px; color: #5B6168">besoin {{ l.need }} · en stock {{ l.have }}</span></span>
+<span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600">{{ l.order }}</span>
+</div>
+</sc-for>
+</section>
+</sc-for>
+<button style="height: 52px; border-radius: 14px; border: 0; background: #2C6A3E; color: #FFFFFF; font-size: 16px; font-weight: 600">Générer le bon de commande</button>
+</sc-if>
+</div>
+
+<div style="position: absolute; left: 0; bottom: 0; width: 390px; height: 84px">
+<dc-import name="TabBar" active="stock" hint-size="390px,84px"></dc-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { view: "restes", left: { pesto: 1 }, picked: {} };
+}
+renderVals() {
+var self = this;
+var segOn = "height: 40px; border: 0; border-radius: 9px; background: #FFFFFF; color: #15171A; font-size: 14px; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.08)";
+var segOff = "height: 40px; border: 0; border-radius: 9px; background: transparent; color: #5B6168; font-size: 14px; font-weight: 500";
+var tabs = [["restes", "Restes"], ["dlc", "DLC"], ["achats", "Achats"]].map(function (t) {
+var on = self.state.view === t[0];
+return { label: t[1], pressed: on ? "true" : "false", style: on ? segOn : segOff, pick: function () { self.setState({ view: t[0] }); } };
+});
+var levels = ["0", "¼", "½", "¾", "Tout"];
+var restes = [
+{ id: "pesto", name: "[Préparation]", qty: "[qté]" },
+{ id: "r2", name: "[Préparation]", qty: "[qté]" },
+{ id: "r3", name: "[Préparation]", qty: "[qté]" },
+{ id: "r4", name: "[Produit brut]", qty: "[qté]" }
+].map(function (r) {
+var cur = self.state.left[r.id];
+return Object.assign({}, r, {
+groupLabel: "Reste de " + r.name,
+opts: levels.map(function (lv, k) {
+var on = cur === k;
+return {
+label: lv,
+pressed: on ? "true" : "false",
+pick: function () { var l = Object.assign({}, self.state.left); l[r.id] = k; self.setState({ left: l }); },
+style: "height: 44px; border-radius: 10px; font-size: 15px; font-weight: 600; " + (on ? "background: #15171A; color: #FFFFFF; border: 1px solid #15171A" : "background: #F3F4F1; color: #15171A; border: 1px solid #E2E4DF")
+};
+})
+});
+});
+var mk = function (id, name, need, have, order) {
+var on = !!self.state.picked[id];
+return {
+name: name, need: need, have: have, order: order,
+label: (on ? "Retirer : " : "Commander : ") + name,
+pressed: on ? "true" : "false",
+toggle: function () { var p = Object.assign({}, self.state.picked); p[id] = !p[id]; self.setState({ picked: p }); },
+box: "width: 26px; height: 26px; border-radius: 8px; box-sizing: border-box; " + (on ? "background: #2C6A3E; border: 0" : "background: #FFFFFF; border: 2px solid #9AA09A")
+};
+};
+var suppliers = [
+{ name: "[Fournisseur A]", deadline: "commander avant [heure]", lines: [mk("a1", "Basilic", "[qté]", "[qté]", "[qté]"), mk("a2", "[Produit]", "[qté]", "[qté]", "[qté]")] },
+{ name: "[Fournisseur B]", deadline: "livraison [jour]", lines: [mk("b1", "[Produit]", "[qté]", "[qté]", "[qté]"), mk("b2", "[Produit]", "[qté]", "[qté]", "[qté]")] }
+];
+var subs = { restes: "Service midi terminé · combien reste-t-il ?", dlc: "Classé par date limite", achats: "Besoins de la semaine − stock" };
+return {
+tabs: tabs, restes: restes, suppliers: suppliers, sub: subs[this.state.view],
+isRestes: this.state.view === "restes", isDlc: this.state.view === "dlc", isAchats: this.state.view === "achats"
+};
+}
+}
+</script>
+</body>
+</html>
