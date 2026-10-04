@@ -84,13 +84,14 @@ test('analyserHash : routes, défauts et dates invalides', () => {
   assert.deepEqual(analyserHash('#/semaine/2026-10-14', j), { vue: 'semaine', param: '2026-10-14' }, 'avec date : détail du jour');
   assert.deepEqual(analyserHash('#/semaine/pas-une-date', j), { vue: 'semaine', param: null });
   assert.deepEqual(analyserHash('#/semaine/2026-10-14/tableau', j), { vue: 'semaine', param: '2026-10-12', sous: 'tableau' }, 'ramenée au lundi');
-  assert.deepEqual(analyserHash('#/stock', j), { vue: 'stock', param: lundi, sous: 'achats' });
+  // Sans sous-vue précise, `sous` est absent : la vue Stock choisit (dernière choisie, DLC à consommer, sinon Achats).
+  assert.deepEqual(analyserHash('#/stock', j), { vue: 'stock', param: lundi });
   for (const sous of ['restes', 'dlc', 'achats']) {
     assert.deepEqual(analyserHash(`#/stock/${sous}`, j), { vue: 'stock', param: lundi, sous });
     assert.deepEqual(analyserHash(`#/stock/${sous}/2026-10-14`, j), { vue: 'stock', param: '2026-10-12', sous });
   }
-  assert.deepEqual(analyserHash('#/stock/2026-10-14', j), { vue: 'stock', param: '2026-10-12', sous: 'achats' });
-  assert.deepEqual(analyserHash('#/stock/inconnu', j), { vue: 'stock', param: lundi, sous: 'achats' });
+  assert.deepEqual(analyserHash('#/stock/2026-10-14', j), { vue: 'stock', param: '2026-10-12' });
+  assert.deepEqual(analyserHash('#/stock/inconnu', j), { vue: 'stock', param: lundi });
   assert.deepEqual(analyserHash('#/fiche/comp_1abc', j), { vue: 'fiche', param: 'comp_1abc' });
   assert.deepEqual(analyserHash('#/fiche', j), { vue: 'aujourdhui', param: null }, 'fiche sans identifiant : accueil');
   assert.deepEqual(analyserHash('#/poste/comp_1abc', j), { vue: 'poste', param: 'comp_1abc' });

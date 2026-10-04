@@ -187,12 +187,18 @@ test('achats : cartes par fournisseur, « Imprimer la liste », « vérifié dis
   assert.equal(groupes.length, 1);
   assert.match(groupes[0].textContent, /Fournisseur non précisé/);
   const resume = parClasse(page, 'produit-resume')[0];
-  assert.match(resume.textContent, /besoin 2 400 g · disponible : à vérifier/);
-  assert.doesNotMatch(resume.textContent, /non vérifié|proposé après vérification/);
+  // Adapté (audit v56) : l'état attendu ne s'écrit pas sur la ligne ; il est dit une fois dans l'en-tête.
+  assert.doesNotMatch(resume.textContent, /disponible : à vérifier|suggéré|non vérifié|proposé|besoin/);
+  assert.equal(parClasse(page, 'achats-regle').length, 1, 'phrase d\'en-tête une seule fois');
+  assert.equal(parClasse(page, 'achats-regle')[0].textContent, 'Disponible à vérifier · quantités proposées avec la marge');
+  assert.doesNotMatch(page.textContent, /vérifié disponible · /, 'plus de contradiction dans le sous-titre');
+  assert.equal(parClasse(page, 'produit-marque').length, 0, 'aucun glyphe « O » sur une ligne ordinaire');
+  assert.match(parClasse(page, 'stock-legende').map((x) => x.textContent).join('|'), /Aucun stock théorique, aucun approvisionnement garanti\./);
+  assert.equal(parClasse(page, 'nav-semaine').length, 1, 'semaine par flèches');
+  assert.deepEqual(parClasse(page, 'btn-fleche').map((a) => a.textContent), ['‹', '›']);
   const chiffre = parClasse(resume, 'produit-chiffre')[0].textContent.replace(/[\u202f\u00a0]/g, ' ');
   assert.equal(chiffre, '2400 g', 'la quantité proposée (besoin avec marge) remplace le « – »');
-  assert.match(resume.textContent, /proposé · standard de base/);
-  assert.match(resume.textContent, /standard de base/);
+  assert.match(resume.textContent, /standard de base/, 'provenance inhabituelle : visible');
   assert.ok(parClasse(resume, 'produit-chiffre').length === 1);
   assert.equal(page.querySelector('h1').textContent, 'Stock', 'un seul titre de page : celui de l\'écran Stock');
   assert.equal(page.tous((x) => x.balise === 'h1').length, 1);
@@ -208,7 +214,9 @@ test('achats : après contrôle d\'une quantité vérifiée, la quantité propos
   const page = stock.rendre(magasin.etat(), S.lundi, 'achats');
   const resume = parClasse(page, 'produit-resume')[0];
   assert.match(resume.textContent.replace(/[\u202f\u00a0]/g, ' '), /vérifié disponible : 400 g/);
-  assert.match(resume.textContent, /proposé · standard de base/);
+  // Le besoin (2 400 g) diffère de la quantité proposée (2 000 g) : il s'écrit, avec le disponible vérifié.
+  assert.match(resume.textContent, /^riz.*besoin/);
+  assert.match(resume.textContent, /standard de base/);
   assert.equal(parClasse(resume, 'produit-chiffre')[0].textContent.replace(/[\u202f\u00a0]/g, ' '), '2000 g');
   assert.match(parClasse(resume, 'produit-chiffre')[0].textContent, /g$/);
 });
@@ -230,4 +238,101 @@ test('CSS : le bloc Stock est en fin de fichier, annoncé par un commentaire, av
   assert.match(bloc, /prefers-reduced-motion/);
   assert.doesNotMatch(bloc, /#[0-9a-fA-F]{3,6}\b/, 'jetons seulement, aucune couleur écrite en dur');
   assert.doesNotMatch(bloc, /font-size: ?(1[0-4]|[0-9])px/, 'texte de 15 px au moins, légendes de 13 px au moins');
+});
+
+// ---------------------------------------------------------------- audit v56 : montrer l'exception, pas la normalité
+
+const sansEspaceFin = (t) => t.replace(/[  ]/g, ' ');
+
+function mondeDeuxRestes() {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 2, 'riz, carottes', h());
+  prevision(e, S.lundi, 2, 40);
+  magasin.remplacer(e);
+}
+
+function mondeRizFait(jourService) {
+  const e = etatVide();
+  definirMenu(e, jourService, 2, 'riz', h());
+  prevision(e, jourService, 2, 40);
+  const riz = Object.values(e.composants).find((c) => c.famille === 'riz');
+  marquerFait(e, principaleDe(e, riz.id), 2400, h()); // fait le 1er octobre (jeu de test)
+  magasin.remplacer(e);
+}
+
+test('restes : une ligne par produit, « + Surplus / rebut » ouvre les champs au toucher, l\'aide du rebut une seule fois, Enregistrer en dernier', () => {
+  mondeDeuxRestes();
+  const page = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const lignes = parClasse(page, 'stock-reste');
+  assert.ok(lignes.length >= 2);
+  const ouvrir = parClasse(page, 'stock-reste-ouvrir');
+  assert.equal(ouvrir.length, lignes.length);
+  assert.ok(ouvrir.every((b) => b.textContent === '+ Surplus / rebut' && b.attributs['aria-expanded'] === 'false'));
+  const champs = parClasse(page, 'stock-reste-champs');
+  assert.ok(champs.every((c) => c.hidden === true), 'champs repliés tant qu\'aucune saisie n\'existe');
+  assert.equal(page.textContent.split('Le rebut n\'est pas une perte normale').length - 1, 1, 'aide dite une seule fois');
+  ouvrir[0].click();
+  assert.equal(champs[0].hidden, false);
+  assert.equal(ouvrir[0].attributs['aria-expanded'], 'true');
+  ouvrir[0].click();
+  assert.equal(champs[0].hidden, true);
+  const cartes = parClasse(page, 'stock-carte');
+  assert.ok(cartes[0].textContent.includes('Ventes du service'), 'ventes par menu en haut');
+  const zone = parClasse(page, 'stock-restes-corps')[0];
+  assert.equal(zone.enfants.at(-1).className, 'stock-valider', 'Enregistrer en bas, collant');
+});
+
+test('restes : une saisie existante ouvre la ligne et reste résumée (exception visible)', () => {
+  const id = mondeRestes();
+  magasin.agir((e) => { e.composants[id].apresService = { surplus: 300, rebut: 50, note: '' }; });
+  const page = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  assert.equal(parClasse(page, 'stock-reste-champs')[0].hidden, false);
+  assert.match(sansEspaceFin(parClasse(page, 'stock-reste-resume')[0].textContent), /surplus 300 g · rebut 50 g/);
+  assert.equal(parClasse(page, 'stock-reste-ouvrir')[0].textContent, '− Surplus / rebut');
+});
+
+test('dlc : la date limite (production + durée connue) remplace « se garde N jours » seul ; une seule pastille « à lire » par ligne', () => {
+  mondeRizFait(S.vendredi);
+  const page = dateDuJour(S.lundi, () => stock.rendre(magasin.etat(), S.lundi, 'dlc'));
+  assert.match(page.textContent, /à consommer avant le [a-zéû]+ \d+(er)? [a-zéû]+ · se garde 1 jour \(standard de base\)/);
+  for (const carte of parClasse(page, 'stock-dlc')) {
+    assert.ok(parClasse(carte, 'pastille').filter((p) => p.textContent === 'à lire').length <= 1);
+  }
+  assert.ok(parClasse(page, 'stock-dlc-nom').length > 0);
+});
+
+test('dlc : hors règle et avertissement sont gardés, avec une seule pastille « à lire » pour les deux', () => {
+  mondeRizFait(S.vendredi);
+  const page = dateDuJour(S.lundi, () => stock.rendre(magasin.etat(), S.lundi, 'dlc'));
+  assert.match(page.textContent, /avertissement : avance de/);
+  assert.equal(parClasse(page, 'pastille').filter((p) => p.textContent === 'à lire').length, 1);
+});
+
+test('onglet Stock : sans adresse précise, DLC s\'il y a à consommer en priorité, sinon Achats ; la sous-vue choisie est gardée', () => {
+  stock.oublierSousVue();
+  magasin.remplacer(etatVide());
+  assert.equal(parClasse(stock.rendre(magasin.etat(), S.lundi), 'stock-segment-actif')[0].textContent, 'Achats');
+  assert.match(stock.titre(S.lundi), /Achats/);
+  mondeRizFait(S.lundi);
+  dateDuJour(S.lundi, () => {
+    assert.equal(stock.aConsommerEnPriorite(magasin.etat()), true);
+    assert.equal(parClasse(stock.rendre(magasin.etat(), S.lundi), 'stock-segment-actif')[0].textContent, 'DLC');
+    assert.match(stock.titre(S.lundi), /DLC/);
+    stock.rendre(magasin.etat(), S.lundi, 'restes'); // choix explicite : gardé ensuite
+    assert.equal(parClasse(stock.rendre(magasin.etat(), S.lundi), 'stock-segment-actif')[0].textContent, 'Restes');
+  });
+  stock.oublierSousVue();
+});
+
+test('CSS (lot Stock et Import) : bloc commenté en fin de fichier, cibles de 44 px, mouvement réduit, jetons seulement', () => {
+  const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
+  const i = css.indexOf('/* ===== Lot Stock et Import');
+  assert.ok(i > 0);
+  const bloc = css.slice(i);
+  assert.match(bloc, /\.stock-dlc-nom, \.stock-reste-nom \{[^}]*min-height: var\(--cible\)/);
+  assert.match(bloc, /\.stock-reste-ouvrir \{[^}]*min-height: var\(--cible\)/);
+  assert.match(bloc, /\.stock-valider \{[^}]*position: sticky/);
+  assert.match(bloc, /prefers-reduced-motion/);
+  assert.doesNotMatch(bloc, /#[0-9a-fA-F]{3,6}\b/);
+  assert.doesNotMatch(bloc, /font-size: ?(1[0-4]|[0-9])px/);
 });

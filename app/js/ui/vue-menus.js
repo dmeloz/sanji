@@ -27,6 +27,21 @@ export function champSaisi(champs, balise, attributs) {
   return el;
 }
 
+/** Adapte la hauteur d'un champ à son contenu (sans effet là où la mise en page n'existe pas, comme sous faux DOM). */
+function ajuster(el) {
+  if (!el.style) return;
+  el.style.height = 'auto';
+  if (el.scrollHeight) el.style.height = `${el.scrollHeight}px`;
+}
+
+/** Champ d'intitulé : une ligne au départ, qui s'agrandit avec le texte. */
+function champIntitule(champs, attributs) {
+  const el = champSaisi(champs, 'textarea', attributs);
+  el.addEventListener('input', () => ajuster(el));
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => ajuster(el));
+  return el;
+}
+
 /** Un champ de menu et sa prévision, pour un jour et un numéro de menu. */
 function blocMenu(champs, date, menu, jour) {
   const idMenu = `menu-${date}-${menu}`;
@@ -34,7 +49,7 @@ function blocMenu(champs, date, menu, jour) {
   const prevision = jour.previsions[menu].portions;
   return h('div', { classe: 'saisie-menu' },
     h('label', { pour: idMenu, classe: 'saisie-libelle' }, `Menu ${menu}`),
-    champSaisi(champs, 'textarea', { id: idMenu, rows: 3, placeholder: 'intitulé du menu', autocapitalize: 'sentences',
+    champIntitule(champs, { id: idMenu, rows: 1, classe: 'champ-intitule', placeholder: 'intitulé du menu', autocapitalize: 'sentences',
       'aria-label': `${majuscule(libelleJour(date))}, intitulé du menu ${menu}`, value: jour.menus[menu].intitule }),
     h('div', { classe: 'saisie-prevision' },
       h('label', { pour: idPrevision }, 'Portions prévues, hors groupes'),
@@ -43,8 +58,23 @@ function blocMenu(champs, date, menu, jour) {
         value: Number.isFinite(prevision) ? String(prevision) : '' })));
 }
 
-export function blocJour(champs, etat, date) {
+/**
+ * Un jour de saisie. Avec `options.repliable` (écran Import) : un jour déjà rempli est replié sur son résumé (les deux
+ * intitulés), un jour vide reste ouvert ; tous les jours restent des lignes visibles, rien n'est caché derrière un bouton.
+ */
+export function blocJour(champs, etat, date, options = {}) {
   const jour = jourOuVide(etat, date);
+  if (options.repliable) {
+    const intitules = [1, 2].map((m) => String(jour.menus[m].intitule ?? '').replace(/\s+/g, ' ').trim());
+    const rempli = intitules.some(Boolean);
+    const resume = rempli ? intitules.map((t, i) => (t ? `Menu ${i + 1} : ${t}` : null)).filter(Boolean).join(' · ') : 'à saisir';
+    return h('details', { classe: 'carte saisie-jour saisie-jour-repliable', open: !rempli },
+      h('summary', { classe: 'saisie-jour-resume' },
+        h('span', { classe: 'saisie-jour-titre' }, majuscule(libelleJour(date))),
+        h('span', { classe: 'saisie-jour-extrait' }, resume)),
+      blocMenu(champs, date, 1, jour),
+      blocMenu(champs, date, 2, jour));
+  }
   return h('section', { classe: 'carte saisie-jour', 'aria-label': libelleJour(date) },
     h('h2', { classe: 'feutre saisie-jour-titre' }, majuscule(libelleJour(date))),
     blocMenu(champs, date, 1, jour),
