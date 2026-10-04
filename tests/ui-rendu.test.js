@@ -121,7 +121,8 @@ test('contenus attendus : tableau, détail, produits, réglages', () => {
   const tab = vues.tableau.rendre(magasin.etat(), S.lundi).textContent;
   assert.match(tab, /Semaine du 5 octobre/);
   assert.match(tab, /INTITULE_TEST_1/);
-  assert.match(tab, /Semaine type à confirmer/);
+  // Trois lignes au plus : selon le jour réel (l'écart compte aussi un jour fermé), la semaine type est une ligne ou fait partie du « reste ».
+  assert.match(tab, /Semaine type à confirmer|autres? sujets?, à voir/);
   assert.match(tab, /point[s]? à confirmer/);
   assert.match(tab, /allergie/);
   const det = vues.detail.rendre(magasin.etat(), S.lundi).textContent;

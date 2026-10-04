@@ -6,6 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { controlerProduit, creerFiche, definirMenu, marquerFait, planifier } from '../app/js/domaine/actions.js';
 import { tableauBlanc } from '../app/js/domaine/tableau-blanc.js';
+import { decisionsDe } from '../app/js/domaine/decisions.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, etatVide, h, menuValide, prevision, principaleDe } from './aide.js';
@@ -82,6 +83,22 @@ test('bord : un écart à arbitrer est une ligne de « À confirmer » qui mène
   const ligne = tableauBlanc(e, S.mardi).bord.aConfirmer.lignes.find((l) => /écart/.test(l.texte));
   assert.ok(ligne, 'écart à arbitrer');
   assert.equal(ligne.lien, `#/production/${S.mardi}`);
+});
+
+test('bord : le repli « À confirmer » compte les mêmes écarts que le bandeau (decisionsDe), même un jour fermé', () => {
+  const e = etatVide();
+  prevision(e, S.mercredi, 1, 10);
+  const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
+  planifier(e, principaleDe(e, c), S.mardi, 'apres_midi', h());
+  marquerFait(e, principaleDe(e, c), undefined, h(1));
+  prevision(e, S.mercredi, 1, 20);
+  for (const jour of [S.mardi, S.dimanchePrecedent]) {
+    const attendu = decisionsDe(e, jour).cartes.filter((x) => x.genre === 'ecart').length;
+    assert.ok(attendu > 0, `${jour} : le bandeau voit l'écart`);
+    const ligne = tableauBlanc(e, jour).bord.aConfirmer.lignes.find((l) => /écart/.test(l.texte));
+    assert.ok(ligne, `${jour} : le repli aussi`);
+    assert.equal(ligne.n, attendu, jour);
+  }
 });
 
 test('bord : production = jauge « x/y fait » vers Jour ; une avance possible et le chiffrage restent dits calmement', () => {
