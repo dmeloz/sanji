@@ -386,7 +386,7 @@ test('bandeau : même nombre que la feuille « À décider » (sauce implicite s
     const prod = aDate(S.mercredi, () => { magasin.remplacer(structuredClone(e)); return production.rendre(magasin.etat(), S.mercredi); });
     const acces = classes(prod, 'prod-decisions')[0];
     assert.ok(acces, `${nom} : second accès dans Production`);
-    assert.match(acces.textContent, new RegExp(`${attendu} décisions? en attente`));
+    assert.match(acces.textContent, new RegExp(`${attendu} décisions? à prendre`)); // Production : « à prendre » (audit v56)
     assert.equal(acces.balise, 'button');
   }
   const calmeProd = aDate(S.mercredi, () => { magasin.remplacer(calme(etatVide())); return production.rendre(magasin.etat(), S.mercredi); });

@@ -191,7 +191,8 @@ test('Jour : ordre de lecture menu 1, menu 2, autres, après service ; une ligne
   const { e } = lundiTravail();
   const noeud = jour(S.lundi, e);
   const titres = classes(noeud, 'jour-bloc').map((b) => b.querySelector('h2').textContent);
-  assert.deepEqual(titres, ['Menu 1 · pour le service du jour', 'Menu 2 · pour le service du jour', 'Après service · avances pour les jours suivants']);
+  // L'avance J+2 n'est que proposée : le titre du groupe le dit une fois (« 1 à planifier »), pas chaque ligne.
+  assert.deepEqual(titres, ['Menu 1 · pour le service du jour', 'Menu 2 · pour le service du jour', 'Après service · avances pour les jours suivants · 1 à planifier']);
   assert.equal(classes(noeud, 'tache').length, 0, 'aucune grosse carte dans la liste');
   const lignes = classes(noeud, 'mep-ligne');
   const cases = classes(noeud, 'case-fait').filter((c) => c.balise === 'button' && c.attributs['aria-checked'] === 'false');
@@ -279,7 +280,7 @@ test('Jour : « Fait » en un toucher, annulable', async () => {
   assert.ok(dom.corps.tous((x) => x.balise === 'button' && x.textContent === 'Annuler').length > 0, 'le message propose d\'annuler');
 });
 
-test('Jour : décisions = résumé de 3 lignes au plus qui mène au centre « À confirmer » de la même page', async () => {
+test('Jour : une décision se dit une fois : le bandeau « N décision à prendre » ; plus de résumé ni de centre « À confirmer » dans la page', async () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_ECART_TEST' });
@@ -287,15 +288,14 @@ test('Jour : décisions = résumé de 3 lignes au plus qui mène au centre « À
   marquerFait(e, principaleDe(e, c), undefined, h(1));
   prevision(e, S.mercredi, 1, 20);
   const noeud = jour(S.mardi, e);
-  const resume = classes(noeud, 'jour-decisions')[0];
-  assert.ok(resume);
-  assert.ok(classes(resume, 'jour-decisions-lignes')[0].enfants.length <= 3);
-  const centre = classes(noeud, 'jour-centre')[0];
-  assert.equal(centre.open, false);
-  await boutons(resume)[0].click();
-  assert.equal(centre.open, true, 'le résumé ouvre le centre');
-  assert.match(centre.textContent, /ELEMENT_ECART_TEST/);
-  assert.equal(classes(jour(S.jeudi, etatVide()), 'jour-decisions').length, 0, 'rien à confirmer : pas de résumé');
+  assert.equal(classes(noeud, 'jour-decisions').length, 0, 'plus de résumé en haut');
+  assert.equal(classes(noeud, 'jour-centre').length, 0, 'plus de centre « À confirmer » en bas');
+  const bandeau = classes(noeud, 'prod-decisions')[0];
+  assert.ok(bandeau, 'le bandeau reste');
+  assert.match(bandeau.textContent, /\d+ décisions? à prendre/);
+  await aDate(S.mardi, () => bandeau.click());
+  assert.match(dom.corps.textContent, /ELEMENT_ECART_TEST/, 'le détail est dans la feuille « À décider »');
+  for (const d of dom.corps.tous((x) => x.balise === 'dialog' && x.open)) d.close();
 });
 
 test('Jour : une tâche du jour sans quantité reste dans la liste, dite sans alerte ; lots = une ligne repliable', () => {
