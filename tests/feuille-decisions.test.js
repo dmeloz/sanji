@@ -335,6 +335,22 @@ test('B1 bis : un écart à arbitrer est une décision, aussi le dimanche et pou
   assert.equal(decisionsDe(e, S.dimanche).total, 0);
 });
 
+test('un même écart n\'est jamais compté deux fois : principale et complément faites, prévision changée = une seule carte par composant, et une décision règle le composant', () => {
+  const { e, p } = avecEcart();
+  const { complement } = deciderEcart(e, p.id, 'complement', h());
+  planifier(e, complement.id, S.lundi, 'avant_midi', h());
+  marquerFait(e, complement.id, undefined, h()); // la cible du complément, soit exactement le manque
+  const cartesEcart = () => decisionsDe(e, S.lundi).cartes.filter((c) => c.genre === 'ecart');
+  assert.equal(cartesEcart().length, 0, 'le complément couvre le besoin');
+  definirPrevision(e, S.lundi, 1, 40, h());
+  const apres = cartesEcart();
+  assert.equal(apres.length, 1, 'deux productions faites, un seul écart du composant');
+  assert.ok(apres[0].ecart > 0);
+  deciderEcart(e, apres[0].productionId, 'aucune', h());
+  assert.equal(cartesEcart().length, 0, 'décider une fois règle le composant');
+  assert.equal(decisionsDe(e, S.lundi).total, 0);
+});
+
 test('compte unique : decisionsDuJour = les cartes datées du jour, texteDecisions dit « décision(s) à prendre »', () => {
   const { e } = avecEcart();
   definirMenu(e, S.mercredi, 1, 'Penne aux courgettes', h());

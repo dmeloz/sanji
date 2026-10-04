@@ -11,7 +11,7 @@ import {
 } from './etat.js';
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
-import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
+import { chargeCreneau, cibleProduction, ecartProduction, etatTache, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
 import { besoinsProduits, cleSuivi, suiviProduit } from './produits.js';
 import { GROUPES, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
@@ -781,7 +781,11 @@ export function deciderEcart(etat, productionId, type, h) {
       etat.productions[id] = complement;
     }
   }
+  // L'écart est celui du composant (toutes ses productions faites ensemble) : une décision règle les cartes sœurs aussi.
+  const soeurs = Object.values(etat.productions).filter((x) => x.id !== p.id && x.composantId === c.id && x.genre !== 'preparatoire'
+    && (x.etat === 'fait' || x.etat === 'en_cours') && etatTache(etat, x.id) === 'ecart');
   p.decisionEcart = { type, cible: cibleProduction(etat, productionId), h };
+  for (const x of soeurs) x.decisionEcart = { type, cible: cibleProduction(etat, x.id), h };
   return terminer(etat, h, 'deciderEcart', `${p.libelle} : ${type}`, { decision: p.decisionEcart, complement });
 }
 

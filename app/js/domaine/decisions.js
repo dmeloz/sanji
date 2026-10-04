@@ -45,10 +45,15 @@ export function decisionsDe(etat, aujourd) {
   // Écarts à arbitrer : toute production faite (ou en cours) dont l'écart n'est pas décidé, jusqu'à la fin de la fenêtre,
   // y compris un service déjà passé ou un dimanche : une décision à prendre ne disparaît pas parce que le jour a changé.
   const fin = dates[dates.length - 1];
-  for (const p of Object.values(etat.productions ?? {})) {
+  // L'écart est celui du composant, pas d'une production : une seule carte par composant (la principale d'abord).
+  const rang = { principale: 0, complement: 1 };
+  const enEcart = Object.values(etat.productions ?? {}).sort((a, b) => (rang[a.genre] ?? 2) - (rang[b.genre] ?? 2));
+  const composantsVus = new Set();
+  for (const p of enEcart) {
     const composant = etat.composants?.[p.composantId];
     if (!composant || (p.etat !== 'fait' && p.etat !== 'en_cours') || p.dateService > fin) continue;
-    if (etatTache(etat, p.id) !== 'ecart') continue;
+    if (etatTache(etat, p.id) !== 'ecart' || composantsVus.has(p.composantId)) continue;
+    composantsVus.add(p.composantId);
     cartes.push({
       id: `ecart:${p.id}`, genre: 'ecart', productionId: p.id, composantId: p.composantId,
       nom: p.libelle || composant.nom, cible: cibleProduction(etat, p.id), date: p.dateService,
