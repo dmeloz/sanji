@@ -26,7 +26,7 @@ test('portion : la famille avant la catégorie, la catégorie avant la base, la 
   const etat = etatInitial();
   const c = appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'feculent' }));
   const reperes = [R.groupeCereales];
-  assert.equal(grammageEffectif(etat, c, reperes).origine, 'base');
+  assert.equal(grammageEffectif(etat, c, reperes).origine, 'standard_base');
 
   etat.standards = { [cleStandardGroupe('cereales')]: { garniture: std(80) } };
   assert.deepEqual(grammageEffectif(etat, c, reperes), {

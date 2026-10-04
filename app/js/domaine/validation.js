@@ -1,7 +1,7 @@
-// Assistant de validation des portions : quelles valeurs la propriétaire est invitée à valider, une à la fois.
-// Une portion qui vient d'un repère (de la base ou validé) est une ESTIMATION : fourchette dont le calcul prend le
-// milieu. Elle n'est jamais présentée comme une valeur du restaurant ; seul un standard maison, valeur choisie par
-// la propriétaire, la remplace. Aucun chiffre ici : les fourchettes viennent des repères.
+// Assistant de validation des portions : quelles valeurs la propriétaire peut ajuster, une à la fois.
+// Une portion qui vient d'un repère (de la base ou validé) est un STANDARD DE BASE (décision du 2026-10-04) : le calcul
+// prend le milieu de la fourchette et l'utilise directement. Elle n'est jamais présentée comme une valeur du restaurant ;
+// un standard maison, valeur choisie par la propriétaire, passe devant. Aucun chiffre ici : les fourchettes viennent des repères.
 
 import { calculerComposant } from './calcul.js';
 import { ajouterJours } from './dates.js';
@@ -9,7 +9,7 @@ import {
   ROLES_STANDARD, cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes, reperesParDefaut,
 } from './savoir.js';
 
-const ORIGINES_REPERE = ['repere_valide', 'base'];
+const ORIGINES_REPERE = ['standard_base'];
 
 /** Clé d'une valeur à valider : « famille|rôle » (ou « groupe:…|rôle » pour une catégorie). */
 export const cleValidation = (cleFamille, role) => `${cleFamille}|${role}`;

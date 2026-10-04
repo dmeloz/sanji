@@ -1,15 +1,17 @@
 // Savoir culinaire de l'application : ce qu'elle sait d'un nom de plat sans qu'on le lui demande.
 //  - FAMILLES : les produits de base connus, les mots du menu qui les désignent et les lignes de la base métier
-//    qui s'y rapportent. AUCUN CHIFFRE dans ces tables : les coefficients viennent uniquement de BASE_METIER,
-//    les portions uniquement des standards saisis par le chef ou de PORTIONS_BASE (repères facultatifs de la base).
+//    qui s'y rapportent. AUCUN CHIFFRE dans ces tables : les coefficients viennent des standards de base
+//    (standards-base.js : référentiel culinaire confirmé à la source, sinon BASE_METIER), les portions des standards
+//    saisis par le chef, à défaut des repères validés ou de PORTIONS_BASE (standards de base).
 //  - Un seul lexique : les mots des familles + MOTS_SANS_FAMILLE (mots qui ne donnent qu'une catégorie).
 //  - lireNom / familleDe : lecture d'un nom ; appliquerSavoir : remplissage d'un composant ; grammageEffectif :
 //    portion à utiliser pour calculer ; lignesStandards et lignesStandardsGroupes : données de l'écran Réglages.
 // Rien n'est inventé : sans famille, sans standard et sans repère, il n'y a pas de portion.
 
-import { BASE_METIER, PORTIONS_BASE } from '../donnees/base-metier.js';
+import { PORTIONS_BASE } from '../donnees/base-metier.js';
 import { REPERES_VALIDES } from '../donnees/savoir-metier.js';
 import { lireMemoire, normaliser } from './etat.js';
+import { rendementDeBase, texteProvenance } from './standards-base.js';
 import { ETAT_POIDS, ROLE, UNITE, libelle } from './statuts.js';
 import { canonique, estHerbe } from './vocabulaire-plats.js';
 
@@ -190,16 +192,16 @@ export function familleDe(nom) {
 
 // ---------------------------------------------------------------- application à un composant
 
-/** Étapes de la base pour une famille : coefficient = milieu de la fourchette ; une ligne introuvable est ignorée. */
+/**
+ * Étapes d'une famille d'après les standards de base (standards-base.js) : référentiel culinaire confirmé à la source,
+ * sinon ligne de la base métier ; coefficient = milieu de la fourchette. Une étape sans standard est ignorée.
+ */
 function etapesDeBase(f) {
   const etapes = [];
-  for (const { etape, produitBase } of f.etapes) {
-    const ligne = BASE_METIER.find((l) => l.etape === etape && l.produit === produitBase);
-    if (!ligne) continue;
-    etapes.push({
-      etape, coefficient: (ligne.coefMin + ligne.coefMax) / 2, statut: 'BASE_METIER_ESTIMATION',
-      source: `base métier : ${ligne.texte}`,
-    });
+  for (const { etape } of f.etapes) {
+    const std = rendementDeBase(f.cle, etape);
+    if (!std) continue;
+    etapes.push({ etape, coefficient: std.coefficient, statut: 'STANDARD_BASE', source: texteProvenance(std, { prefixe: false }) });
   }
   return etapes;
 }
@@ -280,14 +282,16 @@ function repereDe(f, role, reperes) {
  *  3. le standard maison de la famille et du rôle (état.standards) : « standard » ;
  *  4. le standard maison de la grande catégorie et du rôle (état.standards, clé « groupe:… ») : « standard ».
  *     Un légume sans famille connue en dépend aussi (catégorie « Légumes ») ;
- *  5. le repère de portion, milieu de la fourchette, par famille puis par groupe : validé par la propriétaire
- *     (origine « repere_valide ») ou de la base (PORTIONS_BASE, origine « base »). Statut : toujours estimation.
+ *  5. le standard de base : repère de portion, milieu de la fourchette, par famille puis par groupe, validé par la
+ *     propriétaire (REPERES_VALIDES) ou de la base (PORTIONS_BASE). Origine « standard_base », statut STANDARD_BASE
+ *     (décision du 2026-10-04 : utilisé directement, la valeur de la propriétaire passe devant).
  * Une préparation maison se compte en quantité finie : son état est toujours « cuit », et un standard ou un repère
  * exprimé en poids sec ou cru net ne lui est pas appliqué.
  * @param {object} etat
  * @param {object} composant
  * @param {object[]} [reperes] repères de portion (PORTIONS_BASE par défaut ; paramètre prévu pour les tests)
- * @returns {{valeur:number, unite:string, etat:string, statut:string, source:string, origine:string}|null}
+ * @returns {{valeur:number, unite:string, etat:string, statut:string, source:string, origine:string,
+ *   repere?:'valide'|'base'}|null} `repere` : seulement pour un standard de base (quel repère a servi).
  */
 export function grammageEffectif(etat, composant, reperes = reperesParDefaut()) {
   const c = composant;
@@ -329,12 +333,12 @@ export function grammageEffectif(etat, composant, reperes = reperesParDefaut()) 
       if (r.valide) {
         const unite = r.unite === 'g' ? ' g' : ` ${libelle('UNITE', r.unite)}`;
         const etatTexte = libelle('ETAT_POIDS', r.etat);
-        return { valeur: r.valeur, unite: r.unite, etat: r.etat, statut: 'BASE_METIER_ESTIMATION',
-          source: `repère validé par la propriétaire (fourchette ${r.min}–${r.max}${unite}, état ${etatTexte})${groupe}`,
-          origine: 'repere_valide' };
+        return { valeur: r.valeur, unite: r.unite, etat: r.etat, statut: 'STANDARD_BASE',
+          source: `standard de base : repère validé par la propriétaire (fourchette ${r.min}–${r.max}${unite}, état ${etatTexte})${groupe}`,
+          origine: 'standard_base', repere: 'valide' };
       }
-      return { valeur: r.valeur, unite: r.unite, etat: r.etat, statut: 'BASE_METIER_ESTIMATION',
-        source: `base métier : ${r.texte}${groupe}`, origine: 'base' };
+      return { valeur: r.valeur, unite: r.unite, etat: r.etat, statut: 'STANDARD_BASE',
+        source: `standard de base : base métier ${r.texte}${groupe}`, origine: 'standard_base', repere: 'base' };
     }
   }
   return null;

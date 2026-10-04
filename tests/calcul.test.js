@@ -88,29 +88,39 @@ test('gain d\'absorption : coefficient > 1, le brut est inférieur au servi', ()
   assert.match(c.formule, /÷ 2,50 \(cuisson, gain\) = 400 g bruts/);
 });
 
-test('statuts de provenance : aValider et aMesurer', () => {
+// Adapté le 2026-10-04 (décision « Standards de base et ajustement terrain ») : seule une valeur INCONNU rend le calcul
+// « à valider » ; un standard de base (STANDARD_BASE, ou l'ancien BASE_METIER_ESTIMATION) est utilisé directement.
+// « à mesurer » reste une information sur les fortes pertes ou forts gains de base.
+test('statuts de provenance : aValider (inconnu seulement), aMesurer (information), standardBase', () => {
   const e = etatVide();
   prevision(e, S.lundi, 1, 10);
   const etape = (coefficient, statut) => [{ etape: 'parage', coefficient, statut, source: 'ESTIMATION_TEST' }];
-  const id = composantValide(e, S.lundi, 1, J.PRODUIT_CRU_TEST, { etapes: etape(0.8, 'BASE_METIER_ESTIMATION') });
+  const id = composantValide(e, S.lundi, 1, J.PRODUIT_CRU_TEST, { etapes: etape(0.8, 'STANDARD_BASE') });
   let c = calculerComposant(e, id);
-  assert.equal(c.aValider, true, 'estimation non validée');
+  assert.equal(c.aValider, false, 'un standard de base n\'est pas à valider');
+  assert.equal(c.standardBase, true);
   assert.equal(c.aMesurer, true, '|1 − 0,80| = 0,20 ≥ 0,15');
-  modifierComposant(e, id, { etapes: etape(0.85, 'BASE_METIER_ESTIMATION') }, h());
+  modifierComposant(e, id, { etapes: etape(0.8, 'BASE_METIER_ESTIMATION') }, h());
+  c = calculerComposant(e, id);
+  assert.deepEqual([c.aValider, c.standardBase, c.aMesurer], [false, true, true], 'l\'ancien nom se lit comme un standard de base');
+  modifierComposant(e, id, { etapes: etape(0.85, 'STANDARD_BASE') }, h());
   assert.equal(calculerComposant(e, id).aMesurer, true, 'seuil inclus (0,15)');
-  modifierComposant(e, id, { etapes: etape(0.9, 'BASE_METIER_ESTIMATION') }, h());
+  modifierComposant(e, id, { etapes: etape(0.9, 'STANDARD_BASE') }, h());
   assert.equal(calculerComposant(e, id).aMesurer, false);
   modifierComposant(e, id, { etapes: etape(0.5, 'RESTAURANT_VALIDE') }, h());
   c = calculerComposant(e, id);
-  assert.equal(c.aMesurer, false, 'seule une estimation est à mesurer');
-  assert.equal(c.aValider, false);
+  assert.equal(c.aMesurer, false, 'seul un standard de base est à mesurer');
+  assert.deepEqual([c.aValider, c.standardBase], [false, false]);
   modifierComposant(e, id, { etapes: etape(0.5, 'INCONNU') }, h());
-  assert.equal(calculerComposant(e, id).aValider, true);
-  modifierComposant(e, id, { etapes: [], grammage: { statut: 'BASE_METIER_ESTIMATION' } }, h());
-  assert.equal(calculerComposant(e, id).aValider, true, 'grammage estimé');
-  // Gain d'absorption estimé de 15 % ou plus : à mesurer aussi.
+  assert.equal(calculerComposant(e, id).aValider, true, 'une valeur inconnue reste à valider');
+  modifierComposant(e, id, { etapes: [], grammage: { statut: 'INCONNU' } }, h());
+  assert.equal(calculerComposant(e, id).aValider, true, 'grammage de provenance inconnue');
+  modifierComposant(e, id, { grammage: { statut: 'STANDARD_BASE' } }, h());
+  c = calculerComposant(e, id);
+  assert.deepEqual([c.aValider, c.standardBase], [false, true], 'grammage standard de base');
+  // Gain d'absorption de base de 15 % ou plus : à mesurer aussi.
   modifierComposant(e, id, { grammage: { statut: 'RESTAURANT_VALIDE' },
-    etapes: [{ etape: 'cuisson', coefficient: 1.15, statut: 'BASE_METIER_ESTIMATION' }] }, h());
+    etapes: [{ etape: 'cuisson', coefficient: 1.15, statut: 'STANDARD_BASE' }] }, h());
   assert.equal(calculerComposant(e, id).aMesurer, true);
 });
 

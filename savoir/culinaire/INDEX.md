@@ -1,6 +1,6 @@
 # Savoir culinaire — index
 
-Fichier généré par `npm run culinaire` : ne pas éditer. Contenu validé par la propriétaire le 2026-10-04 (sauf entrées marquées « a_valider ») ; aucune valeur n'est utilisée dans un calcul ou une commande.
+Fichier généré par `npm run culinaire` : ne pas éditer. Contenu validé par la propriétaire le 2026-10-04 (sauf entrées marquées « a_valider »). Les entrées listées dans `rattachements.json` sont des standards de base utilisés par les calculs (décision du 2026-10-04) ; les autres servent d'aide.
 
 | Thème | Entrées | Validées | Avec valeur chiffrée | Vérifiées à la source | Confiance faible | À valider localement | Lacunes |
 |---|---|---|---|---|---|---|---|

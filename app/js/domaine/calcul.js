@@ -3,7 +3,7 @@
 
 import { aMenuDuJour } from './dates.js';
 import { grammageEffectif } from './savoir.js';
-import { ETAT_POIDS, libelle } from './statuts.js';
+import { ETAT_POIDS, estStandardBase, libelle } from './statuts.js';
 
 export { chercherBase } from './base.js';
 
@@ -86,7 +86,9 @@ export function portionsMenu(etat, date, menu) {
   return res;
 }
 
-const estimation = (statut) => statut === 'BASE_METIER_ESTIMATION' || statut === 'INCONNU';
+// Seule une valeur de provenance inconnue reste à préciser. Une valeur issue des standards de base (STANDARD_BASE, ou son
+// ancien nom BASE_METIER_ESTIMATION) est utilisée directement (décision du 2026-10-04) : elle n'est plus « à valider ».
+const estimation = (statut) => statut === 'INCONNU';
 
 /** Phrase du calcul en clair pour une étape que l'état du poids de la portion empêche d'appliquer. */
 function phraseNonAppliquee(e) {
@@ -103,7 +105,7 @@ function phraseNonAppliquee(e) {
  * @param {object} etat
  * @param {string} composantId
  * @returns {object} { portions, unite, quantiteServie, etapes:[{etape, coefficient, statut, appliquee, quantiteAvant}],
- *   brut, quantiteTravail, uniteTravail, libelleQuantite, statut:'CALCULE'|'INCONNU', aValider, aMesurer, dependances,
+ *   brut, quantiteTravail, uniteTravail, libelleQuantite, statut:'CALCULE'|'INCONNU', aValider, aMesurer, standardBase, dependances,
  *   formule, manquants, ingredients, quantiteCuiteEstimee }
  * `quantiteCuiteEstimee` : seulement si une étape de cuisson existe sans être appliquée (portion en poids sec ou
  * cru net) : quantité × coefficient de cuisson, à titre d'information ; sinon null.
@@ -117,7 +119,7 @@ export function calculerComposant(etat, composantId) {
   const dependances = [];
   const res = {
     portions, unite: null, quantiteServie: null, etapes: [], brut: null, quantiteTravail: null,
-    uniteTravail: null, libelleQuantite: '', statut: 'INCONNU', aValider: false, aMesurer: false,
+    uniteTravail: null, libelleQuantite: '', statut: 'INCONNU', aValider: false, aMesurer: false, standardBase: false,
     dependances, formule: '', manquants, ingredients: null, quantiteCuiteEstimee: null,
   };
   const signaler = (texte) => { manquants.push(texte); bloquants.push(texte); };
@@ -158,6 +160,7 @@ export function calculerComposant(etat, composantId) {
       res.quantiteServie = servie;
       res.quantiteTravail = servie;
       res.libelleQuantite = 'quantité servie, perte de parage inconnue';
+      res.standardBase = estStandardBase(gg.statut);
       res.statut = 'CALCULE';
       res.formule = `${nPortions} × ${formaterExact(gg.valeur, gg.unite)} = ${formaterQuantite(servie, gg.unite)}, perte de parage inconnue`;
       return res;
@@ -208,10 +211,13 @@ export function calculerComposant(etat, composantId) {
     if (!recette || !recette.valide) manquants.push('recette');
   }
 
-  // Seules les étapes réellement appliquées comptent pour la validation et la mesure.
+  // Seules les étapes réellement appliquées comptent pour la validation et la mesure. `aMesurer` reste une information :
+  // une forte perte ou un fort gain de base gagne à être pesé, mais ne bloque rien. `standardBase` : la quantité repose
+  // au moins en partie sur un standard de base (libellé « standard de base » dans les commandes).
   res.aValider = estimation(g?.statut ?? 'INCONNU') || appliquees.some((e) => estimation(e.statut)) || Boolean(recette && !recette.valide);
-  res.aMesurer = appliquees.some((e) => e.statut === 'BASE_METIER_ESTIMATION'
+  res.aMesurer = appliquees.some((e) => estStandardBase(e.statut)
     && Math.round(Math.abs(1 - e.coefficient) * 1e6) / 1e6 >= SEUIL_A_MESURER);
+  res.standardBase = estStandardBase(g?.statut) || appliquees.some((e) => estStandardBase(e.statut));
 
   if (bloquants.length > 0) {
     res.etapes = etapes.map((e) => ({ ...e, quantiteAvant: null }));

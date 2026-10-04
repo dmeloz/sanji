@@ -31,7 +31,7 @@ import { carteTache, dialogPreparatoire, ligneProduction } from './taches.js';
 export const titre = () => 'Composant';
 
 const VARIANTE_PROVENANCE = {
-  RESTAURANT_VALIDE: 'vert', BASE_METIER_ESTIMATION: 'ambre', SAISI_SERVICE: 'gris', CALCULE: 'vert', INCONNU: 'gris',
+  RESTAURANT_VALIDE: 'vert', STANDARD_BASE: 'gris', BASE_METIER_ESTIMATION: 'gris', SAISI_SERVICE: 'gris', CALCULE: 'vert', INCONNU: 'gris',
 };
 const pastilleProvenance = (statut) => pastille(libelle('PROVENANCE', statut), VARIANTE_PROVENANCE[statut] ?? 'gris');
 const optionsProvenance = (sansInconnu = false) => PROVENANCES_SAISIE.filter((p) => !(sansInconnu && p === 'INCONNU'))
@@ -40,8 +40,10 @@ const nomUnite = (u) => libelle('UNITE', u);
 const optionsEtatPoids = () => Object.keys(ETAT_POIDS).map((x) => [x, libelle('ETAT_POIDS', x)]);
 
 const ORIGINE_PORTION = {
-  plat: 'corrigée pour ce plat', reference: 'référence de ce nom', standard: 'standard maison', base: 'estimation de la base métier',
-  repere_valide: 'repère validé par la propriétaire (estimation, à confirmer par un standard maison)',
+  plat: 'corrigée pour ce plat', reference: 'référence de ce nom', standard: 'standard maison',
+  standard_base: 'standard de base (modifiable dans Réglages, votre valeur passe devant)',
+  // Anciennes origines, encore possibles dans un instantané enregistré avant le 2026-10-04.
+  base: 'standard de base (base métier)', repere_valide: 'standard de base (repère validé)',
 };
 /** « poids sec » ; une préparation maison se compte en quantité finie par portion. */
 const libelleEtat = (d, c) => (c.type === 'preparation_maison' ? 'quantité finie' : `poids ${libelle('ETAT_POIDS', d.etat)}`);
@@ -120,7 +122,7 @@ function dialogModifier(c) {
       options: [[null, 'non estimée'], ...Object.keys(CHARGE).map((x) => [x, libelle('CHARGE', x)])],
       aide: 'Courte, moyenne ou longue : une échelle de charge, pas une durée mesurée.' },
     { cle: 'gramValeur', type: 'nombre', libelle: 'Grammage par portion', valeur: c.grammage.valeur,
-      aide: 'Portion de ce plat seulement. Vide : l\'application prend la référence de ce nom, le standard maison ou le repère de la base.' },
+      aide: 'Portion de ce plat seulement. Vide : l\'application prend la référence de ce nom, le standard maison ou le standard de base.' },
     { cle: 'gramUnite', type: 'choix', libelle: 'Unité du grammage', valeur: c.grammage.unite, options: Object.keys(UNITE).map((x) => [x, nomUnite(x)]) },
     { cle: 'gramEtat', type: 'choix', libelle: 'État du poids du grammage', valeur: c.grammage.etat ?? 'cuit', options: optionsEtatPoids(),
       aide: 'Sec : produit sec, avant cuisson. Cru net : cru et déjà paré. Cuit : poids servi.' },
@@ -223,9 +225,9 @@ function dialogEtape(c) {
           f.fixer('mode', mode);
           majSaisie();
           f.fixer('valeur', valeur);
-          f.fixer('statut', 'BASE_METIER_ESTIMATION');
+          f.fixer('statut', 'STANDARD_BASE');
           f.fixer('source', `base métier v${VERSION_BASE} : ${l.produit} (${l.texte}), milieu de la fourchette`);
-          noteRemplissage.textContent = `Champ rempli avec le milieu de la fourchette (${l.texte}) : estimation à valider ou à remplacer par une pesée. Rien n'est enregistré avant « Enregistrer ».`;
+          noteRemplissage.textContent = `Champ rempli avec le milieu de la fourchette (${l.texte}) : standard de base, à remplacer par une pesée si votre cuisine diffère. Rien n'est enregistré avant « Enregistrer ».`;
         },
       }, h('strong', null, l.produit), h('span', null, ` ${l.categorie} · fourchette ${l.texte}`), l.note ? h('span', { classe: 'meta' }, ` · ${l.note}`) : null)));
   };
@@ -249,7 +251,7 @@ function dialogPesee(c) {
     { cle: 'etape', type: 'choix', libelle: 'Étape pesée', valeur: c.etapes[0]?.etape ?? 'parage', options: Object.keys(ETAPE).map((x) => [x, libelle('ETAPE', x)]) },
     { cle: 'avant', type: 'nombre', libelle: 'Poids avant', valeur: null },
     { cle: 'apres', type: 'nombre', libelle: 'Poids après', valeur: null,
-      aide: 'Même unité pour les deux poids. Le coefficient (après ÷ avant) remplace l\'estimation de cette étape par une mesure maison.' },
+      aide: 'Même unité pour les deux poids. Le coefficient (après ÷ avant) remplace le standard de base de cette étape par une mesure maison.' },
   ]);
   panneau({
     titre: 'Enregistrer une pesée',
@@ -302,9 +304,9 @@ function dialogApresService(c, unite) {
 function blocPortion(c, calc) {
   if (c.type === 'generique') return null;
   const d = calc.dependances.find((x) => x.parametre === 'grammage');
-  // Une portion qui vient d'un repère est une estimation : la fiche de validation propose de la valider (ou de la corriger).
+  // Une portion qui vient d'un standard de base est utilisée telle quelle ; la fiche de validation permet de l'ajuster.
   const cleStandard = cleStandardDe(c);
-  const validable = cleStandard && (d?.origine === 'repere_valide' || d?.origine === 'base');
+  const validable = cleStandard && d?.origine === 'standard_base';
   const gestes = h('div', { classe: 'actions' },
     validable ? bouton('Valider la portion', () => {
       const v = valeurPour(etatCourant(), cleStandard, c.role, aujourdhui(), { composantId: c.id });
@@ -317,7 +319,7 @@ function blocPortion(c, calc) {
   if (!d) {
     return h('div', { classe: 'encadre encadre-alerte portion' },
       h('p', null, h('strong', null, 'Portion : absente')),
-      h('p', { classe: 'petit' }, 'Ni correction sur ce plat, ni référence de ce nom, ni standard maison, ni repère de la base : la quantité ne peut pas être calculée.'),
+      h('p', { classe: 'petit' }, 'Ni correction sur ce plat, ni référence de ce nom, ni standard maison, ni standard de base : la quantité ne peut pas être calculée.'),
       gestes);
   }
   return h('div', { classe: 'encadre portion' }, h('p', null, h('strong', null, `Portion : ${textePortion(d, c)}`)), gestes);
@@ -382,11 +384,11 @@ function sectionEtapes(c, calc) {
           appliquee(x.etape) ? null : h('span', { classe: 'etape-note' }, 'non appliquée : la portion est déjà exprimée avant cuisson')),
         bouton('Retirer', () => agir((e, t) => modifierComposant(e, c.id, { etapes: e.composants[c.id].etapes.filter((y) => y.etape !== x.etape) }, t)), 'court')))),
     Number.isFinite(calc.quantiteCuiteEstimee)
-      ? h('p', { classe: 'petit' }, `soit environ ${quantite(calc.quantiteCuiteEstimee, calc.uniteTravail)} une fois cuit, estimation`) : null,
+      ? h('p', { classe: 'petit' }, `soit environ ${quantite(calc.quantiteCuiteEstimee, calc.uniteTravail)} une fois cuit, à titre indicatif`) : null,
     h('div', { classe: 'actions' },
       bouton('Ajouter une étape', () => dialogEtape(c), 'court'),
       bouton('Enregistrer une pesée', () => dialogPesee(c), 'court')),
-    h('p', { classe: 'aide' }, 'Une pesée (avant, après) remplace une estimation par une mesure maison.'));
+    h('p', { classe: 'aide' }, 'Une pesée (avant, après) remplace un standard de base par une mesure maison.'));
 }
 
 function sectionMemoire(etat, c) {

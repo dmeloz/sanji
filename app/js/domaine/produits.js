@@ -1,6 +1,8 @@
 // Besoins en produits et suivi de la commande. Trois quantités restent séparées :
 // besoin brut calculé, quantité vérifiée disponible, quantité proposée à commander.
-// Aucune estimation n'est jamais transformée en commande : `quantiteAcheter` est toujours saisie à la main.
+// `quantiteAcheter` n'est jamais remplie automatiquement. Une ligne notée sans quantité tapée est commandable pour la
+// quantité calculée (besoin majoré de la marge de sécurité, moins le disponible vérifié) quand elle ne repose sur aucune
+// valeur inconnue ; elle est marquée « standard de base » si un standard de base y contribue (décision du 2026-10-04).
 
 import { ajouterJours, datesDeLaSemaine } from './dates.js';
 import { calculerComposant } from './calcul.js';
@@ -14,7 +16,9 @@ export function cleSuivi(lundi, cle, unite) {
 /**
  * Besoins de la semaine (services du lundi au samedi), agrégés par produit normalisé et unité, à partir des
  * composants attribués et validés. Les composants non chiffrables sont renvoyés à part, sans quantité inventée.
- * @returns {{lignes:{cle:string, nom:string, unite:string, besoinBrut:number, aValider:boolean,
+ * `aValider` : la ligne dépend d'une valeur de provenance inconnue (jamais commandable sans quantité tapée) ;
+ * `standardBase` : au moins une contribution repose sur un standard de base.
+ * @returns {{lignes:{cle:string, nom:string, unite:string, besoinBrut:number, aValider:boolean, standardBase:boolean,
  *   contributions:{composantId:string, date:string, quantite:number}[], premiereUtilisation:string}[],
  *   nonChiffrables:{composantId:string, nom:string, date:string, raison:string}[]}}
  */
@@ -25,15 +29,16 @@ export function besoinsProduits(etat, lundi) {
   const composants = Object.values(etat.composants ?? {})
     .filter((c) => dates.has(c.date) && c.attribue && c.valide)
     .sort((a, b) => a.date.localeCompare(b.date) || a.menu - b.menu || a.nom.localeCompare(b.nom));
-  const ajouter = (c, nom, unite, quantite, aValider) => {
+  const ajouter = (c, nom, unite, quantite, calc) => {
     const cle = normaliser(nom);
     const id = `${cle}|${unite}`;
     if (!parCle.has(id)) {
-      parCle.set(id, { cle, nom, unite, besoinBrut: 0, aValider: false, contributions: [], premiereUtilisation: c.date });
+      parCle.set(id, { cle, nom, unite, besoinBrut: 0, aValider: false, standardBase: false, contributions: [], premiereUtilisation: c.date });
     }
     const ligne = parCle.get(id);
     ligne.besoinBrut += quantite;
-    ligne.aValider = ligne.aValider || aValider;
+    ligne.aValider = ligne.aValider || calc.aValider;
+    ligne.standardBase = ligne.standardBase || Boolean(calc.standardBase);
     ligne.contributions.push({ composantId: c.id, date: c.date, quantite });
     if (c.date < ligne.premiereUtilisation) ligne.premiereUtilisation = c.date;
   };
@@ -42,9 +47,9 @@ export function besoinsProduits(etat, lundi) {
     if (calc.statut !== 'CALCULE') {
       nonChiffrables.push({ composantId: c.id, nom: c.nom, date: c.date, raison: `quantité inconnue (${calc.manquants.join(', ')})` });
     } else if (c.type === 'produit_simple') {
-      ajouter(c, c.produitNom || c.nom, calc.uniteTravail, calc.brut, calc.aValider);
+      ajouter(c, c.produitNom || c.nom, calc.uniteTravail, calc.brut, calc);
     } else if (c.type === 'preparation_maison' && calc.ingredients) {
-      for (const i of calc.ingredients) ajouter(c, i.nom, i.unite, i.quantite, calc.aValider);
+      for (const i of calc.ingredients) ajouter(c, i.nom, i.unite, i.quantite, calc);
     } else {
       const raison = c.type === 'generique' ? 'composant générique : composition à définir'
         : 'préparation sans recette validée : commande détaillée impossible';
@@ -59,6 +64,9 @@ export function besoinsProduits(etat, lundi) {
  * Suivi d'une ligne de besoin. `a_reverifier` si un contrôle a été fait et que le besoin a changé depuis
  * (comparaison arrondie à l'unité). `proposeeACommander` n'existe qu'après une vérification chiffrée ;
  * `quantiteAcheter` n'est jamais remplie automatiquement.
+ * `quantiteCalculee` : besoin majoré de la marge, moins le disponible vérifié s'il l'est ; null si la ligne dépend d'une
+ * valeur inconnue. `quantiteCommandable` : pour une ligne notée, la quantité tapée, sinon la quantité calculée ;
+ * `origineQuantite` dit laquelle ('tapee' | 'standard_base' | 'calculee' | null).
  */
 export function suiviProduit(etat, lundi, ligne) {
   const suivi = { ...suiviProduitVide(), ...(etat.produits?.[cleSuivi(lundi, ligne.cle, ligne.unite)] ?? {}) };
@@ -73,8 +81,15 @@ export function suiviProduit(etat, lundi, ligne) {
   // « À relire » : la ligne est notée et le besoin a changé depuis. La quantité notée n'est jamais modifiée.
   const aRelire = suivi.etatLigne === 'note'
     && (!Number.isFinite(suivi.besoinAuNote) || Math.round(suivi.besoinAuNote) !== Math.round(ligne.besoinBrut));
+  const quantiteCalculee = ligne.aValider ? null : proposeeACommander ?? besoinMajore;
+  const tapee = Number.isFinite(suivi.quantiteAcheter);
+  const note = suivi.etatLigne === 'note';
+  const quantiteCommandable = !note ? null : tapee ? suivi.quantiteAcheter : quantiteCalculee;
+  const origineQuantite = quantiteCommandable === null ? null : tapee ? 'tapee'
+    : ligne.standardBase ? 'standard_base' : 'calculee';
   return {
     etatLigne: suivi.etatLigne, besoinAuNote: suivi.besoinAuNote, historique: suivi.historique, aRelire,
+    besoinMajore, quantiteCalculee, quantiteCommandable, origineQuantite, standardBase: Boolean(ligne.standardBase),
     statutAffiche, statut: suivi.statut, besoinBrut: ligne.besoinBrut, besoinAuControle: suivi.besoinAuControle,
     quantiteVerifiee: suivi.quantiteVerifiee, proposeeACommander, margePourcent, estimationAValider: ligne.aValider,
     quantiteAcheter: suivi.quantiteAcheter, conditionnement: suivi.conditionnement,

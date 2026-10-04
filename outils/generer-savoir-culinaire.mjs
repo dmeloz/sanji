@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// Valide savoir/culinaire/donnees/*.json (règles de savoir/culinaire/FORMAT.md) et génère l'index
-// savoir/culinaire/savoir-culinaire.json et savoir/culinaire/INDEX.md. N'écrit rien dans app/ : le référentiel
-// n'est pas branché sur l'application. Usage : node outils/generer-savoir-culinaire.mjs   (ou : npm run culinaire)
+// Valide savoir/culinaire/donnees/*.json (règles de savoir/culinaire/FORMAT.md) et savoir/culinaire/rattachements.json,
+// génère l'index savoir/culinaire/savoir-culinaire.json et savoir/culinaire/INDEX.md, et le module embarqué
+// app/js/donnees/savoir-culinaire.js (référentiel allégé + rattachements, gelé), lu par app/js/domaine/standards-base.js.
+// Usage : node outils/generer-savoir-culinaire.mjs   (ou : npm run culinaire)
 
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -9,6 +10,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const DOSSIER = resolve(RACINE, 'savoir/culinaire');
+export const SORTIE_MODULE = resolve(RACINE, 'app/js/donnees/savoir-culinaire.js');
 
 const TYPES = new Set(['repere', 'technique', 'regle', 'definition']);
 const ETATS_POIDS = new Set(['sec', 'cru_net', 'cuit']);
@@ -110,13 +112,199 @@ export function lireThemes(dossier = DOSSIER) {
   return { themes, erreurs };
 }
 
-function principal() {
+// ---------------------------------------------------------------- rattachements (standards de base)
+
+/** Usages d'une entrée dans les calculs, et unités normalisées admises pour chacun (null : entrée sans valeur). */
+export const USAGES = Object.freeze({
+  rendement_parage: ['%'],
+  rendement_cuisson: ['x', '%'],
+  conservation: ['jours'],
+  cuisson_temps: ['min'],
+  temperature: ['°C'],
+  buffet_couvert: ['g/couvert'],
+  allergene: [null],
+});
+export const SENS = Object.freeze(['prudent_min', 'prudent_max']);
+const USAGES_RENDEMENT = new Set(['rendement_parage', 'rendement_cuisson']);
+
+/**
+ * Unité normalisée d'une unité écrite dans le référentiel (« % de perte du poids brut » -> « % », « jours après le jour
+ * de production » -> « jours », « °C à cœur » -> « °C », « × poids sec » -> « x »), ou null si elle n'en a pas.
+ * Aucune conversion : « mois », « semaines » ou « h » n'ont pas d'unité normalisée.
+ */
+export function uniteNormalisee(texte) {
+  const t = String(texte ?? '').trim();
+  if (/^°C(?=\s|\(|,|$)/.test(t)) return '°C';
+  if (/^%/.test(t)) return '%';
+  if (/^(?:jours?|j)(?=\s|$)/.test(t)) return 'jours';
+  if (/^min(?=\s|\(|$)/.test(t)) return 'min';
+  if (/^[x×](?=\s|$)/.test(t)) return 'x';
+  if (/^g(?:\/couvert$|\s.*\bpar couvert\b)/.test(t)) return 'g/couvert';
+  return null;
+}
+
+/** Cible lisible d'un rattachement (pour les messages et l'unicité). */
+const texteCible = (c) => (c?.famille ? `famille ${c.famille}` : c?.groupe ? `groupe ${c.groupe}` : `règle ${c?.regle_generale}`);
+
+/**
+ * Erreurs d'un document de rattachements (liste de textes ; vide si conforme).
+ * @param {object} doc contenu de savoir/culinaire/rattachements.json
+ * @param {Map<string, object>} entrees entrées du référentiel par identifiant
+ * @param {{familles: Map<string, {etapes:string[]}>, groupes: Set<string>, categories: Set<string>}|null} lexique
+ *   lexique de app/js/domaine/savoir.js (null : familles et groupes non vérifiés)
+ */
+export function validerRattachements(doc, entrees, lexique = null) {
+  const e = [];
+  if (doc?.etiquette !== 'SAVOIR_CULINAIRE_RATTACHEMENTS') e.push('rattachements : étiquette « SAVOIR_CULINAIRE_RATTACHEMENTS » absente.');
+  const regles = new Map();
+  for (const r of Array.isArray(doc?.regles_generales) ? doc.regles_generales : []) {
+    if (!/^[a-z_]+$/.test(String(r?.cle)) || !estTexte(r?.libelle)) { e.push(`règle générale invalide : ${JSON.stringify(r)}.`); continue; }
+    if (regles.has(r.cle)) e.push(`règle générale en double : ${r.cle}.`);
+    for (const g of r.groupes ?? []) if (lexique && !lexique.groupes.has(g)) e.push(`règle ${r.cle} : groupe absent du lexique « ${g} ».`);
+    for (const c of r.categories ?? []) if (lexique && !lexique.categories.has(c)) e.push(`règle ${r.cle} : catégorie inconnue « ${c} ».`);
+    regles.set(r.cle, r);
+  }
+  if (!Array.isArray(doc?.rattachements)) return [...e, 'rattachements : « rattachements » n\'est pas une liste.'];
+  const vus = new Set();
+  const uniques = new Set();
+  for (const r of doc.rattachements) {
+    const id = r?.id ?? '?';
+    const x = entrees.get(id);
+    if (!x) { e.push(`${id} : identifiant inexistant dans le référentiel.`); continue; }
+    if (vus.has(id)) e.push(`${id} : rattaché deux fois.`);
+    vus.add(id);
+    if (!Object.hasOwn(USAGES, r.usage)) { e.push(`${id} : usage inconnu « ${r.usage} ».`); continue; }
+    const c = r.cible ?? {};
+    const cles = ['famille', 'groupe', 'regle_generale'].filter((k) => c[k] !== undefined);
+    if (cles.length !== 1) e.push(`${id} : la cible désigne exactement une famille, un groupe ou une règle générale.`);
+    if (c.famille !== undefined && lexique && !lexique.familles.has(c.famille)) e.push(`${id} : famille absente du lexique « ${c.famille} ».`);
+    if (c.groupe !== undefined && lexique && !lexique.groupes.has(c.groupe)) e.push(`${id} : groupe absent du lexique « ${c.groupe} ».`);
+    if (c.regle_generale !== undefined && !regles.has(c.regle_generale)) e.push(`${id} : règle générale inconnue « ${c.regle_generale} ».`);
+    if (c.etat !== undefined && !ETATS_POIDS.has(c.etat)) e.push(`${id} : état de la cible invalide.`);
+    if (c.etat !== undefined && x.etat_poids && x.etat_poids !== c.etat) e.push(`${id} : l'état de la cible contredit celui de l'entrée.`);
+    // Unité : normalisée, admise pour l'usage, et conforme à l'unité réellement écrite dans l'entrée.
+    if (!USAGES[r.usage].includes(r.unite)) e.push(`${id} : unité non normalisée ou non admise pour ${r.usage} (« ${r.unite} »).`);
+    else if (r.unite === null) {
+      if (x.valeur) e.push(`${id} : une entrée chiffrée a une unité normalisée.`);
+    } else if (!x.valeur) e.push(`${id} : l'usage ${r.usage} demande une valeur chiffrée.`);
+    else if (uniteNormalisee(x.valeur.unite) !== r.unite) e.push(`${id} : l'unité réelle « ${x.valeur.unite} » ne correspond pas à « ${r.unite} ».`);
+    if (USAGES_RENDEMENT.has(r.usage)) {
+      if (r.unite === '%' && !/perte/.test(String(x.valeur?.unite))) e.push(`${id} : un rendement en % doit être une perte (« % de perte … »).`);
+      if (!ETATS_POIDS.has(x.etat_poids)) e.push(`${id} : un rendement exige l'état du poids de l'entrée.`);
+      const etape = r.usage === 'rendement_parage' ? 'parage' : 'cuisson';
+      if (c.famille !== undefined && lexique?.familles.get(c.famille) && !lexique.familles.get(c.famille).etapes.includes(etape)) {
+        e.push(`${id} : la famille ${c.famille} n'a pas d'étape ${etape} dans le lexique.`);
+      }
+    }
+    // Sens : obligatoire pour une durée de conservation (le minimum) et pour une température d'hygiène.
+    const hygiene = x.theme === 'hygiene' || String(id).startsWith('hygiene.') || x.portee === 'a_valider_localement';
+    if (r.sens !== undefined && !SENS.includes(r.sens)) e.push(`${id} : sens invalide « ${r.sens} ».`);
+    if (r.usage === 'conservation' && r.sens !== 'prudent_min') e.push(`${id} : une durée de conservation se lit au minimum (sens « prudent_min »).`);
+    if (r.usage === 'temperature' && hygiene && r.sens === undefined) e.push(`${id} : une température d'hygiène exige un sens.`);
+    if (r.sens !== undefined && !['conservation', 'temperature'].includes(r.usage)) e.push(`${id} : sens réservé à la conservation et aux températures.`);
+    if (r.unite !== null) {
+      const cle = `${r.usage}|${texteCible(c)}|${c.etat ?? x.etat_poids ?? ''}`;
+      if (uniques.has(cle)) e.push(`${id} : un autre rattachement porte déjà ${r.usage} pour ${texteCible(c)}.`);
+      uniques.add(cle);
+    }
+  }
+  for (const a of Array.isArray(doc.reperes_aide) ? doc.reperes_aide : []) {
+    if (!entrees.has(a?.id)) e.push(`${a?.id} : aide sur un identifiant inexistant.`);
+    if (vus.has(a?.id)) e.push(`${a?.id} : une entrée rattachée n'est pas aussi une aide.`);
+    if (lexique && !lexique.familles.has(a?.famille)) e.push(`${a?.id} : famille absente du lexique « ${a?.famille} ».`);
+  }
+  return e;
+}
+
+/** Lit savoir/culinaire/rattachements.json. */
+export function lireRattachements(dossier = DOSSIER) {
+  return JSON.parse(readFileSync(resolve(dossier, 'rattachements.json'), 'utf8'));
+}
+
+const LONGUEUR_CONDITIONS = 300;
+const tronquer = (t) => { const s = String(t ?? ''); return s.length > LONGUEUR_CONDITIONS ? `${s.slice(0, LONGUEUR_CONDITIONS - 1)}…` : s; };
+
+/** Entrées allégées pour l'application, avec leur rattachement (ou leur rubrique d'aide). */
+export function entreesEmbarquees(themes, doc) {
+  const rattachements = new Map(doc.rattachements.map((r) => [r.id, r]));
+  const aides = new Map((doc.reperes_aide ?? []).map((a) => [a.id, a]));
+  return themes.flatMap((t) => t.entrees.map((x) => {
+    const r = rattachements.get(x.id);
+    return {
+      id: x.id, theme: t.theme, sujet: x.sujet, type: x.type, enonce: x.enonce, valeur: x.valeur ?? null,
+      etat_poids: x.etat_poids ?? null, conditions: tronquer(x.conditions), confiance: x.confiance, portee: x.portee,
+      verification: x.verification ? { resultat: x.verification.resultat } : null,
+      sources: (x.sources ?? []).map((s) => ({ titre: s.titre, organisme: s.organisme, url: s.url })),
+      rattachement: r ? { usage: r.usage, cible: r.cible, unite: r.unite, ...(r.sens ? { sens: r.sens } : {}) } : null,
+      aide: r ? null : aides.has(x.id) ? { famille: aides.get(x.id).famille } : { theme: t.theme },
+    };
+  }));
+}
+
+/** Texte du module app/js/donnees/savoir-culinaire.js (sortie déterministe : même source, même texte). */
+export function genererModule(themes, doc) {
+  const version = themes.map((t) => t.genere_le ?? '').sort().at(-1) || doc.etabli_le;
+  const regles = (doc.regles_generales ?? []).map((r) => '  ' + JSON.stringify(r)).join(',\n');
+  const corps = entreesEmbarquees(themes, doc).map((x) => '  ' + JSON.stringify(x)).join(',\n');
+  return `// FICHIER GÉNÉRÉ : NE PAS ÉDITER À LA MAIN.
+// Produit par outils/generer-savoir-culinaire.mjs (commande : npm run culinaire) à partir de
+// savoir/culinaire/donnees/*.json et savoir/culinaire/rattachements.json.
+//
+// Référentiel de savoir culinaire validé par la propriétaire (2026-10-04), allégé pour l'application. Les entrées
+// rattachées (\`rattachement\`) sont des STANDARDS DE BASE lus par js/domaine/standards-base.js (décision du 2026-10-04,
+// « Standards de base et ajustement terrain ») ; les autres sont des aides (\`aide\` : famille ou thème).
+// Les fourchettes sont gardées telles quelles (min, max) : aucune valeur par défaut n'est calculée ici.
+
+export const VERSION_REFERENTIEL = ${JSON.stringify(version)};
+
+function geler(valeur) {
+  if (valeur !== null && typeof valeur === 'object') {
+    Object.values(valeur).forEach(geler);
+    Object.freeze(valeur);
+  }
+  return valeur;
+}
+
+export const REGLES_GENERALES = geler([
+${regles},
+]);
+
+export const SAVOIR_CULINAIRE = geler([
+${corps},
+]);
+`;
+}
+
+/** Lexique de app/js/domaine/savoir.js pour la validation des rattachements, ou null s'il ne se charge pas. */
+export async function chargerLexique() {
+  try {
+    const savoir = await import(pathToFileURL(resolve(RACINE, 'app/js/domaine/savoir.js')).href);
+    const statuts = await import(pathToFileURL(resolve(RACINE, 'app/js/domaine/statuts.js')).href);
+    return {
+      familles: new Map(savoir.FAMILLES.map((f) => [f.cle, { etapes: f.etapes.map((x) => x.etape) }])),
+      groupes: new Set(savoir.GROUPES.map((g) => g.cle)),
+      categories: new Set(Object.keys(statuts.CATEGORIE)),
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function principal() {
   const { themes, erreurs } = lireThemes();
+  const doc = lireRattachements();
+  const parId = new Map(themes.flatMap((t) => t.entrees.map((x) => [x.id, { ...x, theme: t.theme }])));
+  const lexique = await chargerLexique();
+  if (!lexique) console.warn('Lexique de savoir.js non chargé : familles et groupes des rattachements non vérifiés (npm test le fait).');
+  erreurs.push(...validerRattachements(doc, parId, lexique));
   if (erreurs.length) { console.error(erreurs.join('\n')); process.exit(1); }
+  const module = genererModule(themes, doc);
+  writeFileSync(SORTIE_MODULE, module);
+  console.log(`${SORTIE_MODULE} : ${doc.rattachements.length} rattachements, ${Buffer.byteLength(module)} octets.`);
   const entrees = themes.flatMap((t) => t.entrees);
   const index = { etiquette: 'SAVOIR_CULINAIRE', genere_le: new Date().toISOString().slice(0, 10), themes: themes.map((t) => t.theme), entrees };
   writeFileSync(resolve(DOSSIER, 'savoir-culinaire.json'), JSON.stringify(index, null, 1) + '\n');
-  const lignes = ['# Savoir culinaire — index', '', 'Fichier généré par `npm run culinaire` : ne pas éditer. Contenu validé par la propriétaire le 2026-10-04 (sauf entrées marquées « a_valider ») ; aucune valeur n\'est utilisée dans un calcul ou une commande.', '',
+  const lignes = ['# Savoir culinaire — index', '', 'Fichier généré par `npm run culinaire` : ne pas éditer. Contenu validé par la propriétaire le 2026-10-04 (sauf entrées marquées « a_valider »). Les entrées listées dans `rattachements.json` sont des standards de base utilisés par les calculs (décision du 2026-10-04) ; les autres servent d\'aide.', '',
     '| Thème | Entrées | Validées | Avec valeur chiffrée | Vérifiées à la source | Confiance faible | À valider localement | Lacunes |', '|---|---|---|---|---|---|---|---|'];
   for (const t of themes) {
     const n = t.entrees;

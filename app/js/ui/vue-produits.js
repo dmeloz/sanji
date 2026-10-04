@@ -5,7 +5,7 @@ import { noterAchat, restaurerAchat, retirerAchat } from '../domaine/actions-ach
 import { controlerProduit, definirAchat, marquerCommande } from '../domaine/actions.js';
 import { ajouterJours, libelleJour, lundiDe } from '../domaine/dates.js';
 import { besoinsProduits, echeanceCommande, suiviProduit } from '../domaine/produits.js';
-import { LIBELLE_ESTIMATION_A_VALIDER, VERIF, libelle } from '../domaine/statuts.js';
+import { LIBELLE_ESTIMATION_A_VALIDER, LIBELLE_STANDARD_BASE, VERIF, libelle } from '../domaine/statuts.js';
 import { agir, agirStrict, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
@@ -72,13 +72,19 @@ function dialogAchat(lundi, ligne) {
 const ETAT_LIGNE = { suggere: 'Suggéré', note: 'Noté à commander', retire: 'Retiré' };
 const ETAT_COURT = { suggere: 'suggéré', note: 'noté', retire: 'retiré' };
 
-/** Noter à commander : une ligne qui repose sur une estimation exige une quantité tapée ; l'application ne la remplit jamais. */
+/**
+ * Noter à commander : une ligne qui repose sur une valeur inconnue exige une quantité tapée ; une ligne calculée (standards
+ * de base compris) se note sans quantité, pour la quantité calculée marge comprise. Noter est la confirmation.
+ */
 function dialogNoter(lundi, ligne) {
+  const suivi = suiviProduit(etatCourant(), lundi, ligne);
+  const calculee = suivi.quantiteCalculee === null ? '' : ` (${quantite(suivi.quantiteCalculee, ligne.unite)}${suivi.margePourcent ? `, dont ${suivi.margePourcent} % de marge` : ''})`;
   const f = champs([
     { cle: 'quantite', type: 'nombre', libelle: `Quantité à commander (${ligne.unite === 'piece' ? 'pièces' : ligne.unite})`,
-      valeur: suiviProduit(etatCourant(), lundi, ligne).quantiteAcheter,
-      aide: ligne.aValider ? 'Ce besoin repose sur une estimation : tapez vous-même la quantité à commander. Elle est obligatoire et jamais remplie à votre place.'
-        : 'Facultative : vide, la ligne est seulement notée.' },
+      valeur: suivi.quantiteAcheter,
+      aide: ligne.aValider ? 'Ce besoin repose sur une valeur inconnue : tapez vous-même la quantité à commander. Elle est obligatoire et jamais remplie à votre place.'
+        : ligne.standardBase ? `Facultative : vide, la quantité notée est celle calculée sur les standards de base${calculee}.`
+          : `Facultative : vide, la quantité notée est celle calculée${calculee}.` },
   ]);
   panneau({
     titre: `Noter à commander : ${ligne.nom}`,
@@ -114,9 +120,11 @@ function carteLigne(etat, lundi, ligne, aujourd) {
       h('span', { classe: 'produit-etat' },
         h('span', { classe: 'produit-etat-texte' }, ETAT_COURT[suivi.etatLigne] ?? ETAT_COURT.suggere,
           suivi.aRelire ? ' · à relire' : ''),
-        ligne.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre') : null)),
+        ligne.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre')
+          : ligne.standardBase ? pastille(LIBELLE_STANDARD_BASE, 'gris') : null)),
     suivi.aRelire ? h('p', { classe: 'meta' }, 'À relire : le besoin a changé depuis que vous l\'avez noté ; la quantité notée n\'a pas bougé.') : null,
-    ligne.aValider ? h('p', { classe: 'meta' }, 'Le besoin repose sur une estimation non validée.') : null,
+    ligne.aValider ? h('p', { classe: 'meta' }, 'Le besoin repose sur une valeur inconnue : quantité à taper pour la noter.')
+      : ligne.standardBase ? h('p', { classe: 'meta' }, 'Le besoin repose sur des standards de base (modifiables dans Réglages).') : null,
     h('dl', { classe: 'definitions' },
       detail('Contrôle', pastille(libelleVerif(suivi.statutAffiche), VARIANTE_VERIF[suivi.statutAffiche] ?? 'gris')),
       detail('État', ETAT_LIGNE[suivi.etatLigne] ?? ETAT_LIGNE.suggere),
@@ -124,7 +132,10 @@ function carteLigne(etat, lundi, ligne, aujourd) {
       detail('Vérifié disponible', suivi.quantiteVerifiee === null ? 'non vérifié' : quantite(suivi.quantiteVerifiee, ligne.unite)),
       detail('Proposé à commander', suivi.proposeeACommander === null ? '— (après vérification)'
         : `${quantite(suivi.proposeeACommander, ligne.unite)}${suivi.margePourcent ? ` (dont ${suivi.margePourcent} % de marge)` : ''}`),
-      detail('À acheter', suivi.quantiteAcheter === null ? 'à saisir' : quantite(suivi.quantiteAcheter, ligne.unite)),
+      detail('À acheter', suivi.quantiteAcheter !== null ? quantite(suivi.quantiteAcheter, ligne.unite)
+        : suivi.quantiteCommandable !== null
+          ? `${quantite(suivi.quantiteCommandable, ligne.unite)} (calculée${suivi.origineQuantite === 'standard_base' ? `, ${LIBELLE_STANDARD_BASE}` : ''}${suivi.margePourcent ? `, marge de ${suivi.margePourcent} % comprise` : ''})`
+          : 'à saisir'),
       detail('Conditionnement', suivi.conditionnement || 'non précisé'),
       detail('Fournisseur', fournisseur ? fournisseur.nom : 'non précisé'),
       detail('Première utilisation', libelleJour(ligne.premiereUtilisation)),

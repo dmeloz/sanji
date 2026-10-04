@@ -164,6 +164,6 @@ test('plus tard : masqué jusqu\'au lendemain, ne bloque aucune quantité', () =
   const apres = calculerComposant(e, riz.id);
   assert.equal(apres.quantiteTravail, avant.quantiteTravail);
   assert.equal(apres.statut, avant.statut);
-  assert.equal(grammageEffectif(e, riz).origine, 'repere_valide');
+  assert.equal(grammageEffectif(e, riz).origine, 'standard_base');
   assert.throws(() => reporterValidation(e, '', h()), /clé/i);
 });
