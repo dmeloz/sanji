@@ -37,7 +37,7 @@ function lienFiche(id, classe, ...contenu) {
   return h('a', { href: `#/fiche/${encodeURIComponent(id)}`, classe }, ...contenu);
 }
 
-/** Oublie la position et le refus (en quittant par « Terminer » ; aussi pour les tests). */
+/** Oublie la position et le refus (en quittant par « Quitter le mode poste » ; aussi pour les tests). */
 export function oublier() { position = { id: null, i: 0 }; refus = null; }
 
 function remplir(racine, etat, id) {
@@ -70,6 +70,7 @@ function remplir(racine, etat, id) {
     remplir(racine, etatCourant(), id);
   };
   const annuler = () => { refus = null; defaireEnUnToucher(p.id); remplir(racine, etatCourant(), id); };
+  const note = String(p?.note ?? etape.note ?? '').trim();
   const message = refus && refus.id === id && refus.i === i ? refus.texte : null;
 
   racine.replaceChildren(...[
@@ -87,14 +88,19 @@ function remplir(racine, etat, id) {
     h('div', { classe: 'poste-etape' },
       h('p', { classe: 'poste-numero' }, `Étape ${i + 1} sur ${n}`),
       h('p', { classe: 'poste-texte' }, etape.libelle),
+      h('p', { classe: 'poste-jour' }, 'Quantité du jour : ',
+        calc.statut === 'CALCULE' ? h('span', { classe: 'poste-qte' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail))
+          : h('span', { classe: 'poste-qte-inconnue' }, 'inconnue')),
+      note ? h('p', { classe: 'poste-note' }, h('strong', null, 'Note : '), note) : null,
       h('p', { classe: 'poste-etat' }, p?.etat === 'fait' ? pastille('fait', 'vert') : null, ' ', libelle('ETAT_TACHE', etape.etat))),
     p ? h('div', { classe: 'poste-fait' },
       p.etat === 'fait' ? bouton('Annuler le fait', annuler, 'poste-grand') : bouton('Fait', faire, 'principal poste-grand')) : null,
     message ? h('p', { classe: 'poste-refus', role: 'alert' }, message) : null,
     h('div', { classe: 'poste-nav' },
       bouton('Précédente', aller(i - 1), 'poste-grand', i === 0 ? { disabled: true } : {}),
-      derniere ? h('a', { href: `#/fiche/${encodeURIComponent(id)}`, classe: 'btn btn-principal btn-poste-grand', onClick: oublier }, 'Terminer')
+      derniere ? h('a', { href: `#/fiche/${encodeURIComponent(id)}`, classe: 'btn btn-principal btn-poste-grand', onClick: oublier }, 'Quitter le mode poste')
         : bouton('Suivante', aller(i + 1), 'principal poste-grand')),
+    derniere ? h('p', { classe: 'poste-quitter-aide' }, 'Quitter ne marque rien comme fait : seules les étapes avec « Fait » le sont.') : null,
   ].filter(Boolean));
 }
 

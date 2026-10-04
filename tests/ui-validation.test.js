@@ -1,5 +1,5 @@
 // Feuille de validation et liste « à commander » sous faux DOM : ouverture depuis le plat et depuis Réglages,
-// quatre gestes, états en texte. Ce n'est pas un test dans un navigateur (mise en page, tactile, IndexedDB).
+// un geste principal, deux secondaires, Annuler en lien, états en texte. Ce n'est pas un test dans un navigateur (mise en page, tactile, IndexedDB).
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
@@ -51,7 +51,7 @@ const dateDuJour = (jour, fonction) => {
   try { return fonction(); } finally { globalThis.Date = original; }
 };
 
-test('feuille : s\'ouvre depuis le plat, montre la fourchette, l\'état du poids, l\'effet, et quatre gestes', () => {
+test('feuille : s\'ouvre depuis le plat, montre la fourchette, l\'état du poids, l\'effet, et un geste principal, deux secondaires, Annuler en lien', () => {
   nettoyer();
   const id = monde();
   const page = vues.composant.rendre(magasin.etat(), id);
@@ -65,9 +65,12 @@ test('feuille : s\'ouvre depuis le plat, montre la fourchette, l\'état du poids
   assert.match(texte, /40 portions/);
   assert.match(texte, /Sources/);
   assert.doesNotMatch(texte, /undefined|NaN|null/);
-  for (const g of ['Valider comme standard maison', 'Corriger', 'Seulement cette fois', 'Plus tard']) {
+  // Adapté (audit v56) : un geste principal, deux secondaires, Annuler en lien ; « Corriger » seulement quand un standard existe.
+  for (const g of ['Valider comme standard maison', 'Seulement cette fois', 'Plus tard', 'Annuler']) {
     assert.ok(parTexte(d, g), `geste « ${g} »`);
   }
+  assert.equal(parTexte(d, 'Corriger'), undefined, 'pas de standard maison à corriger');
+  assert.match(parTexte(d, 'Annuler').className, /btn-lien/);
 });
 
 test('feuille depuis le plat : sans valeur tapée, « Valider » est refusé et rien n\'est écrit', async () => {

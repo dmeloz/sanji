@@ -75,15 +75,29 @@ test('poste : Suivante et Précédente avancent et reculent d\'une étape', () =
   assert.match(racine.textContent, /Étape 1 sur 3/);
 });
 
-test('poste : « Terminer » sur la dernière étape ramène à la fiche, sans « Suivante »', () => {
+test('poste : « Quitter le mode poste » sur la dernière étape ramène à la fiche, sans « Suivante », et dit qu\'il ne marque rien', () => {
   const { e, c } = scenario();
   const racine = vue.rendre(e, c);
   bouton(racine, 'Suivante').ecouteurs.click[0]();
   bouton(racine, 'Suivante').ecouteurs.click[0]();
   assert.match(racine.textContent, /Étape 3 sur 3/);
   assert.ok(!libellesBoutons(racine).includes('Suivante'));
-  const fin = racine.tous((x) => x.balise === 'a' && x.textContent === 'Terminer')[0];
+  const fin = racine.tous((x) => x.balise === 'a' && x.textContent === 'Quitter le mode poste')[0];
   assert.equal(fin.attributs.href, `#/fiche/${encodeURIComponent(c)}`);
+  assert.match(racine.textContent, /Quitter ne marque rien comme fait/);
+  assert.doesNotMatch(racine.textContent, /Terminer/);
+});
+
+test('poste : la quantité du jour est dite sous l\'étape, la note de l\'étape seulement si elle existe', () => {
+  const { e, c } = scenario();
+  let racine = vue.rendre(e, c);
+  assert.match(racine.tous((x) => x.className.includes('poste-jour'))[0].textContent, /Quantité du jour : .*\d/);
+  assert.equal(racine.tous((x) => x.className.includes('poste-note')).length, 0, 'pas de note : rien d\'affiché');
+  const prod = Object.values(magasin.etat().productions).filter((p) => p.composantId === c && p.etapeCle).sort((a, b) => a.ordre - b.ordre)[0];
+  const copie = structuredClone(magasin.etat());
+  copie.productions[prod.id].note = 'Couper en brunoise';
+  racine = vue.rendre(copie, c);
+  assert.match(racine.tous((x) => x.className.includes('poste-note'))[0].textContent, /Couper en brunoise/);
 });
 
 test('poste : « Fait » d\'une étape suivante avant la précédente est refusé, dit en texte', () => {

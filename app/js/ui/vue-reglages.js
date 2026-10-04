@@ -137,7 +137,7 @@ function sectionStandards(etat) {
   };
   return h('section', { classe: 'carte' },
     titreSection('Standards maison', 'standards'),
-    h('p', { classe: 'aide' }, 'Le standard maison passe avant le standard de base. Une correction faite sur un plat ne le change pas. '
+    h('p', { classe: 'aide' }, 'Vos portions par famille de produit. Le standard maison passe avant le standard de base. Une correction faite sur un plat ne le change pas. '
       + 'Il sert au calcul de tous les plats de cette famille qui n\'ont pas été corrigés. '
       + 'Le standard de toute la catégorie sert aux familles qui n\'ont pas le leur ; pour les légumes, il sert aussi à ceux que l\'application ne reconnaît pas (tomates…).'),
     h('p', { classe: 'meta' }, `${aRegler} à régler, à votre rythme : un standard non réglé laisse simplement le standard de base donner la portion.`),
@@ -150,6 +150,17 @@ function sectionStandards(etat) {
 
 const UNITE_BASE = { '%': '% de perte', x: '× le poids de départ', jours: 'jours', min: 'min', '°C': '°C' };
 const uniteBase = (u) => UNITE_BASE[u] ?? u;
+/** Usages dont le repli reste ouvert après « Revenir au standard » (sinon le repli se refermait et la ligne disparaissait). */
+const repliesOuverts = new Set();
+/** Oublie les replis gardés ouverts (essais). */
+export function oublierReplis() { repliesOuverts.clear(); }
+/** Règle du calcul (calcul.js : la cuisson n'est appliquée qu'à une portion en poids cuit) dite en clair sous un gain de cuisson. */
+export const PHRASE_GAIN_SEC = 'Sans effet sur une portion saisie en poids sec (les pâtes et le riz sont souvent comptés secs) : il sert quand la portion est en poids cuit.';
+function reviens(l) {
+  repliesOuverts.add(l.usage);
+  agir((e, t) => revenirAuStandard(e, l.sujet, l.usage, t));
+  afficherMessage('Valeur de base rétablie', 'ok');
+}
 const PROVENANCE_BASE = { propriete: 'votre valeur', referentiel: 'référentiel', base_metier: 'base métier' };
 
 function texteBornes(f, unite) {
@@ -168,7 +179,7 @@ function dialogAjustement(l) {
   panneau({
     titre: `Changer : ${l.libelle} (${l.usageTitre})`,
     corps: [h('p', { classe: 'aide' }, 'Votre valeur passe devant le standard de base, pour tous les plats concernés.'), ...f.noeuds],
-    extras: l.ajuste ? [{ libelle: 'Revenir au standard', action: (api) => { agirStrict((e, t) => revenirAuStandard(e, l.sujet, l.usage, t)); api.fermer(); } }] : [],
+    extras: l.ajuste ? [{ libelle: 'Revenir au standard', action: (api) => { repliesOuverts.add(l.usage); agirStrict((e, t) => revenirAuStandard(e, l.sujet, l.usage, t)); afficherMessage('Valeur de base rétablie', 'ok'); api.fermer(); } }] : [],
     surEnregistrer: () => {
       const v = f.lire().valeur;
       if (v === null) throw new Error('Saisissez la valeur.');
@@ -187,13 +198,14 @@ function ligneBase(l) {
       h('p', { classe: 'standard-valeur' }, `${formaterNombre(eff.valeur)} ${uniteBase(eff.unite)}`, ' ',
         pastille(PROVENANCE_BASE[eff.origine] ?? eff.origine, eff.ajuste ? 'vert' : 'gris')),
       h('p', { classe: 'meta' }, `Fourchette : ${texteBornes(l.base.fourchette, l.base.unite)}`),
+      l.usage === 'rendement_cuisson' && eff.unite === 'x' ? h('p', { classe: 'meta phrase-gain-sec' }, PHRASE_GAIN_SEC) : null,
       l.base.ecart ? h('p', { classe: 'meta' },
         `Écart : référentiel ${texteBornes(l.base.ecart.referentiel, l.base.unite)}, base métier ${texteBornes(l.base.ecart.base_metier, l.base.unite)}`) : null,
       l.ajuste && eff.ajustement.avant?.valeur !== null && eff.ajustement.avant?.valeur !== undefined
         ? h('p', { classe: 'meta' }, `Standard de base : ${formaterNombre(eff.ajustement.avant.valeur)} ${uniteBase(eff.unite)}`) : null),
     h('div', { classe: 'actions' },
       bouton('Changer', () => dialogAjustement(l), 'court', { 'aria-label': `Changer la valeur : ${nom}` }),
-      l.ajuste ? bouton('Revenir au standard', () => agir((e, t) => revenirAuStandard(e, l.sujet, l.usage, t)), 'court',
+      l.ajuste ? bouton('Revenir au standard', () => reviens(l), 'court',
         { 'aria-label': `Revenir au standard de base : ${nom}` }) : null));
 }
 
@@ -202,10 +214,10 @@ const texteChanges = (n, total) => (n === 0 ? `${total} valeur${total > 1 ? 's' 
 /** Standards de base : une ligne par sujet rattaché, repliée par usage ; « Changer » ouvre un panneau, la valeur passe devant. */
 function sectionStandardsBase(etat) {
   return h('section', { classe: 'carte' },
-    h('p', { classe: 'aide', id: 'standards-base' }, 'On part de ce que disent les manuels. Quand la réalité de votre cuisine est différente, changez la valeur : '
+    h('p', { classe: 'aide', id: 'standards-base' }, 'Rendements, conservation, cuissons et températures. On part de ce que disent les manuels. Quand la réalité de votre cuisine est différente, changez la valeur : '
       + 'votre valeur passe devant, pour toujours. « Revenir au standard » rétablit la valeur de base.'),
     lignesStandardsBase(etat).map((u) => (u.lignes.length === 0 ? null
-      : repliable(`${u.titre} · ${texteChanges(u.lignes.filter((l) => l.ajuste).length, u.lignes.length)}`, u.lignes.some((l) => l.ajuste),
+      : repliable(`${u.titre} · ${texteChanges(u.lignes.filter((l) => l.ajuste).length, u.lignes.length)}`, u.lignes.some((l) => l.ajuste) || repliesOuverts.has(u.usage),
         h('ul', { classe: 'liste-standards' }, u.lignes.map((l) => ligneBase({ ...l, usageTitre: u.titre }))), { classe: 'repliable-groupe' }))));
 }
 
@@ -475,6 +487,8 @@ const LIBELLE_ACTION = {
   saisirMenusSemaine: 'Menus de la semaine enregistrés',
   validerStandard: 'Portion validée comme standard maison', corrigerStandard: 'Standard maison corrigé',
   reporterValidation: 'Validation reportée à plus tard',
+  ajusterStandard: 'Valeur de base changée', revenirAuStandard: 'Valeur de base rétablie',
+  accepterApprentissage: 'Proposition acceptée comme standard maison', ecarterApprentissage: 'Proposition écartée',
   noterAchat: 'Ligne notée à commander', retirerAchat: 'Ligne retirée de la liste', restaurerAchat: 'Ligne remise dans la liste',
 };
 const MOTS_TECHNIQUES = [
@@ -489,6 +503,39 @@ function lisible(detail) {
   return texte.replace(/(\d{4})-(\d{2})-(\d{2})/g, '$3/$2/$1');
 }
 
+const TEXTE_NEUTRE_JOURNAL = 'Modification enregistrée';
+const USAGE_JOURNAL = {
+  rendement_parage: () => 'Perte de parage', rendement_cuisson: (u) => (u === 'x' ? 'Gain de cuisson' : 'Perte de cuisson'),
+  conservation: () => 'Conservation', cuisson_temps: () => 'Temps de cuisson', temperature: () => 'Température',
+};
+const enMinuscule = (t) => t.charAt(0).toLowerCase() + t.slice(1);
+
+/**
+ * Phrase du journal pour une entrée : une table de traduction des types d'entrée en phrases ; une entrée de type inconnu
+ * garde un texte neutre (jamais un identifiant technique). Les changements de valeur de base se disent en clair :
+ * « Gain de cuisson, pâtes sèches : 2,65 → 2,5 (votre valeur) ».
+ * @returns {{titre:string, detail:string}} `detail` vide quand le titre est déjà la phrase complète.
+ */
+export function phraseJournal(etat, j) {
+  const detail = String(j.detail ?? '');
+  if (j.action === 'ajusterStandard' || j.action === 'revenirAuStandard') {
+    const m = /^([a-z_]+)\|(\S+) : (.*)$/.exec(detail);
+    const usage = m && USAGE_JOURNAL[m[1]] ? m[1] : null;
+    if (!usage) return { titre: LIBELLE_ACTION[j.action], detail: '' };
+    const ligne = lignesStandardsBase(etat).find((u) => u.usage === usage)?.lignes.find((l) => l.sujet === m[2]);
+    const sujet = ligne ? enMinuscule(ligne.libelle) : lisible(m[2].replace(/^(regle|groupe):/, '')).replace(/_/g, ' ');
+    const v = /^([\d.,-]+) (\S+) \(standard de base\) → ([\d.,-]+) \S+ \(votre valeur\)(?: ; (.*))?$/.exec(m[3]);
+    const tete = `${USAGE_JOURNAL[usage](v?.[2])}, ${sujet}`;
+    if (j.action === 'revenirAuStandard') return { titre: `${tete} : valeur de base rétablie`, detail: '' };
+    if (!v) return { titre: `${tete} : valeur changée`, detail: '' };
+    const unite = v[2] === 'x' ? '' : ` ${uniteBase(v[2]).replace(/^% de perte$/, '%')}`;
+    return { titre: `${tete} : ${v[1]} → ${v[3]}${unite} (votre valeur)${v[4] ? ` ; ${v[4]}` : ''}`, detail: '' };
+  }
+  const titreAction = LIBELLE_ACTION[j.action];
+  if (!titreAction) return { titre: TEXTE_NEUTRE_JOURNAL, detail: '' };
+  return { titre: titreAction, detail: detail ? lisible(detail) : '' };
+}
+
 function sectionJournal(etat) {
   const total = etat.journal.length;
   const pages = Math.max(1, Math.ceil(total / TAILLE_PAGE_JOURNAL));
@@ -496,7 +543,10 @@ function sectionJournal(etat) {
   const recentes = [...etat.journal].reverse().slice(pageJournal * TAILLE_PAGE_JOURNAL, (pageJournal + 1) * TAILLE_PAGE_JOURNAL);
   return carte('Journal des modifications',
     total === 0 ? ligneVide('Aucune modification enregistrée.') : [
-      h('ul', { classe: 'liste-journal' }, recentes.map((j) => h('li', null, h('span', { classe: 'meta' }, `${formaterHeure(j.h)} · `), h('strong', null, LIBELLE_ACTION[j.action] ?? j.action), j.detail ? ` : ${lisible(j.detail)}` : ''))),
+      h('ul', { classe: 'liste-journal' }, recentes.map((j) => {
+        const { titre: t, detail } = phraseJournal(etat, j);
+        return h('li', null, h('span', { classe: 'meta' }, `${formaterHeure(j.h)} · `), h('strong', null, t), detail ? ` : ${detail}` : '');
+      })),
       h('div', { classe: 'actions' },
         bouton('‹ Plus récentes', () => { pageJournal -= 1; redessiner(); }, 'court', { disabled: pageJournal === 0 }),
         h('span', { classe: 'meta' }, `page ${pageJournal + 1} sur ${pages}`),
@@ -617,11 +667,11 @@ const compteStandards = (etat) => {
 
 /** Rubriques de la racine : clé de route, titre, résumé d'une ligne et blocs conservés tels quels. */
 const RUBRIQUES = [
-  { cle: 'standards', titre: 'Standards de production',
+  { cle: 'standards', titre: 'Standards maison (portions)',
     resume: (e) => { const c = compteStandards(e); return `${pluriel(c.regles, 'standard réglé', 'standards réglés')} · ${c.aRegler} à régler`; },
-    blocs: (e) => [h('p', { classe: 'aide' }, h('a', { href: '#/reglages/standards-base' }, 'Standards de base : changer une valeur de départ ›')),
+    blocs: (e) => [h('p', { classe: 'aide' }, h('a', { href: '#/reglages/standards-base' }, 'Valeurs de base (manuels) : changer une valeur de départ ›')),
       sectionStandards(e), sectionMemoire(e)] },
-  { cle: 'standards-base', titre: 'Standards de base',
+  { cle: 'standards-base', titre: 'Valeurs de base (manuels)',
     resume: (e) => { const n = Object.keys(e.ajustements ?? {}).length; return n === 0 ? 'aucune valeur changée' : `${pluriel(n, 'valeur changée', 'valeurs changées')} par vous`; },
     blocs: (e) => [sectionStandardsBase(e)] },
   { cle: 'reperes', titre: 'Repères métier',

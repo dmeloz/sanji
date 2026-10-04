@@ -1185,3 +1185,12 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prod-ligne .mep-quantite { align-items: flex-end; text-align: right; }
 .prod-ligne .mep-qte { font-size: max(var(--t-qte), 20px); font-weight: 600; text-align: right; }
 .prod-ligne .mep-qte .qte-unite { font-size: var(--t-corps); }
+/* ===== Lot Réglages, journal, validation, poste (audit v56) : montrer l'exception, pas la normalité ===== */
+.phrase-gain-sec { max-width: 60ch; }
+.feuille-valider-secondaires { justify-content: flex-start; margin: 4px 0 0; }
+.feuille-valider-secondaires .btn { min-height: 44px; }
+.btn-lien { background: transparent; border-color: transparent; color: var(--texte-moyen); text-decoration: underline; min-height: 44px; }
+.btn-lien:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.poste-jour { margin: 0; font-size: var(--t-corps); color: var(--texte-moyen); }
+.poste-note { margin: 0; padding: 10px 12px; font-size: var(--t-corps); border: 1px solid var(--bordure); border-radius: var(--r-carte-petite); overflow-wrap: anywhere; }
+.poste-quitter-aide { margin: 0; font-size: var(--t-corps); color: var(--texte-doux); text-align: center; }
