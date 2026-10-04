@@ -36,12 +36,27 @@ function scenario(etapes = ETAPES, nom = 'carottes') {
 
 test('poste : titre', () => assert.equal(vue.titre(), 'Mode en poste'));
 
+test('poste : « Écran maintenu allumé » seulement si l\'API existe, sinon « l\'écran peut se mettre en veille »', () => {
+  const { e, c } = scenario();
+  const avant = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  try {
+    Object.defineProperty(globalThis, 'navigator', { configurable: true, writable: true, value: { wakeLock: { request: async () => ({}) } } });
+    assert.match(vue.rendre(e, c).textContent, /Écran maintenu allumé/);
+    Object.defineProperty(globalThis, 'navigator', { configurable: true, writable: true, value: {} });
+    const t = vue.rendre(e, c).textContent;
+    assert.doesNotMatch(t, /Écran maintenu allumé/);
+    assert.match(t, /l'écran peut se mettre en veille/);
+  } finally {
+    if (avant) Object.defineProperty(globalThis, 'navigator', avant); else delete globalThis.navigator;
+  }
+});
+
 test('poste : nom, quantité en police quantité, écran allumé, étape 1 sur N, aucun minuteur', () => {
   const { e, c } = scenario();
   const racine = vue.rendre(e, c);
   const t = racine.textContent;
   assert.match(t, /carottes/);
-  assert.match(t, /Écran maintenu allumé/);
+  assert.doesNotMatch(t, /Écran maintenu allumé/, 'sans API d\'écran allumé, la vue ne le promet pas');
   assert.match(t, /Étape 1 sur 3/);
   assert.match(t, /Couper/);
   assert.ok(racine.tous((x) => x.className.includes('poste-qte'))[0], 'quantité dans poste-qte');
