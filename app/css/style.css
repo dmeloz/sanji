@@ -1136,3 +1136,10 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .imp-doutes { display: grid; gap: 2px; font-size: var(--t-legende); font-weight: 600; color: var(--exception); }
 .imp-neutre { font-size: var(--t-legende); color: var(--texte-doux); }
 @media (prefers-reduced-motion: reduce) { .imp-jour, .imp-jour > summary { transition: none; scroll-behavior: auto; } }
+/* ===== Écran Réglages (refonte 1) : sections de lignes, informations sans réglage, pied hors ligne. Jetons du socle seulement. ===== */
+.vue-reglages-racine { display: flex; flex-direction: column; gap: 6px; }
+.reglages-groupe { display: flex; flex-direction: column; }
+.reglages-groupe-titre { margin: 10px 16px 4px; font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); }
+.reglage-info { display: flex; align-items: center; min-height: var(--cible); padding: 12px 16px; }
+.reglage-rubrique-texte .pastille { align-self: flex-start; }
+.reglages-pied { margin: 12px 16px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: var(--t-legende); color: var(--texte-doux); }
