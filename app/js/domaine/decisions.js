@@ -57,7 +57,7 @@ export function decisionsDe(etat, aujourd) {
     composantsVus.add(p.composantId);
     cartes.push({
       id: `ecart:${p.id}`, genre: 'ecart', productionId: p.id, composantId: p.composantId,
-      nom: p.libelle || composant.nom, cible: cibleProduction(etat, p.id), date: p.dateService,
+      nom: p.genre === 'complement' ? `Complément : ${composant.nom}` : composant.nom, cible: cibleProduction(etat, p.id), date: p.dateService,
       reel: Number.isFinite(p.quantiteReelle) ? p.quantiteReelle : null, unite: p.unite ?? calculerComposant(etat, composant.id)?.uniteTravail ?? null,
       ecart: ecartProduction(etat, p.composantId),
     });

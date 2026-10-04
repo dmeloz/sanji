@@ -414,6 +414,20 @@ test('allergènes : le panneau dit pourquoi la liste ne compte pas, et Enregistr
   nettoyer();
 });
 
+test('nom courant : après un changement de nom du composant (sauce choisie), l\'écart et le journal ne gardent pas l\'ancien nom', () => {
+  const { e, p } = avecEcart();
+  const ancien = e.composants[p.composantId].nom;
+  // Données déjà enregistrées avant le correctif : libellé de production resté à l'ancien nom.
+  modifierComposant(e, p.composantId, { nom: 'Sauce bolognaise' }, h(5));
+  assert.equal(e.productions[p.id].libelle, 'Sauce bolognaise', 'le libellé de la production suit le nom');
+  e.productions[p.id].libelle = ancien; // cas d'un état ancien
+  const carte = decisionsDe(e, S.lundi).cartes.find((c) => c.genre === 'ecart');
+  assert.equal(carte.nom, 'Sauce bolognaise');
+  deciderEcart(e, p.id, 'aucune', h(6));
+  assert.match(e.journal.at(-1).detail, /^Sauce bolognaise : /);
+  assert.doesNotMatch(JSON.stringify(e.journal.at(-1)), new RegExp(ancien));
+});
+
 test('compte unique : decisionsDuJour = les cartes datées du jour, texteDecisions dit « décision(s) à prendre »', () => {
   const { e } = avecEcart();
   definirMenu(e, S.mercredi, 1, 'Penne aux courgettes', h());
