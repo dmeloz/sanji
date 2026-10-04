@@ -31,7 +31,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -67,7 +67,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -90,7 +90,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -113,7 +113,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -136,7 +136,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -159,7 +159,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -190,7 +190,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -221,7 +221,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -252,7 +252,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -284,7 +284,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -312,7 +312,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -339,7 +339,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -375,7 +375,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -406,7 +406,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -433,7 +433,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -461,7 +461,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -519,7 +519,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -566,7 +566,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -605,7 +605,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -636,7 +636,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -675,7 +675,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -723,7 +723,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -775,7 +775,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -822,7 +822,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -861,7 +861,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -924,7 +924,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -971,7 +971,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1018,7 +1018,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1081,7 +1081,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1136,7 +1136,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1175,7 +1175,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1238,7 +1238,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1277,7 +1277,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1324,7 +1324,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1363,7 +1363,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1402,7 +1402,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1454,7 +1454,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -1493,7 +1493,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -1524,7 +1524,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -1551,7 +1551,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1606,7 +1606,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1662,7 +1662,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1701,7 +1701,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1748,7 +1748,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1779,7 +1779,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1834,7 +1834,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1862,7 +1862,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -1893,7 +1893,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1924,7 +1924,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1960,7 +1960,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -1999,7 +1999,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2022,7 +2022,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -2053,7 +2053,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2084,7 +2084,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2115,7 +2115,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2141,7 +2141,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2177,7 +2177,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2216,7 +2216,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2247,7 +2247,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2273,7 +2273,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2309,7 +2309,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2348,7 +2348,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2371,7 +2371,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2394,7 +2394,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2429,7 +2429,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2469,7 +2469,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2497,7 +2497,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2528,7 +2528,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2567,7 +2567,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2590,7 +2590,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2613,7 +2613,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2644,7 +2644,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2683,7 +2683,7 @@
     }
    ],
    "confiance": "haute",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2726,7 +2726,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2765,7 +2765,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2828,5 +2828,11 @@
    "sujet": "Température légale du lait pasteurisé, du fromage et du beurre en cuisine",
    "raison": "Aucun chiffre dans la HyV pour la restauration ; la GVG (tableau 6.2) donne 5 °C pour les denrées légèrement périssables en général ; 6 °C (site privé) et 8 à 10 °C (base Sanji) non recoupés par une source officielle."
   }
- ]
+ ],
+ "validation": {
+  "le": "2026-10-04",
+  "par": "propriétaire",
+  "decision": "02-Decisions-validees/2026-10-04 - Sanji - Referentiel de savoir culinaire valide.md",
+  "portee": "contenu des fiches relu et validé ; usage dans un calcul ou une commande non décidé"
+ }
 }

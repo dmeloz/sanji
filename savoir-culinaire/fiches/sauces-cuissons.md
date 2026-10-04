@@ -1,6 +1,8 @@
 # Fonds, sauces et méthodes de cuisson
 
-Fiche du référentiel de savoir culinaire, générée le 2026-10-04. **Rien n'est validé** : tout est une proposition à valider par la propriétaire (statut `a_valider`, `usage_calcul` faux). Source de vérité : `donnees/sauces-cuissons.json`.
+**Statut : validé par la propriétaire le 2026-10-04** (relecture de toutes les fiches). Aucune entrée n'est utilisée dans un calcul ou une commande ; « à valider localement » vise le canton et le plan d'autocontrôle.
+
+Fiche du référentiel de savoir culinaire, générée le 2026-10-04. `usage_calcul` faux. Source de vérité : `donnees/sauces-cuissons.json`.
 
 85 entrées. Vérification à la source le 2026-10-04 : 55 confirmées, 1 partielle, 0 non confirmée, 10 base Sanji seule (les autres n'ont pas de valeur chiffrée). Les références abrégées sont listées en fin de fiche.
 

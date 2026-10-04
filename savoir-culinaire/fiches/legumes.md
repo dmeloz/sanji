@@ -1,6 +1,8 @@
 # Légumes, champignons, herbes, œufs et produits laitiers
 
-Statut : proposition, tout est `a_valider`, aucun usage de calcul. Généré le 2026-10-04 depuis `donnees/legumes.json` (source de vérité). 108 entrées.
+**Statut : validé par la propriétaire le 2026-10-04** (relecture de toutes les fiches). Aucune entrée n'est utilisée dans un calcul ou une commande ; « à valider localement » vise le canton et le plan d'autocontrôle.
+
+Aucun usage de calcul. Généré le 2026-10-04 depuis `donnees/legumes.json` (source de vérité). 108 entrées.
 
 Légende confiance : H haute, M moyenne, F faible. Vérif. (relecture à la source le 2026-10-04) : C confirmée, P partielle, N non confirmée, B base Sanji seule. Un chiffre unique venant de la base Sanji reste F ou M au plus.
 

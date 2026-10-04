@@ -32,6 +32,13 @@ test('le validateur refuse : statut validé, usage dans le calcul, chiffre sans 
   assert.ok(validerTheme(doc(entree({ valeur: { unite: '°C' } })), 'x.json').length > 0);
 });
 
+test('statut validé : seulement avec une validation écrite au niveau du document', () => {
+  assert.ok(validerTheme(doc(entree({ statut: 'valide_chef' })), 'x.json').length > 0);
+  const valide = { ...doc(entree({ statut: 'valide_chef' })), validation: { le: '2026-10-04', par: 'propriétaire', decision: '02-Decisions-validees/x.md' } };
+  assert.deepEqual(validerTheme(valide, 'x.json'), []);
+  assert.ok(validerTheme({ ...valide, entrees: [entree({ statut: 'valide_chef', usage_calcul: true })] }, 'x.json').length > 0, 'usage_calcul reste interdit');
+});
+
 test('le validateur refuse : url en http, officielle sur un site privé, confiance haute sans source solide', () => {
   const src = (o) => [{ titre: 'T', organisme: 'O', url: 'https://exemple.test', consulte: '2026-10-04', extrait: '', type_source: 'web', ...o }];
   assert.ok(validerTheme(doc(entree({ sources: src({ url: 'http://exemple.test' }) })), 'x.json').some((m) => /http/.test(m)));

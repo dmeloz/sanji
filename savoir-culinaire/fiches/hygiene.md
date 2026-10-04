@@ -1,6 +1,8 @@
 # Hygiène, HACCP, allergènes et conservation
 
-Référentiel proposé le 2026-10-04 pour Sanji. **Tout est à valider** (statut `a_valider`, `usage_calcul: false`, portée `a_valider_localement` : le droit et les températures légales dépendent de la version du texte et du canton). Source de vérité : `donnees/hygiene.json` (75 entrées). Textes fédéraux lus à l'état du 01.07.2025 (la LMG relue à l'état 01.10.2024, la VLtH à l'état 01.02.2024). Les aide-mémoire cantonaux lus sont alémaniques (AG, BS, SO, LU, SG) ; la GVG de GastroSuisse (2e édition 2019) a été relue en texte intégral.
+**Statut : validé par la propriétaire le 2026-10-04** (relecture de toutes les fiches). Aucune entrée n'est utilisée dans un calcul ou une commande ; « à valider localement » vise le canton et le plan d'autocontrôle.
+
+Référentiel proposé le 2026-10-04 pour Sanji. (`usage_calcul: false`, portée `a_valider_localement` : le droit et les températures légales dépendent de la version du texte et du canton). Source de vérité : `donnees/hygiene.json` (75 entrées). Textes fédéraux lus à l'état du 01.07.2025 (la LMG relue à l'état 01.10.2024, la VLtH à l'état 01.02.2024). Les aide-mémoire cantonaux lus sont alémaniques (AG, BS, SO, LU, SG) ; la GVG de GastroSuisse (2e édition 2019) a été relue en texte intégral.
 
 Confiance : H = haute, M = moyenne, F = faible. Vérif. (relecture à la source le 2026-10-04) : C confirmée, P partielle, N non confirmée, B base Sanji seule, - sans vérification (entrée sans chiffre ou non relue). Cuisson, froid et durées : voir les conditions dans le JSON pour chaque écart avec la base Sanji.
 

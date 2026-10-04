@@ -31,7 +31,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -66,7 +66,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -114,7 +114,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -154,7 +154,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -194,7 +194,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -242,7 +242,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -274,7 +274,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -306,7 +306,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -338,7 +338,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -370,7 +370,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -402,7 +402,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -434,7 +434,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -466,7 +466,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -498,7 +498,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -530,7 +530,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -562,7 +562,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -594,7 +594,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -630,7 +630,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -661,7 +661,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -692,7 +692,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -723,7 +723,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -746,7 +746,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -769,7 +769,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -804,7 +804,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -844,7 +844,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -884,7 +884,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -924,7 +924,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -964,7 +964,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1004,7 +1004,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1052,7 +1052,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1088,7 +1088,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -1123,7 +1123,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1155,7 +1155,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1187,7 +1187,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1200,7 +1200,7 @@
    "sujet": "Chou-fleur",
    "type": "repere",
    "etat_poids": null,
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "usage_calcul": false,
    "portee": "general",
    "id": "legumes.blanchir.chou-fleur",
@@ -1251,7 +1251,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1279,7 +1279,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -1310,7 +1310,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -1344,7 +1344,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1376,7 +1376,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1412,7 +1412,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -1447,7 +1447,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1487,7 +1487,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1515,7 +1515,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -1538,7 +1538,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -1572,7 +1572,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1604,7 +1604,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1636,7 +1636,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1668,7 +1668,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1700,7 +1700,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1732,7 +1732,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -1764,7 +1764,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1792,7 +1792,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1828,7 +1828,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -1855,7 +1855,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1894,7 +1894,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1942,7 +1942,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -1982,7 +1982,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2018,7 +2018,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -2049,7 +2049,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -2076,7 +2076,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -2108,7 +2108,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -2140,7 +2140,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -2180,7 +2180,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2216,7 +2216,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2247,7 +2247,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2282,7 +2282,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2310,7 +2310,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -2333,7 +2333,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -2356,7 +2356,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -2399,7 +2399,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2446,7 +2446,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2482,7 +2482,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -2517,7 +2517,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2549,7 +2549,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -2589,7 +2589,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -2621,7 +2621,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -2661,7 +2661,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -2692,7 +2692,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -2728,7 +2728,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2759,7 +2759,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -2786,7 +2786,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2818,7 +2818,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2850,7 +2850,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -2882,7 +2882,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -2895,7 +2895,7 @@
    "sujet": "Demi-crème",
    "type": "repere",
    "etat_poids": null,
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "usage_calcul": false,
    "portee": "general",
    "id": "legumes.lait.demi-creme-matiere-grasse",
@@ -2954,7 +2954,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -2982,7 +2982,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -3017,7 +3017,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -3049,7 +3049,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -3077,7 +3077,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -3104,7 +3104,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -3132,7 +3132,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false
   },
@@ -3159,7 +3159,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -3199,7 +3199,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -3231,7 +3231,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -3267,7 +3267,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false
   },
@@ -3301,7 +3301,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -3314,7 +3314,7 @@
    "sujet": "Fromage et beurre",
    "type": "repere",
    "etat_poids": null,
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "usage_calcul": false,
    "portee": "a_valider_localement",
    "id": "legumes.lait.temperature-fromage-beurre",
@@ -3372,7 +3372,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -3404,7 +3404,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -3436,7 +3436,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -3468,7 +3468,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -3496,7 +3496,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -3524,7 +3524,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -3555,7 +3555,7 @@
     }
    ],
    "confiance": "moyenne",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "a_valider_localement",
    "usage_calcul": false,
    "verification": {
@@ -3595,7 +3595,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -3627,7 +3627,7 @@
     }
    ],
    "confiance": "faible",
-   "statut": "a_valider",
+   "statut": "valide_chef",
    "portee": "general",
    "usage_calcul": false,
    "verification": {
@@ -3690,5 +3690,11 @@
    "sujet": "Temps de liaison au jaune, durée de vie des ovoproduits pasteurisés ouverts",
    "raison": "Non trouvés ; suivre l'étiquette du fabricant."
   }
- ]
+ ],
+ "validation": {
+  "le": "2026-10-04",
+  "par": "propriétaire",
+  "decision": "02-Decisions-validees/2026-10-04 - Sanji - Referentiel de savoir culinaire valide.md",
+  "portee": "contenu des fiches relu et validé ; usage dans un calcul ou une commande non décidé"
+ }
 }

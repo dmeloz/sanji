@@ -1,6 +1,8 @@
 # Organisation, calculs et cadre du brevet
 
-Statut : proposition à valider (rien n'est validé ni branché sur l'application). Généré le 2026-10-04. Données : `donnees/organisation.json`.
+**Statut : validé par la propriétaire le 2026-10-04** (relecture de toutes les fiches). Aucune entrée n'est utilisée dans un calcul ou une commande ; « à valider localement » vise le canton et le plan d'autocontrôle.
+
+Rien n'est branché sur l'application. Généré le 2026-10-04. Données : `donnees/organisation.json`.
 67 entrées. Colonnes : valeur et état de poids, confiance (H haute, M moyenne, F faible), sources, vérification à la source le 2026-10-04 (C confirmée, P partielle, N non confirmée, B base Sanji seule ; vide = entrée sans chiffre, non vérifiée chiffre par chiffre). Les chiffres de la base Sanji sont des repères génériques à remplacer par les pesées de la maison. `usage_calcul` reste faux partout.
 Vérification : 31 entrées chiffrées relues à la source (confirmées 22, partielles 0, non confirmées 0, base Sanji seule 9). Les notes de relecture sont dans `donnees/organisation.json` (champ `verification`). Le refroidissement de référence reste `hygiene.temperature.refroidissement`.
 

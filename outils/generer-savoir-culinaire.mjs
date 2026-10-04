@@ -43,7 +43,8 @@ export function validerTheme(doc, nomFichier = '?') {
     if (!estTexte(x.sujet)) e.push(`${o(id)} : sujet absent.`);
     if (!TYPES.has(x.type)) e.push(`${o(id)} : type invalide.`);
     if (!estTexte(x.enonce)) e.push(`${o(id)} : énoncé absent.`);
-    if (x.statut !== 'a_valider') e.push(`${o(id)} : le statut doit être « a_valider ».`);
+    const docValide = estTexte(doc.validation?.le) && estTexte(doc.validation?.par) && estTexte(doc.validation?.decision);
+    if (x.statut === 'valide_chef' ? !docValide : x.statut !== 'a_valider') e.push(`${o(id)} : statut « a_valider », ou « valide_chef » avec une validation écrite au niveau du document.`);
     if (x.usage_calcul !== false) e.push(`${o(id)} : usage_calcul doit être false.`);
     if (!CONFIANCES.has(x.confiance)) e.push(`${o(id)} : confiance invalide.`);
     if (!PORTEES.has(x.portee)) e.push(`${o(id)} : portée invalide.`);
@@ -115,11 +116,11 @@ function principal() {
   const entrees = themes.flatMap((t) => t.entrees);
   const index = { etiquette: 'SAVOIR_CULINAIRE', genere_le: new Date().toISOString().slice(0, 10), themes: themes.map((t) => t.theme), entrees };
   writeFileSync(resolve(DOSSIER, 'savoir-culinaire.json'), JSON.stringify(index, null, 1) + '\n');
-  const lignes = ['# Savoir culinaire — index', '', 'Fichier généré par `npm run culinaire` : ne pas éditer. Tout est à valider par la propriétaire ; rien n\'est branché sur l\'application.', '',
-    '| Thème | Entrées | Avec valeur chiffrée | Vérifiées à la source | Confiance faible | À valider localement | Lacunes |', '|---|---|---|---|---|---|---|'];
+  const lignes = ['# Savoir culinaire — index', '', 'Fichier généré par `npm run culinaire` : ne pas éditer. Contenu validé par la propriétaire le 2026-10-04 (sauf entrées marquées « a_valider ») ; aucune valeur n\'est utilisée dans un calcul ou une commande.', '',
+    '| Thème | Entrées | Validées | Avec valeur chiffrée | Vérifiées à la source | Confiance faible | À valider localement | Lacunes |', '|---|---|---|---|---|---|---|---|'];
   for (const t of themes) {
     const n = t.entrees;
-    lignes.push(`| ${t.titre ?? t.theme} | ${n.length} | ${n.filter((x) => x.valeur).length} | ${n.filter((x) => x.verification?.resultat === 'confirmee').length} | ${n.filter((x) => x.confiance === 'faible').length} | ${n.filter((x) => x.portee !== 'general').length} | ${t.lacunes.length} |`);
+    lignes.push(`| ${t.titre ?? t.theme} | ${n.length} | ${n.filter((x) => x.statut === 'valide_chef').length} | ${n.filter((x) => x.valeur).length} | ${n.filter((x) => x.verification?.resultat === 'confirmee').length} | ${n.filter((x) => x.confiance === 'faible').length} | ${n.filter((x) => x.portee !== 'general').length} | ${t.lacunes.length} |`);
   }
   lignes.push('', `Total : ${entrees.length} entrées.`, '');
   writeFileSync(resolve(DOSSIER, 'INDEX.md'), lignes.join('\n'));

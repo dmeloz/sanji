@@ -1,6 +1,6 @@
 # Féculents et pommes de terre
 
-Statut : proposition à valider. Aucune entrée n'est validée ni utilisée en calcul. Généré le 2026-10-04. Données : `donnees/feculents.json`. Valeurs relues à la source le 2026-10-04 (champ `verification`).
+Statut : validé par la propriétaire le 2026-10-04 (relecture de toutes les fiches). Aucune entrée n'est utilisée en calcul. Généré le 2026-10-04. Données : `donnees/feculents.json`. Valeurs relues à la source le 2026-10-04 (champ `verification`).
 
 Sources principales : Swissmilk, Schweizer Kartoffeln (kartoffel.ch), Schweizer Salinen, BZfE, Verbraucherzentrale Bayern, USDA (PDF relu), aide-mémoires cantonaux (Zurich, Soleure), base métier Sanji (§10-§34), sources web générales (confiance réduite).
 

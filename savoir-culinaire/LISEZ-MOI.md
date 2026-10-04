@@ -1,6 +1,6 @@
 # Savoir culinaire de Sanji — brevet fédéral de chef de cuisine
 
-Construit le 2026-10-04, en autonomie, sur demande de la propriétaire. **Tout est une proposition à valider** : rien n'est branché sur l'application, rien n'entre dans un calcul ou une commande.
+Construit le 2026-10-04, en autonomie, sur demande de la propriétaire. **Contenu validé par la propriétaire le 2026-10-04** après relecture de toutes les fiches (décision `Cerveau-Obsidian/02-Decisions-validees/2026-10-04 - Sanji - Referentiel de savoir culinaire valide.md`). Rien n'est encore branché sur l'application, rien n'entre dans un calcul ou une commande : c'est une décision distincte, pas encore prise. Une entrée ajoutée après cette date repart « à valider ».
 
 ## Où lire quoi
 - `INDEX.md` : le nombre d'entrées par thème (généré).
