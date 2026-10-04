@@ -549,7 +549,7 @@ async function lireFichierRestauration(evenement) {
   if (!fichier) return;
   let nouvelEtat;
   try {
-    nouvelEtat = importer(await fichier.text());
+    nouvelEtat = importer(await fichier.text(), aujourdhui());
   } catch (erreur) {
     afficherMessage(`Fichier refusé : ${erreur.message}`, 'erreur');
     return;

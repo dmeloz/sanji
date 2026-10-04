@@ -851,7 +851,11 @@ export function reprendreMemoire(etat, composantId, h) {
   c.categorie = m.categorie;
   if (m.type && m.type !== 'a_preciser') { c.type = m.type; champs.push('type'); }
   if (m.charge) { c.charge = m.charge; champs.push('charge'); }
-  if (c.role && m.parRole?.[c.role]?.grammage) { c.grammage = structuredClone(m.parRole[c.role].grammage); champs.push('grammage'); }
+  if (c.role && m.parRole?.[c.role]?.grammage) {
+    // Reprise, pas correction : l'apprentissage ne la compte pas (le grammage d'origine, lui, a déjà compté).
+    c.grammage = { ...structuredClone(m.parRole[c.role].grammage), repris: true };
+    champs.push('grammage');
+  }
   const reprises = Object.entries(m.etapes ?? {}).map(([etape, v]) => ({ etape, ...v }));
   if (reprises.length > 0) {
     c.etapes = normaliserEtapes([...c.etapes.filter((e) => !(e.etape in m.etapes)), ...reprises]);

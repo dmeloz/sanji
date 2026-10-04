@@ -1,5 +1,5 @@
 // Document d'état unique : création, normalisation, export et import.
-// Aucune lecture de l'heure : l'horodatage `h` (ISO) est toujours un argument.
+// Aucune lecture de l'heure : l'horodatage `h` (ISO) est toujours un argument .
 
 import { controleAjustement } from './ajustements.js';
 import { ETAT_POIDS } from './statuts.js';
@@ -248,13 +248,28 @@ function lectureValide(valeur) {
   return sansClesDangereuses(valeur);
 }
 
+/** Vrai si l'entrée d'une proposition d'apprentissage écartée est exploitable (voir importer). */
+function ecartApprentissageValide(e, aujourdhui) {
+  if (!estObjet(e) || e.statut !== 'ecarte' || typeof e.h !== 'string') return false;
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:T[\d:.]+(?:Z|[+-]\d{2}:\d{2})?)?$/.exec(e.h);
+  if (!m || Number.isNaN(Date.parse(e.h))) return false;
+  const jour = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  if (jour.getUTCFullYear() !== +m[1] || jour.getUTCMonth() !== +m[2] - 1 || jour.getUTCDate() !== +m[3]) return false;
+  if (aujourdhui !== null && /^\d{4}-\d{2}-\d{2}$/.test(aujourdhui)) {
+    const limite = new Date(Date.parse(`${aujourdhui}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
+    if (e.h.slice(0, 10) > limite) return false;
+  }
+  return e.vus === undefined || (Array.isArray(e.vus) && e.vus.every((v) => typeof v === 'string'));
+}
+
 /**
  * Lit un fichier d'export. Refuse un autre document, un schéma inconnu et tout fichier portant
  * l'étiquette TEST_ONLY (propriété `etiquette`, à n'importe quel niveau). Complète les champs absents.
  * @param {string} texte
+ * @param {string} [aujourdhui] AAAA-MM-JJ ; sert à écarter les dates futures des propositions écartées (donnée par l'appelant, jamais lue ici ; absente : pas de contrôle de futur)
  * @returns {object} l'état complet ; lève une Error en français sinon
  */
-export function importer(texte) {
+export function importer(texte, aujourdhui = null) {
   let doc;
   try { doc = JSON.parse(texte); } catch { throw new Error("Fichier illisible : ce n'est pas un export valide."); }
   if (contientTestOnly(doc)) {
@@ -285,6 +300,13 @@ export function importer(texte) {
       if (CLES_INTERDITES.has(id)) continue;
       etat[nom][id] = fusionner(fabrique(id), source[nom][id]);
     }
+  }
+  // Propositions d'apprentissage écartées (`apprentissage:famille|rôle`) : { statut:'ecarte', h, vus:[ids] }. Une date illisible
+  // ou au-delà de demain (la date d'aujourd'hui vient de l'appelant, un jour de tolérance pour le fuseau), un statut autre
+  // ou une liste `vus` qui n'en est pas une feraient taire la proposition pour toujours : l'entrée est écartée.
+  for (const [cle, entree] of Object.entries(etat.validations)) {
+    if (!cle.startsWith('apprentissage:')) continue;
+    if (!ecartApprentissageValide(entree, aujourdhui)) delete etat.validations[cle];
   }
   if (source.standards !== undefined) {
     // { [clé de famille]: { [rôle]: {valeur, unite, etat, h} } } : un état du poids absent se lit « cuit ».

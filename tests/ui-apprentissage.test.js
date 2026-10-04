@@ -103,7 +103,8 @@ test('« Non, garder » : rien n\'est changé, la ligne se tait, l\'écart est m
   monde();
   ligneApprentissage(page()).click();
   const d = ouvert();
-  await parTexte(d, 'Non, garder').click();
+  // Le geste lit l'horloge : comme la page, il s'exécute « le lundi » (sinon la correction du 05/10 serait dans le futur d'aujourd'hui).
+  await dateDuJour(S.lundi, () => parTexte(d, 'Non, garder').click());
   assert.deepEqual(magasin.etat().standards, {});
   assert.equal(magasin.etat().validations['apprentissage:riz|garniture'].statut, 'ecarte');
   assert.equal(d.open, false);

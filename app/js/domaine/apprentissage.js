@@ -7,13 +7,16 @@
 // La date d'une correction est celle du service du plat : la correction elle-même n'est pas horodatée.
 //
 // Règle : pour une même famille (ou catégorie de légumes sans famille), un même rôle et un même état de poids, au moins
-// 3 corrections dans le MÊME SENS sur les 30 derniers jours donnent une proposition : la médiane des valeurs corrigées
+// 3 corrections dans le MÊME SENS sur les 30 derniers jours (jusqu'à aujourd'hui : jamais une date future) donnent une
+// proposition ; un seul plat compte une fois par jour (menu 1 et menu 2 confondus), et un grammage repris de la mémoire
+// (`reprendreMemoire`, marqué `repris`) n'est pas une correction ; dès que les deux sens sont présents, rien n'est proposé : la médiane des valeurs corrigées
 // dans ce sens, arrondie au gramme. Seules comptent les corrections postérieures au dernier standard maison (celui
 // qu'on vient de valider ne se rediscute pas avec les corrections qui l'ont produit). Rien n'est appliqué ici.
 // Une proposition écartée (`etat.validations['apprentissage:famille|rôle']`, statut « ecarte ») se tait 30 jours, ou
 // jusqu'à 3 nouvelles corrections.
 
 import { ajouterJours, joursEntre } from './dates.js';
+import { normaliser } from './etat.js';
 import { GROUPES, ROLES_STANDARD, cleStandardGroupe, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import { estStandardBase, libelle } from './statuts.js';
 import { cleStandardDe } from './validation.js';
@@ -51,13 +54,14 @@ function dernierStandard(etat, cleFamille, role) {
 }
 
 /** Corrections de portion des composants, avec leur écart au standard en vigueur (sans correction ni référence). */
-function corrections(etat, debut) {
+function corrections(etat, debut, fin) {
   const sansMemoire = { ...etat, memoire: {} };
   const liste = [];
   for (const c of Object.values(etat.composants ?? {})) {
     const g = c.grammage;
     if (!positif(g?.valeur) || g.statut === 'INCONNU' || estStandardBase(g.statut)) continue;
-    if (!c.date || c.date < debut) continue;
+    if (g.repris === true) continue; // grammage repris de la mémoire (reprendreMemoire) : pas une correction
+    if (!c.date || c.date < debut || c.date > fin) continue; // ni hors fenêtre, ni dans le futur
     const cleFamille = cleStandardDe(c);
     if (!cleFamille || !ROLES_STANDARD.includes(c.role)) continue;
     const actuel = grammageEffectif(sansMemoire, { ...c, grammage: { valeur: null, unite: g.unite, statut: 'INCONNU', source: '', etat: g.etat } });
@@ -65,7 +69,7 @@ function corrections(etat, debut) {
     if (!actuel || actuel.unite !== g.unite || actuel.etat !== (g.etat ?? 'cuit') || actuel.valeur === g.valeur) continue;
     liste.push({
       id: c.id, nom: c.nom, date: c.date, cleFamille, role: c.role, unite: g.unite, etatPoids: g.etat ?? 'cuit',
-      valeur: g.valeur, sens: g.valeur > actuel.valeur ? 'plus' : 'moins', actuel,
+      valeur: g.valeur, menu: c.menu ?? 0, sens: g.valeur > actuel.valeur ? 'plus' : 'moins', actuel,
     });
   }
   return liste;
@@ -83,16 +87,24 @@ function corrections(etat, debut) {
 export function propositionsApprentissage(etat, aujourdhui) {
   const debut = ajouterJours(aujourdhui, -(JOURS_FENETRE - 1));
   const groupes = new Map();
-  for (const x of corrections(etat, debut)) {
+  // Une correction par plat (nom normalisé) et par jour au plus : le même plat corrigé en menu 1 et en menu 2 compte une fois.
+  const vusParJour = new Set();
+  const triees = corrections(etat, debut, aujourdhui).sort((a, b) => a.menu - b.menu || a.id.localeCompare(b.id));
+  for (const x of triees) {
     if (x.date <= dernierStandard(etat, x.cleFamille, x.role)) continue;
     const cle = `${x.cleFamille}|${x.role}|${x.etatPoids}|${x.unite}`;
+    const plat = `${cle}|${normaliser(x.nom)}|${x.date}`;
+    if (vusParJour.has(plat)) continue;
+    vusParJour.add(plat);
     if (!groupes.has(cle)) groupes.set(cle, []);
     groupes.get(cle).push(x);
   }
   const propositions = [];
   for (const toutes of groupes.values()) {
-    // Un seul sens à la fois : le plus fréquent, s'il atteint le seuil (les sens mélangés ne font pas une tendance).
-    const liste = ['plus', 'moins'].map((s) => toutes.filter((x) => x.sens === s)).sort((a, b) => b.length - a.length)[0];
+    // Les deux sens dans la fenêtre : pas de tendance, rien à proposer (même si un sens atteint le seuil).
+    const [plus, moins] = ['plus', 'moins'].map((sens) => toutes.filter((x) => x.sens === sens));
+    if (plus.length > 0 && moins.length > 0) continue;
+    const liste = plus.length > 0 ? plus : moins;
     if (liste.length < MIN_CORRECTIONS) continue;
     const { cleFamille, role, etatPoids, unite, sens } = liste[0];
     const ecart = etat.validations?.[cleApprentissage(cleFamille, role)];
@@ -102,18 +114,18 @@ export function propositionsApprentissage(etat, aujourdhui) {
       const silence = jourDe(ecart.h) !== '' && joursEntre(jourDe(ecart.h), aujourdhui) < JOURS_SILENCE;
       if (silence && nouvelles < MIN_CORRECTIONS) continue;
     }
-    const triees = [...liste].sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
-    const actuelle = triees.at(-1).actuel;
+    const ordonnees = [...liste].sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+    const actuelle = ordonnees.at(-1).actuel;
     const valeur = Math.round(mediane(liste.map((x) => x.valeur)));
     if (!positif(valeur) || valeur === actuelle.valeur) continue;
     const nom = libelleDe(cleFamille);
     const roleTexte = role.replace('_', ' ');
     propositions.push({
       cle: cleApprentissage(cleFamille, role), cleFamille, libelle: nom, role, etatPoids, unite, valeur, sens,
-      nombre: liste.length, dates: triees.map((x) => x.date), valeursCorrigees: triees.map((x) => x.valeur),
+      nombre: liste.length, dates: ordonnees.map((x) => x.date), valeursCorrigees: ordonnees.map((x) => x.valeur),
       actuelle: { valeur: actuelle.valeur, unite: actuelle.unite, etat: actuelle.etat, origine: actuelle.origine, source: actuelle.source },
-      historique: triees.slice(-5).map((x) => ({ date: x.date, nom: x.nom, valeur: x.valeur })),
-      composantIds: triees.map((x) => x.id),
+      historique: ordonnees.slice(-5).map((x) => ({ date: x.date, nom: x.nom, valeur: x.valeur })),
+      composantIds: ordonnees.map((x) => x.id),
       texte: `Vous corrigez souvent ${nom} (${roleTexte}) vers ${valeur} ${libelle('UNITE', unite)} : en faire votre standard ?`,
     });
   }
