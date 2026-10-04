@@ -817,3 +817,54 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .mep-ligne.mep-fait .mep-nom { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--texte-doux); }
 .mep-ligne.mep-fait .mep-qte { color: var(--texte-doux); }
 .mep-ligne.mep-fait .mep-meta { color: var(--texte-doux); }
+
+/* ===== Écran Stock (refonte 1) : sélecteur segmenté, Restes, DLC, Achats en cartes. Jetons du socle seulement. ===== */
+.stock-entete { display: flex; flex-direction: column; gap: 4px; }
+.stock-sous { margin: 0; font-size: var(--t-1); font-weight: 500; color: var(--texte-doux); }
+.stock-horsligne { white-space: nowrap; }
+.stock-segments { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: var(--r-bouton); background: var(--carte-2); }
+.stock-segment { display: flex; align-items: center; justify-content: center; min-height: var(--cible); border-radius: 9px; font-size: var(--t-1); font-weight: 500; color: var(--texte-doux); text-decoration: none; border: 2px solid transparent; }
+.stock-segment-actif { background: var(--carte); color: var(--texte); font-weight: 700; border-color: var(--encre); }
+.stock-segment:focus-visible, .stock-jour:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.stock-carte, .stock-groupe, .produits-groupe { background: var(--carte); border-radius: var(--r-carte); padding: 8px 14px 12px; }
+.stock-carte > * + * { margin-top: 10px; }
+.stock-carte-titre, .stock-groupe-titre { margin: 4px 0 6px; font-size: var(--t-legende); font-weight: 650; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); }
+.stock-legende { display: block; font-size: var(--t-legende); color: var(--texte-doux); }
+.stock-qte { font-family: var(--police-qte); font-size: var(--t-qte); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--texte); }
+
+.stock-jours { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.stock-jour { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: var(--cible); padding: 2px; border-radius: 10px; border: 1px solid var(--bordure); background: var(--carte); color: var(--texte); font: inherit; font-size: var(--t-1); cursor: pointer; }
+.stock-jour-sous { font-size: var(--t-legende); color: var(--texte-doux); }
+.stock-jour-actif { background: var(--encre); color: var(--sur-encre); border-color: var(--encre); font-weight: 700; }
+.stock-jour-actif .stock-jour-sous { color: inherit; }
+.stock-reste { padding: 10px 0; border-top: 1px solid var(--bordure); }
+.stock-reste:first-of-type { border-top: 0; }
+.stock-reste-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.stock-reste-nom { font-size: var(--t-ligne); font-weight: 600; min-height: var(--cible); display: inline-flex; align-items: center; }
+.stock-valider .btn { width: 100%; min-height: 52px; font-size: var(--t-ligne); }
+
+.stock-dlc-liste { list-style: none; margin: 0; padding: 0; }
+.stock-dlc { padding: 10px 0; border-top: 1px solid var(--bordure); }
+.stock-dlc:first-child { border-top: 0; }
+.stock-dlc-ligne { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: var(--cible); }
+.stock-dlc-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stock-dlc-nom { font-size: var(--t-ligne); font-weight: 600; overflow-wrap: anywhere; }
+.stock-dlc-alerte { background: var(--exception-fond); border: 1px solid var(--exception-bord); border-radius: var(--r-carte-petite); padding: 10px 12px; margin: 6px 0; }
+.stock-mention { margin: 4px 0 0; font-size: var(--t-1); color: var(--texte-moyen); }
+.stock-mention-alerte { color: var(--exception); font-weight: 600; }
+
+.produits-groupe { padding: 4px 14px 8px 8px; }
+.produits-groupe + .produits-groupe { margin-top: 12px; }
+.produits-groupe-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 10px 0 4px 6px; }
+.produits-groupe-nom { margin: 0; font-size: var(--t-corps); font-weight: 700; }
+.produits-groupe-echeance { font-size: var(--t-legende); color: var(--texte-doux); }
+.produit-ligne { align-items: center; gap: 8px; }
+.produit-marque { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex: none; border: 2px solid var(--bordure-forte); border-radius: var(--r-case); font-size: var(--t-1); font-weight: 700; }
+.produit-titre { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.produit-sous { font-size: var(--t-legende); color: var(--texte-doux); }
+.produit-commande { display: flex; flex-direction: column; align-items: flex-end; flex: none; }
+.produit-commande .produit-chiffre { font-family: var(--police-qte); font-size: var(--t-qte); font-weight: 600; line-height: 1.2; }
+.produit-legende { font-size: var(--t-legende); color: var(--texte-doux); }
+.stock-semaine { margin: 0; font-size: var(--t-1); color: var(--texte-doux); }
+@media (prefers-reduced-motion: reduce) { .stock-segment, .stock-jour { transition: none; } }

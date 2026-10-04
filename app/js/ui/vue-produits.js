@@ -97,14 +97,15 @@ function dialogNoter(lundi, ligne) {
   });
 }
 
-/** « 2 400 g » : le chiffre en gros, l'unité à côté (le texte complet reste lu par les lecteurs d'écran). */
-function besoinEnGros(ligne) {
-  const texte = quantite(ligne.besoinBrut, ligne.unite);
-  const i = texte.lastIndexOf(' ');
-  return h('span', { classe: 'produit-besoin', 'aria-label': `besoin brut ${texte}` },
-    h('span', { classe: 'produit-chiffre feutre', 'aria-hidden': 'true' }, i < 0 ? texte : texte.slice(0, i)),
-    i < 0 ? null : h('span', { classe: 'produit-unite', 'aria-hidden': 'true' }, texte.slice(i + 1)));
+/** Quantité mise en avant à droite de la ligne : ce que le chef a tapé, sinon la quantité notée, sinon la proposition. Jamais inventée. */
+function quantiteEnAvant(suivi, unite) {
+  if (suivi.quantiteAcheter !== null) return { valeur: quantite(suivi.quantiteAcheter, unite), legende: 'à acheter' };
+  if (suivi.etatLigne === 'note' && suivi.quantiteCommandable !== null) return { valeur: quantite(suivi.quantiteCommandable, unite), legende: 'noté' };
+  if (suivi.proposeeACommander !== null) return { valeur: quantite(suivi.proposeeACommander, unite), legende: 'proposé' };
+  return { valeur: '—', legende: 'proposé après vérification' };
 }
+
+const MARQUE_ETAT = { suggere: '○', note: '✓', retire: '–' };
 
 /** Une ligne par produit ; un toucher déplie les détails et les gestes. L'état est écrit en toutes lettres. */
 function carteLigne(etat, lundi, ligne, aujourd) {
@@ -115,8 +116,13 @@ function carteLigne(etat, lundi, ligne, aujourd) {
   return h('details', { classe: 'produit-compact' },
     h('summary', { classe: 'produit-resume' },
       h('span', { classe: 'produit-ligne' },
-        h('strong', { classe: 'produit-nom' }, ligne.nom),
-        besoinEnGros(ligne)),
+        h('span', { classe: 'produit-marque', 'aria-hidden': 'true' }, MARQUE_ETAT[suivi.etatLigne] ?? MARQUE_ETAT.suggere),
+        h('span', { classe: 'produit-titre' },
+          h('strong', { classe: 'produit-nom' }, ligne.nom),
+          h('span', { classe: 'produit-sous' }, `besoin ${quantite(ligne.besoinBrut, ligne.unite)} · vérifié disponible ${suivi.quantiteVerifiee === null ? 'non vérifié' : quantite(suivi.quantiteVerifiee, ligne.unite)}`)),
+        h('span', { classe: 'produit-commande' },
+          h('span', { classe: 'produit-chiffre' }, quantiteEnAvant(suivi, ligne.unite).valeur),
+          h('span', { classe: 'produit-legende' }, quantiteEnAvant(suivi, ligne.unite).legende))),
       h('span', { classe: 'produit-etat' },
         h('span', { classe: 'produit-etat-texte' }, ETAT_COURT[suivi.etatLigne] ?? ETAT_COURT.suggere,
           suivi.aRelire ? ' · à relire' : ''),
@@ -157,22 +163,54 @@ function carteLigne(etat, lundi, ligne, aujourd) {
     ));
 }
 
-export function rendre(etat, lundi) {
+/** Groupe de lignes par fournisseur : en-tête (nom, échéance en toutes lettres) puis les cartes. */
+function groupesParFournisseur(etat, lundi, lignes, aujourd) {
+  const groupes = new Map();
+  for (const l of lignes) {
+    const suivi = suiviProduit(etat, lundi, l);
+    const f = suivi.fournisseurId ? etat.fournisseurs[suivi.fournisseurId] ?? null : null;
+    const cle = f ? f.id : '';
+    if (!groupes.has(cle)) groupes.set(cle, { fournisseur: f, lignes: [], echeances: [] });
+    const g = groupes.get(cle);
+    g.lignes.push(l);
+    g.echeances.push(echeanceCommande(l, f, aujourd));
+  }
+  return [...groupes.values()].sort((a, b) => (a.fournisseur ? 0 : 1) - (b.fournisseur ? 0 : 1)
+    || (a.fournisseur?.nom ?? '').localeCompare(b.fournisseur?.nom ?? ''));
+}
+
+function texteGroupe(g) {
+  if (!g.fournisseur) return 'fournisseur non précisé';
+  const datees = g.echeances.filter((e) => e.dateLimite).sort((a, b) => a.dateLimite.localeCompare(b.dateLimite));
+  if (datees.length === 0) return 'délai fournisseur à renseigner';
+  const e = datees[0];
+  return `commander avant le ${libelleJour(e.dateLimite)}${e.statut === 'depassee' ? ' · échéance dépassée' : e.statut === 'aujourdhui' ? " · aujourd'hui" : ''}`;
+}
+
+/** @param {{integre?:boolean}} [options] `integre` : la vue Stock fournit déjà le titre de la page. */
+export function rendre(etat, lundi, options = {}) {
   const aujourd = aujourdhui();
   const { lignes, nonChiffrables } = besoinsProduits(etat, lundi);
-  const racine = h('div', { classe: 'vue vue-produits' });
-  racine.appendChild(h('h1', { classe: 'page-titre' }, `Produits : semaine du ${libelleJour(lundi)}`));
+  const racine = h('div', { classe: options.integre ? 'stock-achats' : 'vue vue-produits' });
+  if (!options.integre) racine.appendChild(h('h1', { classe: 'page-titre' }, `Produits : semaine du ${libelleJour(lundi)}`));
   racine.appendChild(navigationPeriode(
     { href: `#/stock/achats/${ajouterJours(lundi, -7)}`, texte: '‹ Semaine précédente' },
     { href: `#/stock/achats/${lundiDe(aujourd)}`, texte: "Aujourd'hui" },
     { href: `#/stock/achats/${ajouterJours(lundi, 7)}`, texte: 'Semaine suivante ›' }));
+  if (options.integre) racine.appendChild(h('p', { classe: 'stock-semaine' }, `Semaine du ${libelleJour(lundi)}`));
   racine.appendChild(encadre('info', 'Aucun stock théorique, aucun approvisionnement garanti.'));
   racine.appendChild(h('div', { classe: 'actions pas-imprime' }, bouton('Imprimer la liste', imprimer, 'court')));
   racine.appendChild(h('h2', { classe: 'section-titre' }, 'Besoins chiffrés'));
   if (lignes.length === 0) racine.appendChild(ligneVide('Aucun besoin chiffré cette semaine : il faut des composants attribués, validés et calculables.'));
   const retiree = (l) => suiviProduit(etat, lundi, l).etatLigne === 'retire';
   const actives = lignes.filter((x) => !retiree(x));
-  if (actives.length > 0) racine.appendChild(h('div', { classe: 'produits-liste' }, actives.map((l) => carteLigne(etat, lundi, l, aujourd))));
+  for (const g of groupesParFournisseur(etat, lundi, actives, aujourd)) {
+    racine.appendChild(h('section', { classe: 'produits-groupe' },
+      h('div', { classe: 'produits-groupe-tete' },
+        h('h3', { classe: 'produits-groupe-nom' }, g.fournisseur ? g.fournisseur.nom : 'Fournisseur non précisé'),
+        h('span', { classe: 'produits-groupe-echeance' }, texteGroupe(g))),
+      h('div', { classe: 'produits-liste' }, g.lignes.map((l) => carteLigne(etat, lundi, l, aujourd)))));
+  }
   const retirees = lignes.filter(retiree);
   if (retirees.length > 0) {
     racine.appendChild(repliable(`Retirées (${retirees.length})`, false,
