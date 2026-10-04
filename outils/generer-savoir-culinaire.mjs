@@ -75,6 +75,13 @@ export function validerTheme(doc, nomFichier = '?') {
         && !x.sources.some((s) => ['officielle', 'professionnelle', 'manuel'].includes(s?.type_source))) {
       e.push(`${o(id)} : confiance haute sans source officielle, professionnelle ou de manuel.`);
     }
+    if (x.verification !== undefined) {
+      const v = x.verification;
+      if (!['confirmee', 'partielle', 'non_confirmee', 'base_sanji_seule'].includes(v?.resultat) || !/^\d{4}-\d{2}-\d{2}$/.test(String(v?.le))) e.push(`${o(id)} : vérification invalide (le, resultat).`);
+      else if (v.resultat === 'non_confirmee' && x.confiance !== 'faible') e.push(`${o(id)} : une valeur non confirmée a une confiance faible.`);
+      else if (v.resultat === 'base_sanji_seule' && x.confiance === 'haute') e.push(`${o(id)} : la base de Sanji seule ne donne pas une confiance haute.`);
+      else if (x.confiance === 'haute' && v.resultat !== 'confirmee') e.push(`${o(id)} : une confiance haute exige une vérification confirmée.`);
+    }
     if (x.portee === 'general' && /\b(RS \d|LDAl|OHyg|fedlex)\b/i.test(`${x.enonce} ${x.conditions ?? ''}`)) {
       e.push(`${o(id)} : une règle de droit doit avoir la portée « a_valider_localement ».`);
     }
@@ -109,10 +116,10 @@ function principal() {
   const index = { etiquette: 'SAVOIR_CULINAIRE', genere_le: new Date().toISOString().slice(0, 10), themes: themes.map((t) => t.theme), entrees };
   writeFileSync(resolve(DOSSIER, 'savoir-culinaire.json'), JSON.stringify(index, null, 1) + '\n');
   const lignes = ['# Savoir culinaire — index', '', 'Fichier généré par `npm run culinaire` : ne pas éditer. Tout est à valider par la propriétaire ; rien n\'est branché sur l\'application.', '',
-    '| Thème | Entrées | Avec valeur chiffrée | Confiance faible | À valider localement | Lacunes |', '|---|---|---|---|---|---|'];
+    '| Thème | Entrées | Avec valeur chiffrée | Vérifiées à la source | Confiance faible | À valider localement | Lacunes |', '|---|---|---|---|---|---|---|'];
   for (const t of themes) {
     const n = t.entrees;
-    lignes.push(`| ${t.titre ?? t.theme} | ${n.length} | ${n.filter((x) => x.valeur).length} | ${n.filter((x) => x.confiance === 'faible').length} | ${n.filter((x) => x.portee !== 'general').length} | ${t.lacunes.length} |`);
+    lignes.push(`| ${t.titre ?? t.theme} | ${n.length} | ${n.filter((x) => x.valeur).length} | ${n.filter((x) => x.verification?.resultat === 'confirmee').length} | ${n.filter((x) => x.confiance === 'faible').length} | ${n.filter((x) => x.portee !== 'general').length} | ${t.lacunes.length} |`);
   }
   lignes.push('', `Total : ${entrees.length} entrées.`, '');
   writeFileSync(resolve(DOSSIER, 'INDEX.md'), lignes.join('\n'));

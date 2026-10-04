@@ -30,7 +30,8 @@ Référentiel de savoir culinaire de niveau chef de cuisine avec brevet fédéra
       "confiance": "haute | moyenne | faible",
       "statut": "a_valider",
       "portee": "general | a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": { "le": "2026-10-04", "resultat": "confirmee | partielle | non_confirmee | base_sanji_seule", "note": "ce qui a été relu (page, tableau, article)" }
     }
   ],
   "lacunes": [ { "sujet": "…", "raison": "Ce qui n'a pas été trouvé ou pas pu être vérifié." } ]
@@ -48,3 +49,4 @@ Référentiel de savoir culinaire de niveau chef de cuisine avec brevet fédéra
 8. Aucun nom de plat ou de grammage « de la maison » : le savoir est général.
 9. `id` unique dans tout le référentiel, de la forme `theme.sujet.aspect` (minuscules, sans accent, points et tirets).
 10. Étiquette `etat_poids` renseignée dès qu'une valeur est un poids ou un rendement : une valeur en poids sans son état (sec, cru net, cuit) est refusée.
+11. `verification` (facultatif) dit si la valeur a été relue à la source : `confirmee` (valeur et énoncé étayés), `partielle` (l'énoncé dépasse la source, corrigé ou signalé), `non_confirmee` (source illisible ou muette : confiance faible obligatoire), `base_sanji_seule` (seule la base de Sanji l'appuie : confiance moyenne au plus). Une entrée `confiance: "haute"` qui a une vérification doit être `confirmee`.

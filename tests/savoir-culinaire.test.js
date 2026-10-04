@@ -46,6 +46,16 @@ test('administrations reconnues : fédérales, cantonales, étrangères ; pas le
   for (const u of ['https://www.gastrosuisse.ch/a', 'https://evil-ag.ch.example.com/', 'https://exemple.test', 'pas une url', 'https://notag.ch/x']) assert.equal(estAdministration(u), false, u);
 });
 
+test('vérification : résultat et confiance cohérents', () => {
+  const v = (resultat) => ({ le: '2026-10-04', resultat, note: '' });
+  assert.deepEqual(validerTheme(doc(entree({ verification: v('confirmee') })), 'x.json'), []);
+  assert.ok(validerTheme(doc(entree({ verification: v('non_confirmee') })), 'x.json').length > 0, 'non confirmée exige confiance faible');
+  assert.deepEqual(validerTheme(doc(entree({ verification: v('non_confirmee'), confiance: 'faible' })), 'x.json'), []);
+  const solide = [{ titre: 'T', organisme: 'O', url: 'https://www.blv.admin.ch/x', consulte: '2026-10-04', extrait: '', type_source: 'officielle' }];
+  assert.ok(validerTheme(doc(entree({ verification: v('partielle'), confiance: 'haute', sources: solide })), 'x.json').length > 0);
+  assert.ok(validerTheme(doc(entree({ verification: v('inventee') })), 'x.json').length > 0);
+});
+
 test('le référentiel publié est conforme et ses identifiants sont uniques', () => {
   const { themes, erreurs } = lireThemes();
   assert.deepEqual(erreurs, []);
