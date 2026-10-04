@@ -754,3 +754,6 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 
 /* Tableau : élément implicite (sauce ou base « à confirmer »), distinct de ce que le chef a écrit. */
 .tb-implicite { font-size: var(--t-1); font-style: italic; color: var(--texte-doux); text-decoration: none; }
+
+/* Apprentissage : une proposition du tableau ouvre une feuille, la ligne est un bouton. */
+.bord-ligne-bouton { width: 100%; background: none; border-top: 0; border-left: 0; border-right: 0; font: inherit; text-align: left; cursor: pointer; }

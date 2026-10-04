@@ -7,6 +7,7 @@ import { tableauBlanc } from '../domaine/tableau-blanc.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { lien } from './elements.js';
+import { ouvrirProposition } from './feuille-validation.js';
 import { libelleHorsLigne } from './horsligne.js';
 import { dialogPrevision } from './vue-detail.js';
 
@@ -120,15 +121,23 @@ function zoneFiches(bord, aujourd) {
 
 // ------------------------------------------------------------------ zone 3 : à confirmer
 
+/** Une ligne : un lien, sauf une proposition d'apprentissage qui ouvre sa feuille (aucune navigation). */
+function ligneAConfirmer(l) {
+  const contenu = [caseSymbole('a_decider'),
+    h('span', { classe: 'bord-ligne-texte' }, l.texte, l.detail ? h('span', { classe: 'note-detail' }, l.detail) : null)];
+  if (l.proposition) {
+    return h('li', null, h('button', { type: 'button', classe: 'bord-ligne bord-ligne-bouton', onClick: () => ouvrirProposition(l.proposition) }, contenu));
+  }
+  return h('li', null, h('a', { href: l.lien, classe: 'bord-ligne' }, contenu));
+}
+
 function zoneAConfirmer(bord) {
   const { total, lignes, reste } = bord.aConfirmer;
   const resume = total === 0 ? 'Rien à confirmer'
     : total === 1 ? '1 sujet attend le chef' : `${total} sujets attendent le chef`;
   return zone('confirmer', 'À confirmer', [
     h('p', { classe: total === 0 ? 'vide' : 'bord-resume' }, resume),
-    lignes.length === 0 ? null : h('ul', { classe: 'bord-lignes' }, lignes.map((l) => h('li', null,
-      h('a', { href: l.lien, classe: 'bord-ligne' }, caseSymbole('a_decider'),
-        h('span', { classe: 'bord-ligne-texte' }, l.texte, l.detail ? h('span', { classe: 'note-detail' }, l.detail) : null))))),
+    lignes.length === 0 ? null : h('ul', { classe: 'bord-lignes' }, lignes.map(ligneAConfirmer)),
     reste > 0 ? h('p', { classe: 'meta' }, `et ${pluriel(reste, 'autre sujet', 'autres sujets')}, à voir sur le détail des jours`) : null,
   ]);
 }

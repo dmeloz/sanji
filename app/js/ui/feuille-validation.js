@@ -2,6 +2,8 @@
 // seule), l'état du poids, les sources et l'effet calculé ; la propriétaire tape la valeur, puis choisit un geste :
 // valider comme standard maison, corriger, « seulement cette fois » ou « plus tard ». Aucune logique métier ici.
 
+import { accepterApprentissage, ecarterApprentissage } from '../domaine/actions-apprentissage.js';
+import { libelleJour } from '../domaine/dates.js';
 import { corrigerStandard, correctionDuJour, reporterValidation, validerStandard } from '../domaine/actions-validation.js';
 import { libelle } from '../domaine/statuts.js';
 import { agirStrict } from '../magasin.js';
@@ -81,6 +83,39 @@ export function ouvrirValidation(valeur) {
         api.fermer();
       } },
       { libelle: 'Plus tard', action: (api) => { agirStrict((e, t) => reporterValidation(e, valeur.cle, t)); api.fermer(); } },
+    ],
+  });
+}
+
+const ORIGINE_EN_CLAIR = { standard: 'standard maison', standard_base: 'standard de base', reference: 'référence du nom', plat: 'correction du plat' };
+
+/**
+ * Feuille d'une proposition d'apprentissage (`propositionsApprentissage`) : « Vous corrigez souvent… ». La valeur proposée
+ * (médiane de vos corrections) est préremplie ; la valeur actuelle et vos corrections récentes sont montrées. « En faire
+ * mon standard » l'enregistre ; « Non, garder » écarte la proposition (elle se tait 30 jours). Fermer = plus tard.
+ */
+export function ouvrirProposition(proposition) {
+  const p = proposition;
+  const unite = libelle('UNITE', p.unite);
+  const f = champs([
+    { cle: 'valeur', type: 'nombre', libelle: 'Nouvelle valeur du standard', valeur: p.valeur,
+      aide: `Valeur proposée d'après vos corrections (${unite}, poids ${libelle('ETAT_POIDS', p.etatPoids)}) ; vous pouvez la changer.` },
+  ]);
+  const lire = () => ({ valeur: f.lire().valeur, unite: p.unite, etat: p.etatPoids });
+  const origine = ORIGINE_EN_CLAIR[p.actuelle.origine] ?? p.actuelle.origine;
+  panneau({
+    titre: `Votre standard : ${p.libelle} ${ROLE_EN_CLAIR[p.role] ?? ''}`.trim(),
+    corps: [
+      h('p', { classe: 'quantite-grande' }, `${formaterNombre(p.valeur)} ${unite}`, h('small', null, ` poids ${libelle('ETAT_POIDS', p.etatPoids)}`)),
+      h('p', { classe: 'aide' }, `Vous avez corrigé ${pluriel(p.nombre, 'fois')} la portion dans le même sens (du ${libelleJour(p.dates[0])} au ${libelleJour(p.dates.at(-1))}).`),
+      h('p', { classe: 'meta' }, `Valeur actuelle : ${formaterNombre(p.actuelle.valeur)} ${libelle('UNITE', p.actuelle.unite)} (${origine}).`),
+      h('ul', { classe: 'meta' }, p.historique.map((x) => h('li', null, `${libelleJour(x.date)} : ${x.nom}, ${formaterNombre(x.valeur)} ${unite}`))),
+      ...f.noeuds,
+    ],
+    libelleEnregistrer: 'En faire mon standard',
+    surEnregistrer: () => { agirStrict((e, t) => accepterApprentissage(e, p.cleFamille, p.role, lire(), t)); },
+    extras: [
+      { libelle: 'Non, garder', action: (api) => { agirStrict((e, t) => ecarterApprentissage(e, p.cleFamille, p.role, t)); api.fermer(); } },
     ],
   });
 }
