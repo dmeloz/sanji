@@ -69,6 +69,15 @@ export function valeurEffective(etat, sujet, usage, opts = {}) {
  * valeur finie, rendement qui se calcule (perte de 0 à moins de 100 %, gain strictement positif), pas de valeur négative
  * hors température. `erreur` dit pourquoi (null si tout va bien) ; `base` est le standard de base du sujet.
  */
+const VRAISEMBLANCE = Object.freeze({
+  'rendement_cuisson|x': { min: 1, max: 6 },
+  'conservation|jours': { min: 0, max: 365 },
+  'conservation|semaines': { min: 0, max: 52 },
+  'conservation|mois': { min: 0, max: 24 },
+  'temperature|°C': { min: -40, max: 300 },
+  'cuisson_temps|min': { min: 0, max: 1440 },
+});
+
 export function controleAjustement(usage, sujet, valeur) {
   if (!USAGES_AJUSTABLES.includes(usage)) return { base: null, erreur: `Cet usage ne se règle pas ici : « ${usage} ».` };
   if (typeof sujet !== 'string' || sujet === '') return { base: null, erreur: 'Sujet manquant.' };
@@ -79,6 +88,9 @@ export function controleAjustement(usage, sujet, valeur) {
     return { base, erreur: base.unite === '%' ? 'Une perte se saisit entre 0 et moins de 100 %.' : 'Un gain de cuisson doit être supérieur à zéro.' };
   }
   if (valeur < 0 && usage !== 'temperature') return { base, erreur: 'La valeur ne peut pas être négative.' };
+  // Garde-fous de vraisemblance (bornes larges, pas des valeurs de cuisine) : une faute de frappe ne doit pas entrer dans un calcul.
+  const borne = VRAISEMBLANCE[`${usage}|${base.unite}`];
+  if (borne && (valeur < borne.min || valeur > borne.max)) return { base, erreur: `Valeur invraisemblable : attendu entre ${borne.min} et ${borne.max} ${base.unite}.` };
   return { base, erreur: null };
 }
 

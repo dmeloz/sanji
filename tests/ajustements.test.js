@@ -248,3 +248,17 @@ test('lignesStandardsBase : cinq usages, une ligne par sujet, l\'ajustement se v
   assert.equal(ligne.ajuste, true);
   assert.equal(ligne.base.statut, 'STANDARD_BASE');
 });
+
+test('garde-fous de vraisemblance : gain de cuisson ×0,0001 ou conservation de 1e9 jours refusés, à la saisie comme à l\'import', async () => {
+  const { controleAjustement } = await import('../app/js/domaine/ajustements.js');
+  assert.match(controleAjustement('rendement_cuisson', 'riz', 0.0001).erreur ?? '', /invraisemblable/);
+  assert.match(controleAjustement('conservation', 'riz', 1e9).erreur ?? '', /invraisemblable/);
+  assert.equal(controleAjustement('rendement_cuisson', 'riz', 2.8).erreur, null);
+  const { etatInitial, exporter, importer } = await import('../app/js/domaine/etat.js');
+  const e = etatInitial();
+  e.ajustements['rendement_cuisson|riz'] = { valeur: 0.0001, unite: 'x', le: '2026-10-04T08:00:00', avant: null };
+  e.ajustements['conservation|riz'] = { valeur: 1e9, unite: 'jours', le: '2026-10-04T08:00:00', avant: null };
+  const relu = importer(exporter(e, '2026-10-04T08:00:00'), '2026-10-04');
+  assert.equal(Object.hasOwn(relu.ajustements, 'rendement_cuisson|riz'), false);
+  assert.equal(Object.hasOwn(relu.ajustements, 'conservation|riz'), false);
+});
