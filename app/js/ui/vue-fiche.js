@@ -10,7 +10,7 @@ import { LIBELLE_ESTIMATION_A_VALIDER, libelle } from '../domaine/statuts.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { bouton, ligneVide, lien, pastille, repliable } from './elements.js';
-import { qteNoeuds, quantiteNoeuds } from './format.js';
+import { pluriel, qteNoeuds, quantiteNoeuds } from './format.js';
 import { libelleAllergene } from './reference.js';
 import { blocReperes } from './reperes-metier.js';
 import { defaireEnUnToucher, dialogCorriger, faireEnUnToucher } from './taches.js';
@@ -66,12 +66,22 @@ function sectionQuantite(etat, c, calc) {
     h('p', { classe: 'fiche-legende' }, `Calcul : ${calc.formule}`));
 }
 
+/** « Portions : 55 portions (hors groupes 40 ; groupes confirmés 10 ; groupes provisoires 5) » : le détail de l'ancienne vue composant. */
+function detailPortions(p) {
+  return `Portions : ${pluriel(p.total, 'portion')} (hors groupes ${p.prevision}${p.previsionManquante ? ', non saisie' : ''} ; groupes confirmés ${p.groupesConfirmes} ; groupes provisoires ${p.groupesProvisoires})`;
+}
+
+/** « ven. 2 » : jour abrégé et numéro. */
+const courtJour = (date) => `${libelleJour(date).slice(0, 3)}. ${Number(date.slice(8))}`;
+
 function sectionProvenance(c, calc) {
   return h('section', { classe: 'carte fiche-bloc' },
     h('h2', { classe: 'fiche-titre-bloc' }, 'Calcul et provenance'),
     h('p', null, calc.statut === 'CALCULE' ? pastille(libelle('PROVENANCE', 'CALCULE'), 'vert') : pastille(libelle('PROVENANCE', 'INCONNU'), 'gris'), ' ',
       calc.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre') : null, ' ',
-      calc.standardBase ? pastille(libelle('PROVENANCE', 'STANDARD_BASE'), 'gris') : null),
+      calc.standardBase ? pastille(libelle('PROVENANCE', 'STANDARD_BASE'), 'gris') : null, ' ',
+      calc.aMesurer ? pastille('à mesurer', 'ambre') : null),
+    h('p', { classe: 'meta' }, detailPortions(calc.portions)),
     calc.dependances.length === 0 ? ligneVide('Aucun paramètre renseigné.')
       : h('ul', { classe: 'liste-simple' }, calc.dependances.map((d) => h('li', null,
         h('strong', null, d.parametre === 'recette' ? 'recette' : d.parametre === 'grammage' ? 'grammage' : libelle('ETAPE', d.parametre)), ' ',
@@ -91,12 +101,14 @@ function sectionIngredients(etat, c, calc) {
     recette ? h('p', { classe: 'meta' }, `Recette : ${recette.nom}, version ${recette.version}${recette.valide ? ', validée' : ', non validée'}`) : null);
 }
 
-function sectionEtapes(etapes) {
+function sectionEtapes(etapes, c) {
   return h('section', { classe: 'carte fiche-bloc' },
     h('h2', { classe: 'fiche-titre-bloc' }, 'Étapes'),
     etapes.length === 0 ? ligneVide('Aucune étape de préparation définie dans la règle.')
       : h('ol', { classe: 'liste-simple fiche-etapes' }, etapes.map((x) => h('li', null,
-        h('strong', null, x.libelle), ' ', pastille(libelle('ETAT_TACHE', x.etat), VARIANTE_ETAPE[x.etat] ?? 'gris')))));
+        h('strong', null, x.libelle), ' ', pastille(libelle('ETAT_TACHE', x.etat), VARIANTE_ETAPE[x.etat] ?? 'gris'),
+        x.faitLe && x.faitLe < c.date ? h('span', { classe: 'meta' }, ` · déjà avancé ${courtJour(x.faitLe)}`)
+          : (x.jourDecide && x.etat !== 'fait' ? h('span', { classe: 'meta' }, ` · prévu ${courtJour(x.jourDecide)}`) : null)))));
 }
 
 function sectionAllergenes(etat, c) {
@@ -140,7 +152,7 @@ export function rendre(etat, id) {
     sectionQuantite(etat, c, calc),
     sectionProvenance(c, calc),
     sectionIngredients(etat, c, calc),
-    sectionEtapes(etapes),
+    sectionEtapes(etapes, c),
     sectionAllergenes(etat, c),
     blocReperes(c.famille, etat),
     (poste || fait) ? h('div', { classe: 'fiche-actions' }, poste, fait) : null,
