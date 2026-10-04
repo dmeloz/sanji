@@ -25,7 +25,8 @@ import {
 } from './format.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
-import { ALLERGENES, PROVENANCES_SAISIE, libelleAllergene } from './reference.js';
+import { ALLERGENES, PROVENANCES_SAISIE, libelleAllergene, texteSourceAllergenes } from './reference.js';
+import { blocReperes } from './reperes-metier.js';
 import { carteTache, dialogPreparatoire, ligneProduction } from './taches.js';
 
 export const titre = () => 'Composant';
@@ -419,6 +420,7 @@ function sectionAllergenes(etat, c) {
     s.liste.length > 0
       ? h('p', null, s.statut === 'valide' ? 'Allergènes : ' : 'Cochés, non validés : ', s.liste.map(libelleAllergene).join(', '))
       : ligneVide(s.statut === 'valide' ? 'Aucun allergène coché dans la liste validée.' : 'Aucun allergène coché.'),
+    h('p', { classe: 'meta' }, texteSourceAllergenes()),
     h('div', { classe: 'actions' }, bouton('Renseigner les allergènes', () => dialogAllergenes(c), 'court')));
 }
 
@@ -485,7 +487,7 @@ export function rendre(etat, id) {
   const calc = calculerComposant(etat, id);
   racine.appendChild(h('p', null, lien(`#/detail/${c.date}`, '‹ Détail du jour'), ' · ', lien(`#/jour/${c.date}`, 'Feuille du jour')));
   for (const s of [sectionEntete(etat, c, calc), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionEtapesPreparation(etat, c), sectionProductions(etat, c),
-    sectionIngredients(etat, c, calc), sectionMemoire(etat, c), sectionAllergenes(etat, c), sectionApresService(c, calc)]) {
+    sectionIngredients(etat, c, calc), sectionMemoire(etat, c), sectionAllergenes(etat, c), sectionApresService(c, calc), blocReperes(c.famille)]) {
     if (s) racine.appendChild(s);
   }
   return racine;

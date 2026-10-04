@@ -754,3 +754,8 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 
 /* Tableau : élément implicite (sauce ou base « à confirmer »), distinct de ce que le chef a écrit. */
 .tb-implicite { font-size: var(--t-1); font-style: italic; color: var(--texte-doux); text-decoration: none; }
+
+/* Repères métier et buffet : lecture seule ; l'état se lit par le texte (pastilles étiquetées), jamais par la couleur seule. */
+.reperes-metier .repere, .buffet-couvert .repere { padding: 6px 0; border-bottom: 1px solid var(--bordure); }
+.reperes-metier .repere:last-child, .buffet-couvert .repere:last-child { border-bottom: 0; }
+.reperes-metier h4 { margin-top: 8px; }

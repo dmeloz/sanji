@@ -21,6 +21,7 @@ import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { importerPhoto, retirerPhoto, urlPhoto } from './photo.js';
 import { LIBELLE_SERVICE, libelleAllergene } from './reference.js';
+import { blocBuffet } from './reperes-metier.js';
 import { pastilleCreneau, texteCharge } from './taches.js';
 
 export const titre = () => 'Détail du jour';
@@ -222,6 +223,7 @@ function carteFiche(f) {
       ? h('p', { classe: 'alerte-texte' }, `Alerte : la répartition (${(f.repartition[1] || 0) + (f.repartition[2] || 0)}) ne correspond pas aux couverts (${f.couverts}).`) : null,
     f.allergies.trim() ? h('p', null, h('strong', null, 'Allergies : '), f.allergies) : null,
     f.remarques.trim() ? h('p', null, h('strong', null, 'Remarques : '), f.remarques) : null,
+    annulee ? null : blocBuffet(f.couverts),
     h('div', { classe: 'actions' },
       annulee ? null : bouton('Modifier', () => dialogFiche(f, f.date), 'court'),
       !annulee && f.mode === 'choix_libre' && f.statutRepartition !== 'confirmee'
