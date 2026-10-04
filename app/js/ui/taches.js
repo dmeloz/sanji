@@ -100,7 +100,7 @@ export function carteTache(etat, ligne, options = {}) {
   }
   return h('article', { classe: `tache tache-${ligne.etat}` },
     h('div', { classe: 'tache-tete' },
-      lien(`#/composant/${encodeURIComponent(ligne.composantId)}`, titre, 'tache-nom'),
+      lien(`#/fiche/${encodeURIComponent(ligne.composantId)}`, titre, 'tache-nom'),
       pastille(libelle('ETAT_TACHE', ligne.etat), VARIANTE_ETAT[ligne.etat] ?? 'gris')),
     !principale ? h('p', { classe: 'meta' }, `composant : ${ligne.nom}`) : null,
     h('p', { classe: 'tache-quantite' }, ligneQuantite),
@@ -119,7 +119,7 @@ export function actionsTache(ligne, p) {
   const court = (texte, f, classe = 'court') => bouton(texte, f, classe);
   switch (ligne.etat) {
     case 'a_preciser':
-      a.push(lien(`#/composant/${encodeURIComponent(ligne.composantId)}`, 'Préciser', 'btn btn-court'));
+      a.push(lien(`#/fiche/${encodeURIComponent(ligne.composantId)}`, 'Préciser', 'btn btn-court'));
       a.push(court('Planifier', () => dialogPlanifier(id, 'planifier')));
       break;
     case 'a_planifier':

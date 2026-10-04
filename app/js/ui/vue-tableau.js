@@ -39,7 +39,7 @@ function morceaux(menu) {
     if (i > 0) noeuds.push(h('span', { classe: 'tb-virgule' }, ', '));
     const classe = morceau.implicite ? 'tb-implicite' : morceau.auPoste ? 'tb-poste feutre' : 'tb-hors';
     noeuds.push(morceau.composantId
-      ? h('a', { href: `#/composant/${morceau.composantId}`, classe: `${classe} bord-plat` }, morceau.texte)
+      ? h('a', { href: `#/fiche/${morceau.composantId}`, classe: `${classe} bord-plat` }, morceau.texte)
       : h('span', { classe }, morceau.texte));
   });
   return noeuds;
@@ -76,7 +76,7 @@ function jourDuBord(jour) {
   const saisis = jour.menus.filter((m) => m.saisi);
   const couverts = jour.couvertsTotal !== null ? ` · ${pluriel(jour.couvertsTotal, 'couvert', 'couverts')}` : '';
   return h('li', { classe: `bord-jour${jour.estAujourdhui ? ' bord-aujourdhui' : ''}` },
-    h('a', { href: `#/detail/${jour.date}`, classe: 'bord-jour-lien feutre',
+    h('a', { href: `#/semaine/${jour.date}`, classe: 'bord-jour-lien feutre',
       'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''} : ouvrir le détail du jour` },
     `${etiquetteJour(jour.date)}${couverts} `,
     jour.estAujourdhui ? h('span', { classe: 'bord-badge' }, "aujourd'hui") : null),
@@ -97,7 +97,7 @@ function zoneMenus(bord, lundi) {
     }
   }
   contenu.push(h('p', { classe: 'bord-actions' },
-    lien(`#/menus/${lundi}`, aucunMenu ? 'Saisir les menus de la semaine' : 'Menus de la semaine', 'btn btn-court')));
+    lien(`#/import/${lundi}`, aucunMenu ? 'Saisir les menus de la semaine' : 'Menus de la semaine', 'btn btn-court')));
   return zone('menus', 'Menus de la semaine', contenu);
 }
 
@@ -182,11 +182,11 @@ function entete(tb) {
   const e = tb.bord.entete;
   return h('header', { classe: 'bord-tete' },
     h('div', { classe: 'bord-semaine-nav' },
-      h('a', { href: `#/tableau/${tb.semainePrecedente}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
+      h('a', { href: `#/semaine/${tb.semainePrecedente}/tableau`, classe: 'btn btn-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
       h('div', { classe: 'bord-semaine' },
         h('h1', { classe: 'bord-titre feutre' }, `Semaine du ${libelleJour(tb.lundi).replace(/^lundi\s+/, '')}`),
         h('p', { classe: 'bord-sous-titre' }, `Semaine ${e.semaine} · ${libelleHorsLigne()}`)),
-      h('a', { href: `#/tableau/${tb.semaineSuivante}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')),
+      h('a', { href: `#/semaine/${tb.semaineSuivante}/tableau`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')),
     h('div', { classe: 'bord-aujourdhui-ligne' },
       h('p', { classe: 'bord-date' }, `Aujourd'hui, ${libelleJour(e.date)}`),
       lien(e.lienJour, 'Ouvrir Jour →', 'btn btn-principal')),
@@ -204,7 +204,7 @@ export function rendre(etat, lundiAffiche) {
   racine.appendChild(zoneAConfirmer(tb.bord));
   racine.appendChild(zoneProduction(tb.bord));
   if (!tb.estSemaineCourante) {
-    racine.appendChild(h('p', { classe: 'tableau-pied' }, lien('#/tableau', "Revenir à aujourd'hui", 'btn')));
+    racine.appendChild(h('p', { classe: 'tableau-pied' }, lien('#/aujourdhui', "Revenir à aujourd'hui", 'btn')));
   }
   return racine;
 }

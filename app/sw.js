@@ -2,7 +2,7 @@
 // Règle du projet : tout nouveau fichier de app/ s'ajoute à FICHIERS ET la VERSION s'incrémente
 // (js/version.js doit porter la même valeur). Un test vérifie la liste.
 
-const VERSION = '43';
+const VERSION = '44';
 const NOM_CACHE = `sanji-v${VERSION}`;
 const PAGE_ACCUEIL = 'index.html';
 
@@ -45,6 +45,7 @@ const FICHIERS = [
   'js/ui/dom.js',
   'js/ui/ecran-allume.js',
   'js/ui/elements.js',
+  'js/ui/feuille-decisions.js',
   'js/ui/feuille-validation.js',
   'js/ui/fiches.js',
   'js/ui/format.js',
@@ -57,15 +58,25 @@ const FICHIERS = [
   'js/ui/reperes-metier.js',
   'js/ui/routeur.js',
   'js/ui/taches.js',
+  'js/ui/vue-aujourdhui.js',
   'js/ui/vue-composant.js',
   'js/ui/vue-detail.js',
+  'js/ui/vue-fiche.js',
+  'js/ui/vue-import.js',
   'js/ui/vue-jour.js',
   'js/ui/vue-menus.js',
+  'js/ui/vue-poste.js',
+  'js/ui/vue-production.js',
   'js/ui/vue-produits.js',
   'js/ui/vue-reglages.js',
+  'js/ui/vue-semaine.js',
+  'js/ui/vue-stock.js',
   'js/ui/vue-tableau.js',
   'js/version.js',
   'manifest.webmanifest',
+  'polices/IBMPlexMono-Medium.woff2',
+  'polices/IBMPlexMono-SemiBold.woff2',
+  'polices/LICENSE.txt',
 ];
 
 self.addEventListener('install', (evenement) => {

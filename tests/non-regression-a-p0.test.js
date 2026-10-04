@@ -25,7 +25,16 @@ before(async () => {
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   routeur = await import('../app/js/ui/routeur.js');
-  vues = routeur.VUES;
+  // Les vues-relais du routeur (clés = adresses) plus les vues d'origine sous leurs anciens noms : les relais délèguent à celles-ci.
+  vues = {
+    ...routeur.VUES,
+    tableau: await import('../app/js/ui/vue-tableau.js'),
+    menus: await import('../app/js/ui/vue-menus.js'),
+    detail: await import('../app/js/ui/vue-detail.js'),
+    jour: await import('../app/js/ui/vue-jour.js'),
+    composant: await import('../app/js/ui/vue-composant.js'),
+    produits: await import('../app/js/ui/vue-produits.js'),
+  };
 });
 after(() => dom.restaurer());
 
@@ -67,8 +76,10 @@ const RENDUS = (e) => {
   return [
     ['tableau', null], ['tableau', S.lundiSuivant], ['menus', S.lundiSuivant], ['detail', S.lundiSuivant], ['detail', S.samedi],
     ['jour', S.samedi], ['jour', S.lundiSuivant], ['produits', S.lundiSuivant], ['reglages', null],
+    ['aujourdhui', null], ['production', S.samedi], ['semaine', null], ['semaine', S.samedi], ['stock', S.lundiSuivant], ['import', S.lundiSuivant],
     ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees'],
     ...composants.slice(0, 4).map((id) => ['composant', id]),
+    ...composants.slice(0, 2).map((id) => ['fiche', id]),
   ];
 };
 
@@ -80,7 +91,7 @@ test('liens : chaque lien interne de chaque écran mène à une vue qui existe, 
       for (const href of liensDe(noeud)) {
         const { vue: cible, param: p } = routeur.analyserHash(href, S.samedi);
         assert.ok(Object.hasOwn(vues, cible), `${nom} / ${vue} ${param} : lien ${href} vers une vue inconnue`);
-        if (cible === 'composant') {
+        if (cible === 'fiche') {
           assert.ok(magasin.etat().composants[p], `${nom} / ${vue} ${param} : lien ${href} vers un composant qui n'existe pas`);
         }
       }
@@ -88,18 +99,20 @@ test('liens : chaque lien interne de chaque écran mène à une vue qui existe, 
   }
 });
 
-test('liens : les adresses historiques (#/accueil, #/semaine) mènent toujours au Tableau', () => {
-  for (const hash of ['#/accueil', '#/semaine', `#/semaine/${S.lundi}`, '#/', '', '#/inconnu']) {
-    assert.equal(routeur.analyserHash(hash, S.samedi).vue, 'tableau', hash);
+test('liens : les adresses historiques mènent toujours à une page, et une route inconnue à Aujourd\'hui', () => {
+  for (const hash of ['#/accueil', '#/tableau', '#/', '', '#/inconnu']) {
+    assert.equal(routeur.analyserHash(hash, S.samedi).vue, 'aujourdhui', hash);
   }
+  const attendu = { '#/jour': 'production', '#/detail': 'semaine', '#/produits': 'stock', '#/menus': 'import', [`#/composant/${'x'}`]: 'fiche' };
+  for (const [hash, vue] of Object.entries(attendu)) assert.equal(routeur.analyserHash(hash, S.samedi).vue, vue, hash);
 });
 
-test('liens : le Tableau mène à un jour, à un plat, aux prévisions, aux réglages et à la semaine suivante', () => {
+test('liens : Aujourd\'hui mène à un jour, à un plat, aux prévisions et à la semaine suivante', () => {
   const e = semaineComplete();
   magasin.remplacer(e);
   const noeud = aDate(S.samedi, () => vues.tableau.rendre(magasin.etat(), S.lundiSuivant));
   const cibles = new Set(liensDe(noeud).map((href) => routeur.analyserHash(href, S.samedi).vue));
-  for (const attendu of ['detail', 'composant', 'menus', 'tableau']) assert.ok(cibles.has(attendu), `le Tableau ne mène plus à « ${attendu} »`);
+  for (const attendu of ['semaine', 'fiche', 'import']) assert.ok(cibles.has(attendu), `le Tableau ne mène plus à « ${attendu} »`);
 });
 
 // ---------------------------------------------------------------- aucune tâche ne disparaît
@@ -206,7 +219,7 @@ test('routeur : #/reglages est la racine, #/reglages/<rubrique> une sous-page, u
   assert.deepEqual(routeur.analyserHash('#/reglages', S.samedi), { vue: 'reglages', param: null });
   for (const c of RUBRIQUES_REGLAGES) {
     assert.deepEqual(routeur.analyserHash(`#/reglages/${c}`, S.samedi), { vue: 'reglages', param: c });
-    assert.equal(routeur.ONGLET_DE_VUE[routeur.analyserHash(`#/reglages/${c}`, S.samedi).vue], 'reglages');
+    assert.equal(routeur.ONGLET_DE_VUE[routeur.analyserHash(`#/reglages/${c}`, S.samedi).vue], 'aujourdhui', 'Réglages n\'a plus d\'onglet : il s\'ouvre depuis Aujourd\'hui');
   }
   assert.deepEqual(routeur.analyserHash('#/reglages/inconnue', S.samedi), { vue: 'reglages', param: null });
   // Chaque sous-page a son titre de barre et un lien de retour « ‹ Réglages ».
@@ -220,9 +233,10 @@ test('routeur : #/reglages est la racine, #/reglages/<rubrique> une sous-page, u
   }
 });
 
-test('inventaire : les quatre onglets et les sept vues de l\'application sont déclarés', () => {
-  assert.deepEqual(Object.keys(vues).sort(), ['composant', 'detail', 'jour', 'menus', 'produits', 'reglages', 'tableau']);
-  assert.deepEqual([...new Set(Object.values(routeur.ONGLET_DE_VUE))].sort(), ['jour', 'produits', 'reglages', 'tableau']);
+test('inventaire : les quatre onglets et les huit vues du routeur sont déclarés, les vues d\'origine existent encore', () => {
+  assert.deepEqual(Object.keys(routeur.VUES).sort(), ['aujourdhui', 'fiche', 'import', 'poste', 'production', 'reglages', 'semaine', 'stock']);
+  assert.deepEqual(Object.keys(vues).sort(), [...Object.keys(routeur.VUES), 'composant', 'detail', 'jour', 'menus', 'produits', 'tableau'].sort());
+  assert.deepEqual([...new Set(Object.values(routeur.ONGLET_DE_VUE))].sort(), ['aujourdhui', 'production', 'semaine', 'stock']);
 });
 
 // ---------------------------------------------------------------- défaut connu, à corriger en A-P1 (test « rouge » assumé)

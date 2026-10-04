@@ -45,7 +45,7 @@ export function ouvrirFiche(ficheId) {
       ]),
       repartitionIncoherente(f)
         ? h('p', { classe: 'alerte-texte' }, `La répartition (${sommeRepartition(f)}) ne correspond pas aux couverts (${f.couverts}).`) : null,
-      lien(`#/detail/${f.date}`, 'Ouvrir le jour pour modifier', 'lien'),
+      lien(`#/semaine/${f.date}`, 'Ouvrir le jour pour modifier', 'lien'),
     ],
   });
 }

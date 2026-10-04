@@ -51,7 +51,7 @@ test('bord : fiches de fonction = horaire, numéro, couverts, mode, allergies, l
   const { fiches } = tableauBlanc(e, S.mardi).bord;
   assert.deepEqual(fiches.map((f) => f.numero), ['FICHE_TEST_1'], 'les fiches passées de la semaine ne sont pas à venir');
   assert.deepEqual([fiches[0].horaire, fiches[0].couverts, fiches[0].mode, fiches[0].aAllergies, fiches[0].lien],
-    ['12:00', 24, 'menu_fixe', true, `#/detail/${S.mardi}`]);
+    ['12:00', 24, 'menu_fixe', true, `#/semaine/${S.mardi}`]);
   assert.match(fiches[0].modeTexte, /Menu fixe/);
 });
 
@@ -81,7 +81,7 @@ test('bord : un écart à arbitrer est une ligne de « À confirmer » qui mène
   prevision(e, S.mercredi, 1, 20);
   const ligne = tableauBlanc(e, S.mardi).bord.aConfirmer.lignes.find((l) => /écart/.test(l.texte));
   assert.ok(ligne, 'écart à arbitrer');
-  assert.equal(ligne.lien, `#/jour/${S.mardi}`);
+  assert.equal(ligne.lien, `#/production/${S.mardi}`);
 });
 
 test('bord : production = jauge « x/y fait » vers Jour ; une avance possible et le chiffrage restent dits calmement', () => {
@@ -92,7 +92,7 @@ test('bord : production = jauge « x/y fait » vers Jour ; une avance possible e
   planifier(e, p, S.mardi, 'apres_midi', h());
   let { production } = tableauBlanc(e, S.mardi).bord;
   assert.deepEqual(production.avancement, { faites: 0, total: 1 });
-  assert.equal(production.lien, `#/jour/${S.mardi}`);
+  assert.equal(production.lien, `#/production/${S.mardi}`);
   marquerFait(e, p, undefined, h(1));
   production = tableauBlanc(e, S.mardi).bord.production;
   assert.deepEqual(production.avancement, { faites: 1, total: 1 });
@@ -109,7 +109,7 @@ test('bord : une commande à revérifier mène à Produits', () => {
   prevision(e, S.lundi, 1, 50);
   const commande = tableauBlanc(e, S.lundi).bord.production.commande;
   assert.ok(commande, 'le besoin a changé depuis le contrôle');
-  assert.equal(commande.lien, `#/produits/${S.lundi}`);
+  assert.equal(commande.lien, `#/stock/achats/${S.lundi}`);
 });
 
 test('bord : chaque ancienne ligne de la note a une destination (chiffrage, sauvegarde, semaine type)', () => {
@@ -128,7 +128,7 @@ test('bord : chaque ancienne ligne de la note a une destination (chiffrage, sauv
 });
 
 test('bord : l\'action de l\'en-tête mène à la feuille du jour', () => {
-  assert.equal(tableauBlanc(semaine(), S.mardi).bord.entete.lienJour, `#/jour/${S.mardi}`);
+  assert.equal(tableauBlanc(semaine(), S.mardi).bord.entete.lienJour, `#/production/${S.mardi}`);
 });
 
 test('bord : « À confirmer » compte des lignes distinctes ; les « conservation à confirmer » sont regroupées en une ligne', () => {
@@ -173,7 +173,7 @@ test('bord : une autre semaine affichée a sa propre production, jamais les chif
   assert.equal(autre.lundi, S.lundiSuivant);
   assert.deepEqual(autre.avancement, { faites: 0, total: 1 }, 'la tâche de la semaine affichée, pas celle d\'aujourd\'hui');
   assert.equal(autre.avances, 0);
-  assert.equal(autre.lien, `#/jour/${S.lundiSuivant}`);
+  assert.equal(autre.lien, `#/production/${S.lundiSuivant}`);
 });
 
 test('bord : les menus d\'une autre semaine sont les trois premiers jours à menu saisi de cette semaine', () => {

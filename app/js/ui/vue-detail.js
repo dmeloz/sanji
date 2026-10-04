@@ -129,7 +129,7 @@ function interrupteurAuPoste(c) {
 function ligneComposant(c) {
   return h('li', { classe: 'composant-ligne' },
     h('div', { classe: 'composant-tete' },
-      lien(`#/composant/${encodeURIComponent(c.id)}`, c.nom, 'tache-nom'),
+      lien(`#/fiche/${encodeURIComponent(c.id)}`, c.nom, 'tache-nom'),
       interrupteurAuPoste(c)),
     h('p', { classe: 'meta' }, libelle('CATEGORIE', c.categorie)),
     h('div', { classe: 'actions' },
@@ -159,7 +159,7 @@ function sectionMenus(etat, date) {
   }
   return h('section', { classe: 'carte', id: 'menus' },
     h('h2', { classe: 'section-titre' }, 'Menus du jour'),
-    h('div', { classe: 'actions' }, lien(`#/menus/${lundiDe(date)}`, 'Saisir toute la semaine', 'btn btn-court')),
+    h('div', { classe: 'actions' }, lien(`#/import/${lundiDe(date)}`, 'Saisir toute la semaine', 'btn btn-court')),
     h('p', { classe: 'aide' }, 'L\'application répartit seule ce qui revient au poste ; corrigez seulement une exception.'),
     blocPhoto(date),
     blocMenu(etat, date, 1),
@@ -338,7 +338,7 @@ function versAncre(id) {
 }
 
 function actionPoint(p) {
-  if (p.composantId) return lien(`#/composant/${encodeURIComponent(p.composantId)}`, 'Ouvrir le composant', 'btn btn-court');
+  if (p.composantId) return lien(`#/fiche/${encodeURIComponent(p.composantId)}`, 'Ouvrir le composant', 'btn btn-court');
   if (p.type === 'prevision_manquante') return bouton('Aller aux prévisions', versAncre('previsions'), 'court');
   if (p.ficheId) return bouton('Aller aux fiches', versAncre('fiches'), 'court');
   return bouton('Aller aux menus', versAncre('menus'), 'court');
@@ -358,10 +358,10 @@ export function rendre(etat, date) {
   const racine = h('div', { classe: 'vue vue-detail' });
   racine.appendChild(h('h1', { classe: 'page-titre' }, libelleJour(date)));
   racine.appendChild(navigationPeriode(
-    { href: `#/detail/${ajouterJours(date, -1)}`, texte: '‹ Jour précédent' },
-    { href: `#/semaine/${lundiDe(date)}`, texte: 'Semaine' },
-    { href: `#/detail/${ajouterJours(date, 1)}`, texte: 'Jour suivant ›' }));
-  racine.appendChild(h('p', null, lien(`#/jour/${date}`, 'Voir la feuille du jour')));
+    { href: `#/semaine/${ajouterJours(date, -1)}`, texte: '‹ Jour précédent' },
+    { href: `#/semaine/${lundiDe(date)}/tableau`, texte: 'Semaine' },
+    { href: `#/semaine/${ajouterJours(date, 1)}`, texte: 'Jour suivant ›' }));
+  racine.appendChild(h('p', null, lien(`#/production/${date}`, 'Voir la feuille du jour')));
   if (!estOuvert(date)) {
     racine.appendChild(h('p', { classe: 'ferme' }, 'fermé'));
     racine.appendChild(h('p', { classe: 'aide' }, 'Le dimanche est non travaillé, sans tâche ; il reste compté dans le temps de conservation.'));

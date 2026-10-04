@@ -163,9 +163,9 @@ export function rendre(etat, lundi) {
   const racine = h('div', { classe: 'vue vue-produits' });
   racine.appendChild(h('h1', { classe: 'page-titre' }, `Produits : semaine du ${libelleJour(lundi)}`));
   racine.appendChild(navigationPeriode(
-    { href: `#/produits/${ajouterJours(lundi, -7)}`, texte: '‹ Semaine précédente' },
-    { href: `#/produits/${lundiDe(aujourd)}`, texte: "Aujourd'hui" },
-    { href: `#/produits/${ajouterJours(lundi, 7)}`, texte: 'Semaine suivante ›' }));
+    { href: `#/stock/achats/${ajouterJours(lundi, -7)}`, texte: '‹ Semaine précédente' },
+    { href: `#/stock/achats/${lundiDe(aujourd)}`, texte: "Aujourd'hui" },
+    { href: `#/stock/achats/${ajouterJours(lundi, 7)}`, texte: 'Semaine suivante ›' }));
   racine.appendChild(encadre('info', 'Aucun stock théorique, aucun approvisionnement garanti.'));
   racine.appendChild(h('div', { classe: 'actions pas-imprime' }, bouton('Imprimer la liste', imprimer, 'court')));
   racine.appendChild(h('h2', { classe: 'section-titre' }, 'Besoins chiffrés'));
@@ -188,7 +188,7 @@ export function rendre(etat, lundi) {
       false,
       h('ul', { classe: 'liste-points liste-compacte' }, nonChiffrables.map((n) => h('li', null,
         h('span', null, `${n.nom} (${libelleJour(n.date)}) : ${n.raison}`),
-        lien(`#/composant/${encodeURIComponent(n.composantId)}`, 'Ouvrir', 'btn btn-court')))),
+        lien(`#/fiche/${encodeURIComponent(n.composantId)}`, 'Ouvrir', 'btn btn-court')))),
       { classe: 'carte' }));
   }
   return racine;
