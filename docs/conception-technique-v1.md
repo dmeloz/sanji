@@ -416,3 +416,15 @@ Cette section résume ce qui a changé depuis la section 17. Le détail des choi
 - Les pâtes et le risotto du menu 1 ne sont pas avançables par défaut ; une herbe ou une sauce implicite n'est jamais comptée en portions.
 
 **Vérification** : 528 tests sous faux DOM ; captures du rendu réel à 390 px avec Chrome sans fenêtre ; deux relectures indépendantes (lecture seule). Non vérifié : un vrai iPhone, le tactile, IndexedDB réelle après fermeture complète, le service worker.
+
+## 19. Savoir branché : standards de base (2026-10-04, versions 39 à 42)
+
+Décision validée : « Standards de base et ajustement terrain ». Rangement préalable : tout le savoir dans `savoir/` (base métier, repères de portion, référentiel culinaire), documents dans `docs/`.
+
+- **Données** : `savoir/culinaire/rattachements.json` (choisi à la main, sans chiffre) rattache une quarantaine d'entrées du référentiel à une famille, un groupe ou une règle générale, avec usage et unité normalisée ; le générateur produit `app/js/donnees/savoir-culinaire.js` (≈ 406 Ko, gelé, testé à jour).
+- **Domaine** : `standards-base.js` (`standardDeBase`, `rendementDeBase`, `reperesConservation`, `reperesCuisson`, `reperesAide`) ; `ajustements.js` + `actions-ajustements.js` (`etat.ajustements`, `valeurEffective`, garde-fous de vraisemblance, avertissement d'hygiène sur la borne prudente) ; `apprentissage.js` + `actions-apprentissage.js` (3 corrections dans le même sens en 30 jours, une par plat et par jour, sens mélangés = rien ; proposition dans « À confirmer »).
+- **Calcul et commandes** : statut `STANDARD_BASE` (n'est plus `aValider`) ; une quantité calculée dessus est commandable avec la marge ; la quantité notée est figée au geste « noter » et devient « à relire » si le calcul change ; `INCONNU` reste non commandable sans quantité tapée ; `quantiteAcheter` n'est jamais remplie par le calcul.
+- **Planification** : conservation du référentiel ou valeur de la propriétaire → avertissement, jamais blocage (seule `limiteUtilisationJours` bloque) ; riz cuit signalé dès J-2 ; règle de refroidissement (2 h) rappelée « Après service ».
+- **Interface** : Réglages > Standards de base (changer, revenir au standard, écarts) ; Réglages > Repères métier (consultation repliée) ; bloc « Repères métier » dans la fiche de composant ; buffet par couvert sur les fiches de fonction ; source légale des allergènes.
+- **Vérification** : 639 tests ; relecture indépendante (0 critique, 4 importants et 6 mineurs corrigés) ; captures réelles à 390 px. Non vérifié : un vrai iPhone.
+
