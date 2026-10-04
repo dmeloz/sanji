@@ -121,7 +121,7 @@ test('les pâtes du menu 1 restent le jour même (aucune avance proposée)', () 
 
 test('refroidissement : phrase du standard de base (2 h, de 50 à 10 °C)', () => {
   const t = aideRefroidissement();
-  assert.match(t, /Refroidir vite après la cuisson : 2 h \(de 50 à 10 °C\) au plus/);
+  assert.match(t, /Refroidir vite après la cuisson : 2 h \(de 50 à 10 °C\) au plus \(standard de base, référentiel culinaire\)\.$/);
   assert.match(t, /standard de base, référentiel culinaire/);
 });
 

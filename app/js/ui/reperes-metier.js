@@ -89,7 +89,10 @@ function rubriques(lignes, max = Infinity) {
     const l = lignes.filter((x) => x.rubrique === r);
     if (l.length === 0) return null;
     reste += Math.max(0, l.length - max);
-    return h('div', null, h('h4', { classe: 'bloc-titre' }, r), h('ul', { classe: 'liste-simple' }, l.slice(0, max).map(rendreLigne)));
+    const liste = h('ul', { classe: 'liste-simple' }, l.slice(0, max).map(rendreLigne));
+    // Page complète : une rubrique repliée par sujet (fermée), pour ne pas imposer des milliers de pixels à lire.
+    if (max === Infinity) return repliable(h('strong', null, `${r} (${l.length})`), false, [liste], { classe: 'repliable-groupe' });
+    return h('div', null, h('h4', { classe: 'bloc-titre' }, r), liste);
   });
   return { blocs, reste };
 }

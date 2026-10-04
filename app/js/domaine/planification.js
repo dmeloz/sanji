@@ -75,8 +75,7 @@ export function repereConservation(composant) {
 export function aideRefroidissement() {
   const std = standardDeBase(null, 'refroidissement', { regle: 'refroidissement' });
   if (!std || std.unite !== 'h') return null;
-  return `Refroidir vite après la cuisson : ${String(std.valeur).replace('.', ',')} ${std.uniteSource} au plus `
-    + `(${texteProvenance(std)}).`;
+  return `Refroidir vite après la cuisson : ${String(std.valeur).replace('.', ',')} ${std.uniteSource} au plus (standard de base, ${std.origine === 'referentiel' ? 'référentiel culinaire' : 'base métier'}).`;
 }
 
 /**

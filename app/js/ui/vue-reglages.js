@@ -197,14 +197,15 @@ function ligneBase(l) {
         { 'aria-label': `Revenir au standard de base : ${nom}` }) : null));
 }
 
+const texteChanges = (n, total) => (n === 0 ? `${total} valeur${total > 1 ? 's' : ''} de base` : `${n} sur ${total} changée${n > 1 ? 's' : ''} par vous`);
+
 /** Standards de base : une ligne par sujet rattaché, repliée par usage ; « Changer » ouvre un panneau, la valeur passe devant. */
 function sectionStandardsBase(etat) {
   return h('section', { classe: 'carte' },
-    titreSection('Standards de base', 'standards-base'),
-    h('p', { classe: 'aide' }, 'On part de ce que disent les manuels. Quand la réalité de votre cuisine est différente, changez la valeur : '
+    h('p', { classe: 'aide', id: 'standards-base' }, 'On part de ce que disent les manuels. Quand la réalité de votre cuisine est différente, changez la valeur : '
       + 'votre valeur passe devant, pour toujours. « Revenir au standard » rétablit la valeur de base.'),
     lignesStandardsBase(etat).map((u) => (u.lignes.length === 0 ? null
-      : repliable(`${u.titre} · ${u.lignes.filter((l) => l.ajuste).length} changé(s) sur ${u.lignes.length}`, u.lignes.some((l) => l.ajuste),
+      : repliable(`${u.titre} · ${texteChanges(u.lignes.filter((l) => l.ajuste).length, u.lignes.length)}`, u.lignes.some((l) => l.ajuste),
         h('ul', { classe: 'liste-standards' }, u.lignes.map((l) => ligneBase({ ...l, usageTitre: u.titre }))), { classe: 'repliable-groupe' }))));
 }
 

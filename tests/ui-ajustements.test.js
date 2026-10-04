@@ -119,11 +119,11 @@ test('une ligne ajustée déplie son repli ; le titre compte les valeurs changé
   magasin.remplacer(etatVide());
   const vide = page().tous((x) => x.balise === 'details')[0];
   assert.equal(vide.open, false);
-  assert.match(vide.querySelector('summary').textContent, /0 changé\(s\) sur \d+/);
+  assert.match(vide.querySelector('summary').textContent, /\d+ valeurs? de base/);
   const e = etatVide();
   e.ajustements['rendement_parage|carottes'] = { valeur: 30, unite: '%', le: null, avant: { valeur: 18.5, origine: 'referentiel' } };
   magasin.remplacer(e);
   const un = page().tous((x) => x.balise === 'details')[0];
   assert.equal(un.open, true);
-  assert.match(un.querySelector('summary').textContent, /1 changé\(s\) sur \d+/);
+  assert.match(un.querySelector('summary').textContent, /1 sur \d+ changée par vous/);
 });
