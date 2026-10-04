@@ -3,7 +3,8 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { composantVide, etatInitial } from '../app/js/domaine/etat.js';
+import { memoriser, modifierComposant, reprendreMemoire } from '../app/js/domaine/actions.js';
+import { composantVide, etatInitial, importer } from '../app/js/domaine/etat.js';
 import { accepterApprentissage, ecarterApprentissage } from '../app/js/domaine/actions-apprentissage.js';
 import { propositionsApprentissage } from '../app/js/domaine/apprentissage.js';
 import { grammageEffectif } from '../app/js/domaine/savoir.js';
@@ -13,10 +14,10 @@ const AUJOURDHUI = '2026-10-06';
 
 let n = 0;
 /** Un plat « riz » en garniture corrigé à la main : `valeur` en `etat` de poids, servi le `date`. */
-function corriger(e, date, valeur, { etat = 'sec', famille = 'riz', role = 'garniture', statut = 'RESTAURANT_VALIDE', nom = 'riz' } = {}) {
+function corriger(e, date, valeur, { etat = 'sec', famille = 'riz', role = 'garniture', statut = 'RESTAURANT_VALIDE', nom = 'riz', menu = 2 } = {}) {
   n += 1;
   const id = `c_${n}`;
-  e.composants[id] = { ...composantVide(id), date, menu: 2, nom, categorie: 'feculent', famille, role, attribue: true, valide: true,
+  e.composants[id] = { ...composantVide(id), date, menu, nom, categorie: 'feculent', famille, role, attribue: true, valide: true,
     grammage: { valeur, unite: 'g', etat, statut, source: 'corrigé pour ce plat' } };
   return id;
 }
@@ -52,12 +53,79 @@ test('médiane de nombre pair arrondie au gramme', () => {
   assert.equal(propositions(e)[0].valeur, 83); // (81 + 84) / 2 = 82,5 -> 83
 });
 
-test('sens mélangés : rien', () => {
+test('sens mélangés : rien, même quand un sens atteint le seuil (3 plus + 1 moins, 3 plus + 3 moins)', () => {
   const e = etatInitial();
   corriger(e, '2026-10-01', 80);
   corriger(e, '2026-10-02', 90);
   corriger(e, '2026-10-03', 40);
   assert.deepEqual(propositions(e), []);
+  const f = etatInitial();
+  for (const [j, v] of [['2026-10-01', 80], ['2026-10-02', 90], ['2026-10-03', 85], ['2026-10-04', 40]]) corriger(f, j, v);
+  assert.deepEqual(propositions(f), [], '3 plus et 1 moins : pas de tendance');
+  for (const [j, v] of [['2026-10-04', 45], ['2026-10-05', 42]]) corriger(f, j, v);
+  assert.deepEqual(propositions(f), [], '3 plus et 3 moins : pas de tendance');
+  const g = etatInitial();
+  for (const [j, v] of [['2026-10-01', 80], ['2026-10-02', 90], ['2026-10-03', 85]]) corriger(g, j, v);
+  assert.equal(propositions(g).length, 1, 'contrôle : sans le sens contraire, la proposition existe');
+});
+
+test('une correction par plat et par jour : le même plat en menu 1 et menu 2 le même jour compte pour une', () => {
+  const e = etatInitial();
+  corriger(e, '2026-10-01', 80, { menu: 1 });
+  corriger(e, '2026-10-01', 80, { menu: 2 });
+  corriger(e, '2026-10-02', 90);
+  assert.deepEqual(propositions(e), [], '2 corrections, pas 3');
+  corriger(e, '2026-10-03', 86);
+  const [p] = propositions(e);
+  assert.equal(p.nombre, 3);
+  assert.deepEqual(p.dates, ['2026-10-01', '2026-10-02', '2026-10-03']);
+  corriger(e, '2026-10-03', 86, { nom: 'riz basmati' });
+  assert.equal(propositions(e)[0].nombre, 4, 'un autre plat le même jour compte');
+});
+
+test('les corrections datées d\'un jour futur ne comptent pas (borne haute : aujourd\'hui)', () => {
+  const e = etatInitial();
+  corriger(e, '2026-10-05', 80);
+  corriger(e, '2026-10-07', 90);
+  corriger(e, '2026-10-08', 86);
+  assert.deepEqual(propositions(e), [], 'au 06/10 : une seule correction a eu lieu');
+  assert.equal(propositions(e, '2026-10-08').length, 1, 'au 08/10 : les trois ont eu lieu');
+  corriger(e, '2026-10-06', 88);
+  assert.deepEqual(propositions(e, AUJOURDHUI), [], 'au 06/10 : deux corrections seulement');
+  assert.equal(propositions(e, '2026-10-08')[0].nombre, 4);
+});
+
+test('reprendreMemoire : un grammage repris de la mémoire n\'est pas une correction', () => {
+  const e = etatInitial();
+  const a = corriger(e, '2026-10-01', 80);
+  memoriser(e, a, '2026-10-01T09:00:00.000Z');
+  const b = corriger(e, '2026-10-02', 80);
+  e.composants[b].grammage = { valeur: null, unite: 'g', statut: 'INCONNU', source: '', etat: 'cuit' };
+  assert.equal(reprendreMemoire(e, b, '2026-10-02T09:00:00.000Z').applique, true);
+  assert.equal(e.composants[b].grammage.valeur, 80, 'le grammage a bien été repris');
+  corriger(e, '2026-10-03', 90);
+  assert.deepEqual(propositions(e), [], 'A et C sont deux corrections ; B est une reprise');
+  corriger(e, '2026-10-04', 85);
+  assert.equal(propositions(e)[0].nombre, 3, 'A, C et D');
+  // Une retouche du grammage repris est, elle, une correction.
+  modifierComposant(e, b, { grammage: { valeur: 82 } }, '2026-10-05T09:00:00.000Z');
+  assert.equal(propositions(e)[0].nombre, 4);
+});
+
+test('import : une proposition écartée doit avoir une date valide, pas dans le futur au-delà de demain, et des composants en liste', () => {
+  const doc = (validations) => JSON.stringify({ application: 'sanji-entremetier', schema: 1, etat: { validations } });
+  const lire = (validations) => importer(doc(validations), '2026-10-06').validations;
+  const bonne = { statut: 'ecarte', h: '2026-10-06T09:00:00.000Z', vus: ['c_1'] };
+  assert.deepEqual(lire({ 'apprentissage:riz|garniture': bonne }), { 'apprentissage:riz|garniture': bonne });
+  assert.deepEqual(Object.keys(lire({ 'apprentissage:riz|garniture': { ...bonne, h: '2026-10-07T09:00:00.000Z' } })), ['apprentissage:riz|garniture'], 'demain : toléré (fuseau)');
+  for (const mauvaise of [
+    { ...bonne, h: '2999-01-01T00:00:00.000Z' }, { ...bonne, h: '2026-10-08T00:00:00.000Z' }, { ...bonne, h: 'hier' }, { ...bonne, h: 20261006 },
+    { ...bonne, h: undefined }, { ...bonne, h: '2026-13-45T00:00:00.000Z' }, { ...bonne, statut: 'autre' }, { ...bonne, vus: 'c_1' },
+    { ...bonne, vus: [1, 2] }, { ...bonne, vus: -1 }, 'texte', [1], null,
+  ]) {
+    assert.deepEqual(lire({ 'apprentissage:riz|garniture': mauvaise }), {}, JSON.stringify(mauvaise));
+  }
+  assert.deepEqual(lire({ autre: { n: 1 } }), { autre: { n: 1 } }, 'les autres validations ne sont pas touchées');
 });
 
 test('état de poids différent : pas mélangé', () => {

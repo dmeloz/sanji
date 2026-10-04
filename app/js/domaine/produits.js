@@ -65,7 +65,8 @@ export function besoinsProduits(etat, lundi) {
  * (comparaison arrondie à l'unité). `proposeeACommander` n'existe qu'après une vérification chiffrée ;
  * `quantiteAcheter` n'est jamais remplie automatiquement.
  * `quantiteCalculee` : besoin majoré de la marge, moins le disponible vérifié s'il l'est ; null si la ligne dépend d'une
- * valeur inconnue. `quantiteCommandable` : pour une ligne notée, la quantité tapée, sinon la quantité calculée ;
+ * valeur inconnue. `quantiteCommandable` : pour une ligne notée, la quantité tapée, sinon la quantité calculée AU MOMENT
+ * de la note (`quantiteNotee`) ;
  * `origineQuantite` dit laquelle ('tapee' | 'standard_base' | 'calculee' | null).
  */
 export function suiviProduit(etat, lundi, ligne) {
@@ -78,17 +79,24 @@ export function suiviProduit(etat, lundi, ligne) {
   const besoinMajore = Math.round(ligne.besoinBrut * (1 + (margePourcent ?? 0) / 100));
   const proposeeACommander = Number.isFinite(suivi.quantiteVerifiee)
     ? Math.max(0, besoinMajore - Math.round(suivi.quantiteVerifiee)) : null;
-  // « À relire » : la ligne est notée et le besoin a changé depuis. La quantité notée n'est jamais modifiée.
-  const aRelire = suivi.etatLigne === 'note'
-    && (!Number.isFinite(suivi.besoinAuNote) || Math.round(suivi.besoinAuNote) !== Math.round(ligne.besoinBrut));
   const quantiteCalculee = ligne.aValider ? null : proposeeACommander ?? besoinMajore;
   const tapee = Number.isFinite(suivi.quantiteAcheter);
   const note = suivi.etatLigne === 'note';
-  const quantiteCommandable = !note ? null : tapee ? suivi.quantiteAcheter : quantiteCalculee;
+  // Sans quantité tapée, la quantité commandable est celle du moment où la ligne a été notée (jamais recalculée seule) ;
+  // un ancien suivi sans quantité mémorisée prend le calcul courant. Une ligne devenue INCONNU n'est plus commandable ainsi.
+  const memorisee = Number.isFinite(suivi.quantiteNotee) && !ligne.aValider ? suivi.quantiteNotee : null;
+  const quantiteCommandable = !note ? null : tapee ? suivi.quantiteAcheter : memorisee ?? quantiteCalculee;
+  // « À relire » : la ligne est notée et le besoin a changé depuis, ou la quantité recalculée n'est plus celle notée.
+  // La quantité notée n'est jamais modifiée.
+  const besoinNoteChange = !Number.isFinite(suivi.besoinAuNote) || Math.round(suivi.besoinAuNote) !== Math.round(ligne.besoinBrut);
+  const quantiteChange = !tapee && memorisee !== null && quantiteCalculee !== null && quantiteCalculee !== memorisee;
+  const aRelire = note && (besoinNoteChange || quantiteChange);
+  const raisonARelire = !aRelire ? null : besoinNoteChange ? 'besoin' : 'quantite';
   const origineQuantite = quantiteCommandable === null ? null : tapee ? 'tapee'
     : ligne.standardBase ? 'standard_base' : 'calculee';
   return {
-    etatLigne: suivi.etatLigne, besoinAuNote: suivi.besoinAuNote, historique: suivi.historique, aRelire,
+    etatLigne: suivi.etatLigne, besoinAuNote: suivi.besoinAuNote, historique: suivi.historique, aRelire, raisonARelire,
+    quantiteNotee: memorisee,
     besoinMajore, quantiteCalculee, quantiteCommandable, origineQuantite, standardBase: Boolean(ligne.standardBase),
     statutAffiche, statut: suivi.statut, besoinBrut: ligne.besoinBrut, besoinAuControle: suivi.besoinAuControle,
     quantiteVerifiee: suivi.quantiteVerifiee, proposeeACommander, margePourcent, estimationAValider: ligne.aValider,

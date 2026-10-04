@@ -2,9 +2,11 @@
 // temps et températures de cuisson, techniques et conservation, avec fourchette, « standard de base », provenance courte
 // et « à valider localement ». Rien n'est copié dans un champ de saisie ni dans l'état. Aucun chiffre ici.
 //
-// API : reperesPour(cle) -> lignes ; blocReperes(cle) -> <details> fermé ou null ; blocBuffet(couverts) -> <details> ;
-//       pageReperesMetier(conteneur, { theme }) -> page de consultation (branchée par l'intégrateur).
+// API : reperesPour(cle, etat?) -> lignes ; blocReperes(cle, etat?) -> <details> fermé ou null ; blocBuffet(couverts) -> <details> ;
+//       pageReperesMetier(conteneur, { theme, etat? }) -> page de consultation (branchée par l'intégrateur).
+//       Avec `etat`, un repère que la propriétaire a ajusté montre d'abord « votre valeur : N », puis le standard de base.
 
+import { ajustementDe } from '../domaine/ajustements.js';
 import {
   LIBELLE_STANDARD_BASE, rattachementsDe, reperesAide, reperesConservation, reperesCuisson, standardDeBase, texteProvenance,
 } from '../domaine/standards-base.js';
@@ -44,17 +46,23 @@ function provenanceEntree(x) {
 function ligneAide(x) {
   const rubrique = /cuisson|cuire|rendement|temps/.test(x.id) ? 'Cuisson' : /conserv|stock/.test(x.id) ? 'Conservation' : 'Techniques';
   return {
-    rubrique, id: x.id, titre: x.sujet, texte: coupe(x.enonce), standard: null,
+    rubrique, id: x.id, titre: x.sujet, texte: coupe(x.enonce), votre: null, standard: null,
     fourchette: x.valeur ? texteFourchette(x.valeur, x.valeur.unite) : '', provenance: provenanceEntree(x),
     aValiderLocalement: x.portee === 'a_valider_localement',
   };
 }
 
-function ligneStandard(std, rubrique) {
+/** Sujet de l'ajustement d'un standard : famille, « groupe:<clé> » ou « regle:<clé> ». */
+const sujetDe = (c) => c?.famille ?? (c?.groupe ? `groupe:${c.groupe}` : c?.regle_generale ? `regle:${c.regle_generale}` : null);
+
+function ligneStandard(std, rubrique, etat = null) {
+  const sujet = etat ? sujetDe(std.cible) : null;
+  const ajuste = sujet ? ajustementDe(etat, sujet, std.usage) : null;
   const rattachee = std.provenance.id ? rattachementsDe(std.usage).find((x) => x.id === std.provenance.id) : null;
   const nom = std.provenance.sujet ?? std.provenance.produit ?? '';
   return {
     rubrique, id: std.provenance.id ?? std.provenance.table, titre: nom || std.usage.replace('_', ' '), texte: '',
+    votre: ajuste ? `votre valeur : ${nombreFr(ajuste.valeur)} ${ajuste.unite ?? ''}`.trim() : null,
     standard: `${LIBELLE_STANDARD_BASE} : ${nombreFr(std.valeur)} ${std.unite ?? ''}`.trim(),
     fourchette: texteFourchette(std.fourchette, std.unite), provenance: texteProvenance(std, { prefixe: false }),
     aValiderLocalement: rattachee?.portee === 'a_valider_localement',
@@ -62,11 +70,11 @@ function ligneStandard(std, rubrique) {
 }
 
 /** Repères d'une famille ou d'un thème : [{ rubrique, id, titre, texte, standard, fourchette, provenance, aValiderLocalement }]. */
-export function reperesPour(cle) {
+export function reperesPour(cle, etat = null) {
   if (typeof cle !== 'string' || cle === '') return [];
   const lignes = [
-    ...reperesCuisson(cle).map((s) => ligneStandard(s, 'Cuisson')),
-    ...reperesConservation(cle).map((s) => ligneStandard(s, 'Conservation')),
+    ...reperesCuisson(cle).map((s) => ligneStandard(s, 'Cuisson', etat)),
+    ...reperesConservation(cle).map((s) => ligneStandard(s, 'Conservation', etat)),
     ...reperesAide(cle).map(ligneAide),
   ];
   const vus = new Set();
@@ -77,7 +85,7 @@ function rendreLigne(l) {
   return h('li', { classe: 'repere', dataset: { repere: l.id } },
     h('strong', null, l.titre),
     l.fourchette ? h('span', null, ` : ${l.fourchette}`) : null,
-    ' ', l.standard ? pastille(l.standard, 'gris') : null,
+    ' ', l.votre ? [pastille(l.votre, 'vert'), ' '] : null, l.standard ? pastille(l.standard, 'gris') : null,
     l.aValiderLocalement ? [' ', pastille('à valider localement', 'ambre')] : null,
     l.texte ? h('p', { classe: 'petit' }, l.texte) : null,
     h('p', { classe: 'meta' }, `Provenance : ${l.provenance}`));
@@ -98,8 +106,8 @@ function rubriques(lignes, max = Infinity) {
 }
 
 /** Bloc replié (fermé) « Repères métier » d'une famille, ou null s'il n'y a rien à dire. Lecture seule. */
-export function blocReperes(cle) {
-  const lignes = reperesPour(cle);
+export function blocReperes(cle, etat = null) {
+  const lignes = reperesPour(cle, etat);
   if (lignes.length === 0) return null;
   const { blocs, reste } = rubriques(lignes, MAX_PAR_RUBRIQUE);
   return repliable(h('h2', { classe: 'section-titre' }, 'Repères métier'), false, [
@@ -110,15 +118,15 @@ export function blocReperes(cle) {
 }
 
 /** Page de consultation d'un thème (tous les repères) ; le thème par défaut est le premier. Remplit `conteneur`. */
-export function pageReperesMetier(conteneur, { theme, sansTitre = false } = {}) {
+export function pageReperesMetier(conteneur, { theme, sansTitre = false, etat = null } = {}) {
   const actif = THEMES.some(([c]) => c === theme) ? theme : THEMES[0][0];
-  const { blocs } = rubriques(reperesPour(actif));
+  const { blocs } = rubriques(reperesPour(actif, etat));
   conteneur.replaceChildren(h('div', { classe: 'vue vue-reperes' },
     sansTitre ? null : h('h1', { classe: 'page-titre' }, 'Repères métier'),
     h('p', { classe: 'aide' }, 'Consultation seulement : fourchettes et provenance du référentiel culinaire. Votre valeur passe toujours devant.'),
     h('div', { classe: 'actions' }, THEMES.map(([c, nom]) => h('button', {
       type: 'button', classe: `btn btn-court${c === actif ? ' principal' : ''}`, 'aria-pressed': c === actif ? 'true' : 'false',
-      onClick: () => pageReperesMetier(conteneur, { theme: c, sansTitre }),
+      onClick: () => pageReperesMetier(conteneur, { theme: c, sansTitre, etat }),
     }, nom))),
     h('h2', { classe: 'section-titre' }, THEMES.find(([c]) => c === actif)[1]),
     blocs));

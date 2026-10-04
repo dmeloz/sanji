@@ -12,7 +12,7 @@ import {
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
 import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
-import { besoinsProduits, cleSuivi } from './produits.js';
+import { besoinsProduits, cleSuivi, suiviProduit } from './produits.js';
 import { GROUPES, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
   CATEGORIE, CHARGE, ETAPE, ETAT_CRENEAU, ETAT_POIDS, PROVENANCE, ROLE, TYPE_COMPOSANT, UNITE, VERIF,
@@ -654,7 +654,7 @@ function deplacer(etat, productionId, date, creneau, h, action) {
   const refus = refusOrdreEtape(etat, p, { date });
   if (refus) throw new Error(refus);
   const c = etat.composants[p.composantId];
-  const evaluation = evaluerAvance(date, p.dateService, regleDe(etat, c, p.etapeCle ?? null), repereConservation(c));
+  const evaluation = evaluerAvance(date, p.dateService, regleDe(etat, c, p.etapeCle ?? null), repereConservation(c, etat));
   p.jourDecide = date;
   p.creneauDecide = creneau;
   const alertes = [...evaluation.alertes, ...chargeCreneau(etat, date, creneau).alertes];
@@ -851,7 +851,11 @@ export function reprendreMemoire(etat, composantId, h) {
   c.categorie = m.categorie;
   if (m.type && m.type !== 'a_preciser') { c.type = m.type; champs.push('type'); }
   if (m.charge) { c.charge = m.charge; champs.push('charge'); }
-  if (c.role && m.parRole?.[c.role]?.grammage) { c.grammage = structuredClone(m.parRole[c.role].grammage); champs.push('grammage'); }
+  if (c.role && m.parRole?.[c.role]?.grammage) {
+    // Reprise, pas correction : l'apprentissage ne la compte pas (le grammage d'origine, lui, a déjà compté).
+    c.grammage = { ...structuredClone(m.parRole[c.role].grammage), repris: true };
+    champs.push('grammage');
+  }
   const reprises = Object.entries(m.etapes ?? {}).map(([etape, v]) => ({ etape, ...v }));
   if (reprises.length > 0) {
     c.etapes = normaliserEtapes([...c.etapes.filter((e) => !(e.etape in m.etapes)), ...reprises]);
@@ -1107,14 +1111,24 @@ export function definirAchat(etat, lundi, cle, unite, champs, h) {
   return terminer(etat, h, 'definirAchat', cle, suivi);
 }
 
-/** Marque une ligne commandée (une quantité à acheter doit avoir été saisie). */
+/**
+ * Marque une ligne commandée. Une quantité à acheter doit avoir été saisie, sauf pour une ligne NOTÉE sans valeur inconnue :
+ * elle se commande pour la quantité notée (calculée au moment de la note, standard de base compris). `quantiteAcheter` n'est
+ * jamais remplie par le calcul.
+ */
 export function marquerCommande(etat, lundi, cle, unite, h) {
   verifierH(h);
   const suivi = suiviDe(etat, lundi, cle, unite);
   if (suivi.etatLigne === 'retire') throw new Error('Cette ligne est retirée de la liste : remettez-la avant de la marquer commandée.');
-  if (!Number.isFinite(suivi.quantiteAcheter)) throw new Error("Saisissez d'abord la quantité réellement achetée.");
+  let detail = cle;
+  if (!Number.isFinite(suivi.quantiteAcheter)) {
+    const ligne = besoinsProduits(etat, lundi).lignes.find((l) => l.cle === cle && l.unite === unite);
+    const commandable = ligne ? suiviProduit(etat, lundi, ligne).quantiteCommandable : null;
+    if (suivi.etatLigne !== 'note' || !Number.isFinite(commandable)) throw new Error("Saisissez d'abord la quantité réellement achetée.");
+    detail = `${cle} : ${commandable} ${unite} notés${ligne.standardBase ? ' (standard de base)' : ''}`;
+  }
   suivi.commandeLe = h;
-  return terminer(etat, h, 'marquerCommande', cle, suivi);
+  return terminer(etat, h, 'marquerCommande', detail, suivi);
 }
 
 // ---------------------------------------------------------------- après service

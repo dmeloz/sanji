@@ -261,6 +261,29 @@ test('produits : une ligne sur standards de base se note sans quantité tapée, 
   assert.match(page.textContent, /À acheter2 400 g \(calculée, standard de base\)/);
 });
 
+test('produits : « Marquer commandé » est inactif tant que la ligne n\'est pas notée, actif après (quantité notée, rien dans « à acheter » tapé)', async () => {
+  nettoyer();
+  mondeProduits();
+  assert.equal(parTexte(vues.produits.rendre(magasin.etat(), S.lundi), 'Marquer commandé'), undefined, 'inactif (les boutons désactivés ne sont pas listés)');
+  magasin.agir((e, t) => noterAchat(e, S.lundi, 'riz', 'g', {}, t));
+  const bouton = parTexte(vues.produits.rendre(magasin.etat(), S.lundi), 'Marquer commandé');
+  assert.ok(bouton, 'actif : la ligne est notée sur standard de base');
+  bouton.click();
+  const suivi = magasin.etat().produits[`${S.lundi}|riz|g`];
+  assert.ok(suivi.commandeLe);
+  assert.equal(suivi.quantiteAcheter, null, 'jamais rempli par le calcul');
+});
+
+test('produits : « à relire » dit que la quantité calculée a changé depuis la note', () => {
+  nettoyer();
+  mondeProduits();
+  magasin.agir((e, t) => noterAchat(e, S.lundi, 'riz', 'g', {}, t));
+  magasin.agir((e) => { e.reglages.margeSecurite = 30; });
+  const page = vues.produits.rendre(magasin.etat(), S.lundi);
+  assert.match(etatsCompacts(page), /^noté · à relire$/);
+  assert.match(page.textContent, /À relire : la quantité calculée est maintenant .* vous aviez noté 2 400 g/);
+});
+
 test('produits : retirer range la ligne dans « Retirées », « Remettre » la rend ; « à relire » si le besoin change', () => {
   nettoyer();
   mondeProduits();

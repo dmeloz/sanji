@@ -33,7 +33,8 @@ function ligneEtSuivi(etat, lundi, cle, unite) {
  * OBLIGATOIRE quand le besoin repose sur une valeur inconnue ; sinon elle est facultative. Une quantité tapée devient la
  * quantité à acheter ; sans quantité, `quantiteAcheter` reste vide et la ligne est commandable pour la quantité calculée
  * (besoin majoré de la marge, voir suiviProduit), gardée dans l'historique (`calculee`, `standardBase`).
- * Le besoin du moment est mémorisé (`besoinAuNote`).
+ * Le besoin du moment (`besoinAuNote`) et, sans quantité tapée, la quantité calculée du moment (`quantiteNotee`) sont
+ * mémorisés : la quantité commandable reste celle-là, et la ligne est « à relire » si le calcul change ensuite.
  */
 export function noterAchat(etat, lundi, cle, unite, saisie, h) {
   verifierH(h);
@@ -49,6 +50,7 @@ export function noterAchat(etat, lundi, cle, unite, saisie, h) {
   if (tapee) suivi.quantiteAcheter = quantite;
   suivi.etatLigne = 'note';
   suivi.besoinAuNote = ligne.besoinBrut;
+  suivi.quantiteNotee = tapee ? null : calculee; // la quantité du moment : elle ne suit pas les recalculs ultérieurs
   suivi.historique.push({ h, action: 'note', besoin: ligne.besoinBrut, quantite: tapee ? quantite : null, calculee,
     standardBase: Boolean(ligne.standardBase) });
   const detail = tapee ? ` : ${quantite} ${unite}`

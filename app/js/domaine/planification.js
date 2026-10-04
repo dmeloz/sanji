@@ -2,6 +2,7 @@
 // Les valeurs de charge sont des points (1, 2, 3), jamais des minutes.
 
 import { ajouterJours, creneauxDuJour, estOuvert, joursEntre, jourSemaine } from './dates.js';
+import { valeurEffective } from './ajustements.js';
 import { calculerComposant, arrondirQuantite, portionsMenu } from './calcul.js';
 import { normaliser, jourOuVide } from './etat.js';
 import { familleParCle } from './savoir.js';
@@ -52,13 +53,33 @@ export function regleDe(etat, composant, etapeCle = null) {
  * Repère de conservation du référentiel (standard de base) pour un composant : la plus courte des durées en jours des
  * produits cuits de sa famille (borne prudente), ou null. Il AVERTIT seulement, il ne bloque jamais : seule la limite
  * d'utilisation saisie par la propriétaire (`limiteUtilisationJours`) a un effet bloquant.
+ * Avec `etat`, la valeur ajustée par la propriétaire (`etat.ajustements`, plus courte ou plus longue) passe devant :
+ * « se garde N jours (votre valeur) ».
  * @returns {{jours:number, texte:string, provenance:string}|null}
  */
-export function repereConservation(composant) {
+export function repereConservation(composant, etat = null) {
   if (!composant?.famille) return null;
   const candidats = reperesConservation(composant.famille)
     .filter((x) => x.unite === 'jours' && Number.isFinite(x.valeur) && (!x.etatPoids || x.etatPoids === 'cuit'));
   if (candidats.length === 0) return null;
+  if (etat) {
+    // Votre valeur passe devant : la plus précise des valeurs ajustées (famille, groupe, règle générale) remplace le standard.
+    const groupe = familleParCle(composant.famille)?.groupe;
+    const sujets = [composant.famille, ...(groupe ? [`groupe:${groupe}`] : []), ...candidats.map((x) => {
+      const c = x.cible ?? {};
+      return c.famille ?? (c.groupe ? `groupe:${c.groupe}` : c.regle_generale ? `regle:${c.regle_generale}` : null);
+    })];
+    for (const sujet of sujets) {
+      const eff = sujet ? valeurEffective(etat, sujet, 'conservation') : null;
+      if (!eff?.ajuste || eff.unite !== 'jours') continue;
+      const u = eff.valeur > 1 ? 'jours' : 'jour';
+      return {
+        jours: eff.valeur,
+        texte: `se garde ${String(eff.valeur).replace('.', ',')} ${u} (${eff.libelle})`,
+        provenance: `${eff.libelle}, à la place du standard de base`,
+      };
+    }
+  }
   const std = candidats.reduce((a, b) => (b.valeur < a.valeur ? b : a));
   const unite = std.valeur > 1 ? 'jours' : 'jour';
   return {
@@ -159,7 +180,7 @@ function dateProduction(prod) {
 
 function evaluationDe(etat, prod, composant) {
   const date = dateProduction(prod);
-  return date ? evaluerAvance(date, prod.dateService, regleDe(etat, composant, prod.etapeCle ?? null), repereConservation(composant)) : null;
+  return date ? evaluerAvance(date, prod.dateService, regleDe(etat, composant, prod.etapeCle ?? null), repereConservation(composant, etat)) : null;
 }
 
 /** Évaluation de l'avance d'une production (null si sa date de production est inconnue). */
@@ -293,7 +314,7 @@ export function suggererCreneau(etat, productionId) {
     const charge = chargeCreneau(etat, date, creneau);
     const dejaLa = p.jourDecide === date && p.creneauDecide === creneau ? points : 0;
     if (Number.isFinite(charge.capacite) && charge.points - dejaLa + points > charge.capacite) continue;
-    const evaluation = evaluerAvance(date, p.dateService, regle, repereConservation(composant));
+    const evaluation = evaluerAvance(date, p.dateService, regle, repereConservation(composant, etat));
     if (evaluation.autorisee && evaluation.couvre) return { date, creneau, evaluation };
   }
   return null;
@@ -396,7 +417,7 @@ export function avancesPossibles(etat, aujourdhui) {
     const composant = etat.composants[p.composantId];
     // Pâtes et risotto du menu 1 : jour même. Déjà planifiée ce jour à la main : elle reste affichée, avec son évaluation.
     if (!p.jourDecide && sansAvanceParDefaut(etat, composant, p)) continue;
-    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null), repereConservation(composant));
+    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null), repereConservation(composant, etat));
     const creneau = creneauxPossibles.find((c) => etatCreneau(etat, aujourdhui, c) === 'libre') ?? null;
     resultat.push({ ...ligne(etat, p), evaluation, creneau });
   }
@@ -423,7 +444,7 @@ export function lotsPossibles(etat, aujourdhui) {
     const cible = cibleProduction(etat, p.id);
     const unite = p.unite ?? calculerComposant(etat, composant.id).uniteTravail ?? null;
     if (cible === null || !unite) continue;
-    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null), repereConservation(composant));
+    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null), repereConservation(composant, etat));
     if (!evaluation.autorisee || !evaluation.couvre) continue;
     const cle = `${composant.famille}|${unite}`;
     if (!groupes.has(cle)) groupes.set(cle, { famille: composant.famille, unite, productions: [] });

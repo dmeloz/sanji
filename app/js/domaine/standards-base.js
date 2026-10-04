@@ -19,7 +19,7 @@
 //      verification, confiance, version }, ecart: null | { referentiel: {min, max}, base_metier: {min, max} },
 //      coefficient? (rendements seulement : sortie / entrée, à appliquer comme une étape) }
 //    Valeur : milieu de la fourchette (quantités, rendements, durées de cuisson) ; borne prudente pour l'hygiène
-//    (`sens` du rattachement : prudent_min = minimum, prudent_max = maximum) ; un seuil seul (min ou max) est pris tel
+//    (`sens` du rattachement : prudent_min = minimum, prudent_max = maximum ; plage = température à respecter des deux côtés, valeur au milieu, avertit hors de la fourchette) ; un seuil seul (min ou max) est pris tel
 //    quel (l'autre borne de la fourchette vaut null). Rendement en « % » = perte (coefficient = 1 − perte / 100) ;
 //    en « x » = gain (coefficient = valeur).
 //    Choix : référentiel quand sa vérification à la source est « confirmee » ; sinon base métier si elle a la valeur ;

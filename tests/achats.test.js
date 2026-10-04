@@ -2,7 +2,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { definirAchat, definirMenu } from '../app/js/domaine/actions.js';
+import { definirAchat, definirMenu, marquerCommande, modifierComposant } from '../app/js/domaine/actions.js';
 import { noterAchat, restaurerAchat, retirerAchat } from '../app/js/domaine/actions-achats.js';
 import { besoinsProduits, suiviProduit } from '../app/js/domaine/produits.js';
 import { suiviProduitVide } from '../app/js/domaine/etat.js';
@@ -153,4 +153,57 @@ test('aucune quantité calculée n\'atteint quantiteAcheter seule', () => {
   assert.equal(suivi(e, 'riz').quantiteAcheter, null);
   assert.equal(suivi(e, 'riz').proposeeACommander, null);
   for (const s of Object.values(e.produits)) assert.equal(s.quantiteAcheter, null);
+});
+
+test('une ligne notée sans quantité tapée garde la quantité du moment du geste « noter »', () => {
+  const e = monde();
+  e.reglages.margeSecurite = 10;
+  noterAchat(e, S.lundi, 'riz', 'g', {}, h());
+  const noteeA = suivi(e, 'riz').quantiteCommandable;
+  assert.equal(noteeA, Math.round(ligne(e, 'riz').besoinBrut * 1.1));
+  assert.equal(e.produits[`${S.lundi}|riz|g`].quantiteNotee, noteeA, 'mémorisée au geste');
+  assert.equal(suivi(e, 'riz').aRelire, false);
+  // Le besoin change : la quantité commandable ne bouge pas, la ligne est à relire.
+  prevision(e, S.lundi, 2, 80);
+  let s = suivi(e, 'riz');
+  assert.equal(s.quantiteCommandable, noteeA, 'la quantité notée n\'est pas recalculée');
+  assert.equal(s.quantiteCalculee > noteeA, true, 'le calcul, lui, a bougé');
+  assert.deepEqual([s.aRelire, s.raisonARelire, s.origineQuantite, s.quantiteAcheter], [true, 'besoin', 'standard_base', null]);
+  // Noter de nouveau mémorise la nouvelle quantité.
+  noterAchat(e, S.lundi, 'riz', 'g', {}, h(1));
+  s = suivi(e, 'riz');
+  assert.deepEqual([s.aRelire, s.quantiteCommandable], [false, s.quantiteCalculee]);
+  // Même besoin, mais la quantité recalculée change (marge) : à relire, et le message le dit.
+  e.reglages.margeSecurite = 30;
+  s = suivi(e, 'riz');
+  assert.deepEqual([s.aRelire, s.raisonARelire], [true, 'quantite']);
+  assert.notEqual(s.quantiteCalculee, s.quantiteCommandable);
+});
+
+test('« Marquer commandé » : une ligne notée sur standard de base utilise la quantité notée, sans remplir quantiteAcheter', () => {
+  const e = monde();
+  assert.throws(() => marquerCommande(e, S.lundi, 'riz', 'g', h()), /quantité réellement achetée/, 'non notée : exigeant');
+  noterAchat(e, S.lundi, 'riz', 'g', {}, h(1));
+  const q = suivi(e, 'riz').quantiteCommandable;
+  marquerCommande(e, S.lundi, 'riz', 'g', h(2));
+  const s = suivi(e, 'riz');
+  assert.deepEqual([s.commandeLe, s.quantiteAcheter, s.quantiteCommandable], [h(2), null, q]);
+  assert.match(e.journal.at(-1).detail, /standard de base/);
+  assert.match(e.journal.at(-1).detail, new RegExp(String(q)));
+});
+
+test('« Marquer commandé » : une ligne INCONNU reste exigeante, même si elle a été notée sur une valeur connue', () => {
+  const e = monde();
+  assert.throws(() => marquerCommande(e, S.lundi, 'produit_inconnu_test', 'g', h()), /quantité réellement achetée/);
+  noterAchat(e, S.lundi, 'produit_inconnu_test', 'g', { quantite: 900 }, h(1));
+  marquerCommande(e, S.lundi, 'produit_inconnu_test', 'g', h(2));
+  assert.equal(suivi(e, 'produit_inconnu_test').commandeLe, h(2), 'quantité tapée : accepté');
+  // Noté sans quantité sur des valeurs connues, puis une valeur devient inconnue : plus commandable sans quantité tapée.
+  const f = monde();
+  const c = Object.values(f.composants).find((x) => x.nom === 'PRODUIT_SEC_TEST');
+  noterAchat(f, S.lundi, 'produit_sec_test', 'g', {}, h(1));
+  modifierComposant(f, c.id, { etapes: [{ etape: 'parage', coefficient: 0.8, statut: 'INCONNU', source: 'TEST_ONLY' }] }, h(2));
+  assert.equal(ligne(f, 'produit_sec_test').aValider, true);
+  assert.equal(suivi(f, 'produit_sec_test').quantiteCommandable, null);
+  assert.throws(() => marquerCommande(f, S.lundi, 'produit_sec_test', 'g', h(3)), /quantité réellement achetée/);
 });

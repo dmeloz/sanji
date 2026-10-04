@@ -1,6 +1,7 @@
 // Document d'état unique : création, normalisation, export et import.
-// Aucune lecture de l'heure : l'horodatage `h` (ISO) est toujours un argument.
+// Aucune lecture de l'heure : l'horodatage `h` (ISO) est toujours un argument .
 
+import { controleAjustement } from './ajustements.js';
 import { ETAT_POIDS } from './statuts.js';
 
 export const APPLICATION = 'sanji-entremetier';
@@ -161,13 +162,14 @@ export function standardVide() {
 
 /**
  * Suivi d'une ligne de besoin. `etatLigne` : 'suggere' (la ligne vient du calcul), 'note' (la propriétaire l'a notée
- * à commander, `besoinAuNote` garde le besoin vu à ce moment) ou 'retire' ; `historique` garde chaque changement d'état.
+ * à commander, `besoinAuNote` garde le besoin vu à ce moment, `quantiteNotee` la quantité calculée à ce moment quand aucune
+ * quantité n'a été tapée) ou 'retire' ; `historique` garde chaque changement d'état.
  */
 export function suiviProduitVide() {
   return {
     statut: 'a_verifier', quantiteVerifiee: null, besoinAuControle: null, quantiteAcheter: null,
     conditionnement: '', fournisseurId: null, commandeLe: null,
-    etatLigne: 'suggere', besoinAuNote: null, historique: [],
+    etatLigne: 'suggere', besoinAuNote: null, quantiteNotee: null, historique: [],
   };
 }
 
@@ -247,13 +249,28 @@ function lectureValide(valeur) {
   return sansClesDangereuses(valeur);
 }
 
+/** Vrai si l'entrée d'une proposition d'apprentissage écartée est exploitable (voir importer). */
+function ecartApprentissageValide(e, aujourdhui) {
+  if (!estObjet(e) || e.statut !== 'ecarte' || typeof e.h !== 'string') return false;
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:T[\d:.]+(?:Z|[+-]\d{2}:\d{2})?)?$/.exec(e.h);
+  if (!m || Number.isNaN(Date.parse(e.h))) return false;
+  const jour = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  if (jour.getUTCFullYear() !== +m[1] || jour.getUTCMonth() !== +m[2] - 1 || jour.getUTCDate() !== +m[3]) return false;
+  if (aujourdhui !== null && /^\d{4}-\d{2}-\d{2}$/.test(aujourdhui)) {
+    const limite = new Date(Date.parse(`${aujourdhui}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
+    if (e.h.slice(0, 10) > limite) return false;
+  }
+  return e.vus === undefined || (Array.isArray(e.vus) && e.vus.every((v) => typeof v === 'string'));
+}
+
 /**
  * Lit un fichier d'export. Refuse un autre document, un schéma inconnu et tout fichier portant
  * l'étiquette TEST_ONLY (propriété `etiquette`, à n'importe quel niveau). Complète les champs absents.
  * @param {string} texte
+ * @param {string} [aujourdhui] AAAA-MM-JJ ; sert à écarter les dates futures des propositions écartées (donnée par l'appelant, jamais lue ici ; absente : pas de contrôle de futur)
  * @returns {object} l'état complet ; lève une Error en français sinon
  */
-export function importer(texte) {
+export function importer(texte, aujourdhui = null) {
   let doc;
   try { doc = JSON.parse(texte); } catch { throw new Error("Fichier illisible : ce n'est pas un export valide."); }
   if (contientTestOnly(doc)) {
@@ -285,6 +302,13 @@ export function importer(texte) {
       etat[nom][id] = fusionner(fabrique(id), source[nom][id]);
     }
   }
+  // Propositions d'apprentissage écartées (`apprentissage:famille|rôle`) : { statut:'ecarte', h, vus:[ids] }. Une date illisible
+  // ou au-delà de demain (la date d'aujourd'hui vient de l'appelant, un jour de tolérance pour le fuseau), un statut autre
+  // ou une liste `vus` qui n'en est pas une feraient taire la proposition pour toujours : l'entrée est écartée.
+  for (const [cle, entree] of Object.entries(etat.validations)) {
+    if (!cle.startsWith('apprentissage:')) continue;
+    if (!ecartApprentissageValide(entree, aujourdhui)) delete etat.validations[cle];
+  }
   if (source.standards !== undefined) {
     // { [clé de famille]: { [rôle]: {valeur, unite, etat, h} } } : un état du poids absent se lit « cuit ».
     if (!estObjet(source.standards)) throw new Error('Export corrompu : « standards » est invalide.');
@@ -299,11 +323,16 @@ export function importer(texte) {
     }
   }
   if (source.ajustements !== undefined) {
-    // { « usage|sujet »: {valeur, unite, le, avant:{valeur, origine}} } : une entrée sans valeur finie ou sans unité est écartée.
+    // { « usage|sujet »: {valeur, unite, le, avant:{valeur, origine}} } : écartée si sans valeur finie ou sans unité, si
+    // l'usage n'est pas ajustable, si le sujet n'a pas de standard de base, si l'unité n'est pas celle de ce standard ou si la
+    // valeur sort des bornes de ajusterStandard.
     if (!estObjet(source.ajustements)) throw new Error('Export corrompu : « ajustements » est invalide.');
     for (const [cle, a] of Object.entries(source.ajustements)) {
       if (CLES_INTERDITES.has(cle) || !cle.includes('|') || !estObjet(a)) continue;
       if (typeof a.valeur !== 'number' || !Number.isFinite(a.valeur) || typeof a.unite !== 'string' || a.unite === '') continue;
+      const barre = cle.indexOf('|');
+      const { base, erreur } = controleAjustement(cle.slice(0, barre), cle.slice(barre + 1), a.valeur);
+      if (erreur || a.unite !== base.unite) continue;
       const av = estObjet(a.avant) ? a.avant : {};
       etat.ajustements[cle] = {
         valeur: a.valeur, unite: a.unite, le: typeof a.le === 'string' ? a.le : null,

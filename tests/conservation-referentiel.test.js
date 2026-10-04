@@ -5,6 +5,7 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { installerFauxDom } from './aide-dom.js';
+import { ajusterStandard } from '../app/js/domaine/actions-ajustements.js';
 import { definirMenu, definirPrevision, definirRegle, definirStandard, planifier } from '../app/js/domaine/actions.js';
 import { aideRefroidissement, evaluerAvance, evaluationProduction, feuilleDuJour, repereConservation } from '../app/js/domaine/planification.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
@@ -139,4 +140,46 @@ test('vue Jour : le riz à J-2 porte l\'avertissement en texte et sa provenance 
   planifier(e, prodDe(e, 'riz'), S.mercredi, 'avant_midi', h());
   magasin.remplacer(e);
   assert.doesNotMatch(vueJour.rendre(magasin.etat(), S.mercredi).textContent, /Attention : se garde/);
+});
+
+// ---------------------------------------------------------------- la valeur de la propriétaire passe devant
+
+test('repère : la valeur de la propriétaire (riz réglé à 3 jours) remplace le standard : J-2 sans avertissement, J-4 averti', () => {
+  const e = jeudi();
+  ajusterStandard(e, 'riz', 'conservation', 3, h());
+  const r = repereConservation(composantDe(e, 'riz'), e);
+  assert.equal(r.jours, 3);
+  assert.equal(r.texte, 'se garde 3 jours (votre valeur)');
+  const ev = (jour) => evaluerAvance(jour, S.jeudi, null, r);
+  assert.deepEqual(ev(S.mardi).alertes, [], 'J-2 : plus d\'avertissement « se garde 1 jour »');
+  assert.equal(ev(S.mardi).repere.depasse, false);
+  assert.equal(planifier(e, prodDe(e, 'riz'), S.mardi, 'avant_midi', h()).alertes.filter((a) => /conservation/.test(a)).length, 0);
+  ajusterStandard(e, 'riz', 'conservation', 1.5, h());
+  const court = evaluerAvance(S.mardi, S.jeudi, null, repereConservation(composantDe(e, 'riz'), e));
+  assert.ok(court.alertes.some((a) => /se garde 1,5 jours \(votre valeur\)/.test(a)));
+  assert.equal(court.conservation, 'referentiel', 'avertit seulement : seule la limite saisie bloque');
+  assert.equal(court.couvre, true);
+});
+
+test('repère : une valeur plus courte que le standard avertit ; la règle générale ajustée compte aussi', () => {
+  const e = jeudi();
+  ajusterStandard(e, 'carottes', 'conservation', 1, h());
+  const r = repereConservation(composantDe(e, 'carottes'), e);
+  assert.equal(r.texte, 'se garde 1 jour (votre valeur)');
+  assert.equal(evaluerAvance(S.mercredi, S.jeudi, null, r).alertes.length, 0);
+  assert.ok(evaluerAvance(S.mardi, S.jeudi, null, r).alertes.some((a) => /se garde 1 jour \(votre valeur\)/.test(a)));
+  const f = jeudi();
+  ajusterStandard(f, 'regle:feculents_legumes_cuits', 'conservation', 1, h());
+  const rg = repereConservation(composantDe(f, 'carottes'), f);
+  assert.equal(rg.jours, 1);
+  assert.match(rg.texte, /\(votre valeur\)$/);
+});
+
+test('repère : sans état, comportement inchangé ; la limite saisie reste seule à bloquer', () => {
+  const e = jeudi();
+  ajusterStandard(e, 'riz', 'conservation', 3, h());
+  assert.equal(repereConservation(composantDe(e, 'riz')).jours, 1);
+  const r = repereConservation(composantDe(e, 'riz'), e);
+  const bloque = evaluerAvance(S.mardi, S.jeudi, { limiteUtilisationJours: 1 }, r);
+  assert.equal(bloque.conservation, 'depassee');
 });

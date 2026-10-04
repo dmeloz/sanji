@@ -39,13 +39,34 @@ test('import : un export sans ajustements se complète ; les entrées invalides 
   const doc = (ajustements) => JSON.stringify({ application: 'sanji-entremetier', schema: 1, etat: ajustements === undefined ? {} : { ajustements } });
   assert.deepEqual(importer(doc()).ajustements, {});
   const brut = '{"application":"sanji-entremetier","schema":1,"etat":{"ajustements":{"__proto__":{"valeur":1,"unite":"%"},'
-    + '"constructor|x":{"valeur":"12","unite":"%"},"a|ok":{"valeur":12,"unite":"%","le":"2026-10-04T08:00:00","avant":{"valeur":18,"origine":"referentiel"}},'
+    + '"constructor|x":{"valeur":"12","unite":"%"},"rendement_parage|carottes":{"valeur":12,"unite":"%","le":"2026-10-04T08:00:00","avant":{"valeur":18,"origine":"referentiel"}},'
     + '"a|sans-unite":{"valeur":12},"a|nan":{"valeur":null,"unite":"%"},"sans-barre":{"valeur":1,"unite":"%"},"a|liste":[1]}}}';
   const a = importer(brut).ajustements;
-  assert.deepEqual(Object.keys(a), ['a|ok']);
-  assert.deepEqual(a['a|ok'], { valeur: 12, unite: '%', le: '2026-10-04T08:00:00', avant: { valeur: 18, origine: 'referentiel' } });
+  assert.deepEqual(Object.keys(a), ['rendement_parage|carottes']);
+  assert.deepEqual(a['rendement_parage|carottes'], { valeur: 12, unite: '%', le: '2026-10-04T08:00:00', avant: { valeur: 18, origine: 'referentiel' } });
   assert.equal(Object.prototype.polluted, undefined);
   assert.throws(() => importer(doc([1])), /ajustements/);
+});
+
+test('import : usage, unité et bornes sont ceux de ajusterStandard ; sinon l\'entrée est écartée', () => {
+  const doc = (ajustements) => JSON.stringify({ application: 'sanji-entremetier', schema: 1, etat: { ajustements } });
+  const cles = (ajustements) => Object.keys(importer(doc(ajustements)).ajustements).sort();
+  const pates = standardDeBase('pates_seches', 'rendement_cuisson');
+  assert.equal(pates.unite, 'x', 'le rendement des pâtes est un gain');
+  assert.deepEqual(cles({ 'rendement_cuisson|pates_seches': { valeur: 3, unite: '%' } }), [], '3 % de perte ne se lit pas comme un gain : écarté (aurait donné 0,97)');
+  assert.deepEqual(cles({ 'rendement_cuisson|pates_seches': { valeur: 2.5, unite: 'x' } }), ['rendement_cuisson|pates_seches']);
+  assert.deepEqual(cles({ 'x|constructor': { valeur: 1, unite: '%' }, 'buffet_couvert|riz': { valeur: 5, unite: 'g/couvert' } }), [], 'usage non ajustable');
+  assert.deepEqual(cles({ 'rendement_parage|inconnue': { valeur: 10, unite: '%' } }), [], 'sujet sans standard de base');
+  assert.deepEqual(cles({ 'rendement_parage|carottes': { valeur: 100, unite: '%' }, 'rendement_parage|poireaux': { valeur: -5, unite: '%' } }), [], 'perte hors de 0 à moins de 100');
+  assert.deepEqual(cles({ 'rendement_cuisson|riz': { valeur: 0, unite: 'x' } }), [], 'gain nul');
+  assert.deepEqual(cles({ 'conservation|riz': { valeur: -1, unite: 'jours' }, 'conservation|carottes': { valeur: 3, unite: 'h' } }), [], 'négatif ou autre unité');
+  assert.deepEqual(cles({ 'temperature|pommes_de_terre': { valeur: -2, unite: '°C' } }), ['temperature|pommes_de_terre'], 'une température peut être négative');
+  // Ce que ajusterStandard accepte revient à l'identique par l'import.
+  const e = etatVide();
+  ajusterStandard(e, 'riz', 'conservation', 3, h());
+  ajusterStandard(e, 'regle:stockage_froid', 'temperature', 4, h());
+  ajusterStandard(e, 'regle:feculents_legumes_cuits', 'conservation', 2, h());
+  assert.deepEqual(importer(exporter(e, h(1))).ajustements, e.ajustements);
 });
 
 // ---------------------------------------------------------------- valeur effective et actions
@@ -166,17 +187,51 @@ test('hygiène : prudent_max (cuisson à cœur) avertit en dessous du minimum ; 
   assert.equal(coeur.sens, 'prudent_max');
   assert.equal(ajusterStandard(e, 'regle:cuisson_coeur', 'temperature', coeur.fourchette.min + 5, h()).avertissement, null);
   assert.ok(ajusterStandard(e, 'regle:cuisson_coeur', 'temperature', coeur.fourchette.min - 5, h()).avertissement);
-  const riz = standardDeBase('riz', 'conservation');
-  assert.equal(ajusterStandard(e, 'riz', 'conservation', riz.fourchette.max, h()).avertissement, null);
-  assert.ok(ajusterStandard(e, 'riz', 'conservation', riz.fourchette.max + 2, h()).avertissement);
+  // Une famille dont la fourchette n'est pas un point (le riz a 1–1 : le test ne pourrait pas échouer).
+  const leg = standardDeBase('legumineuses', 'conservation');
+  assert.ok(leg.fourchette.min < leg.fourchette.max);
+  assert.equal(ajusterStandard(e, 'legumineuses', 'conservation', leg.valeur, h()).avertissement, null, 'à la borne prudente : rien');
+  assert.ok(ajusterStandard(e, 'legumineuses', 'conservation', leg.valeur + 0.5, h()).avertissement, 'au-delà de la borne prudente : averti');
+  assert.ok(ajusterStandard(e, 'legumineuses', 'conservation', leg.fourchette.max + 2, h()).avertissement);
 });
 
-test('hygiène : aucun avertissement pour un rendement ou une valeur sans sens prudent', () => {
+test('hygiène : aucun avertissement pour un rendement', () => {
   const e = etatVide();
   assert.equal(ajusterStandard(e, 'carottes', 'rendement_parage', 60, h()).avertissement, null);
+});
+
+test('hygiène : pommes de terre, plage 6–10 °C à respecter des deux côtés (sens « plage ») ; valeur par défaut au milieu', () => {
+  const e = etatVide();
   const pdt = standardDeBase('pommes_de_terre', 'temperature');
-  assert.equal(pdt.sens, null);
-  assert.equal(ajusterStandard(e, 'pommes_de_terre', 'temperature', 20, h()).avertissement, null);
+  assert.equal(pdt.sens, 'plage');
+  assert.deepEqual([pdt.valeur, pdt.fourchette.min, pdt.fourchette.max], [8, 6, 10]);
+  assert.equal(ajusterStandard(e, 'pommes_de_terre', 'temperature', 6, h()).avertissement, null);
+  assert.equal(ajusterStandard(e, 'pommes_de_terre', 'temperature', 10, h()).avertissement, null);
+  assert.match(ajusterStandard(e, 'pommes_de_terre', 'temperature', 2, h()).avertissement, /au-delà de la limite de référence/);
+  assert.ok(ajusterStandard(e, 'pommes_de_terre', 'temperature', 12, h()).avertissement);
+  assert.equal(ajustementDe(e, 'pommes_de_terre', 'temperature').valeur, 12, 'jamais bloquant');
+});
+
+test('hygiène : la borne prudente compte, pas le maximum de la fourchette (pâtes cuites, légumineuses)', () => {
+  const e = etatVide();
+  const pates = standardDeBase('pates_seches', 'conservation');
+  assert.ok(pates.fourchette.min < pates.fourchette.max, 'fourchette non réduite à un point');
+  assert.ok(ajusterStandard(e, 'pates_seches', 'conservation', pates.fourchette.max, h()).avertissement, 'au maximum : averti');
+  assert.ok(ajusterStandard(e, 'pates_seches', 'conservation', 3, h()).avertissement, 'entre la borne prudente et le maximum : averti');
+  const leg = standardDeBase('legumineuses', 'conservation');
+  assert.ok(leg.fourchette.min < leg.fourchette.max);
+  assert.ok(ajusterStandard(e, 'legumineuses', 'conservation', leg.fourchette.max, h()).avertissement);
+  assert.equal(ajusterStandard(e, 'legumineuses', 'conservation', leg.valeur, h()).avertissement, null, 'à la borne prudente : rien');
+});
+
+test('hygiène : la règle générale qui couvre la famille avertit aussi (féculents et légumes cuits : au plus 2 jours)', () => {
+  const e = etatVide();
+  const regle = standardDeBase(null, 'conservation', { regle: 'feculents_legumes_cuits' });
+  assert.equal(regle.valeur, 2);
+  assert.ok(ajusterStandard(e, 'pates_seches', 'conservation', 3, h()).avertissement);
+  assert.equal(ajusterStandard(e, 'carottes', 'conservation', regle.valeur, h()).avertissement, null);
+  assert.match(ajusterStandard(e, 'carottes', 'conservation', regle.valeur + 1, h()).avertissement, /au-delà de la limite de référence/);
+  assert.ok(ajusterStandard(e, 'riz', 'conservation', 2, h()).avertissement, 'le riz : borne de 1 jour');
 });
 
 // ---------------------------------------------------------------- liste de Réglages

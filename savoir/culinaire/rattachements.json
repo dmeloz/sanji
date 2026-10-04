@@ -54,7 +54,7 @@
   { "id": "feculents.pates.sec.stockage", "usage": "duree_stockage", "cible": { "famille": "pates_seches", "etat": "sec" }, "unite": "mois", "sens": "prudent_min" },
   { "id": "legumes.avance.legumes-epluches", "usage": "duree_stockage", "cible": { "groupe": "legumes", "etat": "cru_net" }, "unite": "h", "sens": "prudent_min" },
 
-  { "id": "feculents.pdt.stockage.temperature", "usage": "temperature", "cible": { "famille": "pommes_de_terre" }, "unite": "°C" },
+  { "id": "feculents.pdt.stockage.temperature", "usage": "temperature", "cible": { "famille": "pommes_de_terre" }, "unite": "°C", "sens": "plage" },
   { "id": "hygiene.temperature.froid-denrees-perissables", "usage": "temperature", "cible": { "regle_generale": "stockage_froid" }, "unite": "°C", "sens": "prudent_min" },
   { "id": "hygiene.temperature.stockage-preparations-avance", "usage": "temperature", "cible": { "regle_generale": "stockage_preparations_avance" }, "unite": "°C", "sens": "prudent_min" },
   { "id": "hygiene.temperature.surgele", "usage": "temperature", "cible": { "regle_generale": "surgeles" }, "unite": "°C", "sens": "prudent_min" },

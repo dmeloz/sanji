@@ -4,6 +4,7 @@ import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { Element, installerFauxDom } from './aide-dom.js';
 import { definirMenu } from '../app/js/domaine/actions.js';
+import { ajusterStandard } from '../app/js/domaine/actions-ajustements.js';
 import { ALLERGENES } from '../app/js/ui/reference.js';
 import { rattachementsDe, reperesAide } from '../app/js/domaine/standards-base.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
@@ -40,6 +41,24 @@ test('repères d\'une famille : cuisson, conservation, avec fourchette, standard
     if (l.standard) assert.match(l.standard, /standard de base/);
   }
   assert.ok(lignes.some((l) => l.standard && l.fourchette), 'au moins un standard avec fourchette');
+});
+
+test('repère ajusté par la propriétaire : « votre valeur : N » en premier, puis le standard de base', () => {
+  const e = etatVide();
+  const avant = reperes.reperesPour('riz', e).find((l) => l.rubrique === 'Conservation' && /riz/i.test(l.titre));
+  assert.equal(avant.votre, null, 'sans ajustement : rien de plus');
+  ajusterStandard(e, 'riz', 'conservation', 3, h());
+  const lignes = reperes.reperesPour('riz', e);
+  const ligne = lignes.find((l) => l.votre);
+  assert.equal(ligne.votre, 'votre valeur : 3 jours');
+  assert.match(ligne.standard, /^standard de base : 1 jours?$/, 'le standard de base reste visible');
+  assert.equal(lignes.filter((l) => l.votre).length, 1, 'seul le repère ajusté est concerné');
+  const texte = reperes.blocReperes('riz', e).textContent;
+  assert.match(texte, /votre valeur : 3 jours/);
+  const ligneTexte = reperes.blocReperes('riz', e).tous((x) => x.dataset?.repere === ligne.id)[0].textContent;
+  assert.ok(ligneTexte.indexOf('votre valeur : 3 jours') < ligneTexte.indexOf('standard de base : 1 jour'), 'votre valeur avant le standard de base');
+  // Sans état : comme avant.
+  assert.equal(reperes.reperesPour('riz').some((l) => l.votre), false);
 });
 
 test('bloc replié : fermé par défaut, provenance et « à valider localement » en texte, aucun champ de saisie', () => {

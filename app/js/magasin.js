@@ -72,7 +72,7 @@ export async function charger() {
     statut.persistant = await demanderPersistance();
     if (brut) {
       try {
-        etatCourant = importer(exporter(brut, maintenant()));
+        etatCourant = importer(exporter(brut, maintenant()), aujourdhui());
       } catch (erreur) {
         statut.illisible = true;
         statut.enregistre = false;
