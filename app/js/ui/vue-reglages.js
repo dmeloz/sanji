@@ -489,7 +489,7 @@ const LIBELLE_ACTION = {
   reporterValidation: 'Validation reportée à plus tard',
   ajusterStandard: 'Valeur de base changée', revenirAuStandard: 'Valeur de base rétablie',
   accepterApprentissage: 'Proposition acceptée comme standard maison', ecarterApprentissage: 'Proposition écartée',
-  noterAchat: 'Ligne notée à commander', retirerAchat: 'Ligne retirée de la liste', restaurerAchat: 'Ligne remise dans la liste',
+  restaurer: 'Sauvegarde restaurée', noterAchat: 'Ligne notée à commander', retirerAchat: 'Ligne retirée de la liste', restaurerAchat: 'Ligne remise dans la liste',
 };
 const MOTS_TECHNIQUES = [
   ['avant_midi', 'avant midi'], ['apres_midi', 'après midi'], ['avant_soir', 'avant soir'], ['->', '→'],
@@ -502,6 +502,39 @@ function lisible(detail) {
   for (const [technique, clair] of MOTS_TECHNIQUES) texte = texte.split(technique).join(clair);
   return texte.replace(/(\d{4})-(\d{2})-(\d{2})/g, '$3/$2/$1');
 }
+
+// Détails de journal en phrases : les clés de champ, codes de décision et clés de produit enregistrés tels quels
+// (« allergenes », « complement », « carottes|kg ») se lisent ici ; rien n'est changé dans les entrées enregistrées.
+const MOTS_CHAMPS = {
+  nom: 'nom', categorie: 'catégorie', attribue: 'attribution au poste', type: 'type', role: 'rôle', produitNom: 'produit acheté',
+  grammage: 'portion', etapes: 'étapes', recetteId: 'recette', charge: 'charge de travail', allergenes: 'allergènes',
+  numero: 'numéro', date: 'jour', service: 'service', horaire: 'horaire', couverts: 'couverts', mode: 'mode',
+  menuFixe: 'menu fixé', repartition: 'répartition', allergies: 'allergies', remarques: 'remarques',
+};
+const DECISIONS_ECART = { complement: 'complément à produire', ajustement: 'écart réglé par ajustement', aucune: 'aucune production supplémentaire' };
+
+/** Applique `f` à la partie après le dernier « : » du détail. */
+function apresDernierDeuxPoints(detail, f) {
+  const i = detail.lastIndexOf(' : ');
+  return i < 0 ? detail : `${detail.slice(0, i)} : ${f(detail.slice(i + 3))}`;
+}
+/** « carottes|kg » en tête du détail : « carottes (kg) ». */
+const produitLisible = (detail) => detail.replace(/^([^|:]+)\|(\S+?)(?= : |$)/, (_, nom, unite) => `${nom.replace(/_/g, ' ')} (${libelle('UNITE', unite)})`);
+const listeChamps = (liste) => liste.split(', ').map((k) => MOTS_CHAMPS[k] ?? k).join(', ');
+
+const DETAIL_JOURNAL = {
+  modifierComposant: (d) => apresDernierDeuxPoints(d, listeChamps),
+  reprendreMemoire: (d) => apresDernierDeuxPoints(d, listeChamps),
+  modifierFiche: (d) => apresDernierDeuxPoints(d, listeChamps),
+  deciderEcart: (d) => apresDernierDeuxPoints(d, (x) => DECISIONS_ECART[x] ?? x),
+  controlerProduit: (d) => apresDernierDeuxPoints(produitLisible(d), (x) => libelle('VERIF', x)),
+  noterAchat: produitLisible, retirerAchat: produitLisible, restaurerAchat: produitLisible, definirAchat: produitLisible,
+  marquerCommande: produitLisible,
+  definirCreneau: (d) => apresDernierDeuxPoints(d, (x) => libelle('ETAT_CRENEAU', x)),
+  definirSemaineType: (d) => apresDernierDeuxPoints(d, (x) => libelle('ETAT_CRENEAU', x)),
+  noterExport: () => '', // le détail enregistré est l'heure, déjà affichée en tête de ligne
+  restaurer: (d) => (d ? `depuis ${d}` : ''),
+};
 
 const TEXTE_NEUTRE_JOURNAL = 'Modification enregistrée';
 const USAGE_JOURNAL = {
@@ -525,7 +558,7 @@ export function phraseJournal(etat, j) {
     const ligne = lignesStandardsBase(etat).find((u) => u.usage === usage)?.lignes.find((l) => l.sujet === m[2]);
     const sujet = ligne ? enMinuscule(ligne.libelle) : lisible(m[2].replace(/^(regle|groupe):/, '')).replace(/_/g, ' ');
     const v = /^([\d.,-]+) (\S+) \(standard de base\) → ([\d.,-]+) \S+ \(votre valeur\)(?: ; (.*))?$/.exec(m[3]);
-    const tete = `${USAGE_JOURNAL[usage](v?.[2])}, ${sujet}`;
+    const tete = `${USAGE_JOURNAL[usage](v?.[2] ?? ligne?.base?.unite)}, ${sujet}`;
     if (j.action === 'revenirAuStandard') return { titre: `${tete} : valeur de base rétablie`, detail: '' };
     if (!v) return { titre: `${tete} : valeur changée`, detail: '' };
     const unite = v[2] === 'x' ? '' : ` ${uniteBase(v[2]).replace(/^% de perte$/, '%')}`;
@@ -533,7 +566,9 @@ export function phraseJournal(etat, j) {
   }
   const titreAction = LIBELLE_ACTION[j.action];
   if (!titreAction) return { titre: TEXTE_NEUTRE_JOURNAL, detail: '' };
-  return { titre: titreAction, detail: detail ? lisible(detail) : '' };
+  const phrase = (DETAIL_JOURNAL[j.action] ?? ((d) => d))(detail);
+  // Le nom du fichier restauré reste tel quel (sa date ne se réécrit pas).
+  return { titre: titreAction, detail: phrase && j.action !== 'restaurer' ? lisible(phrase) : phrase };
 }
 
 function sectionJournal(etat) {
@@ -714,6 +749,12 @@ const groupe = (titreTexte, ...lignes) => h('section', { classe: 'reglages-group
   h('h2', { classe: 'reglages-groupe-titre' }, titreTexte),
   h('ul', { classe: 'liste-rubriques-reglages' }, lignes));
 
+/** Pastille du pied : neutre pendant la vérification, verte une fois prêt, ambre en cas de problème. */
+function pastilleHorsLigne(hl) {
+  if (hl.attente) return pastille('Vérification en cours', 'gris');
+  return problemeHorsLigne(hl) ? pastille('Hors ligne pas encore prêt', 'ambre') : pastille('Fonctionne hors ligne', 'vert');
+}
+
 /** Racine (param null ou inconnu) : sections de lignes ; sinon la sous-page de la rubrique. */
 export function rendre(etat, param = null) {
   const rubrique = RUBRIQUES.find((r) => r.cle === param);
@@ -735,7 +776,7 @@ export function rendre(etat, param = null) {
         ligneInfo('Apparence', 'suit le réglage du téléphone (clair / sombre)'),
         ligneInfo('Écran allumé', 'en Production et en mode poste')),
       groupe('Données', ligneRubrique('donnees', etat)),
-      h('p', { classe: 'reglages-pied' }, problemeHorsLigne(hl) ? pastille('Hors ligne pas encore prêt', 'ambre') : pastille('Fonctionne hors ligne', 'vert'), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
+      h('p', { classe: 'reglages-pied' }, pastilleHorsLigne(hl), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
   }
   return h('div', { classe: 'vue vue-reglages' },
     h('a', { href: '#/reglages', classe: 'reglage-retour' }, '‹ Réglages'),

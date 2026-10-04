@@ -21,6 +21,17 @@ export function parseEntier(texte, libelle = 'valeur') {
   return n;
 }
 
+/**
+ * Précision écrite après la quantité. Une quantité en portions dit déjà « portions » : « 25 portions portions, composition à
+ * définir » (bug B3) devient « 25 portions · composition à définir ».
+ */
+export function precisionQuantite(calc) {
+  const t = String(calc.libelleQuantite ?? '');
+  if (calc.uniteTravail !== 'portion' || calc.statut !== 'CALCULE') return t;
+  const reste = t.replace(/^portions?\s*,\s*/i, '');
+  return reste === t ? t : `· ${reste}`;
+}
+
 /** Nombre pour un champ de saisie : virgule française, sans bruit de virgule flottante. */
 export function formaterNombre(n) {
   if (n === null || n === undefined || !Number.isFinite(n)) return '';

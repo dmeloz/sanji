@@ -98,6 +98,23 @@ test('ligne : plus de « Actions ▸ » sous chaque ligne ; un bouton « ⋯ » 
   assert.equal(panneau.hidden, false);
 });
 
+test('ligne : « ⋯ » occupe sa propre colonne, la même à chaque ligne (aligné quelle que soit la longueur du nom)', () => {
+  const { e, m1, mardi } = lundi();
+  e.composants[m1].nom = 'A';
+  e.composants[mardi].nom = 'Un nom de produit beaucoup plus long que l\'autre pour la ligne';
+  const noeud = production(e);
+  const lignes = classes(noeud, 'prod-ligne');
+  assert.ok(lignes.length >= 3);
+  for (const l of lignes) {
+    const enfants = classes(l, 'prod-principal')[0].enfants.filter((x) => x.balise);
+    assert.equal(enfants.length, 5, 'case, corps, quantité, « ⋯ » (ou son emplacement vide), chevron');
+    assert.match(enfants[3].className, /prod-plus/, 'la 4e colonne est celle de « ⋯ »');
+    assert.equal(classes(enfants[1], 'prod-plus').length, 0, '« ⋯ » ne suit plus le nom dans la colonne du corps');
+  }
+  const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
+  assert.match(css, /\.prod-principal \{[^}]*grid-template-columns: var\(--cible\) minmax\(0, 1fr\) auto var\(--cible\) var\(--cible\)/);
+});
+
 test('ligne : une proposition à planifier montre « Planifier » directement, et seulement « Pour mer. 7 » en mention', () => {
   const noeud = production(lundi().e);
   const ligne = ligneDe(noeud, 'ELEMENT_MERCREDI_TEST');
@@ -136,11 +153,17 @@ test('ligne : une préparation au standard de base dit « provenance : standard 
   definirPrevision(e, S.lundi, 1, 10, h());
   definirStandard(e, 'riz', 'plat_principal', { valeur: 70, unite: 'g', etat: 'sec' }, h());
   const riz = Object.values(e.composants).find((c) => c.nom === 'riz');
-  const calc = vueJour.provenanceQuantite(e, riz.id);
-  const noeud = production(e);
-  const texte = texteVisible(ligneDe(noeud, 'riz'));
-  if (vueJour.provenanceAMontrer(calc)) assert.match(texte, /provenance : /);
-  else assert.doesNotMatch(texte, /provenance : /);
+  const valide = vueJour.provenanceQuantite(e, riz.id);
+  assert.notEqual(valide, 'standard de base');
+  assert.equal(vueJour.provenanceAMontrer(valide), null, 'un grammage validé ne se répète pas sur la ligne');
+  assert.doesNotMatch(texteVisible(ligneDe(production(e), 'riz')), /provenance : /);
+  // Sans standard maison : la portion vient du standard de base, et la ligne le dit.
+  const b = etatVide();
+  prevision(b, S.lundi, 1, 10);
+  const grammageBase = { valeur: 50, unite: 'ml', statut: 'STANDARD_BASE', source: 'TEST_ONLY' };
+  const prepBase = composantValide(b, S.lundi, 1, { ...J.PREPARATION_TEST, grammage: grammageBase }, { nom: 'PREP_BASE_TEST' });
+  assert.equal(vueJour.provenanceQuantite(b, prepBase), 'standard de base');
+  assert.match(texteVisible(ligneDe(production(b), 'PREP_BASE_TEST')), /provenance : standard de base/);
 });
 
 test('page : la phrase de refroidissement tient en une ligne courte ; plus de « Rien d\'obligatoire » ni d\'écran allumé sur la page', () => {
@@ -293,6 +316,17 @@ test('fiche, bug B3 : « 25 portions » n\'est pas écrit deux fois', () => {
   assert.match(grande, /composition à définir/, 'le reste de la précision est gardé');
 });
 
+test('composant (page complète) : « 25 portions » n\'est pas écrit deux fois non plus', () => {
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 25);
+  const c = composantValide(e, S.lundi, 1, { ...J.PRODUIT_SEC_TEST, type: 'generique' }, { nom: 'GENERIQUE_TEST', type: 'generique' });
+  e.composants[c].type = 'generique';
+  magasin.remplacer(e);
+  const texte = vueComposant.rendre(magasin.etat(), c).textContent;
+  assert.doesNotMatch(texte, /portions?\s+portions?/i);
+  assert.match(texte, /composition à définir/);
+});
+
 // ------------------------------------------------------------------ 6. choisir la sauce
 
 function sauceDe(e) { return Object.values(e.composants).find((c) => c.categorie === 'sauce'); }
@@ -341,13 +375,43 @@ test('choisir la sauce : pour un risotto, le safran est habituel et la tomate es
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'Risotto aux champignons', h());
   const sauce = sauceDe(e);
-  if (!sauce || sauce.categorie !== 'sauce') return;
+  assert.ok(sauce, 'un risotto au menu 1 propose une sauce à confirmer');
+  assert.equal(sauce.categorie, 'sauce');
   magasin.remplacer(e);
   vueComposant.dialogChoisirSauce(magasin.etat().composants[sauce.id]);
   const [dialogue] = panneauxOuverts(dom.corps);
   const autres = dialogue.tous((x) => x.balise === 'details').find((d) => /Autres sauces/.test(d.querySelector('summary').textContent));
   assert.doesNotMatch(autres.textContent, /sauce safran/);
   assert.match(autres.textContent, /sauce tomate/);
+  dialogue.close();
+});
+
+test('choisir la sauce : pour un plat au poisson ou au saumon, les sauces de poisson d\'abord, avant pesto et arrabbiata, sans présélection', () => {
+  for (const plat of ['Penne au saumon', 'Risotto, filet de cabillaud', 'Tagliatelles et poisson du jour']) {
+    const e = etatVide();
+    definirMenu(e, S.lundi, 1, plat, h());
+    const sauce = sauceDe(e);
+    assert.ok(sauce, `${plat} : une sauce à confirmer`);
+    magasin.remplacer(e);
+    vueComposant.dialogChoisirSauce(magasin.etat().composants[sauce.id]);
+    const [dialogue] = panneauxOuverts(dom.corps);
+    const noms = dialogue.tous((x) => x.balise === 'label' && x.className === 'case').map((l) => l.textContent);
+    assert.equal(noms.length, SAUCES.length, 'toutes les sauces restent accessibles');
+    for (const nom of ['crème et fond de poisson', 'beurre blanc', 'sauce à la crème']) {
+      assert.ok(noms.indexOf(nom) >= 0 && noms.indexOf(nom) < noms.indexOf('pesto'), `${plat} : « ${nom} » avant le pesto`);
+      assert.ok(noms.indexOf(nom) < noms.indexOf('sauce arrabbiata'), `${plat} : « ${nom} » avant l'arrabbiata`);
+    }
+    assert.equal(noms[0], 'crème et fond de poisson', 'la première proposition est une sauce de poisson');
+    assert.equal(dialogue.tous((x) => x.balise === 'input' && x.attributs.type === 'radio').some((r) => r.checked), false);
+    dialogue.close();
+  }
+  // Un plat sans poisson garde l'ordre des pâtes : la tomate d'abord.
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'Penne aux courgettes', h());
+  magasin.remplacer(e);
+  vueComposant.dialogChoisirSauce(magasin.etat().composants[sauceDe(e).id]);
+  const [dialogue] = panneauxOuverts(dom.corps);
+  assert.equal(dialogue.tous((x) => x.balise === 'label' && x.className === 'case')[0].textContent, 'sauce tomate');
   dialogue.close();
 });
 

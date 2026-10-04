@@ -70,6 +70,12 @@ export class Element extends Noeud {
   }
 
   querySelector(balise) { return this.tous((e) => e.balise === balise)[0] ?? null; }
+
+  /** Uniquement « balise » ou « balise[open] » (un dialogue ouvert). */
+  querySelectorAll(selecteur) {
+    const balise = selecteur.replace(/\[open\]$/, '');
+    return this.tous((e) => e.balise === balise && (!selecteur.endsWith('[open]') || e.open));
+  }
 }
 
 export function installerFauxDom() {

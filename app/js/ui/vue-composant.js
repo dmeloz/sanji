@@ -3,7 +3,7 @@
 import {
   composerMelange, enregistrerPesee, memoriser, modifierComposant, reprendreMemoire, saisirApresService, supprimerComposant,
 } from '../domaine/actions.js';
-import { statutAllergenes } from '../domaine/allergenes.js';
+import { obstacleValidationAllergenes, statutAllergenes } from '../domaine/allergenes.js';
 import { chercherBase } from '../domaine/base.js';
 import { calculerComposant } from '../domaine/calcul.js';
 import { libelleJour } from '../domaine/dates.js';
@@ -21,7 +21,7 @@ import { ouvrirValidation } from './feuille-validation.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, lien, pastille, repliable } from './elements.js';
 import {
-  coefficientDepuis, formaterNombre, libelleCoefficient, milieu, modeDepuisCoefficient, pluriel, quantite, quantiteNoeuds,
+  coefficientDepuis, formaterNombre, libelleCoefficient, milieu, modeDepuisCoefficient, pluriel, precisionQuantite, quantite, quantiteNoeuds,
 } from './format.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
@@ -92,9 +92,16 @@ const SAUCES_RISOTTO = ['safran', 'champignons', 'gorgonzola', 'bisque', 'creme_
 /** Le plat décrit-il un risotto ? (nom d'origine « base de risotto à confirmer » ou intitulé du menu) sinon des pâtes. */
 const estRisotto = (c, intitule) => /risotto/.test(normaliser(`${c.nom} ${typeof c.implicite === 'string' ? c.implicite : ''} ${intitule}`));
 
+// Plat au poisson : ses sauces d'abord (clés du vocabulaire existant), avant celles des pâtes ou du risotto.
+const SAUCES_POISSON = ['creme_fumet', 'beurre_blanc', 'creme', 'meuniere', 'tartare'];
+const MOTS_POISSON = /\b(poissons?|saumons?|cabillauds?|colins?|thons?|lottes?|merlus?|truites?|dorades?|soles?|lieu|merlans?|fletans?|perches?|ombles?|sandres?|brochets?)\b/;
+/** Le plat parle-t-il d'un poisson ? (nom du composant, sauce implicite d'origine ou intitulé du menu). */
+const estPoisson = (c, intitule) => MOTS_POISSON.test(normaliser(`${c.nom} ${typeof c.implicite === 'string' ? c.implicite : ''} ${intitule}`));
+
 /** { habituelles, autres } : les sauces du vocabulaire qui vont avec ce plat, puis toutes les autres, chacune une seule fois. */
 export function saucesPourPlat(c, intitule = '') {
-  const cles = estRisotto(c, intitule) ? SAUCES_RISOTTO : SAUCES_PATES;
+  const deBase = estRisotto(c, intitule) ? SAUCES_RISOTTO : SAUCES_PATES;
+  const cles = estPoisson(c, intitule) ? [...new Set([...SAUCES_POISSON, ...deBase])] : deBase;
   const habituelles = cles.map((cle) => SAUCES.find((x) => x.cle === cle)).filter(Boolean);
   return { habituelles, autres: SAUCES.filter((x) => !habituelles.includes(x)) };
 }
@@ -140,7 +147,7 @@ export function dialogChoisirSauce(c) {
 
 // ------------------------------------------------------------------ modifier
 
-function dialogModifier(c) {
+export function dialogModifier(c) {
   const e = etatCourant();
   const f = champs([
     { cle: 'nom', type: 'texte', libelle: 'Nom', valeur: c.nom, placeholder: 'nom du composant' },
@@ -299,17 +306,30 @@ function dialogPesee(c) {
 
 // ------------------------------------------------------------------ allergènes, après service
 
-function dialogAllergenes(c) {
+const TEXTE_OBSTACLE_ALLERGENES = {
+  'composition à définir': 'Composition à définir : tant que ce composant n\'est ni un produit simple ni une préparation maison, sa liste d\'allergènes ne peut pas être validée.',
+  'recette restaurant non validée': 'Recette restaurant non validée : la liste d\'une préparation maison ne compte qu\'avec sa recette validée.',
+};
+
+/** Phrase qui dit pourquoi valider la liste ne suffit pas (`obstacle` de `obstacleValidationAllergenes`), ou null. */
+export const texteObstacleAllergenes = (obstacle) => (obstacle ? TEXTE_OBSTACLE_ALLERGENES[obstacle] ?? `${obstacle}.` : null);
+
+export function dialogAllergenes(c) {
+  const obstacle = obstacleValidationAllergenes(etatCourant(), c);
   const f = champs([
     { cle: 'liste', type: 'cases', libelle: 'Allergènes présents', valeur: c.allergenes.liste, options: ALLERGENES },
     { cle: 'valider', type: 'case', libelle: 'Je valide cette liste', valeur: c.allergenes.statut === 'valide' },
   ]);
   panneau({
     titre: `Allergènes : ${c.nom}`,
-    corps: [h('p', { classe: 'aide' }, 'Tant que la liste n\'est pas validée, le statut reste « à confirmer ». Une liste validée ne vaut que si la recette et les ingrédients réellement utilisés sont validés.'), ...f.noeuds],
+    corps: [h('p', { classe: 'aide' }, 'Tant que la liste n\'est pas validée, le statut reste « à confirmer ». Une liste validée ne vaut que si la recette et les ingrédients réellement utilisés sont validés.'),
+      obstacle ? h('p', { classe: 'aide', role: 'note' }, `Ici, valider ne suffit pas. ${texteObstacleAllergenes(obstacle)}`) : null,
+      ...f.noeuds],
     surEnregistrer: () => {
       const v = f.lire();
       agirStrict((x, t) => modifierComposant(x, c.id, { allergenes: { statut: v.valider ? 'valide' : 'a_confirmer', liste: v.liste } }, t));
+      const reste = obstacleValidationAllergenes(etatCourant(), etatCourant().composants[c.id]);
+      if (v.valider && reste) afficherMessage(`Liste enregistrée, mais elle reste « à confirmer ». ${texteObstacleAllergenes(reste)}`, 'info');
     },
   });
 }
@@ -366,8 +386,8 @@ function sectionEntete(etat, c, calc) {
     h('p', null, pastille(c.attribue ? 'attribué au poste' : 'non attribué', c.attribue ? 'gris' : 'ambre'), ' ',
       pastille(libelle('TYPE_COMPOSANT', c.type), 'gris')),
     calc.statut === 'CALCULE'
-      ? h('p', { classe: 'quantite-grande' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail), h('small', null, ` ${calc.libelleQuantite}`))
-      : h('p', { classe: 'quantite-grande discret' }, 'quantité inconnue', h('small', null, ` ${calc.libelleQuantite}`)),
+      ? h('p', { classe: 'quantite-grande' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail), h('small', null, ` ${precisionQuantite(calc)}`))
+      : h('p', { classe: 'quantite-grande discret' }, 'quantité inconnue', h('small', null, ` ${precisionQuantite(calc)}`)),
     blocPortion(c, calc),
     h('p', null,
       calc.statut === 'CALCULE' ? pastille(libelle('PROVENANCE', 'CALCULE'), 'vert') : pastille(libelle('PROVENANCE', 'INCONNU'), 'gris'), ' ',

@@ -29,8 +29,9 @@ export const ONGLET_DE_VUE = {
  * Analyse un hash (« #/production/2026-10-05 ») : { vue, param, sous? }. Fonction pure, sans DOM.
  * Adresses : #/aujourdhui (accueil, défaut), #/production[/date], #/semaine[/date[/tableau]], #/stock[/restes|dlc|achats][/date],
  * #/fiche/<composantId>, #/poste/<composantId>, #/import[/date], #/reglages[/rubrique].
- * Défauts : production = aujourd'hui ; import et stock = lundi de la semaine donnée ou en cours ; stock sans sous-vue = « achats »
- * (« #/stock/<date> » vaut « achats ») ; semaine sans date = tableau de la semaine (param null), avec date = détail du jour,
+ * Défauts : production = aujourd'hui ; import et stock = lundi de la semaine donnée ou en cours ; stock sans sous-vue précise
+ * (« #/stock », « #/stock/<date> ») : `sous` est absent et la vue Stock choisit (dernière choisie, sinon DLC s'il y a à consommer
+ * en priorité, sinon Achats ; l'ancienne adresse #/produits vaut « achats ») ; semaine sans date = tableau de la semaine (param null), avec date = détail du jour,
  * « /tableau » en plus = tableau de cette semaine (ramenée au lundi). Une adresse inconnue, ou fiche/poste sans identifiant, mène à l'accueil.
  * Réglages : une clé de rubrique inconnue donne la racine.
  * Anciennes adresses, redirigées pour les favoris : #/accueil et #/tableau → aujourdhui (#/tableau/<date> → tableau de la semaine),
@@ -83,6 +84,12 @@ function majOnglets(vue) {
   }
 }
 
+/** Ferme les dialogues ouverts (leur fermeture nettoie leurs abonnements et rend le focus). */
+function fermerPanneaux() {
+  const zone = parId('panneaux');
+  for (const d of zone?.querySelectorAll?.('dialog[open]') ?? []) d.close();
+}
+
 /** Dessine la vue courante. Même vue et même paramètre : le défilement est conservé ; sinon retour en haut. */
 export function rendre() {
   const racine = parId('vue');
@@ -90,6 +97,8 @@ export function rendre() {
   const { vue, param, sous } = analyserHash(location.hash, aujourdhui());
   const cle = `${vue}/${sous ?? ''}/${param ?? ''}`;
   const defilement = cle === cleCourante ? window.scrollY : 0;
+  // Changement de page : un dialogue resté ouvert (fiche, saisie, « À décider ») ne suit pas dans la nouvelle page.
+  if (cle !== cleCourante) fermerPanneaux();
   let noeud;
   try {
     noeud = VUES[vue].rendre(etat(), param, sous);

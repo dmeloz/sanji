@@ -178,16 +178,25 @@ function dateProduction(prod) {
   return prod.jourDecide ?? (prod.hFait ? String(prod.hFait).slice(0, 10) : null);
 }
 
-function evaluationDe(etat, prod, composant) {
-  const date = dateProduction(prod);
+/**
+ * Date réelle de production, pour dater une conservation : celle du marquage « fait » si la production est faite
+ * (elle a pu être faite avant son jour prévu), sinon le jour décidé.
+ */
+export function dateRealiseeProduction(prod) {
+  if (prod.etat === 'fait' && prod.hFait) return String(prod.hFait).slice(0, 10);
+  return dateProduction(prod);
+}
+
+function evaluationDe(etat, prod, composant, reelle = false) {
+  const date = reelle ? dateRealiseeProduction(prod) : dateProduction(prod);
   return date ? evaluerAvance(date, prod.dateService, regleDe(etat, composant, prod.etapeCle ?? null), repereConservation(composant, etat)) : null;
 }
 
-/** Évaluation de l'avance d'une production (null si sa date de production est inconnue). */
-export function evaluationProduction(etat, productionId) {
+/** Évaluation de l'avance d'une production (null si sa date de production est inconnue). `reelle` : partir de la date réelle du « fait » (conservation). */
+export function evaluationProduction(etat, productionId, { reelle = false } = {}) {
   const p = etat.productions?.[productionId];
   if (!p) return null;
-  return evaluationDe(etat, p, etat.composants?.[p.composantId] ?? null);
+  return evaluationDe(etat, p, etat.composants?.[p.composantId] ?? null, reelle);
 }
 
 /** Somme des quantités réellement faites qui couvrent le besoin (préparatoires et avances non couvrantes exclues). */
@@ -202,6 +211,26 @@ function sommeReelsCouvrants(etat, composantId, exclureId = null) {
     somme += p.quantiteReelle;
   }
   return somme;
+}
+
+/**
+ * Quantités réellement faites que l'écart ne compte PAS (même règle que `sommeReelsCouvrants`) et pourquoi : un réel fait
+ * un dimanche (jour non travaillé), après le service, hors règle ou au-delà de la limite d'utilisation ne couvre pas le
+ * besoin. Sert à dire pourquoi « il manque » une quantité alors que le réel égale la cible.
+ * @returns {{quantite:number, raison:string}|null} null quand tout le réel est compté
+ */
+export function reelNonCompte(etat, composantId) {
+  const composant = etat.composants?.[composantId];
+  let quantite = 0;
+  let raison = '';
+  for (const p of Object.values(etat.productions ?? {})) {
+    if (p.composantId !== composantId || p.etat !== 'fait' || p.genre === 'preparatoire' || !Number.isFinite(p.quantiteReelle)) continue;
+    const ev = evaluationDe(etat, p, composant);
+    if (!ev || ev.couvre) continue;
+    quantite += p.quantiteReelle;
+    if (!raison) raison = ev.alertes[0] ?? 'ne couvre pas le besoin';
+  }
+  return quantite > 0 ? { quantite, raison } : null;
 }
 
 /** Quantité de travail arrondie du composant, ou null si le calcul est inconnu. */

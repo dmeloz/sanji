@@ -11,7 +11,7 @@ import {
 } from './etat.js';
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
-import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
+import { chargeCreneau, cibleProduction, ecartProduction, etatTache, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
 import { besoinsProduits, cleSuivi, suiviProduit } from './produits.js';
 import { GROUPES, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
@@ -108,6 +108,15 @@ function normaliserEtapes(etapes) {
     if (!STATUTS_SAISIE.includes(statut)) throw new Error(`Provenance de l'étape ${e.etape} inconnue : « ${statut} ».`);
     return { etape: e.etape, coefficient: e.coefficient, statut, source: String(e.source ?? '') };
   });
+}
+
+/** Libellé d'une production avec le nom COURANT de son composant (le libellé enregistré garde l'ancien nom après un renommage). */
+function libelleCourant(etat, p) {
+  const c = etat.composants[p.composantId];
+  if (!c) return p.libelle;
+  if (p.genre === 'principale') return c.nom;
+  if (p.genre === 'complement') return `Complément : ${c.nom}`;
+  return p.libelle;
 }
 
 export function terminer(etat, h, action, detail, valeur) {
@@ -432,6 +441,10 @@ export function modifierComposant(etat, composantId, champs, h) {
   const attributionChangee = ('attribue' in maj && maj.attribue !== c.attribue)
     || ('categorie' in maj && maj.categorie !== c.categorie);
   Object.assign(c, maj);
+  // Un composant renommé (sauce choisie…) : ses productions portent le nom courant, jamais l'ancien.
+  for (const p of Object.values(etat.productions)) {
+    if (p.composantId === c.id && (p.genre === 'principale' || p.genre === 'complement')) p.libelle = libelleCourant(etat, p);
+  }
   if (attributionChangee) memoriserAttribution(etat, c);
   return terminer(etat, h, 'modifierComposant', `${c.nom} : ${Object.keys(maj).join(', ')}`, c);
 }
@@ -645,7 +658,7 @@ function deplacer(etat, productionId, date, creneau, h, action) {
   if (date === null) {
     p.jourDecide = null;
     p.creneauDecide = null;
-    return terminer(etat, h, action, `${p.libelle} : retour à planifier`, { production: p, evaluation: null, alertes: [] });
+    return terminer(etat, h, action, `${libelleCourant(etat, p)} : retour à planifier`, { production: p, evaluation: null, alertes: [] });
   }
   verifierDate(date);
   if (!estOuvert(date)) throw new Error('Le dimanche est un jour non travaillé : aucune tâche.');
@@ -658,7 +671,7 @@ function deplacer(etat, productionId, date, creneau, h, action) {
   p.jourDecide = date;
   p.creneauDecide = creneau;
   const alertes = [...evaluation.alertes, ...chargeCreneau(etat, date, creneau).alertes];
-  return terminer(etat, h, action, `${p.libelle} -> ${date} ${creneau}`, { production: p, evaluation, alertes });
+  return terminer(etat, h, action, `${libelleCourant(etat, p)} -> ${date} ${creneau}`, { production: p, evaluation, alertes });
 }
 
 /**
@@ -682,7 +695,7 @@ export function demarrer(etat, productionId, h) {
   if (p.etat === 'fait') throw new Error('Cette production est déjà faite.');
   p.etat = 'en_cours';
   p.cibleAuDemarrage = cibleProduction(etat, productionId);
-  return terminer(etat, h, 'demarrer', p.libelle, p);
+  return terminer(etat, h, 'demarrer', libelleCourant(etat, p), p);
 }
 
 /**
@@ -718,7 +731,7 @@ export function marquerFait(etat, productionId, quantite, h) {
   p.quantiteReelle = reel;
   p.unite = calc?.uniteTravail ?? c?.grammage.unite ?? null;
   p.hFait = h;
-  return terminer(etat, h, 'marquerFait', `${p.libelle} : ${reel ?? '—'}`, p);
+  return terminer(etat, h, 'marquerFait', `${libelleCourant(etat, p)} : ${reel ?? '—'}`, p);
 }
 
 /** Fenêtre pendant laquelle un marquage « fait » peut être annulé (un toucher par erreur). */
@@ -745,7 +758,7 @@ export function annulerFait(etat, productionId, h) {
   p.hFait = null;
   p.instantane = null;
   p.avantFait = null;
-  return terminer(etat, h, 'annulerFait', p.libelle, p);
+  return terminer(etat, h, 'annulerFait', libelleCourant(etat, p), p);
 }
 
 /** Corrige la quantité réelle d'une production faite (l'instantané reste celui du marquage). */
@@ -756,7 +769,7 @@ export function corrigerReel(etat, productionId, quantite, h) {
   if (!Number.isFinite(quantite) || quantite < 0) throw new Error('Quantité réelle : nombre positif ou nul attendu.');
   const avant = p.quantiteReelle;
   p.quantiteReelle = quantite;
-  return terminer(etat, h, 'corrigerReel', `${p.libelle} : ${avant} -> ${quantite}`, p);
+  return terminer(etat, h, 'corrigerReel', `${libelleCourant(etat, p)} : ${avant} -> ${quantite}`, p);
 }
 
 /**
@@ -781,8 +794,12 @@ export function deciderEcart(etat, productionId, type, h) {
       etat.productions[id] = complement;
     }
   }
+  // L'écart est celui du composant (toutes ses productions faites ensemble) : une décision règle les cartes sœurs aussi.
+  const soeurs = Object.values(etat.productions).filter((x) => x.id !== p.id && x.composantId === c.id && x.genre !== 'preparatoire'
+    && (x.etat === 'fait' || x.etat === 'en_cours') && etatTache(etat, x.id) === 'ecart');
   p.decisionEcart = { type, cible: cibleProduction(etat, productionId), h };
-  return terminer(etat, h, 'deciderEcart', `${p.libelle} : ${type}`, { decision: p.decisionEcart, complement });
+  for (const x of soeurs) x.decisionEcart = { type, cible: cibleProduction(etat, x.id), h };
+  return terminer(etat, h, 'deciderEcart', `${libelleCourant(etat, p)} : ${type}`, { decision: p.decisionEcart, complement });
 }
 
 /** Ajoute une action préparatoire (sans cible chiffrée) liée à un composant, par exemple lorsque la conservation n'est pas validée. */

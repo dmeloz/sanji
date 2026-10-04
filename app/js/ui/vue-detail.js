@@ -112,12 +112,11 @@ function dialogComposant(date, menu, c) {
 }
 
 /** Interrupteur « au poste » : le choix est enregistré aussitôt, et mémorisé par nom par le domaine. */
-export function interrupteurAuPoste(c, prefixe = 'poste', { etat = 'toujours' } = {}) {
+export function interrupteurAuPoste(c, prefixe = 'poste') {
   const id = `${prefixe}-${c.id}`;
   const dit = (attribue) => (attribue ? 'au poste' : 'hors poste');
-  // « exception » : le libellé n'est écrit que pour ce qui est hors poste (la normalité se dit une fois, dans le résumé) ;
-  // le nom accessible porte toujours l'état.
-  const texte = (attribue) => (etat === 'exception' && attribue ? '' : dit(attribue));
+  // L'état est écrit dans les deux sens (jamais une coche seule) ; le nom accessible le porte aussi.
+  const texte = dit;
   const mot = h('span', { classe: 'interrupteur-etat' }, texte(c.attribue));
   const entree = h('input', {
     type: 'checkbox', role: 'switch', id, classe: 'interrupteur-entree', checked: c.attribue, 'aria-label': `${c.nom}, ${dit(c.attribue)}`,

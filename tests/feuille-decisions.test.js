@@ -6,12 +6,13 @@ import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
-import { creerFiche, deciderEcart, definirMenu, definirPrevision, definirStandard, marquerFait, planifier } from '../app/js/domaine/actions.js';
+import { creerFiche, deciderEcart, definirMenu, definirPrevision, definirStandard, marquerFait, modifierComposant, planifier } from '../app/js/domaine/actions.js';
 import { composantVide } from '../app/js/domaine/etat.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
-import { decisionsDe, decisionsDuJour, POINTS_SANS_DECISION, texteDecisions } from '../app/js/domaine/decisions.js';
+import { decisionsDe, POINTS_SANS_DECISION, texteDecisions } from '../app/js/domaine/decisions.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { etatVide, h } from './aide.js';
+import { composantValide, etatVide, h } from './aide.js';
+import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 
 let dom;
 let magasin;
@@ -191,6 +192,27 @@ test('feuille : avance hors règle écrite « hors règle », « Replanifier » 
   d.close();
 });
 
+test('feuille : une avance hors règle sur une tâche déjà FAITE ne propose plus « Replanifier » (inerte) mais corriger le réel, la règle de préparation et la fiche', () => {
+  nettoyer();
+  const { e, p } = avecAvanceHorsRegle();
+  marquerFait(e, p.id, undefined, `${S.lundi}T08:00:00.000Z`);
+  assert.equal(decisionsDe(e, S.lundi).cartes.find((x) => x.genre === 'avance_hors_regle')?.fait, true);
+  magasin.remplacer(e);
+  aDate(S.lundi, () => feuille.ouvrirDecisions());
+  const [d] = ouverts();
+  const carte = classes(d, 'dec-carte').find((c) => c.dataset.genre === 'avance_hors_regle');
+  assert.ok(carte);
+  assert.equal(parTexte(carte, /^Replanifier$/), undefined);
+  assert.match(carte.textContent, /Déjà faite : elle ne se replanifie plus/);
+  assert.match(carte.textContent, /règle de préparation/);
+  const liens = carte.tous((x) => x.balise === 'a').map((a) => a.attributs.href);
+  assert.ok(liens.includes('#/reglages/organisation'));
+  aDate(S.lundi, () => parTexte(carte, /^Corriger le réel$/).click());
+  assert.ok(ouverts().some((x) => /Corriger le réel :/.test(x.textContent)));
+  ouverts().at(-1).close();
+  d.close();
+});
+
 test('feuille : sauce à confirmer = « Choisir la sauce » ouvre le panneau existant ; valider la sauce retire la carte', async () => {
   nettoyer();
   magasin.remplacer(avecSauce());
@@ -318,16 +340,19 @@ test('B1 : le dimanche, une avance hors règle pour le lundi suivant apparaît',
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   const p = Object.values(e.productions).find((x) => x.genre === 'principale');
   planifier(e, p.id, S.veille, 'avant_midi', h());
-  // même carte qu'en semaine : visible seulement si l'avance est hors règle
-  const brut = pointsAConfirmer(e, S.mardi).some((x) => x.type === 'avance_hors_regle');
-  assert.equal(genres(e, S.dimanchePrecedent).includes('avance_hors_regle'), brut);
+  // Même carte qu'en semaine : le point existe (avance de 4 jours, sans règle), et le dimanche la montre aussi.
+  assert.equal(pointsAConfirmer(e, S.mardi).some((x) => x.type === 'avance_hors_regle'), true, 'le cas est bien une avance hors règle');
+  const carte = decisionsDe(e, S.dimanchePrecedent).cartes.find((c) => c.genre === 'avance_hors_regle');
+  assert.ok(carte, 'le dimanche voit la carte');
+  assert.equal(carte.productionId, p.id);
+  assert.equal(carte.jours, 4);
 });
 
 test('B1 bis : un écart à arbitrer est une décision, aussi le dimanche et pour un jour passé ; décidé, il disparaît', () => {
   const { e, p } = avecEcart();
   for (const jour of [S.lundi, S.mardi, S.dimanche]) {
     const cartes = decisionsDe(e, jour).cartes.filter((c) => c.genre === 'ecart');
-    assert.equal(cartes.length, jour === S.dimanche ? 1 : 1, jour);
+    assert.equal(cartes.length, 1, jour);
   }
   assert.equal(decisionsDe(e, S.lundi).total, 1);
   deciderEcart(e, p.id, 'ajustement', h());
@@ -335,12 +360,108 @@ test('B1 bis : un écart à arbitrer est une décision, aussi le dimanche et pou
   assert.equal(decisionsDe(e, S.dimanche).total, 0);
 });
 
-test('compte unique : decisionsDuJour = les cartes datées du jour, texteDecisions dit « décision(s) à prendre »', () => {
+test('un même écart n\'est jamais compté deux fois : principale et complément faites, prévision changée = une seule carte par composant, et une décision règle le composant', () => {
+  const { e, p } = avecEcart();
+  const { complement } = deciderEcart(e, p.id, 'complement', h());
+  planifier(e, complement.id, S.lundi, 'avant_midi', h());
+  marquerFait(e, complement.id, undefined, h()); // la cible du complément, soit exactement le manque
+  const cartesEcart = () => decisionsDe(e, S.lundi).cartes.filter((c) => c.genre === 'ecart');
+  assert.equal(cartesEcart().length, 0, 'le complément couvre le besoin');
+  definirPrevision(e, S.lundi, 1, 40, h());
+  const apres = cartesEcart();
+  assert.equal(apres.length, 1, 'deux productions faites, un seul écart du composant');
+  assert.ok(apres[0].ecart > 0);
+  deciderEcart(e, apres[0].productionId, 'aucune', h());
+  assert.equal(cartesEcart().length, 0, 'décider une fois règle le composant');
+  assert.equal(decisionsDe(e, S.lundi).total, 0);
+});
+
+function avecAllergenesSansComposition() {
+  const e = calme(etatVide());
+  const id = composantValide(e, S.mercredi, 1, J.COMPOSANT_VAGUE_TEST);
+  creerFiche(e, { date: S.mercredi, service: 'midi', couverts: 4, mode: 'choix_libre', allergies: 'ALLERGIE_TEST', numero: 'F1' }, h());
+  modifierComposant(e, id, { allergenes: { statut: 'valide', liste: ['gluten'] } }, h()); // la liste est déjà validée par le chef
+  return { e, id };
+}
+const messagesAffiches = () => dom.corps.tous((x) => x.attributs.id === 'messages')[0].textContent;
+
+test('allergènes d\'un composant sans composition : la carte dit pourquoi et propose de définir la composition, pas de revalider la liste', () => {
+  nettoyer();
+  const { e, id } = avecAllergenesSansComposition();
+  const carteDonnee = decisionsDe(e, S.mercredi).cartes.find((c) => c.genre === 'point' && c.type === 'allergenes');
+  assert.ok(carteDonnee, 'le point reste ouvert malgré la liste validée');
+  assert.equal(carteDonnee.obstacle, 'composition à définir');
+  magasin.remplacer(e);
+  aDate(S.mercredi, () => feuille.ouvrirDecisions());
+  const d = ouverts()[0];
+  const carte = classes(d, 'dec-carte').find((c) => c.dataset.genre === 'point' && /allergènes à confirmer/.test(c.textContent));
+  assert.ok(carte);
+  assert.match(carte.textContent, /Composition à définir : tant que ce composant n'est ni un produit simple ni une préparation maison/);
+  assert.equal(boutons(carte).length, 1);
+  parTexte(carte, /^Définir la composition$/).click();
+  assert.ok(ouverts().some((x) => new RegExp(`Modifier ${e.composants[id].nom}`).test(x.textContent)), 'ouvre la modification du type et de la recette');
+  parTexte(d, /^OK$/).click(); // ferme la feuille (libère son verrou) avant le nettoyage
+  nettoyer();
+});
+
+test('allergènes : le panneau dit pourquoi la liste ne compte pas, et Enregistrer le redit au lieu de se taire', async () => {
+  nettoyer();
+  const { e, id } = avecAllergenesSansComposition();
+  magasin.remplacer(e);
+  const { dialogAllergenes } = await import('../app/js/ui/vue-composant.js');
+  dialogAllergenes(magasin.etat().composants[id]);
+  const d = ouverts().at(-1);
+  assert.match(d.textContent, /Ici, valider ne suffit pas\. Composition à définir/);
+  await d.enfants[0].declencher('submit');
+  assert.match(messagesAffiches(), /Liste enregistrée, mais elle reste « à confirmer ». Composition à définir/);
+  nettoyer();
+});
+
+test('« cible 5399 · réel 5399 · il manque 5399 » : un réel fait un dimanche n\'est pas compté, et la carte le dit au lieu d\'afficher des chiffres incohérents', () => {
+  const e = calme(etatVide());
+  definirMenu(e, S.lundi, 1, 'pommes de terre', h());
+  definirStandard(e, 'pommes_de_terre', 'plat_principal', { valeur: 250, unite: 'g', etat: 'cru_net' }, h());
+  definirPrevision(e, S.lundi, 1, 20, h());
+  const p = Object.values(e.productions).find((x) => x.genre === 'principale');
+  marquerFait(e, p.id, undefined, `${S.dimanchePrecedent}T10:00:00.000Z`); // fait la veille, un dimanche (jour non travaillé)
+  const carte = decisionsDe(e, S.lundi).cartes.find((c) => c.genre === 'ecart');
+  assert.ok(carte, 'la production faite ne couvre pas le besoin : écart à arbitrer');
+  assert.equal(carte.reel, carte.cible, 'le réel égale la cible');
+  assert.equal(carte.ecart, carte.cible, 'et tout le besoin « manque » : la cause est la règle du dimanche');
+  assert.equal(carte.reelNonCompte.quantite, carte.reel);
+  assert.match(carte.reelNonCompte.raison, /dimanche : jour non travaillé/);
+  magasin.remplacer(e);
+  nettoyer();
+  aDate(S.lundi, () => feuille.ouvrirDecisions());
+  const d = ouverts()[0];
+  const texte = classes(d, 'dec-carte').find((c) => c.dataset.genre === 'ecart').textContent;
+  assert.match(texte, /il manque/);
+  assert.match(texte, /non comptés? : dimanche : jour non travaillé/);
+  parTexte(d, /^OK$/).click();
+});
+
+test('nom courant : après un changement de nom du composant (sauce choisie), l\'écart et le journal ne gardent pas l\'ancien nom', () => {
+  const { e, p } = avecEcart();
+  const ancien = e.composants[p.composantId].nom;
+  // Données déjà enregistrées avant le correctif : libellé de production resté à l'ancien nom.
+  modifierComposant(e, p.composantId, { nom: 'Sauce bolognaise' }, h(5));
+  assert.equal(e.productions[p.id].libelle, 'Sauce bolognaise', 'le libellé de la production suit le nom');
+  e.productions[p.id].libelle = ancien; // cas d'un état ancien
+  const carte = decisionsDe(e, S.lundi).cartes.find((c) => c.genre === 'ecart');
+  assert.equal(carte.nom, 'Sauce bolognaise');
+  deciderEcart(e, p.id, 'aucune', h(6));
+  assert.match(e.journal.at(-1).detail, /^Sauce bolognaise : /);
+  assert.doesNotMatch(JSON.stringify(e.journal.at(-1)), new RegExp(ancien));
+});
+
+test('compte unique : le total de decisionsDe suit les cartes, texteDecisions dit « décision(s) à prendre »', () => {
   const { e } = avecEcart();
   definirMenu(e, S.mercredi, 1, 'Penne aux courgettes', h());
-  assert.equal(decisionsDuJour(e, S.lundi).total, 1);
-  assert.equal(decisionsDuJour(e, S.mercredi).cartes[0].genre, 'sauce');
-  assert.equal(decisionsDuJour(e, S.jeudi).total, 0);
+  const duJour = (jour) => decisionsDe(e, jour).cartes.filter((c) => c.date === jour);
+  assert.equal(duJour(S.lundi).length, 1);
+  assert.equal(duJour(S.mercredi)[0].genre, 'sauce');
+  assert.equal(duJour(S.jeudi).length, 0);
+  assert.equal(decisionsDe(e, S.lundi).total, decisionsDe(e, S.lundi).cartes.length);
   assert.equal(texteDecisions(1), '1 décision à prendre');
   assert.equal(texteDecisions(3), '3 décisions à prendre');
 });
@@ -348,7 +469,7 @@ test('compte unique : decisionsDuJour = les cartes datées du jour, texteDecisio
 test('feuille : un écart compte, la feuille ne dit pas « Tout est réglé » ; elle reste ouverte après une décision jusqu\'à OK', () => {
   nettoyer();
   const { e } = avecEcart();
-  definirMenu(e, S.lundi, 2, 'Penne aux courgettes', h());
+  definirMenu(e, S.mardi, 1, 'Penne aux courgettes', h());
   magasin.remplacer(e);
   aDate(S.lundi, () => feuille.ouvrirDecisions());
   const d = ouverts()[0];
@@ -357,9 +478,10 @@ test('feuille : un écart compte, la feuille ne dit pas « Tout est réglé » ;
   assert.match(d.textContent, /ajustement \(/);
   // une décision (sauce choisie) : la feuille reste ouverte et se met à jour
   const sauce = classes(d, 'dec-carte').find((c) => c.dataset.genre === 'sauce');
-  if (sauce) {
-    magasin.agir((x) => { Object.values(x.composants).forEach((c) => { c.sauceAConfirmer = false; }); });
-  }
+  assert.ok(sauce, 'la sauce implicite du menu 1 est une décision de la feuille');
+  const idSauce = Object.values(magasin.etat().composants).find((c) => c.categorie === 'sauce').id;
+  aDate(S.lundi, () => magasin.agir((x, t) => modifierComposant(x, idSauce, { nom: 'sauce tomate' }, t)));
+  assert.equal(classes(d, 'dec-carte').filter((c) => c.dataset.genre === 'sauce').length, 0, 'choisie, la carte disparaît');
   const p = Object.values(magasin.etat().productions).find((x) => x.genre === 'principale' && x.etat === 'fait');
   aDate(S.lundi, () => magasin.agir((x, t) => deciderEcart(x, p.id, 'aucune', t)));
   assert.equal(ouverts().length, 1, 'toujours ouverte');

@@ -91,7 +91,7 @@ test('horsligne.js : une seule fonction, null quand tout est normal (prêt ou v�
 test('les écrans ne montrent rien quand tout est normal, et le problème en toutes lettres sinon (Aujourd\'hui, Semaine, Réglages)', async () => {
   const e = mercrediAvecFiche();
   assert.doesNotMatch(rendreAu(S.mercredi, e).textContent, /hors ligne/);
-  assert.match(reglages.rendre(e, null).textContent, /Fonctionne hors ligne/, 'Réglages garde l\'état (pied)');
+  assert.match(reglages.rendre(e, null).textContent, /Vérification en cours/, 'Réglages garde l\'état (pied), neutre pendant l\'attente');
   // Ici le navigateur de test n'a pas de service worker : c'est un vrai problème, dit tel quel.
   await horsligne.preparerHorsLigne();
   assert.ok(horsligne.problemeHorsLigne(), 'problème détecté');
@@ -125,7 +125,10 @@ test('Semaine : « Attribution au poste » repliée quand tout est au poste, dé
   assert.ok(reglesPoste.length >= 1);
   assert.ok(reglesPoste.every((d) => d.open === false), 'tout est au poste : replié');
   assert.match(reglesPoste[0].textContent, /Attribution au poste : (\d+) sur \1/);
-  assert.doesNotMatch(classes(n, 'sem-carte')[0].textContent, /au poste(?! :)/, 'plus de « au poste » répété à côté de chaque interrupteur');
+  // Chaque interrupteur écrit son état dans les deux sens (jamais une coche seule).
+  const etiquettes = classes(n, 'interrupteur-etat');
+  assert.ok(etiquettes.length >= 1);
+  assert.ok(etiquettes.every((x) => x.textContent === 'au poste'), 'tout est au poste : « au poste » est écrit à côté de chaque interrupteur');
   assert.doesNotMatch(classes(n, 'sem-carte')[0].textContent, /hors poste/);
 
   const poulet = Object.values(e.composants).find((c) => c.nom === 'poulet');
@@ -154,7 +157,7 @@ test('Semaine : le nom accessible de l\'interrupteur porte l\'état et le suit',
   sw.checked = true;
   await sw.declencher('change');
   assert.equal(sw.attributs['aria-label'], 'poulet, au poste');
-  assert.equal(etiquette.textContent, '');
+  assert.equal(etiquette.textContent, 'au poste');
 });
 
 test('Semaine : l\'attribution n\'est pas répétée dans « Tout le détail du jour » (les interrupteurs sont dans Services)', () => {

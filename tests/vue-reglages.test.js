@@ -41,10 +41,11 @@ test('racine : informations seulement (ni avance −/+, ni planning, taux d\'act
   assert.doesNotMatch(t, /Mon planning|Taux d'activité|Jours off|Importer le planning/i);
 });
 
-test('racine : pied « Fonctionne hors ligne » et état existant de horsligne.js', () => {
+test('racine : pied neutre pendant la vérification (jamais « Fonctionne hors ligne ») et état existant de horsligne.js', () => {
   const t = vue.rendre(etatVide(), null).textContent;
-  assert.match(t, /Fonctionne hors ligne/);
-  assert.match(t, /hors ligne : vérification en cours|hors ligne prêt|hors ligne indisponible/);
+  assert.match(t, /Vérification en cours/);
+  assert.doesNotMatch(t, /Fonctionne hors ligne/);
+  assert.match(t, /hors ligne : vérification en cours/);
 });
 
 test('racine : la semaine type non confirmée est dite « à confirmer » en toutes lettres', () => {

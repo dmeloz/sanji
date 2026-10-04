@@ -282,6 +282,15 @@ test('restes : une ligne par produit, « + Surplus / rebut » ouvre les champs a
   assert.equal(zone.enfants.at(-1).className, 'stock-valider', 'Enregistrer en bas, collant');
 });
 
+test('restes : la note saisie est affichée dans le résumé, pas seulement le mot « note »', () => {
+  const id = mondeRestes();
+  magasin.agir((e) => { e.composants[id].apresService = { surplus: 300, rebut: null, note: 'trop cuit, à servir demain' }; });
+  const resume = sansEspaceFin(parClasse(stock.rendre(magasin.etat(), S.lundi, 'restes'), 'stock-reste-resume')[0].textContent);
+  assert.match(resume, /surplus 300 g · note : trop cuit, à servir demain/);
+  magasin.agir((e) => { e.composants[id].apresService = { surplus: null, rebut: null, note: '   ' }; });
+  assert.equal(parClasse(stock.rendre(magasin.etat(), S.lundi, 'restes'), 'stock-reste-resume').length, 0, 'une note blanche ne dit rien');
+});
+
 test('restes : une saisie existante ouvre la ligne et reste résumée (exception visible)', () => {
   const id = mondeRestes();
   magasin.agir((e) => { e.composants[id].apresService = { surplus: 300, rebut: 50, note: '' }; });
@@ -335,4 +344,19 @@ test('CSS (lot Stock et Import) : bloc commenté en fin de fichier, cibles de 44
   assert.match(bloc, /prefers-reduced-motion/);
   assert.doesNotMatch(bloc, /#[0-9a-fA-F]{3,6}\b/);
   assert.doesNotMatch(bloc, /font-size: ?(1[0-4]|[0-9])px/);
+});
+
+test('dlc : la date limite part du jour réel où la production a été faite, pas du jour prévu (prévue mercredi, faite lundi)', () => {
+  const e = etatVide();
+  definirMenu(e, S.mercredi, 2, 'riz', h());
+  prevision(e, S.mercredi, 2, 40);
+  const riz = Object.values(e.composants).find((c) => c.famille === 'riz');
+  const p = principaleDe(e, riz.id);
+  e.productions[p].jourDecide = S.mercredi;
+  marquerFait(e, p, 2400, `${S.lundi}T08:00:00.000Z`);
+  magasin.remplacer(e);
+  const texte = dateDuJour(S.lundi, () => stock.rendre(magasin.etat(), S.lundi, 'dlc')).textContent;
+  assert.match(texte, /produit le lundi 5 octobre/);
+  assert.match(texte, /à consommer avant le mardi 6 octobre/);
+  assert.doesNotMatch(texte, /à consommer avant le jeudi 8 octobre/);
 });

@@ -201,7 +201,7 @@ function ligneTache(etat, ligneBrute, date, options) {
     h('div', { classe: 'prod-principal' },
       fait ? caseFaite(l) : COCHABLES.has(l.etat) ? caseFait(l) : h('span', { classe: 'case-fait case-fait-vide' }),
       h('div', { classe: 'mep-corps' },
-        h('div', { classe: 'prod-nom-ligne' }, boutonNom ?? h('span', { classe: 'tache-nom mep-nom' }, nom), plus),
+        h('div', { classe: 'prod-nom-ligne' }, boutonNom ?? h('span', { classe: 'tache-nom mep-nom' }, nom)),
         etiquette || destination || creneau
           ? h('p', { classe: 'mep-meta prod-etiquettes' },
             etiquette ? h('span', { classe: 'prod-etiquette prod-etiquette-recette' }, etiquette) : null,
@@ -214,6 +214,8 @@ function ligneTache(etat, ligneBrute, date, options) {
       h('div', { classe: 'mep-quantite' },
         q ? h('strong', { classe: 'mep-qte' }, qteNoeuds(q)) : (l.genre === 'preparatoire' ? null : h('span', { classe: 'mep-neutre' }, 'quantité à compléter')),
         q && poids ? h('span', { classe: 'mep-poids' }, poids) : null),
+      // « ⋯ » a sa propre colonne (la même à chaque ligne) ; sans actions, son emplacement reste vide.
+      plus ?? h('span', { classe: 'prod-plus-vide', 'aria-hidden': 'true' }),
       brut ? h('span', { classe: 'prod-chevron-vide', 'aria-hidden': 'true' })
         : h('a', {
           href: `#/fiche/${encodeURIComponent(l.composantId)}`, classe: 'prod-chevron', 'aria-label': `Ouvrir la fiche : ${nom}`,

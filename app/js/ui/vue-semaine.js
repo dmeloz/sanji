@@ -148,7 +148,7 @@ function ligneComposants(etat, date, menu) {
     h('summary', null, `Attribution au poste : ${aposte} sur ${composants.length}`),
     h('ul', { classe: 'sem-composants' }, composants.map((c) => h('li', { classe: 'sem-composant' },
       lien(`#/fiche/${encodeURIComponent(c.id)}`, c.nom, 'tache-nom'),
-      vueDetail.interrupteurAuPoste(c, 'sem-poste', { etat: 'exception' })))));
+      vueDetail.interrupteurAuPoste(c, 'sem-poste')))));
 }
 
 function blocMenu(etat, date, menu) {

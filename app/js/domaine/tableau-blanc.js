@@ -4,6 +4,7 @@
 import { proposerComposants } from './analyse-menu.js';
 import { propositionsApprentissage } from './apprentissage.js';
 import { calculerComposant, formaterQuantite, portionsMenu } from './calcul.js';
+import { decisionsDe } from './decisions.js';
 import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, libelleJour, lundiDe } from './dates.js';
 import { jourOuVide, normaliser } from './etat.js';
 import { avancesPossibles, cibleProduction, etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
@@ -403,10 +404,10 @@ function fichesDuBord(etat, dates, lundi) {
  */
 function aConfirmerDuBord(etat, dates, aujourdhui) {
   const categories = [];
-  const feuille = estOuvert(aujourdhui) ? feuilleDuJour(etat, aujourdhui) : null;
-  const ecarts = feuille ? decisionsSansDoublon(feuille).filter((d) => d.motif === 'ecart') : [];
+  // Les mêmes écarts que le bandeau et la feuille « À décider » (`decisionsDe`), aussi un jour fermé ou un jour passé.
+  const ecarts = decisionsDe(etat, aujourdhui).cartes.filter((c) => c.genre === 'ecart');
   if (ecarts.length > 0) {
-    categories.push({ genre: 'ecart', n: ecarts.length, lien: `#/production/${aujourdhui}`,
+    categories.push({ genre: 'ecart', n: ecarts.length, lien: `#/production/${estOuvert(aujourdhui) ? aujourdhui : ecarts[0].date}`,
       texte: ecarts.length === 1 ? '1 écart à arbitrer' : `${ecarts.length} écarts à arbitrer` });
   }
   const points = dates.map((date) => ({ date, liste: pointsAConfirmer(etat, date).filter((p) => p.type !== 'ecart') }));
@@ -606,7 +607,7 @@ function aConsommerDe(etat, aujourd) {
   for (const p of Object.values(etat.productions ?? {})) {
     if (p.etat !== 'fait' || p.genre === 'preparatoire' || p.dateService < aujourd) continue;
     const composant = etat.composants?.[p.composantId];
-    const ev = composant ? evaluationProduction(etat, p.id) : null;
+    const ev = composant ? evaluationProduction(etat, p.id, { reelle: true }) : null;
     if (!ev || !(ev.jours > 0)) continue;
     lignes.push({
       productionId: p.id, composantId: composant.id, nom: p.genre === 'complement' ? `Complément : ${composant.nom}` : composant.nom,

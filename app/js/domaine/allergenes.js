@@ -22,6 +22,17 @@ export function statutAllergenes(etat, composant) {
   return { statut: 'valide', liste, raison: '' };
 }
 
+/**
+ * Ce qui empêche la liste d'un composant de compter comme validée, même si le chef la valide : « composition à définir »
+ * (composant générique ou à préciser) ou « recette restaurant non validée ». `null` : la validation de la liste suffit.
+ * Même règle que `statutAllergenes`, qui reste seule juge.
+ * @returns {null|'composition à définir'|'recette restaurant non validée'}
+ */
+export function obstacleValidationAllergenes(etat, composant) {
+  const s = statutAllergenes(etat, { ...composant, allergenes: { ...composant.allergenes, statut: 'valide' } });
+  return s.statut === 'valide' ? null : s.raison;
+}
+
 /** Composants attribués auxquels s'applique une fiche (midi : selon son mode ; soir : aucun menu du jour). */
 function composantsConcernes(etat, fiche) {
   if (fiche.service !== 'midi' || fiche.mode === 'hors_menu' || !aMenuDuJour(fiche.date)) return [];
