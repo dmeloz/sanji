@@ -50,6 +50,7 @@ const FICHIERS = [
   'js/ui/panneau.js',
   'js/ui/photo.js',
   'js/ui/reference.js',
+  'js/ui/reperes-metier.js',
   'js/ui/routeur.js',
   'js/ui/taches.js',
   'js/ui/vue-composant.js',
