@@ -1076,3 +1076,29 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .produit-legende { font-size: var(--t-legende); color: var(--texte-doux); }
 .stock-semaine { margin: 0; font-size: var(--t-1); color: var(--texte-doux); }
 @media (prefers-reduced-motion: reduce) { .stock-segment, .stock-jour { transition: none; } }
+
+/* ===== Écran Mode en poste (refonte 1) : une étape à la fois, en très grand. Jetons du socle seulement. ===== */
+.vue-poste { display: flex; flex-direction: column; gap: 18px; min-height: calc(100vh - var(--haut-onglets) - 80px); }
+.poste-entete { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.poste-quitter { width: var(--cible); height: var(--cible); border-radius: 22px; background: var(--carte-2); color: var(--texte); display: flex; align-items: center; justify-content: center; flex: none; }
+.poste-cale { width: var(--cible); flex: none; }
+.poste-titre { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; text-align: center; }
+.poste-nom { margin: 0; font-size: var(--t-section); font-weight: 600; overflow-wrap: anywhere; }
+.poste-qte, .poste-qte-inconnue { font-family: var(--police-qte); font-weight: 600; }
+.poste-qte-inconnue { font-family: var(--police); font-weight: 500; color: var(--texte-doux); }
+.poste-allume { display: inline-flex; align-items: center; gap: 6px; font-size: var(--t-legende); color: var(--texte-doux); }
+.poste-point { width: 8px; height: 8px; border-radius: 4px; background: var(--action); }
+.poste-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.poste-segments { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
+.poste-segment { height: 6px; border-radius: 3px; background: var(--bordure); }
+.poste-segment-plein { background: var(--action); }
+.poste-etape { display: flex; flex-direction: column; gap: 10px; }
+.poste-numero { margin: 0; font-family: var(--police-qte); font-size: var(--t-corps); font-weight: 600; color: var(--texte-doux); }
+.poste-texte { margin: 0; font-size: 30px; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.poste-etat { margin: 0; font-size: var(--t-corps); color: var(--texte-moyen); }
+.poste-fait .btn { width: 100%; min-height: 64px; font-size: 20px; font-weight: 700; border-radius: 18px; }
+.poste-refus { margin: 0; padding: 12px 14px; font-size: var(--t-corps); font-weight: 600; background: var(--exception-fond); border: 1px solid var(--exception-bord); border-radius: var(--r-carte-petite); color: var(--exception); }
+.poste-nav { margin-top: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.poste-nav .btn { min-height: 80px; font-size: 20px; font-weight: 700; border-radius: 18px; justify-content: center; text-decoration: none; }
+.poste-quitter:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .vue-poste .btn { transition: none; } .vue-poste .btn:active { transform: none; } }
