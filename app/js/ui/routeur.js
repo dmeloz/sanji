@@ -51,9 +51,12 @@ export function analyserHash(hash, aujourd) {
   if (vue === 'tableau' && dateValide) return { vue: 'semaine', param: lundiDe(param), sous: 'tableau' };
   if (vue === 'import' || vue === 'menus') return { vue: 'import', param: lundiDe(dateValide ? param : aujourd) };
   if (vue === 'stock' || vue === 'produits') {
-    const sous = vue === 'stock' && vueStock.SOUS_VUES.includes(param) ? param : 'achats';
-    const date = vue === 'stock' && sous === param ? morceaux[2] : param;
-    return { vue: 'stock', param: lundiDe(date && estDateValide(date) ? date : aujourd), sous };
+    // Sans sous-vue précise (« #/stock », date seule, inconnue), `sous` est absent : la vue Stock choisit (dernière choisie,
+    // sinon DLC s'il y a à consommer, sinon Achats). L'ancienne adresse #/produits vaut toujours « achats ».
+    const choisie = vue === 'stock' && vueStock.SOUS_VUES.includes(param);
+    const sous = choisie ? param : vue === 'produits' ? 'achats' : undefined;
+    const date = choisie ? morceaux[2] : param;
+    return { vue: 'stock', param: lundiDe(date && estDateValide(date) ? date : aujourd), ...(sous ? { sous } : {}) };
   }
   if ((vue === 'fiche' || vue === 'composant') && param) return { vue: 'fiche', param };
   if (vue === 'poste' && param) return { vue: 'poste', param };

@@ -11,7 +11,7 @@ import { ajouterJours, aMenuDuJour, libelleJour, lundiDe } from '../domaine/date
 import { jourOuVide } from '../domaine/etat.js';
 import { evaluationProduction, regleDe } from '../domaine/planification.js';
 import { libelle } from '../domaine/statuts.js';
-import { agir, aujourdhui } from '../magasin.js';
+import { agir, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, lien, pastille } from './elements.js';
@@ -28,10 +28,32 @@ const LIBELLES = { restes: 'Restes', dlc: 'DLC', achats: 'Achats' };
 const LEGENDES = {
   restes: 'Après le service · saisie facultative',
   dlc: 'Classé par service : aujourd\'hui, demain, plus tard',
-  achats: 'Besoins de la semaine · vérifié disponible',
+  achats: 'Besoins de la semaine',
 };
 
-export function titre(param, sous = 'achats') { return TITRES[sous] ?? TITRES.achats; }
+/** Sous-vue gardée pendant la session (la dernière choisie). Sans choix, la vue utile du moment est proposée. */
+let sousChoisie = null;
+
+/** Oublie la sous-vue gardée (retour au choix automatique) : sert aux tests et à une réinitialisation de session. */
+export function oublierSousVue() { sousChoisie = null; }
+
+/** Une production faite sert aujourd'hui ou demain, ou porte un avertissement de conservation : à consommer en priorité. */
+export function aConsommerEnPriorite(etat, aujourd = aujourdhui()) {
+  const demain = ajouterJours(aujourd, 1);
+  return Object.values(etat.productions ?? {}).some((p) => p.etat === 'fait' && etat.composants?.[p.composantId]
+    && p.dateService >= aujourd
+    && (p.dateService <= demain
+      || mentionsConservation(etat, p, evaluationProduction(etat, p.id), dateDeProduction(p)).some((m) => m.alerte)));
+}
+
+/** Sous-vue affichée : celle de l'adresse ; sans adresse précise, la dernière choisie, sinon DLC s'il y a à consommer, sinon Achats. */
+export function sousVueEffective(etat, sous) {
+  if (SOUS_VUES.includes(sous)) return sous;
+  if (sous === undefined || sous === null) return sousChoisie ?? (aConsommerEnPriorite(etat) ? 'dlc' : 'achats');
+  return aConsommerEnPriorite(etat) ? 'dlc' : 'achats';
+}
+
+export function titre(param, sous) { return TITRES[sousVueEffective(etatCourant(), sous)] ?? TITRES.achats; }
 
 // ------------------------------------------------------------------ sélecteur
 
@@ -103,11 +125,37 @@ function formulaireRestes(etat, date) {
     if (r.ok) afficherMessage('Restes enregistrés.', 'ok');
   };
 
+  // Une ligne par produit ; « + Surplus / rebut » ouvre les champs au toucher (ouverts d'emblée quand une saisie existe).
+  const ligneReste = ({ c, unite, prevu }) => {
+    const a = c.apresService;
+    const saisi = [a.surplus, a.rebut].some((x) => x !== null && x !== undefined) || String(a.note ?? '').trim() !== '';
+    const champsReste = h('div', { classe: 'stock-reste-champs', id: `reste-${c.id}`, hidden: !saisi },
+      noeuds.get(`s:${c.id}`), noeuds.get(`r:${c.id}`), noeuds.get(`n:${c.id}`));
+    const ouvrir = h('button', { type: 'button', classe: 'btn btn-court stock-reste-ouvrir', 'aria-expanded': saisi ? 'true' : 'false', 'aria-controls': `reste-${c.id}` },
+      saisi ? '− Surplus / rebut' : '+ Surplus / rebut');
+    ouvrir.addEventListener('click', () => {
+      champsReste.hidden = !champsReste.hidden;
+      ouvrir.setAttribute('aria-expanded', champsReste.hidden ? 'false' : 'true');
+      ouvrir.textContent = champsReste.hidden ? '+ Surplus / rebut' : '− Surplus / rebut';
+    });
+    const resume = [a.surplus != null ? `surplus ${quantite(a.surplus, unite)}` : null, a.rebut != null ? `rebut ${quantite(a.rebut, unite)}` : null,
+      String(a.note ?? '').trim() !== '' ? 'note' : null].filter(Boolean).join(' · ');
+    return h('div', { classe: 'stock-reste', role: 'group', 'aria-label': `Reste de ${c.nom}` },
+      h('div', { classe: 'stock-reste-tete' },
+        h('span', { classe: 'stock-reste-texte' },
+          lien(`#/fiche/${encodeURIComponent(c.id)}`, c.nom, 'stock-reste-nom'),
+          h('span', { classe: 'stock-legende' }, `menu ${c.menu} · ${prevu === null ? 'quantité prévue à préciser' : 'prévu '}`,
+            prevu === null ? null : h('span', { classe: 'stock-qte' }, qteNoeuds(prevu))),
+          resume ? h('span', { classe: 'stock-legende stock-reste-resume' }, resume) : null),
+        ouvrir),
+      champsReste);
+  };
+
   return h('div', { classe: 'stock-restes-corps' },
-    h('section', { classe: 'stock-carte' },
+    h('section', { classe: 'stock-carte stock-ventes' },
       h('h2', { classe: 'stock-carte-titre' }, 'Ventes du service'),
       aMenuDuJour(date)
-        ? [noeuds.get('v1'), noeuds.get('v2'),
+        ? [h('div', { classe: 'stock-ventes-champs' }, noeuds.get('v1'), noeuds.get('v2')),
           h('p', { classe: 'aide' }, 'Facultatif. Les ventes servent de repère pour les prévisions futures ; elles ne modifient aucune prévision.'),
           jour.ventes.h ? h('p', { classe: 'meta' }, `saisie du ${formaterHeure(jour.ventes.h)}`) : null]
         : ligneVide('Pas de menu du jour le samedi : pas de ventes par menu.')),
@@ -115,13 +163,8 @@ function formulaireRestes(etat, date) {
       ? ligneVide('Aucun composant au poste ce jour-là : rien à saisir pour le surplus ou le rebut.')
       : h('section', { classe: 'stock-carte' },
         h('h2', { classe: 'stock-carte-titre' }, 'Surplus et rebut'),
-        lignes.map(({ c, prevu }) => h('div', { classe: 'stock-reste', role: 'group', 'aria-label': `Reste de ${c.nom}` },
-          h('div', { classe: 'stock-reste-tete' },
-            lien(`#/fiche/${encodeURIComponent(c.id)}`, c.nom, 'stock-reste-nom'),
-            h('span', { classe: 'stock-legende' }, `menu ${c.menu} · ${prevu === null ? 'quantité prévue à préciser' : 'prévu '}`,
-              prevu === null ? null : h('span', { classe: 'stock-qte' }, qteNoeuds(prevu)))),
-          noeuds.get(`s:${c.id}`), noeuds.get(`r:${c.id}`), noeuds.get(`n:${c.id}`),
-          h('p', { classe: 'aide' }, 'Le rebut n\'est pas une perte normale de parage ou de cuisson : il ne modifie aucun coefficient.')))),
+        h('p', { classe: 'aide' }, 'Le rebut n\'est pas une perte normale de parage ou de cuisson : il ne modifie aucun coefficient.'),
+        lignes.map(ligneReste)),
     h('div', { classe: 'stock-valider' }, bouton('Enregistrer', enregistrer, 'principal')));
 }
 
@@ -155,18 +198,20 @@ function corpsRestes(etat, lundi) {
 const dateDeProduction = (p) => p.jourDecide ?? (p.hFait ? String(p.hFait).slice(0, 10) : null);
 
 /** Phrases de conservation d'une évaluation d'avance, avec le mot écrit (avertissement, hors règle, dépassée). */
-function mentionsConservation(etat, p, ev) {
+function mentionsConservation(etat, p, ev, produit = null) {
   const mentions = [];
   if (!ev) return mentions;
   const regle = regleDe(etat, etat.composants[p.composantId], p.etapeCle ?? null);
   const limite = Number.isFinite(regle?.limiteUtilisationJours) ? regle.limiteUtilisationJours : null;
+  // Date limite = date de production + durée connue (jours entiers, arrondie vers le bas : la plus prudente).
+  const avant = (jours) => (produit && Number.isFinite(jours) ? `à consommer avant le ${libelleJour(ajouterJours(produit, Math.floor(jours)))} · ` : '');
   if (ev.exception && !ev.autorisee) mentions.push({ texte: 'hors règle : avance de plus de deux jours sans règle validée', alerte: true });
   else if (ev.exception) mentions.push({ texte: 'avance de plus de deux jours autorisée par la règle', alerte: false });
   if (ev.conservation === 'referentiel' && ev.repere) {
-    mentions.push({ texte: `conservation : ${ev.repere.texte}`, alerte: false });
+    mentions.push({ texte: `${avant(ev.repere.jours)}${avant(ev.repere.jours) ? '' : 'conservation : '}${ev.repere.texte} (${ev.repere.provenance})`, alerte: false });
     if (ev.repere.depasse) mentions.push({ texte: `avertissement : avance de ${pluriel(ev.jours, 'jour')}, plus longue que la durée de base`, alerte: true });
   }
-  if (ev.conservation === 'validee') mentions.push({ texte: `limite d'utilisation : ${pluriel(limite, 'jour')} (validée)`, alerte: false });
+  if (ev.conservation === 'validee') mentions.push({ texte: `${avant(limite)}limite d'utilisation : ${pluriel(limite, 'jour')} (validée)`, alerte: false });
   if (ev.conservation === 'depassee') mentions.push({ texte: `limite d'utilisation dépassée (${pluriel(limite, 'jour')}) : le besoin n'est pas couvert`, alerte: true });
   if (ev.conservation === 'a_confirmer') mentions.push({ texte: 'conservation à confirmer', alerte: false });
   return mentions;
@@ -174,9 +219,10 @@ function mentionsConservation(etat, p, ev) {
 
 function carteDlc(etat, p, avecService) {
   const l = ligneProduction(etat, p);
-  const mentions = mentionsConservation(etat, p, evaluationProduction(etat, p.id));
-  const alerte = mentions.some((m) => m.alerte);
   const produit = dateDeProduction(p);
+  const mentions = mentionsConservation(etat, p, evaluationProduction(etat, p.id), produit);
+  const alerte = mentions.some((m) => m.alerte);
+  let dejaLu = false; // une seule mention « à lire » par carte, même avec plusieurs avertissements
   const preparatoire = p.genre === 'preparatoire';
   const nom = preparatoire ? `${l.libelle} · ${l.nom}` : l.nom;
   return h('li', { classe: `stock-dlc${alerte ? ' stock-dlc-alerte' : ''}` },
@@ -186,8 +232,12 @@ function carteDlc(etat, p, avecService) {
         h('span', { classe: 'stock-legende' },
           `${produit ? `produit le ${libelleJour(produit)}` : 'date de production non décidée'}${avecService ? ` · pour le service du ${libelleJour(p.dateService)}` : ''}`)),
       h('span', { classe: 'stock-qte' }, qteNoeuds(preparatoire || !Number.isFinite(p.quantiteReelle) ? 'sans quantité' : quantite(p.quantiteReelle, l.unite)))),
-    mentions.map((m) => h('p', { classe: m.alerte ? 'stock-mention stock-mention-alerte' : 'stock-mention' },
-      m.alerte ? pastille('à lire', 'ambre') : null, m.alerte ? ' ' : null, m.texte)));
+    mentions.map((m) => {
+      const marque = m.alerte && !dejaLu;
+      if (m.alerte) dejaLu = true;
+      return h('p', { classe: m.alerte ? 'stock-mention stock-mention-alerte' : 'stock-mention' },
+        marque ? pastille('à lire', 'ambre') : null, marque ? ' ' : null, m.texte);
+    }));
 }
 
 function corpsDlc(etat) {
@@ -215,8 +265,9 @@ function corpsDlc(etat) {
 
 // ------------------------------------------------------------------ vue
 
-export function rendre(etat, lundi, sous = 'achats') {
-  const vue = SOUS_VUES.includes(sous) ? sous : 'achats';
+export function rendre(etat, lundi, sous) {
+  const vue = sousVueEffective(etat, sous);
+  if (SOUS_VUES.includes(sous)) sousChoisie = sous; // la sous-vue choisie est gardée pendant la session
   const semaine = lundiDe(lundi ?? aujourdhui());
   if (vue !== 'restes') jourChoisi = null; // quitter les restes oublie le jour choisi : on y revient sur aujourd'hui
   const racine = h('div', { classe: 'vue vue-stock' });

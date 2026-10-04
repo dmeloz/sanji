@@ -1185,3 +1185,31 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prod-ligne .mep-quantite { align-items: flex-end; text-align: right; }
 .prod-ligne .mep-qte { font-size: max(var(--t-qte), 20px); font-weight: 600; text-align: right; }
 .prod-ligne .mep-qte .qte-unite { font-size: var(--t-corps); }
+
+/* ===== Lot Stock et Import (audit v56) : montrer l'exception, pas la normalité. Jetons du socle seulement. ===== */
+/* Achats : une phrase d'en-tête, une légende discrète, changement de semaine par flèches. */
+.achats-regle { margin: 0; font-size: var(--t-corps); font-weight: 600; color: var(--texte-moyen); }
+.stock-achats > .stock-legende { margin: 0; }
+.nav-semaine { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; }
+.nav-semaine-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: var(--t-corps); font-weight: 600; }
+.nav-semaine-retour { display: inline-flex; align-items: center; min-height: var(--cible); font-size: var(--t-legende); font-weight: 600; color: var(--action); }
+.produit-etat-texte { font-weight: 600; }
+/* Restes : une ligne par produit, champs ouverts au toucher, Enregistrer à portée du pouce. */
+.stock-ventes-champs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.stock-reste-tete { align-items: center; }
+.stock-reste-texte { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.stock-reste-ouvrir { flex: none; min-height: var(--cible); }
+.stock-reste-champs { display: grid; gap: 8px; padding-top: 6px; }
+.stock-reste-champs[hidden] { display: none; }
+.stock-valider { position: sticky; bottom: calc(var(--haut-onglets) + env(safe-area-inset-bottom)); margin: 12px -14px 0; padding: 10px 14px; background: var(--fond); border-top: 1px solid var(--bordure); }
+/* DLC : le lien du nom a la hauteur d'une cible. */
+.stock-dlc-nom, .stock-reste-nom { display: inline-flex; align-items: center; min-height: var(--cible); }
+/* Import : flèches de semaine, intitulés d'une ligne qui s'agrandissent, jours remplis repliés sur leur résumé. */
+.imp-semaine-nav { margin-top: 4px; }
+.champ-intitule { min-height: var(--cible); resize: none; overflow: hidden; field-sizing: content; }
+.saisie-jour-repliable > summary { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: var(--cible); cursor: pointer; }
+.saisie-jour-repliable > summary .saisie-jour-titre { font-size: var(--t-ligne); font-weight: 650; }
+.saisie-jour-extrait { font-size: var(--t-legende); color: var(--texte-doux); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saisie-jour-repliable[open] > summary .saisie-jour-extrait { display: none; }
+.saisie-jour-repliable[open] > summary { margin-bottom: 8px; }
+@media (prefers-reduced-motion: reduce) { .stock-reste-ouvrir, .saisie-jour-repliable, .nav-semaine .btn { transition: none; scroll-behavior: auto; } }

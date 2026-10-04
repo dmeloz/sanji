@@ -9,7 +9,7 @@ import { LIBELLE_ESTIMATION_A_VALIDER, LIBELLE_STANDARD_BASE, VERIF, libelle } f
 import { agir, agirStrict, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
-import { bouton, imprimer, encadre, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
+import { bouton, imprimer, ligneVide, lien, pastille, repliable } from './elements.js';
 import { formaterHeure, qteNoeuds, quantite } from './format.js';
 import { panneau } from './panneau.js';
 
@@ -70,7 +70,8 @@ function dialogAchat(lundi, ligne) {
 }
 
 const ETAT_LIGNE = { suggere: 'Suggéré', note: 'Noté à commander', retire: 'Retiré' };
-const ETAT_COURT = { suggere: 'suggéré', note: 'noté', retire: 'retiré' };
+// Même mot dans la ligne et dans le détail. « Suggéré » est l'état attendu : il ne s'écrit pas sur la ligne (seule l'exception s'écrit).
+const ETAT_COURT = { note: 'Noté à commander', retire: 'Retiré' };
 
 /**
  * Noter à commander : une ligne qui repose sur une valeur inconnue exige une quantité tapée ; une ligne calculée (standards
@@ -103,14 +104,16 @@ function dialogNoter(lundi, ligne) {
  * « — » seulement quand la quantité est inconnue (ligne fondée sur une valeur inconnue).
  */
 function quantiteEnAvant(suivi, unite) {
-  const base = suivi.origineQuantite === 'standard_base' || suivi.standardBase ? ` · ${LIBELLE_STANDARD_BASE}` : '';
-  if (suivi.quantiteAcheter !== null) return { valeur: quantite(suivi.quantiteAcheter, unite), legende: 'à acheter' };
-  if (suivi.etatLigne === 'note' && suivi.quantiteCommandable !== null) return { valeur: quantite(suivi.quantiteCommandable, unite), legende: `noté${base}` };
-  if (suivi.quantiteCalculee !== null) return { valeur: quantite(suivi.quantiteCalculee, unite), legende: `proposé${base}` };
-  return { valeur: '—', legende: 'quantité à saisir' };
+  const base = suivi.origineQuantite === 'standard_base' || suivi.standardBase ? LIBELLE_STANDARD_BASE : '';
+  // La quantité proposée est l'état attendu (dit une fois dans l'en-tête) : seule une origine inhabituelle s'écrit.
+  if (suivi.quantiteAcheter !== null) return { nombre: suivi.quantiteAcheter, valeur: quantite(suivi.quantiteAcheter, unite), legende: 'à acheter' };
+  if (suivi.etatLigne === 'note' && suivi.quantiteCommandable !== null) return { nombre: suivi.quantiteCommandable, valeur: quantite(suivi.quantiteCommandable, unite), legende: base };
+  if (suivi.quantiteCalculee !== null) return { nombre: suivi.quantiteCalculee, valeur: quantite(suivi.quantiteCalculee, unite), legende: base };
+  return { nombre: null, valeur: '—', legende: 'quantité à saisir' };
 }
 
-const MARQUE_ETAT = { suggere: '○', note: '✓', retire: '–' };
+// Marque seulement pour les états écrits (noté, retiré) : jamais de glyphe « O » sur une ligne ordinaire.
+const MARQUE_ETAT = { note: '✓', retire: '–' };
 
 /** Une ligne par produit ; un toucher déplie les détails et les gestes. L'état est écrit en toutes lettres. */
 function carteLigne(etat, lundi, ligne, aujourd) {
@@ -118,21 +121,28 @@ function carteLigne(etat, lundi, ligne, aujourd) {
   const fournisseur = suivi.fournisseurId ? etat.fournisseurs[suivi.fournisseurId] ?? null : null;
   const ech = echeanceCommande(ligne, fournisseur, aujourd);
   const detail = (cle, valeur) => [h('dt', null, cle), h('dd', null, valeur)];
+  const enAvant = quantiteEnAvant(suivi, ligne.unite);
+  // Seulement ce qui s'écarte : le besoin quand il diffère de la quantité proposée, un disponible réellement vérifié.
+  // Le besoin reste toujours dans le détail dépliable.
+  const sous = [];
+  if (enAvant.nombre === null || enAvant.nombre !== ligne.besoinBrut) sous.push(`besoin ${quantite(ligne.besoinBrut, ligne.unite)}`);
+  if (suivi.quantiteVerifiee !== null) sous.push(`vérifié disponible : ${quantite(suivi.quantiteVerifiee, ligne.unite)}`);
+  const texteEtat = ETAT_COURT[suivi.etatLigne] ?? null;
   return h('details', { classe: 'produit-compact' },
     h('summary', { classe: 'produit-resume' },
       h('span', { classe: 'produit-ligne' },
-        h('span', { classe: 'produit-marque', 'aria-hidden': 'true' }, MARQUE_ETAT[suivi.etatLigne] ?? MARQUE_ETAT.suggere),
+        MARQUE_ETAT[suivi.etatLigne] ? h('span', { classe: 'produit-marque', 'aria-hidden': 'true' }, MARQUE_ETAT[suivi.etatLigne]) : null,
         h('span', { classe: 'produit-titre' },
           h('strong', { classe: 'produit-nom' }, ligne.nom),
-          h('span', { classe: 'produit-sous' }, `besoin ${quantite(ligne.besoinBrut, ligne.unite)} · ${suivi.quantiteVerifiee === null ? 'disponible : à vérifier' : `vérifié disponible : ${quantite(suivi.quantiteVerifiee, ligne.unite)}`}`)),
+          sous.length > 0 ? h('span', { classe: 'produit-sous' }, sous.join(' · ')) : null),
         h('span', { classe: 'produit-commande' },
-          h('span', { classe: 'produit-chiffre' }, qteNoeuds(quantiteEnAvant(suivi, ligne.unite).valeur)),
-          h('span', { classe: 'produit-legende' }, quantiteEnAvant(suivi, ligne.unite).legende))),
-      h('span', { classe: 'produit-etat' },
-        h('span', { classe: 'produit-etat-texte' }, ETAT_COURT[suivi.etatLigne] ?? ETAT_COURT.suggere,
-          suivi.aRelire ? ' · à relire' : ''),
-        ligne.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre')
-          : null)),
+          h('span', { classe: 'produit-chiffre' }, qteNoeuds(enAvant.valeur)),
+          enAvant.legende ? h('span', { classe: 'produit-legende' }, enAvant.legende) : null)),
+      texteEtat || ligne.aValider || suivi.aRelire
+        ? h('span', { classe: 'produit-etat' },
+          texteEtat || suivi.aRelire ? h('span', { classe: 'produit-etat-texte' }, texteEtat ?? '', suivi.aRelire ? `${texteEtat ? ' · ' : ''}à relire` : '') : null,
+          ligne.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre') : null)
+        : null),
     suivi.aRelire ? h('p', { classe: 'meta' }, suivi.raisonARelire === 'quantite'
       ? `À relire : la quantité calculée est maintenant ${quantite(suivi.quantiteCalculee, ligne.unite)} ; vous aviez noté ${quantite(suivi.quantiteNotee, ligne.unite)}, qui n'a pas bougé.`
       : 'À relire : le besoin a changé depuis que vous l\'avez noté ; la quantité notée n\'a pas bougé.') : null,
@@ -198,12 +208,15 @@ export function rendre(etat, lundi, options = {}) {
   const { lignes, nonChiffrables } = besoinsProduits(etat, lundi);
   const racine = h('div', { classe: options.integre ? 'stock-achats' : 'vue vue-produits' });
   if (!options.integre) racine.appendChild(h('h1', { classe: 'page-titre' }, `Produits : semaine du ${libelleJour(lundi)}`));
-  racine.appendChild(navigationPeriode(
-    { href: `#/stock/achats/${ajouterJours(lundi, -7)}`, texte: '‹ Semaine précédente' },
-    { href: `#/stock/achats/${lundiDe(aujourd)}`, texte: "Aujourd'hui" },
-    { href: `#/stock/achats/${ajouterJours(lundi, 7)}`, texte: 'Semaine suivante ›' }));
-  if (options.integre) racine.appendChild(h('p', { classe: 'stock-semaine' }, `Semaine du ${libelleJour(lundi)}`));
-  racine.appendChild(encadre('info', 'Aucun stock théorique, aucun approvisionnement garanti.'));
+  const semaineCourante = lundiDe(aujourd);
+  racine.appendChild(h('nav', { classe: 'nav-periode nav-semaine', 'aria-label': 'Semaine' },
+    h('a', { href: `#/stock/achats/${ajouterJours(lundi, -7)}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
+    h('span', { classe: 'nav-semaine-texte' }, `Semaine du ${libelleJour(lundi)}`,
+      lundi === semaineCourante ? null : lien(`#/stock/achats/${semaineCourante}`, "Aujourd'hui", 'nav-semaine-retour')),
+    h('a', { href: `#/stock/achats/${ajouterJours(lundi, 7)}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')));
+  // L'en-tête dit une fois ce qui vaut pour toutes les lignes ; la légende (jamais de stock théorique) reste discrète.
+  racine.appendChild(h('p', { classe: 'achats-regle' }, 'Disponible à vérifier · quantités proposées avec la marge'));
+  racine.appendChild(h('p', { classe: 'stock-legende' }, 'Aucun stock théorique, aucun approvisionnement garanti.'));
   racine.appendChild(h('div', { classe: 'actions pas-imprime' }, bouton('Imprimer la liste', imprimer, 'court')));
   racine.appendChild(h('h2', { classe: 'section-titre' }, 'Besoins chiffrés'));
   if (lignes.length === 0) racine.appendChild(ligneVide('Aucun besoin chiffré cette semaine : il faut des composants attribués, validés et calculables.'));

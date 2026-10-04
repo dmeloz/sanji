@@ -98,7 +98,9 @@ test('Production : la quantité de chaque ligne est en grand (graisse 600, à dr
 });
 
 test('CSS : bloc « Finition » en fin de fichier, séparateurs étroits, mouvement réduit global', () => {
-  const marque = css.lastIndexOf('/* ===== ');
+  // Les blocs « Lot … » des chantiers d'audit viennent après Finition : on regarde le dernier bloc qui précède le premier d'entre eux.
+  const lot = css.indexOf('/* ===== Lot ');
+  const marque = css.lastIndexOf('/* ===== ', lot > 0 ? lot - 1 : css.length);
   assert.match(css.slice(marque, marque + 40), /Finition/);
   assert.match(css, /\.sep-milliers, \.sep-unite \{[^}]*width: 0\.2\d?em/);
   // Une taille de police nulle annulerait une largeur en em : le séparateur deviendrait invisible (vu sur capture).

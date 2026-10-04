@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom } from './aide-dom.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide } from './aide.js';
+import { saisirMenusSemaine } from '../app/js/domaine/actions.js';
 
 let dom; let magasin; let vue; let routeur;
 
@@ -119,4 +120,52 @@ test('style : bloc Import en fin de style.css, légendes >= 13 px, cibles >= 44 
   assert.match(bloc, /\.imp-jour-tete[^}]*min-height: var\(--cible\)/);
   assert.match(bloc, /prefers-reduced-motion/);
   assert.doesNotMatch(bloc, /gradient/);
+});
+
+// ---------------------------------------------------------------- audit v56 : page plus courte
+
+test('semaine : deux flèches ‹ › comme l\'écran Semaine, plus de gros boutons empilés', () => {
+  magasin.remplacer(etatVide());
+  const noeud = vue.rendre(magasin.etat(), S.lundi);
+  const fleches = parClasse(noeud, 'btn-fleche');
+  assert.deepEqual(fleches.map((a) => a.textContent), ['‹', '›']);
+  assert.deepEqual(fleches.map((a) => a.attributs['aria-label']), ['Semaine précédente', 'Semaine suivante']);
+  assert.equal(fleches[1].attributs.href, `#/import/${S.lundiSuivant}`);
+  assert.doesNotMatch(noeud.textContent, /‹ Semaine précédente|Semaine suivante ›/);
+  assert.equal(parClasse(noeud, 'nav-periode').length, 0);
+});
+
+test('intitulés : champs d\'une ligne qui s\'agrandissent ; les cinq jours restent des lignes visibles', () => {
+  magasin.remplacer(etatVide());
+  const noeud = vue.rendre(magasin.etat(), S.lundi);
+  const intitule = champ(noeud, `menu-${S.lundi}-1`);
+  assert.equal(intitule.attributs.rows, '1');
+  assert.ok(intitule.className.split(' ').includes('champ-intitule'));
+  const jours = parClasse(noeud, 'saisie-jour');
+  assert.equal(jours.length, 5, 'lundi à vendredi, jeudi compris');
+  assert.ok(jours.every((j) => j.balise === 'details' && j.open === true), 'jours vides : ouverts d\'emblée');
+  assert.ok(jours.some((j) => j.textContent.startsWith('Jeudi')));
+});
+
+test('jours déjà remplis : repliés sur leur résumé, un jour vide reste ouvert, les champs restent atteignables', async () => {
+  magasin.remplacer(etatVide());
+  magasin.agir((x, t) => saisirMenusSemaine(x, S.lundi, { [S.lundi]: { menu1: 'riz et carottes', menu2: 'courgettes' } }, t));
+  const noeud = vue.rendre(magasin.etat(), S.lundi);
+  const lundi = parClasse(noeud, 'saisie-jour').find((j) => j.textContent.startsWith('Lundi'));
+  assert.equal(lundi.open, false, 'jour rempli : replié');
+  assert.match(parClasse(lundi, 'saisie-jour-extrait')[0].textContent, /Menu 1 : riz et carottes · Menu 2 : courgettes/);
+  assert.ok(champ(lundi, `menu-${S.lundi}-1`), 'le champ reste dans la page (replié, pas retiré)');
+  const mardi = parClasse(noeud, 'saisie-jour').find((j) => j.textContent.startsWith('Mardi'));
+  assert.equal(mardi.open, true);
+  assert.equal(parClasse(mardi, 'saisie-jour-extrait')[0].textContent, 'à saisir');
+  await bouton(noeud, 'Enregistrer la semaine').click();
+  assert.equal(magasin.etat().jours[S.lundi].menus[1].intitule, 'riz et carottes', 'enregistrer sans rien changer ne perd rien');
+});
+
+test('CSS (lot Stock et Import) : cible de 44 px sur le résumé d\'un jour, intitulé à hauteur de cible, mouvement réduit', () => {
+  const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
+  const bloc = css.slice(css.indexOf('/* ===== Lot Stock et Import'));
+  assert.match(bloc, /\.saisie-jour-repliable > summary \{[^}]*min-height: var\(--cible\)/);
+  assert.match(bloc, /\.champ-intitule \{[^}]*min-height: var\(--cible\)/);
+  assert.match(bloc, /prefers-reduced-motion/);
 });

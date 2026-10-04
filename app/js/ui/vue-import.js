@@ -126,12 +126,13 @@ export function rendre(etat, lundi) {
   const racine = h('div', { classe: 'vue vue-import vue-menus' });
 
   racine.appendChild(lien(`#/semaine/${lundi}/tableau`, '‹ Semaine', 'imp-retour'));
-  racine.appendChild(h('header', { classe: 'imp-tete' },
-    h('p', { classe: 'imp-legende' }, `Semaine ${numero} · du ${libelleJour(lundi)} · ${libelleHorsLigne()}`),
-    h('h1', { classe: 'page-titre' }, 'Importer les menus')));
-  racine.appendChild(h('nav', { classe: 'nav-periode', 'aria-label': 'Semaine' },
-    lien(`#/import/${ajouterJours(lundi, -7)}`, '‹ Semaine précédente', 'btn'),
-    lien(`#/import/${ajouterJours(lundi, 7)}`, 'Semaine suivante ›', 'btn')));
+  // Changer de semaine : deux flèches de part et d'autre de l'en-tête, comme sur l'écran Semaine.
+  racine.appendChild(h('div', { classe: 'bord-semaine-nav imp-semaine-nav' },
+    h('a', { href: `#/import/${ajouterJours(lundi, -7)}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
+    h('header', { classe: 'imp-tete bord-semaine' },
+      h('p', { classe: 'imp-legende' }, `Semaine ${numero} · du ${libelleJour(lundi)} · ${libelleHorsLigne()}`),
+      h('h1', { classe: 'page-titre' }, 'Importer les menus')),
+    h('a', { href: `#/import/${ajouterJours(lundi, 7)}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')));
 
   racine.appendChild(blocPhoto(lundi));
 
@@ -150,7 +151,7 @@ export function rendre(etat, lundi) {
     ])));
 
   racine.appendChild(h('h2', { classe: 'imp-titre-section imp-titre-hors' }, 'Ou taper jour par jour'));
-  for (const date of dates) racine.appendChild(blocJour(champs, etat, date));
+  for (const date of dates) racine.appendChild(blocJour(champs, etat, date, { repliable: true }));
   // La lecture suit la frappe ; les champs n'enregistrent rien avant « Enregistrer la semaine ».
   for (const date of dates) for (const menu of [1, 2]) champs.get(`menu-${date}-${menu}`).addEventListener('input', majLecture);
 
