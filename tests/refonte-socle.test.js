@@ -44,9 +44,10 @@ test('vues-relais : chacune exporte titre et rendre', () => {
   }
 });
 
-test('vues-relais : Stock « restes » et « dlc » disent « À venir » ; « achats » délègue aux Produits', () => {
+// Adapté pour l'écran Stock (refonte 1) : les trois sous-vues sont réelles ; le détail est dans tests/vue-stock.test.js.
+test('vue Stock : « restes », « dlc » et « achats » s\'affichent ; « achats » garde « Aucun stock théorique »', () => {
   magasin.remplacer(etatVide());
-  for (const sous of ['restes', 'dlc']) assert.match(relais.stock.rendre(magasin.etat(), '2026-10-05', sous).textContent, /À venir/);
+  for (const sous of ['restes', 'dlc']) assert.doesNotMatch(relais.stock.rendre(magasin.etat(), '2026-10-05', sous).textContent, /À venir/);
   assert.match(relais.stock.rendre(magasin.etat(), '2026-10-05', 'achats').textContent, /Aucun stock théorique/);
   assert.match(relais.stock.titre('2026-10-05', 'dlc'), /DLC/);
 });
