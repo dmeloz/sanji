@@ -903,6 +903,7 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .au-hors-regle::before { content: "\25B3\00A0"; }
 .au-allergie { font-weight: 600; }
 .au-statut { font-weight: 600; }
+.au-statut-certitude { font-weight: 600; color: var(--texte-moyen); }
 
 /* Prochaine fiche de fonction */
 .au-fiche { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 14px; border: 1px solid var(--bordure); border-radius: 16px; background: var(--carte); color: var(--texte); text-decoration: none; }

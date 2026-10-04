@@ -217,7 +217,7 @@ function carteFiche(d, aujourd) {
       h('span', { classe: 'au-sous' },
         [f.numero ? `fiche ${f.numero}` : null, f.modeTexte || null].filter(Boolean).join(' · '),
         f.allergies ? [' · ', h('strong', { classe: 'au-allergie' }, 'allergies'), ` : ${f.allergies}`] : ' · aucune allergie notée',
-        ' · ', h('strong', { classe: f.certitude === 'provisoire' ? 'au-hors-regle' : 'au-statut' }, statut))),
+        ' · ', h('strong', { classe: f.certitude ? 'au-statut-certitude' : 'au-statut' }, statut))),
     icone(CHEVRON, 'au-icone au-chevron'));
 }
 

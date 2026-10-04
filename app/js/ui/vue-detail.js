@@ -335,7 +335,8 @@ export function versAncre(id) {
     const cible = document.getElementById(id);
     // une rubrique repliée (et les replis qui la contiennent) s'ouvre avant qu'on y aille
     for (let n = cible; n; n = n.parentElement) if ('open' in n) n.open = true;
-    cible?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const reduit = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    cible?.scrollIntoView({ behavior: reduit ? 'auto' : 'smooth', block: 'start' });
   };
 }
 

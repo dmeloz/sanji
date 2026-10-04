@@ -258,6 +258,15 @@ test('prochaine fiche de fonction : jour, personnes, allergies écrites, certitu
   assert.match(f.textContent, /18 pers\./);
   assert.match(f.textContent, /allergies : ALLERGIE_TEST/);
   assert.match(f.textContent, /provisoire/);
+  // La certitude n'a pas le style « hors règle » : style neutre propre aux certitudes (classe rendue, puis CSS).
+  const mot = f.tous((x) => x.balise === 'strong' && /provisoire/.test(x.textContent))[0];
+  assert.ok(mot, 'certitude écrite en toutes lettres');
+  assert.ok(!mot.className.split(' ').includes('au-hors-regle'), mot.className);
+  assert.ok(mot.className.split(' ').includes('au-statut-certitude'), mot.className);
+  const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
+  const regle = css.match(/\.au-statut-certitude \{([^}]*)\}/);
+  assert.ok(regle, 'style défini');
+  assert.doesNotMatch(regle[1], /exception|background/, 'ni ambre ni fond d\'alerte');
   assert.doesNotMatch(f.textContent, /F_PASSEE/);
   assert.equal(f.attributs.href, `#/semaine/${S.jeudi}`);
 });
