@@ -606,7 +606,7 @@ function aConsommerDe(etat, aujourd) {
   for (const p of Object.values(etat.productions ?? {})) {
     if (p.etat !== 'fait' || p.genre === 'preparatoire' || p.dateService < aujourd) continue;
     const composant = etat.composants?.[p.composantId];
-    const ev = composant ? evaluationProduction(etat, p.id) : null;
+    const ev = composant ? evaluationProduction(etat, p.id, { reelle: true }) : null;
     if (!ev || !(ev.jours > 0)) continue;
     lignes.push({
       productionId: p.id, composantId: composant.id, nom: p.genre === 'complement' ? `Complément : ${composant.nom}` : composant.nom,

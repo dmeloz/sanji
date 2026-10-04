@@ -9,7 +9,7 @@ import { saisirApresService, saisirVentes } from '../domaine/actions.js';
 import { calculerComposant } from '../domaine/calcul.js';
 import { ajouterJours, aMenuDuJour, libelleJour, lundiDe } from '../domaine/dates.js';
 import { jourOuVide } from '../domaine/etat.js';
-import { evaluationProduction, regleDe } from '../domaine/planification.js';
+import { dateRealiseeProduction, evaluationProduction, regleDe } from '../domaine/planification.js';
 import { libelle } from '../domaine/statuts.js';
 import { agir, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { champs } from './champs.js';
@@ -43,7 +43,7 @@ export function aConsommerEnPriorite(etat, aujourd = aujourdhui()) {
   return Object.values(etat.productions ?? {}).some((p) => p.etat === 'fait' && etat.composants?.[p.composantId]
     && p.dateService >= aujourd
     && (p.dateService <= demain
-      || mentionsConservation(etat, p, evaluationProduction(etat, p.id), dateDeProduction(p)).some((m) => m.alerte)));
+      || mentionsConservation(etat, p, evaluationProduction(etat, p.id, { reelle: true }), dateDeProduction(p)).some((m) => m.alerte)));
 }
 
 /** Sous-vue affichée : celle de l'adresse ; sans adresse précise, la dernière choisie, sinon DLC s'il y a à consommer, sinon Achats. */
@@ -194,8 +194,8 @@ function corpsRestes(etat, lundi) {
 
 // ------------------------------------------------------------------ DLC
 
-/** Date de production : le jour décidé, à défaut la date du « fait » (même règle que la feuille Jour). */
-const dateDeProduction = (p) => p.jourDecide ?? (p.hFait ? String(p.hFait).slice(0, 10) : null);
+/** Date de production : la date réelle du « fait » (même règle que l'évaluation de l'avance), sinon le jour décidé. */
+const dateDeProduction = dateRealiseeProduction;
 
 /** Phrases de conservation d'une évaluation d'avance, avec le mot écrit (avertissement, hors règle, dépassée). */
 function mentionsConservation(etat, p, ev, produit = null) {
@@ -220,7 +220,7 @@ function mentionsConservation(etat, p, ev, produit = null) {
 function carteDlc(etat, p, avecService) {
   const l = ligneProduction(etat, p);
   const produit = dateDeProduction(p);
-  const mentions = mentionsConservation(etat, p, evaluationProduction(etat, p.id), produit);
+  const mentions = mentionsConservation(etat, p, evaluationProduction(etat, p.id, { reelle: true }), produit);
   const alerte = mentions.some((m) => m.alerte);
   let dejaLu = false; // une seule mention « à lire » par carte, même avec plusieurs avertissements
   const preparatoire = p.genre === 'preparatoire';

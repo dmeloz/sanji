@@ -336,3 +336,18 @@ test('CSS (lot Stock et Import) : bloc commenté en fin de fichier, cibles de 44
   assert.doesNotMatch(bloc, /#[0-9a-fA-F]{3,6}\b/);
   assert.doesNotMatch(bloc, /font-size: ?(1[0-4]|[0-9])px/);
 });
+
+test('dlc : la date limite part du jour réel où la production a été faite, pas du jour prévu (prévue mercredi, faite lundi)', () => {
+  const e = etatVide();
+  definirMenu(e, S.mercredi, 2, 'riz', h());
+  prevision(e, S.mercredi, 2, 40);
+  const riz = Object.values(e.composants).find((c) => c.famille === 'riz');
+  const p = principaleDe(e, riz.id);
+  e.productions[p].jourDecide = S.mercredi;
+  marquerFait(e, p, 2400, `${S.lundi}T08:00:00.000Z`);
+  magasin.remplacer(e);
+  const texte = dateDuJour(S.lundi, () => stock.rendre(magasin.etat(), S.lundi, 'dlc')).textContent;
+  assert.match(texte, /produit le lundi 5 octobre/);
+  assert.match(texte, /à consommer avant le mardi 6 octobre/);
+  assert.doesNotMatch(texte, /à consommer avant le jeudi 8 octobre/);
+});

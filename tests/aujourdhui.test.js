@@ -204,7 +204,7 @@ test('à consommer en priorité : production faite pour un service à venir, ave
   const rizJeudi = Object.values(e.productions).find((p) => p.composantId === composantDe(e, 'riz').id && p.genre === 'principale');
   assert.ok(rizJeudi);
   planifier(e, rizJeudi.id, S.mardi, 'avant_midi', h());
-  marquerFait(e, rizJeudi.id, 5000, h());
+  marquerFait(e, rizJeudi.id, 5000, `${S.mardi}T08:00:00.000Z`);
   const d = aujourdhuiDe(e, S.mercredi);
   assert.equal(d.aConsommer.total, 1);
   const l = d.aConsommer.lignes[0];
@@ -229,7 +229,7 @@ test('à consommer : trois lignes au plus, les avertissements d\'abord ; une ava
   definirRegle(e, { nom: 'riz', avanceMaxJours: 1 }, h());
   const ids = Object.values(e.productions).filter((p) => p.genre === 'principale');
   assert.equal(ids.length, 4);
-  for (const p of ids) { planifier(e, p.id, S.samediPrecedent, 'avant_midi', h()); marquerFait(e, p.id, 1000, h()); }
+  for (const p of ids) { planifier(e, p.id, S.samediPrecedent, 'avant_midi', h()); marquerFait(e, p.id, 1000, `${S.samediPrecedent}T08:00:00.000Z`); }
   const d = aujourdhuiDe(e, S.lundi);
   assert.equal(d.aConsommer.total, 4);
   assert.equal(d.aConsommer.lignes.length, 3);
