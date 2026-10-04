@@ -80,6 +80,8 @@ export function etatInitial() {
     fournisseurs: {},
     memoire: {},
     standards: {},
+    // Valeurs changées par la propriétaire sur les standards de base (clé « usage|sujet »).
+    ajustements: {},
     produits: {},
     // Lectures corrigées par le chef (clé « intitulé normalisé|menu ») et validations reportées.
     lectures: {},
@@ -294,6 +296,19 @@ export function importer(texte) {
         retenus[role] = fusionner(standardVide(), standard);
       }
       etat.standards[cle] = retenus;
+    }
+  }
+  if (source.ajustements !== undefined) {
+    // { « usage|sujet »: {valeur, unite, le, avant:{valeur, origine}} } : une entrée sans valeur finie ou sans unité est écartée.
+    if (!estObjet(source.ajustements)) throw new Error('Export corrompu : « ajustements » est invalide.');
+    for (const [cle, a] of Object.entries(source.ajustements)) {
+      if (CLES_INTERDITES.has(cle) || !cle.includes('|') || !estObjet(a)) continue;
+      if (typeof a.valeur !== 'number' || !Number.isFinite(a.valeur) || typeof a.unite !== 'string' || a.unite === '') continue;
+      const av = estObjet(a.avant) ? a.avant : {};
+      etat.ajustements[cle] = {
+        valeur: a.valeur, unite: a.unite, le: typeof a.le === 'string' ? a.le : null,
+        avant: { valeur: Number.isFinite(av.valeur) ? av.valeur : null, origine: typeof av.origine === 'string' ? av.origine : null },
+      };
     }
   }
   if (source.journal !== undefined) {
