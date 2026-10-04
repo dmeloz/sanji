@@ -32,7 +32,10 @@ function aDate(iso, fonction) {
 const classes = (n, c) => n.tous((x) => x.className.split(' ').includes(c));
 const calme = (e) => { e.reglages.semaineTypeConfirmee = true; return e; };
 const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
-const blocLot = css.slice(css.indexOf("/* ---- Lot « Aujourd'hui, Semaine, fiche de fonction"));
+const debutLot = css.indexOf("/* ---- Lot « Aujourd'hui, Semaine, fiche de fonction");
+// Le bloc du lot s'arrête au bloc commenté suivant (d'autres lots ajoutent les leurs après lui).
+const finLot = css.slice(debutLot + 10).search(/\/\* (-{4}|={5}) /);
+const blocLot = css.slice(debutLot, finLot < 0 ? undefined : debutLot + 10 + finLot);
 
 /** Mercredi : menu 1 saisi (composants créés seuls, allergènes non validés), fiche de fonction avec une allergie. */
 function mercrediAvecFiche(mode = 'menu_fixe') {
@@ -253,7 +256,7 @@ test('sombre : « Maintenant » et la carte quantité de la fiche sont des surfa
 });
 
 test('CSS du lot : en fin de fichier, dans un bloc commenté, sans texte sous 13 px ni animation', () => {
-  assert.ok(css.endsWith(blocLot));
+  assert.ok(debutLot > 0 && blocLot.length > 0, 'bloc du lot présent');
   assert.doesNotMatch(blocLot, /font-size: ?(1[0-2]|[0-9])px/);
   assert.doesNotMatch(blocLot, /transition|animation/);
 });

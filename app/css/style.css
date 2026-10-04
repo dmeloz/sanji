@@ -1266,3 +1266,12 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .saisie-jour-repliable[open] > summary .saisie-jour-extrait { display: none; }
 .saisie-jour-repliable[open] > summary { margin-bottom: 8px; }
 @media (prefers-reduced-motion: reduce) { .stock-reste-ouvrir, .saisie-jour-repliable, .nav-semaine .btn { transition: none; scroll-behavior: auto; } }
+/* ===== Lot Réglages, journal, validation, poste (audit v56) : montrer l'exception, pas la normalité ===== */
+.phrase-gain-sec { max-width: 60ch; }
+.feuille-valider-secondaires { justify-content: flex-start; margin: 4px 0 0; }
+.feuille-valider-secondaires .btn { min-height: 44px; }
+.btn-lien { background: transparent; border-color: transparent; color: var(--texte-moyen); text-decoration: underline; min-height: 44px; }
+.btn-lien:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.poste-jour { margin: 0; font-size: var(--t-corps); color: var(--texte-moyen); }
+.poste-note { margin: 0; padding: 10px 12px; font-size: var(--t-corps); border: 1px solid var(--bordure); border-radius: var(--r-carte-petite); overflow-wrap: anywhere; }
+.poste-quitter-aide { margin: 0; font-size: var(--t-corps); color: var(--texte-doux); text-align: center; }

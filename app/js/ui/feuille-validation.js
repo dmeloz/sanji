@@ -9,6 +9,7 @@ import { libelle } from '../domaine/statuts.js';
 import { agirStrict } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
+import { bouton } from './elements.js';
 import { formaterNombre, pluriel, quantite } from './format.js';
 import { panneau } from './panneau.js';
 
@@ -38,9 +39,13 @@ function texteEffet(valeur) {
 export function ouvrirValidation(valeur) {
   const p = valeur.proposition;
   const existant = valeur.standard ?? null;
+  // Préremplie seulement par une valeur proposée ou déjà validée ; jamais par le milieu d'une fourchette d'estimation.
+  const valeurDepart = valeur.valeurProposee ?? existant?.valeur ?? null;
   const f = champs([
-    { cle: 'valeur', type: 'nombre', libelle: 'Valeur de la portion', valeur: null,
-      aide: `Tapez la valeur que vous servez (${libelle('UNITE', p.unite)}, ${texteEtat(p)}). Elle n'est jamais remplie à votre place.` },
+    { cle: 'valeur', type: 'nombre', libelle: 'Valeur de la portion', valeur: valeurDepart,
+      aide: valeurDepart === null
+        ? `Tapez la valeur que vous servez (${libelle('UNITE', p.unite)}, ${texteEtat(p)}). Elle n'est jamais remplie à votre place.`
+        : `Valeur proposée (${libelle('UNITE', p.unite)}, ${texteEtat(p)}) : changez-la si ce n'est pas celle que vous servez.` },
     { cle: 'hors', type: 'case', libelle: 'Cette valeur est hors de la fourchette : je la confirme', valeur: false, cache: true },
   ]);
   const effetVu = h('p', { classe: 'meta' }, texteEffet(valeur));
@@ -53,16 +58,35 @@ export function ouvrirValidation(valeur) {
       effetVu.textContent = `Avec ${formaterNombre(v)} ${libelle('UNITE', p.unite)} : ${pluriel(valeur.effet.portions, 'portion')} = ${quantite(valeur.effet.portions * v, p.unite)}.`;
     } else effetVu.textContent = texteEffet(valeur);
   };
-  f.surChangement('valeur', majSaisie);
+  /** Erreur annoncée dès la saisie invalide (role=alert du panneau) ; effacée dès qu'elle est corrigée ou vide. */
+  const signalerErreur = (api) => {
+    let message = '';
+    try {
+      const v = f.valeur('valeur');
+      if (v !== null && v <= 0) message = 'La valeur de la portion doit être supérieure à 0.';
+    } catch (e) { message = e?.message ?? String(e); }
+    api.erreur(message);
+  };
 
   const lire = () => {
     const v = f.lire();
     return { valeur: v.valeur, confirmeHorsFourchette: v.hors === true };
   };
+  const essayer = (api, action) => { api.erreur(''); try { action(); } catch (e) { api.erreur(e?.message ?? String(e)); } };
+  const seulementCetteFois = (api) => essayer(api, () => {
+    if (valeur.composantIds.length === 0) throw new Error('Aucun plat concerné : ouvrez cette feuille depuis un plat pour une correction ponctuelle.');
+    const saisie = lire();
+    agirStrict((e, t) => { for (const id of valeur.composantIds) correctionDuJour(e, id, { valeur: saisie.valeur }, t); });
+    api.fermer();
+  });
   const nom = `${valeur.libelle} ${ROLE_EN_CLAIR[valeur.role] ?? ''}`.trim();
   panneau({
     titre: `Valider la portion : ${nom}`,
-    corps: [
+    annulerEnLien: true,
+    corps: (api) => {
+      majSaisie();
+      f.surChangement('valeur', () => { majSaisie(); signalerErreur(api); });
+      return [
       h('p', { classe: 'aide' }, 'Estimation à valider : fourchette de référence, pas encore une valeur de votre cuisine.'),
       h('p', { classe: 'quantite-grande fourchette' }, texteFourchette(p), h('small', null, ` ${texteEtat(p)}`)),
       h('p', { classe: 'meta' }, `Le calcul prend aujourd'hui le milieu de cette fourchette (${formaterNombre((p.min + p.max) / 2)} ${libelle('UNITE', p.unite)}).`),
@@ -71,19 +95,14 @@ export function ouvrirValidation(valeur) {
       existant ? h('p', { classe: 'encadre' }, `Standard maison déjà validé : ${formaterNombre(existant.valeur)} ${libelle('UNITE', existant.unite)}, poids ${libelle('ETAT_POIDS', existant.etat)}. « Corriger » le remplace.`) : null,
       effetVu,
       ...f.noeuds,
-    ],
+      h('div', { classe: 'actions feuille-valider-secondaires' },
+        bouton('Seulement cette fois', () => seulementCetteFois(api), 'court'),
+        bouton('Plus tard', () => essayer(api, () => { agirStrict((e, t) => reporterValidation(e, valeur.cle, t)); api.fermer(); }), 'court'),
+        existant ? bouton('Corriger', () => essayer(api, () => { agirStrict((e, t) => corrigerStandard(e, valeur.famille, valeur.role, lire(), t)); api.fermer(); }), 'court') : null),
+      ];
+    },
     libelleEnregistrer: 'Valider comme standard maison',
     surEnregistrer: () => { agirStrict((e, t) => validerStandard(e, valeur.famille, valeur.role, lire(), t)); },
-    extras: [
-      { libelle: 'Corriger', action: (api) => { agirStrict((e, t) => corrigerStandard(e, valeur.famille, valeur.role, lire(), t)); api.fermer(); } },
-      { libelle: 'Seulement cette fois', action: (api) => {
-        if (valeur.composantIds.length === 0) throw new Error('Aucun plat concerné : ouvrez cette feuille depuis un plat pour une correction ponctuelle.');
-        const saisie = lire();
-        agirStrict((e, t) => { for (const id of valeur.composantIds) correctionDuJour(e, id, { valeur: saisie.valeur }, t); });
-        api.fermer();
-      } },
-      { libelle: 'Plus tard', action: (api) => { agirStrict((e, t) => reporterValidation(e, valeur.cle, t)); api.fermer(); } },
-    ],
   });
 }
 

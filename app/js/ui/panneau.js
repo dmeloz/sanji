@@ -12,11 +12,12 @@ import { h, parId } from './dom.js';
  * @param {string} [options.libelleAnnuler] « Annuler » par défaut
  * @param {boolean} [options.lectureSeule] un seul bouton « Fermer »
  * @param {boolean} [options.danger] bouton principal en rouge
+ * @param {boolean} [options.annulerEnLien] « Annuler » discret, en lien (moins de boutons visibles)
  * @param {{libelle:string, action:(api)=>any}[]} [options.extras] boutons supplémentaires
  */
 export function panneau(options) {
   const { titre, corps, surEnregistrer, libelleEnregistrer = 'Enregistrer', libelleAnnuler = 'Annuler',
-    lectureSeule = false, danger = false, extras = [] } = options;
+    lectureSeule = false, danger = false, extras = [], annulerEnLien = false } = options;
   const dialogue = h('dialog', { classe: 'panneau', 'aria-labelledby': 'panneau-titre' });
   const zoneErreur = h('p', { classe: 'panneau-erreur', role: 'alert', hidden: true });
   const api = {
@@ -34,7 +35,7 @@ export function panneau(options) {
         try { await x.action(api); } catch (e) { api.erreur(e?.message ?? String(e)); }
       },
     }, x.libelle)),
-    h('button', { type: 'button', classe: 'btn', onClick: () => dialogue.close() }, lectureSeule ? 'Fermer' : libelleAnnuler),
+    h('button', { type: 'button', classe: annulerEnLien && !lectureSeule ? 'btn btn-lien' : 'btn', onClick: () => dialogue.close() }, lectureSeule ? 'Fermer' : libelleAnnuler),
     boutonOk,
   ];
   let enCours = false;
