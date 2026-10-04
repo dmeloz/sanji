@@ -112,8 +112,8 @@ function dialogComposant(date, menu, c) {
 }
 
 /** Interrupteur « au poste » : le choix est enregistré aussitôt, et mémorisé par nom par le domaine. */
-function interrupteurAuPoste(c) {
-  const id = `poste-${c.id}`;
+export function interrupteurAuPoste(c, prefixe = 'poste') {
+  const id = `${prefixe}-${c.id}`;
   const entree = h('input', {
     type: 'checkbox', role: 'switch', id, classe: 'interrupteur-entree', checked: c.attribue, 'aria-label': `${c.nom}, au poste`,
     onChange: (evenement) => {
@@ -153,17 +153,18 @@ function blocMenu(etat, date, menu) {
     h('div', { classe: 'actions' }, bouton('Ajouter un composant', () => dialogComposant(date, menu, null), 'court')));
 }
 
-function sectionMenus(etat, date) {
-  if (!aMenuDuJour(date)) {
-    return h('section', { classe: 'carte', id: 'menus' }, h('h2', { classe: 'section-titre' }, 'Menus'), ligneVide('Pas de menu du jour le samedi.'));
-  }
-  return h('section', { classe: 'carte', id: 'menus' },
-    h('h2', { classe: 'section-titre' }, 'Menus du jour'),
+/** `replie` (écran Semaine) : la section est un repli fermé, au même identifiant, au lieu d'une carte ouverte. */
+function sectionMenus(etat, date, replie = false) {
+  const enveloppe = (titreTexte, contenu) => (replie
+    ? repliable(h('h2', { classe: 'section-titre' }, titreTexte), false, contenu, { classe: 'carte', id: 'menus' })
+    : h('section', { classe: 'carte', id: 'menus' }, h('h2', { classe: 'section-titre' }, titreTexte), contenu));
+  if (!aMenuDuJour(date)) return enveloppe('Menus', ligneVide('Pas de menu du jour le samedi.'));
+  return enveloppe('Menus du jour', [
     h('div', { classe: 'actions' }, lien(`#/import/${lundiDe(date)}`, 'Saisir toute la semaine', 'btn btn-court')),
     h('p', { classe: 'aide' }, 'L\'application répartit seule ce qui revient au poste ; corrigez seulement une exception.'),
     blocPhoto(date),
     blocMenu(etat, date, 1),
-    blocMenu(etat, date, 2));
+    blocMenu(etat, date, 2)]);
 }
 
 // ------------------------------------------------------------------ prévisions
@@ -329,10 +330,11 @@ function sectionApresService(etat, date) {
 
 // ------------------------------------------------------------------ points à confirmer
 
-function versAncre(id) {
+export function versAncre(id) {
   return () => {
     const cible = document.getElementById(id);
-    if (cible && 'open' in cible) cible.open = true; // une rubrique repliée s'ouvre avant qu'on y aille
+    // une rubrique repliée (et les replis qui la contiennent) s'ouvre avant qu'on y aille
+    for (let n = cible; n; n = n.parentElement) if ('open' in n) n.open = true;
     cible?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 }
@@ -344,15 +346,26 @@ function actionPoint(p) {
   return bouton('Aller aux menus', versAncre('menus'), 'court');
 }
 
-function sectionPoints(etat, date) {
+function sectionPoints(etat, date, replie = false) {
   const points = pointsAConfirmer(etat, date);
-  return h('section', { classe: 'carte', id: 'points' },
-    h('h2', { classe: 'section-titre' }, 'Points à confirmer'),
-    points.length === 0 ? ligneVide('Rien à confirmer ce jour-là.')
-      : h('ul', { classe: 'liste-points' }, points.map((p) => h('li', null, h('span', null, p.texte), actionPoint(p)))));
+  const contenu = points.length === 0 ? ligneVide('Rien à confirmer ce jour-là.')
+    : h('ul', { classe: 'liste-points' }, points.map((p) => h('li', null, h('span', null, p.texte), actionPoint(p))));
+  return replie
+    ? repliable(h('h2', { classe: 'section-titre' }, 'Points à confirmer'), points.length > 0, contenu, { classe: 'carte', id: 'points' })
+    : h('section', { classe: 'carte', id: 'points' }, h('h2', { classe: 'section-titre' }, 'Points à confirmer'), contenu);
 }
 
 // ------------------------------------------------------------------ vue
+
+/**
+ * Toutes les rubriques du détail d'un jour ouvert, dans l'ordre. `replie` (écran Semaine) : menus et points sont
+ * eux aussi des replis ; les autres le sont déjà.
+ */
+export function sectionsDuJour(etat, date, { replie = false } = {}) {
+  return [sectionMenus(etat, date, replie), sectionPrevisions(etat, date), sectionFiches(etat, date),
+    sectionAllergies(etat, date), sectionCreneaux(etat, date), sectionApresService(etat, date), sectionPoints(etat, date, replie)]
+    .filter(Boolean);
+}
 
 export function rendre(etat, date) {
   const racine = h('div', { classe: 'vue vue-detail' });
@@ -367,10 +380,7 @@ export function rendre(etat, date) {
     racine.appendChild(h('p', { classe: 'aide' }, 'Le dimanche est non travaillé, sans tâche ; il reste compté dans le temps de conservation.'));
     return racine;
   }
-  for (const section of [sectionMenus(etat, date), sectionPrevisions(etat, date), sectionFiches(etat, date),
-    sectionAllergies(etat, date), sectionCreneaux(etat, date), sectionApresService(etat, date), sectionPoints(etat, date)]) {
-    if (section) racine.appendChild(section);
-  }
+  for (const section of sectionsDuJour(etat, date)) racine.appendChild(section);
   return racine;
 }
 
