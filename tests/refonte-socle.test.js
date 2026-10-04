@@ -52,7 +52,8 @@ test('vue Stock : « restes », « dlc » et « achats » s\'affichent ; « acha
   assert.match(relais.stock.titre('2026-10-05', 'dlc'), /DLC/);
 });
 
-test('vues-relais : le mode en poste provisoire ramène à la fiche', () => {
+// Adapté pour l'écran Mode en poste (refonte 1) : sans étapes, il ramène à la fiche ; le détail est dans tests/vue-poste.test.js.
+test('vue Mode en poste : sans étapes, elle ramène à la fiche', () => {
   const liens = relais.poste.rendre(magasin.etat(), 'comp 1').tous((x) => x.balise === 'a').map((a) => a.attributs.href);
   assert.deepEqual(liens, ['#/fiche/comp%201']);
 });
