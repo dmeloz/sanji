@@ -759,3 +759,5 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .reperes-metier .repere, .buffet-couvert .repere { padding: 6px 0; border-bottom: 1px solid var(--bordure); }
 .reperes-metier .repere:last-child, .buffet-couvert .repere:last-child { border-bottom: 0; }
 .reperes-metier h4 { margin-top: 8px; }
+/* Apprentissage : une proposition du tableau ouvre une feuille, la ligne est un bouton. */
+.bord-ligne-bouton { width: 100%; background: none; border-top: 0; border-left: 0; border-right: 0; font: inherit; text-align: left; cursor: pointer; }

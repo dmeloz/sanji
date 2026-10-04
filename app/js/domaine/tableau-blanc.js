@@ -2,6 +2,7 @@
 // Aucune règle métier propre : le module assemble les fonctions du domaine. Ni DOM ni heure courante.
 
 import { proposerComposants } from './analyse-menu.js';
+import { propositionsApprentissage } from './apprentissage.js';
 import { calculerComposant, formaterQuantite, portionsMenu } from './calcul.js';
 import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, libelleJour, lundiDe } from './dates.js';
 import { jourOuVide, normaliser } from './etat.js';
@@ -429,6 +430,10 @@ function aConfirmerDuBord(etat, dates, aujourdhui) {
     const n = compte(conservations);
     categories.push({ genre: 'conservation', n, lien: `#/detail/${conservations[0].date}`,
       texte: n === 1 ? '1 préparation : conservation à confirmer' : `${n} préparations : conservation à confirmer` });
+  }
+  // Une correction répétée dans le même sens : une ligne par proposition d'apprentissage, après les vraies décisions.
+  for (const proposition of propositionsApprentissage(etat, aujourdhui)) {
+    categories.push({ genre: 'apprentissage', n: 1, lien: '#/reglages', texte: proposition.texte, proposition });
   }
   // Le total compte des lignes distinctes (jamais des points répétés) ; `reste` = lignes non affichées.
   const lignes = categories.slice(0, LIGNES_A_CONFIRMER);
