@@ -31,8 +31,19 @@ export function problemeHorsLigne(s = situation) {
   return s.raison ? `hors ligne pas encore prêt : ${s.raison}` : 'hors ligne pas encore prêt';
 }
 
+/** Délai maximal d'attente du service worker : au-delà, le problème est affiché (jamais une attente sans fin). */
+export const DELAI_MAX_MS = 10000;
+
+/** Attend la promesse, au plus `delai` ms : sinon rejette avec `delaiDepasse`. */
+function avecDelai(promesse, delai) {
+  return new Promise((resoudre, rejeter) => {
+    const minuteur = setTimeout(() => rejeter(Object.assign(new Error('délai dépassé'), { delaiDepasse: true })), delai);
+    promesse.then((v) => { clearTimeout(minuteur); resoudre(v); }, (e) => { clearTimeout(minuteur); rejeter(e); });
+  });
+}
+
 /** Enregistre le service worker si le navigateur et le contexte le permettent, puis vérifie le cache. */
-export async function preparerHorsLigne() {
+export async function preparerHorsLigne({ delaiMax = DELAI_MAX_MS } = {}) {
   if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
     definir(false, 'ce navigateur ne gère pas les service workers');
     return situation;
@@ -42,13 +53,16 @@ export async function preparerHorsLigne() {
     return situation;
   }
   try {
-    await navigator.serviceWorker.register('sw.js');
-    await navigator.serviceWorker.ready;
+    await avecDelai((async () => {
+      await navigator.serviceWorker.register('sw.js');
+      await navigator.serviceWorker.ready;
+    })(), delaiMax);
     const noms = typeof caches !== 'undefined' ? await caches.keys() : [];
     if (noms.some((n) => n.startsWith(PREFIXE_CACHE))) definir(true, '');
     else definir(false, 'les fichiers ne sont pas encore en cache');
   } catch (erreur) {
-    definir(false, `enregistrement impossible (${erreur?.message ?? 'erreur inconnue'})`);
+    if (erreur?.delaiDepasse) definir(false, `le service worker ne répond pas (plus de ${Math.round(delaiMax / 1000)} s d'attente)`);
+    else definir(false, `enregistrement impossible (${erreur?.message ?? 'erreur inconnue'})`);
   }
   return situation;
 }

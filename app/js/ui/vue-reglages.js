@@ -714,6 +714,12 @@ const groupe = (titreTexte, ...lignes) => h('section', { classe: 'reglages-group
   h('h2', { classe: 'reglages-groupe-titre' }, titreTexte),
   h('ul', { classe: 'liste-rubriques-reglages' }, lignes));
 
+/** Pastille du pied : neutre pendant la vérification, verte une fois prêt, ambre en cas de problème. */
+function pastilleHorsLigne(hl) {
+  if (hl.attente) return pastille('Vérification en cours', 'gris');
+  return problemeHorsLigne(hl) ? pastille('Hors ligne pas encore prêt', 'ambre') : pastille('Fonctionne hors ligne', 'vert');
+}
+
 /** Racine (param null ou inconnu) : sections de lignes ; sinon la sous-page de la rubrique. */
 export function rendre(etat, param = null) {
   const rubrique = RUBRIQUES.find((r) => r.cle === param);
@@ -735,7 +741,7 @@ export function rendre(etat, param = null) {
         ligneInfo('Apparence', 'suit le réglage du téléphone (clair / sombre)'),
         ligneInfo('Écran allumé', 'en Production et en mode poste')),
       groupe('Données', ligneRubrique('donnees', etat)),
-      h('p', { classe: 'reglages-pied' }, problemeHorsLigne(hl) ? pastille('Hors ligne pas encore prêt', 'ambre') : pastille('Fonctionne hors ligne', 'vert'), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
+      h('p', { classe: 'reglages-pied' }, pastilleHorsLigne(hl), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
   }
   return h('div', { classe: 'vue vue-reglages' },
     h('a', { href: '#/reglages', classe: 'reglage-retour' }, '‹ Réglages'),

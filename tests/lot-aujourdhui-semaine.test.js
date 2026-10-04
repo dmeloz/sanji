@@ -91,7 +91,7 @@ test('horsligne.js : une seule fonction, null quand tout est normal (prêt ou v�
 test('les écrans ne montrent rien quand tout est normal, et le problème en toutes lettres sinon (Aujourd\'hui, Semaine, Réglages)', async () => {
   const e = mercrediAvecFiche();
   assert.doesNotMatch(rendreAu(S.mercredi, e).textContent, /hors ligne/);
-  assert.match(reglages.rendre(e, null).textContent, /Fonctionne hors ligne/, 'Réglages garde l\'état (pied)');
+  assert.match(reglages.rendre(e, null).textContent, /Vérification en cours/, 'Réglages garde l\'état (pied), neutre pendant l\'attente');
   // Ici le navigateur de test n'a pas de service worker : c'est un vrai problème, dit tel quel.
   await horsligne.preparerHorsLigne();
   assert.ok(horsligne.problemeHorsLigne(), 'problème détecté');
