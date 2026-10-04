@@ -241,7 +241,7 @@ export function dialogDecider(productionId) {
     cle: 'type', type: 'radio', libelle: 'Décision', valeur: null,
     options: [
       ['complement', 'Complément', fait ? 'crée une tâche pour produire le reste' : 'disponible une fois la production faite'],
-      ['ajustement', 'Ajustement'],
+      ['ajustement', 'Ajustement', 'note l\'écart comme réglé, sans nouvelle production'],
       ['aucune', 'Aucune production supplémentaire'],
     ],
   }]);

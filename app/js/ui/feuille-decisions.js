@@ -1,12 +1,12 @@
 // Feuille « À décider » (maquette « Exceptions ») : un <dialog> (panneau.js) qui monte du bas, une carte par décision RÉELLE
 // (`decisionsDe`, domaine/decisions.js) avec les actions qui existent déjà : arbitrer un écart, replanifier une avance hors
 // règle, choisir la sauce, confirmer une répartition, accepter ou écarter une proposition de l'apprentissage, valider une
-// valeur. Une quantité absente n'est jamais une décision. Aucune logique métier ici. La feuille se met à jour quand l'état
-// change (une décision prise disparaît) ; vide : « Tout est réglé ». Fermeture au bouton et à Échap, focus rendu à l'appelant.
+// valeur. Une quantité absente n'est jamais une décision. Aucune logique métier ici. La feuille se met à jour sur place quand l'état
+// change (une décision prise disparaît) et reste ouverte jusqu'à « OK » ; vide : « Tout est réglé ». Fermeture au bouton et à Échap, focus rendu à l'appelant.
 
 import { ecarterApprentissage } from '../domaine/actions-apprentissage.js';
 import { libelleJour } from '../domaine/dates.js';
-import { decisionsDe } from '../domaine/decisions.js';
+import { decisionsDe, texteDecisions } from '../domaine/decisions.js';
 import { abonner, agir, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { dialogRepartition } from './fiches.js';
@@ -48,7 +48,7 @@ function carte(c, fermer) {
       if (c.ecart !== null && c.ecart > 0) morceaux.push(['il manque ', quantite(c.ecart, c.unite)]);
       if (c.ecart !== null && c.ecart < 0) morceaux.push(['surplus de ', quantite(-c.ecart, c.unite)]);
       detail = [morceaux.map(([mot, q], i) => [i > 0 ? ' · ' : null, mot, h('span', { classe: 'dec-qte' }, qteNoeuds(q))]),
-        h('span', { classe: 'dec-choix' }, 'Complément, ajustement ou aucune production supplémentaire.')];
+        h('span', { classe: 'dec-choix' }, 'Complément (produire le reste), ajustement (écart réglé, rien de plus) ou aucune production supplémentaire.')];
       actions = [principal('Décider', () => dialogDecider(c.productionId), { 'aria-label': `Décider de l'écart : ${c.nom}` }),
         versLien(`#/fiche/${encodeURIComponent(c.composantId)}`, 'Ouvrir la fiche')];
       break;
@@ -106,19 +106,24 @@ function carte(c, fermer) {
     h('div', { classe: 'dec-actions' }, actions));
 }
 
+/** « OK » : la feuille reste ouverte après chaque décision (elle se met à jour sur place) jusqu'à ce geste. */
+function boutonOk(fermer) {
+  return h('div', { classe: 'dec-fin' }, h('button', { type: 'button', classe: 'btn btn-decision dec-btn dec-ok', onClick: fermer }, 'OK'));
+}
+
 /** Contenu de la feuille pour un état : sous-titre, nombre, cartes ou état vide. */
 export function contenuDecisions(etat, aujourd, fermer = () => {}) {
   const { total, cartes } = decisionsDe(etat, aujourd);
   const entete = h('div', { classe: 'dec-entete' },
     h('p', { classe: 'dec-sous' }, "Sanji a tranché le reste. Ici, c'est vous qui décidez."),
-    total > 0 ? h('p', { classe: 'dec-nombre' }, h('span', { classe: 'dec-qte' }, String(total)), total === 1 ? ' décision en attente' : ' décisions en attente') : null);
+    total > 0 ? h('p', { classe: 'dec-nombre' }, h('span', { classe: 'dec-qte' }, String(total)), total === 1 ? ' décision à prendre' : ' décisions à prendre') : null);
   if (total === 0) {
     return [entete, h('div', { classe: 'dec-vide' },
       icone(['M8 12l3 3 5-6', 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0'], 'dec-icone-vide', 40),
       h('p', { classe: 'dec-vide-titre' }, 'Tout est réglé'),
-      h('p', { classe: 'dec-sous' }, 'Sanji continue avec vos décisions.'))];
+      h('p', { classe: 'dec-sous' }, 'Sanji continue avec vos décisions.')), boutonOk(fermer)];
   }
-  return [entete, h('div', { classe: 'dec-cartes' }, cartes.map((c) => carte(c, fermer)))];
+  return [entete, h('div', { classe: 'dec-cartes' }, cartes.map((c) => carte(c, fermer))), boutonOk(fermer)];
 }
 
 /** Ouvre la feuille « À décider » (appelée par le bandeau de l'écran Aujourd'hui). Une seule feuille à la fois. */

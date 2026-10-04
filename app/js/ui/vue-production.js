@@ -3,7 +3,7 @@
 // de la feuille Jour (`feuilleDuJour`), les gestes de `taches.js`, le corps de la page de `vue-jour.js`.
 
 import { ajouterJours, libelleJour, lundiDe } from '../domaine/dates.js';
-import { decisionsDe } from '../domaine/decisions.js';
+import { decisionsDe, texteDecisions } from '../domaine/decisions.js';
 import { feuilleDuJour } from '../domaine/planification.js';
 import { ouvrirDecisions } from './feuille-decisions.js';
 import { aujourdhui } from '../magasin.js';
@@ -75,7 +75,7 @@ function accesDecisions(etat, aujourd) {
   if (total === 0) return null;
   return h('button', { type: 'button', classe: 'au-decisions prod-decisions', onClick: () => ouvrirDecisions() },
     h('span', { classe: 'au-decisions-texte' },
-      h('span', { classe: 'au-decisions-titre' }, total === 1 ? '1 décision en attente' : `${total} décisions en attente`),
+      h('span', { classe: 'au-decisions-titre' }, texteDecisions(total)),
       h('span', { classe: 'au-decisions-detail' }, 'Ouvrir « À décider »')));
 }
 

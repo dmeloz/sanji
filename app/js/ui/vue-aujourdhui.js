@@ -6,7 +6,7 @@
 // Interface commune des vues : `titre(param, sous)` et `rendre(etat, param, sous)`.
 
 import { libelleJour } from '../domaine/dates.js';
-import { decisionsDe } from '../domaine/decisions.js';
+import { decisionsDe, texteDecisions } from '../domaine/decisions.js';
 import { aujourdhuiDe } from '../domaine/tableau-blanc.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
@@ -150,7 +150,7 @@ function bandeauDecisions(feuille, repli) {
   return h('button', { type: 'button', classe: 'au-decisions', onClick: surClic },
     icone(['M12 3l10 18H2z', 'M12 10v5M12 18v.5']),
     h('span', { classe: 'au-decisions-texte' },
-      h('span', { classe: 'au-decisions-titre' }, total === 1 ? '1 décision en attente' : `${total} décisions en attente`),
+      h('span', { classe: 'au-decisions-titre' }, texteDecisions(total)),
       h('span', { classe: 'au-decisions-detail' }, resumeDecisions(cartes))),
     icone(CHEVRON, 'au-icone au-chevron'));
 }

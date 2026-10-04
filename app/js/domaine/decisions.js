@@ -3,12 +3,12 @@
 // valeurs à valider). Une quantité absente n'est JAMAIS une décision : grammage, prévision manquante et composant à
 // préciser (points de chiffrage) n'y figurent pas. Pur : ni DOM ni heure courante.
 
+import { calculerComposant } from './calcul.js';
 import { propositionsApprentissage } from './apprentissage.js';
-import { ajouterJours, estOuvert, lundiDe } from './dates.js';
+import { ajouterJours, jourSemaine, lundiDe } from './dates.js';
 import { estSauceAConfirmer } from './etat.js';
-import { cibleProduction, ecartProduction, evaluationProduction, feuilleDuJour } from './planification.js';
+import { cibleProduction, ecartProduction, etatTache, evaluationProduction } from './planification.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
-import { decisionsSansDoublon } from './tableau-blanc.js';
 import { valeursAValider } from './validation.js';
 
 /** Points de quantité manquante : jamais une décision. */
@@ -17,9 +17,12 @@ export const POINTS_SANS_DECISION = Object.freeze(new Set(['grammage', 'previsio
 /** Genres de cartes, dans l'ordre d'affichage (ce qui bloque le travail d'abord). */
 export const GENRES = Object.freeze(['ecart', 'avance_hors_regle', 'sauce', 'repartition', 'point', 'apprentissage', 'valeur']);
 
-/** Jours regardés : aujourd'hui jusqu'au samedi de la semaine, comme le bandeau de l'accueil. */
+/**
+ * Jours regardés : aujourd'hui jusqu'au samedi de la semaine, comme le bandeau de l'accueil ; le dimanche (jour fermé),
+ * la semaine qui vient (lundi au samedi) : sinon le dimanche ne verrait presque rien.
+ */
 function datesDe(aujourd) {
-  const lundi = lundiDe(aujourd);
+  const lundi = jourSemaine(aujourd) === 7 ? ajouterJours(lundiDe(aujourd), 7) : lundiDe(aujourd);
   return [0, 1, 2, 3, 4, 5].map((i) => ajouterJours(lundi, i)).filter((d) => d >= aujourd);
 }
 
@@ -39,14 +42,18 @@ export function decisionsDe(etat, aujourd) {
   const cartes = [];
   const dates = datesDe(aujourd);
 
-  const feuille = estOuvert(aujourd) ? feuilleDuJour(etat, aujourd) : null;
-  for (const d of feuille ? decisionsSansDoublon(feuille).filter((x) => x.motif === 'ecart') : []) {
-    const p = etat.productions[d.productionId];
+  // Écarts à arbitrer : toute production faite (ou en cours) dont l'écart n'est pas décidé, jusqu'à la fin de la fenêtre,
+  // y compris un service déjà passé ou un dimanche : une décision à prendre ne disparaît pas parce que le jour a changé.
+  const fin = dates[dates.length - 1];
+  for (const p of Object.values(etat.productions ?? {})) {
+    const composant = etat.composants?.[p.composantId];
+    if (!composant || (p.etat !== 'fait' && p.etat !== 'en_cours') || p.dateService > fin) continue;
+    if (etatTache(etat, p.id) !== 'ecart') continue;
     cartes.push({
-      id: `ecart:${d.productionId}`, genre: 'ecart', productionId: d.productionId, composantId: d.composantId,
-      nom: p.libelle || d.libelle || d.nom, cible: cibleProduction(etat, d.productionId),
-      reel: Number.isFinite(p.quantiteReelle) ? p.quantiteReelle : null, unite: p.unite ?? d.unite ?? null,
-      ecart: ecartProduction(etat, d.composantId),
+      id: `ecart:${p.id}`, genre: 'ecart', productionId: p.id, composantId: p.composantId,
+      nom: p.libelle || composant.nom, cible: cibleProduction(etat, p.id), date: p.dateService,
+      reel: Number.isFinite(p.quantiteReelle) ? p.quantiteReelle : null, unite: p.unite ?? calculerComposant(etat, composant.id)?.uniteTravail ?? null,
+      ecart: ecartProduction(etat, p.composantId),
     });
   }
 
@@ -64,7 +71,7 @@ export function decisionsDe(etat, aujourd) {
           if (vus.has(id)) continue;
           vus.add(id);
           cartes.push({ id, genre: 'avance_hors_regle', productionId: p.id, composantId: pt.composantId,
-            nom: etat.composants[pt.composantId].nom, dateService: date, jours: ev.jours, limiteDepassee });
+            nom: etat.composants[pt.composantId].nom, dateService: date, date, jours: ev.jours, limiteDepassee });
         }
       } else if (pt.type === 'repartition_provisoire') {
         const f = etat.fiches[pt.ficheId];
@@ -80,7 +87,7 @@ export function decisionsDe(etat, aujourd) {
   for (const pt of pointsGlobaux(etat)) cartes.push({ id: `point:${pt.type}`, genre: 'point', type: pt.type, texte: pt.texte, composantId: null, ficheId: null, date: null });
 
   for (const c of Object.values(etat.composants ?? {})) {
-    if (c.date >= aujourd && dates.includes(c.date) && estSauceAConfirmer(c)) {
+    if (dates.includes(c.date) && estSauceAConfirmer(c)) {
       cartes.push({ id: `sauce:${c.id}`, genre: 'sauce', composantId: c.id, nom: c.nom, date: c.date });
     }
   }
@@ -94,4 +101,20 @@ export function decisionsDe(etat, aujourd) {
 
   cartes.sort((a, b) => GENRES.indexOf(a.genre) - GENRES.indexOf(b.genre));
   return { total: cartes.length, cartes };
+}
+
+/**
+ * Le même compte, pour un jour choisi (écran Semaine) : les cartes de `decisionsDe` qui portent la date de ce jour
+ * (écart, avance hors règle, sauce, répartition, point). Les décisions sans jour (semaine type, apprentissage, valeur à
+ * valider) restent dans le compte général. Mêmes règles, même mot : « décision(s) à prendre ».
+ * @returns {{total:number, cartes:object[]}}
+ */
+export function decisionsDuJour(etat, date) {
+  const cartes = decisionsDe(etat, date).cartes.filter((c) => c.date === date);
+  return { total: cartes.length, cartes };
+}
+
+/** « 1 décision à prendre » / « N décisions à prendre » : le même mot partout. */
+export function texteDecisions(total) {
+  return total === 1 ? '1 décision à prendre' : `${total} décisions à prendre`;
 }

@@ -6,10 +6,10 @@ import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
-import { creerFiche, definirMenu, definirPrevision, definirStandard, marquerFait, planifier } from '../app/js/domaine/actions.js';
+import { creerFiche, deciderEcart, definirMenu, definirPrevision, definirStandard, marquerFait, planifier } from '../app/js/domaine/actions.js';
 import { composantVide } from '../app/js/domaine/etat.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
-import { decisionsDe, POINTS_SANS_DECISION } from '../app/js/domaine/decisions.js';
+import { decisionsDe, decisionsDuJour, POINTS_SANS_DECISION, texteDecisions } from '../app/js/domaine/decisions.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h } from './aide.js';
 
@@ -128,7 +128,7 @@ test('données : l\'ordre suit les genres (sauce avant répartition)', () => {
   assert.ok(g.indexOf('sauce') < g.indexOf('repartition'));
 });
 
-test('feuille : « À décider », sous-titre, état vide « Tout est réglé », <dialog> avec un seul bouton Fermer', () => {
+test('feuille : « À décider », sous-titre, état vide « Tout est réglé », <dialog> avec Fermer et OK', () => {
   nettoyer();
   magasin.remplacer(calme(etatVide()));
   aDate(S.lundi, () => feuille.ouvrirDecisions());
@@ -140,7 +140,7 @@ test('feuille : « À décider », sous-titre, état vide « Tout est réglé »
   assert.match(d.textContent, /Sanji a tranché le reste\. Ici, c'est vous qui décidez\./);
   assert.match(d.textContent, /Tout est réglé/);
   assert.equal(classes(d, 'dec-carte').length, 0);
-  assert.deepEqual(boutons(d).map((b) => b.textContent), ['Fermer']);
+  assert.deepEqual(boutons(d).map((b) => b.textContent), ['OK', 'Fermer']);
   d.close();
 });
 
@@ -294,4 +294,76 @@ test('style et source : cibles de 44 px, quantités en police des quantités, mo
   for (const interdit of ['Plus tard', 'en stock', 'minuteur', 'température']) assert.ok(!src.includes(interdit), interdit);
   const sw = readFileSync(new URL('../app/sw.js', import.meta.url), 'utf8');
   assert.ok(sw.includes("'js/domaine/decisions.js'"));
+});
+
+test('B1 : le dimanche, la semaine suivante est regardée (sauces, répartitions, avances du lundi au samedi)', () => {
+  const e = avecRepartition(); // fiche du mercredi 7/10
+  definirMenu(e, S.lundi, 1, 'Penne aux courgettes', h()); // sauce implicite du lundi 5/10
+  const g = genres(e, S.dimanchePrecedent);
+  assert.ok(g.includes('sauce'), 'sauce du lundi suivant');
+  assert.ok(g.includes('repartition'), 'répartition du mercredi suivant');
+  const lundi = genres(e, S.lundi);
+  assert.ok(lundi.includes('sauce') && lundi.includes('repartition'), 'même contenu le lundi');
+  // un samedi ne regarde pas encore la semaine d'après
+  const eSemaineApres = calme(etatVide());
+  definirMenu(eSemaineApres, S.lundiSuivant, 1, 'Penne aux courgettes', h());
+  assert.equal(genres(eSemaineApres, S.samedi ?? '2026-10-10').includes('sauce'), false);
+  assert.equal(genres(eSemaineApres, S.dimanche).includes('sauce'), true);
+});
+
+test('B1 : le dimanche, une avance hors règle pour le lundi suivant apparaît', () => {
+  const e = calme(etatVide());
+  definirMenu(e, S.mardi, 1, 'carottes', h());
+  definirPrevision(e, S.mardi, 1, 20, h());
+  definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
+  const p = Object.values(e.productions).find((x) => x.genre === 'principale');
+  planifier(e, p.id, S.veille, 'avant_midi', h());
+  // même carte qu'en semaine : visible seulement si l'avance est hors règle
+  const brut = pointsAConfirmer(e, S.mardi).some((x) => x.type === 'avance_hors_regle');
+  assert.equal(genres(e, S.dimanchePrecedent).includes('avance_hors_regle'), brut);
+});
+
+test('B1 bis : un écart à arbitrer est une décision, aussi le dimanche et pour un jour passé ; décidé, il disparaît', () => {
+  const { e, p } = avecEcart();
+  for (const jour of [S.lundi, S.mardi, S.dimanche]) {
+    const cartes = decisionsDe(e, jour).cartes.filter((c) => c.genre === 'ecart');
+    assert.equal(cartes.length, jour === S.dimanche ? 1 : 1, jour);
+  }
+  assert.equal(decisionsDe(e, S.lundi).total, 1);
+  deciderEcart(e, p.id, 'ajustement', h());
+  assert.equal(decisionsDe(e, S.lundi).total, 0);
+  assert.equal(decisionsDe(e, S.dimanche).total, 0);
+});
+
+test('compte unique : decisionsDuJour = les cartes datées du jour, texteDecisions dit « décision(s) à prendre »', () => {
+  const { e } = avecEcart();
+  definirMenu(e, S.mercredi, 1, 'Penne aux courgettes', h());
+  assert.equal(decisionsDuJour(e, S.lundi).total, 1);
+  assert.equal(decisionsDuJour(e, S.mercredi).cartes[0].genre, 'sauce');
+  assert.equal(decisionsDuJour(e, S.jeudi).total, 0);
+  assert.equal(texteDecisions(1), '1 décision à prendre');
+  assert.equal(texteDecisions(3), '3 décisions à prendre');
+});
+
+test('feuille : un écart compte, la feuille ne dit pas « Tout est réglé » ; elle reste ouverte après une décision jusqu\'à OK', () => {
+  nettoyer();
+  const { e } = avecEcart();
+  definirMenu(e, S.lundi, 2, 'Penne aux courgettes', h());
+  magasin.remplacer(e);
+  aDate(S.lundi, () => feuille.ouvrirDecisions());
+  const d = ouverts()[0];
+  assert.doesNotMatch(d.textContent, /Tout est réglé/);
+  assert.match(d.textContent, /décisions? à prendre/);
+  assert.match(d.textContent, /ajustement \(/);
+  // une décision (sauce choisie) : la feuille reste ouverte et se met à jour
+  const sauce = classes(d, 'dec-carte').find((c) => c.dataset.genre === 'sauce');
+  if (sauce) {
+    magasin.agir((x) => { Object.values(x.composants).forEach((c) => { c.sauceAConfirmer = false; }); });
+  }
+  const p = Object.values(magasin.etat().productions).find((x) => x.genre === 'principale' && x.etat === 'fait');
+  aDate(S.lundi, () => magasin.agir((x, t) => deciderEcart(x, p.id, 'aucune', t)));
+  assert.equal(ouverts().length, 1, 'toujours ouverte');
+  assert.equal(classes(d, 'dec-carte').filter((c) => c.dataset.genre === 'ecart').length, 0);
+  parTexte(d, /^OK$/).click();
+  assert.equal(ouverts().length, 0, 'OK ferme');
 });
