@@ -9,7 +9,6 @@ import { libelleJour } from '../domaine/dates.js';
 import { decisionsDe } from '../domaine/decisions.js';
 import { abonner, agir, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { h, svg } from './dom.js';
-import { bouton } from './elements.js';
 import { dialogRepartition } from './fiches.js';
 import { ouvrirProposition, ouvrirValidation, texteFourchette } from './feuille-validation.js';
 import { qteNoeuds, quantite } from './format.js';
@@ -33,8 +32,10 @@ function icone(chemins, classe = 'dec-icone', taille = 16) {
 
 /** Une carte : étiquette (mot écrit + icône), titre, détail, un ou deux gestes. `fermer` ferme la feuille avant un changement de page. */
 function carte(c, fermer) {
-  const principal = (texte, surClic, extra) => bouton(texte, surClic, 'decision dec-btn', extra);
-  const secondaire = (texte, surClic, extra) => bouton(texte, surClic, 'dec-btn', extra);
+  // `bouton()` préfixe chaque classe par « btn- » : la classe de mise en page `dec-btn` est donc posée ici, sans préfixe.
+  const geste = (classe) => (texte, surClic, extra) => h('button', { type: 'button', classe, onClick: surClic, ...extra }, texte);
+  const principal = geste('btn btn-decision dec-btn');
+  const secondaire = geste('btn dec-btn');
   const versLien = (href, texte) => h('a', { href, classe: 'btn dec-btn', onClick: fermer }, texte);
   let etiquette; let titre; let detail = null; let actions;
   switch (c.genre) {
