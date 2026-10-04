@@ -4,7 +4,7 @@
 // repliées ; les décisions sont résumées en 1 à 3 lignes qui mènent au centre « À confirmer » de la même page.
 
 import { ajouterJours, estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js';
-import { evaluationProduction, feuilleDuJour } from '../domaine/planification.js';
+import { aideRefroidissement, evaluationProduction, feuilleDuJour } from '../domaine/planification.js';
 import { libelle } from '../domaine/statuts.js';
 import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
@@ -135,6 +135,17 @@ function badgesEtMeta(l, ev, { groupe }) {
   return { meta, badges };
 }
 
+/**
+ * Avertissement de conservation du référentiel (jamais un blocage) : en texte, avec sa provenance sur une ligne.
+ * Seulement quand l'avance dépasse la durée de base et que la propriétaire n'a saisi aucune limite.
+ */
+function avertissementConservation(ev) {
+  if (!ev || ev.conservation !== 'referentiel' || !ev.repere?.depasse) return null;
+  return h('p', { classe: 'mep-conservation' },
+    h('strong', null, 'Attention : '), `${ev.repere.texte}, avance de ${ev.jours} jours. `,
+    h('span', { classe: 'mep-provenance' }, ev.repere.provenance));
+}
+
 /** Actions de la ligne hors « Fait » (déjà sur la case) : repliées derrière « Actions » pour garder la liste compacte. */
 function actionsDeLigne(etat, l, date) {
   const p = etat.productions[l.productionId];
@@ -171,7 +182,8 @@ function ligneTache(etat, ligneBrute, date, options) {
       fait ? caseFaite() : COCHABLES.has(l.etat) ? caseFait(l) : h('span', { classe: 'case-fait case-fait-vide' }),
       h('div', { classe: 'mep-corps' },
         lien(`#/composant/${encodeURIComponent(l.composantId)}`, l.genre === 'principale' ? l.nom : (l.libelle || l.nom), 'tache-nom mep-nom'),
-        h('p', { classe: 'mep-meta' }, badges, meta.join(' · '))),
+        h('p', { classe: 'mep-meta' }, badges, meta.join(' · ')),
+        avertissementConservation(ev)),
       h('div', { classe: 'mep-quantite' },
         q ? h('strong', { classe: 'mep-qte feutre' }, q) : (l.genre === 'preparatoire' ? null : h('span', { classe: 'mep-neutre' }, 'quantité à compléter')),
         q && poids ? h('span', { classe: 'mep-poids' }, poids) : null)),
@@ -193,8 +205,10 @@ function bloc(titreTexte, lignes, etat, date, groupe) {
   // Page courte : au-delà de 8 lignes de travail, la suite se replie sous « Voir les N autres » (un compte et un toucher).
   const visibles = dansLaRegle.slice(0, LIGNES_VISIBLES);
   const suite = dansLaRegle.slice(LIGNES_VISIBLES);
+  const aideApres = groupe === 'apres' ? aideRefroidissement() : null;
   return h('section', { classe: 'jour-bloc' },
     h('h2', { classe: 'section-titre' }, titreTexte),
+    aideApres ? h('p', { classe: 'aide mep-aide-froid' }, aideApres) : null,
     visibles.length > 0 ? liste(visibles) : null,
     suite.length > 0 ? repliable(`Voir les ${suite.length} autres`, false, liste(suite), { classe: 'jour-hors-regle' }) : null,
     horsRegle.length > 0 ? repliable(`${horsRegle.length === 1 ? '1 avance hors règle' : `${horsRegle.length} avances hors règle`}`,

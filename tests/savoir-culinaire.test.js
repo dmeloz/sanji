@@ -144,7 +144,7 @@ test('rattachements : refus d\'un id inexistant, d\'une famille hors lexique, d\
 test('unités normalisées : seules les unités de la liste, sans conversion', () => {
   const attendu = [['% de perte du poids brut', '%'], ['jours après le jour de production', 'jours'], ['jour', 'jours'], ['j', 'jours'],
     ['°C à cœur', '°C'], ['°C (minimum à cœur)', '°C'], ['min de mijotage', 'min'], ['× poids sec', 'x'], ['x poids sec', 'x'],
-    ['g de féculent sec (riz, pâtes) par couvert', 'g/couvert'], ['mois', null], ['semaines', null], ['h', null], ['mm de côté', null],
+    ['g de féculent sec (riz, pâtes) par couvert', 'g/couvert'], ['mois', 'mois'], ['semaines', 'semaines'], ['h', 'h'], ['h (de 50 à 10 °C)', 'h'], ['h sans symptômes', 'h'], ['heures', null], ['mm de côté', null], ['min par face', 'min'], 
     ['g/L', null], ['g', null]];
   for (const [texte, unite] of attendu) assert.equal(uniteNormalisee(texte), unite, texte);
 });

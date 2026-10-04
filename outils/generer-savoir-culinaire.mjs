@@ -122,15 +122,19 @@ export const USAGES = Object.freeze({
   cuisson_temps: ['min'],
   temperature: ['°C'],
   buffet_couvert: ['g/couvert'],
+  refroidissement: ['h'],
+  limite_duree: ['h'],
+  duree_stockage: ['h', 'semaines', 'mois'],
   allergene: [null],
 });
 export const SENS = Object.freeze(['prudent_min', 'prudent_max']);
+const SENS_PERMIS = new Set(['conservation', 'temperature', 'refroidissement', 'limite_duree', 'duree_stockage']);
 const USAGES_RENDEMENT = new Set(['rendement_parage', 'rendement_cuisson']);
 
 /**
  * Unité normalisée d'une unité écrite dans le référentiel (« % de perte du poids brut » -> « % », « jours après le jour
  * de production » -> « jours », « °C à cœur » -> « °C », « × poids sec » -> « x »), ou null si elle n'en a pas.
- * Aucune conversion : « mois », « semaines » ou « h » n'ont pas d'unité normalisée.
+ * Aucune conversion : « h », « semaines » et « mois » sont des unités à part entière, jamais ramenées en jours.
  */
 export function uniteNormalisee(texte) {
   const t = String(texte ?? '').trim();
@@ -138,6 +142,9 @@ export function uniteNormalisee(texte) {
   if (/^%/.test(t)) return '%';
   if (/^(?:jours?|j)(?=\s|$)/.test(t)) return 'jours';
   if (/^min(?=\s|\(|$)/.test(t)) return 'min';
+  if (/^h(?=\s|\(|$)/.test(t)) return 'h';
+  if (/^semaines?(?=\s|\(|$)/.test(t)) return 'semaines';
+  if (/^mois(?=\s|\(|$)/.test(t)) return 'mois';
   if (/^[x×](?=\s|$)/.test(t)) return 'x';
   if (/^g(?:\/couvert$|\s.*\bpar couvert\b)/.test(t)) return 'g/couvert';
   return null;
@@ -201,7 +208,9 @@ export function validerRattachements(doc, entrees, lexique = null) {
     if (r.sens !== undefined && !SENS.includes(r.sens)) e.push(`${id} : sens invalide « ${r.sens} ».`);
     if (r.usage === 'conservation' && r.sens !== 'prudent_min') e.push(`${id} : une durée de conservation se lit au minimum (sens « prudent_min »).`);
     if (r.usage === 'temperature' && hygiene && r.sens === undefined) e.push(`${id} : une température d'hygiène exige un sens.`);
-    if (r.sens !== undefined && !['conservation', 'temperature'].includes(r.usage)) e.push(`${id} : sens réservé à la conservation et aux températures.`);
+    if (['refroidissement', 'limite_duree'].includes(r.usage) && r.sens === undefined) e.push(`${id} : une durée d'hygiène exige un sens.`);
+    if (r.usage === 'duree_stockage' && r.sens !== 'prudent_min') e.push(`${id} : une durée de stockage se lit au minimum (sens « prudent_min »).`);
+    if (r.sens !== undefined && !SENS_PERMIS.has(r.usage)) e.push(`${id} : sens réservé à la conservation et aux températures.`);
     if (r.unite !== null) {
       const cle = `${r.usage}|${texteCible(c)}|${c.etat ?? x.etat_poids ?? ''}`;
       if (uniques.has(cle)) e.push(`${id} : un autre rattachement porte déjà ${r.usage} pour ${texteCible(c)}.`);

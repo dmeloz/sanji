@@ -764,3 +764,7 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 /* Réglages > Standards de base : lignes compactes, gestes de 44 px. */
 .ligne-standard-base { display: grid; gap: 6px; padding: 8px 0; border-bottom: 1px solid var(--bordure); }
 .ligne-standard-base .actions .btn { min-height: var(--cible); }
+/* Jour : avertissement de conservation du référentiel (texte, jamais la couleur seule) et aide au refroidissement. */
+.mep-conservation { margin-top: 4px; font-size: var(--t-1); }
+.mep-provenance { display: block; color: var(--texte-doux); overflow-wrap: anywhere; }
+.mep-aide-froid { margin: 4px 0 6px; font-size: var(--t-1); color: var(--texte-doux); }

@@ -4,7 +4,7 @@
 import { creneauxDuJour, estDateValide, libelleJour } from '../domaine/dates.js';
 import { calculerComposant } from '../domaine/calcul.js';
 import {
-  chargeCreneau, cibleProduction, ecartProduction, etatCreneau, etatTache, evaluerAvance, regleDe, suggererCreneau,
+  chargeCreneau, cibleProduction, ecartProduction, etatCreneau, etatTache, evaluerAvance, regleDe, repereConservation, suggererCreneau,
 } from '../domaine/planification.js';
 import {
   ajouterPreparatoire, annulerFait, corrigerReel, deciderEcart, demarrer, marquerFait, planifier, reporter, supprimerProduction,
@@ -48,6 +48,10 @@ export function noeudEvaluation(ev) {
   if (ev.exception && ev.autorisee) morceaux.push(pastille('autorisée par la règle', 'vert'));
   if (ev.exception && !ev.autorisee) morceaux.push(pastille('hors règle : règle de préparation à valider', 'rouge'));
   if (ev.conservation === 'a_confirmer') morceaux.push(pastille('conservation à confirmer', 'ambre'));
+  if (ev.conservation === 'referentiel' && ev.repere) {
+    morceaux.push(pastille(`conservation : ${ev.repere.texte}`, ev.repere.depasse ? 'ambre' : 'gris'));
+    if (ev.repere.depasse) morceaux.push(pastille('avertissement : avance plus longue que la durée de base', 'ambre'));
+  }
   if (ev.conservation === 'validee') morceaux.push(pastille("limite d'utilisation validée par l'établissement", 'vert'));
   if (ev.conservation === 'depassee') morceaux.push(pastille("limite d'utilisation dépassée", 'rouge'));
   if (ev.jours !== null && ev.jours > 0 && !ev.couvre) morceaux.push(pastille('non couvert', 'rouge'));
@@ -292,7 +296,7 @@ export function dialogPlanifier(productionId, mode, preset = {}) {
     const date = f.valeur('date');
     if (!estDateValide(date)) { zoneEvaluation.replaceChildren(h('p', { classe: 'vide' }, 'Choisissez un jour.')); return; }
     const creneau = f.valeur('creneau');
-    const ev = evaluerAvance(date, p.dateService, regle);
+    const ev = evaluerAvance(date, p.dateService, regle, repereConservation(composant));
     const lignes = [h('p', { classe: 'meta' }, `Service : ${libelleJour(p.dateService)}. Production : ${libelleJour(date)}.`),
       noeudEvaluation(ev)];
     if (creneau) {

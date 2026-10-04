@@ -5,6 +5,7 @@ import { ajouterJours, creneauxDuJour, estOuvert, joursEntre, jourSemaine } from
 import { calculerComposant, arrondirQuantite, portionsMenu } from './calcul.js';
 import { normaliser, jourOuVide } from './etat.js';
 import { familleParCle } from './savoir.js';
+import { reperesConservation, standardDeBase, texteProvenance } from './standards-base.js';
 import { POINTS_CHARGE } from './statuts.js';
 
 const AVANCE_HABITUELLE = 2;
@@ -48,14 +49,48 @@ export function regleDe(etat, composant, etapeCle = null) {
 }
 
 /**
+ * Repère de conservation du référentiel (standard de base) pour un composant : la plus courte des durées en jours des
+ * produits cuits de sa famille (borne prudente), ou null. Il AVERTIT seulement, il ne bloque jamais : seule la limite
+ * d'utilisation saisie par la propriétaire (`limiteUtilisationJours`) a un effet bloquant.
+ * @returns {{jours:number, texte:string, provenance:string}|null}
+ */
+export function repereConservation(composant) {
+  if (!composant?.famille) return null;
+  const candidats = reperesConservation(composant.famille)
+    .filter((x) => x.unite === 'jours' && Number.isFinite(x.valeur) && (!x.etatPoids || x.etatPoids === 'cuit'));
+  if (candidats.length === 0) return null;
+  const std = candidats.reduce((a, b) => (b.valeur < a.valeur ? b : a));
+  const unite = std.valeur > 1 ? 'jours' : 'jour';
+  return {
+    jours: std.valeur,
+    texte: `se garde ${String(std.valeur).replace('.', ',')} ${unite} (standard de base, ${std.provenance.id})`,
+    provenance: texteProvenance(std),
+  };
+}
+
+/**
+ * Phrase d'aide sur le refroidissement après cuisson (standard de base : de 50 à 10 °C en 2 h au plus), ou null si le
+ * référentiel ne le donne pas. Information, jamais un blocage.
+ */
+export function aideRefroidissement() {
+  const std = standardDeBase(null, 'refroidissement', { regle: 'refroidissement' });
+  if (!std || std.unite !== 'h') return null;
+  return `Refroidir vite après la cuisson : ${String(std.valeur).replace('.', ',')} ${std.uniteSource} au plus `
+    + `(${texteProvenance(std)}).`;
+}
+
+/**
  * Évalue une avance de travail (voir conception, section 8).
  * @param {string|null} dateProduction
  * @param {string} dateService
  * @param {object|null} regle règle de préparation (avanceMaxJours, limiteUtilisationJours)
+ * @param {{jours:number, texte:string, provenance:string}|null} [repere] repère de conservation du référentiel
+ *   (`repereConservation`), lu seulement quand la propriétaire n'a pas saisi de limite : il avertit, il ne bloque pas.
  * @returns {{jours:number|null, exception:boolean, autorisee:boolean,
- *   conservation:'sans_objet'|'validee'|'a_confirmer'|'depassee', couvre:boolean, alertes:string[]}}
+ *   conservation:'sans_objet'|'validee'|'a_confirmer'|'referentiel'|'depassee', couvre:boolean, alertes:string[],
+ *   repere?:{jours:number, texte:string, provenance:string, depasse:boolean}}}
  */
-export function evaluerAvance(dateProduction, dateService, regle) {
+export function evaluerAvance(dateProduction, dateService, regle, repere = null) {
   const res = { jours: null, exception: false, autorisee: false, conservation: 'sans_objet', couvre: false, alertes: [] };
   if (!dateProduction) { res.alertes.push('date de production non décidée'); return res; }
   res.jours = joursEntre(dateProduction, dateService);
@@ -63,8 +98,8 @@ export function evaluerAvance(dateProduction, dateService, regle) {
   if (!estOuvert(dateProduction)) { res.alertes.push('dimanche : jour non travaillé'); return res; }
   if (res.jours === 0) { res.autorisee = true; res.couvre = true; return res; }
   const limite = Number.isFinite(regle?.limiteUtilisationJours) ? regle.limiteUtilisationJours : null;
-  if (regle?.etape) return evaluerEtape(res, regle, limite);
-  if (limite === null) res.conservation = 'a_confirmer';
+  if (regle?.etape) return evaluerEtape(res, regle, limite, repere);
+  if (limite === null) appliquerRepere(res, repere);
   else res.conservation = limite >= res.jours ? 'validee' : 'depassee';
   if (res.jours <= AVANCE_HABITUELLE) {
     res.autorisee = true;
@@ -82,8 +117,20 @@ export function evaluerAvance(dateProduction, dateService, regle) {
   return res;
 }
 
+/**
+ * Sans limite saisie : le repère du référentiel remplace « conservation à confirmer ». Une avance plus longue que la
+ * durée du repère donne un avertissement, jamais un blocage ni un classement « hors règle ».
+ */
+function appliquerRepere(res, repere) {
+  if (!repere || !Number.isFinite(repere.jours)) { res.conservation = 'a_confirmer'; return; }
+  res.conservation = 'referentiel';
+  const depasse = res.jours > repere.jours;
+  res.repere = { ...repere, depasse };
+  if (depasse) res.alertes.push(`avertissement de conservation : ${repere.texte}, avance de ${res.jours} jours`);
+}
+
 /** Avance d'une étape : son propre maximum (jamais la règle générale de deux jours seule, jamais une conservation). */
-function evaluerEtape(res, regle, limite) {
+function evaluerEtape(res, regle, limite, repere = null) {
   const maximum = Number.isFinite(regle.avanceMaxJours) ? regle.avanceMaxJours : null;
   res.exception = res.jours > AVANCE_HABITUELLE;
   if (maximum === null) {
@@ -93,7 +140,10 @@ function evaluerEtape(res, regle, limite) {
     res.alertes.push('conservation à confirmer');
   } else {
     res.autorisee = res.jours <= maximum;
-    if (regle.finition) res.conservation = limite === null ? 'a_confirmer' : (limite >= res.jours ? 'validee' : 'depassee');
+    if (regle.finition) {
+      if (limite === null) appliquerRepere(res, repere);
+      else res.conservation = limite >= res.jours ? 'validee' : 'depassee';
+    }
     if (!res.autorisee) res.alertes.push(`hors règle : avance de ${res.jours} jours, maximum ${maximum} pour cette étape`);
     else if (res.exception) res.alertes.push("avance exceptionnelle autorisée par la règle de l'étape");
     if (res.conservation === 'a_confirmer') res.alertes.push('conservation à confirmer');
@@ -110,7 +160,7 @@ function dateProduction(prod) {
 
 function evaluationDe(etat, prod, composant) {
   const date = dateProduction(prod);
-  return date ? evaluerAvance(date, prod.dateService, regleDe(etat, composant, prod.etapeCle ?? null)) : null;
+  return date ? evaluerAvance(date, prod.dateService, regleDe(etat, composant, prod.etapeCle ?? null), repereConservation(composant)) : null;
 }
 
 /** Évaluation de l'avance d'une production (null si sa date de production est inconnue). */
@@ -244,7 +294,7 @@ export function suggererCreneau(etat, productionId) {
     const charge = chargeCreneau(etat, date, creneau);
     const dejaLa = p.jourDecide === date && p.creneauDecide === creneau ? points : 0;
     if (Number.isFinite(charge.capacite) && charge.points - dejaLa + points > charge.capacite) continue;
-    const evaluation = evaluerAvance(date, p.dateService, regle);
+    const evaluation = evaluerAvance(date, p.dateService, regle, repereConservation(composant));
     if (evaluation.autorisee && evaluation.couvre) return { date, creneau, evaluation };
   }
   return null;
@@ -347,7 +397,7 @@ export function avancesPossibles(etat, aujourdhui) {
     const composant = etat.composants[p.composantId];
     // Pâtes et risotto du menu 1 : jour même. Déjà planifiée ce jour à la main : elle reste affichée, avec son évaluation.
     if (!p.jourDecide && sansAvanceParDefaut(etat, composant, p)) continue;
-    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null));
+    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null), repereConservation(composant));
     const creneau = creneauxPossibles.find((c) => etatCreneau(etat, aujourdhui, c) === 'libre') ?? null;
     resultat.push({ ...ligne(etat, p), evaluation, creneau });
   }
@@ -374,7 +424,7 @@ export function lotsPossibles(etat, aujourdhui) {
     const cible = cibleProduction(etat, p.id);
     const unite = p.unite ?? calculerComposant(etat, composant.id).uniteTravail ?? null;
     if (cible === null || !unite) continue;
-    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null));
+    const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null), repereConservation(composant));
     if (!evaluation.autorisee || !evaluation.couvre) continue;
     const cle = `${composant.famille}|${unite}`;
     if (!groupes.has(cle)) groupes.set(cle, { famille: composant.famille, unite, productions: [] });

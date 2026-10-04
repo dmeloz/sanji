@@ -13,9 +13,10 @@ import { SAVOIR_CULINAIRE } from '../app/js/donnees/savoir-culinaire.js';
 test('nombre d\'entrées rattachées par usage (choisies à la main)', () => {
   const compte = Object.fromEntries(USAGES.map((u) => [u, rattachementsDe(u).length]));
   assert.deepEqual(compte, {
-    rendement_parage: 6, rendement_cuisson: 5, conservation: 5, cuisson_temps: 6, temperature: 8, buffet_couvert: 2, allergene: 3,
+    rendement_parage: 6, rendement_cuisson: 5, conservation: 6, cuisson_temps: 6, temperature: 8, buffet_couvert: 2,
+    refroidissement: 1, limite_duree: 2, duree_stockage: 3, allergene: 3,
   });
-  assert.equal(SAVOIR_CULINAIRE.filter((x) => x.aide).length, SAVOIR_CULINAIRE.length - 35, 'tout le reste sert d\'aide');
+  assert.equal(SAVOIR_CULINAIRE.filter((x) => x.aide).length, SAVOIR_CULINAIRE.length - 42, 'tout le reste sert d\'aide');
 });
 
 test('rendement : le référentiel confirmé à la source prime, l\'écart avec la base métier reste visible', () => {
@@ -70,7 +71,18 @@ test('hygiène : borne prudente ; conservation au minimum, seuil seul pris tel q
   const carottes = standardDeBase('carottes', 'conservation', { etatPoids: 'cuit' });
   assert.deepEqual([carottes.valeur, carottes.fourchette, carottes.provenance.id], [2, { min: null, max: 2 }, 'hygiene.duree.feculents-legumes-cuits']);
   assert.equal(standardDeBase('carottes', 'conservation', { etatPoids: 'cru_net' }), null, 'la règle des cuits ne vaut pas pour le cru');
-  assert.equal(standardDeBase('legumineuses', 'conservation', { etatPoids: 'cuit' }), null, 'légumineuses : non visées par la règle, rien d\'inventé');
+  const leg = standardDeBase('legumineuses', 'conservation', { etatPoids: 'cuit' });
+  assert.deepEqual([leg.valeur, leg.fourchette, leg.provenance.id], [3, { min: 3, max: 4 }, 'feculents.leg.conservation.cuites'], 'légumineuses cuites : 3 à 4 jours, minimum');
+  // Durées en heures, semaines, mois : unités normalisées, jamais converties.
+  const froid = standardDeBase(null, 'refroidissement', { regle: 'refroidissement' });
+  assert.deepEqual([froid.valeur, froid.unite, froid.fourchette, froid.sens, froid.provenance.id], [2, 'h', { min: null, max: 2 }, 'prudent_max', 'hygiene.temperature.refroidissement']);
+  assert.equal(standardDeBase(null, 'limite_duree', { regle: 'maintien_chaud' }).valeur, 3);
+  assert.equal(standardDeBase(null, 'limite_duree', { regle: 'hors_froid' }).unite, 'h');
+  const sec = standardDeBase('pates_seches', 'duree_stockage', { etatPoids: 'sec' });
+  assert.deepEqual([sec.valeur, sec.unite], [12, 'mois']);
+  assert.deepEqual(['semaines', 2], [standardDeBase('pommes_de_terre', 'duree_stockage').unite, standardDeBase('pommes_de_terre', 'duree_stockage').valeur]);
+  assert.equal(standardDeBase('carottes', 'duree_stockage', { etatPoids: 'cru_net' }).unite, 'h');
+  assert.ok(reperesConservation('pates_seches').every((x) => x.unite === 'jours'), 'la conservation reste en jours');
   assert.equal(standardDeBase('categorie:sauce', 'conservation', { etatPoids: 'cuit' }).valeur, 2, 'sauces cuites : 2 à 4 jours, prudence 2');
   // Températures : seuils seuls, et sens prudent sur une fourchette.
   assert.equal(standardDeBase(null, 'temperature', { regle: 'cuisson_coeur' }).valeur, 70);
@@ -96,7 +108,8 @@ test('quantités et temps : milieu de la fourchette ; buffet par couvert', () =>
 test('reperesConservation : de la plus précise à la plus générale', () => {
   assert.deepEqual(reperesConservation('pates_seches').map((s) => [s.provenance.id, s.valeur]),
     [['feculents.pates.conservation.cuites', 1], ['hygiene.duree.feculents-legumes-cuits', 2]]);
-  assert.deepEqual(reperesConservation('legumineuses'), []);
+  assert.deepEqual(reperesConservation('legumineuses').map((s) => [s.provenance.id, s.valeur]),
+    [['feculents.leg.conservation.cuites', 3]], 'seule règle propre : hors du groupe des féculents et légumes de la règle générale');
   assert.deepEqual(reperesConservation(null), []);
 });
 
