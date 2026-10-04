@@ -296,7 +296,7 @@ export function dialogPlanifier(productionId, mode, preset = {}) {
     const date = f.valeur('date');
     if (!estDateValide(date)) { zoneEvaluation.replaceChildren(h('p', { classe: 'vide' }, 'Choisissez un jour.')); return; }
     const creneau = f.valeur('creneau');
-    const ev = evaluerAvance(date, p.dateService, regle, repereConservation(composant));
+    const ev = evaluerAvance(date, p.dateService, regle, repereConservation(composant, e));
     const lignes = [h('p', { classe: 'meta' }, `Service : ${libelleJour(p.dateService)}. Production : ${libelleJour(date)}.`),
       noeudEvaluation(ev)];
     if (creneau) {

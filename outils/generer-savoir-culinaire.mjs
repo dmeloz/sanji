@@ -127,7 +127,7 @@ export const USAGES = Object.freeze({
   duree_stockage: ['h', 'semaines', 'mois'],
   allergene: [null],
 });
-export const SENS = Object.freeze(['prudent_min', 'prudent_max']);
+export const SENS = Object.freeze(['prudent_min', 'prudent_max', 'plage']);
 const SENS_PERMIS = new Set(['conservation', 'temperature', 'refroidissement', 'limite_duree', 'duree_stockage']);
 const USAGES_RENDEMENT = new Set(['rendement_parage', 'rendement_cuisson']);
 
@@ -210,6 +210,9 @@ export function validerRattachements(doc, entrees, lexique = null) {
     if (r.usage === 'temperature' && hygiene && r.sens === undefined) e.push(`${id} : une température d'hygiène exige un sens.`);
     if (['refroidissement', 'limite_duree'].includes(r.usage) && r.sens === undefined) e.push(`${id} : une durée d'hygiène exige un sens.`);
     if (r.usage === 'duree_stockage' && r.sens !== 'prudent_min') e.push(`${id} : une durée de stockage se lit au minimum (sens « prudent_min »).`);
+    if (r.sens === 'plage' && (r.usage !== 'temperature' || x.valeur?.min === undefined || x.valeur?.max === undefined)) {
+      e.push(`${id} : le sens « plage » ne vaut que pour une température qui donne un minimum ET un maximum.`);
+    }
     if (r.sens !== undefined && !SENS_PERMIS.has(r.usage)) e.push(`${id} : sens réservé à la conservation et aux températures.`);
     if (r.unite !== null) {
       const cle = `${r.usage}|${texteCible(c)}|${c.etat ?? x.etat_poids ?? ''}`;

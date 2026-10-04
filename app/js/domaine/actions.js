@@ -654,7 +654,7 @@ function deplacer(etat, productionId, date, creneau, h, action) {
   const refus = refusOrdreEtape(etat, p, { date });
   if (refus) throw new Error(refus);
   const c = etat.composants[p.composantId];
-  const evaluation = evaluerAvance(date, p.dateService, regleDe(etat, c, p.etapeCle ?? null), repereConservation(c));
+  const evaluation = evaluerAvance(date, p.dateService, regleDe(etat, c, p.etapeCle ?? null), repereConservation(c, etat));
   p.jourDecide = date;
   p.creneauDecide = creneau;
   const alertes = [...evaluation.alertes, ...chargeCreneau(etat, date, creneau).alertes];

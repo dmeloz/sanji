@@ -90,9 +90,9 @@ test('hygiène : borne prudente ; conservation au minimum, seuil seul pris tel q
   assert.equal(standardDeBase(null, 'temperature', { regle: 'surgeles' }).valeur, -18);
   assert.equal(standardDeBase('riz', 'temperature', { regle: 'maintien_chaud' }).valeur, 65, 'règle universelle nommée, pour une famille');
   assert.equal(standardDeBase('riz', 'temperature', { regle: 'viandes_cuites' }), null, 'règle hors portée de la famille');
-  // Hors hygiène (qualité), pas de sens : le milieu.
+  // Plage à respecter des deux côtés (sens « plage ») : valeur par défaut au milieu.
   const pdt = standardDeBase('pommes_de_terre', 'temperature');
-  assert.deepEqual([pdt.valeur, pdt.sens], [8, null], 'stockage des pommes de terre : 6 à 10 °C, milieu');
+  assert.deepEqual([pdt.valeur, pdt.sens], [8, 'plage'], 'stockage des pommes de terre : 6 à 10 °C, milieu');
 });
 
 test('quantités et temps : milieu de la fourchette ; buffet par couvert', () => {

@@ -41,7 +41,7 @@ export function ajusterStandard(etat, sujet, usage, valeur, h) {
     avant: existant?.avant ?? { valeur: base.valeur, origine: base.origine },
   };
   etat.ajustements[cle] = ajustement;
-  const avertissement = limiteHygiene(base, valeur);
+  const avertissement = limiteHygiene(base, valeur, sujet);
   const detail = `${cle} : ${texteValeur(base.valeur, base.unite)} (standard de base) → ${texteValeur(valeur, base.unite)} (votre valeur)`
     + (avertissement ? ' ; au-delà de la limite de référence' : '');
   return terminer(etat, h, 'ajusterStandard', detail, { ajustement, avertissement });

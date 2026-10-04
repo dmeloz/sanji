@@ -10,11 +10,12 @@
 //  - valeurEffective(etat, sujet, usage, { etatPoids?, regle? }) -> le standard de base tel quel (`ajuste: false`), ou,
 //    si la propriétaire a ajusté : { ...standard, valeur, unite, origine: 'propriete', statut: 'RESTAURANT_VALIDE',
 //    libelle: 'votre valeur', ajuste: true, ajustement, base: <standard de base ou null>, coefficient? (rendements) }.
-//  - limiteHygiene(base, valeur) -> texte d'avertissement ou null (conservation et température : au-delà de la borne
-//    prudente du standard de base, selon `sens`).
+//  - limiteHygiene(base, valeur, sujet?) -> texte d'avertissement ou null (conservation et température : au-delà de la
+//    borne prudente du standard de base, selon `sens` ; `plage` : hors de la fourchette ; conservation : les règles
+//    générales qui couvrent la famille comptent aussi).
 //  - lignesStandardsBase(etat) -> [{ usage, titre, lignes: [{ usage, sujet, libelle, effectif, base, ajuste }] }].
 
-import { REGLES_GENERALES, rattachementsDe, standardDeBase, texteProvenance } from './standards-base.js';
+import { REGLES_GENERALES, rattachementsDe, reperesConservation, standardDeBase, texteProvenance } from './standards-base.js';
 import { GROUPES, familleParCle } from './savoir.js';
 
 export const USAGES_AJUSTABLES = Object.freeze(['rendement_parage', 'rendement_cuisson', 'conservation', 'cuisson_temps', 'temperature']);
@@ -63,15 +64,28 @@ export function valeurEffective(etat, sujet, usage, opts = {}) {
   return eff;
 }
 
-/** Avertissement (jamais bloquant) si la valeur dépasse la limite de référence ; null sinon. */
-export function limiteHygiene(base, valeur) {
+/** Vrai si `valeur` dépasse la limite de ce standard : borne prudente (`valeur` du standard) ou, pour `plage`, l'un des bords. */
+function depasseLimite(std, valeur) {
+  if (std.sens === 'prudent_min') return valeur > std.valeur;
+  if (std.sens === 'prudent_max') return valeur < std.valeur;
+  if (std.sens === 'plage') return (std.fourchette.min !== null && valeur < std.fourchette.min) || (std.fourchette.max !== null && valeur > std.fourchette.max);
+  return false;
+}
+
+/**
+ * Avertissement (jamais bloquant) si la valeur dépasse la limite de référence ; null sinon. La limite est la borne
+ * PRUDENTE du standard (`base.valeur`), jamais l'autre bord de sa fourchette ; pour une conservation, les standards de
+ * la famille (`sujet`) et les règles générales qui la couvrent comptent aussi (le plus précis qui est dépassé parle).
+ */
+export function limiteHygiene(base, valeur, sujet = null) {
   if (!base || !['conservation', 'temperature'].includes(base.usage) || !Number.isFinite(valeur)) return null;
-  const { min, max } = base.fourchette;
-  let depasse = false;
-  if (base.sens === 'prudent_min') depasse = valeur > (max ?? min);
-  else if (base.sens === 'prudent_max') depasse = valeur < (min ?? max);
-  if (!depasse) return null;
-  return `${String(valeur).replace('.', ',')} ${base.unite} est au-delà de la limite de référence (${texteProvenance(base, { prefixe: false })}) : à valider avec le plan d'autocontrôle.`;
+  const candidats = [base];
+  if (base.usage === 'conservation' && typeof sujet === 'string' && !sujet.startsWith('regle:')) {
+    candidats.push(...reperesConservation(sujet).filter((x) => x.unite === base.unite && (!x.etatPoids || x.etatPoids === 'cuit')));
+  }
+  const std = candidats.find((x) => depasseLimite(x, valeur));
+  if (!std) return null;
+  return `${String(valeur).replace('.', ',')} ${base.unite} est au-delà de la limite de référence (${texteProvenance(std, { prefixe: false })}) : à valider avec le plan d'autocontrôle.`;
 }
 
 // ---------------------------------------------------------------- liste pour Réglages
