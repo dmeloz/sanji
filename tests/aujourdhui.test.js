@@ -313,6 +313,55 @@ test('le bloc CSS de l\'écran est en fin de fichier', () => {
   assert.match(css.slice(marque, marque + 120), /Écran Aujourd'hui/);
 });
 
+test('hors règle : même définition partout (exception ET non autorisée) ; une étape à J-1 au-delà de son maximum n\'est pas « hors règle » sur Aujourd\'hui ni Semaine', async () => {
+  const semaine = await import('../app/js/ui/vue-semaine.js');
+  const e = calme(etatVide());
+  definirMenu(e, S.mardi, 1, 'carottes', h());
+  definirPrevision(e, S.mardi, 1, 20, h());
+  definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
+  definirRegle(e, { nom: 'carottes', etapes: [{ libelle: 'Couper', avanceMaxJours: 0 }, { libelle: 'Finir', avanceMaxJours: 0 }] }, h());
+  const couper = Object.values(e.productions).find((p) => p.etapeCle === 'couper');
+  planifier(e, couper.id, S.lundi, 'avant_midi', h());
+  const dec = aDate(S.lundi, () => decisionsDe(e, S.lundi));
+  assert.ok(!dec.cartes.some((c) => c.genre === 'avance_hors_regle'), 'la feuille « À décider » ne la classe pas hors règle');
+  // Aujourd'hui, « Maintenant » : la ligne n'est pas marquée.
+  const d = aujourdhuiDe(e, S.lundi);
+  assert.equal(d.maintenant.productionId, couper.id);
+  assert.equal(d.maintenant.horsRegle, false);
+  assert.doesNotMatch(classes(page(S.lundi, e), 'au-maintenant')[0].textContent, /hors règle/);
+  // Semaine : aucune mention « hors règle » (jour, puces) tant que la feuille ne la classe pas ainsi.
+  const e2 = calme(etatVide());
+  definirMenu(e2, S.mardi, 1, 'carottes', h());
+  definirPrevision(e2, S.mardi, 1, 20, h());
+  definirStandard(e2, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
+  definirRegle(e2, { nom: 'carottes', etapes: [{ libelle: 'Couper', avanceMaxJours: 0 }, { libelle: 'Finir', avanceMaxJours: 0 }] }, h());
+  planifier(e2, Object.values(e2.productions).find((p) => p.etapeCle === 'couper').id, S.lundi, 'avant_midi', h());
+  magasin.remplacer(e2);
+  const sem = aDate(S.lundi, () => semaine.rendre(magasin.etat(), S.lundi));
+  // (la légende « hors règle » des puces et le texte d'alerte du domaine restent : seuls les marqueurs dépendent de la définition)
+  assert.equal(classes(sem, 'sem-prod-hors-regle').length, 0);
+  assert.equal(classes(sem, 'sem-hors-regle').length, 0);
+  assert.ok(classes(sem, 'sem-puce').every((p) => !/hors règle/.test(p.attributs['aria-label'] ?? '')), 'aucune puce de jour marquée');
+});
+
+test('hors règle : une vraie avance hors règle (plus de 2 jours sans règle) reste signalée partout', async () => {
+  const semaine = await import('../app/js/ui/vue-semaine.js');
+  const e = calme(etatVide());
+  definirMenu(e, S.vendredi, 1, 'carottes', h());
+  definirPrevision(e, S.vendredi, 1, 20, h());
+  definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
+  const p = Object.values(e.productions).find((x) => x.genre === 'principale');
+  planifier(e, p.id, S.lundi, 'avant_midi', h());
+  assert.equal(aujourdhuiDe(e, S.lundi).maintenant.horsRegle, true);
+  magasin.remplacer(structuredClone(e));
+  const sem = aDate(S.lundi, () => semaine.rendre(magasin.etat(), S.lundi));
+  assert.ok(classes(sem, 'sem-prod-hors-regle').length >= 1);
+  assert.ok(classes(sem, 'sem-puce').some((x) => /hors règle/.test(x.attributs['aria-label'] ?? '')));
+  marquerFait(e, p.id, 100, h());
+  const conso = aujourdhuiDe(e, S.lundi).aConsommer.lignes.find((l) => l.composantId === p.composantId);
+  assert.equal(conso?.horsRegle, true, 'à consommer : même définition');
+});
+
 test('bandeau : même nombre que la feuille « À décider » (sauce implicite seule, plusieurs répartitions provisoires), et accès depuis Production', async () => {
   const production = await import('../app/js/ui/vue-production.js');
   const sauce = calme(etatVide());
