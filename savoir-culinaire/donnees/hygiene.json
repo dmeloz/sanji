@@ -11,7 +11,7 @@
       "enonce": "La loi fédérale de base est le Lebensmittelgesetz du 20.06.2014 (loi sur les denrées alimentaires et les objets usuels, LDAl), RS 817.0 ; elle pose la sécurité des denrées et les devoirs de l'exploitant.",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Écart de la base Sanji (non modifiée) : elle écrit « LPA » (loi sur les produits alimentaires), ancien nom de la LMG/LDAl ; le texte en vigueur est la LMG (RS 817.0), relue ici à l'état au 01.10.2024.",
+      "conditions": "Écart de la base Sanji (non modifiée) : elle écrit « LPA » (loi sur les produits alimentaires), ancien nom de la LMG/LDAl ; le texte en vigueur est la LMG (RS 817.0), relue ici à l'état au 01.10.2024 (art. 7 et 26 relus dans le PDF Fedlex). Aucun état postérieur à celui du 01.10.2024 n'a été repéré sur Fedlex (sondage non exhaustif des états au 1er et au 15 de chaque mois de 2025 et 2026 : aucun PDF) ; l'état en vigueur à ce jour reste à confirmer sur Fedlex.",
       "sources": [
         {
           "titre": "Lebensmittelgesetz (LMG ; loi sur les denrées alimentaires et les objets usuels, LDAl) du 20.06.2014, RS 817.0",
@@ -33,7 +33,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "LMG, PDF Fedlex état 01.10.2024 : titre, art. 7 al. 1 (denrées sûres) et art. 26 (autocontrôle) relus."
+      }
     },
     {
       "id": "hygiene.cadre.autocontrole-obligation",
@@ -224,10 +229,10 @@
       "id": "hygiene.cadre.gvg-version",
       "sujet": "GVG de GastroSuisse : version",
       "type": "repere",
-      "enonce": "La GVG de GastroSuisse est présentée comme approuvée par l'OSAV le 21.09.2018 (version 2, édition 2019) ; une version plus récente peut exister.",
+      "enonce": "La GVG de GastroSuisse est la 2e édition de 2019, approuvée par l'OSAV le 21.09.2018 (état de la loi au 01.05.2017) ; une version plus récente peut exister.",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Version et date à vérifier sur GastroSuisse et auprès de l'OSAV. Le texte intégral du guide n'a pas pu être relu (PDF illisible par extraction) : aucune valeur n'est tirée directement de la GVG ici.",
+      "conditions": "Texte intégral relu (extraction PDF directe) : page de titre « 2. Auflage 2019 », avant-propos « Genehmigung vom BLV » le 21.09.2018. La page de GastroSuisse ne mentionne aucune édition plus récente. Les chiffres de la GVG sont repris dans les autres entrées de ce thème.",
       "sources": [
         {
           "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), page de présentation",
@@ -236,12 +241,25 @@
           "consulte": "2026-10-04",
           "extrait": "Genehmigt am 21. September 2018 vom BLV",
           "type_source": "professionnelle"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "2. Auflage 2019 ... am 21. September 2018 ... Genehmigung vom BLV",
+          "type_source": "professionnelle"
         }
       ],
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG, page de titre et avant-propos relus : 2e édition 2019, approbation du 21.09.2018."
+      }
     },
     {
       "id": "hygiene.cadre.sanction",
@@ -254,7 +272,7 @@
         "unite": "CHF"
       },
       "etat_poids": null,
-      "conditions": "LMG art. 64 al. 1 (40 000 CHF) et al. 2 (80 000 CHF), texte relu à l'état au 01.10.2024 (version la plus récente consultée ; version en vigueur à ce jour non confirmée). L'al. 4 prévoit jusqu'à 20 000 CHF en cas de négligence. Cas jugé par les cantons.",
+      "conditions": "LMG art. 64 al. 1 (40 000 CHF) et al. 2 (80 000 CHF), texte relu à l'état au 01.10.2024. L'al. 4 prévoit jusqu'à 20 000 CHF en cas de négligence. Cas jugé par les cantons. Aucun état postérieur à celui du 01.10.2024 n'a été repéré sur Fedlex (sondage non exhaustif des états au 1er et au 15 de chaque mois de 2025 et 2026 : aucun PDF) ; l'état en vigueur à ce jour reste à confirmer sur Fedlex.",
       "sources": [
         {
           "titre": "Bundesgesetz über Lebensmittel und Gebrauchsgegenstände (Lebensmittelgesetz, LMG ; loi sur les denrées alimentaires et les objets usuels, LDAl) du 20.06.2014, RS 817.0, état au 01.10.2024",
@@ -268,7 +286,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "LMG art. 64 al. 1, 2 et 4 relus dans le PDF Fedlex (état 01.10.2024) : 40 000, 80 000 et 20 000 CHF."
+      }
     },
     {
       "id": "hygiene.haccp.obligation",
@@ -318,7 +341,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "LGV art. 79 al. 2 let. a à g relus dans le PDF Fedlex (état 01.07.2025) : sept composantes."
+      }
     },
     {
       "id": "hygiene.haccp.points-critiques-cuisine",
@@ -407,7 +435,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §6 et §25 relues (glace fondante, ±0,5 à 1 °C, mensuel) ; page Fluke sur la méthode du point de glace relue : ni tolérance ni fréquence ; aucune source suisse."
+      }
     },
     {
       "id": "hygiene.haccp.formation",
@@ -442,7 +475,7 @@
         "unite": "°C"
       },
       "etat_poids": null,
-      "conditions": "Pas de plafond numérique unique dans la HyV ; 5 °C vient des aide-mémoire cantonaux et de la branche. Les catégories ci-dessous sont plus strictes. Concorde avec la base Sanji.",
+      "conditions": "Pas de plafond numérique unique dans la HyV ; 5 °C vient des aide-mémoire cantonaux et de la branche. Les catégories ci-dessous sont plus strictes. Concorde avec la base Sanji. La GVG (tableau 6.2, relu) donne aussi 5 °C au plus pour les denrées légèrement périssables.",
       "sources": [
         {
           "titre": "Vorproduzierte, leicht verderbliche Lebensmittel : Lagerung und Haltbarkeitsfristen (juin 2013)",
@@ -475,12 +508,25 @@
           "consulte": "2026-10-04",
           "extrait": "Art. 24 al. 1 et 2 : Kühltemperaturen ... Lebensmittelsicherheit jederzeit",
           "type_source": "officielle"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Leicht verderbliche Lebensmittel max. 5 °C",
+          "type_source": "professionnelle"
         }
       ],
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Aide-mémoire SO (juin 2013) « maximal 5 °C » et GVG tableau 6.2 relus ; HyV art. 24 relu : pas de chiffre."
+      }
     },
     {
       "id": "hygiene.temperature.viande-hachee",
@@ -492,7 +538,7 @@
         "unite": "°C à cœur"
       },
       "etat_poids": null,
-      "conditions": "Art. 29 vise surtout les établissements de découpe et de fabrication ; en cuisine, valeur de référence prudente. La base Sanji donne 2 à 4 °C : on garde 2 °C.",
+      "conditions": "Art. 29 vise surtout les établissements de découpe et de fabrication ; en cuisine, valeur de référence prudente. Écarts : la base Sanji donne 2 à 4 °C et le tableau 6.2 de la GVG (édition 2019, relu) indique « Hackfleisch max. 5 °C » ; le texte HyV en vigueur (état 01.07.2025) dit 2 °C : on garde 2 °C, plus strict et plus récent.",
       "sources": [
         {
           "titre": "Hygieneverordnung EDI (HyV ; ordonnance du DFI sur l'hygiène, OHyg) du 16.12.2016, RS 817.024.1, état au 01.07.2025",
@@ -509,12 +555,25 @@
           "consulte": "2026-10-04",
           "extrait": "Hackfleisch < +2 °C",
           "type_source": "web"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Hackfleisch max. 5 °C",
+          "type_source": "professionnelle"
         }
       ],
-      "confiance": "haute",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "HyV art. 29 al. 1 let. e relu dans le PDF Fedlex (état 01.07.2025) : 2 °C ; GVG 6.2 relue (5 °C, écart signalé)."
+      }
     },
     {
       "id": "hygiene.temperature.volaille-prep-viande",
@@ -548,7 +607,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "HyV art. 29 al. 1 let. b et c relus (PDF Fedlex, état 01.07.2025) : 4 °C à cœur."
+      }
     },
     {
       "id": "hygiene.temperature.viande-rouge",
@@ -571,10 +635,15 @@
           "type_source": "officielle"
         }
       ],
-      "confiance": "moyenne",
+      "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "HyV art. 29 al. 1 let. a relu (PDF Fedlex, état 01.07.2025) : 7 °C ; hors oiseaux sauvages, lapins sauvages et lièvres (4 °C)."
+      }
     },
     {
       "id": "hygiene.temperature.abats",
@@ -608,7 +677,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "HyV art. 29 al. 1 let. d relu (PDF Fedlex, état 01.07.2025) : 3 °C."
+      }
     },
     {
       "id": "hygiene.temperature.poisson-frais",
@@ -651,7 +725,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "HyV art. 44 al. 1 et al. 4 relus (PDF Fedlex, état 01.07.2025) : glace fondante, 2 °C au plus ; cuit ou fumé 5 °C à la vente."
+      }
     },
     {
       "id": "hygiene.temperature.lait-produits-laitiers",
@@ -660,7 +739,7 @@
       "enonce": "Pas de température fédérale unique en cuisine : lait cru, 10 °C au plus à l'arrivée depuis le producteur et 6 °C au plus en laiterie (HyV art. 46 et 48, qui visent la filière, pas la cuisine) ; lait pasteurisé, 6 °C selon un site de branche et 8 °C selon la base Sanji ; fromage et beurre, 10 °C selon la base Sanji seulement.",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Distinctions : lait cru (HyV art. 46 al. 1 : 10 °C au plus à l'arrivée, dérogations art. 46 al. 2 ; art. 48 al. 1 : 6 °C au plus à la réception en laiterie), lait pasteurisé (aucun chiffre dans la HyV ; seule l'obligation de l'informer sur la conservation en vente ouverte, art. 51), fromage et beurre (aucun chiffre légal trouvé ; base Sanji 10 °C). Ancien repère « 6 °C » : venait du site privé gastronomie-hygiene.ch, pas d'une source officielle. À confirmer auprès du canton, de l'étiquette ou de la GVG.",
+      "conditions": "Distinctions : lait cru (HyV art. 46 al. 1 : 10 °C au plus à l'arrivée, dérogations art. 46 al. 2 ; art. 48 al. 1 : 6 °C au plus à la réception en laiterie), lait pasteurisé (aucun chiffre dans la HyV ; seule l'obligation de l'informer sur la conservation en vente ouverte, art. 51), fromage et beurre (aucun chiffre légal trouvé ; base Sanji 10 °C). Ancien repère « 6 °C » : venait du site privé gastronomie-hygiene.ch, pas d'une source officielle. À confirmer auprès du canton, de l'étiquette ou de la GVG. La GVG (tableau 6.2, relu) donne 5 °C au plus pour les denrées légèrement périssables en général, sans chiffre propre au lait.",
       "sources": [
         {
           "titre": "Hygieneverordnung EDI (HyV ; ordonnance du DFI sur l'hygiène, OHyg) du 16.12.2016, RS 817.024.1, état au 01.07.2025",
@@ -675,7 +754,7 @@
           "organisme": "gastronomie-hygiene.ch (site privé, non officiel)",
           "url": "https://www.gastronomie-hygiene.ch/haccp-temperaturen-im-ueberblick/",
           "consulte": "2026-10-04",
-          "extrait": "Milchprodukte < +6 °C",
+          "extrait": "Molkereiprodukte < + 6°C inkl. Feinkostwaren",
           "type_source": "web"
         },
         {
@@ -685,6 +764,14 @@
           "consulte": "2026-10-04",
           "extrait": "lait et produits laitiers ≤ 8 °C ; fromage et beurre ≤ 10 °C",
           "type_source": "base_sanji"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Leicht verderbliche Lebensmittel max. 5 °C",
+          "type_source": "professionnelle"
         }
       ],
       "confiance": "faible",
@@ -696,10 +783,10 @@
       "id": "hygiene.temperature.oeufs-conservation",
       "sujet": "Œufs : température de conservation",
       "type": "regle",
-      "enonce": "Les œufs se gardent propres, secs, à l'abri des chocs et du soleil, à une température la plus constante possible ; l'aide-mémoire lucernois conseille le frigo après achat.",
+      "enonce": "Les œufs se gardent propres, secs, à l'abri des chocs et du soleil, à une température la plus constante possible ; les aide-mémoire lucernois et argovien conseillent le frigo après achat.",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Pas de chiffre légal trouvé ; le seuil de 8 °C de la base Sanji n'a pas été recoupé. Ne pas laver les œufs sales (Lucerne).",
+      "conditions": "Pas de chiffre légal (HyV art. 54 al. 2 : « la température qui garantit le mieux la qualité hygiénique, la plus constante possible »). Le mémo argovien propose, comme exemple d'étiquette, de garder en continu à 5 °C un œuf une fois réfrigéré (suggestion, pas une règle) ; la GVG demande de garder au frais une fois réfrigéré et dès le 21e jour après la ponte ; le seuil de 8 °C de la base Sanji n'est pas recoupé. Ne pas laver les œufs sales (Lucerne).",
       "sources": [
         {
           "titre": "Hygieneverordnung EDI (HyV ; ordonnance du DFI sur l'hygiène, OHyg) du 16.12.2016, RS 817.024.1, état au 01.07.2025",
@@ -718,6 +805,14 @@
           "type_source": "officielle"
         },
         {
+          "titre": "Merkblatt Nr. 03 Eierverkauf : Lagerung, Kennzeichnung und Selbstkontrolle (état 25.09.2025)",
+          "organisme": "Canton d'Argovie, Lebensmittelkontrolle",
+          "url": "https://www.ag.ch/media/kanton-aargau/dgs/dokumente/verbraucherschutz/lebensmittelkontrolle/lebensmittelinspektorat/merkblaetter/neu-merkblatt-03-eierverkauf-lagerung-kennzeichnung-und-selbstkontrolle.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Einmal gekühlte Eier dauernd bei 5 °C aufbewahren.",
+          "type_source": "officielle"
+        },
+        {
           "titre": "Base officielle production-stock-hygiène de Sanji",
           "organisme": "Sanji (base métier)",
           "url": "base-officielle-production-stock-hygiene.md §8",
@@ -729,7 +824,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "HyV art. 54 al. 1 et 2 (PDF Fedlex), LU HM1308V7 et AG Merkblatt 03 relus ; aucun chiffre légal."
+      }
     },
     {
       "id": "hygiene.temperature.surgele",
@@ -741,14 +841,14 @@
         "unite": "°C"
       },
       "etat_poids": null,
-      "conditions": "HyV art. 25 al. 3 (le signe moins est perdu à l'extraction du PDF ; sens confirmé par la valeur usuelle et la base Sanji). Dérogation de courte durée pendant transport et dégivrage.",
+      "conditions": "HyV art. 25 al. 3 : signe moins lisible dans le PDF Fedlex à l'état 01.07.2025 (–18 °C ; couches périphériques –15 °C) ; la GVG (tableau 6.2) dit aussi –18 °C. Dérogation de courte durée pendant transport et dégivrage.",
       "sources": [
         {
           "titre": "Hygieneverordnung EDI (HyV ; ordonnance du DFI sur l'hygiène, OHyg) du 16.12.2016, RS 817.024.1, état au 01.07.2025",
           "organisme": "Confédération suisse (Fedlex)",
           "url": "https://www.fedlex.admin.ch/eli/cc/2017/183/de",
           "consulte": "2026-10-04",
-          "extrait": "Art. 25 al. 3 : 18 °C oder kälter ... Randschichten 15 °C",
+          "extrait": "Art. 25 al. 3 : –18 °C oder kälter ... Randschichten –15 °C",
           "type_source": "officielle"
         },
         {
@@ -763,19 +863,24 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "HyV art. 25 al. 3 relu dans le PDF Fedlex (état 01.07.2025) : –18 °C ou plus froid, –15 °C en périphérie."
+      }
     },
     {
       "id": "hygiene.temperature.cuisson-coeur",
       "sujet": "Cuisson à cœur",
       "type": "repere",
-      "enonce": "Les aliments se cuisent à cœur à 70 °C au minimum, contrôlés à la sonde.",
+      "enonce": "Les aliments se cuisent à cœur à 70 °C au minimum, contrôlés à la sonde ; la GVG précise au moins 2 minutes à cette température.",
       "valeur": {
         "min": 70,
         "unite": "°C à cœur"
       },
       "etat_poids": null,
-      "conditions": "Les sources suisses n'imposent pas de durée de maintien ; la base Sanji ajoute 2 minutes (plus prudent, non recoupé). Exception cuisson rosée (voir fiche dédiée).",
+      "conditions": "Les aide-mémoire cantonaux AG et BS fixent 70 °C à cœur sans durée de maintien ; la GVG (chap. 2.4.4, relue) demande au moins 2 minutes à 70 °C à la préparation et à la remise en température, comme la base Sanji. Exception cuisson rosée (voir fiche dédiée).",
       "sources": [
         {
           "titre": "Merkblatt Nr. 11 Temperaturführung im Umgang mit Lebensmitteln : Erhitzen, Abkühlen, Auftauen (état 25.09.2025)",
@@ -792,6 +897,14 @@
           "consulte": "2026-10-04",
           "extrait": "Die Kerntemperatur muss mindestens 70 °C betragen.",
           "type_source": "officielle"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "mindestens 2 Minuten eine Kerntemperatur von mindestens 70 °C",
+          "type_source": "professionnelle"
         },
         {
           "titre": "HACCP-Temperaturen im Überblick",
@@ -813,7 +926,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "AG Merkblatt 11 et BS Merkblatt (21.05.2026) relus : 70 °C à cœur ; GVG chap. 2.4.4 relu : 2 minutes."
+      }
     },
     {
       "id": "hygiene.temperature.cuisson-exceptions",
@@ -825,7 +943,7 @@
         "unite": "°C en surface"
       },
       "etat_poids": null,
-      "conditions": "Le chiffre de 65 °C vient d'une source web non officielle ; à confirmer. Ne s'applique pas au haché ni à la volaille.",
+      "conditions": "Le chiffre de 65 °C en surface vient d'une source web non officielle (gastronomie-hygiene.ch, page relue : « de tous côtés bien saisi », pour filet de bœuf ou rosbif) ; les cantons AG et BS admettent l'exception rosbif et la GVG « viande rosée » sans chiffre ; à confirmer. Ne s'applique pas au haché ni à la volaille.",
       "sources": [
         {
           "titre": "Merkblatt Nr. 11 Temperaturführung im Umgang mit Lebensmitteln : Erhitzen, Abkühlen, Auftauen (état 25.09.2025)",
@@ -840,14 +958,27 @@
           "organisme": "gastronomie-hygiene.ch (site privé, non officiel)",
           "url": "https://www.gastronomie-hygiene.ch/haccp-temperaturen-im-ueberblick/",
           "consulte": "2026-10-04",
-          "extrait": "Beef steak/roast beef > +65 °C surface",
+          "extrait": "Roastbeef > + 65°C an der Oberfläche, von allen Seiten gut angebraten",
           "type_source": "web"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Ausnahmen, wie beispielsweise rosa gebratenes Schlachtfleisch, sind bekannt",
+          "type_source": "professionnelle"
         }
       ],
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "AG Merkblatt 11 (exception rosbif), page gastronomie-hygiene.ch (65 °C en surface, bien saisi) et GVG 2.4.4 relus ; le chiffre ne repose que sur le site privé."
+      }
     },
     {
       "id": "hygiene.temperature.friture",
@@ -859,7 +990,7 @@
         "unite": "°C"
       },
       "etat_poids": null,
-      "conditions": "Recommandation cantonale (aide-mémoire, confirmée à la relecture du texte AG). Écarts à harmoniser dans les autres thèmes : GVG 175 °C au plus et base Sanji jusqu'à 180 °C (sauces-cuissons, feculents, legumes), signalés dans ces thèmes ; la valeur prudente de référence reste 170 °C.",
+      "conditions": "Recommandation cantonale (AG et BS, relues : 170 °C). Écarts : la GVG (chap. 2.4.4, relue) fixe 175 °C au plus et la base Sanji va jusqu'à 180 °C (sauces-cuissons, feculents, legumes, signalés dans ces thèmes) ; la valeur prudente de référence reste 170 °C.",
       "sources": [
         {
           "titre": "Merkblatt Nr. 11 Temperaturführung im Umgang mit Lebensmitteln : Erhitzen, Abkühlen, Auftauen (état 25.09.2025)",
@@ -876,12 +1007,25 @@
           "consulte": "2026-10-04",
           "extrait": "Temperatur des Frittieröls nicht mehr als 170 °C",
           "type_source": "officielle"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Maximaltemperatur von 175 °C nicht überschritten",
+          "type_source": "professionnelle"
         }
       ],
-      "confiance": "haute",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "AG Merkblatt 11 et BS Merkblatt relus : 170 °C ; GVG 2.4.4 relue : 175 °C (écart signalé)."
+      }
     },
     {
       "id": "hygiene.temperature.maintien-chaud",
@@ -893,7 +1037,7 @@
         "unite": "°C"
       },
       "etat_poids": null,
-      "conditions": "65 °C = bonne pratique cantonale et BPHR, pas un chiffre de loi. Sous 65 °C des spores peuvent germer (AG, BS).",
+      "conditions": "65 °C = bonne pratique cantonale et GVG (65 °C à cœur), pas un chiffre de loi. Sous 65 °C des spores peuvent germer (AG, BS).",
       "sources": [
         {
           "titre": "Merkblatt Nr. 11 Temperaturführung im Umgang mit Lebensmitteln : Erhitzen, Abkühlen, Auftauen (état 25.09.2025)",
@@ -920,6 +1064,14 @@
           "type_source": "officielle"
         },
         {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "bei mindestens 65 °C Kerntemperatur während höchstens 3 Stunden warm gehalten",
+          "type_source": "professionnelle"
+        },
+        {
           "titre": "Base officielle production-stock-hygiène de Sanji",
           "organisme": "Sanji (base métier)",
           "url": "base-officielle-production-stock-hygiene.md §6",
@@ -931,7 +1083,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "AG Merkblatt 11, BS Merkblatt et GVG 2.4.4 relus : au moins 65 °C ; HyV art. 27 al. 2 relu : pas de chiffre."
+      }
     },
     {
       "id": "hygiene.temperature.maintien-chaud-duree",
@@ -943,7 +1100,7 @@
         "unite": "h"
       },
       "etat_poids": null,
-      "conditions": "Limite de qualité recommandée, pas une limite légale.",
+      "conditions": "Limite de qualité recommandée par les cantons ; la GVG la reprend (3 h au plus à 65 °C à cœur). Pas une limite légale.",
       "sources": [
         {
           "titre": "Merkblatt Nr. 11 Temperaturführung im Umgang mit Lebensmitteln : Erhitzen, Abkühlen, Auftauen (état 25.09.2025)",
@@ -962,6 +1119,14 @@
           "type_source": "officielle"
         },
         {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "bei mindestens 65 °C Kerntemperatur während höchstens 3 Stunden warm gehalten",
+          "type_source": "professionnelle"
+        },
+        {
           "titre": "Base officielle production-stock-hygiène de Sanji",
           "organisme": "Sanji (base métier)",
           "url": "base-officielle-production-stock-hygiene.md §6",
@@ -973,7 +1138,51 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "AG Merkblatt 11, BS Merkblatt (« maximal drei Stunden ») et GVG 2.4.4 relus."
+      }
+    },
+    {
+      "id": "hygiene.temperature.remise-en-temperature",
+      "sujet": "Remise en température",
+      "type": "regle",
+      "enonce": "Lors de la remise en température d'une préparation déjà cuite, on atteint à cœur au moins 70 °C pendant au moins 2 minutes, avec des appareils ou procédés adaptés ; aucune durée pour y parvenir n'est fixée.",
+      "valeur": {
+        "min": 70,
+        "unite": "°C à cœur (au moins 2 min)"
+      },
+      "etat_poids": null,
+      "conditions": "GVG chap. 2.4.4 (relu) ; même chiffre que la base Sanji §6 (cuisson et décontamination). La GVG ne donne ni durée maximale pour atteindre les 70 °C ni température intermédiaire ; les aide-mémoire AG et BS lus ne traitent pas la remise en température. Pas un chiffre de loi.",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "mindestens 2 Minuten eine Kerntemperatur von mindestens 70 °C",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base officielle production-stock-hygiène de Sanji",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §6",
+          "consulte": "2026-10-04",
+          "extrait": "≥ 70 °C à cœur pendant 2 min",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG chap. 2.4.4 « Garen, Regenerieren und Warmhalten » relu : 70 °C à cœur, 2 minutes, à la préparation et au regenerieren."
+      }
     },
     {
       "id": "hygiene.temperature.refroidissement",
@@ -985,7 +1194,7 @@
         "unite": "h (de 50 à 10 °C)"
       },
       "etat_poids": null,
-      "conditions": "Valeur prudente retenue : 2 h de 50 à 10 °C (aide-mémoires cantonaux AG et BS, relus). Écarts : GVG GastroSuisse, de 65 à moins de 5 °C en 90 min (non relu directement, à confirmer) ; base Sanji, de 65 à 10 °C en 3 h ; autres sources, 2 à 3 h ; une source secondaire, 63 à 10 °C en 2 h (non vérifiée). Les autres thèmes renvoient à cet identifiant (hygiene.temperature.refroidissement) au lieu de répéter une durée. La HyV art. 27 ne fixe aucune durée chiffrée (« le plus vite possible »).",
+      "conditions": "Valeur prudente retenue : 2 h de 50 à 10 °C (aide-mémoires cantonaux AG et BS, relus). Écarts : GVG GastroSuisse, de 65 à moins de 5 °C en 90 min (chap. 2.4.4, relue directement) ; base Sanji, de 65 à 10 °C en 3 h ; autres sources, 2 à 3 h ; une source secondaire, 63 à 10 °C en 2 h (non vérifiée). Les autres thèmes renvoient à cet identifiant (hygiene.temperature.refroidissement) au lieu de répéter une durée. La HyV art. 27 ne fixe aucune durée chiffrée (« le plus vite possible »).",
       "sources": [
         {
           "titre": "Merkblatt Nr. 11 Temperaturführung im Umgang mit Lebensmitteln : Erhitzen, Abkühlen, Auftauen (état 25.09.2025)",
@@ -1012,6 +1221,14 @@
           "type_source": "web"
         },
         {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "innert 90 Minuten von 65 °C auf weniger als 5 °C abkühlen",
+          "type_source": "professionnelle"
+        },
+        {
           "titre": "Hygieneverordnung EDI (HyV ; ordonnance du DFI sur l'hygiène, OHyg) du 16.12.2016, RS 817.024.1, état au 01.07.2025",
           "organisme": "Confédération suisse (Fedlex)",
           "url": "https://www.fedlex.admin.ch/eli/cc/2017/183/de",
@@ -1023,7 +1240,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "AG Merkblatt 11 et BS Merkblatt relus : 10 à 50 °C en 2 h au plus ; GVG 2.4.4 relue : 65 à moins de 5 °C en 90 min ; HyV art. 27 al. 1 relu."
+      }
     },
     {
       "id": "hygiene.temperature.refroidissement-techniques",
@@ -1057,7 +1279,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "AG Merkblatt 11 et BS Merkblatt relus : couches plates de 6 cm au plus, spirale, eau courante, cellule."
+      }
     },
     {
       "id": "hygiene.temperature.stockage-preparations-avance",
@@ -1099,7 +1326,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Aide-mémoire SO (juin 2013) relu : 5 °C au plus, couvert ou sous vide, séparé des denrées crues."
+      }
     },
     {
       "id": "hygiene.temperature.hors-froid-3h",
@@ -1133,7 +1365,51 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Aide-mémoire SO (juin 2013) relu : 3 heures sans froid depuis la fabrication, plus de remise en vente."
+      }
+    },
+    {
+      "id": "hygiene.duree.decongele-consommation",
+      "sujet": "Consommation après décongélation",
+      "type": "repere",
+      "enonce": "Une denrée décongelée porte la date de décongélation et se consomme vite : 48 heures au plus, 24 heures pour les produits délicats.",
+      "valeur": {
+        "max": 48,
+        "unite": "h après la décongélation (24 h pour les produits délicats)"
+      },
+      "etat_poids": null,
+      "conditions": "GVG chap. 2.4.3 (relu), orientation de branche, pas une loi. Écart avec la base Sanji §7 (24 h pour le cru, 48 h pour le cuit) : la GVG ne distingue pas cru et cuit mais « produits délicats ». Durée du processus de décongélation lui-même : non trouvée (voir lacunes).",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "max. 48 Stunden, heikle Produkte max. 24 Stunden nach dem Auftauen verbrauchen",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base officielle production-stock-hygiène de Sanji",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §7",
+          "consulte": "2026-10-04",
+          "extrait": "24 h cru, 48 h cuit",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG chap. 2.4.3 (Lagerung, Verbrauchsfristen) relu : 48 h, produits délicats 24 h après la décongélation."
+      }
     },
     {
       "id": "hygiene.temperature.decongelation-methodes",
@@ -1142,7 +1418,7 @@
       "enonce": "On décongèle au frigo (récipient avec égouttoir, couvert, liquide jeté), en emballage étanche sous eau froide, ou rapidement au micro-ondes, four ou cuiseur vapeur ; le droit exige un risque microbien minimal ; la décongélation non contrôlée à température ambiante est strictement interdite (AG).",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Aucune durée de décongélation n'est donnée par ces sources ; le repère maison de la base Sanji (24 h cru, 48 h cuit) n'a pas été recoupé.",
+      "conditions": "Aucune durée de décongélation (en heures) n'est donnée par ces sources ; la GVG limite seulement la consommation après décongélation (voir hygiene.duree.decongele-consommation). Le repère maison de la base Sanji (24 h cru, 48 h cuit) n'est pas une durée de décongélation recoupée.",
       "sources": [
         {
           "titre": "Merkblatt Nr. 11 Temperaturführung im Umgang mit Lebensmitteln : Erhitzen, Abkühlen, Auftauen (état 25.09.2025)",
@@ -1263,7 +1539,7 @@
         "unite": "h (congélateur fermé)"
       },
       "etat_poids": null,
-      "conditions": "Chiffres uniquement de la base Sanji (marqués [M][BP]) ; aucune source suisse trouvée. Au moindre doute : écarter.",
+      "conditions": "Chiffres uniquement de la base Sanji (marqués [M][BP]) ; aucune source suisse trouvée. Au moindre doute : écarter. Recherche externe : seules des pages commerciales ont été trouvées (non retenues) ; les pages USDA, FDA et CDC n'ont pas pu être ouvertes.",
       "sources": [
         {
           "titre": "Base officielle production-stock-hygiène de Sanji",
@@ -1277,7 +1553,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §7 relue (frigo > 4 h, congélateur 48 h plein et 24 h à moitié) ; aucune source officielle lisible pour recouper."
+      }
     },
     {
       "id": "hygiene.duree.feculents-legumes-cuits",
@@ -1314,12 +1595,25 @@
           "consulte": "2026-10-04",
           "extrait": "beschränkt sich die Lagerdauer ... auf rund zwei Tage",
           "type_source": "officielle"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Gekochtes Gemüse, vorgekochte Produkte (Teigwaren, Saucen etc.) Produktionstag + 2 Tage",
+          "type_source": "professionnelle"
         }
       ],
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Aide-mémoire SO (juin 2013), LU Haltbarkeitsliste et AG Merkblatt 11 relus : jour de production + 2 jours ; GVG 6.3.1 relue : idem."
+      }
     },
     {
       "id": "hygiene.duree.sauces-cuites",
@@ -1332,7 +1626,7 @@
         "unite": "jours après le jour de production"
       },
       "etat_poids": null,
-      "conditions": "Fourchette large gardée : GVG GastroSuisse J+2 (d'après les thèmes sauces-cuissons et legumes, lecture indirecte du PDF, non relue ici) ; Soleure J+3 ; Lucerne J+4 ; base Sanji 3 à 4 j. Les autres thèmes disent J+2 (GVG). À fixer par le plan d'autocontrôle de l'établissement et le canton.",
+      "conditions": "Fourchette large gardée : GVG GastroSuisse J+2 (tableau 6.3.1, relu : « vorgekochte Produkte (Teigwaren, Saucen etc.) ») ; Soleure J+3 ; Lucerne J+4 ; base Sanji 3 à 4 j. À fixer par le plan d'autocontrôle de l'établissement et le canton.",
       "sources": [
         {
           "titre": "Vorproduzierte, leicht verderbliche Lebensmittel : Lagerung und Haltbarkeitsfristen (juin 2013)",
@@ -1351,11 +1645,11 @@
           "type_source": "officielle"
         },
         {
-          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), lue via les autres thèmes du référentiel, PDF non rouvert",
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
           "organisme": "GastroSuisse",
           "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
           "consulte": "2026-10-04",
-          "extrait": "",
+          "extrait": "Gekochtes Gemüse, vorgekochte Produkte (Teigwaren, Saucen etc.) Produktionstag + 2 Tage",
           "type_source": "professionnelle"
         },
         {
@@ -1370,7 +1664,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SO « Produktionstag + 3 Tage », LU « + 4 Tage » et GVG tableau 6.3.1 (J+2) relus ; base Sanji §8 relue (3 à 4 j)."
+      }
     },
     {
       "id": "hygiene.duree.viande-cuite-salades",
@@ -1404,7 +1703,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Aide-mémoire SO et LU relus : jour de production + 2 jours (viandes cuites, salades assaisonnées, sauces dips) ; GVG 6.3.1 : salades à la sauce J+2."
+      }
     },
     {
       "id": "hygiene.duree.desserts-fragiles",
@@ -1416,7 +1720,7 @@
         "unite": "jour"
       },
       "etat_poids": null,
-      "conditions": "Recommandations cantonales.",
+      "conditions": "Recommandations cantonales (SO, LU : 1 jour). La GVG (tableau 6.3.1, relu) est plus stricte pour les desserts très périssables et les plats aux œufs crus ou au poisson cru : à consommer le jour de production.",
       "sources": [
         {
           "titre": "Vorproduzierte, leicht verderbliche Lebensmittel : Lagerung und Haltbarkeitsfristen (juin 2013)",
@@ -1433,24 +1737,37 @@
           "consulte": "2026-10-04",
           "extrait": "Dessert / Süssspeisen leicht verderblich: Produktionstag + 1 Tag",
           "type_source": "officielle"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Süssspeisen/Desserts: Am Produktionstag verbrauchen",
+          "type_source": "professionnelle"
         }
       ],
-      "confiance": "haute",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Aide-mémoire SO (« Tagesprodukt max. 1 Tag ») et LU (« + 1 Tag ») relus ; GVG 6.3.1 relue (jour même, écart signalé)."
+      }
     },
     {
       "id": "hygiene.duree.conserves-ouvertes",
       "sujet": "Denrées périssables entamées",
       "type": "repere",
-      "enonce": "Denrées périssables en emballage ouvert (boîtes, sachets) et charcuterie ou préparations de viande entamées : 2 jours après le jour de production ou d'ouverture.",
+      "enonce": "Denrées périssables en emballage ouvert (boîtes, sachets) et charcuterie ou préparations de viande entamées : 2 jours selon la liste lucernoise (jour de production + 2).",
       "valeur": {
         "max": 2,
         "unite": "jours"
       },
       "etat_poids": null,
-      "conditions": "Aide-mémoire de Lucerne ; la base Sanji donne 2 à 3 jours pour les conserves ouvertes (écart léger : 2 jours gardés). Respecter aussi l'indication du fabricant.",
+      "conditions": "Aide-mémoire de Lucerne, relu : « Produktionstag + 2 Tage » pour les emballages ouverts et pour les préparations de viande et charcuteries entamées ; le texte ne parle pas du jour d'ouverture. La GVG (6.3.1) renvoie à l'étiquette du fabricant après ouverture d'un emballage d'origine. La base Sanji donne 2 à 3 jours pour les conserves ouvertes (écart léger : 2 jours gardés).",
       "sources": [
         {
           "titre": "Merkblatt Haltbarkeitsliste HM1303V7 (date non indiquée)",
@@ -1464,7 +1781,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "LU Haltbarkeitsliste HM1303V7 relue (emballage ouvert et Anbruch : jour de production + 2) ; énoncé corrigé (jour d'ouverture retiré)."
+      }
     },
     {
       "id": "hygiene.duree.oeufs-coquille",
@@ -1476,8 +1798,16 @@
         "unite": "jours après la ponte"
       },
       "etat_poids": null,
-      "conditions": "Délai de vente de 21 jours : mentionné par des pages web, toujours non vérifié (ni les aide-mémoires LU et AG, ni la LIV ni la HyV relus ne le mentionnent ; l'ordonnance sur les œufs n'a pas pu être consultée) : laissé « non vérifié ». Seule la DDM de 28 jours après la ponte est confirmée (LU, AG). La base Sanji parle de « DLC » : il s'agit d'une DDM selon Lucerne. Œufs fêlés : seulement pour préparations cuites.",
+      "conditions": "Texte de loi : VLtH art. 92 al. 4 (état 01.02.2024, relu) : durabilité minimale de 28 jours au plus après la ponte ; LU et AG concordent. Délai de vente de 21 jours : introuvable dans les textes relus (VLtH art. 92, HyV art. 54 al. 1 et 2, LIV, ordonnance sur les œufs lue à l'état 01.01.2022 via un miroir) ; le mémo lucernois mentionne un « max. Abgabedatum » sans chiffre et la GVG parle du 21e jour après la ponte pour la conservation au frais : délai de vente non confirmé. La base Sanji parle de « DLC » : il s'agit d'une DDM. Œufs fêlés : seulement pour préparations cuites (VLtH art. 89 al. 1).",
       "sources": [
+        {
+          "titre": "Verordnung des EDI über Lebensmittel tierischer Herkunft (VLtH ; ordonnance du DFI sur les denrées d'origine animale), RS 817.022.108, état au 01.02.2024",
+          "organisme": "Confédération suisse (Fedlex)",
+          "url": "https://fedlex.data.admin.ch/filestore/fedlex.data.admin.ch/eli/cc/2017/152/20240201/de/pdf-a/fedlex-data-admin-ch-eli-cc-2017-152-20240201-de-pdf-a.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Art. 92 al. 4 : Mindesthaltbarkeitsdatum ... höchstens 28 Tage nach dem Legen",
+          "type_source": "officielle"
+        },
         {
           "titre": "Merkblatt Kennzeichnung Eier HM1308V7 (13.09.2024)",
           "organisme": "Canton de Lucerne, Lebensmittelkontrolle und Verbraucherschutz",
@@ -1506,7 +1836,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "VLtH art. 92 al. 4 (PDF Fedlex, état 01.02.2024), LU Merkblatt HM1308V7 et AG Merkblatt 03 relus : 28 jours après la ponte."
+      }
     },
     {
       "id": "hygiene.duree.oeufs-crus-preparations",
@@ -1530,6 +1865,73 @@
       "statut": "a_valider",
       "portee": "a_valider_localement",
       "usage_calcul": false
+    },
+    {
+      "id": "hygiene.duree.produits-laitiers-fabricant",
+      "sujet": "Lait et produits laitiers : durée de conservation",
+      "type": "regle",
+      "enonce": "Pour le lait et les produits laitiers, la GVG ne fixe pas de durée en jours : on suit l'indication du fabricant, et après ouverture d'un emballage d'origine l'étiquette fait foi.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "GVG tableau 6.3.1 (relu) : « Milch und Milchprodukte : nach Herstellerangabe » (réfrigéré), 6 mois en congélation (6.3.2). Les durées en jours de la base Sanji (§8 : lait pasteurisé ouvert 3 j, crème 5 j fermée et 2 j ouverte, fromage frais 5 à 7 j fermé et 2 à 3 j ouvert) ne sont recoupées par aucune source suisse lue : à ne pas présenter comme règle.",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Milch und Milchprodukte Nach Herstellerangabe",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base officielle production-stock-hygiène de Sanji",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §8",
+          "consulte": "2026-10-04",
+          "extrait": "Lait pasteurisé selon DLC ; crème 5 j ; fromage frais 5–7 j",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG tableau 6.3.1 relu en extraction par colonnes : lait et produits laitiers, nach Herstellerangabe."
+      }
+    },
+    {
+      "id": "hygiene.duree.siphon-creme",
+      "sujet": "Crème fouettée : siphon rempli sur place",
+      "type": "repere",
+      "enonce": "La crème fouettée se prépare juste avant le service ; un siphon à crème rempli sur place se garde au froid et se consomme dans un jour au plus.",
+      "valeur": {
+        "max": 1,
+        "unite": "jour"
+      },
+      "etat_poids": null,
+      "conditions": "GVG chap. 2.4.5 (relu) : « innerhalb eines Tages » ; pour une cartouche ou un emballage acheté et entamé, suivre le fabricant. Orientation de branche, pas une loi.",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG ; BPHR en français), 2e édition 2019, texte intégral relu",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "gekühlt gelagert und innerhalb eines Tages aufgebraucht",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG chap. 2.4.5 « Milch und Rahm » relu : siphon rempli sur place, au froid, consommé dans un jour."
+      }
     },
     {
       "id": "hygiene.etiquetage.date-production",
@@ -1631,7 +2033,7 @@
       "enonce": "Une denrée décongelée porte la date de décongélation et se consomme selon les durées des préparations à l'avance.",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "",
+      "conditions": "La GVG fixe la consommation à 48 h au plus (24 h pour les produits délicats) après la décongélation : voir hygiene.duree.decongele-consommation.",
       "sources": [
         {
           "titre": "Merkblatt Nr. 11 Temperaturführung im Umgang mit Lebensmitteln : Erhitzen, Abkühlen, Auftauen (état 25.09.2025)",
@@ -1741,7 +2143,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "LIV annexe 6 ch. 12 et art. 11 al. 5 let. a relus dans le PDF Fedlex (état 01.07.2025) : 10 mg/kg ou 10 mg/l de SO2."
+      }
     },
     {
       "id": "hygiene.allergenes.poudre-grillon",
@@ -1854,7 +2261,7 @@
         "unite": "g/kg (cas général)"
       },
       "etat_poids": null,
-      "conditions": "Texte lu au 01.07.2025. Sert de repère de risque pour les produits achetés ; ne concerne pas directement le plat servi.",
+      "conditions": "LIV art. 11 al. 5 let. a, b, d, e relus (état 01.07.2025) : 10 mg SO2, 200 mg gluten, 1 g lactose, 1 g dans les autres cas par kg ou litre de denrée prête à consommer (huile d'arachide raffinée : 10 g, let. c). Sert de repère de risque pour les produits achetés ; ne concerne pas directement le plat servi.",
       "sources": [
         {
           "titre": "Verordnung des EDI betreffend die Information über Lebensmittel (LIV ; ordonnance du DFI concernant l'information sur les denrées alimentaires, OIDAl) du 16.12.2016, RS 817.022.16, état au 01.07.2025",
@@ -1868,7 +2275,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "LIV art. 11 al. 5 relu dans le PDF Fedlex (état 01.07.2025) : seuils 1 g, 200 mg gluten, 10 mg SO2, 1 g lactose par kg ou litre."
+      }
     },
     {
       "id": "hygiene.allergenes.heritage-composants",
@@ -1990,13 +2402,14 @@
       "id": "hygiene.personnel.retour-apres-maladie",
       "sujet": "Retour après vomissements ou diarrhée",
       "type": "regle",
-      "enonce": "La base Sanji propose un retour après 48 heures sans symptômes.",
+      "enonce": "La base Sanji propose un retour après 48 heures sans symptômes ; le canton de Saint-Gall recommande, après une infection à norovirus, de tenir la personne guérie à l'écart 2 à 3 jours de plus.",
       "valeur": {
         "min": 48,
+        "max": 72,
         "unite": "h sans symptômes"
       },
       "etat_poids": null,
-      "conditions": "Estimation [E] de la base Sanji, non recoupée ; la HyV n'indique pas de durée. À valider par le médecin ou l'autorité cantonale.",
+      "conditions": "Estimation [E] de la base Sanji (48 h) élargie par la recommandation de Saint-Gall (infoblatt BIO 90, 2018 : 2 à 3 jours après guérison, pour le norovirus) ; la HyV et la GVG (2.1.2, relue) n'indiquent aucune durée. À valider par le médecin ou l'autorité cantonale.",
       "sources": [
         {
           "titre": "Base officielle production-stock-hygiène de Sanji",
@@ -2005,25 +2418,38 @@
           "consulte": "2026-10-04",
           "extrait": "retour après 48 h sans symptômes",
           "type_source": "base_sanji"
+        },
+        {
+          "titre": "Verhalten von in Lebensmittelbetrieben arbeitenden Ausscheidern von Krankheitserregern (Info-Blatt BIO 90, 10.12.2018)",
+          "organisme": "Canton de Saint-Gall, Amt für Verbraucherschutz und Veterinärwesen",
+          "url": "https://www.sg.ch/gesundheit-soziales/verbraucherschutz/lebensmittel/gastro--und-verpflegungsbetriebe/_jcr_content/Par/sgch_downloadlist/DownloadListPar/sgch_download_27444713.ocFile/BIO090%20Infoblatt%20Ausscheider.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "für weitere 2 bis 3 Tage freizustellen",
+          "type_source": "officielle"
         }
       ],
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "partielle",
+        "note": "Base Sanji §23 et Info-Blatt SG relus : SG ne cite pas « 48 h sans symptômes » mais 2 à 3 jours après guérison (norovirus) ; fourchette 48 à 72 h, énoncé élargi."
+      }
     },
     {
       "id": "hygiene.personnel.lavage-mains",
       "sujet": "Lavage des mains",
       "type": "technique",
-      "enonce": "La base Sanji prévoit eau tiède, savon, environ 30 secondes, séchage à usage unique, à l'entrée, après le cru, les toilettes, les déchets et le téléphone.",
+      "enonce": "La base Sanji prévoit eau tiède, savon, environ 30 secondes, séchage à usage unique ; un site de branche privé conseille 40 à 60 secondes.",
       "valeur": {
         "min": 30,
-        "max": 30,
+        "max": 60,
         "unite": "s"
       },
       "etat_poids": null,
-      "conditions": "Bonne pratique de la base Sanji [BP] ; non recoupée avec une source suisse ou OSAV lue ici.",
+      "conditions": "Bonne pratique : base Sanji [BP] (30 s) et site privé gastronomie-hygiene.ch (40 à 60 s, page relue) ; aucune source suisse officielle ni OSAV n'a pu être lue. Divergence : fourchette large gardée.",
       "sources": [
         {
           "titre": "Base officielle production-stock-hygiène de Sanji",
@@ -2032,12 +2458,25 @@
           "consulte": "2026-10-04",
           "extrait": "eau tiède + savon, ~30 secondes",
           "type_source": "base_sanji"
+        },
+        {
+          "titre": "Hände richtig waschen",
+          "organisme": "gastronomie-hygiene.ch (site privé, non officiel)",
+          "url": "https://www.gastronomie-hygiene.ch/hande-richtig-waschen/",
+          "consulte": "2026-10-04",
+          "extrait": "mindestens zwischen 40 bis 60 Sekunden beanspruchen",
+          "type_source": "web"
         }
       ],
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "partielle",
+        "note": "Base Sanji §23 relue (~30 s) ; page privée gastronomie-hygiene.ch relue (40 à 60 s) ; aucune source officielle lisible : fourchette 30 à 60 s."
+      }
     },
     {
       "id": "hygiene.personnel.bijoux-ongles",
@@ -2259,7 +2698,7 @@
         "unite": "h"
       },
       "etat_poids": null,
-      "conditions": "Écart important : la fourchette la plus prudente (jusqu'à 7 jours, congelé) est affichée. Prescriptions du concept d'échantillons dans la GVG pour restauration collective : non relues.",
+      "conditions": "Écart important : la fourchette la plus prudente (jusqu'à 7 jours, congelé) est affichée. LAVES relu : la DIN 10526 donne 7 jours au minimum, de préférence congelé à -18 °C, et juge ce délai souvent trop court en pratique. La GVG (relue) demande un concept d'échantillons sans durée ni quantité chiffrée.",
       "sources": [
         {
           "titre": "Lebensmittel- und Gebrauchsgegenständeverordnung (LGV ; ordonnance sur les denrées alimentaires et les objets usuels, ODAlOUs) du 16.12.2016, RS 817.02, état au 01.07.2025",
@@ -2282,14 +2721,19 @@
           "organisme": "LAVES Niedersachsen",
           "url": "https://www.laves.niedersachsen.de/startseite/lebensmittel/lebensmittelhygiene/weitere_informationen_fur_lebensmittelunternehmer/die-rueckstellprobe-eine-absicherung-fuer-den-lebensmittelunternehmer-108784.html",
           "consulte": "2026-10-04",
-          "extrait": "DIN 10526 : Mindestdauer 7 Tage",
+          "extrait": "gibt eine Mindestlagerdauer von 7 Tagen an",
           "type_source": "web"
         }
       ],
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Base Sanji §26 relue (72 à 100 h à 0–3 °C) et page LAVES relue (DIN 10526 : 7 jours minimum, à -18 °C) ; droit suisse sans durée."
+      }
     },
     {
       "id": "hygiene.incident.echantillons-quantite",
@@ -2301,7 +2745,7 @@
         "unite": "g (ou ml) par composant"
       },
       "etat_poids": null,
-      "conditions": "Pas de quantité fixée par le droit suisse ; les deux sources concordent mais ne sont pas suisses officielles (base Sanji et norme allemande).",
+      "conditions": "Pas de quantité fixée par le droit suisse ; la base Sanji (≥ 100 g par plat) et la DIN 10526 citée par LAVES (100 g ou 100 ml par composant) concordent, mais ne sont pas suisses officielles ; LAVES conseille plutôt 200 g ou 200 ml.",
       "sources": [
         {
           "titre": "Base officielle production-stock-hygiène de Sanji",
@@ -2316,32 +2760,37 @@
           "organisme": "LAVES Niedersachsen",
           "url": "https://www.laves.niedersachsen.de/startseite/lebensmittel/lebensmittelhygiene/weitere_informationen_fur_lebensmittelunternehmer/die-rueckstellprobe-eine-absicherung-fuer-den-lebensmittelunternehmer-108784.html",
           "consulte": "2026-10-04",
-          "extrait": "mindestens 100 g oder 100 ml",
+          "extrait": "mindestens 100 g bzw. 100 ml je Menuekomponente",
           "type_source": "web"
         }
       ],
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Base Sanji §26 et page LAVES relues : 100 g ou ml par composant (LAVES recommande 200)."
+      }
     }
   ],
   "lacunes": [
     {
-      "sujet": "Texte intégral de la GVG / BPHR",
-      "raison": "PDF de GastroSuisse et du canton de Vaud non lisible par extraction ; aucune valeur lue directement. Versions et chiffres de la GVG (stockage par catégorie, remise en température, échantillons témoins) à recouper dans le guide papier."
+      "sujet": "Version récente et édition française de la GVG / BPHR",
+      "raison": "Le texte intégral de la GVG (2e édition 2019) a été relu et ses chiffres sont repris ; aucune édition plus récente n'est mentionnée sur la page de GastroSuisse, mais ce n'est pas une preuve qu'il n'en existe pas ; le PDF du canton de Vaud (BPHR en français) n'a pas été rouvert. La GVG ne fixe ni durée ni quantité pour les échantillons témoins."
     },
     {
-      "sujet": "Remise en température",
-      "raison": "Aucune valeur suisse (température et durée) trouvée dans les sources lues."
+      "sujet": "Remise en température : durée pour atteindre la température",
+      "raison": "La température (70 °C à cœur, 2 min) est lue dans la GVG (entrée hygiene.temperature.remise-en-temperature) ; aucune source lue ne donne la durée maximale pour y parvenir (la GVG dit seulement « appareils ou procédés adaptés »)."
     },
     {
-      "sujet": "Durées de décongélation au frigo",
-      "raison": "Les aide-mémoire suisses lus ne donnent pas de durée ; repère de la base Sanji (24 h cru, 48 h cuit) non recoupé."
+      "sujet": "Durée du processus de décongélation au frigo",
+      "raison": "Aucune source lue ne donne les heures de décongélation au frigo ; la GVG limite seulement la consommation après décongélation (48 h, 24 h pour les produits délicats : entrée ajoutée) ; le repère de la base Sanji (24 h cru, 48 h cuit) n'est pas recoupé comme durée de décongélation."
     },
     {
-      "sujet": "Durées de conservation des produits laitiers préparés",
-      "raison": "Aucune source suisse trouvée ; durées de la base Sanji (lait ouvert 3 j, crème 2 à 5 j, fromage frais 2 à 3 j) non recoupées."
+      "sujet": "Durées en jours des produits laitiers préparés",
+      "raison": "La GVG renvoie aux indications du fabricant (entrée ajoutée) et fixe 1 jour pour un siphon à crème rempli sur place ; aucune source suisse lue ne donne de durées en jours pour le lait ouvert, la crème ou le fromage frais : les durées de la base Sanji (lait ouvert 3 j, crème 2 à 5 j, fromage frais 2 à 3 j) ne sont pas recoupées."
     },
     {
       "sujet": "Contenu type d'une étiquette de préparation interne",
@@ -2369,19 +2818,15 @@
     },
     {
       "sujet": "Délai de vente des œufs (21 jours)",
-      "raison": "Mentionné par des pages web non officielles ; ni les aide-mémoires LU et AG, ni la LIV, ni la HyV relus ne le contiennent ; ordonnance sur les œufs non consultée. Seule la DDM de 28 jours est confirmée : délai de vente non vérifié."
+      "raison": "Mentionné par des pages web non officielles ; introuvable dans la VLtH (art. 92, état 01.02.2024), l'ordonnance sur les œufs (état 01.01.2022, lue via un miroir), la HyV (art. 54), la LIV et les mémos LU et AG ; la GVG parle du 21e jour après la ponte pour la conservation au frais, sans y voir un délai de vente. Seule la DDM de 28 jours est confirmée (VLtH art. 92 al. 4) : délai de vente non vérifié."
     },
     {
       "sujet": "Version en vigueur de la LMG (RS 817.0)",
-      "raison": "Amendes (art. 64) relues à l'état au 01.10.2024 ; Fedlex n'est pas lisible par l'outil sans navigateur, un état plus récent n'a pas pu être contrôlé. Les art. 26, 27 et 28 ont été lus dans l'état de 2017."
+      "raison": "Dernier état relu : 01.10.2024 (art. 7, 26, 64). Aucun état postérieur repéré sur Fedlex (sondage non exhaustif des états au 1er et au 15 de chaque mois de 2025 et 2026 : aucun PDF) ; la page Fedlex n'est pas lisible sans navigateur : l'état en vigueur à ce jour reste à confirmer."
     },
     {
       "sujet": "Température légale du lait pasteurisé, du fromage et du beurre en cuisine",
-      "raison": "Aucun chiffre dans la HyV pour la restauration ; 6 °C (site privé) et 8 à 10 °C (base Sanji) non recoupés par une source officielle."
-    },
-    {
-      "sujet": "GVG : refroidissement (65 à moins de 5 °C en 90 min) et sauces J+2",
-      "raison": "Lus seulement via les autres thèmes du référentiel (extraits de moteur de recherche) ; PDF de la GVG non relu."
+      "raison": "Aucun chiffre dans la HyV pour la restauration ; la GVG (tableau 6.2) donne 5 °C pour les denrées légèrement périssables en général ; 6 °C (site privé) et 8 à 10 °C (base Sanji) non recoupés par une source officielle."
     }
   ]
 }

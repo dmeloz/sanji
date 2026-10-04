@@ -99,7 +99,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "die-kartoffel.de, section « Festkochend » relue : stärkegehalt « ca 11-13 % » ; une seule source web."
+      }
     },
     {
       "id": "feculents.pdt.famille-mi-farineuse.usage",
@@ -258,7 +263,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "kartoffel.ch, page Kartoffelwissen relue : 6 à 10 °C, sucre sous 4 °C, germination au-dessus de 10 °C, sombre et sec, sac de lin ou caisse de bois."
+      }
     },
     {
       "id": "feculents.pdt.stockage.duree",
@@ -271,7 +281,7 @@
         "unite": "semaines"
       },
       "etat_poids": null,
-      "conditions": "Source unique (base Sanji) ; la source suisse donne la température, pas la durée.",
+      "conditions": "Source unique (base Sanji, §32.2) ; kartoffel.ch (relu) dit seulement de consommer « dans les quelques semaines » à défaut de cave, sans chiffre : la durée 2 à 4 semaines n'est pas recoupée.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -285,7 +295,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §32.2 (ligne 1732) relue ; kartoffel.ch Kartoffelwissen relue : « innerhalb von wenigen Wochen », sans durée chiffrée."
+      }
     },
     {
       "id": "feculents.pdt.perte.epluchage",
@@ -298,7 +313,7 @@
         "unite": "% du poids brut"
       },
       "etat_poids": "cru_net",
-      "conditions": "Base Sanji 15-20 % ; sources web 17 à 20 %. Valeurs industrielles 8-15 % (épluchage mécanisé), hors usage manuel. Poids brut avant épluchage.",
+      "conditions": "Base Sanji 15-20 % ; une seule source web chiffrée : rezeptrechner-online.de, environ 17 % (exemple de calcul). La page de la PH Freiburg ne donne qu'un exercice (12 %), sans valeur de référence : retirée des sources. Valeurs industrielles 8-15 % (épluchage mécanisé) non retenues, hors usage manuel. Poids brut avant épluchage.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -315,20 +330,17 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "web"
-        },
-        {
-          "titre": "Schälverluste",
-          "organisme": "PH Freiburg (icse)",
-          "url": "https://icse.ph-freiburg.de/downloads/unterricht/mathematik/schaelverluste/",
-          "consulte": "2026-10-04",
-          "extrait": "",
-          "type_source": "web"
         }
       ],
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "partielle",
+        "note": "rezeptrechner-online.de relu : « ungefähr 17 % » pour les pommes de terre ; base Sanji §11.1 relue : 15-20 %. Les bornes 15 et 20 % ne reposent que sur la base."
+      }
     },
     {
       "id": "feculents.pdt.perte.friture",
@@ -341,7 +353,7 @@
         "unite": "% du poids cru net"
       },
       "etat_poids": "cru_net",
-      "conditions": "Source unique (base Sanji), non recoupée.",
+      "conditions": "Source unique (base Sanji §11.2, ligne 558), non recoupée par une source ouverte.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -355,7 +367,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §11.2 relue : 30-40 % ; aucune source externe ouverte ne donne un chiffre comparable pour des frites crues (les tests normalisés portent sur des frites surgelées)."
+      }
     },
     {
       "id": "feculents.pdt.cuisson.salees-gschwellti",
@@ -364,7 +381,7 @@
       "enonce": "Pommes à l'anglaise ou en robe : cuire fermes ou mi-farineuses entières ou en gros morceaux dans l'eau salée, jusqu'à tendreté à cœur.",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Pas de temps de cuisson sourcé pour les pommes entières (voir lacunes). Pour la purée, 20 à 25 min en morceaux (entrée dédiée).",
+      "conditions": "Temps de cuisson des pommes entières : voir les entrées dédiées (eau, vapeur, autocuiseur). Pour la purée, 20 à 25 min en morceaux.",
       "sources": [
         {
           "titre": "Gschwellti",
@@ -399,7 +416,7 @@
         "unite": "% du poids cru net"
       },
       "etat_poids": "cru_net",
-      "conditions": "Cuisson vapeur seule. Base Sanji 5 à 10 % ; un exemple de calcul web (rezeptrechner-online.de) utilise 5 % pour des pommes cuites, sans préciser le mode. Le chiffre de 20 à 30 % pour la cuisson au four n'a pas pu être confirmé : voir lacunes.",
+      "conditions": "Base Sanji 5 à 10 % (cuisson vapeur). Le site rezeptrechner-online.de n'utilise 5 % que comme facteur de cuisson générique d'un exemple de calcul, sans préciser le mode : il ne recoupe pas la vapeur. Le chiffre de 20 à 30 % pour la cuisson au four n'a pas pu être confirmé : voir lacunes.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -421,7 +438,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §11.2 (ligne 557) relue ; rezeptrechner-online.de relu : « Reduktionsfaktor beim Kochen 5 % », mode non précisé."
+      }
     },
     {
       "id": "feculents.pdt.puree.proportions",
@@ -448,7 +470,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Kartoffelstock relue : 1 kg de pommes mehligkochend épluchées en morceaux, 2 dl de lait, 30 g de beurre, pour 4 portions."
+      }
     },
     {
       "id": "feculents.pdt.puree.cuisson",
@@ -475,7 +502,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Kartoffelstock relue : « in Salzwasser ca. 20-25 Minuten weichkochen », puis égoutter à fond."
+      }
     },
     {
       "id": "feculents.pdt.puree.technique",
@@ -525,7 +557,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Kartoffelgratin relue : 800 g de pommes farineuses, 3 dl de lait, 3 dl de crème pour 4 portions, tranches de 2 à 3 mm."
+      }
     },
     {
       "id": "feculents.pdt.gratin.cuisson",
@@ -560,7 +597,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Kartoffelgratin relue : 40-50 min à 180 °C puis +40 °C environ 10 min ; base Sanji §14 (ligne 860) relue : 60-75 min à 160-170 °C."
+      }
     },
     {
       "id": "feculents.pdt.rosti.base",
@@ -573,7 +615,7 @@
         "unite": "kg pour 4 portions"
       },
       "etat_poids": "cuit",
-      "conditions": "Poids de pommes de terre déjà cuites, non épluchées avant cuisson selon la recette de référence.",
+      "conditions": "Poids de pommes de terre cuites la veille (Gschwellti vom Vortag) ; la recette les épluche à volonté après cuisson, puis les râpe grossièrement.",
       "sources": [
         {
           "titre": "Rösti",
@@ -587,7 +629,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Rösti relue : 1 kg de Gschwellti vom Vortag pour 4 portions."
+      }
     },
     {
       "id": "feculents.pdt.rosti.temps",
@@ -614,7 +661,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Rösti relue : 5 min, puis 10 min sans remuer, puis 12-15 min sur la seconde face."
+      }
     },
     {
       "id": "feculents.pdt.rosti.variete",
@@ -654,7 +706,7 @@
       "enonce": "Cuire les pommes de terre la veille (Gschwellti) : elles se râpent mieux une fois refroidies. Garder la galette elle-même pour le service.",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Cuisson la veille indiquée par la recette ; durée de garde précise des pommes cuites : voir lacunes.",
+      "conditions": "Cuisson la veille indiquée par la recette ; durée de garde des pommes cuites refroidies : voir feculents.pdt.cuites.conservation.",
       "sources": [
         {
           "titre": "Rösti",
@@ -674,14 +726,31 @@
       "id": "feculents.pdt.frites.finition",
       "sujet": "Pommes frites",
       "type": "repere",
-      "enonce": "Frites : finition à 170 °C au plus (la base Sanji indique 170 à 180 °C) ; préfriture à 130-150 °C.",
+      "enonce": "Friture des frites : régler la friteuse entre 150 et 170 °C (aide-mémoire du canton de Zurich) ; plafond de chauffe de 175 °C (canton de Soleure). La base Sanji indique 170 à 180 °C pour la finition.",
       "valeur": {
+        "min": 150,
         "max": 170,
         "unite": "°C"
       },
       "etat_poids": null,
-      "conditions": "Plafond retenu à 170 °C par prudence : écart avec la base Sanji (170 à 180 °C, 3 à 4 min) ; les aide-mémoires cantonaux relevés par la relecture disent 170 °C au plus (non rouverts ici). Valeur à valider selon le canton et le plan de l'établissement.",
+      "conditions": "Écart : la base Sanji (§14, ligne 862) donne 3 à 4 min à 170-180 °C, soit un haut de fourchette au-dessus du plafond soleurois de 175 °C ; on retient la plage zurichoise 150-170 °C, plus prudente. Préfriture à 130-150 °C : base Sanji seule, non recoupée. À valider selon le canton et le plan d'autocontrôle de l'établissement.",
       "sources": [
+        {
+          "titre": "Merkblatt zum Frittieren (mars 2018, copie hébergée par trioleine.ch)",
+          "organisme": "Kantonales Labor Zürich",
+          "url": "https://www.trioleine.ch/images/pdf/kt_zh_merkblatt_zum_frittieren.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Richtiger Gebrauch von Frittierölen und Frittierfetten (mars 2025)",
+          "organisme": "Gesundheitsamt Lebensmittelkontrolle Solothurn",
+          "url": "https://so.ch/fileadmin/internet/ddi/ddi-gesa-lk/Lebensmittel_und_Gebrauchsgegenstaende/pdf_LMK/Merkblaetter_LMK/Prozesse_und_Taetigkeiten/Frittieroel.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "officielle"
+        },
         {
           "titre": "Base officielle production, stock, hygiène",
           "organisme": "Sanji (base métier)",
@@ -691,16 +760,21 @@
           "type_source": "base_sanji"
         }
       ],
-      "confiance": "faible",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Aide-mémoire du canton de Zurich relu : température de service 150-170 °C ; aide-mémoire du canton de Soleure relu : chauffer par paliers à 175 °C au plus ; base Sanji §14 relue : 170-180 °C."
+      }
     },
     {
       "id": "feculents.pdt.pretraitement.eau",
       "sujet": "Pommes de terre épluchées",
       "type": "regle",
-      "enonce": "Pommes épluchées : les couvrir d'eau froide pour éviter le brunissement ; jusqu'à 3 h à température ambiante, jusqu'à 24 h au frais (un peu de vinaigre ou citron).",
+      "enonce": "Pommes épluchées : les couvrir d'eau froide pour éviter le brunissement ; 2 à 3 h à température ambiante, jusqu'à 24 h au frais avec un peu de vinaigre ou de jus de citron.",
       "valeur": {
         "min": 3,
         "max": 24,
@@ -711,7 +785,7 @@
       "sources": [
         {
           "titre": "Geschälte Kartoffeln aufbewahren",
-          "organisme": "t-online / kartoffel-magazin.de (résumé de recherche)",
+          "organisme": "kartoffel-magazin.de",
           "url": "https://kartoffel-magazin.de/tipps/geschaelte-kartoffeln-aufbewahren/",
           "consulte": "2026-10-04",
           "extrait": "",
@@ -721,16 +795,21 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "kartoffel-magazin.de relue : « zwei bis drei Stunden » à température ambiante dans l'eau ; jusqu'à 24 h au réfrigérateur avec vinaigre ou citron."
+      }
     },
     {
       "id": "feculents.pdt.avance.gschwellti-rosti",
       "sujet": "Pommes de terre cuites",
       "type": "regle",
-      "enonce": "La cuisson des pommes la veille pour le rösti est la seule avance de pommes de terre confirmée par une source suisse.",
+      "enonce": "La cuisson des pommes la veille pour le rösti est l'avance de pommes de terre confirmée par une source suisse (Swissmilk) ; la durée de garde maximale vient de sources web grand public.",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Durée maximale non sourcée (lacune).",
+      "conditions": "Durée de garde des pommes cuites : voir feculents.pdt.cuites.conservation.",
       "sources": [
         {
           "titre": "Rösti",
@@ -779,20 +858,21 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "kartoffel.ch, recette de gnocchi relue : 700 g de pommes, 300 g de farine, 1 œuf ; cookandsoul.de relue : 1 kg de pommes, 50 g de semoule, 50-100 g de farine, 1 œuf."
+      }
     },
     {
       "id": "feculents.pdt.gnocchi.cuisson-pommes",
       "sujet": "Gnocchi de pommes de terre",
       "type": "technique",
-      "enonce": "Cuire les pommes au four (sans eau) donne une pâte plus sèche : environ 20 % d'eau en moins, donc moins de farine et des gnocchi plus légers.",
-      "valeur": {
-        "min": 20,
-        "max": 20,
-        "unite": "% perte d'eau au four"
-      },
-      "etat_poids": "cru_net",
-      "conditions": "Source web unique.",
+      "enonce": "Des pommes cuites au four ou à la vapeur donnent une pâte plus sèche que des pommes bouillies à l'eau : elles demandent moins de farine.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Source web unique (cookandsoul.de) : qualitatif. Le chiffre « environ 20 % d'eau en moins au four » relevé auparavant ne figure pas dans la page relue : retiré (voir lacunes).",
       "sources": [
         {
           "titre": "Gnocchi selber machen aus mehlig kochenden Kartoffeln",
@@ -806,7 +886,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "cookandsoul.de relue, rubrique de conseils : pommes cuites au four ou à la vapeur d'eau, pas d'eau absorbée, donc moins de farine ; aucun pourcentage dans la page."
+      }
     },
     {
       "id": "feculents.pdt.gnocchi.variete",
@@ -858,20 +943,20 @@
         "unite": "L pour 100 g"
       },
       "etat_poids": "sec",
-      "conditions": "Barilla : 1 L pour 100 g ; Swissmilk : 3 L pour 400 g.",
+      "conditions": "Swissmilk : 3 L pour 400 g (0,75 L pour 100 g) ; Schweizer Salinen : 1 L pour 100 g. La page Barilla n'a pas pu être ouverte (erreur 403) : retirée des sources.",
       "sources": [
-        {
-          "titre": "Tagliatelle (page produit, indications de cuisson)",
-          "organisme": "Barilla",
-          "url": "https://www.barilla.com/de-ch/produkte/pasta/collezione/tagliatelle",
-          "consulte": "2026-10-04",
-          "extrait": "",
-          "type_source": "web"
-        },
         {
           "titre": "Teigwaren kochen",
           "organisme": "Swissmilk",
           "url": "https://www.swissmilk.ch/de/rezepte-kochideen/rezepte/SM2023_SUGR_07/teigwaren-kochen/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Wann gehört Salz ins Pastawasser?",
+          "organisme": "Schweizer Salinen (salz.ch)",
+          "url": "https://www.salz.ch/de/salz-storys/haeufige-fragen/wann-gehoert-salz-ins-pastawasser",
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "professionnelle"
@@ -880,29 +965,26 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Teigwaren kochen relue : 3 l d'eau pour 400 g ; salz.ch relue : 1 000 ml d'eau pour 100 g de pâtes."
+      }
     },
     {
       "id": "feculents.pates.eau.sel",
       "sujet": "Pâtes sèches",
       "type": "repere",
-      "enonce": "Sel dans l'eau de cuisson : 7 à 10 g par litre.",
+      "enonce": "Sel dans l'eau de cuisson : 10 g par litre selon la saline suisse (pour 100 g de pâtes par litre d'eau) ; Swissmilk indique 1 cuillère à soupe pour 3 L.",
       "valeur": {
-        "min": 7,
+        "min": 10,
         "max": 10,
         "unite": "g/L"
       },
       "etat_poids": null,
-      "conditions": "Barilla 7 g/L (pour 100 g de pâtes), Schweizer Salinen 10 g/L ; Swissmilk : 1 c. à s. pour 3 L. Saler à l'ébullition.",
+      "conditions": "Divergence entre sources : Swissmilk, 1 c. à s. de sel pour 3 L (poids de la cuillère non précisé) ; un blog (pastapalast.com, relu) cite 20 g/L pour les pâtes fraîches. Le 7 g/L de la page Barilla n'a pas pu être vérifié (403) : retiré. Saler à l'ébullition.",
       "sources": [
-        {
-          "titre": "Tagliatelle (page produit, indications de cuisson)",
-          "organisme": "Barilla",
-          "url": "https://www.barilla.com/de-ch/produkte/pasta/collezione/tagliatelle",
-          "consulte": "2026-10-04",
-          "extrait": "",
-          "type_source": "web"
-        },
         {
           "titre": "Wann gehört Salz ins Pastawasser?",
           "organisme": "Schweizer Salinen (salz.ch)",
@@ -918,12 +1000,25 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "professionnelle"
+        },
+        {
+          "titre": "Frische Nudeln kochen: perfekte Pasta in 5 Schritten",
+          "organisme": "pastapalast.com",
+          "url": "https://pastapalast.com/selbstgemachte-pasta-kochen/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
         }
       ],
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "salz.ch relue : « 10 Gramm Salz auf 100 Gramm Pasta auf 1000 ml Wasser » ; Swissmilk relue : 1 EL Salz pour 3 l ; Barilla illisible (403)."
+      }
     },
     {
       "id": "feculents.pates.sel.moment",
@@ -963,7 +1058,7 @@
       "enonce": "Cuire à gros bouillons dans une grande casserole, au temps du fabricant, jusqu'à al dente, puis égoutter.",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Le temps dépend du format (ex. tagliatelles 8 min, plaques à lasagne 20 min selon un fabricant) ; suivre l'emballage.",
+      "conditions": "Le temps dépend du format : suivre l'emballage. Swissmilk : porter à ébullition à grand feu, ôter le couvercle, saler, ajouter les pâtes, baisser le feu, cuire al dente selon l'emballage. L'exemple de temps par fabricant (page Barilla) n'a pas pu être relu (403) : retiré.",
       "sources": [
         {
           "titre": "Teigwaren kochen",
@@ -972,14 +1067,6 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "professionnelle"
-        },
-        {
-          "titre": "Tagliatelle (page produit, indications de cuisson)",
-          "organisme": "Barilla",
-          "url": "https://www.barilla.com/de-ch/produkte/pasta/collezione/tagliatelle",
-          "consulte": "2026-10-04",
-          "extrait": "",
-          "type_source": "web"
         }
       ],
       "confiance": "moyenne",
@@ -1012,20 +1099,25 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Teigwaren kochen relue : « Als Beilage 50-80 g Teigwaren, als Hauptgericht 100-120 g »."
+      }
     },
     {
       "id": "feculents.pates.rendement.cuisson",
       "sujet": "Pâtes",
       "type": "repere",
-      "enonce": "Les pâtes sèches prennent 2 à 2,5 fois leur poids à la cuisson.",
+      "enonce": "Les pâtes sèches cuites à l'eau prennent 2,5 à 2,8 fois leur poids sec (tables USDA : 2,53 à 2,79 selon le format).",
       "valeur": {
-        "min": 2,
-        "max": 2.5,
+        "min": 2.5,
+        "max": 2.8,
         "unite": "× poids sec"
       },
       "etat_poids": "sec",
-      "conditions": "Base Sanji ×2-2,5 ; résumé de tables USDA ×2,0-2,2. Valeur selon cuisson al dente. Confiance moyenne : l'USDA n'a été lu que via un résumé de recherche (PDF non relu).",
+      "conditions": "USDA, pâtes cuites à l'eau 12 à 17 min : coquilles 2,53 ; penne 2,60 ; farfalle et lasagnes 2,66 ; roues 2,79. La base Sanji (×2-2,5) est plus basse que toutes les lignes USDA : écart signalé, valeur USDA retenue. L'ancienne mention « USDA ×2,0-2,2 » provenait d'un résumé de recherche et était fausse. Cuisson à l'emballage ; un al dente strict peut donner un peu moins.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1036,7 +1128,7 @@
           "type_source": "base_sanji"
         },
         {
-          "titre": "Food Buying Guide, Section 4 Grains (tables de rendement ; chiffres lus via résumé de recherche, PDF non relu)",
+          "titre": "Food Buying Guide, Section 4 Grains, tables de rendement (PDF relu en entier)",
           "organisme": "USDA",
           "url": "https://foodbuyingguide.fns.usda.gov/files/Reports/USDA_FBG_Section4_GrainsYieldTable.pdf",
           "consulte": "2026-10-04",
@@ -1047,20 +1139,25 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "USDA FBG Section 4, PDF ouvert et lu : pâtes « 1 lb dry = 2.53 / 2.60 / 2.66 / 2.79 lb cooked boiled 12-17 min » ; base Sanji §11.2 (ligne 562) : ×2-2,5."
+      }
     },
     {
       "id": "feculents.pates.conservation.cuites",
       "sujet": "Pâtes cuites",
       "type": "repere",
-      "enonce": "Pâtes cuites réfrigérées : 2 à 3 jours selon la base Sanji, congélation 60 jours.",
+      "enonce": "Pâtes cuites réfrigérées : 1 à 4 jours selon les sources (base Sanji 2 à 3 j ; Verbraucherzentrale Hambourg 1 à 2 j ; un microbiologiste 3 à 4 j) ; congélation 60 jours (base) à 3 mois (web).",
       "valeur": {
-        "min": 2,
-        "max": 3,
+        "min": 1,
+        "max": 4,
         "unite": "jours"
       },
       "etat_poids": "cuit",
-      "conditions": "Base Sanji (§32.1) : 2 à 3 jours ; l'hygiène (hygiene.duree.feculents-legumes-cuits) donne J+2 pour les plats cuits (pâtes, riz, légumes) : écart non tranché ici. Refroidir vite ; à valider avec le plan de l'établissement.",
+      "conditions": "Écart entre sources, fourchette large retenue (règle 3). Référence d'hygiène du référentiel : hygiene.duree.feculents-legumes-cuits (au plus 2 jours) et hygiene.temperature.refroidissement pour le refroidissement ; ne pas dépasser la référence d'hygiène sans validation. Chiffres web relayés par pastapalast.com (non primaire). À valider avec le plan de l'établissement.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1069,12 +1166,25 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "base_sanji"
+        },
+        {
+          "titre": "Nudeln aufbewahren: Haltbarkeit, Lagerung und Trocknung",
+          "organisme": "pastapalast.com",
+          "url": "https://pastapalast.com/nudeln-aufbewahren/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
         }
       ],
-      "confiance": "moyenne",
+      "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Base Sanji §32.1 (ligne 1707) relue : 2-3 j, congélation 60 j ; pastapalast.com relue : 1-2 j (Verbraucherzentrale Hamburg), 3-4 j (microbiologiste), 3 mois au congélateur."
+      }
     },
     {
       "id": "feculents.pates.sec.stockage",
@@ -1087,7 +1197,7 @@
         "unite": "mois"
       },
       "etat_poids": "sec",
-      "conditions": "Source unique (base Sanji). Contient du gluten.",
+      "conditions": "Source unique chiffrée (base Sanji §32.1). Le site pastapalast.com (relu) dit seulement « plusieurs années » et que la DDM se dépasse de plusieurs mois, sans durée chiffrée. Contient du gluten.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1109,20 +1219,25 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §32.1 (ligne 1718) relue : 12-24 mois ; aucune source externe ouverte ne chiffre la durée."
+      }
     },
     {
       "id": "feculents.riz.rendement.cuit",
       "sujet": "Riz",
       "type": "repere",
-      "enonce": "Le riz cuit à l'eau ou à l'absorption prend 2,5 à 3 fois son poids sec.",
+      "enonce": "Le riz cuit à l'eau ou à l'absorption prend 2 à 3 fois son poids sec : environ 2,5 pour le riz long grain, jusqu'à 3 pour le riz à risotto, 2 à 2,5 pour le basmati et le riz complet.",
       "valeur": {
-        "min": 2.5,
+        "min": 2,
         "max": 3,
         "unite": "× poids sec"
       },
       "etat_poids": "sec",
-      "conditions": "Base Sanji ×2,5-3 ; USDA ≈ ×2,8 (résumé de recherche) ; risotto : 80 g secs donnent environ 220 g (×2,75, source commerciale). Confiance moyenne : l'USDA n'a été lu que via un résumé de recherche (PDF non relu).",
+      "conditions": "Base Sanji ×2,5-3 ; HelloFresh, facteur de gonflement : long grain et parboiled ≈ 2,5, basmati et jasmin 2-2,5, complet ≈ 2, risotto jusqu'à 3. USDA (relu) : seulement du riz sauvage (×2,55) et un mélange riz sauvage et blanc (×3,21), pas de riz blanc nature en poids. L'ancien chiffre « 80 g secs donnent environ 220 g » ne figure pas dans la source : retiré.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1133,7 +1248,7 @@
           "type_source": "base_sanji"
         },
         {
-          "titre": "Food Buying Guide, Section 4 Grains (tables de rendement ; chiffres lus via résumé de recherche, PDF non relu)",
+          "titre": "Food Buying Guide, Section 4 Grains (PDF relu : riz sauvage et mélange seulement)",
           "organisme": "USDA",
           "url": "https://foodbuyingguide.fns.usda.gov/files/Reports/USDA_FBG_Section4_GrainsYieldTable.pdf",
           "consulte": "2026-10-04",
@@ -1152,7 +1267,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "HelloFresh relue : tableau « Quellfaktor » 2 à 3 selon la variété, 60 g cru donnent 150-180 g ; USDA lu : riz sauvage 2,55, mélange 3,21 ; base Sanji §11.2 (ligne 561) : 2,5-3."
+      }
     },
     {
       "id": "feculents.riz.pilaf.proportions",
@@ -1165,7 +1285,7 @@
         "unite": "L de fond par kg de riz sec"
       },
       "etat_poids": "sec",
-      "conditions": "Rapport déduit d'une fiche type de la base Sanji (1,0 L de fond pour 700 g de riz), source unique non recoupée ; la durée n'est pas donnée : voir lacunes.",
+      "conditions": "Rapport déduit d'une fiche type illustrative de la base Sanji (§34 : 1,0 L de fond pour 700 g de riz), source unique non recoupée ; ce n'est pas un standard. La durée n'est pas donnée : voir lacunes.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1179,7 +1299,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §34 (ligne 1934) relue : riz 700 g, fond blanc 1,0 L, cuisson à absorption ; aucune source externe ouverte pour ce rapport."
+      }
     },
     {
       "id": "feculents.riz.refroidissement",
@@ -1216,14 +1341,14 @@
       "id": "feculents.riz.rechauffage",
       "sujet": "Riz cuit",
       "type": "regle",
-      "enonce": "Réchauffer une seule fois, à cœur à 70 °C minimum ; la toxine émétique déjà formée n'est pas détruite par la chaleur.",
+      "enonce": "Réchauffer à cœur à plus de 70 °C ; la toxine émétique déjà formée n'est pas détruite par la chaleur.",
       "valeur": {
         "min": 70,
         "max": 70,
         "unite": "°C à cœur"
       },
       "etat_poids": "cuit",
-      "conditions": "Source allemande de protection des consommateurs, via PTA-Forum. À valider localement.",
+      "conditions": "PTA-Forum (relayant une dépêche dpa) : chauffer uniformément et complètement à plus de 70 °C ; la source ne dit pas « une seule fois ». À valider localement.",
       "sources": [
         {
           "titre": "Darf man gekochten Reis aufwärmen?",
@@ -1245,20 +1370,25 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "PTA-Forum relue : « gleichmäßig und vollständig auf über 70 Grad erwärmt » ; toxine émétique non inactivée par un nouveau chauffage (Niedersachsen cité)."
+      }
     },
     {
       "id": "feculents.riz.conservation.cuit",
       "sujet": "Riz cuit",
       "type": "repere",
-      "enonce": "Durée de garde du riz cuit refroidi : 1 jour selon la base Sanji, 2 à 3 jours selon des sources web.",
+      "enonce": "Durée de garde du riz cuit refroidi : 1 jour (base Sanji ; Verbraucherzentrale Bayern, relayée par PTA-Forum).",
       "valeur": {
         "min": 1,
-        "max": 3,
+        "max": 1,
         "unite": "jours"
       },
       "etat_poids": "cuit",
-      "conditions": "Divergence : la base est la plus prudente. Fourchette large, confiance basse ; congélation 60 jours selon la base.",
+      "conditions": "Les deux sources concordent sur 1 jour. L'ancienne mention « 2 à 3 jours selon des sources web » ne figure pas dans les pages relues : retirée. Écart avec la référence d'hygiène du référentiel (hygiene.duree.feculents-legumes-cuits : au plus 2 jours pour pâtes, riz, légumes) : la plus prudente prévaut ; congélation 60 jours selon la base.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1269,6 +1399,14 @@
           "type_source": "base_sanji"
         },
         {
+          "titre": "Darf man gekochten Reis aufwärmen?",
+          "organisme": "Verbraucherzentrale Bayern",
+          "url": "https://www.verbraucherzentrale.bayern/faq/haetten-sies-gewusst/darf-man-gekochten-reis-aufwaermen-63270",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
           "titre": "Bacillus cereus: Reis aufwärmen",
           "organisme": "PTA-Forum",
           "url": "https://www.pta-forum.de/reis-aufwaermen-das-ist-zu-beachten-165918/",
@@ -1277,10 +1415,15 @@
           "type_source": "web"
         }
       ],
-      "confiance": "faible",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Verbraucherzentrale Bayern relue : « gekochter Reis sollte innerhalb eines Tages verzehrt werden » ; PTA-Forum relue : idem ; base Sanji §32.1 (ligne 1706) : 1 j."
+      }
     },
     {
       "id": "feculents.risotto.varietes",
@@ -1289,7 +1432,7 @@
       "enonce": "Riz à risotto à grain court et riche en amidon : Arborio (grain gros et rond), Carnaroli (tient longtemps al dente), Vialone Nano (petit grain, très crémeux).",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Le riz du Tessin et les variétés Swiss Rice n'ont pas été vérifiés.",
+      "conditions": "Le riz du Tessin est traité dans feculents.riz.suisse.tessin. La page Falstaff n'a pas pu être rouverte (erreur 403) : la liste des trois variétés repose sur gustini.at.",
       "sources": [
         {
           "titre": "Welchen Reis für das perfekte Risotto wählen?",
@@ -1317,7 +1460,7 @@
       "id": "feculents.risotto.duree",
       "sujet": "Risotto",
       "type": "repere",
-      "enonce": "Durée de cuisson : 16 à 18 min pour Arborio et Carnaroli, environ 15 min pour Vialone Nano ; une recette suisse indique 18 à 20 min.",
+      "enonce": "Durée de cuisson : 16 à 18 min pour Arborio et Carnaroli, 15 à 18 min pour Vialone Nano ; deux recettes suisses indiquent 18 à 20 min.",
       "valeur": {
         "min": 15,
         "max": 20,
@@ -1354,7 +1497,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "gustini.at relue : Carnaroli et Arborio 16-18 min, Vialone Nano 15-18 min ; Swissmilk Steinpilz-Risotto : 18-20 min ; Swissmilk Pilzrisotto : environ 20 min."
+      }
     },
     {
       "id": "feculents.risotto.etapes",
@@ -1391,15 +1539,23 @@
       "id": "feculents.risotto.portion",
       "sujet": "Risotto",
       "type": "repere",
-      "enonce": "Portion de riz à risotto : environ 80 g secs, 100 g en plat principal, 50 g en petite entrée.",
+      "enonce": "Portion de riz à risotto : environ 75 à 80 g secs par personne (recette Swissmilk : 300 g pour 4 ; HelloFresh : 80 g).",
       "valeur": {
-        "min": 50,
-        "max": 100,
+        "min": 75,
+        "max": 80,
         "unite": "g"
       },
       "etat_poids": "sec",
-      "conditions": "Sources commerciales non professionnelles ; à confirmer par la pratique de l'établissement.",
+      "conditions": "Le « 100 g en plat principal » et le « 50 g en petite entrée » relevés auparavant concernaient le riz en général (HelloFresh : 50-60 g en garniture, 80-100 g en plat) et non le risotto : retirés. À confirmer par la pratique de l'établissement.",
       "sources": [
+        {
+          "titre": "Steinpilz-Risotto",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/rezepte/LM201206_33/steinpilz-risotto-risotto-ai-funghi-porcini/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
         {
           "titre": "Wie viel Reis pro Person?",
           "organisme": "HelloFresh",
@@ -1409,20 +1565,37 @@
           "type_source": "web"
         }
       ],
-      "confiance": "faible",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Steinpilz-Risotto relue : 300 g de riz pour 4 portions ; HelloFresh relue : « Für Risotto werden etwa 80 g Rohreis pro Person verwendet »."
+      }
     },
     {
       "id": "feculents.risotto.avance",
       "sujet": "Risotto",
       "type": "regle",
-      "enonce": "Le risotto se sert tout de suite ; la précuisson partielle en service est une pratique de métier non sourcée ici.",
-      "valeur": null,
+      "enonce": "Précuisson en service (technique de brigade relayée par une communauté culinaire suisse) : cuire le risotto jusqu'à 5 min avant la fin (grain encore ferme), l'étaler aussitôt sur une plaque pour le refroidir vite, puis finir la cuisson avec du liquide au moment du service.",
+      "valeur": {
+        "min": 5,
+        "max": 5,
+        "unite": "min de cuisson restants à l'arrêt"
+      },
       "etat_poids": null,
-      "conditions": "Aucune durée d'avance trouvée : voir lacunes. Le riz cuit suit la règle de refroidissement du riz.",
+      "conditions": "Source unique, une astuce de forum sans durée de garde du risotto précuit ni température : voir lacunes. Le riz cuit refroidi suit hygiene.temperature.refroidissement (de 50 à 10 °C en 2 h au plus) et la garde du riz cuit (1 jour).",
       "sources": [
+        {
+          "titre": "Risotto vorkochen",
+          "organisme": "waskochen.ch (communauté)",
+          "url": "https://waskochen.ch/2007/05/14/risotto-vorkochen/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
         {
           "titre": "Darf man gekochten Reis aufwärmen?",
           "organisme": "Verbraucherzentrale Bayern",
@@ -1435,20 +1608,25 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "waskochen.ch relue : « Risotto kochen bis 5 Min. vor Schluss (noch körnig). Sofort auf Backblech ausstreichen … Flüssigkeit dazu, fertig kochen »."
+      }
     },
     {
       "id": "feculents.polenta.proportion",
       "sujet": "Polenta",
       "type": "repere",
-      "enonce": "Polenta : 1 part de semoule de maïs pour 4 parts de liquide, soit 250 g pour 1 L.",
+      "enonce": "Polenta de semoule de maïs : de 3,3 à 5,2 parts de liquide pour 1 part de semoule selon les recettes (4 parts pour 250 g et 1 L).",
       "valeur": {
-        "min": 4,
-        "max": 4,
+        "min": 3.3,
+        "max": 5.2,
         "unite": "parts de liquide pour 1 part de semoule"
       },
       "etat_poids": "sec",
-      "conditions": "Polenta traditionnelle ; la semoule précuite demande souvent moins de liquide, suivre l'emballage.",
+      "conditions": "GuteKüche.ch : 250 g pour 1 L (1:4) ; Küchengötter : 125 g pour 500 ml (1:4) ; foodboom.de : 300 g pour 1 L (1:3,3) ; NZZ Bellevue : 250 g pour 650 ml d'eau et 650 ml de lait (1:5,2). La semoule précuite demande souvent moins de liquide : suivre l'emballage.",
       "sources": [
         {
           "titre": "Polenta Grundrezept",
@@ -1465,12 +1643,33 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "web"
+        },
+        {
+          "titre": "Gebratene Polentaschnitten mit schnellem Tomatensalat",
+          "organisme": "foodboom.de",
+          "url": "https://www.foodboom.de/rezept/polentaschnitten-mit-tomatensalat",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Polenta-Schnitten",
+          "organisme": "Küchengötter",
+          "url": "https://www.kuechengoetter.de/rezepte/polenta-schnitten-76506",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
         }
       ],
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GuteKüche.ch, NZZ Bellevue, foodboom.de et Küchengötter relues : 1:4, 1:5,2, 1:3,3 et 1:4 (liquide pour semoule, en poids ou volume)."
+      }
     },
     {
       "id": "feculents.polenta.cuisson",
@@ -1483,7 +1682,7 @@
         "unite": "min"
       },
       "etat_poids": null,
-      "conditions": "Valeur = méthode classique à la casserole (Swissmilk). La variante au four vient d'une recette web ; la durée de la semoule précuite est donnée sans chiffre précis (suivre l'emballage).",
+      "conditions": "Valeur = méthode classique à la casserole (Swissmilk : « ca. 40-60 Minuten »). Semoule précuite : quelques minutes (Swissmilk), 5 à 15 min de gonflement selon l'emballage (Küchengötter), environ 15 min (NZZ). Variante au four : 10 min en remuant puis 12 à 15 min à 180 °C (GuteKüche.ch). Un chef de la NZZ cite aussi le four à environ 100 °C (semoule fine : environ 30 min).",
       "sources": [
         {
           "titre": "Polenta kochen",
@@ -1505,7 +1704,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Polenta kochen relue : 40-60 min ; GuteKüche.ch relue : 10 min puis 12-15 min au four à 180 °C ; NZZ Bellevue relue."
+      }
     },
     {
       "id": "feculents.polenta.rendement",
@@ -1518,7 +1722,7 @@
         "unite": "× poids sec"
       },
       "etat_poids": "sec",
-      "conditions": "Source unique (base Sanji) ; la proportion 1:4 liquide est compatible. Poids après refroidissement non vérifié.",
+      "conditions": "Source unique (base Sanji §11.2). Le PDF USDA relu donne seulement des volumes pour la semoule de maïs, pas de poids cuit. Les proportions de liquide des recettes (1:3,3 à 1:5,2) sont compatibles avec un facteur de 3 à 4 mais ne le prouvent pas. Poids après refroidissement non vérifié.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1532,20 +1736,25 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §11.2 (ligne 565) relue : gain ×3-4 ; USDA Section 4 lu : cornmeal sans poids cuit."
+      }
     },
     {
       "id": "feculents.semoule.rendement",
       "sujet": "Semoule et couscous",
       "type": "repere",
-      "enonce": "Semoule et couscous prennent 2 à 2,5 fois leur poids sec.",
+      "enonce": "Couscous : environ 2,55 fois le poids sec (USDA) ; la base Sanji donne 2 à 2,5 pour la semoule et le couscous.",
       "valeur": {
         "min": 2,
-        "max": 2.5,
+        "max": 2.55,
         "unite": "× poids sec"
       },
       "etat_poids": "sec",
-      "conditions": "Source unique (base Sanji).",
+      "conditions": "USDA : couscous enrichi, 1 lb sec = 2,55 lb cuit avec 3 1/4 tasses d'eau par lb. La semoule seule n'est pas recoupée : seule la base Sanji la couvre.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1554,12 +1763,25 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "base_sanji"
+        },
+        {
+          "titre": "Food Buying Guide, Section 4 Grains, tables de rendement (PDF relu en entier)",
+          "organisme": "USDA",
+          "url": "https://foodbuyingguide.fns.usda.gov/files/Reports/USDA_FBG_Section4_GrainsYieldTable.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "officielle"
         }
       ],
-      "confiance": "faible",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "partielle",
+        "note": "USDA Section 4 lu : couscous 2,55 ; base Sanji §11.2 (ligne 563) : 2-2,5. La semoule hors couscous reste couverte par la seule base."
+      }
     },
     {
       "id": "feculents.couscous.proportion",
@@ -1594,7 +1816,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "eat.de relue : eau et couscous 1:1, 60 g en garniture, 150 g en plat ; Verbraucherfenster Hessen relue : 1:1 avec de l'eau chaude."
+      }
     },
     {
       "id": "feculents.couscous.gonflement-duree",
@@ -1629,20 +1856,25 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Verbraucherfenster Hessen relue : 10-15 min de gonflement ; eat.de relue : 3 à 5 min."
+      }
     },
     {
       "id": "feculents.boulgour.proportion",
       "sujet": "Boulgour",
       "type": "repere",
-      "enonce": "Boulgour fin ou instantané : 1 part pour 1,2 à 2 parts d'eau chaude, gonflement environ 10 min ; portion 50 g en garniture, 80 g en plat.",
+      "enonce": "Boulgour : 1 part pour 1 à 2 parts d'eau selon la mouture (fin 1:1,2 à 1:1,5, moyen 1:1,5 à 1:2, gros 1:2, instantané 1:1), gonflement de 5 à 20 min ; portion sèche 50-60 g en garniture, 70-80 g en plat.",
       "valeur": {
-        "min": 1.2,
+        "min": 1,
         "max": 2,
         "unite": "parts d'eau"
       },
       "etat_poids": "sec",
-      "conditions": "Selon la grosseur du grain ; suivre l'emballage. Sources web.",
+      "conditions": "Sources web ; suivre l'emballage. Mouture fine : environ 10 min en versant l'eau chaude seulement ; moyenne 12-15 min ; grosse 15-20 min ; instantané environ 5 min. Gonflement du poids sec environ ×2,5 selon la même page. La page eat.de ne traite pas le boulgour : retirée des sources.",
       "sources": [
         {
           "titre": "Bulgur zubereiten: Wasserverhältnis",
@@ -1651,33 +1883,30 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "web"
-        },
-        {
-          "titre": "Perfekte Menge: Wie viel Couscous pro Person?",
-          "organisme": "eat.de",
-          "url": "https://eat.de/magazin/couscous-menge/",
-          "consulte": "2026-10-04",
-          "extrait": "",
-          "type_source": "web"
         }
       ],
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "fitmitgenuss.de relue : tableau de ratios et temps de gonflement par mouture, portion 50-60 g (garniture) et 70-80 g (plat)."
+      }
     },
     {
       "id": "feculents.quinoa.cuisson",
       "sujet": "Quinoa",
       "type": "repere",
-      "enonce": "Quinoa : 1 part pour 2 parts d'eau, 10 à 15 min de mijotage après ébullition.",
+      "enonce": "Quinoa : 1 part pour 2 parts d'eau ; brève ébullition, environ 10 min de mijotage puis environ 10 min couvert hors du feu.",
       "valeur": {
         "min": 10,
-        "max": 15,
-        "unite": "min"
+        "max": 10,
+        "unite": "min de mijotage"
       },
       "etat_poids": "sec",
-      "conditions": "Rapport 1:2. Rendement base Sanji ×2,5-3 (source unique).",
+      "conditions": "Rapport 1:2. Verbraucherfenster Hessen : mijotage environ 10 min puis encore environ 10 min de gonflement couvert (l'ancien « 10 à 15 min » était imprécis). Rendement : USDA 2,51 pour 1 avec 2 parts d'eau ; base Sanji ×2,5-3.",
       "sources": [
         {
           "titre": "Bulgur, Couscous, Quinoa: Kennen Sie den Unterschied?",
@@ -1694,25 +1923,38 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "base_sanji"
+        },
+        {
+          "titre": "Food Buying Guide, Section 4 Grains, tables de rendement (PDF relu en entier)",
+          "organisme": "USDA",
+          "url": "https://foodbuyingguide.fns.usda.gov/files/Reports/USDA_FBG_Section4_GrainsYieldTable.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "officielle"
         }
       ],
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Verbraucherfenster Hessen relue : eau doublée, brève ébullition, ~10 min de mijotage, ~10 min de gonflement ; USDA lu : quinoa 2,51 lb cuit pour 1 lb sec (2 parts d'eau)."
+      }
     },
     {
       "id": "feculents.leg.trempage",
       "sujet": "Légumineuses sèches",
       "type": "repere",
-      "enonce": "Haricots secs et pois chiches : trempage de 8 à 12 h ; lentilles et pois cassés sans trempage.",
+      "enonce": "Haricots secs, pois non pelés et pois chiches : trempage de 8 à 12 h (BZfE), jusqu'à 24 h pour les pois chiches selon GuteKüche.ch ; lentilles et pois cassés sans trempage.",
       "valeur": {
         "min": 8,
-        "max": 12,
+        "max": 24,
         "unite": "h"
       },
       "etat_poids": "sec",
-      "conditions": "Jeter l'eau de trempage. Source officielle allemande + sources web.",
+      "conditions": "BZfE : 8 à 12 h dans trois fois le volume d'eau, jeter l'eau de trempage ; GuteKüche.ch : pois chiches 24 h, haricots 10 à 12 h. Divergence : fourchette large retenue (règle 3).",
       "sources": [
         {
           "titre": "Hülsenfrüchte: Vom Einkauf in die Küche",
@@ -1739,10 +1981,15 @@
           "type_source": "web"
         }
       ],
-      "confiance": "haute",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "BZfE relue : trempage 8-12 h, lentilles et pois cassés sans trempage ; GuteKüche.ch relue : pois chiches 24 h, haricots 10-12 h."
+      }
     },
     {
       "id": "feculents.leg.cuisson.haricots-pois-chiches",
@@ -1777,20 +2024,25 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "BZfE relue, tableau : haricots et pois chiches « ca. 60 bis 90 » min, pois non pelés 60-120 min."
+      }
     },
     {
       "id": "feculents.leg.cuisson.lentilles",
       "sujet": "Lentilles",
       "type": "repere",
-      "enonce": "Lentilles rouges et jaunes : 5 à 15 min ; lentilles brunes, vertes ou du Puy : 20 à 40 min.",
+      "enonce": "Lentilles rouges et jaunes : 5 à 15 min ; lentilles de montagne, Beluga et du Puy : 20 à 30 min ; lentilles brunes ou vertes : 15 à 40 min selon la source.",
       "valeur": {
         "min": 5,
         "max": 40,
         "unite": "min"
       },
       "etat_poids": "sec",
-      "conditions": "Fourchette large, selon variété et pelage.",
+      "conditions": "BZfE : rouges et jaunes 5-15 min, Puy, Beluga et de montagne 20-30 min, lentilles brunes (Tellerlinsen) 15-30 min ; lusina.de : rouges 10-15 min, brunes ou vertes 25-40 min. Fourchette large, selon variété et pelage.",
       "sources": [
         {
           "titre": "Hülsenfrüchte: Vom Einkauf in die Küche",
@@ -1807,20 +2059,17 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "web"
-        },
-        {
-          "titre": "Wie kocht man Hülsenfrüchte?",
-          "organisme": "GuteKüche.ch",
-          "url": "https://www.gutekueche.ch/wie-kocht-man-huelsenfruechte-artikel-962",
-          "consulte": "2026-10-04",
-          "extrait": "",
-          "type_source": "web"
         }
       ],
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "BZfE relue, tableau : rouges/jaunes 5-15 min, Berg/Beluga/Puy 20-30 min, Tellerlinsen 15-30 min ; lusina.de relue : 10-15 et 25-40 min."
+      }
     },
     {
       "id": "feculents.leg.eau",
@@ -1833,7 +2082,7 @@
         "unite": "L pour 250 g"
       },
       "etat_poids": "sec",
-      "conditions": "Sources web.",
+      "conditions": "Source web unique (lusina.de) pour 250 g : 1,2-1,5 L (haricots, pois chiches), 0,75-1 L (lentilles). GuteKüche.ch indique seulement « le double du volume » sans ces chiffres : retirée.",
       "sources": [
         {
           "titre": "Hülsenfrüchte kochen (tableau trempage et cuisson)",
@@ -1842,20 +2091,17 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "web"
-        },
-        {
-          "titre": "Wie kocht man Hülsenfrüchte?",
-          "organisme": "GuteKüche.ch",
-          "url": "https://www.gutekueche.ch/wie-kocht-man-huelsenfruechte-artikel-962",
-          "consulte": "2026-10-04",
-          "extrait": "",
-          "type_source": "web"
         }
       ],
-      "confiance": "moyenne",
+      "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "lusina.de relue, tableau : pour 250 g, 1 200-1 500 ml (pois chiches, haricots), 750-900 ml (lentilles rouges), 900-1 000 ml (brunes, vertes)."
+      }
     },
     {
       "id": "feculents.leg.haricots-rouges.securite",
@@ -1868,7 +2114,7 @@
         "unite": "min d'ébullition vive"
       },
       "etat_poids": "sec",
-      "conditions": "BZfE pour l'interdiction du cru ; le préchauffage de 10 min vient d'une source web.",
+      "conditions": "BZfE : jamais crus, une cuisson suffisante neutralise les lectines ; lusina.de : haricots rouges 8-12 h de trempage, 10 min d'ébullition vive, puis 45-60 min de mijotage.",
       "sources": [
         {
           "titre": "Hülsenfrüchte: Vom Einkauf in die Küche",
@@ -1890,7 +2136,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "BZfE relue : « frische Hülsenfrüchte nie roh … Lektine » ; lusina.de relue : « Kidneybohnen … 10 Min. sprudelnd vorkochen, dann 45-60 Min. leise simmern »."
+      }
     },
     {
       "id": "feculents.leg.sel",
@@ -1919,14 +2170,14 @@
       "id": "feculents.leg.rendement",
       "sujet": "Légumineuses sèches",
       "type": "repere",
-      "enonce": "Les légumineuses sèches prennent 2,2 à 2,5 fois leur poids à la cuisson (base Sanji).",
+      "enonce": "Les légumineuses sèches prennent 2 à 3 fois leur poids à la cuisson (base Sanji 2,2-2,5 ; lusina.de 2-3, soit 250 g secs pour 600 à 750 g cuits).",
       "valeur": {
-        "min": 2.2,
-        "max": 2.5,
+        "min": 2,
+        "max": 3,
         "unite": "× poids sec"
       },
       "etat_poids": "sec",
-      "conditions": "Source unique (base Sanji), non recoupée : la section USDA « Grains » ne contient pas de légumineuses, la source a été retirée. Après trempage le cas échéant.",
+      "conditions": "Base Sanji §11.2 : 2,2-2,5 après trempage le cas échéant ; lusina.de, un blog : « gekocht ≈ 2-3 × Gewicht trocken ». La section USDA « Grains » ne contient pas de légumineuses. Fourchette large retenue (règle 3).",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1935,12 +2186,25 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "base_sanji"
+        },
+        {
+          "titre": "Hülsenfrüchte kochen (tableau trempage et cuisson)",
+          "organisme": "lusina.de",
+          "url": "https://lusina.de/huelsenfruechte-kochen-einweichen-zeiten-bekoemmlich/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
         }
       ],
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "lusina.de relue : rendement 2-3, 250 g secs donnent environ 600-750 g cuits ; base Sanji §11.2 (ligne 566) : 2,2-2,5."
+      }
     },
     {
       "id": "feculents.leg.conservation.cuites",
@@ -1967,69 +2231,646 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §32.1 (ligne 1708) relue : 3-4 j, 2-3 j transvasées, congélation 90 j ; aucune source externe ouverte ne chiffre la durée."
+      }
+    },
+    {
+      "id": "feculents.pdt.cuisson.entieres-eau",
+      "sujet": "Pommes de terre entières",
+      "type": "repere",
+      "enonce": "Pommes de terre entières dans l'eau salée, sans couvercle : environ 25 minutes à feu moyen après ébullition, jusqu'à ce qu'un couteau entre sans résistance.",
+      "valeur": {
+        "min": 25,
+        "max": 25,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Une seule recette (Gschwellti) : le temps dépend du calibre ; contrôler à la pointe du couteau.",
+      "sources": [
+        {
+          "titre": "Gschwellti",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/rezepte/SM2018_ALLT_05/gschwellti/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Gschwellti relue : « ca. 25 Minuten offen bei mittlerer Hitze köcheln », contrôle au couteau."
+      }
+    },
+    {
+      "id": "feculents.pdt.cuisson.entieres-vapeur",
+      "sujet": "Pommes de terre entières",
+      "type": "repere",
+      "enonce": "Pommes de terre entières au four à vapeur : environ 35 minutes à 100 °C.",
+      "valeur": {
+        "min": 35,
+        "max": 35,
+        "unite": "min à 100 °C"
+      },
+      "etat_poids": null,
+      "conditions": "Une seule recette (Gschwellti) ; appareil de type steamer à plaque perforée.",
+      "sources": [
+        {
+          "titre": "Gschwellti",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/rezepte/SM2018_ALLT_05/gschwellti/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Gschwellti relue : « Steamer/Dampfgarer … Ca. 35 Minuten bei 100 °C »."
+      }
+    },
+    {
+      "id": "feculents.pdt.cuisson.entieres-autocuiseur",
+      "sujet": "Pommes de terre entières",
+      "type": "repere",
+      "enonce": "Pommes de terre entières à l'autocuiseur sur panier vapeur : 8 à 15 minutes une fois la pression atteinte.",
+      "valeur": {
+        "min": 8,
+        "max": 15,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Remplir l'autocuiseur aux trois quarts au plus ; attendre la chute complète de la pression avant d'ouvrir (source). Selon le calibre.",
+      "sources": [
+        {
+          "titre": "Gschwellti",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/rezepte/SM2018_ALLT_05/gschwellti/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Gschwellti relue : « Aufkochen, Hitze reduzieren, 8-15 Minuten garen », Dampfkochtopf."
+      }
+    },
+    {
+      "id": "feculents.pdt.rissolees.cuisson",
+      "sujet": "Pommes de terre rissolées",
+      "type": "repere",
+      "enonce": "Pommes de terre fermes crues en dés de 1 cm, rissolées au beurre clarifié : environ 25 minutes (5 min en remuant, 15 min à couvert à feu moyen, puis coloration à découvert).",
+      "valeur": {
+        "min": 25,
+        "max": 25,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Une recette Swissmilk ; avec des pommes déjà cuites la veille, quelques minutes de coloration suffisent (la source ne chiffre pas). Les 25 min incluent la coloration finale.",
+      "sources": [
+        {
+          "titre": "Bratkartoffeln",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/rezepte/SM2022_DIVE_12/bratkartoffeln/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Bratkartoffeln relue : environ 5 min, puis environ 15 min à couvert, puis dorer ; « Kochen/Backen 25 min » ; pommes de la veille : quelques minutes."
+      }
+    },
+    {
+      "id": "feculents.pdt.rosti-cru.cuisson",
+      "sujet": "Rösti de pommes crues",
+      "type": "repere",
+      "enonce": "Rösti de pommes de terre crues râpées : 5 à 10 min de poêlage en remuant, 5 à 10 min en galette sans remuer, puis 5 à 10 min sur la seconde face, soit 15 à 30 min au total.",
+      "valeur": {
+        "min": 15,
+        "max": 30,
+        "unite": "min au total"
+      },
+      "etat_poids": null,
+      "conditions": "Recette pour 1,2 kg de pommes de terre râpées grossièrement et 4 portions ; contrôle : pommes tendres.",
+      "sources": [
+        {
+          "titre": "Rösti aus rohen Kartoffeln",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/rezepte/LM200003_33_MEN003B032B/roesti-aus-rohen-kartoffeln/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Rösti aus rohen Kartoffeln relue : 5-10 min + 5-10 min + 5-10 min ; 1,2 kg de pommes pour 4 portions."
+      }
+    },
+    {
+      "id": "feculents.pdt.cuites.conservation",
+      "sujet": "Pommes de terre cuites refroidies",
+      "type": "repere",
+      "enonce": "Pommes de terre cuites refroidies : environ 3 à 4 jours au réfrigérateur selon une source grand public, après refroidissement complet et séchage de la condensation.",
+      "valeur": {
+        "min": 3,
+        "max": 4,
+        "unite": "jours"
+      },
+      "etat_poids": "cuit",
+      "conditions": "Source web unique (kochfrau.de). Écart avec la référence d'hygiène du référentiel : hygiene.duree.feculents-legumes-cuits (au plus 2 jours pour pâtes, riz, légumes cuits) et hygiene.temperature.refroidissement pour le refroidissement : la référence d'hygiène prévaut en restauration. À valider avec le plan de l'établissement.",
+      "sources": [
+        {
+          "titre": "Pellkartoffeln aufbewahren: So bleiben sie länger frisch",
+          "organisme": "kochfrau.de",
+          "url": "https://kochfrau.de/pellkartoffeln-aufbewahren/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "kochfrau.de relue : « im Kühlschrank etwa 3 bis 4 Tage », complètement refroidies, bien couvertes."
+      }
+    },
+    {
+      "id": "feculents.pdt.gnocchi.cuisson-eau",
+      "sujet": "Gnocchi de pommes de terre",
+      "type": "repere",
+      "enonce": "Gnocchi frais : les pocher environ 5 minutes sous le point d'ébullition, jusqu'à ce qu'ils remontent à la surface, puis les égoutter à l'écumoire ; une ébullition vive les fait éclater.",
+      "valeur": {
+        "min": 5,
+        "max": 5,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "kartoffel.ch : 5 min sous l'ébullition jusqu'à la remontée ; cookandsoul.de : même méthode, sans durée.",
+      "sources": [
+        {
+          "titre": "Gnocchi (recette)",
+          "organisme": "Schweizer Kartoffeln (kartoffel.ch)",
+          "url": "https://www.kartoffel.ch/de/rezepte/hauptgang/gnocchi.html",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Gnocchi selber machen aus mehlig kochenden Kartoffeln",
+          "organisme": "cookandsoul.de",
+          "url": "https://cookandsoul.de/gemuese/gnocchi-selber-machen/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "kartoffel.ch recette relue : « 5 Minuten unter dem Siedepunkt ziehen lassen, bis sie an die Wasseroberfläche aufsteigen » ; cookandsoul.de relue : eau frémissante, à l'écumoire."
+      }
+    },
+    {
+      "id": "feculents.pdt.gnocchi.congelation",
+      "sujet": "Gnocchi de pommes de terre",
+      "type": "repere",
+      "enonce": "Gnocchi crus congelés : 1 à 6 mois à -18 °C, après une pré-congélation à plat ; les cuire sans décongeler, environ 3 minutes dans l'eau bouillante salée.",
+      "valeur": {
+        "min": 1,
+        "max": 6,
+        "unite": "mois"
+      },
+      "etat_poids": null,
+      "conditions": "Deux sites web divergent (pastapalast.com : 1 à 2 mois, cuisson de 3 min ; utopia.de : jusqu'à 6 mois, cuisson directe sans décongélation) ; fourchette large retenue. Les gnocchi gardés plusieurs jours au frais ne se congèlent plus (utopia.de).",
+      "sources": [
+        {
+          "titre": "Gnocchi einfrieren und auftauen",
+          "organisme": "pastapalast.com",
+          "url": "https://pastapalast.com/gnocchi-einfrieren-und-auftauen/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Gnocchi auf Vorrat einfrieren: Das solltest du beachten",
+          "organisme": "utopia.de",
+          "url": "https://utopia.de/ratgeber/gnocchi-auf-vorrat-einfrieren-das-solltest-du-beachten_309457/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "pastapalast.com relue : crus 1-2 mois, 2 h à plat, 3 min dans l'eau bouillante ; utopia.de relue : jusqu'à six mois à -18 °C, directement dans l'eau bouillante."
+      }
+    },
+    {
+      "id": "feculents.pdt.gnocchi.avance",
+      "sujet": "Gnocchi de pommes de terre",
+      "type": "repere",
+      "enonce": "Avance de gnocchi : crus, farinés et égouttés sur une grille, au plus 2 jours au réfrigérateur ; cuits, environ 2 à 3 jours.",
+      "valeur": {
+        "min": 2,
+        "max": 3,
+        "unite": "jours"
+      },
+      "etat_poids": null,
+      "conditions": "Deux sources web (cookandsoul.de : 2 jours au plus pour les gnocchi crus farinés ; pastapalast.com : 2 à 3 jours pour les gnocchi cuits). Pour les gnocchi cuits, la référence d'hygiène des féculents cuits (hygiene.duree.feculents-legumes-cuits, au plus 2 jours) prévaut. À valider localement.",
+      "sources": [
+        {
+          "titre": "Gnocchi selber machen aus mehlig kochenden Kartoffeln",
+          "organisme": "cookandsoul.de",
+          "url": "https://cookandsoul.de/gemuese/gnocchi-selber-machen/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Gnocchi einfrieren und auftauen",
+          "organisme": "pastapalast.com",
+          "url": "https://pastapalast.com/gnocchi-einfrieren-und-auftauen/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "cookandsoul.de relue : « maximal 2 Tage im Kühlschrank » ; pastapalast.com relue : cuits 2 à 3 jours au frais."
+      }
+    },
+    {
+      "id": "feculents.pates.fraiches.cuisson",
+      "sujet": "Pâtes fraîches",
+      "type": "repere",
+      "enonce": "Pâtes fraîches : 2 à 3 minutes de cuisson dans beaucoup d'eau (environ 1 L pour 100 g) ; elles deviennent molles si elles restent trop longtemps.",
+      "valeur": {
+        "min": 2,
+        "max": 3,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Source web unique (pastapalast.com) ; selon l'épaisseur et le format. Le même site cite 20 g de sel par litre, plus que la saline suisse (10 g/L) : non retenu.",
+      "sources": [
+        {
+          "titre": "Frische Nudeln kochen: perfekte Pasta in 5 Schritten",
+          "organisme": "pastapalast.com",
+          "url": "https://pastapalast.com/selbstgemachte-pasta-kochen/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "pastapalast.com relue : « Frische Nudeln müssen in der Regel nur 2 bis 3 Minuten kochen » ; un litre d'eau pour 100 g."
+      }
+    },
+    {
+      "id": "feculents.pates.fraiches.congelation",
+      "sujet": "Pâtes fraîches farcies",
+      "type": "repere",
+      "enonce": "Pâtes fraîches farcies (type ravioli) : congélation crues, 3 mois ; les plonger directement, sans décongeler, dans l'eau bouillante.",
+      "valeur": {
+        "min": 3,
+        "max": 3,
+        "unite": "mois"
+      },
+      "etat_poids": null,
+      "conditions": "Source web unique (pastapalast.com). La durée de garde au frais des pâtes fraîches est restée sans source fiable (voir lacunes).",
+      "sources": [
+        {
+          "titre": "Nudeln aufbewahren: Haltbarkeit, Lagerung und Trocknung",
+          "organisme": "pastapalast.com",
+          "url": "https://pastapalast.com/nudeln-aufbewahren/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "pastapalast.com relue : ravioli congelés crus, 3 mois, cuisson directe dans l'eau bouillante."
+      }
+    },
+    {
+      "id": "feculents.pates.cuites.tenue-chaud",
+      "sujet": "Pâtes cuites",
+      "type": "technique",
+      "enonce": "Maintien au chaud en service : pâtes cuites al dente, égouttées sans secouer, huilées avec une huile neutre puis remises dans la casserole chaude couverte, 20 à 30 minutes ; le beurre ne convient pas et l'huile gêne l'accroche de la sauce.",
+      "valeur": {
+        "min": 20,
+        "max": 30,
+        "unite": "min"
+      },
+      "etat_poids": "cuit",
+      "conditions": "Source web unique (Betty Bossi, Suisse). Conseil de cuisine domestique ; pour un volume de brigade, étaler sur plaques avec peu d'huile pour refroidir vite, puis suivre hygiene.temperature.refroidissement. Tenue au chaud à valider avec le plan HACCP.",
+      "sources": [
+        {
+          "titre": "Teigwaren warm halten: 6 Tipps und Tricks",
+          "organisme": "Betty Bossi",
+          "url": "https://www.bettybossi.ch/de/magazin/artikel/teigwaren-warm-halten-6-tipps-und-tricks/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Betty Bossi relue : huile neutre, remise en casserole chaude, « 20-30 Min. warm gehalten » ; beurre inadapté ; plaques avec peu d'huile pour refroidir."
+      }
+    },
+    {
+      "id": "feculents.pates.rechauffage",
+      "sujet": "Pâtes cuites",
+      "type": "regle",
+      "enonce": "Réchauffer les pâtes cuites à cœur à plus de 70 °C, de façon uniforme ; au micro-ondes la chaleur est inégale.",
+      "valeur": {
+        "min": 70,
+        "max": 70,
+        "unite": "°C à cœur"
+      },
+      "etat_poids": "cuit",
+      "conditions": "PTA-Forum (dépêche dpa) à propos des restes de riz, avec extension explicite aux pâtes et à la lasagne ; source secondaire. À valider localement.",
+      "sources": [
+        {
+          "titre": "Bacillus cereus: Reis aufwärmen",
+          "organisme": "PTA-Forum",
+          "url": "https://www.pta-forum.de/reis-aufwaermen-das-ist-zu-beachten-165918/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "PTA-Forum relue : restes de riz, pâtes et lasagne en petites portions au froid ; « gleichmäßig und vollständig auf über 70 Grad erwärmt »."
+      }
+    },
+    {
+      "id": "feculents.risotto.liquide",
+      "sujet": "Risotto",
+      "type": "repere",
+      "enonce": "Liquide total d'un risotto : environ 3,3 à 4,2 L par kg de riz sec (vin, bouillon et crème compris), soit 1,0 à 1,25 L pour 300 g de riz.",
+      "valeur": {
+        "min": 3.3,
+        "max": 4.2,
+        "unite": "L de liquide par kg de riz sec"
+      },
+      "etat_poids": "sec",
+      "conditions": "Déduit de recettes : Swissmilk Steinpilz-Risotto, 300 g de riz, 2,5 dl de vin et 1 L de bouillon (1,25 L) ; Swissmilk Pilzrisotto, 300 g, 3 dl de vin ou bouillon, 4,5 dl de bouillon et 2,5 dl de crème (1,0 L) ; Wasserschlossreis, 150 g pour 2 dl de vin et 4 dl d'eau (4,0 L/kg). Le liquide se rajoute peu à peu, le riz restant juste couvert ; ajuster selon le grain et la cuisson.",
+      "sources": [
+        {
+          "titre": "Steinpilz-Risotto",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/rezepte/LM201206_33/steinpilz-risotto-risotto-ai-funghi-porcini/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Pilzrisotto (Risotto ai funghi)",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/rezepte/SM2021_OUTD_08/pilzrisotto-risotto-ai-funghi/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Der Reis (idée de recette)",
+          "organisme": "Wasserschlossreis (wasserschlossreis.ch)",
+          "url": "https://www.wasserschlossreis.ch/der-reis.html",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk Steinpilz-Risotto et Pilzrisotto relues (quantités de riz et de liquide) ; wasserschlossreis.ch relue : 150 g de riz, 2 dl de vin, 4 dl d'eau."
+      }
+    },
+    {
+      "id": "feculents.riz.suisse.tessin",
+      "sujet": "Riz suisse (Tessin)",
+      "type": "definition",
+      "enonce": "Le riz suisse de risotto vient surtout du delta de la Maggia (Tessin), cultivé en sec depuis 1997 par un seul domaine ; la variété Loto, de type japonica, représente environ 60 % des surfaces ; Carnaroli est en essai depuis 2020 sur un hectare.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Surface environ 90 ha et 400 à 520 t de riz paddy selon l'année et la source (variable : mauvaises récoltes dues aux adventices). Loto n'est pas une variété classique italienne de risotto (Arborio, Vialone Nano, Carnaroli) ; elle est choisie pour son cycle court et sa bonne liaison. Aucun temps de cuisson ni rapport liquide propre à Loto relevé : voir lacunes.",
+      "sources": [
+        {
+          "titre": "Tessiner Reis auf Erfolgskurs",
+          "organisme": "Schweizer Bauer",
+          "url": "https://www.schweizerbauer.ch/artikel/pflanzen/spezialkulturen/tessiner-reis-auf-erfolgskurs",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Schweizer Reis hat Tradition",
+          "organisme": "LID Mediendienst (Landwirtschaft)",
+          "url": "https://lid.ch/artikel/schweizer-reis-hat-tradition",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Der Reis (idée de recette)",
+          "organisme": "Wasserschlossreis (wasserschlossreis.ch)",
+          "url": "https://www.wasserschlossreis.ch/der-reis.html",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Schweizer Bauer, LID et wasserschlossreis.ch relues : Maggia, culture sèche depuis 1997, Loto sur 60 %, Carnaroli en 2020 sur 1 ha."
+      }
+    },
+    {
+      "id": "feculents.polenta.refroidie",
+      "sujet": "Polenta refroidie",
+      "type": "technique",
+      "enonce": "Polenta taillée : l'étaler sur 1 à 1,5 cm, la laisser refroidir et prendre (environ 30 min), la tailler en bâtons ou en losanges, puis la dorer à la poêle environ 2 à 4 minutes par face.",
+      "valeur": {
+        "min": 2,
+        "max": 4,
+        "unite": "min par face"
+      },
+      "etat_poids": null,
+      "conditions": "Deux recettes web concordantes (Küchengötter : 1,5 cm, 30 min de prise, 2 à 3 min par face ; foodboom.de : 1 cm, environ 4 min). La durée de garde de la polenta refroidie n'est pas sourcée (voir lacunes). Hygiène : refroidir selon hygiene.temperature.refroidissement.",
+      "sources": [
+        {
+          "titre": "Polenta-Schnitten",
+          "organisme": "Küchengötter",
+          "url": "https://www.kuechengoetter.de/rezepte/polenta-schnitten-76506",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Gebratene Polentaschnitten mit schnellem Tomatensalat",
+          "organisme": "foodboom.de",
+          "url": "https://www.foodboom.de/rezept/polentaschnitten-mit-tomatensalat",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Küchengötter relue : 1,5 cm, 30 min, rhombes 5 x 5 cm, 2-3 min par face ; foodboom.de relue : 1 cm, bâtons 8 x 4 cm, environ 4 min."
+      }
     }
   ],
   "lacunes": [
     {
-      "sujet": "Pâtes fraîches",
-      "raison": "Aucune source fiable trouvée pour le temps de cuisson, le rendement cuit/frais et la conservation des pâtes fraîches."
+      "sujet": "Pâtes fraîches : rendement cuit/frais et conservation réfrigérée",
+      "raison": "Cuisson (2 à 3 min) et congélation des farcies sont sourcées, mais aucune source fiable pour le rendement cuit/frais ; la garde au frais diverge fortement entre blogs (1 à 2 jours pour du fait maison, environ 5 jours pour du commerce) : non retenue."
     },
     {
-      "sujet": "Pâtes : refroidissement et réchauffage",
-      "raison": "Pas de source suisse ou professionnelle trouvée sur le choc thermique, l'huilage et le réchauffage des pâtes cuites ; seule la base Sanji (2-3 jours) donne une durée."
+      "sujet": "Pâtes : choc thermique, huilage et réchauffage en brigade",
+      "raison": "Seuls le maintien au chaud huilé de 20 à 30 min (Betty Bossi) et le seuil de 70 °C sont sourcés ; aucune source professionnelle suisse sur le refroidissement des pâtes à l'eau glacée ou le réchauffage au bain-marie avec durées."
     },
     {
-      "sujet": "Risotto : rapport bouillon/riz et précuisson",
-      "raison": "Aucune valeur de bouillon par kilo de riz, ni de précuisson en service avec sa durée, n'a pu être vérifiée."
+      "sujet": "Risotto : durée de garde du risotto précuit",
+      "raison": "La méthode (arrêt 5 min avant la fin, étalé, fini au liquide) vient d'une astuce de communauté ; aucune durée de garde ni température de conservation sourcée pour le risotto précuit."
     },
     {
-      "sujet": "Riz à risotto suisse (Swiss Rice, Tessin)",
-      "raison": "Variétés cultivées en Suisse et leurs temps de cuisson non vérifiés ; la fiche utilise des sources générales."
+      "sujet": "Riz suisse (Tessin) : temps de cuisson et rapport liquide de la variété Loto",
+      "raison": "Culture et variété documentées, mais aucun temps de cuisson ni rapport liquide propre à Loto relevé."
     },
     {
       "sujet": "Riz : rapports eau/riz et temps par variété (basmati, long grain, complet)",
-      "raison": "Non recherchés avec suffisamment de sources."
+      "raison": "Non recherchés avec suffisamment de sources ; le rendement du riz blanc nature en poids n'est pas dans le PDF USDA relu."
     },
     {
-      "sujet": "Pommes de terre : temps de cuisson entières, vapeur, rissolées",
-      "raison": "Aucune source suisse avec temps par calibre. Rissolées et pommes sautées non documentées."
+      "sujet": "Pommes de terre : temps de cuisson par calibre",
+      "raison": "Les temps pour pommes entières (eau 25 min, vapeur 35 min, autocuiseur 8-15 min) et rissolées (25 min) viennent d'une seule recette chacun ; aucune table par calibre."
     },
     {
-      "sujet": "Pommes de terre : prétraitements et avance (blanchiment, pommes sous vide, durée des pommes cuites refroidies)",
-      "raison": "Seule la veille pour le rösti est confirmée ; la durée maximale n'est pas sourcée."
+      "sujet": "Pommes de terre : prétraitements (blanchiment, sous vide) et durée de garde en restauration",
+      "raison": "La durée de 3 à 4 jours des pommes cuites vient d'un site grand public ; elle dépasse la référence d'hygiène du référentiel (2 jours) et n'a pas de source professionnelle."
     },
     {
       "sujet": "Variétés suisses courantes : liste officielle swisspatat et disponibilité saisonnière",
       "raison": "Les listes viennent de Swissmilk et Schweizer Kartoffeln ; la liste mi-farineuse vient d'une source allemande."
     },
     {
-      "sujet": "Gnocchi : cuisson, congélation, avance",
-      "raison": "Non vérifié (durée de flottaison, congélation cru, avance en frigo)."
+      "sujet": "Gnocchi : perte d'eau de 20 % des pommes cuites au four",
+      "raison": "Le chiffre relevé auparavant ne figure pas dans la page citée (cookandsoul.de), retiré de l'entrée ; aucune autre source."
     },
     {
-      "sujet": "Polenta : refroidissement, découpe, avance et poids refroidi",
-      "raison": "Non trouvé ; seule la base Sanji donne un rendement."
+      "sujet": "Polenta : durée de garde et poids de la polenta refroidie",
+      "raison": "Taille et poêlage sont sourcés ; aucune durée de garde au frais ni poids après refroidissement (la base Sanji ne donne que le rendement de cuisson, non recoupé)."
     },
     {
       "sujet": "Semoule, couscous, boulgour, quinoa : conservation cuits et avance",
-      "raison": "Pas de source ; la base ne les détaille pas."
+      "raison": "Seuls des sites commerciaux (3 à 5 jours) ont été vus, non retenus ; la référence d'hygiène des féculents cuits (2 jours) s'applique par défaut."
     },
     {
       "sujet": "Chiffres USDA",
-      "raison": "Les rendements USDA (pâtes, riz) n'ont pas été relus dans le PDF original mais via un résumé de recherche : confiance moyenne. La section « Grains » ne couvre pas les légumineuses."
+      "raison": "PDF USDA Section 4 relu en entier le 2026-10-04 : pâtes ×2,53 à 2,79, couscous ×2,55, quinoa ×2,51, riz sauvage ×2,55 ; pas de riz blanc nature en poids, ni semoule de maïs, ni légumineuses."
     },
     {
       "sujet": "Pertes de cuisson des pommes de terre",
-      "raison": "Seule la cuisson vapeur (5 à 10 %, base Sanji) est chiffrée ; la perte au four (20 à 30 % dans une relecture) n'a pas pu être confirmée par une source ouverte."
+      "raison": "La vapeur (5 à 10 %) et les frites (30 à 40 %) reposent sur la base Sanji seule ; la perte au four (20 à 30 % dans une relecture) n'a pas pu être confirmée."
     },
     {
       "sujet": "Riz pilaf : durée de cuisson",
-      "raison": "Aucune durée ni source externe pour le rapport fond/riz ; seule la base Sanji donne les proportions."
+      "raison": "Aucune durée ni source externe pour le rapport fond/riz ; seule une fiche type illustrative de la base Sanji donne les proportions."
     },
     {
-      "sujet": "Gnocchi : source vogels-kueche.de",
-      "raison": "Page non ouverte (erreur 403) : sa proportion de farine n'est pas retenue."
+      "sujet": "Sources non ouvertes",
+      "raison": "Barilla (page produit) et Falstaff : erreur 403 (blocage) ; vogels-kueche.de : erreur 403 ; Swissmilk (FAQ risotto) et gluecklichegaeste.de : connexion refusée ou expirée. Aucune valeur n'en est tirée."
     }
   ]
 }

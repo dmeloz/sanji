@@ -153,7 +153,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC, tableau de composition : 10 kg d'os et parures pour 12 L d'eau froide (1,2 L/kg)."
+      }
     },
     {
       "id": "sauces-cuissons.fonds.blanc-proportions",
@@ -175,25 +180,38 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "web"
+        },
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "10 kilos de jarrets et bas morceaux de veau ; 12 litres d'eau",
+          "type_source": "manuel"
         }
       ],
-      "confiance": "faible",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC, tableau fond blanc : 10 kg d'os pour 12 L d'eau ; Escoffier, fonds blanc ordinaire : 10 kg pour 12 L."
+      }
     },
     {
       "id": "sauces-cuissons.fonds.fumet-proportions",
       "sujet": "Fumet de poisson, proportions",
       "type": "repere",
-      "enonce": "Repère de proportion d'un fumet : environ 1,2 L d'eau par kg d'arêtes dégorgées, avec vin blanc, échalotes, champignons et oignons.",
+      "enonce": "Repère de proportion d'un fumet : 1,0 à 1,2 L d'eau par kg d'arêtes dégorgées, avec vin blanc, échalotes ou oignons, champignons.",
       "valeur": {
-        "min": 1.2,
+        "min": 1.0,
         "max": 1.2,
         "unite": "L d'eau par kg d'arêtes"
       },
       "etat_poids": "cru_net",
-      "conditions": "Source unique, support de cours personnel : les colonnes d'un tableau ont été lues par déduction, donc à vérifier ; seul le rapport eau/os est retenu, la garniture reste un ordre de grandeur modeste par rapport aux os.",
+      "conditions": "Support de cours : 12 L d'eau, 1 L de vin blanc pour 10 kg d'arêtes. Escoffier : 10 L d'eau et une bouteille de vin pour 10 kg ; le vin s'ajoute au mouillement.",
       "sources": [
         {
           "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
@@ -202,12 +220,25 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "web"
+        },
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "10 litres d'eau et 1 bouteille de vin blanc",
+          "type_source": "manuel"
         }
       ],
-      "confiance": "faible",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC, tableau fumet : 10 kg d'arêtes pour 12 L d'eau et 1 L de vin ; Escoffier : 10 kg d'arêtes pour 10 L d'eau et une bouteille de vin."
+      }
     },
     {
       "id": "sauces-cuissons.fonds.brun-duree",
@@ -220,7 +251,7 @@
         "unite": "min"
       },
       "etat_poids": null,
-      "conditions": "Écart : 2 h 30 à 3 h (support SDC) contre 3 à 4 h (fiche EDM, fond de veau). Fourchette large retenue.",
+      "conditions": "Écart : 2 h 30 à 3 h (support SDC) contre 3 à 4 h (fiche EDM, fond de veau). Fourchette large retenue. Escoffier (1903) donne des durées bien plus longues pour l'estouffade (au moins 12 h) et 6 h pour le jus de veau brun : voir les entrées dédiées ; les durées modernes des supports de cours sont retenues ici.",
       "sources": [
         {
           "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
@@ -242,7 +273,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC : 2 h 30 à 3 h pour le fond brun ; EDM : fond de veau 3 à 4 h."
+      }
     },
     {
       "id": "sauces-cuissons.fonds.blanc-duree",
@@ -272,25 +308,38 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "manuel"
+        },
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "Temps de cuisson, lente et régulière : 3 heures.",
+          "type_source": "manuel"
         }
       ],
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "EDM : fond de volaille environ 1 h ; SDC : 2 h 30 à 3 h ; Escoffier : fonds blanc 3 h."
+      }
     },
     {
       "id": "sauces-cuissons.fonds.fumet-duree",
       "sujet": "Fumet de poisson, durée",
       "type": "repere",
-      "enonce": "Un fumet de poisson cuit environ 20 minutes à frémissement.",
+      "enonce": "Un fumet de poisson cuit de 20 à 30 minutes à frémissement.",
       "valeur": {
         "min": 20,
-        "max": 20,
+        "max": 30,
         "unite": "min"
       },
       "etat_poids": null,
-      "conditions": "Concordance des deux supports.",
+      "conditions": "Supports de cours français : 20 min ; Escoffier : 30 min. Fourchette la plus large gardée.",
       "sources": [
         {
           "titre": "Les fonds (fiche de technologie culinaire)",
@@ -307,12 +356,25 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "manuel"
+        },
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "Temps de cuisson : 30 minutes.",
+          "type_source": "manuel"
         }
       ],
-      "confiance": "haute",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "EDM et SDC : environ 20 min ; Escoffier : 30 min pour le fumet de poisson."
+      }
     },
     {
       "id": "sauces-cuissons.fonds.marmite-duree",
@@ -347,7 +409,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC, tableau marmite : 2 h 30 à 3 h ; la base Sanji §14 donne 3 à 4 h pour une pièce à bouillir (fourchette réunie)."
+      }
     },
     {
       "id": "sauces-cuissons.fonds.glace",
@@ -397,7 +464,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "fond.kitchen : « 2 parts d'oignon pour 1 de carotte et 1 de céleri », au poids (500 g : 250/125/125)."
+      }
     },
     {
       "id": "sauces-cuissons.fonds.refroidissement",
@@ -440,7 +512,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG relue (texte intégral, section Abkühlen) : 65 à moins de 5 °C en 90 min ; EDM : 63 à 10 °C en moins de 2 h. Référence du référentiel : hygiene.temperature.refroidissement, non contredite."
+      }
     },
     {
       "id": "sauces-cuissons.fonds.conservation",
@@ -491,7 +568,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "EDM : 3 jours si refroidi en cellule ; SDC : 48 h à +3 °C ; base Sanji §8 et §32 : 3 à 4 jours ; GVG : J+2 pour les sauces seulement, fonds non nommés."
+      }
     },
     {
       "id": "sauces-cuissons.fonds.congelation",
@@ -518,7 +600,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §32, tableau fond/fumet maison : 90 à 120 jours congelé ; aucune source externe ouverte pour cette durée."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.schema-meres",
@@ -554,7 +641,7 @@
         "unite": "g de beurre et 70 g de farine par L de liquide"
       },
       "etat_poids": "cru_net",
-      "conditions": "Poids égaux confirmés ; la quantité par litre varie de 60 à 100 g selon l'épaisseur voulue (voir béchamel).",
+      "conditions": "Poids égaux confirmés ; la quantité par litre varie de 40 à 100 g selon l'épaisseur voulue (voir béchamel). Escoffier donne pour 1 kg de roux 500 g de beurre et 600 g de farine, soit un peu plus de farine que de beurre (voir sauces-cuissons.sauces.roux-escoffier).",
       "sources": [
         {
           "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
@@ -576,7 +663,12 @@
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC (« 70 gr de beurre et 70 gr de farine » pour 1 L de fond) et fiche RRC (« Roux Blanc 70/70 beurre farine au litre »)."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.roux-technique",
@@ -603,20 +695,25 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC : tableau roux (« cuire 2 minutes en remuant ») et schéma des sauces mères (« faire cuire 1 minute »)."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.bechamel-proportion",
       "sujet": "Béchamel, proportion de roux",
       "type": "repere",
-      "enonce": "La béchamel se fait à 60 à 100 g de beurre et autant de farine par litre de lait selon l'épaisseur : 70 g en restauration collective, 100 g pour une sauce de gratin.",
+      "enonce": "La béchamel se fait à 40 à 100 g de beurre et autant de farine par litre de lait selon l'épaisseur : 40 g fluide, 70 g classique (restauration collective), 100 g épaisse.",
       "valeur": {
-        "min": 60,
+        "min": 40,
         "max": 100,
         "unite": "g de beurre et autant de farine par L de lait"
       },
       "etat_poids": "cru_net",
-      "conditions": "70/70 : fiche de restauration collective. 50 g pour 50 cl (soit 100 g par litre) : source web. Fourchette large.",
+      "conditions": "70/70 : fiche de restauration collective et dosage classique. 40/40 (fluide) et 100/100 (épaisse) : dosage web relu. Ancienne valeur du fichier : 60 à 100 g, corrigée en 40 à 100 g.",
       "sources": [
         {
           "titre": "La sauce béchamel (fiche recette de restauration collective)",
@@ -638,7 +735,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "BEW : béchamel fluide 40 g, classique 70 g, épaisse 100 g de beurre et de farine par litre de lait ; RRC : 70/70."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.bechamel-technique",
@@ -665,7 +767,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "RRC : « Temps de cuisson 20 minutes », fiche pour 100 portions (10 L de lait)."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.espagnole",
@@ -709,7 +816,7 @@
         "unite": "% de réduction du volume"
       },
       "etat_poids": null,
-      "conditions": "",
+      "conditions": "Réduction de moitié selon le support de cours SDC seul ; Escoffier définit la demi-glace comme l'espagnole parvenue à sa perfection après un dernier dépouillement, sans fraction de réduction.",
       "sources": [
         {
           "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
@@ -726,18 +833,31 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "manuel"
+        },
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "est l'Espagnole parvenue à l'extrême limite de perfection",
+          "type_source": "manuel"
         }
       ],
-      "confiance": "haute",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC : « demi-glace = fond brun lié réduit de moitié » ; EDM : réduction lente de fonds bruns liés ou d'espagnole. Escoffier la décrit autrement (espagnole après un dernier dépouillement, sans réduction chiffrée)."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.tomate-conservation",
       "sujet": "Sauce tomate, conservation",
       "type": "repere",
-      "enonce": "Sauce tomate maison : jour de production + 2 selon la GVG ; +3 (SO) ou +4 (LU) selon les cantons ; base Sanji 4 à 5 j au froid et 90 à 120 jours congelée, sans trancher.",
+      "enonce": "Sauce tomate maison : jour de production + 2 selon la GVG ; base Sanji 4 à 5 j au froid et 90 à 120 jours congelée ; écarts cantonaux : voir hygiene.duree.sauces-cuites.",
       "valeur": {
         "min": 2,
         "max": 5,
@@ -766,7 +886,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG §6.3.1 relue : J+2 pour les produits précuits dont les sauces ; RRC : J+3 ; base Sanji §32.1 : 4 à 5 jours (tomate maison)."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.hollandaise-proportion",
@@ -801,7 +926,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC : 12 jaunes pour 1 kg de beurre clarifié ; Radio-Canada : 2 jaunes pour 125 g de beurre clarifié (soit 16 par kg)."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.hollandaise-temperature",
@@ -814,7 +944,7 @@
         "unite": "°C"
       },
       "etat_poids": null,
-      "conditions": "Coagulation vers 80 °C confirmée par la fiche sur les liaisons.",
+      "conditions": "Coagulation vers 80 °C : fiche SDC sur les liaisons ; plafond de 65 °C pendant la préparation : Radio-Canada.",
       "sources": [
         {
           "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
@@ -823,33 +953,29 @@
           "consulte": "2026-10-04",
           "extrait": "au-dessus la liaison est détruite par la coagulation",
           "type_source": "manuel"
-        },
-        {
-          "titre": "Sauce hollandaise réussie et facile à rattraper",
-          "organisme": "darocca.fr",
-          "url": "https://darocca.fr/sauce-hollandaise-reussie-et-facile-a-rattraper",
-          "consulte": "2026-10-04",
-          "extrait": "",
-          "type_source": "web"
         }
       ],
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC : fouetter au-dessus de la chaleur (60 °) et jaune détruit au-delà d'environ 80 ° ; Radio-Canada : ne jamais dépasser 65 °C. darocca.fr (HTTP 403) non lue, retirée des sources."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.hollandaise-maintien",
       "sujet": "Hollandaise, maintien",
       "type": "repere",
-      "enonce": "Une hollandaise ne se tient pas longtemps : 30 minutes au bain-marie vers 55 °C au plus selon une source web.",
+      "enonce": "Une hollandaise ne se tient pas longtemps : jusqu'à 2 heures au plus au bain-marie à 55 °C au plus selon une source web.",
       "valeur": {
-        "min": 30,
-        "max": 30,
+        "max": 120,
         "unite": "min"
       },
       "etat_poids": null,
-      "conditions": "Source web seule. La GVG impose de consommer le jour même les plats à œufs crus ou peu cuits ; la règle de 65 °C pendant 3 h concerne les plats cuits, pas cette émulsion. À fixer par l'établissement. GVG lue en texte intégral le 2026-10-04 (PDF p. 62, §6.3.1 « Maximale Lagerzeiten für die Kühlhaltung », ligne alignée par position dans la page : plats à œufs crus à consommer le jour de production ; maintien au chaud 65 °C max 3 h, PDF p. 26, section « Garen, Regenerieren und Warmhalten » : confirmés).",
+      "conditions": "Source web seule. Ancienne valeur du fichier : 30 min, corrigée en 2 h d'après la page relue. La GVG impose de consommer le jour même les plats à œufs crus ou peu cuits ; 55 °C est sous le seuil de maintien au chaud de 65 °C (GVG) : à fixer par l'établissement.",
       "sources": [
         {
           "titre": "Comment réaliser une sauce hollandaise",
@@ -871,7 +997,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Radio-Canada : bain-marie à 55 °C au plus, sauce maintenue « jusqu'à 2 heures (maximum) » ; GVG : plats à œufs crus à consommer le jour de production."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.hollandaise-rattrapage",
@@ -952,7 +1083,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC : 4 à 6 jaunes pour 1 L d'huile ; chefsnotes : 1 jaune pour 1 tasse d'huile (environ 4 jaunes par litre)."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.mayonnaise-securite",
@@ -970,20 +1106,17 @@
           "consulte": "2026-10-04",
           "extrait": "ganz frische oder pasteurisierte Eier verwenden",
           "type_source": "professionnelle"
-        },
-        {
-          "titre": "Hygienetipps für den Umgang mit Eiern",
-          "organisme": "Swissmilk",
-          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/tipps-tricks/hygienetipps-fuer-den-umgang-mit-eiern/",
-          "consulte": "2026-10-04",
-          "extrait": "",
-          "type_source": "professionnelle"
         }
       ],
       "confiance": "haute",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG relue : « ganz frische oder pasteurisierte Eier » pour mayonnaise et mousses ; plats à œufs crus à consommer le jour de production (§6.3.1). Page Swissmilk sur les œufs : HTTP 503, non lue, retirée."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.vinaigrette-proportion",
@@ -1018,7 +1151,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC : 1 L d'huile pour 0,35 L de vinaigre (2,9:1) ; chefsnotes : « 3:1 ... 4:1 is common as well »."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.emulsion-principe",
@@ -1076,13 +1214,18 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG §6.3.1 relue (position dans la page) : « Salatsaucen Produktionstag + 6 Tage »."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.vorgekocht-conservation",
       "sujet": "Sauces cuites, conservation",
       "type": "repere",
-      "enonce": "Sauces cuites : jour de production + 2 selon la GVG ; +3 (SO) ou +4 (LU) selon les cantons ; base Sanji 4 à 5 j pour la sauce tomate, sans trancher.",
+      "enonce": "Sauces cuites : jour de production + 2 selon la GVG ; +3 selon une fiche de restauration collective ; base Sanji 4 à 5 j pour la sauce tomate ; écarts cantonaux : voir hygiene.duree.sauces-cuites.",
       "valeur": {
         "min": 2,
         "max": 5,
@@ -1119,7 +1262,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG §6.3.1 : vorgekochte Produkte (Saucen) J+2 ; RRC : J+3 ; base Sanji : 4 à 5 j (tomate)."
+      }
     },
     {
       "id": "sauces-cuissons.sauces.reheating",
@@ -1154,7 +1302,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG : au moins 70 °C à cœur pendant 2 min au réchauffage ; RRC : de +10 °C à +63 °C en 1 h au plus."
+      }
     },
     {
       "id": "sauces-cuissons.liaisons.beurre-manie",
@@ -1181,7 +1334,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC, tableau beurre manié : « Cuire 5 à 6 minutes »."
+      }
     },
     {
       "id": "sauces-cuissons.liaisons.amidon-liquide",
@@ -1208,7 +1366,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC : la liaison de l'amidon « commence graduellement à partir de 50 °C »."
+      }
     },
     {
       "id": "sauces-cuissons.liaisons.amidon-effets",
@@ -1258,7 +1421,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "SDC : jaune d'œuf lié vers 80 °C au plus ; avec farine, le mélange peut être porté à 100 ° pendant 2 à 3 minutes."
+      }
     },
     {
       "id": "sauces-cuissons.liaisons.creme-reduction",
@@ -1354,7 +1522,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Page du Consortium relue : 50 g de basilic à petites feuilles pour 600 g de pâtes, 2 gousses d'ail, parmesan et pecorino."
+      }
     },
     {
       "id": "sauces-cuissons.pates.pesto-conservation",
@@ -1381,7 +1554,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §32.1 (pesto maison : 5 à 7 jours, sans congélation) ; aucune source externe ouverte."
+      }
     },
     {
       "id": "sauces-cuissons.pates.ragu-composition",
@@ -1394,7 +1572,7 @@
         "unite": "g de bœuf pour 6 personnes"
       },
       "etat_poids": "cru_net",
-      "conditions": "Page ouverte le 2026-10-04 : seule la proportion de bœuf est retenue, les autres quantités ne sont pas reprises. Durée de cuisson non trouvée : voir lacunes.",
+      "conditions": "Page relue le 2026-10-04 (quantités exactes pour 6 personnes). Durée de cuisson : voir sauces-cuissons.pates.ragu-duree.",
       "sources": [
         {
           "titre": "Ragù classico bolognese (recette déposée, mise à jour du 20.04.2023)",
@@ -1408,7 +1586,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Fiche de l'Accademia relue : bœuf haché gros 400 g, pancetta 150 g, oignon, carotte et céleri 60 g chacun, passata 200 g, vin, lait facultatif, pour 6 personnes."
+      }
     },
     {
       "id": "sauces-cuissons.pates.pilaf-fond",
@@ -1435,7 +1618,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §34 : 1,0 L de fond pour 700 g de riz (1,4 L/kg) ; aucune source externe ouverte pour ce rapport."
+      }
     },
     {
       "id": "sauces-cuissons.assaisonnement.equilibre",
@@ -1539,20 +1727,25 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §14, temps indicatifs : repos de 10 à 15 min avant tranchage ; aucune source externe ouverte."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.pocher",
       "sujet": "Pocher",
       "type": "repere",
-      "enonce": "Pocher : liquide sans ébullition entre 65 et 80 °C pour œufs, poisson, volaille, fruits ; filet de poisson de 150 g en 8 à 12 min selon l'épaisseur.",
+      "enonce": "Pocher : liquide sans ébullition entre 70 et 80 °C pour œufs, poisson, volaille, fruits ; la base Sanji descend à 65 °C ; filet de poisson de 150 g environ 8 à 12 min.",
       "valeur": {
-        "min": 65,
+        "min": 70,
         "max": 80,
         "unite": "°C"
       },
       "etat_poids": null,
-      "conditions": "Source unique.",
+      "conditions": "Valeur recoupée par Wikipedia (70 à 80 °C). Ancienne valeur : 65 à 80 °C (base Sanji seule pour la borne basse de 65 °C, gardée comme écart).",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1561,12 +1754,25 @@
           "consulte": "2026-10-04",
           "extrait": "",
           "type_source": "base_sanji"
+        },
+        {
+          "titre": "Poaching (cooking)",
+          "organisme": "Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Poaching_(cooking)",
+          "consulte": "2026-10-04",
+          "extrait": "about 70–80 °C",
+          "type_source": "web"
         }
       ],
-      "confiance": "faible",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Wikipedia (Poaching) : pochage « about 70–80 °C » ; base Sanji §14 : 65 à 80 °C."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.mijoter",
@@ -1593,7 +1799,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §14 : frémissement 95 à 98 °C ; Wikipedia (Simmering) dit seulement sous 100 °C et au-dessus du pochage, sans fourchette."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.braiser",
@@ -1620,7 +1831,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §14, temps indicatifs : épaule, jarret, joue 2,5 à 4 h ; Wikipedia (Braising) ne donne aucune durée."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.etuver",
@@ -1647,7 +1863,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §14 : légumes étuvés en 8 à 15 min ; aucune source externe ouverte."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.griller",
@@ -1674,20 +1895,25 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §14 : entrecôte de 2 à 3 cm, 3 à 4 min par face ; aucune source externe ouverte."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.frire",
       "sujet": "Frire, températures",
       "type": "repere",
-      "enonce": "Friture en deux temps : préfriture à 130-150 °C puis finition à 170-180 °C (frites 3 à 4 min, base Sanji) ; plafond du bain : 170 °C (aide-mémoires AG et BS) ou 175 °C (GVG).",
+      "enonce": "Friture en deux temps : préfriture à 130-150 °C (base Sanji) puis finition jusqu'à 175 °C au plus (GVG) ; plafond de 170 °C dans les aide-mémoires AG et BS ; frites 3 à 4 min (base Sanji).",
       "valeur": {
         "min": 130,
-        "max": 180,
+        "max": 175,
         "unite": "°C"
       },
       "etat_poids": null,
-      "conditions": "Écart signalé : base Sanji jusqu'à 180 °C, GVG 175 °C au plus, aide-mémoires cantonaux AG et BS 170 °C au plus (voir hygiene.temperature.friture, source cantonale non reprise ici). Fourchette large gardée ; le plafond le plus bas relevé est 170 °C ; à fixer par l'établissement et le canton. GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Garen, Regenerieren und Warmhalten », section « Frittieröl/Frittierfett » : 175 °C confirmé).",
+      "conditions": "GVG : 175 °C au plus (relue). Aide-mémoires cantonaux AG et BS : 170 °C (voir hygiene.temperature.friture). Ancienne valeur : jusqu'à 180 °C (base Sanji), abaissée à 175 °C d'après la GVG. La préfriture à 130-150 °C reste de la base Sanji seule ; à fixer par l'établissement.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -1709,7 +1935,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "partielle",
+        "note": "GVG relue : température maximale du bain 175 °C et composés polaires 27 % ; préfriture 130-150 °C : base Sanji seule."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.huile-controle",
@@ -1736,7 +1967,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG relue : « Höchstwert polare Anteile 27 % »."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.vapeur",
@@ -1763,7 +1999,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §14 : blanchir les légumes verts 1 à 3 min ; aucune durée de cuisson vapeur ; aucune source externe ouverte."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.reactions",
@@ -1790,7 +2031,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "general",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "base_sanji_seule",
+        "note": "Base Sanji §14, physique utile : jalons 60-70 °C, 140 °C, 160 °C ; aucune source externe ouverte."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.sonde",
@@ -1848,7 +2094,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Directive du Nouveau-Brunswick (texte français BCCDC) relue : minimum 55 °C, 60 °C pour la volaille, 4 h au plus sous 55 °C (points 6 et 12)."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.sous-vide-pasteurisation",
@@ -1861,7 +2112,7 @@
         "unite": "°C à cœur"
       },
       "etat_poids": null,
-      "conditions": "Les durées sont des temps à cœur : ajouter 1 h à partir de réfrigéré, 2 h de congelé (Anova). L'exemple du poulet (28 min à 67 °C) est dans la directive canadienne ouverte le 2026-10-04 ; les couples 63 °C 9,2 min et 66 °C 2,8 min n'ont pas été retrouvés dans ce texte et viennent d'Anova seule.",
+      "conditions": "Les durées sont des temps à cœur (7 log) : ajouter la montée en température (1 h à partir de réfrigéré, 2 h de congelé, Anova). Couples 63 et 66 °C : tableau Anova relu le 2026-10-04 ; exemple 67 °C et 28,2 min : directive du Nouveau-Brunswick relue.",
       "sources": [
         {
           "titre": "Lignes directrices de salubrité pour la cuisson sous vide dans les restaurants au Nouveau-Brunswick",
@@ -1880,10 +2131,15 @@
           "type_source": "web"
         }
       ],
-      "confiance": "faible",
+      "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Directive NB : exemple poulet à 65 °C à cœur, bain à 67 °C, 28,2 min ; Anova (tableau poulet 5 % de gras) : 63 °C 9,2 min, 66 °C 2,8 min."
+      }
     },
     {
       "id": "sauces-cuissons.cuisson.sous-vide-refroidissement",
@@ -1918,7 +2174,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Directive NB point 10 : moins de 3 °C en 2 h (eau et glace à parts égales), 3,3 °C au plus au stockage, 3 j (7 j au plus si pasteurisé) ; GVG : moins de 5 °C."
+      }
     },
     {
       "id": "sauces-cuissons.securite.noyau-70",
@@ -1961,7 +2222,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "BLV : « Fleisch, Geflügel, Fisch und Meeresfrüchte auf mindestens 70 Grad erhitzen » ; GVG : 70 °C à cœur pendant 2 min."
+      }
     },
     {
       "id": "sauces-cuissons.securite.volaille-porc",
@@ -2004,7 +2270,12 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk relue : « ab 72 °C durch : Geflügel, Schwein » ; base Sanji §14 : volaille 72-75 °C, porc 62-65 °C."
+      }
     },
     {
       "id": "sauces-cuissons.securite.boeuf-garstufen",
@@ -2047,20 +2318,25 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Swissmilk relue : ab 45 °C bleu, ab 50 °C saignant, ab 60 °C à point (Rind, Wild, Lamm, Ente) ; base Sanji §14 pour les cibles rosées."
+      }
     },
     {
       "id": "sauces-cuissons.securite.poisson",
       "sujet": "Poisson, cible de cuisson",
       "type": "repere",
-      "enonce": "Cible à cœur du poisson : 55-60 °C (base Sanji) ; 60 °C minimum (source web) ; 70 °C selon le texte général de l'OSAV.",
+      "enonce": "Cible à cœur du poisson : 50 à 60 °C selon l'espèce et la cuisson voulue (source web) ; 55-60 °C (base Sanji) ; 70 °C selon le texte général de l'OSAV.",
       "valeur": {
-        "min": 55,
+        "min": 50,
         "max": 70,
         "unite": "°C à cœur"
       },
       "etat_poids": null,
-      "conditions": "Écart large, source suisse officielle non précise par espèce. Confiance faible.",
+      "conditions": "Écart large, source suisse officielle non précise par espèce. Ancienne formulation « 60 °C minimum (source web) » corrigée : la table donne 50 à 58 °C (glasig) et 60 °C (bien cuit). Confiance faible.",
       "sources": [
         {
           "titre": "Base officielle production, stock, hygiène",
@@ -2090,7 +2366,12 @@
       "confiance": "faible",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "kerntemperatur-tabelle relue : saumon 50-54 °C (glasig) et 60 °C ; truite 54, sandre 58, cabillaud 54 °C (glasig), 60 °C bien cuit ; BLV : 70 °C."
+      }
     },
     {
       "id": "sauces-cuissons.securite.oeufs",
@@ -2099,16 +2380,8 @@
       "enonce": "Plats à œuf cru ou peu cuit : œufs très frais ou pasteurisés, froid, consommation rapide. Œuf mollet : environ 6 min pour un œuf moyen, départ eau tiède, temps compté dès l'ébullition, sans piquer ni passer sous l'eau froide (GalloSuisse) ; œuf poché : 3 à 4 min à l'eau frémissante (base Sanji).",
       "valeur": null,
       "etat_poids": null,
-      "conditions": "Écart avec la base Sanji (3 à 4 min, calibre et départ non précisés) : pour le mollet, la durée dépend du calibre, du départ et de la quantité ; 6 min vaut pour un calibre moyen, départ eau tiède (voir legumes.oeuf.mollet). Température à cœur visée : aucune valeur trouvée, voir lacunes. GVG lue en texte intégral le 2026-10-04 (PDF p. 27, section « Eier » : œufs frais ou pasteurisés pour les plats crus ; PDF p. 62, §6.3.1 « Maximale Lagerzeiten für die Kühlhaltung », ligne alignée par position dans la page : consommation le jour de production).",
+      "conditions": "Écart avec la base Sanji (3 à 4 min, calibre et départ non précisés) : pour le mollet, la durée dépend du calibre, du départ et de la quantité ; 6 min vaut pour un calibre moyen, départ eau tiède (voir legumes.oeuf.mollet). Température à cœur visée : aucune valeur trouvée, voir lacunes. GVG lue en texte intégral le 2026-10-04 (PDF p. 27, section « Eier » : œufs frais ou pasteurisés pour les plats crus ; PDF p. 62, §6.3.1 « Maximale Lagerzeiten für die Kühlhaltung », ligne alignée par position dans la page : consommation le jour de production). Page Swissmilk sur les œufs (HTTP 503 le 2026-10-04) non relue, retirée des sources.",
       "sources": [
-        {
-          "titre": "Hygienetipps für den Umgang mit Eiern",
-          "organisme": "Swissmilk",
-          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/tipps-tricks/hygienetipps-fuer-den-umgang-mit-eiern/",
-          "consulte": "2026-10-04",
-          "extrait": "",
-          "type_source": "professionnelle"
-        },
         {
           "titre": "ABC des œufs, section « Eier perfekt kochen »",
           "organisme": "GalloSuisse",
@@ -2180,45 +2453,514 @@
       "confiance": "moyenne",
       "statut": "a_valider",
       "portee": "a_valider_localement",
-      "usage_calcul": false
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "GVG relue : « mindestens 65 °C Kerntemperatur während höchstens 3 Stunden » ; RRC : maintien à +63 °C."
+      }
+    },
+    {
+      "id": "sauces-cuissons.sauces.espagnole-proportions",
+      "sujet": "Espagnole, proportions",
+      "type": "repere",
+      "enonce": "Espagnole classique : pour 5 L de sauce finie, 625 g de roux, 12 L de fond brun en tout et 1 L de purée de tomates (ou environ 2 kg de tomates fraîches), soit 125 g de roux par litre de sauce.",
+      "valeur": {
+        "min": 125,
+        "max": 125,
+        "unite": "g de roux par L de sauce finie"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Source historique unique (Escoffier, 1903), qui précise aussi la mirepoix (lard, carottes, oignons, thym, laurier). Les fonds s'ajoutent en trois temps (8 L, puis 2 L, puis 2 L). Les supports de cours modernes ne chiffrent pas l'espagnole.",
+      "sources": [
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "Roux de liaison : 625 grammes.",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Escoffier, Guide culinaire, grandes sauces de base, sauce espagnole (proportions pour 5 litres), relu sur la page Wikisource."
+      }
+    },
+    {
+      "id": "sauces-cuissons.sauces.espagnole-duree",
+      "sujet": "Espagnole, durée de cuisson",
+      "type": "repere",
+      "enonce": "L'espagnole cuit très doucement 3 h, puis 3 h après un nouveau mouillement, puis 1 h après l'ajout de la tomate, avec dépouillement régulier ; une très bonne base permet de la mettre à point en 6 h.",
+      "valeur": {
+        "min": 360,
+        "max": 420,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Source historique unique (Escoffier, 1903) ; 3 h + 3 h + 1 h d'ébullition lente, 6 h possibles avec un fond d'excellente qualité. Durée de production artisanale, non transposée à une cuisine de brigade moderne.",
+      "sources": [
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "Laisser cuire très doucement pendant 3 heures, en dépouillant très souvent la sauce.",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Escoffier, sauce espagnole, étapes 2, 3 et 4 et note finale (6 heures), relues sur la page Wikisource."
+      }
+    },
+    {
+      "id": "sauces-cuissons.sauces.tomate-proportions",
+      "sujet": "Sauce tomate, proportions",
+      "type": "repere",
+      "enonce": "Sauce tomate classique : pour 5 L, 4 L de purée de tomates (ou 6 kg de tomates crues), 150 g de farine et 2 L de fond blanc, avec mirepoix, ail, sel et sucre ; soit 30 g de farine par litre de sauce.",
+      "valeur": {
+        "min": 30,
+        "max": 30,
+        "unite": "g de farine par L de sauce finie"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Source historique unique (Escoffier, 1903) ; la farine est cuite blonde avec la mirepoix avant l'ajout de la tomate. Les supports de cours lus parlent de farine singée sans quantité.",
+      "sources": [
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "150 grammes de farine ; 2 litres de fonds blanc",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Escoffier, sauce tomate (proportions pour 5 litres), relue sur la page Wikisource."
+      }
+    },
+    {
+      "id": "sauces-cuissons.sauces.tomate-duree",
+      "sujet": "Sauce tomate, durée de cuisson",
+      "type": "repere",
+      "enonce": "La sauce tomate classique cuit à couvert au four 1 h 30 à 2 h, puis se passe au tamis fin et reprend quelques minutes d'ébullition.",
+      "valeur": {
+        "min": 90,
+        "max": 120,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Source historique unique (Escoffier, 1903).",
+      "sources": [
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "couvrir, et cuire doucement au four pendant 1 heure et demie à 2 heures",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Escoffier, sauce tomate, traitement, relu sur la page Wikisource."
+      }
+    },
+    {
+      "id": "sauces-cuissons.sauces.roux-escoffier",
+      "sujet": "Roux blanc, blond, brun, proportions et cuisson",
+      "type": "technique",
+      "enonce": "Escoffier compte pour 1 kg de roux, brun, blond ou blanc, 500 g de beurre et 600 g de farine ; le blanc ne cuit que quelques minutes (disparition du goût de farine crue), le blond s'arrête à une teinte légèrement blonde, le brun cuit longtemps et doucement.",
+      "valeur": {
+        "min": 500,
+        "max": 500,
+        "unite": "g de beurre pour 600 g de farine (1 kg de roux)"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Aucune durée en minutes pour le blond ni le brun : l'auteur dit que le temps ne peut être fixé mathématiquement (il dépend de l'intensité du feu) et qu'il vaut mieux cuire trop lentement que trop vite. Beurre clarifié recommandé. Voir sauces-cuissons.sauces.roux-proportion pour le repère moderne à poids égaux.",
+      "sources": [
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "500 grammes de beurre clarifié ou d'excellente graisse de marmite clarifiée",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Escoffier, chapitre Les Roux (brun, blond, blanc), relu sur la page Wikisource."
+      }
+    },
+    {
+      "id": "sauces-cuissons.fonds.jus-veau-brun",
+      "sujet": "Jus de veau brun, proportions et durée",
+      "type": "repere",
+      "enonce": "Jus de veau brun : pour 10 L, 6 kg de jarret de veau et d'épaules désossés, 5 kg d'os cassés menu colorés au four, 12 L de mouillement, cuisson 6 h à ébullition lente et régulière.",
+      "valeur": {
+        "min": 360,
+        "max": 360,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Source historique unique (Escoffier, 1903) ; garniture : carottes, oignons, queues de persil, thym, laurier. Les supports de cours modernes donnent des durées plus courtes pour les fonds bruns (voir sauces-cuissons.fonds.brun-duree).",
+      "sources": [
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "tenir ensuite en ébullition lente et bien régulière pendant 6 heures",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Escoffier, Fonds ou jus de veau brun (proportions pour 10 litres), relu sur la page Wikisource."
+      }
+    },
+    {
+      "id": "sauces-cuissons.fonds.estouffade-duree",
+      "sujet": "Fond brun (estouffade), durée classique",
+      "type": "repere",
+      "enonce": "Escoffier cuit le fond des os d'un fond brun (estouffade) lentement 12 h au moins, voire 12 à 15 h, avant de s'en servir pour mouiller les viandes ; durée d'un fond classique, bien plus longue que les supports de cours modernes.",
+      "valeur": {
+        "min": 720,
+        "max": 900,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Source historique unique (Escoffier, 1903) : 12 h au moins, 12 à 15 h en cas d'os de bœuf. Ne pas confondre avec la durée moderne de 2 h 30 à 4 h (sauces-cuissons.fonds.brun-duree). Pour 10 L : 6 kg de jarret de bœuf, 6 kg de jarret de veau, 14 L d'eau.",
+      "sources": [
+        {
+          "titre": "Le Guide culinaire, Escoffier (1903), chapitre Sauces et fonds",
+          "organisme": "Wikisource (texte de domaine public)",
+          "url": "https://fr.wikisource.org/wiki/Le_guide_culinaire/Sauces",
+          "consulte": "2026-10-04",
+          "extrait": "cuit lentement, et pendant 12 heures au moins",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Escoffier, fonds brun ou estouffade (proportions pour 10 litres) et observation (12 ou 15 heures), relus sur la page Wikisource."
+      }
+    },
+    {
+      "id": "sauces-cuissons.fonds.legumes-proportions",
+      "sujet": "Bouillon de légumes, proportions",
+      "type": "repere",
+      "enonce": "Bouillon de légumes : environ 25 % du poids de l'eau en légumes, soit 1 kg de légumes (400 g d'oignons, 200 g de carottes, 100 g de blanc de poireau, 40 g d'ail, 30 g de céleri ou de fenouil) pour 4 L d'eau.",
+      "valeur": {
+        "min": 25,
+        "max": 25,
+        "unite": "% du poids de l'eau, en légumes"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Source web unique (Radio-Canada, Mordu) ; non recoupée par un support de cours : confiance faible.",
+      "sources": [
+        {
+          "titre": "Comment faire un bouillon de légumes",
+          "organisme": "Radio-Canada, Mordu",
+          "url": "https://ici.radio-canada.ca/mordu/techniques/5679/comment-faire-bouillon-legumes",
+          "consulte": "2026-10-04",
+          "extrait": "comptez environ 25 % du poids en légumes",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Page Radio-Canada Mordu relue : 25 % du poids en légumes, 4 L d'eau pour 1 kg de légumes."
+      }
+    },
+    {
+      "id": "sauces-cuissons.fonds.legumes-duree",
+      "sujet": "Bouillon de légumes, durée",
+      "type": "repere",
+      "enonce": "Le bouillon de légumes mijote environ 2 h après ébullition, puis infuse 30 min avec les herbes avant d'être passé.",
+      "valeur": {
+        "min": 120,
+        "max": 120,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Source web unique (Radio-Canada, Mordu) ; non recoupée : confiance faible.",
+      "sources": [
+        {
+          "titre": "Comment faire un bouillon de légumes",
+          "organisme": "Radio-Canada, Mordu",
+          "url": "https://ici.radio-canada.ca/mordu/techniques/5679/comment-faire-bouillon-legumes",
+          "consulte": "2026-10-04",
+          "extrait": "pendant environ deux heures",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Page Radio-Canada Mordu relue : environ deux heures de mijotage puis 30 min d'infusion."
+      }
+    },
+    {
+      "id": "sauces-cuissons.pates.risotto-base",
+      "sujet": "Risotto, rapport bouillon et riz",
+      "type": "repere",
+      "enonce": "Risotto : 2 L de bouillon chaud pour 500 g de riz (6 portions), soit 4 L par kg de riz sec, ajouté par louches au fur et à mesure de l'absorption après avoir nacré le riz dans le gras.",
+      "valeur": {
+        "min": 4,
+        "max": 4,
+        "unite": "L de bouillon par kg de riz sec"
+      },
+      "etat_poids": "sec",
+      "conditions": "Recette codifiée par l'Accademia Italiana della Cucina, relayée par un blog culinaire (texte relu, non la page de l'Accademia). Le risotto n'est pas un pilaf : rapport bien plus liquide que le repère du pilaf (sauces-cuissons.pates.pilaf-fond), cuisson par ajouts successifs et non par absorption en une fois.",
+      "sources": [
+        {
+          "titre": "Risotto alla milanese dell'Accademia Italiana della Cucina",
+          "organisme": "La luna sul cucchiaio (blog, recette de l'Accademia)",
+          "url": "https://www.lalunasulcucchiaio.it/2017/02/risotto-alla-milanese-dellaccademia-italiana-della-cucina.html",
+          "consulte": "2026-10-04",
+          "extrait": "500 g riso Carnaroli ; 2 l brodo di carne",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Page relue : 500 g de riz, 2 L de bouillon de viande, 6 portions."
+      }
+    },
+    {
+      "id": "sauces-cuissons.pates.risotto-duree",
+      "sujet": "Risotto, durée de cuisson",
+      "type": "repere",
+      "enonce": "Le riz à risotto cuit environ 15 minutes, selon la variété, en ajoutant le bouillon bouillant louche après louche.",
+      "valeur": {
+        "min": 15,
+        "max": 15,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Même source que sauces-cuissons.pates.risotto-base ; durée « a seconda della varietà di riso ». D'autres sources web citent 16 à 18 min, non ouvertes.",
+      "sources": [
+        {
+          "titre": "Risotto alla milanese dell'Accademia Italiana della Cucina",
+          "organisme": "La luna sul cucchiaio (blog, recette de l'Accademia)",
+          "url": "https://www.lalunasulcucchiaio.it/2017/02/risotto-alla-milanese-dellaccademia-italiana-della-cucina.html",
+          "consulte": "2026-10-04",
+          "extrait": "Cuocere per quindici minuti, a seconda della varietà di riso",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Page relue : « quindici minuti » selon la variété de riz."
+      }
+    },
+    {
+      "id": "sauces-cuissons.pates.ragu-duree",
+      "sujet": "Ragù, durée de cuisson",
+      "type": "repere",
+      "enonce": "Le ragù bolognaise cuit environ 2 h, voire 3 h selon les goûts et les viandes.",
+      "valeur": {
+        "min": 120,
+        "max": 180,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Fiche de l'Accademia relue (« circa 2 ore, anche 3 ore »).",
+      "sources": [
+        {
+          "titre": "Ragù classico bolognese (recette déposée, mise à jour du 20.04.2023)",
+          "organisme": "Accademia Italiana della Cucina",
+          "url": "https://www.accademiaitalianadellacucina.it/it/ricette/ricetta/rag%C3%B9-classico-bolognese",
+          "consulte": "2026-10-04",
+          "extrait": "circa 2 ore (anche 3 ore secondo le preferenze)",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Fiche de l'Accademia relue : « circa 2 ore (anche 3 ore) »."
+      }
+    },
+    {
+      "id": "sauces-cuissons.pates.beurre-citron",
+      "sujet": "Pâtes au beurre et au citron",
+      "type": "repere",
+      "enonce": "Pâtes au beurre et au citron : 100 g de beurre, 1 citron et 80 g de parmesan râpé pour 450 g de spaghetti, préparation rapide.",
+      "valeur": {
+        "min": 100,
+        "max": 100,
+        "unite": "g de beurre pour 450 g de pâtes"
+      },
+      "etat_poids": "sec",
+      "conditions": "Nombre de personnes et état des pâtes non précisés par la source (450 g supposés secs, soit environ 4 portions) ; pas de crème. Source de consortium, une seule recette : confiance faible.",
+      "sources": [
+        {
+          "titre": "Spaghetti al limone",
+          "organisme": "Consorzio del Parmigiano Reggiano",
+          "url": "https://www.parmigianoreggiano.com/it/ricette/spaghetti-al-limone",
+          "consulte": "2026-10-04",
+          "extrait": "450 g di spaghetti ; 100 g di burro ; 80 g di Parmigiano Reggiano",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Page relue : 450 g de spaghetti, 100 g de beurre, 1 citron, 80 g de parmesan."
+      }
+    },
+    {
+      "id": "sauces-cuissons.pates.aglio-olio",
+      "sujet": "Pâtes à l'ail et à l'huile",
+      "type": "repere",
+      "enonce": "Pâtes à l'ail et à l'huile : pour 4 personnes, 400 g de spaghetti, 4 gousses d'ail, 1 piment et 50 mL d'huile d'olive vierge extra.",
+      "valeur": {
+        "min": 50,
+        "max": 50,
+        "unite": "mL d'huile pour 400 g de pâtes (4 personnes)"
+      },
+      "etat_poids": null,
+      "conditions": "Source commerciale unique (Eataly, recette pour 4 personnes) ; état des pâtes non précisé (supposées sèches). Confiance faible.",
+      "sources": [
+        {
+          "titre": "Spaghetti aglio, olio e peperoncino, ricetta originale",
+          "organisme": "Eataly (Italie)",
+          "url": "https://www.eataly.it/ispirazioni/ricette/ricette-primi-piatti/ricette-pastasciutta/ricette-di-pasta-al-sugo/spaghetti-aglio-olio-e-peperoncino-ricetta-originale.html",
+          "consulte": "2026-10-04",
+          "extrait": "400 g di spaghetti ; 4 spicchi d'aglio ; 50 ml di olio",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Page relue : 400 g de spaghetti, 4 gousses d'ail, 50 mL d'huile, pour 4 personnes."
+      }
+    },
+    {
+      "id": "sauces-cuissons.pates.beurre-parmesan",
+      "sujet": "Pâtes au beurre et au parmesan, sans crème",
+      "type": "repere",
+      "enonce": "Pâtes fraîches fines au beurre et au parmesan : pour 2 personnes, 50 g de beurre non salé, 120 g de parmesan 24 mois et de l'eau de cuisson, sans crème ; la liaison vient de l'eau de cuisson.",
+      "valeur": {
+        "min": 50,
+        "max": 50,
+        "unite": "g de beurre et 120 g de parmesan pour 2 personnes"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Source de consortium, une seule recette (pâtes fraîches très fines). Aucune sauce de pâtes à la crème n'a été lue : la recette classique relue n'en contient pas.",
+      "sources": [
+        {
+          "titre": "Fettuccine Alfredo",
+          "organisme": "Consorzio del Parmigiano Reggiano",
+          "url": "https://www.parmigianoreggiano.com/it/ricette/fettuccine-alfredo",
+          "consulte": "2026-10-04",
+          "extrait": "50 g di burro non salato ; 120 g Parmigiano Reggiano 24 mesi",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false,
+      "verification": {
+        "le": "2026-10-04",
+        "resultat": "confirmee",
+        "note": "Page relue : 50 g de beurre, 120 g de parmesan, eau de cuisson, pour 2 personnes ; pas de crème."
+      }
     }
   ],
   "lacunes": [
     {
-      "sujet": "Sauce espagnole, proportions de roux",
-      "raison": "Aucune quantité trouvée dans les sources lues (seulement le principe fond brun, tomates, roux)."
-    },
-    {
-      "sujet": "Sauce tomate, proportions et durée",
-      "raison": "Seul le principe (coulis lié à la farine singée) et la conservation de la base Sanji."
-    },
-    {
-      "sujet": "Bouillon de légumes, proportions et durée",
-      "raison": "Aucun chiffre trouvé."
+      "sujet": "Roux blond et brun, durées de cuisson en minutes",
+      "raison": "Aucune durée chiffrée trouvée : Escoffier dit que le temps ne peut être fixé (il dépend du feu) ; seule la couleur guide. Les durées de blogs (2 à 3 min, 4 à 6 min, 10 à 20 min) n'ont pas été relues à la source."
     },
     {
       "sujet": "Jus de rôti et jus lié, rendement",
-      "raison": "Pas de proportion ni de durée trouvée."
+      "raison": "Pas de proportion ni de durée trouvée (Escoffier ne chiffre pas le jus lié)."
     },
     {
       "sujet": "Glace de viande, rendement de réduction",
-      "raison": "Pas de rapport volume initial/final trouvé."
+      "raison": "Pas de rapport volume initial/final trouvé ; seul le critère de consistance (nappe la cuiller) est relu."
     },
     {
-      "sujet": "Roux blond et brun, durées de cuisson",
-      "raison": "Seules les couleurs sont citées, sans durée ni température."
+      "sujet": "Sauce de pâtes à la crème",
+      "raison": "Aucune recette à la crème avec proportions relue à la source (la recette classique au beurre et parmesan n'en contient pas)."
     },
     {
-      "sujet": "Sauces de pâtes : beurre-citron, huile-ail, crème",
-      "raison": "Aucune source fiable lue avec des proportions ; pas de chiffre inventé."
-    },
-    {
-      "sujet": "Risotto, rapport fond/riz et durée",
-      "raison": "Seul un pilaf est chiffré dans la base Sanji ; rien trouvé pour le risotto."
-    },
-    {
-      "sujet": "Ragù, durée de cuisson",
-      "raison": "La recette déposée a été lue par résumé de recherche, sans durée explicite."
+      "sujet": "Risotto, durée et rapport selon la variété de riz",
+      "raison": "Une seule recette relue (15 min, 4 L par kg) ; d'autres sources web citent 16 à 18 min, non ouvertes."
     },
     {
       "sujet": "Température à cœur de l'œuf (Suisse)",
@@ -2226,7 +2968,7 @@
     },
     {
       "sujet": "Poisson, cible par espèce (Suisse)",
-      "raison": "Seul le seuil général de 70 °C trouvé côté OSAV ; les cibles de 55-60 °C viennent de la base Sanji."
+      "raison": "Seul le seuil général de 70 °C trouvé côté OSAV ; les cibles de 50 à 60 °C viennent de la base Sanji et d'une table web (kerntemperatur-tabelle.de)."
     },
     {
       "sujet": "Sous vide en Suisse",
@@ -2234,7 +2976,7 @@
     },
     {
       "sujet": "Durée de vie des sauces chaudes",
-      "raison": "Sources divergentes (J+2 GVG, +3 SO, +4 LU, 4 à 5 j base Sanji) ; les documents cantonaux SO et LU sont repris de hygiene.json et n'ont pas été rouverts ici."
+      "raison": "Sources divergentes (J+2 GVG relue, +3 fiche RRC, +3 SO et +4 LU selon hygiene.duree.sauces-cuites, 4 à 5 j base Sanji) ; les documents cantonaux n'ont pas été rouverts ici."
     },
     {
       "sujet": "Cuisson basse température au four (GT), températures par pièce",
@@ -2249,8 +2991,12 @@
       "raison": "La GVG fixe J+2 pour les produits précuits dont les sauces mais ne nomme pas les fonds ; aucune source suisse lue pour les fonds."
     },
     {
-      "sujet": "Pasteurisation sous vide, couples 63 °C et 66 °C",
-      "raison": "Les durées 9,2 min et 2,8 min viennent d'Anova seule ; non retrouvées dans la directive canadienne ouverte."
+      "sujet": "Valeurs de la base Sanji sans recoupement externe",
+      "raison": "Congélation des fonds, pesto, pilaf, repos du rôti, mijoter, braiser, étuver, griller, vapeur, jalons de réactions : base_sanji_seule, aucune source externe ouverte (Wikipedia ne donne ni durée de braisage ni fourchette de mijotage)."
+    },
+    {
+      "sujet": "Sources non ouvertes",
+      "raison": "Swissmilk, page sur les œufs (HTTP 503) et darocca.fr (HTTP 403) : non lues, retirées des sources des entrées concernées."
     }
   ]
 }

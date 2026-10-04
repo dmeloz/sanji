@@ -68,7 +68,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Référentiel restauration collective, tableau « ce que deviennent 10 kg livrés » relu : carotte épluchée 7,5 à 8,3 kg ; base §11.1 relue (12-15 %)."
+   }
   },
   {
    "id": "legumes.parage.pomme-de-terre",
@@ -111,7 +116,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Référentiel restauration collective, tableau « ce que deviennent 10 kg livrés » relu : 7,81 à 8,5 kg ; Bloc-notes culinaire : rendement 90 % pour les peaux fines ; base §11.1 relue (15-20 %)."
+   }
   },
   {
    "id": "legumes.parage.oignon",
@@ -146,7 +156,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Référentiel restauration collective, tableau « ce que deviennent 10 kg livrés » relu : oignon pelé 8 à 8,8 kg ; base §11.1 relue (10-15 %)."
+   }
   },
   {
    "id": "legumes.parage.poireau",
@@ -181,7 +196,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Référentiel restauration collective, tableau « ce que deviennent 10 kg livrés » relu : poireau 6 à 7 kg ; base §11.1 relue (30-40 %)."
+   }
   },
   {
    "id": "legumes.parage.chou-fleur",
@@ -224,7 +244,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Référentiel restauration collective, tableau « ce que deviennent 10 kg livrés » relu : fleurettes 6 à 6,2 kg ; Bloc-notes culinaire : 1 kg avec feuilles donne 600 g (60 %) ; base §11.1 relue."
+   }
   },
   {
    "id": "legumes.parage.panais",
@@ -251,7 +276,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue : valeur identique ; le tableau externe relu (restauration collective) ne contient pas ce légume."
+   }
   },
   {
    "id": "legumes.parage.betterave",
@@ -278,7 +308,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue : valeur identique ; le tableau externe relu (restauration collective) ne contient pas ce légume."
+   }
   },
   {
    "id": "legumes.parage.epinard",
@@ -305,7 +340,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue : valeur identique ; le tableau externe relu (restauration collective) ne contient pas ce légume."
+   }
   },
   {
    "id": "legumes.parage.courgette",
@@ -332,7 +372,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue : valeur identique ; le tableau externe relu (restauration collective) ne contient pas ce légume."
+   }
   },
   {
    "id": "legumes.parage.courge",
@@ -359,7 +404,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue : valeur identique ; le tableau externe relu (restauration collective) ne contient pas ce légume."
+   }
   },
   {
    "id": "legumes.parage.asperge",
@@ -386,7 +436,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue : valeur identique ; le tableau externe relu (restauration collective) ne contient pas ce légume."
+   }
   },
   {
    "id": "legumes.parage.haricot-vert",
@@ -413,7 +468,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue : valeur identique ; le tableau externe relu (restauration collective) ne contient pas ce légume."
+   }
   },
   {
    "id": "legumes.parage.petit-pois",
@@ -440,7 +500,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue : valeur identique ; le tableau externe relu (restauration collective) ne contient pas ce légume."
+   }
   },
   {
    "id": "legumes.parage.artichaut",
@@ -467,7 +532,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue : valeur identique ; le tableau externe relu (restauration collective) ne contient pas ce légume."
+   }
   },
   {
    "id": "legumes.parage.mais",
@@ -494,20 +564,25 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue : valeur identique ; le tableau externe relu (restauration collective) ne contient pas ce légume."
+   }
   },
   {
    "id": "legumes.saison.octobre",
    "sujet": "Octobre en Suisse",
    "type": "repere",
-   "enonce": "En octobre, une soixantaine de légumes et salades suisses sont de saison ; courgette, haricot vert, poivron et maïs s'achèvent, chou de Bruxelles, chou-fleur et chicorée arrivent.",
+   "enonce": "En octobre, 62 légumes et salades sont de saison en Suisse selon le calendrier de Schweizer Gemüse.",
    "valeur": {
     "min": 62,
     "max": 62,
     "unite": "légumes et salades de saison"
    },
    "etat_poids": null,
-   "conditions": "Lecture du calendrier au 2026-10-04 (mois courant). Chiffre : 62 donné par la page.",
+   "conditions": "Lecture du calendrier au 2026-10-04 (mois courant). Chiffre : 62 donné par la page ; l'énoncé précédent sur les légumes qui s'achèvent ou arrivent n'a pas pu être relu sur la page (calendrier en tableau) : retiré.",
    "sources": [
     {
      "titre": "Calendrier de saison Suisse",
@@ -521,7 +596,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Page du calendrier relue : « 62 légumes et salades sont de saison en octobre en Suisse »."
+   }
   },
   {
    "id": "legumes.saison.stockage-toute-annee",
@@ -726,20 +806,25 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "cuisinedebase.com et chef-fabien.com relus : 1 x 1 x 60 mm ; 5 cm sur 1 à 2 mm."
+   }
   },
   {
    "id": "legumes.coupe.brunoise",
    "sujet": "Brunoise",
    "type": "repere",
-   "enonce": "Petits dés de 1 à 3 mm de côté (la fine brunoise descend à 1 mm).",
+   "enonce": "Petits dés de 1 à 2 mm de côté (2 mm pour cuisinedebase ; la fine brunoise descend à 1 mm).",
    "valeur": {
     "min": 1,
-    "max": 3,
+    "max": 2,
     "unite": "mm de côté"
    },
    "etat_poids": null,
-   "conditions": "Les dimensions varient selon les écoles et les sites : fourchette large retenue. Sources : 2 mm / 1-2 mm / 2-3 mm.",
+   "conditions": "Valeur corrigée (1-3 mm précédemment : le « 2-3 mm » n'est pas dans les sources relues). Sources : 2 mm ; 1 à 2 mm ; fine brunoise 1 mm. Les dimensions varient selon les écoles.",
    "sources": [
     {
      "titre": "Tailles des légumes",
@@ -761,7 +846,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "cuisinedebase.com et chef-fabien.com relus : brunoise 2 mm, dés de 1 à 2 mm, fine brunoise 1 mm."
+   }
   },
   {
    "id": "legumes.coupe.macedoine",
@@ -796,7 +886,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "cuisinedebase.com et chef-fabien.com relus : 5 mm ; 4 à 5 mm."
+   }
   },
   {
    "id": "legumes.coupe.mirepoix",
@@ -831,20 +926,25 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "cuisinedebase.com et chef-fabien.com relus : 10 mm ; cubes irréguliers de 1 à 2 cm."
+   }
   },
   {
    "id": "legumes.coupe.paysanne",
    "sujet": "Paysanne",
    "type": "repere",
-   "enonce": "Carrés, triangles ou rondelles minces : environ 5 à 10 mm de côté pour 1 à 2 mm d'épaisseur.",
+   "enonce": "Carrés ou triangles minces : environ 1 cm de côté pour 1 à 2 mm d'épaisseur.",
    "valeur": {
-    "min": 5,
+    "min": 10,
     "max": 10,
     "unite": "mm de côté (épaisseur 1-2 mm)"
    },
    "etat_poids": null,
-   "conditions": "Sources contradictoires : 1 cm x 1 mm ; carré ou triangle de 2 mm d'épaisseur. Fourchette large, confiance faible.",
+   "conditions": "Valeur corrigée (5-10 mm précédemment : non étayé). Sources contradictoires sur l'épaisseur : 1 cm de côté sur 1 mm (chef-fabien) ; carré ou triangle de 2 mm d'épaisseur (cuisinedebase, sans côté). Confiance faible.",
    "sources": [
     {
      "titre": "Tailles des légumes",
@@ -866,7 +966,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "cuisinedebase.com et chef-fabien.com relus : 1 cm sur 1 mm environ ; carré ou triangle de 2 mm d'épaisseur."
+   }
   },
   {
    "id": "legumes.coupe.jardiniere",
@@ -901,16 +1006,25 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "cuisinedebase.com et chef-fabien.com relus : 5 x 5 x 50 mm ; 3 à 4 cm sur 4 à 5 mm."
+   }
   },
   {
    "id": "legumes.coupe.tourner",
    "sujet": "Tourner",
    "type": "definition",
-   "enonce": "Tourner consiste à donner une forme régulière ovale aux légumes pour une cuisson et une présentation homogènes.",
-   "valeur": null,
+   "enonce": "Tourner : donner une forme régulière et oblongue (ballon de rugby) à des tronçons de 5 à 6 cm ; les pommes tournées ont classiquement 7 faces.",
+   "valeur": {
+    "min": 7,
+    "max": 7,
+    "unite": "faces (pommes tournées)"
+   },
    "etat_poids": null,
-   "conditions": "Nombre de faces et longueur non trouvés (lacune).",
+   "conditions": "7 faces et tronçons de 6 cm : fiche technique de l'École des papilles (Bazan, PDF relu en local) ; 5 à 6 cm : Meilleur du Chef. Le nombre de faces pour d'autres légumes n'est pas précisé.",
    "sources": [
     {
      "titre": "Tailles des légumes",
@@ -919,12 +1033,33 @@
      "consulte": "2026-10-04",
      "extrait": "Tourner",
      "type_source": "web"
+    },
+    {
+     "titre": "Technique de base : tourner des légumes (fiche Bazan, p. 32)",
+     "organisme": "École des papilles",
+     "url": "https://www.ecole-des-papilles.fr/wp-content/uploads/2015/04/032-tourner-des-legumes-bazan.pdf",
+     "consulte": "2026-10-04",
+     "extrait": "ont classiquement 7 faces",
+     "type_source": "manuel"
+    },
+    {
+     "titre": "Légumes tournés",
+     "organisme": "Meilleur du Chef",
+     "url": "https://www.meilleurduchef.com/fr/recette/legumes-tournes.html",
+     "consulte": "2026-10-04",
+     "extrait": "morceaux de 5 à 6 cm de long",
+     "type_source": "web"
     }
    ],
-   "confiance": "faible",
+   "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "PDF Bazan extrait localement : 7 faces, tronçons de 6 cm ; page Meilleur du Chef : 5 à 6 cm."
+   }
   },
   {
    "id": "legumes.coupe.regle-uniformite",
@@ -990,7 +1125,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Migusto relu : « entre 30 secondes et 3 minutes » ; base §14 relue : 1-3 min."
+   }
   },
   {
    "id": "legumes.blanchir.haricots-verts",
@@ -1017,7 +1157,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "lechatouilleur.fr relu : haricots verts 4 à 5 min depuis la reprise de l'ébullition."
+   }
   },
   {
    "id": "legumes.blanchir.brocoli",
@@ -1044,7 +1189,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "lechatouilleur.fr relu : brocoli 3 min depuis la reprise de l'ébullition."
+   }
   },
   {
    "sujet": "Chou-fleur",
@@ -1071,7 +1221,12 @@
      "type_source": "web"
     }
    ],
-   "confiance": "faible"
+   "confiance": "faible",
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "lechatouilleur.fr relu : chou-fleur 5 à 6 min depuis la reprise de l'ébullition."
+   }
   },
   {
    "id": "legumes.blanchir.asperges-petits-pois-epinards",
@@ -1098,7 +1253,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "lechatouilleur.fr relu : asperges 3 min, petits pois 2 min, épinards 30 s depuis la reprise de l'ébullition."
+   }
   },
   {
    "id": "legumes.blanchir.volume-eau-lots",
@@ -1107,7 +1267,7 @@
    "enonce": "Blanchir par petites quantités à grande eau pour que l'ébullition reprenne vite.",
    "valeur": null,
    "etat_poids": null,
-   "conditions": "Le ratio eau/légume et le sel par litre n'ont pas été trouvés dans une source fiable (lacune).",
+   "conditions": "Voir legumes.blanchir.eau-par-legume et legumes.blanchir.sel-par-litre (source web unique, non recoupée).",
    "sources": [
     {
      "titre": "Blanchir",
@@ -1186,7 +1346,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Fiche AG relue en local (PDF) : 50 à 10 °C en deux heures au plus ; gastronomie-hygiene.ch (HACCP) : idem ; base §6 relue : 65 à 10 °C en 3 h."
+   }
   },
   {
    "id": "legumes.etuver.legumes",
@@ -1213,7 +1378,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §14 relue (étuver légumes 8-15 min à couvert)."
+   }
   },
   {
    "id": "legumes.glacer.technique",
@@ -1250,14 +1420,14 @@
    "id": "legumes.roti.four",
    "sujet": "Rôtir les légumes",
    "type": "repere",
-   "enonce": "Légumes rôtis au four vers 200-220 °C, de 15 à 40 minutes selon le légume (courgette 15-20, poivron 20-25, courge en dés environ 40, racines environ 40).",
+   "enonce": "Légumes rôtis au four vers 200 °C (180 à 220 °C selon le légume) ; durées indicatives : courgette 15-22 min, poivron 20-25, carotte en rondelles 20-30, pomme de terre 20-45 selon la taille, betterave entière 45-60 min à 180 °C.",
    "valeur": {
-    "min": 200,
+    "min": 180,
     "max": 220,
     "unite": "°C"
    },
    "etat_poids": null,
-   "conditions": "Sources web ; températures de four et temps très variables.",
+   "conditions": "Sources web ; températures de four et temps très variables. Valeurs corrigées d'après les pages relues : la courge en dés (environ 40 min) n'y figure pas et a été retirée ; 180 °C ajouté (betterave, oignon).",
    "sources": [
     {
      "titre": "Légumes rôtis : le guide pour réussir",
@@ -1279,20 +1449,25 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "latraine-restaurant.fr relu (200 °C ; courgette 18-22, poivron 20-25, carotte 25-30, pomme de terre 30-35 min) et nagano92.fr relu (180-200 °C ; carotte 20-25, courgette 15-20, betterave 45-60 min à 180 °C)."
+   }
   },
   {
    "id": "legumes.vapeur.legumes",
    "sujet": "Cuisson vapeur",
    "type": "repere",
-   "enonce": "Cuisson à la vapeur, peu de lessivage ; à titre d'ordre de grandeur, brocoli ou chou-fleur 3-10 min, haricots 4-6 min, carottes 5-15 min selon la texture voulue.",
+   "enonce": "Cuisson à la vapeur, peu de lessivage ; ordres de grandeur : brocoli et chou-fleur en bouquets 7-10 min croquants, 15-19 min tendres ; haricots verts 10-12 min croquants, 20-25 min tendres ; carottes en rondelles 8-15 min, en fines lamelles 5-10 min.",
    "valeur": {
-    "min": 3,
-    "max": 15,
+    "min": 5,
+    "max": 25,
     "unite": "min"
    },
    "etat_poids": null,
-   "conditions": "Sources web hétérogènes (matériel domestique) ; pour un four mixte, tester.",
+   "conditions": "Valeurs corrigées d'après lase.fr (l'ancien énoncé, 3-10 min pour le brocoli et 4-6 min pour les haricots, était plus court que la source). Matériel domestique ; pour un four mixte, tester. La base Sanji ne donne pas de durée de vapeur.",
    "sources": [
     {
      "titre": "Base officielle production, stock, hygiène (base métier Sanji)",
@@ -1314,7 +1489,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Tableau lase.fr relu : brocoli 7-10 / 15-18, chou-fleur 8-10 / 15-19, haricot vert 10-12 / 20-25, carotte 8-10 / 15 min (lamelles 5-6 / 8-10)."
+   }
   },
   {
    "id": "legumes.sauter.legumes",
@@ -1346,7 +1526,7 @@
    "enonce": "Braiser : saisir puis cuire longuement à couvert avec peu de liquide.",
    "valeur": null,
    "etat_poids": null,
-   "conditions": "Temps pour les légumes non trouvé (lacune).",
+   "conditions": "Temps pour les légumes en général non trouvé ; voir legumes.braiser.endives-duree (endives seulement).",
    "sources": [
     {
      "titre": "Base officielle production, stock, hygiène (base métier Sanji)",
@@ -1394,7 +1574,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Fiche AG relue en local : huile de friture à 170 °C au plus ; base §14 relue : préfriture 130-150 °C, finition 3-4 min."
+   }
   },
   {
    "id": "legumes.gratin.pomme-de-terre",
@@ -1421,7 +1606,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §14 relue (gratin dauphinois 60-75 min à 160-170 °C)."
+   }
   },
   {
    "id": "legumes.perte-cuisson.etuves-glaces",
@@ -1448,7 +1638,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.2 relue : valeur identique ; aucun recoupement externe."
+   }
   },
   {
    "id": "legumes.perte-cuisson.asperges-pdt",
@@ -1475,7 +1670,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.2 relue : valeur identique ; aucun recoupement externe."
+   }
   },
   {
    "id": "legumes.perte-cuisson.champignons-ratatouille",
@@ -1502,7 +1702,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.2 relue : valeur identique ; aucun recoupement externe."
+   }
   },
   {
    "id": "legumes.perte-cuisson.frites",
@@ -1529,20 +1734,25 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.2 relue : valeur identique ; aucun recoupement externe."
+   }
   },
   {
    "id": "legumes.avance.legumes-epluches",
    "sujet": "Légumes épluchés",
    "type": "repere",
-   "enonce": "Légumes épluchés ou taillés crus : 24 à 48 h au froid en bac fermé.",
+   "enonce": "Légumes épluchés ou taillés crus : 24 à 48 h au réfrigérateur (la plupart sous 24 h).",
    "valeur": {
     "min": 24,
     "max": 48,
     "unite": "h"
    },
    "etat_poids": "cru_net",
-   "conditions": "Source web unique ; pas de valeur officielle trouvée.",
+   "conditions": "Source web unique ; pas de valeur officielle trouvée. « Bac fermé » retiré (non présent dans la source). Pour les produits crus entiers, voir legumes.avance.legumes-crus-gvg.",
    "sources": [
     {
      "titre": "Peut-on éplucher les légumes la veille ?",
@@ -1556,20 +1766,21 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Boutique Marmiton relu : « entre 24 et 48 heures au réfrigérateur » (la plupart sous 24 h)."
+   }
   },
   {
    "id": "legumes.avance.pomme-de-terre-eau",
    "sujet": "Pommes de terre épluchées",
    "type": "repere",
-   "enonce": "Les pommes de terre épluchées se gardent sous eau froide au froid, 48 h au plus conseillé, en changeant l'eau.",
-   "valeur": {
-    "min": 24,
-    "max": 48,
-    "unite": "h"
-   },
+   "enonce": "Les pommes de terre épluchées se gardent entièrement couvertes d'eau froide, au froid, en changeant l'eau le matin.",
+   "valeur": null,
    "etat_poids": "cru_net",
-   "conditions": "Un site indique jusqu'à 3-4 jours (écart) ; l'eau est absorbée et rend plus d'eau à la cuisson.",
+   "conditions": "Valeur retirée : la source ne donne aucune durée pour les pommes de terre dans l'eau (« 24-48 h » non étayé ; le « 3-4 jours » concerne carottes et céleri dans l'eau). Voir lacunes.",
    "sources": [
     {
      "titre": "Peut-on éplucher les légumes la veille ?",
@@ -1583,7 +1794,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Boutique Marmiton relu : couvrir d'eau froide, changer l'eau le matin ; aucune durée pour les pommes de terre."
+   }
   },
   {
    "id": "legumes.avance.blanchis-refroidis",
@@ -1592,7 +1808,7 @@
    "enonce": "Légumes blanchis puis refroidis : refroidir vite, étiqueter, stocker au froid ; durée de conservation à fixer dans le plan d'autocontrôle.",
    "valeur": null,
    "etat_poids": null,
-   "conditions": "Aucune durée spécifique aux légumes blanchis trouvée (lacune). Repère proche : plats cuisinés et gratins de légumes 3 jours en base Sanji.",
+   "conditions": "Aucune durée propre aux légumes blanchis trouvée ; repère proche : légumes cuits, jour de production plus 2 jours (GVG, voir legumes.avance.legumes-cuits-gvg) ; gratins de légumes 3 jours en base Sanji.",
    "sources": [
     {
      "titre": "Base officielle production, stock, hygiène (base métier Sanji)",
@@ -1641,7 +1857,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base catalogue (gratin de légumes, 3 j fermé, 2 j ouvert) relue."
+   }
   },
   {
    "id": "legumes.avance.refroidissement",
@@ -1675,7 +1896,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Fiche AG relue en local (PDF) : 50 à 10 °C en deux heures au plus ; gastronomie-hygiene.ch (HACCP) : idem ; base §6 relue : 65 à 10 °C en 3 h."
+   }
   },
   {
    "id": "legumes.avance.maintien-chaud",
@@ -1688,7 +1914,7 @@
     "unite": "°C minimum (3 h maximum)"
    },
    "etat_poids": null,
-   "conditions": "Fiche hygiène Suisse : plus de 65 °C au service ; durée de 3 h issue de la base Sanji.",
+   "conditions": "Fiche hygiène suisse : plus de 65 °C au service ; fiche AG : 65 °C au moins recommandés, maintien des plats précuits limité à trois heures au plus selon le produit ; base Sanji : 3 h au plus.",
    "sources": [
     {
      "titre": "Temperaturen bei Lagerung & Speisenausgabe",
@@ -1697,6 +1923,14 @@
      "consulte": "2026-10-04",
      "extrait": "",
      "type_source": "professionnelle"
+    },
+    {
+     "titre": "Merkblatt Nr. 11 Temperaturführung im Umgang mit Lebensmitteln",
+     "organisme": "Canton d'Argovie, Lebensmittelkontrolle",
+     "url": "https://www.ag.ch/media/kanton-aargau/dgs/dokumente/verbraucherschutz/lebensmittelkontrolle/lebensmittelinspektorat/merkblaetter/merkblatt-11-temperaturfuehrung-im-umgang-mit-lebensmitteln-erhitzen-abkhlen-auftauen.pdf",
+     "consulte": "2026-10-04",
+     "extrait": "mindestens 65 °C",
+     "type_source": "officielle"
     },
     {
      "titre": "Base officielle production, stock, hygiène (base métier Sanji)",
@@ -1710,7 +1944,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "gastronomie-hygiene.ch relu : plus de 65 °C ; fiche AG relue en local : 65 °C, trois heures au plus ; base §6 relue."
+   }
   },
   {
    "id": "legumes.avance.remise-temperature",
@@ -1723,7 +1962,7 @@
     "unite": "°C à cœur"
    },
    "etat_poids": null,
-   "conditions": "Repère de la GVG (extrait de recherche) et de la base Sanji.",
+   "conditions": "Valeur de la base Sanji (§6 et §14). Le guide GVG et la fiche AG relus fixent 70 °C à cœur (2 min) pour la cuisson, pas explicitement pour la remise en température : non retenu comme confirmation.",
    "sources": [
     {
      "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG) - PDF non extrait, lu via extrait de moteur de recherche",
@@ -1745,7 +1984,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §6 et §14 relues (remise en température ≥ 70 °C) ; GVG et fiche AG : 70 °C à cœur seulement pour la cuisson."
+   }
   },
   {
    "id": "legumes.avance.froid-legumes",
@@ -1834,7 +2078,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue (champignons de Paris 10-20 %) ; aucun recoupement externe."
+   }
   },
   {
    "id": "legumes.champignon.rendement-sauvages",
@@ -1861,20 +2110,25 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.1 relue (cèpes, girolles 15-25 %) ; aucun recoupement externe."
+   }
   },
   {
    "id": "legumes.champignon.perte-sauter",
    "sujet": "Champignons sautés",
    "type": "repere",
-   "enonce": "Perte de cuisson 40 à 50 % : faire évaporer l'eau avant d'ajouter le beurre.",
+   "enonce": "Champignons sautés : perte de cuisson de 40 à 50 % (forte perte d'eau).",
    "valeur": {
     "min": 40,
     "max": 50,
     "unite": "% de perte à la cuisson"
    },
    "etat_poids": "cuit",
-   "conditions": "Base seule pour le chiffre ; conseil d'évaporation de sites web.",
+   "conditions": "Base seule pour le chiffre. Le conseil d'évaporation avant le beurre n'est pas dans la page Quitoque relue : retiré, et la source retirée.",
    "sources": [
     {
      "titre": "Base officielle production, stock, hygiène (base métier Sanji)",
@@ -1883,33 +2137,30 @@
      "consulte": "2026-10-04",
      "extrait": "",
      "type_source": "base_sanji"
-    },
-    {
-     "titre": "Comment réussir la conservation des champignons de Paris ?",
-     "organisme": "Quitoque",
-     "url": "https://www.quitoque.fr/blog/article/conservation-champignons-de-paris",
-     "consulte": "2026-10-04",
-     "extrait": "",
-     "type_source": "web"
     }
    ],
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §11.2 relue (champignons sautés 40-50 %)."
+   }
   },
   {
    "id": "legumes.champignon.conservation",
    "sujet": "Conservation des champignons de Paris",
    "type": "repere",
-   "enonce": "Au froid, dans un contenant respirant (papier, torchon), 3 à 5 jours ; pas de sac plastique.",
+   "enonce": "Au froid, dans un récipient couvert d'un torchon ou un sac en papier (pas de sac plastique) : 3 à 5 jours selon la base Sanji, jusqu'à une semaine selon un site web.",
    "valeur": {
     "min": 3,
-    "max": 5,
+    "max": 7,
     "unite": "jours"
    },
    "etat_poids": null,
-   "conditions": "Source web unique.",
+   "conditions": "Valeur élargie (3-5 jours précédemment) : Quitoque dit « jusqu'à une semaine » ; base Sanji (catalogue §32.2) 3-5 jours, contenant aéré, ne pas laver avant stockage.",
    "sources": [
     {
      "titre": "Comment réussir la conservation des champignons de Paris ?",
@@ -1918,12 +2169,25 @@
      "consulte": "2026-10-04",
      "extrait": "",
      "type_source": "web"
+    },
+    {
+     "titre": "Base officielle production, stock, hygiène (base métier Sanji)",
+     "organisme": "Sanji",
+     "url": "base-officielle-production-stock-hygiene.md §32.2",
+     "consulte": "2026-10-04",
+     "extrait": "",
+     "type_source": "base_sanji"
     }
    ],
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Quitoque relu : « jusqu'à une semaine », récipient couvert d'un torchon ou sac en papier ; base §32.2 relue : 3-5 j."
+   }
   },
   {
    "id": "legumes.champignon.sauvages-cuisson",
@@ -1991,14 +2255,14 @@
    "id": "legumes.herbe.conservation-frigo",
    "sujet": "Herbes fraîches",
    "type": "repere",
-   "enonce": "Au frigo avec papier absorbant humide, environ 5 jours, jusqu'à une semaine.",
+   "enonce": "Au frigo : environ 5 jours, jusqu'à une semaine avec du papier absorbant humide ; herbes robustes (thym, romarin, estragon, sauge) 2 à 3 semaines dans un torchon humide en sac fermé.",
    "valeur": {
     "min": 5,
-    "max": 7,
+    "max": 21,
     "unite": "jours"
    },
    "etat_poids": null,
-   "conditions": "Sources web.",
+   "conditions": "Schilliger : 5 jours, une semaine avec papier humide. Supertoinette : herbes robustes 2 à 3 semaines ; herbes tendres plutôt dans l'eau à température ambiante (7 à 10 jours), car elles brunissent en 2 jours au frigo. Fourchette large.",
    "sources": [
     {
      "titre": "Conserver ses plantes aromatiques",
@@ -2020,7 +2284,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Schilliger relu : environ 5 jours, une semaine avec papier humide ; Supertoinette relu : herbes robustes 2 à 3 semaines."
+   }
   },
   {
    "id": "legumes.herbe.ajout-fragiles",
@@ -2095,14 +2364,14 @@
    "id": "legumes.oeuf.date-limite",
    "sujet": "Date des œufs en coquille",
    "type": "repere",
-   "enonce": "Œufs suisses : durabilité minimale d'au plus 28 jours après la ponte (fiche cantonale) ; délai de vente de 21 jours annoncé comme légal par une association de branche, sans texte de loi relu.",
+   "enonce": "Œufs suisses : vente jusqu'à 21 jours après la ponte et consommation jusqu'au 28e jour (rundumsei.ch) ; GalloSuisse écrit que le délai de vente de 21 jours est fixé par la loi.",
    "valeur": {
     "min": 21,
     "max": 28,
     "unite": "jours après la ponte"
    },
    "etat_poids": null,
-   "conditions": "Niveau de preuve : 28 jours = fiche cantonale officielle de Lucerne (voir hygiene.duree.oeufs-coquille) et rundumsei.ch ; 21 jours = GalloSuisse (« par la loi ») et Swissmilk (stockage non réfrigéré, sans base légale citée), ordonnance sur les œufs non relue (Fedlex illisible par l'outil). Cohérent avec hygiene.duree.oeufs-coquille. La base Sanji parle de DLC à 28 jours : il s'agit d'une date de durabilité.",
+   "conditions": "21 jours : GalloSuisse, Swissmilk, rundumsei.ch ; 28 jours : rundumsei.ch ; base Sanji : DLC 28 j. La fiche cantonale de Lucerne citée avant n'a pas été relue ici. Texte de loi non relu (voir hygiene.duree.oeufs-coquille).",
    "sources": [
     {
      "titre": "ABC des œufs",
@@ -2132,29 +2401,25 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "rundumsei.ch relu : vente 21 jours, consommation jusqu'au 28e jour ; GalloSuisse et Swissmilk relus : 21 jours."
+   }
   },
   {
    "id": "legumes.oeuf.stockage-temperature",
    "sujet": "Stockage des œufs",
    "type": "regle",
-   "enonce": "En cuisine professionnelle : froid constant, 5 à 8 °C selon la GVG ; ne pas laver, pointe en bas.",
+   "enonce": "En cuisine professionnelle : froid constant, 8 °C au plus selon la base Sanji ; les œufs suisses se vendent non réfrigérés (21 jours depuis la ponte, Swissmilk) et un producteur cite 10-18 °C pour son stockage.",
    "valeur": {
-    "min": 0,
     "max": 8,
-    "unite": "°C"
+    "unite": "°C maximum"
    },
    "etat_poids": null,
-   "conditions": "Écarts : GVG +5 à +8 °C (extrait de recherche) ; autre source 0-4 °C ; base Sanji 8 °C maximum ; en commerce suisse non réfrigéré 21 jours. Fourchette large.",
+   "conditions": "Valeur de la base Sanji (§6). Le « 5 à 8 °C selon la GVG » n'a pas été retrouvé dans le guide GVG (tableaux de températures illisibles à l'extraction) : retiré, source retirée. Eier Meier : 10-18 °C (stockage producteur, autre contexte). « 0-4 °C » d'une autre source non retrouvé.",
    "sources": [
-    {
-     "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG) - PDF non extrait, lu via extrait de moteur de recherche",
-     "organisme": "GastroSuisse, HotellerieSuisse, Cafetiersuisse",
-     "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
-     "consulte": "2026-10-04",
-     "extrait": "",
-     "type_source": "professionnelle"
-    },
     {
      "titre": "Haltbarkeit von Eier (lu via résultat de recherche)",
      "organisme": "Eier Meier AG",
@@ -2180,10 +2445,15 @@
      "type_source": "professionnelle"
     }
    ],
-   "confiance": "moyenne",
+   "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §6 relue (œufs ≤ 8 °C constant) ; Eier Meier : 10-18 °C ; Swissmilk : 21 jours non réfrigérés ; GVG : valeur non retrouvée."
+   }
   },
   {
    "id": "legumes.oeuf.pointe-en-bas",
@@ -2220,14 +2490,14 @@
    "id": "legumes.oeuf.dur-conservation",
    "sujet": "Œufs durs",
    "type": "repere",
-   "enonce": "Œufs durs : 1 à 2 semaines au froid ; noter la date de cuisson sur la coquille.",
+   "enonce": "Œufs durs refroidis à l'eau : 3 jours au plus selon la GVG, 1 à 2 semaines au froid selon Swissmilk ; retenir la durée courte en restauration.",
    "valeur": {
-    "min": 1,
-    "max": 2,
-    "unite": "semaines"
+    "min": 3,
+    "max": 14,
+    "unite": "jours"
    },
    "etat_poids": "cuit",
-   "conditions": "Pour la restauration, durée interne plus courte possible.",
+   "conditions": "Sources divergentes : GVG (gekochte, in Wasser abgekühlte Eier, max. 3 Tage) et Swissmilk (1-2 semaines, usage domestique). Fourchette la plus large gardée ; la mention « noter la date sur la coquille » n'est pas dans les sources : retirée.",
    "sources": [
     {
      "titre": "Eier-Haltbarkeit",
@@ -2236,12 +2506,25 @@
      "consulte": "2026-10-04",
      "extrait": "",
      "type_source": "professionnelle"
+    },
+    {
+     "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), tableau 6.3.1 des durées maximales de stockage au froid",
+     "organisme": "GastroSuisse, HotellerieSuisse, Cafetiersuisse",
+     "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+     "consulte": "2026-10-04",
+     "extrait": "Gekochte, in Wasser abgekühlte Eier: max. 3 Tage",
+     "type_source": "professionnelle"
     }
    ],
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Swissmilk relu : « 1-2 Wochen » ; GVG tableau 6.3.1 (PDF extrait en local) : 3 jours au plus."
+   }
   },
   {
    "id": "legumes.oeuf.coque",
@@ -2268,20 +2551,25 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "lesoeufs.fr relu : 3 minutes, eau frémissante."
+   }
   },
   {
    "id": "legumes.oeuf.mollet",
    "sujet": "Œuf mollet",
    "type": "repere",
-   "enonce": "Œuf mollet : environ 6 minutes (œuf de calibre moyen, minutage dès l'ébullition) ; 3 minutes correspond à l'œuf à la coque.",
+   "enonce": "Œuf mollet : environ 6 minutes (œuf de calibre moyen, eau frémissante) ; 3 minutes correspond à l'œuf à la coque.",
    "valeur": {
     "min": 6,
     "max": 6,
     "unite": "min"
    },
    "etat_poids": null,
-   "conditions": "lesoeufs.fr : 6 min en eau frémissante puis eau froide ; GalloSuisse : environ 6 min pour un œuf moyen, départ en eau tiède, minutage dès l'ébullition, refroidissement naturel (pas d'eau froide). L'autre thème du référentiel (sauces-cuissons) donne 3 à 4 min pour un œuf mollet ou poché peu cuit : écart non résolu, calibre et départ non précisés partout. Sondage du 2026-10-04 : les sources disent 6 min ; la borne de 3 min n'était étayée par aucune. L'entrée sauces-cuissons.securite.oeufs, qui parle de 3 à 4 min, est à rapprocher (œuf à la coque ou poché).",
+   "conditions": "lesoeufs.fr : 6 min en eau frémissante ; GalloSuisse : environ 6 min pour un œuf moyen. Le départ en eau tiède et le refroidissement à l'eau froide ne sont pas confirmés par les pages relues : retirés.",
    "sources": [
     {
      "titre": "Se faire cuire un œuf",
@@ -2303,20 +2591,25 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "lesoeufs.fr relu : 6 minutes, eau frémissante ; GalloSuisse relu : « rund sechs Minuten » pour un œuf moyen."
+   }
   },
   {
    "id": "legumes.oeuf.dur",
    "sujet": "Œuf dur",
    "type": "repere",
-   "enonce": "Environ 9 à 10 minutes à petits bouillons (9 à 12 selon les sites).",
+   "enonce": "Environ 9 minutes à petits bouillons (œuf moyen, départ à l'eau froide).",
    "valeur": {
     "min": 9,
-    "max": 12,
+    "max": 9,
     "unite": "min"
    },
    "etat_poids": null,
-   "conditions": "Taille moyenne ; départ eau froide ou bouillante selon la méthode.",
+   "conditions": "lesoeufs.fr : 9 minutes. La fourchette 9-12 min « selon les sites » n'a pas été retrouvée : ramenée à la source lue.",
    "sources": [
     {
      "titre": "Se faire cuire un œuf",
@@ -2330,7 +2623,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "lesoeufs.fr relu : 9 minutes à petits bouillons."
+   }
   },
   {
    "id": "legumes.oeuf.poche",
@@ -2365,20 +2663,24 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "lesoeufs.fr relu : environ 3 minutes, eau frémissante ; base §14 relue : 3-4 min, pocher 65-80 °C."
+   }
   },
   {
    "id": "legumes.oeuf.fraicheur-ecalage",
    "sujet": "Fraîcheur et écalage",
    "type": "regle",
-   "enonce": "Les œufs très frais s'écalent mal ; attendre environ une semaine avant de les cuire durs ; meilleur goût après 5 à 7 jours.",
+   "enonce": "Les œufs très frais s'écalent mal : pour les cuire durs, prendre des œufs d'au moins une semaine.",
    "valeur": {
-    "min": 5,
-    "max": 7,
-    "unite": "jours"
+    "min": 7,
+    "unite": "jours (minimum)"
    },
    "etat_poids": null,
-   "conditions": "",
+   "conditions": "GalloSuisse : œufs à coquille intacte d'au moins une semaine. L'ancien « meilleur goût après 5 à 7 jours » n'est pas dans la source : retiré.",
    "sources": [
     {
      "titre": "ABC des œufs",
@@ -2392,7 +2694,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "GalloSuisse relu : « mindestens eine Woche alt », œufs très frais difficiles à écaler."
+   }
   },
   {
    "id": "legumes.oeuf.hygiene-mains",
@@ -2481,34 +2788,44 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base catalogue relue (mayonnaise maison 24-48 h)."
+   }
   },
   {
    "id": "legumes.oeuf.pasteurisation-liquide",
    "sujet": "Pasteurisation des œufs liquides",
    "type": "repere",
-   "enonce": "Pasteurisation industrielle : œuf entier environ 60 °C pendant 3,5 min ; blanc 57,5 °C ; jaune 61,1 °C (2,5 min). Les normes varient selon les pays (60 à 68 °C).",
+   "enonce": "Pasteurisation industrielle des ovoproduits liquides (USDA, 9 CFR 590.570, version 2012) : blanc 56,7 °C (134 °F) 3,5 min ; œuf entier 60 °C (140 °F) 3,5 min ; jaune nature 61,1 °C (142 °F) 3,5 min.",
    "valeur": {
-    "min": 57.5,
-    "max": 68,
+    "min": 56.7,
+    "max": 61.1,
     "unite": "°C"
    },
    "etat_poids": null,
-   "conditions": "Procédé industriel, pas reproductible en cuisine sans équipement. Lu via résultats de recherche (USDA).",
+   "conditions": "Procédé industriel, non reproductible en cuisine. Valeurs corrigées d'après le texte réglementaire relu (2012) : l'ancien « blanc 57,5 °C » et « jaune 2,5 min » n'y figurent pas ; « 60 à 68 °C selon les pays » non étayé, retiré. Des barèmes alternatifs existent dans le texte (par exemple 132 °F pendant 6,2 min pour le blanc) et le guide FSIS de 2020 (page bloquée, non relu) durcirait l'exigence pour le blanc.",
    "sources": [
     {
-     "titre": "FSIS Food Safety Guideline for Egg Products (lu via résultat de recherche)",
-     "organisme": "USDA FSIS",
-     "url": "https://www.fsis.usda.gov/sites/default/files/media_file/2021-01/food-safety-guideline-egg-products.pdf",
+     "titre": "9 CFR 590.570, Pasteurization of liquid eggs (version 2012)",
+     "organisme": "USDA FSIS (Code of Federal Regulations)",
+     "url": "https://www.govinfo.gov/content/pkg/CFR-2012-title9-vol2/xml/CFR-2012-title9-vol2-sec590-570.xml",
      "consulte": "2026-10-04",
-     "extrait": "",
+     "extrait": "whole egg 140 °F 3.5 minutes",
      "type_source": "officielle"
     }
    ],
-   "confiance": "moyenne",
+   "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Tableau du 9 CFR 590.570 (2012) relu sur govinfo.gov : albumen 134 °F 3,5 min, œuf entier 140 °F 3,5 min, jaune 142 °F 3,5 min."
+   }
   },
   {
    "id": "legumes.oeuf.oeufs-battus",
@@ -2535,7 +2852,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base catalogue relue (œufs battus, congélation 90-120 j)."
+   }
   },
   {
    "id": "legumes.lait.creme-entiere-matiere-grasse",
@@ -2562,7 +2884,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Swissmilk relu : « 100 g Vollrahm enthalten mindestens 35 g Fett » ; VLtH art. 70 relu : 350 g/kg."
+   }
   },
   {
    "sujet": "Demi-crème",
@@ -2578,7 +2905,7 @@
     "max": 15,
     "unite": "% matière grasse (minimum)"
    },
-   "conditions": "Minimum propre à la demi-crème ; elle ne se fouette pas comme la crème entière. Le minimum de la crème à fouetter n'a pas été trouvé sur la page ouverte.",
+   "conditions": "Minimum propre à la demi-crème (ou crème à café) ; elle ne se fouette pas comme la crème entière. Minimum de la crème à fouetter : voir legumes.lait.creme-fouetter-minimum.",
    "sources": [
     {
      "titre": "Schweizer Rahm",
@@ -2589,7 +2916,12 @@
      "type_source": "professionnelle"
     }
    ],
-   "confiance": "moyenne"
+   "confiance": "moyenne",
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Swissmilk relu : « Halbrahm mindestens 15 g Fett » ; VLtH art. 70 relu : 150 g/kg."
+   }
   },
   {
    "id": "legumes.lait.creme-stockage",
@@ -2624,7 +2956,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Swissmilk relu : « maximal 5 °C » ; durées d'ouverture (2 j, 3-5 j) : base catalogue relue."
+   }
   },
   {
    "id": "legumes.lait.creme-usage",
@@ -2660,7 +2997,7 @@
     "unite": "jours"
    },
    "etat_poids": null,
-   "conditions": "Température de fouettage : Swissmilk.",
+   "conditions": "Température de fouettage : Swissmilk (environ 5 °C pour la crème entière ; demi-crème : 15 à 20 min au congélateur avant). Durée de la chantilly maison : base Sanji seule.",
    "sources": [
     {
      "titre": "Schweizer Rahm",
@@ -2682,7 +3019,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Durée (jour même à 2 jours) : base catalogue relue ; Swissmilk relu pour le fouettage vers 5 °C."
+   }
   },
   {
    "id": "legumes.lait.beurre",
@@ -2709,7 +3051,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §8 et catalogue relus (beurre 30 j, 14 j ouvert, congélation 180 j)."
+   }
   },
   {
    "id": "legumes.lait.beurre-noisette",
@@ -2759,7 +3106,12 @@
    "confiance": "faible",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Swissmilk relu : « il se conserve environ six semaines » en bocal fermé au réfrigérateur."
+   }
   },
   {
    "id": "legumes.lait.beurre-noir",
@@ -2809,20 +3161,25 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Swissmilk relu : beurre et farine à parts égales, cube ajouté à la préparation chaude."
+   }
   },
   {
    "id": "legumes.lait.fromage-conservation",
    "sujet": "Fromages à gratin",
    "type": "repere",
-   "enonce": "Fromage entier : 5-10 °C, jusqu'à 3 semaines ; pâte dure fermée 21-30 jours, ouverte 10-14 jours (base).",
+   "enonce": "Fromage : 5-10 °C ; pièce entière jusqu'à 3 semaines au froid (Swissmilk) ; pâte dure fermée 21-30 jours, ouverte 10-14 jours (base).",
    "valeur": {
     "min": 10,
     "max": 30,
     "unite": "jours"
    },
    "etat_poids": null,
-   "conditions": "Swissmilk : 3 semaines pièce entière. Gruyère, emmental, parmesan.",
+   "conditions": "Swissmilk : environ 5-10 °C, pièces entières jusqu'à trois semaines. Base : gruyère, emmental, comté 21-30 j fermés, 10-14 j ouverts ; parmesan 30-45 j / 14-21 j.",
    "sources": [
     {
      "titre": "Käse aufbewahren",
@@ -2844,29 +3201,26 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Swissmilk relu : 5-10 °C, « bis zu drei Wochen » pour les pièces entières ; base catalogue relue."
+   }
   },
   {
    "id": "legumes.lait.fromage-rape-congel",
-   "sujet": "Fromage râpé",
+   "sujet": "Fromage à pâte dure congelé",
    "type": "repere",
-   "enonce": "Le fromage râpé se congèle, environ 6 mois.",
+   "enonce": "Les fromages à pâte dure (gruyère, emmental, comté, parmesan) se congèlent environ 6 mois selon la base Sanji.",
    "valeur": {
     "min": 6,
     "max": 6,
     "unite": "mois"
    },
    "etat_poids": null,
-   "conditions": "Concorde avec la base (180 j).",
+   "conditions": "Base seule : 180 j pour ces fromages (la base ne parle pas de fromage « râpé » dans ce tableau). La page Swissmilk relue ne traite pas de congélation : source retirée.",
    "sources": [
-    {
-     "titre": "Käse aufbewahren",
-     "organisme": "Swissmilk",
-     "url": "https://www.swissmilk.ch/de/rezepte-kochideen/tipps-tricks/kaese-aufbewahren/",
-     "consulte": "2026-10-04",
-     "extrait": "",
-     "type_source": "professionnelle"
-    },
     {
      "titre": "Base officielle production, stock, hygiène (base métier Sanji)",
      "organisme": "Sanji",
@@ -2876,10 +3230,15 @@
      "type_source": "base_sanji"
     }
    ],
-   "confiance": "moyenne",
+   "confiance": "faible",
    "statut": "a_valider",
    "portee": "general",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base catalogue relue (gruyère, emmental, comté, parmesan : congélation 180 j) ; page Swissmilk sans congélation."
+   }
   },
   {
    "id": "legumes.lait.allergenes",
@@ -2916,7 +3275,7 @@
    "id": "legumes.lait.temperature-stockage",
    "sujet": "Lait",
    "type": "regle",
-   "enonce": "Lait : au plus 6 °C selon une source de branche ; la base Sanji tolère 8 °C. Pour l'ensemble des produits laitiers, la source donne moins de 6 °C ; aucune valeur propre à la crème n'est étayée.",
+   "enonce": "Lait et produits laitiers : moins de 6 °C selon une source de branche ; la base Sanji tolère 8 °C pour le lait.",
    "valeur": {
     "max": 6,
     "unite": "°C maximum (lait)"
@@ -2944,7 +3303,12 @@
    "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "a_valider_localement",
-   "usage_calcul": false
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "gastronomie-hygiene.ch relu : « Molkereiprodukte < +6 °C » ; base §6 relue : lait ≤ 8 °C."
+   }
   },
   {
    "sujet": "Fromage et beurre",
@@ -2959,7 +3323,7 @@
     "max": 10,
     "unite": "°C maximum (fromage, beurre)"
    },
-   "conditions": "À distinguer du lait (6 °C, voir hygiene.temperature.lait-produits-laitiers) ; la fiche de branche parle de 7 °C pour les denrées périssables préemballées, 10 °C parfois pour les produits laitiers. Suivre l'étiquette du fabricant.",
+   "conditions": "À distinguer du lait (6 °C, voir hygiene.temperature.lait-produits-laitiers) ; la fiche de branche parle de 7 °C pour les denrées périssables préemballées, 10 °C parfois pour les produits laitiers. Suivre l'étiquette du fabricant. La phrase relue sur gastronomie-hygiene.ch (« bei Milch und Milchprodukten auch bei +10 °C ») n'a pas de contexte lisible : non retenue comme confirmation.",
    "sources": [
     {
      "titre": "Base officielle production, stock, hygiène (base métier Sanji)",
@@ -2978,53 +3342,309 @@
      "type_source": "professionnelle"
     }
    ],
-   "confiance": "faible"
+   "confiance": "faible",
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "base_sanji_seule",
+    "note": "Base §6 relue (fromage et beurre ≤ 10 °C) ; fiche de branche ambiguë."
+   }
+  },
+  {
+   "id": "legumes.blanchir.eau-par-legume",
+   "sujet": "Blanchir : volume d'eau",
+   "type": "repere",
+   "enonce": "Blanchir dans un grand volume d'eau bouillante : 1 litre d'eau pour 100 g de légumes.",
+   "valeur": {
+    "min": 1,
+    "max": 1,
+    "unite": "L d'eau pour 100 g de légumes"
+   },
+   "etat_poids": null,
+   "conditions": "Source web unique, valeur donnée telle quelle (volume très généreux, 10 L par kg) ; non recoupée. En production, le volume dépend de la capacité à reprendre vite l'ébullition.",
+   "sources": [
+    {
+     "titre": "Blanchir les légumes : la méthode et les temps exacts",
+     "organisme": "lechatouilleur.fr",
+     "url": "https://lechatouilleur.fr/blanchir-legumes-methode-temps/",
+     "consulte": "2026-10-04",
+     "extrait": "Un litre par cent grammes de légumes",
+     "type_source": "web"
+    }
+   ],
+   "confiance": "faible",
+   "statut": "a_valider",
+   "portee": "general",
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "lechatouilleur.fr relu : « un litre par cent grammes de légumes »."
+   }
+  },
+  {
+   "id": "legumes.blanchir.sel-par-litre",
+   "sujet": "Blanchir : sel",
+   "type": "repere",
+   "enonce": "Saler l'eau de blanchiment à environ 10 g de sel par litre.",
+   "valeur": {
+    "min": 10,
+    "max": 10,
+    "unite": "g de sel par litre d'eau"
+   },
+   "etat_poids": null,
+   "conditions": "Source web unique ; non recoupée.",
+   "sources": [
+    {
+     "titre": "Blanchir les légumes : la méthode et les temps exacts",
+     "organisme": "lechatouilleur.fr",
+     "url": "https://lechatouilleur.fr/blanchir-legumes-methode-temps/",
+     "consulte": "2026-10-04",
+     "extrait": "Environ 10 grammes par litre",
+     "type_source": "web"
+    }
+   ],
+   "confiance": "faible",
+   "statut": "a_valider",
+   "portee": "general",
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "lechatouilleur.fr relu : « environ 10 grammes par litre »."
+   }
+  },
+  {
+   "id": "legumes.avance.legumes-cuits-gvg",
+   "sujet": "Légumes cuits au froid",
+   "type": "repere",
+   "enonce": "Légumes cuits et produits précuits (pâtes, sauces) : au froid, jour de production plus 2 jours au plus.",
+   "valeur": {
+    "min": 2,
+    "max": 2,
+    "unite": "jours après le jour de production"
+   },
+   "etat_poids": null,
+   "conditions": "Tableau 6.3.1 du guide GVG (durées maximales recommandées pour la conservation au froid). Pas de valeur propre aux légumes blanchis ni au sous vide. Le refroidissement suit hygiene.temperature.refroidissement.",
+   "sources": [
+    {
+     "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), tableau 6.3.1 des durées maximales de stockage au froid",
+     "organisme": "GastroSuisse, HotellerieSuisse, Cafetiersuisse",
+     "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+     "consulte": "2026-10-04",
+     "extrait": "Gekochtes Gemüse, vorgekochte Produkte: Produktionstag + 2 Tage",
+     "type_source": "professionnelle"
+    }
+   ],
+   "confiance": "moyenne",
+   "statut": "a_valider",
+   "portee": "a_valider_localement",
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "PDF GVG extrait en local, tableau 6.3.1 : « Gekochtes Gemüse, vorgekochte Produkte (Teigwaren, Saucen etc.) : Produktionstag + 2 Tage »."
+   }
+  },
+  {
+   "id": "legumes.avance.legumes-crus-gvg",
+   "sujet": "Légumes crus au froid",
+   "type": "repere",
+   "enonce": "Fruits et légumes crus : 10 jours au plus au froid ; salades de légumes crus (avec ou sans sauce) : jour de production plus 2 jours.",
+   "valeur": {
+    "min": 2,
+    "max": 10,
+    "unite": "jours"
+   },
+   "etat_poids": null,
+   "conditions": "Tableau 6.3.1 du guide GVG ; le tableau ne dit pas si les légumes sont entiers ou taillés (les légumes taillés crus : 24 à 48 h dans une autre source, voir legumes.avance.legumes-epluches).",
+   "sources": [
+    {
+     "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), tableau 6.3.1 des durées maximales de stockage au froid",
+     "organisme": "GastroSuisse, HotellerieSuisse, Cafetiersuisse",
+     "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+     "consulte": "2026-10-04",
+     "extrait": "Rohes Obst und Gemüse: max. 10 Tage",
+     "type_source": "professionnelle"
+    }
+   ],
+   "confiance": "moyenne",
+   "statut": "a_valider",
+   "portee": "a_valider_localement",
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "PDF GVG extrait en local, tableau 6.3.1 : fruits et légumes crus 10 jours ; salades de légumes Produktionstag + 2 Tage."
+   }
+  },
+  {
+   "id": "legumes.herbe.thym-romarin-moment",
+   "sujet": "Thym et romarin",
+   "type": "regle",
+   "enonce": "Thym et romarin : à ajouter en début de cuisson ; le romarin est puissant, une branche suffit, sinon le plat devient amer.",
+   "valeur": null,
+   "etat_poids": null,
+   "conditions": "Source web unique ; usage décrit pour viandes, rôtis, pommes de terre (romarin) et bouquet garni (thym).",
+   "sources": [
+    {
+     "titre": "Les herbes aromatiques qui changent tout en cuisine",
+     "organisme": "Supertoinette",
+     "url": "https://www.supertoinette.com/magazine/actu-cuisine/les-herbes-aromatiques-qui-changent-tout-en-cuisine-et-comment-les-conserver-plus-longtemps",
+     "consulte": "2026-10-04",
+     "extrait": "en début de cuisson",
+     "type_source": "web"
+    }
+   ],
+   "confiance": "faible",
+   "statut": "a_valider",
+   "portee": "general",
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Supertoinette relu : thym et romarin en début de cuisson ; romarin à utiliser avec parcimonie."
+   }
+  },
+  {
+   "id": "legumes.herbe.laurier-moment",
+   "sujet": "Laurier",
+   "type": "regle",
+   "enonce": "Laurier : arôme puissant qui se diffuse lentement ; en cuisson longue, l'ajouter dès le début ou après le mouillage, et le retirer avant de servir.",
+   "valeur": null,
+   "etat_poids": null,
+   "conditions": "Source web unique (fiche bouquet garni).",
+   "sources": [
+    {
+     "titre": "Bouquet garni : ingrédients et composition",
+     "organisme": "Jardiner Malin",
+     "url": "https://www.jardiner-malin.fr/fiche/bouquet-garni.html",
+     "consulte": "2026-10-04",
+     "extrait": "Retirez-le avant de servir",
+     "type_source": "web"
+    }
+   ],
+   "confiance": "faible",
+   "statut": "a_valider",
+   "portee": "general",
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Fiche Jardiner Malin relue : laurier ajouté dès le début ou après le mouillage, retiré avant de servir."
+   }
+  },
+  {
+   "id": "legumes.lait.creme-fouetter-minimum",
+   "sujet": "Crème à fouetter : matière grasse",
+   "type": "regle",
+   "enonce": "La crème désignée « Schlagrahm » (crème à fouetter), comme « Vollrahm » ou « Rahm », contient au moins 35 % de matière grasse (350 g par kg) ; la demi-crème en contient au moins 15 %, la crème double au moins 45 %.",
+   "valeur": {
+    "min": 35,
+    "unite": "% matière grasse (minimum)"
+   },
+   "etat_poids": null,
+   "conditions": "Texte de l'ordonnance relu via un site de droit (pas sur fedlex) : à recouper sur fedlex ; portée à valider (version de la loi).",
+   "sources": [
+    {
+     "titre": "Verordnung des EDI über Lebensmittel tierischer Herkunft (VLtH, SR 817.022.108), art. 70",
+     "organisme": "Confédération suisse (texte relu via lexfind.ch, état au 1.2.2024)",
+     "url": "https://www.lexfind.ch/tolv/235117/de?download=true",
+     "consulte": "2026-10-04",
+     "extrait": "Vollrahm, Schlagrahm, Rahm: mindestens 350 g Milchfett/kg",
+     "type_source": "web"
+    }
+   ],
+   "confiance": "moyenne",
+   "statut": "a_valider",
+   "portee": "a_valider_localement",
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "VLtH art. 70 relu (PDF extrait en local) : Halbrahm 150 g/kg, Vollrahm/Schlagrahm/Rahm/Sahne 350 g/kg, Doppelrahm 450 g/kg."
+   }
+  },
+  {
+   "id": "legumes.confire.duree",
+   "sujet": "Confire des légumes",
+   "type": "technique",
+   "enonce": "Confire des légumes à l'huile : cuisson douce de quelques dizaines de minutes selon l'épaisseur (environ 10 min dans l'huile à frémissement d'après une source ; 30 à 60 min d'après l'autre).",
+   "valeur": {
+    "min": 10,
+    "max": 60,
+    "unite": "min"
+   },
+   "etat_poids": null,
+   "conditions": "Deux sources web aux méthodes différentes ; aucune température précise relue (huile « à frémissement », feu réduit). Conservation non trouvée. Fourchette large.",
+   "sources": [
+    {
+     "titre": "La bonne méthode pour confire des légumes",
+     "organisme": "Quitoque",
+     "url": "https://www.quitoque.fr/blog/article/confire-legumes",
+     "consulte": "2026-10-04",
+     "extrait": "Laissez cuire pendant min 30 à 60 minutes",
+     "type_source": "web"
+    },
+    {
+     "titre": "Confire les légumes à l'huile",
+     "organisme": "Qooq",
+     "url": "https://www.qooq.com/techniques/confire-les-legumes-lhuile",
+     "consulte": "2026-10-04",
+     "extrait": "Laisser confire environ dix minutes",
+     "type_source": "web"
+    }
+   ],
+   "confiance": "faible",
+   "statut": "a_valider",
+   "portee": "general",
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Quitoque relu : 30 à 60 min, en remuant ; Qooq relu : environ dix minutes, huile portée à frémissement puis feu réduit."
+   }
+  },
+  {
+   "id": "legumes.braiser.endives-duree",
+   "sujet": "Endives braisées",
+   "type": "repere",
+   "enonce": "Endives braisées au four à 180 °C, sous papier sulfurisé et couvercle, dans un peu d'eau assaisonnée : 1 h à 1 h 30 selon le calibre.",
+   "valeur": {
+    "min": 60,
+    "max": 90,
+    "unite": "min"
+   },
+   "etat_poids": null,
+   "conditions": "Une seule recette web relue (liquide : eau, jus de citron, sucre, sel, beurre) ; ne vaut pas pour les autres légumes.",
+   "sources": [
+    {
+     "titre": "Endives braisées",
+     "organisme": "Bloc-notes culinaire",
+     "url": "https://www.bloc-notes-culinaire.com/2017/12/endives-braisees.html",
+     "consulte": "2026-10-04",
+     "extrait": "entre 1 h et 1 h 30 selon leur calibre",
+     "type_source": "web"
+    }
+   ],
+   "confiance": "faible",
+   "statut": "a_valider",
+   "portee": "general",
+   "usage_calcul": false,
+   "verification": {
+    "le": "2026-10-04",
+    "resultat": "confirmee",
+    "note": "Recette Bloc-notes culinaire relue : 1 h à 1 h 30 à 180 °C, papier sulfurisé et couvercle."
+   }
   }
  ],
  "lacunes": [
-  {
-   "sujet": "Ratio eau/légume et sel par litre pour blanchir",
-   "raison": "Aucune source fiable trouvée."
-  },
-  {
-   "sujet": "Confire des légumes (température, durée)",
-   "raison": "Pas de source trouvée."
-  },
-  {
-   "sujet": "Nombre de faces et dimensions du légume tourné",
-   "raison": "Non trouvé."
-  },
-  {
-   "sujet": "Durée de conservation des légumes blanchis refroidis, coupés crus ou sous vide",
-   "raison": "Pas de source officielle ; seuls des sites web grand public."
-  },
   {
    "sujet": "Recoupement de nombreux pourcentages de parage (panais, salsifis, asperges, artichaut, courges, etc.)",
    "raison": "Source unique : base Sanji."
   },
   {
-   "sujet": "Texte intégral de la GVG (GastroSuisse), des fiches cantonales (SO, BS) et du PDF Aviforum sur les œufs",
-   "raison": "PDF non extractibles par l'outil ; valeurs reprises par extraits de recherche seulement."
-  },
-  {
-   "sujet": "Température et durée de liaison au jaune, durée de vie des ovoproduits pasteurisés ouverts",
-   "raison": "Non trouvées ; suivre l'étiquette du fabricant."
-  },
-  {
-   "sujet": "Moment d'ajout du thym, romarin, laurier ; conservation des herbes en cuisine pro",
-   "raison": "Non couverts par les sources lues."
-  },
-  {
-   "sujet": "Durées de cuisson braisé ou confit des légumes ; four mixte vapeur",
-   "raison": "Non trouvées en source fiable."
-  },
-  {
    "sujet": "Hotel & Gastro formation, Agridea, supports des écoles hôtelières",
    "raison": "Non consultés avec succès (pas de contenu accessible)."
-  },
-  {
-   "sujet": "Source des chiffres de pasteurisation et de GVG",
-   "raison": "Lus par extraits de moteur de recherche, pages non ouvertes."
   },
   {
    "sujet": "Ordonnance sur les œufs (délai de vente de 21 jours, base légale)",
@@ -3035,12 +3655,40 @@
    "raison": "Le chiffre de 20 min n'a pas été retrouvé sur les pages VAPKO et OSAV."
   },
   {
-   "sujet": "Minimum de matière grasse de la crème à fouetter",
-   "raison": "Non indiqué sur la page Swissmilk ouverte."
-  },
-  {
    "sujet": "Temps de mollet par calibre et mode de départ",
    "raison": "Sources divergentes (3-4 min dans un autre thème, 6 min ici) ; fourchette large gardée."
+  },
+  {
+   "sujet": "Confire des légumes : température de l'huile ou du four, conservation",
+   "raison": "Durée trouvée (10 à 60 min, legumes.confire.duree) mais aucune température fiable ni durée de conservation."
+  },
+  {
+   "sujet": "Durées de braisage des autres légumes (chou, poireau, fenouil, céleri) ; four mixte vapeur",
+   "raison": "Seules les endives braisées sont étayées (legumes.braiser.endives-duree) ; la page sur le chou braisé relue ne donne qu'un temps de plat composé."
+  },
+  {
+   "sujet": "Conservation des herbes en cuisine professionnelle ; usage du romarin hors recettes",
+   "raison": "Seules des pages grand public relues (Schilliger, Supertoinette)."
+  },
+  {
+   "sujet": "Durée des pommes de terre épluchées sous eau",
+   "raison": "La page relue ne donne pas de durée pour les pommes de terre (seulement carottes et céleri 3-4 jours)."
+  },
+  {
+   "sujet": "Conservation des légumes blanchis ou sous vide",
+   "raison": "Seul le repère GVG « légumes cuits : jour de production + 2 jours » est étayé ; rien de propre au blanchi ni au sous vide."
+  },
+  {
+   "sujet": "Guide GVG (GastroSuisse), fiches cantonales SO et BS, PDF Aviforum sur les œufs",
+   "raison": "GVG : PDF extrait en local, tableau 6.3.1 des durées lisible, tableaux de températures de stockage largement illisibles (« œufs 5-8 °C » et « remise à 70 °C » non retrouvés). Fiche AG lue. Fiches SO, BS et Aviforum non lus."
+  },
+  {
+   "sujet": "Guide FSIS 2020 sur les ovoproduits",
+   "raison": "Page bloquée (403) ; pasteurisation relue sur le 9 CFR 590.570 version 2012, éventuellement dépassée pour le blanc."
+  },
+  {
+   "sujet": "Temps de liaison au jaune, durée de vie des ovoproduits pasteurisés ouverts",
+   "raison": "Non trouvés ; suivre l'étiquette du fabricant."
   }
  ]
 }
