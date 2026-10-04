@@ -64,6 +64,24 @@ export function valeurEffective(etat, sujet, usage, opts = {}) {
   return eff;
 }
 
+/**
+ * Contrôle d'un ajustement (le même pour l'action et pour l'import) : usage ajustable, sujet qui a un standard de base,
+ * valeur finie, rendement qui se calcule (perte de 0 à moins de 100 %, gain strictement positif), pas de valeur négative
+ * hors température. `erreur` dit pourquoi (null si tout va bien) ; `base` est le standard de base du sujet.
+ */
+export function controleAjustement(usage, sujet, valeur) {
+  if (!USAGES_AJUSTABLES.includes(usage)) return { base: null, erreur: `Cet usage ne se règle pas ici : « ${usage} ».` };
+  if (typeof sujet !== 'string' || sujet === '') return { base: null, erreur: 'Sujet manquant.' };
+  if (typeof valeur !== 'number' || !Number.isFinite(valeur)) return { base: null, erreur: 'La valeur doit être un nombre.' };
+  const base = baseDe(sujet, usage);
+  if (!base) return { base: null, erreur: "Ce sujet n'a pas de standard de base : rien à ajuster." };
+  if ((usage === 'rendement_parage' || usage === 'rendement_cuisson') && coefficientDe(valeur, base.unite) === null) {
+    return { base, erreur: base.unite === '%' ? 'Une perte se saisit entre 0 et moins de 100 %.' : 'Un gain de cuisson doit être supérieur à zéro.' };
+  }
+  if (valeur < 0 && usage !== 'temperature') return { base, erreur: 'La valeur ne peut pas être négative.' };
+  return { base, erreur: null };
+}
+
 /** Vrai si `valeur` dépasse la limite de ce standard : borne prudente (`valeur` du standard) ou, pour `plage`, l'un des bords. */
 function depasseLimite(std, valeur) {
   if (std.sens === 'prudent_min') return valeur > std.valeur;

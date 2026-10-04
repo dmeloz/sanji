@@ -1,7 +1,7 @@
 // Actions sur les ajustements de la propriétaire (voir ajustements.js). Chaque action journalise en clair.
 
 import { terminer } from './actions.js';
-import { USAGES_AJUSTABLES, ajustementDe, baseDe, cleAjustement, coefficientDe, limiteHygiene } from './ajustements.js';
+import { USAGES_AJUSTABLES, ajustementDe, cleAjustement, controleAjustement, limiteHygiene } from './ajustements.js';
 
 function verifierH(h) {
   if (typeof h !== 'string' || Number.isNaN(Date.parse(h))) {
@@ -25,14 +25,8 @@ const texteValeur = (v, unite) => `${String(v).replace('.', ',')} ${unite}`;
  */
 export function ajusterStandard(etat, sujet, usage, valeur, h) {
   verifierH(h);
-  verifierSujet(sujet, usage);
-  if (typeof valeur !== 'number' || !Number.isFinite(valeur)) throw new Error('La valeur doit être un nombre.');
-  const base = baseDe(sujet, usage);
-  if (!base) throw new Error("Ce sujet n'a pas de standard de base : rien à ajuster.");
-  if ((usage === 'rendement_parage' || usage === 'rendement_cuisson') && coefficientDe(valeur, base.unite) === null) {
-    throw new Error(base.unite === '%' ? 'Une perte se saisit entre 0 et moins de 100 %.' : 'Un gain de cuisson doit être supérieur à zéro.');
-  }
-  if (valeur < 0 && usage !== 'temperature') throw new Error('La valeur ne peut pas être négative.');
+  const { base, erreur } = controleAjustement(usage, sujet, valeur);
+  if (erreur) throw new Error(erreur);
   if (!etat.ajustements || typeof etat.ajustements !== 'object') etat.ajustements = {};
   const cle = cleAjustement(usage, sujet);
   const existant = ajustementDe(etat, sujet, usage);

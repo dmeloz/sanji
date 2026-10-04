@@ -1,6 +1,7 @@
 // Document d'état unique : création, normalisation, export et import.
 // Aucune lecture de l'heure : l'horodatage `h` (ISO) est toujours un argument.
 
+import { controleAjustement } from './ajustements.js';
 import { ETAT_POIDS } from './statuts.js';
 
 export const APPLICATION = 'sanji-entremetier';
@@ -299,11 +300,16 @@ export function importer(texte) {
     }
   }
   if (source.ajustements !== undefined) {
-    // { « usage|sujet »: {valeur, unite, le, avant:{valeur, origine}} } : une entrée sans valeur finie ou sans unité est écartée.
+    // { « usage|sujet »: {valeur, unite, le, avant:{valeur, origine}} } : écartée si sans valeur finie ou sans unité, si
+    // l'usage n'est pas ajustable, si le sujet n'a pas de standard de base, si l'unité n'est pas celle de ce standard ou si la
+    // valeur sort des bornes de ajusterStandard.
     if (!estObjet(source.ajustements)) throw new Error('Export corrompu : « ajustements » est invalide.');
     for (const [cle, a] of Object.entries(source.ajustements)) {
       if (CLES_INTERDITES.has(cle) || !cle.includes('|') || !estObjet(a)) continue;
       if (typeof a.valeur !== 'number' || !Number.isFinite(a.valeur) || typeof a.unite !== 'string' || a.unite === '') continue;
+      const barre = cle.indexOf('|');
+      const { base, erreur } = controleAjustement(cle.slice(0, barre), cle.slice(barre + 1), a.valeur);
+      if (erreur || a.unite !== base.unite) continue;
       const av = estObjet(a.avant) ? a.avant : {};
       etat.ajustements[cle] = {
         valeur: a.valeur, unite: a.unite, le: typeof a.le === 'string' ? a.le : null,

@@ -39,13 +39,34 @@ test('import : un export sans ajustements se complète ; les entrées invalides 
   const doc = (ajustements) => JSON.stringify({ application: 'sanji-entremetier', schema: 1, etat: ajustements === undefined ? {} : { ajustements } });
   assert.deepEqual(importer(doc()).ajustements, {});
   const brut = '{"application":"sanji-entremetier","schema":1,"etat":{"ajustements":{"__proto__":{"valeur":1,"unite":"%"},'
-    + '"constructor|x":{"valeur":"12","unite":"%"},"a|ok":{"valeur":12,"unite":"%","le":"2026-10-04T08:00:00","avant":{"valeur":18,"origine":"referentiel"}},'
+    + '"constructor|x":{"valeur":"12","unite":"%"},"rendement_parage|carottes":{"valeur":12,"unite":"%","le":"2026-10-04T08:00:00","avant":{"valeur":18,"origine":"referentiel"}},'
     + '"a|sans-unite":{"valeur":12},"a|nan":{"valeur":null,"unite":"%"},"sans-barre":{"valeur":1,"unite":"%"},"a|liste":[1]}}}';
   const a = importer(brut).ajustements;
-  assert.deepEqual(Object.keys(a), ['a|ok']);
-  assert.deepEqual(a['a|ok'], { valeur: 12, unite: '%', le: '2026-10-04T08:00:00', avant: { valeur: 18, origine: 'referentiel' } });
+  assert.deepEqual(Object.keys(a), ['rendement_parage|carottes']);
+  assert.deepEqual(a['rendement_parage|carottes'], { valeur: 12, unite: '%', le: '2026-10-04T08:00:00', avant: { valeur: 18, origine: 'referentiel' } });
   assert.equal(Object.prototype.polluted, undefined);
   assert.throws(() => importer(doc([1])), /ajustements/);
+});
+
+test('import : usage, unité et bornes sont ceux de ajusterStandard ; sinon l\'entrée est écartée', () => {
+  const doc = (ajustements) => JSON.stringify({ application: 'sanji-entremetier', schema: 1, etat: { ajustements } });
+  const cles = (ajustements) => Object.keys(importer(doc(ajustements)).ajustements).sort();
+  const pates = standardDeBase('pates_seches', 'rendement_cuisson');
+  assert.equal(pates.unite, 'x', 'le rendement des pâtes est un gain');
+  assert.deepEqual(cles({ 'rendement_cuisson|pates_seches': { valeur: 3, unite: '%' } }), [], '3 % de perte ne se lit pas comme un gain : écarté (aurait donné 0,97)');
+  assert.deepEqual(cles({ 'rendement_cuisson|pates_seches': { valeur: 2.5, unite: 'x' } }), ['rendement_cuisson|pates_seches']);
+  assert.deepEqual(cles({ 'x|constructor': { valeur: 1, unite: '%' }, 'buffet_couvert|riz': { valeur: 5, unite: 'g/couvert' } }), [], 'usage non ajustable');
+  assert.deepEqual(cles({ 'rendement_parage|inconnue': { valeur: 10, unite: '%' } }), [], 'sujet sans standard de base');
+  assert.deepEqual(cles({ 'rendement_parage|carottes': { valeur: 100, unite: '%' }, 'rendement_parage|poireaux': { valeur: -5, unite: '%' } }), [], 'perte hors de 0 à moins de 100');
+  assert.deepEqual(cles({ 'rendement_cuisson|riz': { valeur: 0, unite: 'x' } }), [], 'gain nul');
+  assert.deepEqual(cles({ 'conservation|riz': { valeur: -1, unite: 'jours' }, 'conservation|carottes': { valeur: 3, unite: 'h' } }), [], 'négatif ou autre unité');
+  assert.deepEqual(cles({ 'temperature|pommes_de_terre': { valeur: -2, unite: '°C' } }), ['temperature|pommes_de_terre'], 'une température peut être négative');
+  // Ce que ajusterStandard accepte revient à l'identique par l'import.
+  const e = etatVide();
+  ajusterStandard(e, 'riz', 'conservation', 3, h());
+  ajusterStandard(e, 'regle:stockage_froid', 'temperature', 4, h());
+  ajusterStandard(e, 'regle:feculents_legumes_cuits', 'conservation', 2, h());
+  assert.deepEqual(importer(exporter(e, h(1))).ajustements, e.ajustements);
 });
 
 // ---------------------------------------------------------------- valeur effective et actions
