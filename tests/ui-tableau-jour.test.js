@@ -22,7 +22,16 @@ before(async () => {
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   routeur = await import('../app/js/ui/routeur.js');
-  vues = routeur.VUES;
+  // Les vues-relais du routeur (clés = adresses) plus les vues d'origine sous leurs anciens noms : les relais délèguent à celles-ci.
+  vues = {
+    ...routeur.VUES,
+    tableau: await import('../app/js/ui/vue-tableau.js'),
+    menus: await import('../app/js/ui/vue-menus.js'),
+    detail: await import('../app/js/ui/vue-detail.js'),
+    jour: await import('../app/js/ui/vue-jour.js'),
+    composant: await import('../app/js/ui/vue-composant.js'),
+    produits: await import('../app/js/ui/vue-produits.js'),
+  };
 });
 after(() => dom.restaurer());
 
@@ -70,7 +79,7 @@ test('Tableau : menus = aujourd\'hui et 2 jours suivants ; ligne entière vers l
   const visibles = zone.tous((x) => x.className.split(' ').includes('bord-jour')).filter((li) => !li.parent.parent.className.includes('bord-reste'));
   assert.equal(visibles.length, 3, 'mardi, mercredi, jeudi');
   const entetes = classes(zone, 'bord-jour-lien').map((a) => a.attributs.href);
-  assert.deepEqual(entetes.slice(0, 3), [`#/detail/${S.mardi}`, `#/detail/${S.mercredi}`, `#/detail/${S.jeudi}`]);
+  assert.deepEqual(entetes.slice(0, 3), [`#/semaine/${S.mardi}`, `#/semaine/${S.mercredi}`, `#/semaine/${S.jeudi}`]);
   assert.match(classes(zone, 'bord-jour-lien')[0].textContent, /Mar 6 · 64 couverts/);
   // Le reste de la semaine : une touche, rien n'est perdu.
   const reste = classes(zone, 'bord-reste')[0];
@@ -79,7 +88,7 @@ test('Tableau : menus = aujourd\'hui et 2 jours suivants ; ligne entière vers l
   // Un plat mène à la fiche du plat (composant) ; tous les liens du Tableau existent.
   const plats = classes(zone, 'bord-plat');
   assert.ok(plats.length > 0);
-  for (const a of plats) assert.match(a.attributs.href, /^#\/composant\//);
+  for (const a of plats) assert.match(a.attributs.href, /^#\/fiche\//);
   assert.ok(boutons(zone).length >= 6, 'le cercle de prévision reste un bouton');
 });
 
@@ -97,7 +106,7 @@ test('Tableau : fiches de fonction = horaire, numéro, couverts, mode, allergies
   const noeud = tableau(S.mardi, semaine());
   const zone = classes(noeud, 'bord-fiches')[0];
   const ligne = classes(zone, 'bord-fiche')[0];
-  assert.equal(ligne.attributs.href, `#/detail/${S.mardi}`);
+  assert.equal(ligne.attributs.href, `#/semaine/${S.mardi}`);
   assert.match(ligne.textContent, /12:00 · fiche FICHE_TEST_1 · 24 couverts/);
   assert.match(ligne.textContent, /Menu fixe/);
   assert.match(ligne.textContent, /allergies/);
@@ -116,7 +125,7 @@ test('Tableau : « À confirmer » : trois lignes au plus, jamais une quantité 
   const chargee = classes(tableau(S.lundi, e), 'bord-confirmer')[0];
   assert.ok(classes(chargee, 'bord-ligne').length <= 3);
   assert.ok(classes(chargee, 'bord-ligne').length >= 2);
-  for (const a of classes(chargee, 'bord-ligne')) assert.match(a.attributs.href, /^#\/(detail|jour|reglages)/);
+  for (const a of classes(chargee, 'bord-ligne')) assert.match(a.attributs.href, /^#\/(semaine|production|reglages)/);
 });
 
 test('Tableau : production = jauge « x/y fait » vers Jour ; commande à relire vers Produits', () => {
@@ -127,7 +136,7 @@ test('Tableau : production = jauge « x/y fait » vers Jour ; commande à relire
   const zone = classes(tableau(S.mardi, e), 'bord-production')[0];
   const jauge = classes(zone, 'bord-jauge')[0];
   assert.match(jauge.textContent, /Aujourd'hui 0\/1 fait/);
-  assert.equal(jauge.attributs.href, `#/jour/${S.mardi}`);
+  assert.equal(jauge.attributs.href, `#/production/${S.mardi}`);
 });
 
 test('Tableau : chaque ancienne information de la note a une destination', () => {
@@ -137,7 +146,7 @@ test('Tableau : chaque ancienne information de la note a une destination', () =>
   const noeud = tableau('2026-10-30', e, S.lundi); // vieux : rappel de sauvegarde
   const cibles = hrefs(noeud);
   assert.ok(cibles.includes('#/reglages'), 'portions à régler, semaine type, sauvegarde : Réglages');
-  assert.ok(cibles.some((x) => x.startsWith('#/composant/')) || cibles.includes(`#/menus/${S.lundi}`));
+  assert.ok(cibles.some((x) => x.startsWith('#/fiche/')) || cibles.includes(`#/import/${S.lundi}`));
   assert.match(noeud.textContent, /Sauvegarde à faire/);
   assert.match(noeud.textContent, /portions? à régler/);
 });
@@ -168,14 +177,14 @@ test('Jour : barre de jours horizontale, en-tête minimal (date, couverts, jauge
   creerFiche(e, { numero: 'FICHE_TEST_1', date: S.lundi, service: 'midi', horaire: '12:00', couverts: 24, mode: 'menu_fixe', menuFixe: 1 }, h());
   const noeud = jour(S.lundi, e);
   const puces = classes(noeud, 'jour-puce').filter((a) => !a.className.includes('fleche'));
-  assert.deepEqual(puces.map((a) => a.attributs.href), [S.lundi, S.mardi, S.mercredi, S.jeudi, S.vendredi, S.samedi].map((d) => `#/jour/${d}`));
+  assert.deepEqual(puces.map((a) => a.attributs.href), [S.lundi, S.mardi, S.mercredi, S.jeudi, S.vendredi, S.samedi].map((d) => `#/production/${d}`));
   assert.equal(classes(noeud, 'jour-puce-actif').length, 1);
   assert.match(classes(noeud, 'jour-tete')[0].textContent, /Lundi 5 octobre/);
   assert.match(classes(noeud, 'jour-tete')[0].textContent, /\d+ couverts/);
   assert.match(classes(noeud, 'jour-tete')[0].textContent, /\d sur \d fait/);
   const menus = classes(noeud, 'jour-menu');
   assert.equal(menus.length, 3, 'deux menus et un banquet');
-  for (const a of menus) assert.equal(a.attributs.href, `#/detail/${S.lundi}`);
+  for (const a of menus) assert.equal(a.attributs.href, `#/semaine/${S.lundi}`);
 });
 
 test('Jour : ordre de lecture menu 1, menu 2, autres, après service ; une ligne cochable par tâche, pas de grosses cartes', () => {
@@ -305,7 +314,7 @@ test('Jour : une tâche du jour sans quantité reste dans la liste, dite sans al
   const l = classes(jour(S.lundi, lots), 'jour-lots')[0];
   assert.equal(l.open, false);
   assert.match(l.querySelector('summary').textContent, /À faire en une fois/);
-  assert.ok(hrefs(l).some((x) => x.startsWith('#/composant/')));
+  assert.ok(hrefs(l).some((x) => x.startsWith('#/fiche/')));
 });
 
 test('Jour : une action préparatoire est une autre tâche ; avec un standard, la quantité sort en grand', () => {

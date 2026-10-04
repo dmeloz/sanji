@@ -451,8 +451,8 @@ test('tableau : base vide un lundi, invitation à saisir les menus, rien de vide
   assert.doesNotMatch(texte, /menu non saisi|0 portion/);
   assert.match(texte, /Aucun banquet prévu/, 'ligne calme sans fiche');
   assert.equal(classes(noeud, 'bord-zone').length, 4, 'quatre zones sous l\'en-tête');
-  assert.ok(liens(noeud).some((a) => a.attributs.href === `#/menus/${S.lundi}`));
-  assert.ok(liens(noeud).some((a) => a.attributs.href === `#/jour/${S.lundi}` && /Ouvrir Jour/.test(a.textContent)));
+  assert.ok(liens(noeud).some((a) => a.attributs.href === `#/import/${S.lundi}`));
+  assert.ok(liens(noeud).some((a) => a.attributs.href === `#/production/${S.lundi}` && /Ouvrir Jour/.test(a.textContent)));
 });
 
 test('tableau : le jour du service, la jauge de production et l\'écart à arbitrer mènent à Jour', () => {
@@ -461,7 +461,7 @@ test('tableau : le jour du service, la jauge de production et l\'écart à arbit
   const texte = verifierTableau(noeud, 'tableau avant service');
   assert.match(texte, /Semaine du 28 septembre/, 'un vendredi avec des tâches à faire reste sur la semaine en cours');
   assert.match(texte, /Aujourd'hui \d+\/\d+ fait/);
-  assert.ok(liens(noeud).some((a) => a.attributs.href === `#/jour/${jour}` && /fait/.test(a.textContent)), 'la jauge mène à Jour');
+  assert.ok(liens(noeud).some((a) => a.attributs.href === `#/production/${jour}` && /fait/.test(a.textContent)), 'la jauge mène à Jour');
   assert.match(texte, /écart[s]? à arbitrer/);
   // Une seule action principale : ouvrir Jour. La mise en place détaillée vit sur Jour, plus sur le Tableau.
   assert.equal(classes(noeud, 'btn-principal').length, 1);
@@ -481,7 +481,7 @@ test('tableau : en fin de semaine, la semaine prochaine s\'affiche ; mercredi, l
   // Semaine prochaine non saisie : l'invitation à saisir les menus mène à Menus de la semaine.
   const vide = tableau(S.samediPrecedent, etatVide());
   assert.match(verifierTableau(vide, 'tableau samedi vide'), /Aucun menu saisi cette semaine/);
-  assert.ok(liens(vide).some((a) => a.attributs.href === `#/menus/${S.lundi}` && /Saisir les menus de la semaine/.test(a.textContent)));
+  assert.ok(liens(vide).some((a) => a.attributs.href === `#/import/${S.lundi}` && /Saisir les menus de la semaine/.test(a.textContent)));
 });
 
 // Adapté B-P0 : le repère validé du riz en garniture retire une portion à régler (3 -> 2 : riz en plat principal, carottes).
@@ -555,7 +555,7 @@ test('tableau : navigation de semaine et retour à aujourd\'hui', () => {
   assert.match(texte, /Semaine du 12 octobre/);
   assert.match(texte, /Revenir à aujourd'hui/);
   const hrefs = liens(noeud).map((a) => a.attributs.href);
-  assert.ok(hrefs.includes(`#/tableau/${S.lundi}`) && hrefs.includes('#/tableau/2026-10-19') && hrefs.includes('#/tableau'));
+  assert.ok(hrefs.includes(`#/semaine/${S.lundi}/tableau`) && hrefs.includes('#/semaine/2026-10-19/tableau') && hrefs.includes('#/aujourdhui'));
 });
 
 test('tableau : se dessine chaque jour de la semaine, base vide et état riche', () => {
@@ -625,7 +625,7 @@ test('menus de la semaine : coller, répartir, enregistrer, sans aucune étape d
   assert.equal(composants.length, 4);
   assert.ok(composants.every((c) => c.valide), 'les composants sont valides sans geste du chef');
   assert.deepEqual(composants.filter((c) => !c.attribue).map((c) => c.nom), ['poulet']);
-  assert.equal(globalThis.location.hash, `#/tableau/${S.lundi}`, 'retour au tableau de la semaine');
+  assert.equal(globalThis.location.hash, `#/semaine/${S.lundi}/tableau`, 'retour au tableau de la semaine');
 });
 
 test('menus de la semaine : champs préremplis, texte incohérent signalé, prévision illisible refusée', async () => {
@@ -922,7 +922,7 @@ test('détail : sous chaque menu, ses composants avec catégorie, lien et interr
   const lignes = classes(menu2, 'composant-ligne');
   assert.deepEqual(lignes.map((l) => l.querySelector('a').textContent), ['poulet', 'riz', 'carottes']);
   const poulet = composantNomme(magasin.etat(), 'poulet');
-  assert.equal(lignes[0].querySelector('a').attributs.href, `#/composant/${encodeURIComponent(poulet.id)}`);
+  assert.equal(lignes[0].querySelector('a').attributs.href, `#/fiche/${encodeURIComponent(poulet.id)}`);
   assert.match(lignes[0].textContent, /protéine/);
   assert.match(lignes[1].textContent, /féculent/);
   assert.match(lignes[2].textContent, /légume/);
@@ -1020,7 +1020,7 @@ test('détail : « Saisir toute la semaine » mène au lundi ; la phrase d\'aide
     const noeud = vues.detail.rendre(magasin.etat(), jour);
     const lien = liens(champ(noeud, 'menus'))[0];
     assert.equal(lien.textContent, 'Saisir toute la semaine', `${jour} : le lien est en tête de la rubrique des menus`);
-    assert.equal(lien.attributs.href, `#/menus/${S.lundi}`);
+    assert.equal(lien.attributs.href, `#/import/${S.lundi}`);
     const texte = noeud.textContent;
     assert.match(texte, /L'application répartit seule ce qui revient au poste ; corrigez seulement une exception\./);
     assert.doesNotMatch(texte, /Rappel|attribué par défaut/);

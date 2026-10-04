@@ -171,7 +171,7 @@ function joursSansPrevision(etat, dates) {
 
 const ligneTache = (t) => ({
   genre: 'tache', texte: t.nom, quantite: t.quantite, detail: null,
-  symbole: t.symbole, lien: `#/composant/${t.composantId}`,
+  symbole: t.symbole, lien: `#/fiche/${t.composantId}`,
 });
 
 function ligneAvance(a) {
@@ -183,7 +183,7 @@ function ligneAvance(a) {
     genre: 'avance', texte: `${a.nom}, pour ${libelleJour(a.dateService)}`,
     detail: suite ? `${jours}, ${suite}` : jours,
     quantite: Number.isFinite(a.cible) && a.unite ? formaterQuantite(a.cible, a.unite) : null,
-    symbole: 'a_faire', lien: `#/composant/${a.composantId}`,
+    symbole: 'a_faire', lien: `#/fiche/${a.composantId}`,
   };
 }
 
@@ -240,17 +240,17 @@ function besoinsDe(etat, semaine) {
   if (aRegler.sansFamille.length > 0) {
     const n = aRegler.sansFamille.length;
     lignes.push({
-      genre: 'besoin', symbole: 'a_faire', lien: `#/composant/${aRegler.sansFamille[0]}`,
+      genre: 'besoin', symbole: 'a_faire', lien: `#/fiche/${aRegler.sansFamille[0]}`,
       texte: n === 1 ? '1 élément du menu à préciser' : `${n} éléments du menu à préciser`,
     });
   }
   if (sansPrevision.length > 0) {
     const n = sansPrevision.length;
     lignes.push({
-      genre: 'besoin', symbole: 'a_faire', lien: `#/menus/${semaine}`,
+      genre: 'besoin', symbole: 'a_faire', lien: `#/import/${semaine}`,
       texte: n === 1 ? 'Prévisions à saisir pour 1 jour' : `Prévisions à saisir pour ${n} jours`,
     });
-    action ??= { libelle: 'Saisir les prévisions', lien: `#/menus/${semaine}` };
+    action ??= { libelle: 'Saisir les prévisions', lien: `#/import/${semaine}` };
   }
   return { lignes, action };
 }
@@ -276,7 +276,7 @@ function contexteDe(etat, aujourdhui) {
     lignes.push(...resteAFaire.map(ligneTache));
     const prets = tachesDuJour.length - resteAFaire.length;
     if (prets > 0) lignes.push({ genre: 'info', texte: prets === 1 ? '1 tâche prête' : `${prets} tâches prêtes`, symbole: 'pret' });
-    action = { libelle: 'Ouvrir la feuille du jour', lien: `#/jour/${aujourdhui}` };
+    action = { libelle: 'Ouvrir la feuille du jour', lien: `#/production/${aujourdhui}` };
     lignes.push(...besoinsDe(etat, lundi).lignes);
   } else if (numeroJour >= 5) {
     type = 'semaine_prochaine';
@@ -284,7 +284,7 @@ function contexteDe(etat, aujourdhui) {
     semaine = lundiSuivant;
     if (semaineSansMenu(etat, lundiSuivant)) {
       lignes.push({ genre: 'info', texte: 'Les menus de la semaine prochaine ne sont pas saisis.' });
-      action = { libelle: 'Saisir les menus de la semaine', lien: `#/menus/${lundiSuivant}` };
+      action = { libelle: 'Saisir les menus de la semaine', lien: `#/import/${lundiSuivant}` };
     } else {
       const besoins = besoinsDe(etat, lundiSuivant);
       lignes.push(...besoins.lignes);
@@ -296,14 +296,14 @@ function contexteDe(etat, aujourdhui) {
         }
       }
       action = besoins.action ?? (numeroJour === 7
-        ? { libelle: 'Voir la feuille de lundi', lien: `#/jour/${lundiSuivant}` }
-        : { libelle: 'Ouvrir la feuille du jour', lien: `#/jour/${aujourdhui}` });
+        ? { libelle: 'Voir la feuille de lundi', lien: `#/production/${lundiSuivant}` }
+        : { libelle: 'Ouvrir la feuille du jour', lien: `#/production/${aujourdhui}` });
     }
   } else if (semaineSansMenu(etat, lundi)) {
     type = 'vide';
     titre = 'Aucun menu saisi cette semaine';
     lignes.push({ genre: 'info', texte: 'Saisissez les menus de la semaine : le tableau se remplit seul.' });
-    action = { libelle: 'Saisir les menus de la semaine', lien: `#/menus/${lundi}` };
+    action = { libelle: 'Saisir les menus de la semaine', lien: `#/import/${lundi}` };
   } else {
     type = 'apres_service';
     titre = 'Après le service';
@@ -314,12 +314,12 @@ function contexteDe(etat, aujourdhui) {
       lignes.push(...lignesAvances(avances, 'Rien à avancer pour le moment.'));
     }
     if (numeroJour === 2) lignes.push({ genre: 'info', texte: 'Revue de mi-semaine : préparations de mercredi à vendredi.' });
-    action = besoins.action ?? { libelle: 'Ouvrir la feuille du jour', lien: `#/jour/${aujourdhui}` };
+    action = besoins.action ?? { libelle: 'Ouvrir la feuille du jour', lien: `#/production/${aujourdhui}` };
   }
 
   if (arbitrages.length > 0) {
     lignes.push({
-      genre: 'decision', symbole: 'a_decider', lien: `#/jour/${aujourdhui}`,
+      genre: 'decision', symbole: 'a_decider', lien: `#/production/${aujourdhui}`,
       texte: arbitrages.length === 1 ? '1 écart à arbitrer' : `${arbitrages.length} écarts à arbitrer`,
     });
   }
@@ -392,7 +392,7 @@ function fichesDuBord(etat, dates, lundi) {
     .map((f) => ({
       id: f.id, date: f.date, numero: f.numero, service: f.service, horaire: f.horaire, couverts: f.couverts,
       mode: f.mode, modeTexte: MODE_FICHE[f.mode] ?? '', aAllergies: String(f.allergies ?? '').trim() !== '',
-      lien: `#/detail/${f.date}`, semaine: lundi,
+      lien: `#/semaine/${f.date}`, semaine: lundi,
     }));
 }
 
@@ -406,7 +406,7 @@ function aConfirmerDuBord(etat, dates, aujourdhui) {
   const feuille = estOuvert(aujourdhui) ? feuilleDuJour(etat, aujourdhui) : null;
   const ecarts = feuille ? decisionsSansDoublon(feuille).filter((d) => d.motif === 'ecart') : [];
   if (ecarts.length > 0) {
-    categories.push({ genre: 'ecart', n: ecarts.length, lien: `#/jour/${aujourdhui}`,
+    categories.push({ genre: 'ecart', n: ecarts.length, lien: `#/production/${aujourdhui}`,
       texte: ecarts.length === 1 ? '1 écart à arbitrer' : `${ecarts.length} écarts à arbitrer` });
   }
   const points = dates.map((date) => ({ date, liste: pointsAConfirmer(etat, date).filter((p) => p.type !== 'ecart') }));
@@ -417,18 +417,18 @@ function aConfirmerDuBord(etat, dates, aujourdhui) {
   const compte = (x) => x.reduce((n, y) => n + y.liste.length, 0);
   if (repartitions.length > 0) {
     const n = compte(repartitions);
-    categories.push({ genre: 'repartition', n, lien: `#/detail/${repartitions[0].date}`,
+    categories.push({ genre: 'repartition', n, lien: `#/semaine/${repartitions[0].date}`,
       texte: n === 1 ? '1 répartition provisoire à confirmer' : `${n} répartitions provisoires à confirmer` });
   }
   if (autres.length > 0) {
     const n = compte(autres);
-    categories.push({ genre: 'points', n, lien: `#/detail/${autres[0].date}`,
+    categories.push({ genre: 'points', n, lien: `#/semaine/${autres[0].date}`,
       texte: n === 1 ? '1 point à confirmer' : `${n} points à confirmer`, detail: autres[0].liste[0].texte });
   }
   for (const point of pointsGlobaux(etat)) categories.push({ genre: 'global', n: 1, lien: '#/reglages', texte: point.texte });
   if (conservations.length > 0) {
     const n = compte(conservations);
-    categories.push({ genre: 'conservation', n, lien: `#/detail/${conservations[0].date}`,
+    categories.push({ genre: 'conservation', n, lien: `#/semaine/${conservations[0].date}`,
       texte: n === 1 ? '1 préparation : conservation à confirmer' : `${n} préparations : conservation à confirmer` });
   }
   // Une correction répétée dans le même sens : une ligne par proposition d'apprentissage, après les vraies décisions.
@@ -455,7 +455,7 @@ function commandeARelire(etat, lundi, aujourdhui) {
   const morceaux = [];
   if (arevoir > 0) morceaux.push(arevoir === 1 ? '1 produit à revérifier' : `${arevoir} produits à revérifier`);
   if (echeance > 0) morceaux.push(echeance === 1 ? '1 échéance de commande atteinte' : `${echeance} échéances de commande atteintes`);
-  return morceaux.length > 0 ? { texte: `Commande à relire : ${morceaux.join(', ')}`, lien: `#/produits/${lundi}` } : null;
+  return morceaux.length > 0 ? { texte: `Commande à relire : ${morceaux.join(', ')}`, lien: `#/stock/achats/${lundi}` } : null;
 }
 
 /**
@@ -474,12 +474,12 @@ function productionDuBord(etat, aujourdhui, lundi) {
       const a = estOuvert(date) ? feuilleDuJour(etat, date).avancement : null;
       if (a) { avancement.faites += a.faites; avancement.total += a.total; }
     }
-    return { autreSemaine, lundi, date: lundi, lien: `#/jour/${lundi}`, avancement, avances: 0, commande, chiffrage };
+    return { autreSemaine, lundi, date: lundi, lien: `#/production/${lundi}`, avancement, avances: 0, commande, chiffrage };
   }
   const feuille = estOuvert(aujourdhui) ? feuilleDuJour(etat, aujourdhui) : null;
   const avances = feuille ? feuille.aAvancer.filter((a) => Number.isFinite(a.cible) && a.evaluation.autorisee).length : 0;
   return {
-    autreSemaine, lundi, date: aujourdhui, lien: `#/jour/${aujourdhui}`,
+    autreSemaine, lundi, date: aujourdhui, lien: `#/production/${aujourdhui}`,
     avancement: feuille ? feuille.avancement : { faites: 0, total: 0 },
     avances, commande, chiffrage,
   };
@@ -490,7 +490,7 @@ function bordDe(etat, aujourdhui, lundi, jours, contexte, rappel) {
   const aVenir = datesSemaine.includes(aujourdhui) ? datesSemaine.filter((d) => d >= aujourdhui) : datesSemaine;
   return {
     entete: {
-      date: aujourdhui, semaine: numeroSemaine(lundi), lundi, lienJour: `#/jour/${aujourdhui}`, sauvegarde: rappel,
+      date: aujourdhui, semaine: numeroSemaine(lundi), lundi, lienJour: `#/production/${aujourdhui}`, sauvegarde: rappel,
       aucunMenuCetteSemaine: contexte.type === 'vide',
     },
     menus: menusDuBord(jours, aujourdhui),

@@ -139,7 +139,7 @@ function enregistrer(champs, etat, lundi) {
   const resultat = agir((copie, heure) => saisirMenusSemaine(copie, lundi, saisie, heure));
   if (resultat.ok) {
     afficherMessage('Semaine enregistrée.', 'info');
-    location.hash = `#/tableau/${lundi}`;
+    location.hash = `#/semaine/${lundi}/tableau`;
   }
 }
 
@@ -148,8 +148,8 @@ export function rendre(etat, lundi) {
   const racine = h('div', { classe: 'vue vue-menus' });
   racine.appendChild(h('h1', { classe: 'page-titre' }, `Menus de la semaine du ${libelleJour(lundi)}`));
   racine.appendChild(h('nav', { classe: 'nav-periode', 'aria-label': 'Semaine' },
-    lien(`#/menus/${ajouterJours(lundi, -7)}`, '‹ Semaine précédente', 'btn'),
-    lien(`#/menus/${ajouterJours(lundi, 7)}`, 'Semaine suivante ›', 'btn')));
+    lien(`#/import/${ajouterJours(lundi, -7)}`, '‹ Semaine précédente', 'btn'),
+    lien(`#/import/${ajouterJours(lundi, 7)}`, 'Semaine suivante ›', 'btn')));
 
   // La semaine a déjà des menus : le collage est replié, on vient surtout corriger un intitulé ou saisir des prévisions.
   const dejaSaisie = JOURS_A_MENU.some((decalage) => {
@@ -168,7 +168,7 @@ export function rendre(etat, lundi) {
   for (const decalage of JOURS_A_MENU) racine.appendChild(blocJour(champs, etat, ajouterJours(lundi, decalage)));
 
   racine.appendChild(h('div', { classe: 'barre-enregistrer' },
-    lien(`#/tableau/${lundi}`, 'Annuler', 'btn'),
+    lien(`#/semaine/${lundi}/tableau`, 'Annuler', 'btn'),
     bouton('Enregistrer la semaine', () => enregistrer(champs, etat, lundi), 'principal')));
   return racine;
 }

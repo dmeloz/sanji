@@ -48,14 +48,14 @@ test('base vide : contexte « vide » du lundi au jeudi, « semaine prochaine »
     const tb = tableauBlanc(etatVide(), jour);
     assert.equal(tb.contexte.type, 'vide', jour);
     assert.equal(tb.lundi, S.lundi);
-    assert.deepEqual(tb.contexte.action, { libelle: 'Saisir les menus de la semaine', lien: `#/menus/${S.lundi}` });
+    assert.deepEqual(tb.contexte.action, { libelle: 'Saisir les menus de la semaine', lien: `#/import/${S.lundi}` });
   }
   for (const jour of [S.vendredi, S.samedi, S.dimanche]) {
     const tb = tableauBlanc(etatVide(), jour);
     assert.equal(tb.contexte.type, 'semaine_prochaine', jour);
     assert.equal(tb.lundi, S.lundiSuivant, `${jour} : la semaine affichée est la suivante`);
     assert.equal(tb.estSemaineCourante, false);
-    assert.deepEqual(tb.contexte.action, { libelle: 'Saisir les menus de la semaine', lien: `#/menus/${S.lundiSuivant}` });
+    assert.deepEqual(tb.contexte.action, { libelle: 'Saisir les menus de la semaine', lien: `#/import/${S.lundiSuivant}` });
   }
   assert.equal(tableauBlanc(etatVide(), S.dimanche).contexte.titre, "Fermé aujourd'hui");
 });
@@ -121,7 +121,7 @@ test('besoins : portions à régler, éléments inconnus et prévisions sont dit
   const apres = tableauBlanc(e, S.jeudi).contexte;
   assert.ok(!textes(apres).some((t) => /portions? à régler/.test(t)));
   assert.ok(textes(apres).includes('Prévisions à saisir pour 3 jours'));
-  assert.deepEqual(apres.action, { libelle: 'Saisir les prévisions', lien: `#/menus/${S.lundi}` });
+  assert.deepEqual(apres.action, { libelle: 'Saisir les prévisions', lien: `#/import/${S.lundi}` });
 });
 
 test('contexte « service » : ce qui reste à faire avant le service, avec la quantité ; puis « après le service »', () => {
@@ -133,7 +133,7 @@ test('contexte « service » : ce qui reste à faire avant le service, avec la q
   assert.deepEqual(taches.map((l) => [l.texte, l.quantite, l.symbole]),
     // Carottes : 2 000 g ÷ 0,815 (parage, standard de base du référentiel confirmé à la source ; 0,865 avant le 2026-10-04).
     [['riz et carottes', '1 000 g', 'a_faire'], ['riz', '2 000 g', 'a_faire'], ['carottes', '2 454 g', 'a_faire']]);
-  assert.deepEqual(tb.contexte.action, { libelle: 'Ouvrir la feuille du jour', lien: `#/jour/${S.lundi}` });
+  assert.deepEqual(tb.contexte.action, { libelle: 'Ouvrir la feuille du jour', lien: `#/production/${S.lundi}` });
   // Une tâche démarrée puis toutes faites : le contexte bascule sur l'après-service.
   demarrer(e, principaleDe(e, composantNomme(e, S.lundi, 'riz')), h());
   assert.equal(tableauBlanc(e, S.lundi).jours[0].miseEnPlace.find((t) => t.nom === 'riz').symbole, 'en_cours');

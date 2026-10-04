@@ -590,7 +590,7 @@ test('18. Le tableau blanc met en avant, selon le contexte, ce qui reste à fair
   const avant = tableauBlanc(e, S.lundi).contexte;
   assert.equal(avant.type, 'service');
   assert.deepEqual(avant.lignes.filter((l) => l.genre === 'tache').map((l) => [l.texte, l.quantite]), [['riz et carottes', '1 000 g']]);
-  assert.equal(avant.action.lien, `#/jour/${S.lundi}`);
+  assert.equal(avant.action.lien, `#/production/${S.lundi}`);
 
   // Après le service : ce qui peut être avancé pour le lendemain.
   placer(e, production(S.lundi), S.lundi, 'avant_midi', h());

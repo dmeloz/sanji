@@ -40,7 +40,7 @@ function barreDeJours(date, aujourd) {
   const dates = [0, 1, 2, 3, 4, 5].map((i) => ajouterJours(lundi, i));
   if (!dates.includes(date)) dates.push(date);
   const puce = (d) => h('a', {
-    href: `#/jour/${d}`, classe: `jour-puce${d === date ? ' jour-puce-actif' : ''}${d === aujourd ? ' jour-puce-aujourdhui' : ''}`,
+    href: `#/production/${d}`, classe: `jour-puce${d === date ? ' jour-puce-actif' : ''}${d === aujourd ? ' jour-puce-aujourdhui' : ''}`,
     'aria-label': `${libelleJour(d)}${d === aujourd ? ", aujourd'hui" : ''}${d === date ? ', jour affiché' : ''}`,
     'aria-current': d === date ? 'date' : null,
   }, puceJour(d));
@@ -48,9 +48,9 @@ function barreDeJours(date, aujourd) {
   // Sur un petit écran la barre défile : le jour affiché doit être visible, pas caché à droite (le samedi).
   setTimeout(() => puces[dates.indexOf(date)]?.scrollIntoView?.({ inline: 'center', block: 'nearest' }), 0);
   return h('nav', { classe: 'jour-barre', 'aria-label': 'Jours de la semaine' },
-    h('a', { href: `#/jour/${ajouterJours(lundi, -7)}`, classe: 'jour-puce jour-puce-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
+    h('a', { href: `#/production/${ajouterJours(lundi, -7)}`, classe: 'jour-puce jour-puce-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
     puces,
-    h('a', { href: `#/jour/${ajouterJours(lundi, 7)}`, classe: 'jour-puce jour-puce-fleche', 'aria-label': 'Semaine suivante' }, '›'));
+    h('a', { href: `#/production/${ajouterJours(lundi, 7)}`, classe: 'jour-puce jour-puce-fleche', 'aria-label': 'Semaine suivante' }, '›'));
 }
 
 function jauge(feuille) {
@@ -71,7 +71,7 @@ function enteteJour(date, aujourd, feuille) {
     h('h1', { classe: 'page-titre' }, majuscule(libelleJour(date)), date === aujourd ? [' ', pastille("aujourd'hui", 'vert')] : null),
     h('p', { classe: 'jour-meta' },
       texteCouverts ? h('span', { classe: 'jour-couverts feutre' }, texteCouverts) : null,
-      lien(`#/detail/${date}`, 'Prévisions →', 'jour-lien')),
+      lien(`#/semaine/${date}`, 'Prévisions →', 'jour-lien')),
     jauge(feuille));
 }
 
@@ -79,10 +79,10 @@ function enteteJour(date, aujourd, feuille) {
 function rappelMenus(date, feuille) {
   const { menus, fiches } = feuille.lecture;
   const lignes = menus.filter((m) => m.intitule !== '').map((m) => h('li', null,
-    h('a', { href: `#/detail/${date}`, classe: 'jour-menu', 'aria-label': `Menu ${m.menu} : ${m.intitule}, ouvrir le détail du jour` },
+    h('a', { href: `#/semaine/${date}`, classe: 'jour-menu', 'aria-label': `Menu ${m.menu} : ${m.intitule}, ouvrir le détail du jour` },
       h('span', { classe: 'jour-menu-rang feutre' }, `M${m.menu}`), h('span', { classe: 'jour-menu-texte' }, m.intitule))));
   for (const f of fiches) {
-    lignes.push(h('li', null, h('a', { href: `#/detail/${date}`, classe: 'jour-menu jour-banquet' },
+    lignes.push(h('li', null, h('a', { href: `#/semaine/${date}`, classe: 'jour-menu jour-banquet' },
       h('span', { classe: 'jour-menu-rang feutre' }, 'Banquet'),
       h('span', { classe: 'jour-menu-texte' }, [f.horaire || null, `${Number(f.couverts) || 0} personnes`, f.numero ? `fiche ${f.numero}` : null].filter(Boolean).join(' · ')))));
   }
@@ -186,7 +186,7 @@ function ligneTache(etat, ligneBrute, date, options) {
     h('div', { classe: 'mep-principal' },
       fait ? caseFaite(l) : COCHABLES.has(l.etat) ? caseFait(l) : h('span', { classe: 'case-fait case-fait-vide' }),
       h('div', { classe: 'mep-corps' },
-        lien(`#/composant/${encodeURIComponent(l.composantId)}`, l.genre === 'principale' ? l.nom : (l.libelle || l.nom), 'tache-nom mep-nom'),
+        lien(`#/fiche/${encodeURIComponent(l.composantId)}`, l.genre === 'principale' ? l.nom : (l.libelle || l.nom), 'tache-nom mep-nom'),
         h('p', { classe: 'mep-meta' }, badges, meta.join(' · ')),
         avertissementConservation(ev)),
       h('div', { classe: 'mep-quantite' },
@@ -251,7 +251,7 @@ function rubriqueQuantites(feuille) {
     h('p', null, `${noms.length === 1 ? '1 élément n\'a' : `${noms.length} éléments n'ont`} pas encore de quantité : ${apercu}.`),
     h('p', { classe: 'aide' }, 'Rien d\'obligatoire : saisissez les prévisions et les portions quand vous voulez, ou modifiez-les le lendemain. Tout se recalcule.'),
     h('div', { classe: 'actions' },
-      lien(`#/menus/${lundiDe(premier)}`, 'Saisir les prévisions', 'btn btn-court'),
+      lien(`#/import/${lundiDe(premier)}`, 'Saisir les prévisions', 'btn btn-court'),
       lien('#/reglages', 'Régler les standards maison', 'btn btn-court')));
 }
 
@@ -262,7 +262,7 @@ function rubriqueLots(feuille) {
     h('p', { classe: 'aide' }, 'Suggestion : la même préparation peut servir plusieurs services dans la limite d\'avance autorisée. Chaque tâche garde sa part et se marque faite séparément.'),
     h('ul', { classe: 'liste-lots' }, feuille.lots.map((l) => h('li', null,
       h('strong', null, l.libelle), ` : ${quantite(l.total, l.unite)} en une fois, pour ${l.productions.map((x) => libelleJour(x.dateService)).join(' et ')} `,
-      lien(`#/composant/${encodeURIComponent(l.productions[0].composantId)}`, 'Détail', 'jour-lien')))),
+      lien(`#/fiche/${encodeURIComponent(l.productions[0].composantId)}`, 'Détail', 'jour-lien')))),
   ], { classe: 'jour-lots' });
 }
 
@@ -320,8 +320,8 @@ export function rendre(etat, date) {
     bouton('Imprimer la feuille du jour', imprimer, 'court'),
     ecranAllumePossible() ? h('span', { classe: 'meta' }, 'L\'écran reste allumé sur cette page.') : null));
   activerGlisser(racine, {
-    suivant: () => { location.hash = `#/jour/${ajouterJours(date, 1)}`; },
-    precedent: () => { location.hash = `#/jour/${ajouterJours(date, -1)}`; },
+    suivant: () => { location.hash = `#/production/${ajouterJours(date, 1)}`; },
+    precedent: () => { location.hash = `#/production/${ajouterJours(date, -1)}`; },
   });
   return racine;
 }
