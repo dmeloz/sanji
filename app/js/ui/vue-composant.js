@@ -487,7 +487,7 @@ export function rendre(etat, id) {
   const calc = calculerComposant(etat, id);
   racine.appendChild(h('p', null, lien(`#/detail/${c.date}`, '‹ Détail du jour'), ' · ', lien(`#/jour/${c.date}`, 'Feuille du jour')));
   for (const s of [sectionEntete(etat, c, calc), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionEtapesPreparation(etat, c), sectionProductions(etat, c),
-    sectionIngredients(etat, c, calc), sectionMemoire(etat, c), sectionAllergenes(etat, c), sectionApresService(c, calc), blocReperes(c.famille)]) {
+    sectionIngredients(etat, c, calc), sectionMemoire(etat, c), sectionAllergenes(etat, c), sectionApresService(c, calc), blocReperes(c.famille, etat)]) {
     if (s) racine.appendChild(s);
   }
   return racine;

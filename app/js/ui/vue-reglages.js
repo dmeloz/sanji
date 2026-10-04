@@ -626,7 +626,7 @@ const RUBRIQUES = [
     blocs: (e) => [sectionStandardsBase(e)] },
   { cle: 'reperes', titre: 'Repères métier',
     resume: () => 'temps, températures, conservation, techniques : consultation',
-    blocs: () => { const c = h('div'); pageReperesMetier(c, { sansTitre: true }); return [c]; } },
+    blocs: () => { const c = h('div'); pageReperesMetier(c, { sansTitre: true, etat: etatCourant() }); return [c]; } },
   { cle: 'organisation', titre: 'Organisation du poste',
     resume: (e) => `${e.reglages.semaineTypeConfirmee ? 'semaine type confirmée' : 'semaine type à confirmer'} · ${pluriel(Object.keys(e.regles).length, 'règle')} de préparation`,
     blocs: (e) => [sectionSemaineType(e), sectionRegles(e)] },
