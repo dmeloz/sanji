@@ -13,7 +13,7 @@ import { lien, repliable } from './elements.js';
 import { ouvrirDecisions } from './feuille-decisions.js';
 import { ouvrirProposition } from './feuille-validation.js';
 import { abonnerHorsLigne, libelleHorsLigne, situationHorsLigne } from './horsligne.js';
-import { pluriel, quantite } from './format.js';
+import { phraseConservation, pluriel, qteNoeuds, quantite } from './format.js';
 import { faireEnUnToucher } from './taches.js';
 
 export function titre() { return "Aujourd'hui"; }
@@ -81,7 +81,7 @@ function tuileFiches(f) {
 }
 
 function zoneCouverts(d) {
-  if (!d.ouvert) return h('p', { classe: 'au-neutre au-ferme' }, "Fermé aujourd'hui : le dimanche n'est pas travaillé.");
+  if (!d.ouvert) return null; // jour fermé : une seule mention, dans la carte « Maintenant »
   return h('ul', { classe: 'au-couverts-grille', 'aria-label': 'Couverts du jour' }, [...d.menus.map(tuileMenu), tuileFiches(d.fiches)]);
 }
 
@@ -99,15 +99,15 @@ function carteMaintenant(d, aujourd) {
   const corps = [
     h('div', { classe: 'au-maintenant-tete' },
       h('h2', { classe: 'au-etiquette' }, 'Maintenant'),
-      total > 0 ? h('span', { classe: 'au-qte au-jauge-texte' }, `${faites} / ${total} faites`) : null)];
+      total > 0 ? h('span', { classe: 'au-jauge-texte' }, h('span', { classe: 'au-qte' }, `${faites} / ${total}`), ' faites') : null)];
   if (!m) {
-    corps.push(h('p', { classe: 'au-maintenant-vide' }, !d.ouvert ? "Fermé aujourd'hui."
+    corps.push(h('p', { classe: 'au-maintenant-vide' }, !d.ouvert ? ["Fermé aujourd'hui", d.prochainOuvert ? ` · Prochaine production : ${libelleJour(d.prochainOuvert).split(' ').slice(0, 2).join(' ')}` : null]
       : total > 0 ? 'Tout est fait pour aujourd\'hui.' : 'Aucune tâche décidée pour aujourd\'hui.'));
   } else {
     corps.push(
       h('div', { classe: 'au-maintenant-ligne' },
         h('p', { classe: 'au-maintenant-nom' }, m.nom),
-        q ? h('p', { classe: 'au-qte au-maintenant-qte' }, q) : (m.genre === 'preparatoire' ? null : h('p', { classe: 'au-maintenant-neutre' }, 'quantité à compléter'))),
+        q ? h('p', { classe: 'au-qte au-maintenant-qte' }, qteNoeuds(q)) : (m.genre === 'preparatoire' ? null : h('p', { classe: 'au-maintenant-neutre' }, 'quantité à compléter'))),
       h('p', { classe: 'au-maintenant-dest' }, destination(m, aujourd),
         m.horsRegle ? [' · ', h('strong', { classe: 'au-hors-regle' }, 'hors règle')] : null));
   }
@@ -172,10 +172,10 @@ function ligneAConsommer(l) {
       h('span', { classe: 'au-conso-corps' },
         h('span', { classe: 'au-conso-nom' }, l.nom),
         h('span', { classe: 'au-sous' }, [l.dateFait ? `faite ${courtJour(l.dateFait)}` : null, `pour ${courtJour(l.dateService)}`].filter(Boolean).join(' · '))),
-      h('span', { classe: 'au-conso-droite' }, q ? h('span', { classe: 'au-qte' }, q) : null,
+      h('span', { classe: 'au-conso-droite' }, q ? h('span', { classe: 'au-qte' }, qteNoeuds(q)) : null,
         h('span', { classe: 'au-etiquette-statut' }, `avance J+${l.avanceJours}`))),
     alertes.length > 0 ? h('p', { classe: 'au-attention' }, alertes) : null,
-    l.conservation ? h('p', { classe: 'au-attention' }, h('strong', null, 'Attention : '), `${l.conservation.texte}, avance de ${l.avanceJours} jours. `,
+    l.conservation ? h('p', { classe: 'au-attention' }, h('strong', null, phraseConservation(l.conservation.texte, l.avanceJours)), ' ',
       h('span', { classe: 'au-sous' }, l.conservation.provenance)) : null);
 }
 

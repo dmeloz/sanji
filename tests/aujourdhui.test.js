@@ -205,7 +205,9 @@ test('à consommer en priorité : production faite pour un service à venir, ave
   assert.ok(l.conservation, 'le repère du référentiel avertit à J-2 pour le riz cuit');
   const p = page(S.mercredi, e);
   const carte = classes(p, 'au-carte').find((c) => /À consommer en priorité/.test(c.textContent));
-  assert.match(carte.textContent, /Attention : se garde 1 jour/);
+  assert.match(carte.textContent, /Se garde 1 jour · avance de 2 jours/);
+  assert.match(carte.textContent, /standard de base/);
+  assert.doesNotMatch(carte.textContent, /Attention|feculents|hygiene\.|riz\.conservation/, 'une phrase lisible, aucun identifiant technique');
   assert.match(carte.textContent, /avance J\+2/);
   assert.ok(hrefs(carte).includes('#/stock/dlc'));
   assert.match(carte.textContent, /Tout voir/);
@@ -295,7 +297,7 @@ test('accessibilité : mots écrits pour les états, quantités en police des qu
   assert.doesNotMatch(bloc, /gradient|https?:\/\//);
   // L'écran ne passe jamais un état par la couleur seule : « hors règle », « provisoire », « à décider » sont écrits.
   const src = readFileSync(new URL('../app/js/ui/vue-aujourdhui.js', import.meta.url), 'utf8');
-  for (const mot of ["'hors règle'", "'à décider'", "provisoire: 'provisoire'", 'Attention : ']) assert.ok(src.includes(mot), mot);
+  for (const mot of ["'hors règle'", "'à décider'", "provisoire: 'provisoire'", 'phraseConservation']) assert.ok(src.includes(mot), mot);
   assert.doesNotMatch(src, /en stock|Synchronisé|Générer le bon/);
 });
 

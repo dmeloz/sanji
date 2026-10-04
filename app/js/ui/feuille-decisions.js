@@ -12,7 +12,7 @@ import { h, svg } from './dom.js';
 import { bouton } from './elements.js';
 import { dialogRepartition } from './fiches.js';
 import { ouvrirProposition, ouvrirValidation, texteFourchette } from './feuille-validation.js';
-import { quantite } from './format.js';
+import { qteNoeuds, quantite } from './format.js';
 import { panneau } from './panneau.js';
 import { dialogDecider, dialogPlanifier } from './taches.js';
 import { dialogChoisirSauce } from './vue-composant.js';
@@ -46,7 +46,7 @@ function carte(c, fermer) {
       if (c.reel !== null) morceaux.push(['réel ', quantite(c.reel, c.unite)]);
       if (c.ecart !== null && c.ecart > 0) morceaux.push(['il manque ', quantite(c.ecart, c.unite)]);
       if (c.ecart !== null && c.ecart < 0) morceaux.push(['surplus de ', quantite(-c.ecart, c.unite)]);
-      detail = [morceaux.map(([mot, q], i) => [i > 0 ? ' · ' : null, mot, h('span', { classe: 'dec-qte' }, q)]),
+      detail = [morceaux.map(([mot, q], i) => [i > 0 ? ' · ' : null, mot, h('span', { classe: 'dec-qte' }, qteNoeuds(q))]),
         h('span', { classe: 'dec-choix' }, 'Complément, ajustement ou aucune production supplémentaire.')];
       actions = [principal('Décider', () => dialogDecider(c.productionId), { 'aria-label': `Décider de l'écart : ${c.nom}` }),
         versLien(`#/fiche/${encodeURIComponent(c.composantId)}`, 'Ouvrir la fiche')];

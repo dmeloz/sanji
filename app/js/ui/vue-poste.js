@@ -9,7 +9,7 @@ import { libelle } from '../domaine/statuts.js';
 import { etat as etatCourant } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { bouton, pastille } from './elements.js';
-import { quantite } from './format.js';
+import { quantiteNoeuds } from './format.js';
 import { defaireEnUnToucher, faireEnUnToucher } from './taches.js';
 
 export function titre() { return 'Mode en poste'; }
@@ -76,7 +76,7 @@ function remplir(racine, etat, id) {
       lienFiche(id, 'poste-quitter', icone('M6 6l12 12M18 6L6 18'), h('span', { classe: 'poste-sr' }, 'Quitter le mode en poste')),
       h('div', { classe: 'poste-titre' },
         h('h1', { classe: 'poste-nom' }, c.nom, ' · ',
-          calc.statut === 'CALCULE' ? h('span', { classe: 'poste-qte' }, quantite(calc.quantiteTravail, calc.uniteTravail))
+          calc.statut === 'CALCULE' ? h('span', { classe: 'poste-qte' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail))
             : h('span', { classe: 'poste-qte-inconnue' }, 'quantité inconnue')),
         h('span', { classe: 'poste-allume' }, h('span', { classe: 'poste-point', 'aria-hidden': 'true' }), 'Écran maintenu allumé')),
       h('span', { classe: 'poste-cale', 'aria-hidden': 'true' })),

@@ -10,7 +10,7 @@ import { agir, agirStrict, aujourdhui, etat as etatCourant } from '../magasin.js
 import { champs } from './champs.js';
 import { h } from './dom.js';
 import { bouton, imprimer, encadre, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
-import { formaterHeure, quantite } from './format.js';
+import { formaterHeure, qteNoeuds, quantite } from './format.js';
 import { panneau } from './panneau.js';
 
 export const titre = () => 'Produits';
@@ -97,12 +97,17 @@ function dialogNoter(lundi, ligne) {
   });
 }
 
-/** Quantité mise en avant à droite de la ligne : ce que le chef a tapé, sinon la quantité notée, sinon la proposition. Jamais inventée. */
+/**
+ * Quantité mise en avant à droite de la ligne : ce que le chef a tapé, sinon la quantité notée, sinon la quantité proposée
+ * (besoin majoré de la marge, moins le disponible vérifié) avec son libellé « standard de base » quand la ligne en repose.
+ * « — » seulement quand la quantité est inconnue (ligne fondée sur une valeur inconnue).
+ */
 function quantiteEnAvant(suivi, unite) {
+  const base = suivi.origineQuantite === 'standard_base' || suivi.standardBase ? ` · ${LIBELLE_STANDARD_BASE}` : '';
   if (suivi.quantiteAcheter !== null) return { valeur: quantite(suivi.quantiteAcheter, unite), legende: 'à acheter' };
-  if (suivi.etatLigne === 'note' && suivi.quantiteCommandable !== null) return { valeur: quantite(suivi.quantiteCommandable, unite), legende: 'noté' };
-  if (suivi.proposeeACommander !== null) return { valeur: quantite(suivi.proposeeACommander, unite), legende: 'proposé' };
-  return { valeur: '—', legende: 'proposé après vérification' };
+  if (suivi.etatLigne === 'note' && suivi.quantiteCommandable !== null) return { valeur: quantite(suivi.quantiteCommandable, unite), legende: `noté${base}` };
+  if (suivi.quantiteCalculee !== null) return { valeur: quantite(suivi.quantiteCalculee, unite), legende: `proposé${base}` };
+  return { valeur: '—', legende: 'quantité à saisir' };
 }
 
 const MARQUE_ETAT = { suggere: '○', note: '✓', retire: '–' };
@@ -119,9 +124,9 @@ function carteLigne(etat, lundi, ligne, aujourd) {
         h('span', { classe: 'produit-marque', 'aria-hidden': 'true' }, MARQUE_ETAT[suivi.etatLigne] ?? MARQUE_ETAT.suggere),
         h('span', { classe: 'produit-titre' },
           h('strong', { classe: 'produit-nom' }, ligne.nom),
-          h('span', { classe: 'produit-sous' }, `besoin ${quantite(ligne.besoinBrut, ligne.unite)} · vérifié disponible ${suivi.quantiteVerifiee === null ? 'non vérifié' : quantite(suivi.quantiteVerifiee, ligne.unite)}`)),
+          h('span', { classe: 'produit-sous' }, `besoin ${quantite(ligne.besoinBrut, ligne.unite)} · ${suivi.quantiteVerifiee === null ? 'disponible : à vérifier' : `vérifié disponible : ${quantite(suivi.quantiteVerifiee, ligne.unite)}`}`)),
         h('span', { classe: 'produit-commande' },
-          h('span', { classe: 'produit-chiffre' }, quantiteEnAvant(suivi, ligne.unite).valeur),
+          h('span', { classe: 'produit-chiffre' }, qteNoeuds(quantiteEnAvant(suivi, ligne.unite).valeur)),
           h('span', { classe: 'produit-legende' }, quantiteEnAvant(suivi, ligne.unite).legende))),
       h('span', { classe: 'produit-etat' },
         h('span', { classe: 'produit-etat-texte' }, ETAT_COURT[suivi.etatLigne] ?? ETAT_COURT.suggere,
