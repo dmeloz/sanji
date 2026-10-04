@@ -1,14 +1,149 @@
-// Feuille « À décider ». Provisoire : mène à la section « À confirmer » existante de l'écran Aujourd'hui.
+// Feuille « À décider » (maquette « Exceptions ») : un <dialog> (panneau.js) qui monte du bas, une carte par décision RÉELLE
+// (`decisionsDe`, domaine/decisions.js) avec les actions qui existent déjà : arbitrer un écart, replanifier une avance hors
+// règle, choisir la sauce, confirmer une répartition, accepter ou écarter une proposition de l'apprentissage, valider une
+// valeur. Une quantité absente n'est jamais une décision. Aucune logique métier ici. La feuille se met à jour quand l'état
+// change (une décision prise disparaît) ; vide : « Tout est réglé ». Fermeture au bouton et à Échap, focus rendu à l'appelant.
 
-const ZONE = 'bord-titre-confirmer';
+import { ecarterApprentissage } from '../domaine/actions-apprentissage.js';
+import { libelleJour } from '../domaine/dates.js';
+import { decisionsDe } from '../domaine/decisions.js';
+import { abonner, agir, aujourdhui, etat as etatCourant } from '../magasin.js';
+import { h, svg } from './dom.js';
+import { bouton } from './elements.js';
+import { dialogRepartition } from './fiches.js';
+import { ouvrirProposition, ouvrirValidation, texteFourchette } from './feuille-validation.js';
+import { quantite } from './format.js';
+import { panneau } from './panneau.js';
+import { dialogDecider, dialogPlanifier } from './taches.js';
+import { dialogChoisirSauce } from './vue-composant.js';
 
+const ETIQUETTE_POINT = {
+  allergenes: 'Allergènes à confirmer', conservation: 'Conservation à confirmer', composant_inconnu: 'À classer',
+  creneau_charge: 'Créneau chargé', repartition_incoherente: 'Répartition incohérente', semaine_type: 'Semaine type à confirmer',
+};
+const ROLE_EN_CLAIR = { plat_principal: 'en plat principal', garniture: 'en garniture' };
+
+let feuilleOuverte = false;
+
+function icone(chemins, classe = 'dec-icone', taille = 16) {
+  return svg('svg', { classe, viewBox: '0 0 24 24', width: taille, height: taille, fill: 'none', stroke: 'currentColor', 'stroke-width': 2,
+    'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', focusable: 'false' },
+  chemins.map((d) => svg('path', { d })));
+}
+
+/** Une carte : étiquette (mot écrit + icône), titre, détail, un ou deux gestes. `fermer` ferme la feuille avant un changement de page. */
+function carte(c, fermer) {
+  const principal = (texte, surClic, extra) => bouton(texte, surClic, 'decision dec-btn', extra);
+  const secondaire = (texte, surClic, extra) => bouton(texte, surClic, 'dec-btn', extra);
+  const versLien = (href, texte) => h('a', { href, classe: 'btn dec-btn', onClick: fermer }, texte);
+  let etiquette; let titre; let detail = null; let actions;
+  switch (c.genre) {
+    case 'ecart': {
+      etiquette = 'Écart à arbitrer';
+      titre = c.nom;
+      const morceaux = [];
+      if (c.cible !== null) morceaux.push(['cible ', quantite(c.cible, c.unite)]);
+      if (c.reel !== null) morceaux.push(['réel ', quantite(c.reel, c.unite)]);
+      if (c.ecart !== null && c.ecart > 0) morceaux.push(['il manque ', quantite(c.ecart, c.unite)]);
+      if (c.ecart !== null && c.ecart < 0) morceaux.push(['surplus de ', quantite(-c.ecart, c.unite)]);
+      detail = [morceaux.map(([mot, q], i) => [i > 0 ? ' · ' : null, mot, h('span', { classe: 'dec-qte' }, q)]),
+        h('span', { classe: 'dec-choix' }, 'Complément, ajustement ou aucune production supplémentaire.')];
+      actions = [principal('Décider', () => dialogDecider(c.productionId), { 'aria-label': `Décider de l'écart : ${c.nom}` }),
+        versLien(`#/fiche/${encodeURIComponent(c.composantId)}`, 'Ouvrir la fiche')];
+      break;
+    }
+    case 'avance_hors_regle':
+      etiquette = 'Avance hors règle';
+      titre = `${c.nom} pour ${libelleJour(c.dateService)}`;
+      detail = [h('strong', { classe: 'dec-mot' }, c.limiteDepassee ? "limite d'utilisation dépassée" : 'hors règle'),
+        ` : avance de ${c.jours} jour${c.jours > 1 ? 's' : ''}, le besoin n'est pas couvert.`];
+      actions = [principal('Replanifier', () => dialogPlanifier(c.productionId, 'reporter'), { 'aria-label': `Replanifier : ${c.nom}` }),
+        versLien(`#/fiche/${encodeURIComponent(c.composantId)}`, 'Ouvrir la fiche')];
+      break;
+    case 'sauce':
+      etiquette = 'Sauce à confirmer';
+      titre = c.nom;
+      detail = `Menu du ${libelleJour(c.date)} : rien n'est choisi à votre place.`;
+      actions = [principal('Choisir la sauce', () => dialogChoisirSauce(etatCourant().composants[c.composantId]), { 'aria-label': `Choisir la sauce : ${c.nom}` }),
+        versLien(`#/semaine/${c.date}`, 'Voir le jour')];
+      break;
+    case 'repartition':
+      etiquette = 'Répartition provisoire';
+      titre = `Fiche ${c.numero}`;
+      detail = [`${libelleJour(c.date)} : `, h('span', { classe: 'dec-qte' }, String(c.couverts)), ' couverts, répartition entre les menus provisoire.'];
+      actions = [principal('Confirmer la répartition', () => dialogRepartition(c.ficheId), { 'aria-label': `Confirmer la répartition : fiche ${c.numero}` }),
+        versLien(`#/semaine/${c.date}`, 'Voir le jour')];
+      break;
+    case 'point': {
+      etiquette = ETIQUETTE_POINT[c.type] ?? 'À confirmer';
+      titre = c.texte;
+      const href = c.composantId ? `#/fiche/${encodeURIComponent(c.composantId)}` : c.date ? `#/semaine/${c.date}` : '#/reglages';
+      actions = [h('a', { href, classe: 'btn dec-btn btn-decision', onClick: fermer }, 'Ouvrir')];
+      break;
+    }
+    case 'apprentissage': {
+      const p = c.proposition;
+      etiquette = "Proposition de l'apprentissage";
+      titre = p.texte;
+      detail = "Vous corrigez souvent cette portion dans le même sens. Rien n'est appliqué sans votre accord.";
+      actions = [principal('Examiner', () => ouvrirProposition(p), { 'aria-label': `Examiner la proposition : ${p.libelle}` }),
+        secondaire('Non, garder', () => { agir((e, t) => ecarterApprentissage(e, p.cleFamille, p.role, t)); }, { 'aria-label': `Non, garder la valeur actuelle : ${p.libelle}` })];
+      break;
+    }
+    default: {
+      const v = c.valeur;
+      etiquette = 'Valeur à valider';
+      titre = `${v.libelle} ${ROLE_EN_CLAIR[v.role] ?? ''}`.trim();
+      detail = ['Estimation à valider : ', h('span', { classe: 'dec-qte' }, texteFourchette(v.proposition)), '.'];
+      actions = [principal('Valider', () => ouvrirValidation(v), { 'aria-label': `Valider la valeur : ${titre}` })];
+    }
+  }
+  return h('article', { classe: 'dec-carte', dataset: { genre: c.genre } },
+    h('p', { classe: 'dec-etiquette' }, icone(['M12 3l10 18H2z', 'M12 10v5M12 18v.5']), h('span', null, etiquette)),
+    h('h3', { classe: 'dec-titre' }, titre),
+    detail ? h('p', { classe: 'dec-detail' }, detail) : null,
+    h('div', { classe: 'dec-actions' }, actions));
+}
+
+/** Contenu de la feuille pour un état : sous-titre, nombre, cartes ou état vide. */
+export function contenuDecisions(etat, aujourd, fermer = () => {}) {
+  const { total, cartes } = decisionsDe(etat, aujourd);
+  const entete = h('div', { classe: 'dec-entete' },
+    h('p', { classe: 'dec-sous' }, "Sanji a tranché le reste. Ici, c'est vous qui décidez."),
+    total > 0 ? h('p', { classe: 'dec-nombre' }, h('span', { classe: 'dec-qte' }, String(total)), total === 1 ? ' décision en attente' : ' décisions en attente') : null);
+  if (total === 0) {
+    return [entete, h('div', { classe: 'dec-vide' },
+      icone(['M8 12l3 3 5-6', 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0'], 'dec-icone-vide', 40),
+      h('p', { classe: 'dec-vide-titre' }, 'Tout est réglé'),
+      h('p', { classe: 'dec-sous' }, 'Sanji continue avec vos décisions.'))];
+  }
+  return [entete, h('div', { classe: 'dec-cartes' }, cartes.map((c) => carte(c, fermer)))];
+}
+
+/** Ouvre la feuille « À décider » (appelée par le bandeau de l'écran Aujourd'hui). Une seule feuille à la fois. */
 export function ouvrirDecisions() {
-  if (typeof location === 'undefined') return;
-  const aller = () => {
-    const zone = typeof document === 'undefined' ? null : document.getElementById(ZONE);
-    if (zone && zone.scrollIntoView) zone.scrollIntoView({ block: 'start' });
-  };
-  if (location.hash.startsWith('#/aujourdhui')) { aller(); return; }
-  location.hash = '#/aujourdhui';
-  setTimeout(aller, 60);
+  if (typeof document === 'undefined' || feuilleOuverte) return;
+  feuilleOuverte = true;
+  const appelant = document.activeElement ?? null;
+  const zone = h('div', { classe: 'dec-zone', 'aria-live': 'polite' });
+  let dialogue = null;
+  const fermer = () => dialogue?.close();
+  const remplir = () => zone.replaceChildren(...contenuDecisions(etatCourant(), aujourdhui(), fermer));
+  remplir();
+  dialogue = panneau({ titre: 'À décider', corps: [zone], lectureSeule: true });
+  dialogue.className = `${dialogue.className} feuille-decisions`;
+  // Le titre reçoit le focus à l'ouverture ; si un changement d'état retire le bouton focalisé, le focus y revient.
+  const titre = dialogue.querySelector('h2');
+  titre?.setAttribute('tabindex', '-1');
+  titre?.focus?.();
+  const desabonner = abonner(() => {
+    remplir();
+    const dedans = typeof dialogue.contains === 'function' && dialogue.contains(document.activeElement);
+    if (typeof dialogue.contains === 'function' && !dedans) titre?.focus?.();
+  });
+  dialogue.addEventListener('close', () => {
+    desabonner();
+    feuilleOuverte = false;
+    if (appelant && appelant.isConnected !== false) appelant.focus?.();
+  });
 }

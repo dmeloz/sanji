@@ -24,6 +24,7 @@ const FICHIERS = [
   'js/domaine/base.js',
   'js/domaine/calcul.js',
   'js/domaine/dates.js',
+  'js/domaine/decisions.js',
   'js/domaine/etat.js',
   'js/domaine/feuille.js',
   'js/domaine/planification.js',
