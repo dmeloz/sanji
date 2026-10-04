@@ -45,14 +45,15 @@ function mondeRestes() {
   return Object.values(magasin.etat().composants).find((c) => c.famille === 'riz').id;
 }
 
-test('en-tête : titre Stock, « hors ligne prêt », sélecteur à trois liens, vue active marquée en texte et en attribut', () => {
+test('en-tête : titre Stock, sans état hors ligne quand tout est normal, sélecteur à trois liens, vue active marquée en texte et en attribut', () => {
   magasin.remplacer(etatVide());
   for (const sous of stock.SOUS_VUES) {
     const page = stock.rendre(magasin.etat(), S.lundi, sous);
     assert.match(page.querySelector('h1').textContent, /^Stock$/);
-    // L'état hors ligne vient de libelleHorsLigne() (jamais un « prêt » écrit en dur : ici la vérification est en cours).
-    assert.equal(parClasse(page, 'stock-horsligne')[0].textContent, horsligne.libelleHorsLigne());
-    assert.doesNotMatch(page.textContent, /hors ligne prêt/);
+    // Montrer l'exception : la vérification en cours (ici) ou le « prêt » ne s'affichent pas ; seul un problème s'écrit (problemeHorsLigne).
+    assert.equal(horsligne.problemeHorsLigne(), null);
+    assert.equal(parClasse(page, 'stock-horsligne').length, 0);
+    assert.doesNotMatch(page.textContent, /hors ligne/);
     assert.doesNotMatch(page.textContent, /synchronis|en stock/i);
     const liens = parClasse(page, 'stock-segment');
     assert.deepEqual(liens.map((a) => a.attributs.href), stock.SOUS_VUES.map((v) => `#/stock/${v}/${S.lundi}`));

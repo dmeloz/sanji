@@ -1185,3 +1185,38 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prod-ligne .mep-quantite { align-items: flex-end; text-align: right; }
 .prod-ligne .mep-qte { font-size: max(var(--t-qte), 20px); font-weight: 600; text-align: right; }
 .prod-ligne .mep-qte .qte-unite { font-size: var(--t-corps); }
+/* ---- Lot « Aujourd'hui, Semaine, fiche de fonction, hors ligne, sombre » (audit v56 : montrer l'exception, pas la normalité). Jetons du socle seulement. ---- */
+/* Contour des cases et interrupteurs : le gris doux du texte, au moins 4,5:1 sur la carte en clair comme en sombre (aucune couleur écrite en dur ici). */
+:root { --contour-case: var(--texte-doux); }
+/* Interrupteur « au poste » : 64 × 44 px (cible de 44 px au moins), contour visible. L'état hors poste est écrit à côté ; le nom accessible porte toujours l'état. */
+.interrupteur-entree { width: 64px; height: 44px; border-color: var(--contour-case); }
+.interrupteur-entree::before { top: 3px; left: 3px; width: 34px; height: 34px; }
+.interrupteur-entree:checked { border-color: var(--encre); }
+.interrupteur-entree:checked::before { left: 23px; font-size: 20px; line-height: 34px; }
+.interrupteur-etat { font-weight: 700; }
+.interrupteur-etat:empty { display: none; }
+/* Semaine : liens du tableau de semaine à 44 px, légende des repères sur une ligne par repère si besoin. */
+.bord-plat { display: inline-flex; align-items: center; min-height: var(--cible); padding: 0; }
+.sem-cle > span { display: inline-flex; align-items: center; gap: 4px; min-height: 24px; }
+/* Aujourd'hui : « Prochaine production » est un lien (dimanche), cible de 44 px ; pastille « allergènes à confirmer » de la fiche. */
+.au-lien-prochaine { display: inline-flex; align-items: center; min-height: var(--cible); color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.au-lien-prochaine:focus-visible { outline: 3px solid currentColor; outline-offset: 2px; }
+.au-fiche-pastille { display: block; margin-top: 4px; }
+/* Sombre : la carte « Maintenant » et la carte quantité de la fiche sont des surfaces foncées surélevées (pas de grands blocs clairs), texte clair, accent basilic. */
+@media (prefers-color-scheme: dark) {
+  .au-maintenant { background: var(--carte-2); color: var(--texte); border: 1px solid var(--bordure-forte); --jauge-trait: var(--action); }
+  .au-maintenant .au-etiquette, .au-jauge-texte { color: var(--texte-moyen); opacity: 1; }
+  .au-maintenant-neutre, .au-maintenant-vide, .au-maintenant-dest { opacity: 1; color: var(--texte-moyen); }
+  .au-jauge::-webkit-progress-bar { background: var(--bordure-forte); opacity: 1; }
+  .au-btn-clair { background: var(--action); color: var(--sur-action); border-color: var(--action); }
+  .au-btn-contour { color: var(--texte); border-color: var(--texte-doux); }
+  .au-btn:focus-visible { outline-color: var(--focus); }
+  .fiche-quantite { background: var(--carte-2); color: var(--texte); border: 1px solid var(--bordure-forte); }
+  .fiche-legende { color: var(--texte-moyen); }
+  .fiche-repartition { border-top-color: var(--bordure-forte); }
+  .fiche-jauge { background: var(--bordure); }
+  .fiche-jauge > span { background: var(--action); }
+  /* Cases à cocher : contour net sur fond sombre. */
+  .case input { outline: 1px solid var(--contour-case); outline-offset: 1px; border-radius: 3px; }
+  .case-fait-boite { border-color: var(--contour-case); }
+}

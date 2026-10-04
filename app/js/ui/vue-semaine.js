@@ -16,7 +16,7 @@ import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
 import { bouton, lien, pastille, repliable } from './elements.js';
 import { ouvrirFiche } from './fiches.js';
-import { libelleHorsLigne } from './horsligne.js';
+import { problemeHorsLigne } from './horsligne.js';
 import { qteNoeuds, quantite } from './format.js';
 import {
   actionsTache, defaireEnUnToucher, dialogCorriger, dialogPlanifier, faireEnUnToucher, ligneProduction, noeudEvaluation,
@@ -65,7 +65,7 @@ function entete(etat, date, aujourd) {
   const numero = tableauBlanc(etat, aujourd, lundi).bord.entete.semaine;
   return h('header', { classe: 'sem-tete' },
     h('div', { classe: 'sem-tete-texte' },
-      h('p', { classe: 'sem-legende' }, `Semaine ${numero} · ouvert lun → sam · ${libelleHorsLigne()}`),
+      h('p', { classe: 'sem-legende' }, `Semaine ${numero} · ouvert lun → sam${problemeHorsLigne() ? ` · ${problemeHorsLigne()}` : ''}`),
       h('h1', { classe: 'sem-titre' }, 'Semaine')),
     lien(`#/import/${lundi}`, 'Importer', 'sem-importer'));
 }
@@ -93,8 +93,8 @@ function puces(etat, date, aujourd) {
   return h('div', { classe: 'sem-bandeau-jours' },
     h('nav', { classe: 'sem-puces', 'aria-label': 'Jours de la semaine' }, jours.map(puce)),
     h('p', { classe: 'sem-legende sem-cle' },
-      h('span', null, h('span', { classe: 'sem-point sem-point-regle', 'aria-hidden': 'true' }), ' hors règle'),
-      h('span', null, h('span', { classe: 'sem-point sem-point-off', 'aria-hidden': 'true' }), ' jour off')),
+      h('span', null, h('span', { classe: 'sem-point sem-point-regle', 'aria-hidden': 'true' }), ' hors règle : avance non autorisée'),
+      h('span', null, h('span', { classe: 'sem-point sem-point-off', 'aria-hidden': 'true' }), ' jour off : aucun créneau de travail')),
     h('nav', { classe: 'sem-nav', 'aria-label': 'Changer de semaine' },
       lien(`#/semaine/${ajouterJours(date, -7)}`, '‹ Semaine précédente', 'btn btn-court'),
       lien(`#/semaine/${lundi}/tableau`, 'Menus de la semaine', 'btn btn-court'),
@@ -142,11 +142,13 @@ function ligneComposants(etat, date, menu) {
   const composants = Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
   if (composants.length === 0) return null;
   const aposte = composants.filter((c) => c.attribue).length;
-  return h('details', { classe: 'repliable sem-poste', open: true },
+  // Montrer l'exception : tout est au poste = replié (le résumé suffit) ; dès qu'un élément manque, déplié, et chaque
+  // élément hors poste le dit en toutes lettres. Les interrupteurs restent (modifier l'attribution d'un geste).
+  return h('details', { classe: 'repliable sem-poste', open: aposte < composants.length },
     h('summary', null, `Attribution au poste : ${aposte} sur ${composants.length}`),
     h('ul', { classe: 'sem-composants' }, composants.map((c) => h('li', { classe: 'sem-composant' },
       lien(`#/fiche/${encodeURIComponent(c.id)}`, c.nom, 'tache-nom'),
-      vueDetail.interrupteurAuPoste(c, 'sem-poste')))));
+      vueDetail.interrupteurAuPoste(c, 'sem-poste', { etat: 'exception' })))));
 }
 
 function blocMenu(etat, date, menu) {
@@ -187,7 +189,7 @@ function carteServices(etat, date) {
     h('h2', { classe: 'sem-section', id: 'sem-titre-services' }, `Services · ${libelleJour(date)}`),
     aMenus ? [blocMenu(etat, date, 1), blocMenu(etat, date, 2)] : h('p', { classe: 'sem-neutre' }, 'Pas de menu du jour ce jour-là.'),
     h('div', { classe: 'sem-ligne' }, h('span', { classe: 'sem-rang' }, 'Carte'),
-      h('span', { classe: 'sem-intitule' }, 'contexte du service, aucune quantité calculée')),
+      h('span', { classe: 'sem-intitule' }, 'contexte du service')),
     fiches.length > 0 ? h('div', { classe: 'sem-fiches' }, h('h3', { classe: 'sem-sous-titre' }, 'Fiches de fonction'),
       h('ul', { classe: 'sem-liste' }, fiches.map((f) => ficheDuJour(etat, f, alertes)))) : null);
 }
@@ -268,7 +270,7 @@ function rendreJour(etat, date) {
   racine.appendChild(carteServices(etat, date));
   racine.appendChild(sectionAProduire(etat, date));
   racine.appendChild(repliable(h('h2', { classe: 'sem-section' }, 'Tout le détail du jour'), false,
-    [h('p', { classe: 'aide' }, 'Intitulés, composants, prévisions, fiches de fonction, allergies, créneaux, après service, points à confirmer.'),
+    [h('p', { classe: 'aide' }, 'Intitulés, composants, prévisions, fiches de fonction, allergies, créneaux, après service, points à confirmer. La carte n\'est qu\'un contexte : aucune quantité n\'en est calculée.'),
       ...vueDetail.sectionsDuJour(etat, date, { replie: true })], { classe: 'sem-detail', id: 'detail-jour' }));
   return racine;
 }

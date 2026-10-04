@@ -112,25 +112,33 @@ function dialogComposant(date, menu, c) {
 }
 
 /** Interrupteur « au poste » : le choix est enregistré aussitôt, et mémorisé par nom par le domaine. */
-export function interrupteurAuPoste(c, prefixe = 'poste') {
+export function interrupteurAuPoste(c, prefixe = 'poste', { etat = 'toujours' } = {}) {
   const id = `${prefixe}-${c.id}`;
+  const dit = (attribue) => (attribue ? 'au poste' : 'hors poste');
+  // « exception » : le libellé n'est écrit que pour ce qui est hors poste (la normalité se dit une fois, dans le résumé) ;
+  // le nom accessible porte toujours l'état.
+  const texte = (attribue) => (etat === 'exception' && attribue ? '' : dit(attribue));
+  const mot = h('span', { classe: 'interrupteur-etat' }, texte(c.attribue));
   const entree = h('input', {
-    type: 'checkbox', role: 'switch', id, classe: 'interrupteur-entree', checked: c.attribue, 'aria-label': `${c.nom}, au poste`,
+    type: 'checkbox', role: 'switch', id, classe: 'interrupteur-entree', checked: c.attribue, 'aria-label': `${c.nom}, ${dit(c.attribue)}`,
     onChange: (evenement) => {
       const cible = evenement.target;
       const voulu = cible.checked;
       const r = agir((e, t) => modifierComposant(e, c.id, { attribue: voulu }, t));
       if (!r.ok) cible.checked = !voulu;
+      cible.setAttribute('aria-label', `${c.nom}, ${dit(cible.checked)}`);
+      mot.textContent = texte(cible.checked);
     },
   });
-  return h('label', { classe: 'interrupteur', pour: id }, entree, h('span', null, 'au poste'));
+  return h('label', { classe: 'interrupteur', pour: id }, entree, mot);
 }
 
-function ligneComposant(c) {
+function ligneComposant(c, { sansPoste = false } = {}) {
   return h('li', { classe: 'composant-ligne' },
     h('div', { classe: 'composant-tete' },
       lien(`#/fiche/${encodeURIComponent(c.id)}`, c.nom, 'tache-nom'),
-      interrupteurAuPoste(c)),
+      // Écran Semaine : l'attribution est déjà dans « Services », on ne la répète pas (« Modifier » la porte aussi).
+      sansPoste ? (c.attribue ? null : h('span', { classe: 'interrupteur-etat' }, 'hors poste')) : interrupteurAuPoste(c)),
     h('p', { classe: 'meta' }, libelle('CATEGORIE', c.categorie)),
     h('div', { classe: 'actions' },
       bouton('Modifier', () => dialogComposant(c.date, c.menu, c), 'court'),
@@ -140,7 +148,7 @@ function ligneComposant(c) {
       }), 'court danger')));
 }
 
-function blocMenu(etat, date, menu) {
+function blocMenu(etat, date, menu, replie = false) {
   const m = jourOuVide(etat, date).menus[menu];
   const saisi = m.intitule.trim() !== '';
   const composants = Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
@@ -149,7 +157,7 @@ function blocMenu(etat, date, menu) {
     saisi ? h('p', { classe: 'intitule' }, m.intitule) : h('p', { classe: 'vide' }, 'menu non saisi'),
     h('div', { classe: 'actions' },
       bouton(saisi ? 'Modifier l\'intitulé' : 'Saisir l\'intitulé', () => dialogIntitule(date, menu), 'court')),
-    composants.length > 0 ? h('ul', { classe: 'liste-composants' }, composants.map(ligneComposant)) : (saisi ? ligneVide('Aucun composant : ajoutez-en si besoin.') : null),
+    composants.length > 0 ? h('ul', { classe: 'liste-composants' }, composants.map((c) => ligneComposant(c, { sansPoste: replie }))) : (saisi ? ligneVide('Aucun composant : ajoutez-en si besoin.') : null),
     h('div', { classe: 'actions' }, bouton('Ajouter un composant', () => dialogComposant(date, menu, null), 'court')));
 }
 
@@ -163,8 +171,8 @@ function sectionMenus(etat, date, replie = false) {
     h('div', { classe: 'actions' }, lien(`#/import/${lundiDe(date)}`, 'Saisir toute la semaine', 'btn btn-court')),
     h('p', { classe: 'aide' }, 'L\'application répartit seule ce qui revient au poste ; corrigez seulement une exception.'),
     blocPhoto(date),
-    blocMenu(etat, date, 1),
-    blocMenu(etat, date, 2)]);
+    blocMenu(etat, date, 1, replie),
+    blocMenu(etat, date, 2, replie)]);
 }
 
 // ------------------------------------------------------------------ prévisions
@@ -224,7 +232,7 @@ function carteFiche(f) {
       ? h('p', { classe: 'alerte-texte' }, `Alerte : la répartition (${(f.repartition[1] || 0) + (f.repartition[2] || 0)}) ne correspond pas aux couverts (${f.couverts}).`) : null,
     f.allergies.trim() ? h('p', null, h('strong', null, 'Allergies : '), f.allergies) : null,
     f.remarques.trim() ? h('p', null, h('strong', null, 'Remarques : '), f.remarques) : null,
-    annulee ? null : blocBuffet(f.couverts),
+    f.mode === 'menu_fixe' ? null : annulee ? null : blocBuffet(f.couverts),
     h('div', { classe: 'actions' },
       annulee ? null : bouton('Modifier', () => dialogFiche(f, f.date), 'court'),
       !annulee && f.mode === 'choix_libre' && f.statutRepartition !== 'confirmee'

@@ -21,7 +21,7 @@ import { ouvrirValidation } from './feuille-validation.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, pastille, repliable, titreSection } from './elements.js';
 import { formaterHeure, formaterNombre, nomFichierSauvegarde, parseNombre, pluriel } from './format.js';
-import { libelleHorsLigne, situationHorsLigne } from './horsligne.js';
+import { libelleHorsLigne, problemeHorsLigne, situationHorsLigne } from './horsligne.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { ALLERGENES, libelleAllergene } from './reference.js';
@@ -685,7 +685,7 @@ export function rendre(etat, param = null) {
         ligneInfo('Apparence', 'suit le réglage du téléphone (clair / sombre)'),
         ligneInfo('Écran allumé', 'en Production et en mode poste')),
       groupe('Données', ligneRubrique('donnees', etat)),
-      h('p', { classe: 'reglages-pied' }, pastille('Fonctionne hors ligne', 'vert'), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
+      h('p', { classe: 'reglages-pied' }, problemeHorsLigne(hl) ? pastille('Hors ligne pas encore prêt', 'ambre') : pastille('Fonctionne hors ligne', 'vert'), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
   }
   return h('div', { classe: 'vue vue-reglages' },
     h('a', { href: '#/reglages', classe: 'reglage-retour' }, '‹ Réglages'),

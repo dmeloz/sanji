@@ -67,24 +67,25 @@ test('l\'écran est branché au routeur sous le nom « Aujourd\'hui »', () => {
   assert.equal(vue.titre(), "Aujourd'hui");
 });
 
-test('base vide : la page s\'affiche, « hors ligne » écrit, rien d\'inventé', () => {
+test('base vide : la page s\'affiche, aucun état hors ligne tant que tout est normal, rien d\'inventé', () => {
   const p = page(S.mercredi, calme(etatVide()));
   const texte = p.textContent;
   assert.match(texte, /Aujourd'hui/);
   assert.match(texte, /Mercredi 7 octobre/);
-  assert.match(texte, /hors ligne/);
+  assert.doesNotMatch(texte, /hors ligne/);
   assert.match(texte, /Aucune tâche décidée/);
   assert.match(texte, /menu non saisi/);
   assert.equal(classes(p, 'au-decisions').length, 0, 'aucune décision, aucun bandeau');
   assert.doesNotMatch(texte, /Synchronis|Midi|Soir|minuteur|en stock|frigo|chambre froide|Mon planning/i);
 });
 
-test('en-tête : le libellé « hors ligne » vient de horsligne.js et suit son état', async () => {
-  const { libelleHorsLigne } = await import('../app/js/ui/horsligne.js');
+test('en-tête : « hors ligne » ne s\'affiche que s\'il y a un problème (texte de horsligne.js), jamais « prêt »', async () => {
+  const { problemeHorsLigne } = await import('../app/js/ui/horsligne.js');
+  // Vérification en cours : rien. Le texte du problème est produit par horsligne.js, pas par l'écran (voir lot-aujourdhui-semaine.test.js pour le cas du problème).
+  assert.equal(problemeHorsLigne(), null);
   const p = page(S.mercredi, etatVide());
-  assert.ok(p.textContent.includes(libelleHorsLigne()));
-  const pastille = classes(p, 'au-hors-ligne')[0];
-  assert.match(pastille.dataset.pret, /^(oui|non)$/);
+  assert.equal(classes(p, 'au-hors-ligne').length, 0);
+  assert.doesNotMatch(p.textContent, /hors ligne prêt/);
 });
 
 test('couverts : menu 1, menu 2 et fiches, chacun avec sa certitude écrite (estimée, provisoire, confirmée)', () => {

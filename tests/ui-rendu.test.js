@@ -929,7 +929,8 @@ test('détail : sous chaque menu, ses composants avec catégorie, lien et interr
   const interrupteurs = lignes.map((l) => l.tous((x) => x.attributs.type === 'checkbox')[0]);
   assert.deepEqual(interrupteurs.map((i) => i.checked), [false, true, true], 'la protéine n\'est pas au poste, le féculent et le légume le sont');
   assert.ok(interrupteurs.every((i) => i.attributs.role === 'switch'));
-  assert.match(lignes[0].textContent, /au poste/);
+  assert.match(lignes[0].textContent, /hors poste/, 'l\'état hors poste est écrit à côté de l\'interrupteur');
+  assert.match(lignes[1].textContent, /au poste/);
   for (const l of lignes) assert.deepEqual(boutons(l).map((b) => b.textContent), ['Modifier', 'Supprimer']);
   assert.ok(boutonNomme(menu2, 'Ajouter un composant'));
 });

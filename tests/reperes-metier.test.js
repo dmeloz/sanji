@@ -111,11 +111,11 @@ test('composant : le bloc « Repères métier » est présent, fermé, et ne tou
   assert.match(page.textContent, /Source légale/);
 });
 
-function ficheAvec(couverts) {
+function ficheAvec(couverts, mode = 'choix_libre') {
   const e = etatVide();
   e.fiches.f1 = {
-    id: 'f1', numero: 'T1', date: S.lundi, service: 'midi', horaire: '12:00', couverts, mode: 'menu_fixe', menuFixe: 1,
-    repartition: { 1: 0, 2: 0 }, statutRepartition: 'provisoire', statut: 'active', version: 1, allergies: '', remarques: '',
+    id: 'f1', numero: 'T1', date: S.lundi, service: 'midi', horaire: '12:00', couverts, mode, menuFixe: mode === 'menu_fixe' ? 1 : null,
+    repartition: { 1: couverts, 2: 0 }, statutRepartition: 'provisoire', statut: 'active', version: 1, allergies: '', remarques: '',
     adaptations: [], historique: [],
   };
   magasin.remplacer(e);

@@ -12,7 +12,7 @@ import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
 import { bouton, lien, repliable } from './elements.js';
 import { pluriel } from './format.js';
-import { libelleHorsLigne } from './horsligne.js';
+import { problemeHorsLigne } from './horsligne.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { importerPhoto, retirerPhoto, urlPhoto } from './photo.js';
@@ -127,7 +127,7 @@ export function rendre(etat, lundi) {
 
   racine.appendChild(lien(`#/semaine/${lundi}/tableau`, '‹ Semaine', 'imp-retour'));
   racine.appendChild(h('header', { classe: 'imp-tete' },
-    h('p', { classe: 'imp-legende' }, `Semaine ${numero} · du ${libelleJour(lundi)} · ${libelleHorsLigne()}`),
+    h('p', { classe: 'imp-legende' }, [`Semaine ${numero} · du ${libelleJour(lundi)}`, problemeHorsLigne() ? ` · ${problemeHorsLigne()}` : ''].join('')),
     h('h1', { classe: 'page-titre' }, 'Importer les menus')));
   racine.appendChild(h('nav', { classe: 'nav-periode', 'aria-label': 'Semaine' },
     lien(`#/import/${ajouterJours(lundi, -7)}`, '‹ Semaine précédente', 'btn'),
