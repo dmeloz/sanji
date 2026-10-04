@@ -57,13 +57,17 @@ test('vues-relais : le mode en poste provisoire ramène à la fiche', () => {
   assert.deepEqual(liens, ['#/fiche/comp%201']);
 });
 
-test('feuille des décisions : ouvrirDecisions existe et mène à Aujourd\'hui', async () => {
+test('feuille des décisions : ouvrirDecisions existe et ouvre la feuille « À décider » sans quitter la page', async () => {
   const { ouvrirDecisions } = await import('../app/js/ui/feuille-decisions.js');
   assert.equal(typeof ouvrirDecisions, 'function');
   globalThis.location = { hash: '#/stock' };
   try {
     ouvrirDecisions();
-    assert.equal(globalThis.location.hash, '#/aujourdhui');
+    const feuille = dom.corps.tous((x) => x.balise === 'dialog' && x.open)[0];
+    assert.ok(feuille, 'la feuille est ouverte');
+    assert.equal(feuille.querySelector('h2').textContent, 'À décider');
+    assert.equal(globalThis.location.hash, '#/stock', 'aucune navigation');
+    feuille.close();
   } finally {
     delete globalThis.location;
   }

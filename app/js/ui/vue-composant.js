@@ -88,7 +88,7 @@ function dialogMelange(c) {
  * Sauce implicite « à confirmer » : le chef choisit parmi les sauces du vocabulaire (aucune présélectionnée : la crème
  * n'est jamais le défaut) ou tape la sienne. Valider renomme le composant ; la saisie libre prime sur la liste.
  */
-function dialogChoisirSauce(c) {
+export function dialogChoisirSauce(c) {
   const f = champs([
     { cle: 'choix', type: 'radio', libelle: 'Sauces possibles', valeur: null, options: SAUCES.map((s) => [s.nom, s.nom]) },
     { cle: 'libre', type: 'texte', libelle: 'Une autre sauce', valeur: '', placeholder: 'nom de la sauce' },
