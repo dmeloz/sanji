@@ -6,12 +6,13 @@ import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
-import { creerFiche, deciderEcart, definirMenu, definirPrevision, definirStandard, marquerFait, planifier } from '../app/js/domaine/actions.js';
+import { creerFiche, deciderEcart, definirMenu, definirPrevision, definirStandard, marquerFait, modifierComposant, planifier } from '../app/js/domaine/actions.js';
 import { composantVide } from '../app/js/domaine/etat.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
 import { decisionsDe, decisionsDuJour, POINTS_SANS_DECISION, texteDecisions } from '../app/js/domaine/decisions.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { etatVide, h } from './aide.js';
+import { composantValide, etatVide, h } from './aide.js';
+import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 
 let dom;
 let magasin;
@@ -349,6 +350,47 @@ test('un même écart n\'est jamais compté deux fois : principale et complémen
   deciderEcart(e, apres[0].productionId, 'aucune', h());
   assert.equal(cartesEcart().length, 0, 'décider une fois règle le composant');
   assert.equal(decisionsDe(e, S.lundi).total, 0);
+});
+
+function avecAllergenesSansComposition() {
+  const e = calme(etatVide());
+  const id = composantValide(e, S.mercredi, 1, J.COMPOSANT_VAGUE_TEST);
+  creerFiche(e, { date: S.mercredi, service: 'midi', couverts: 4, mode: 'choix_libre', allergies: 'ALLERGIE_TEST', numero: 'F1' }, h());
+  modifierComposant(e, id, { allergenes: { statut: 'valide', liste: ['gluten'] } }, h()); // la liste est déjà validée par le chef
+  return { e, id };
+}
+const messagesAffiches = () => dom.corps.tous((x) => x.attributs.id === 'messages')[0].textContent;
+
+test('allergènes d\'un composant sans composition : la carte dit pourquoi et propose de définir la composition, pas de revalider la liste', () => {
+  nettoyer();
+  const { e, id } = avecAllergenesSansComposition();
+  const carteDonnee = decisionsDe(e, S.mercredi).cartes.find((c) => c.genre === 'point' && c.type === 'allergenes');
+  assert.ok(carteDonnee, 'le point reste ouvert malgré la liste validée');
+  assert.equal(carteDonnee.obstacle, 'composition à définir');
+  magasin.remplacer(e);
+  aDate(S.mercredi, () => feuille.ouvrirDecisions());
+  const d = ouverts()[0];
+  const carte = classes(d, 'dec-carte').find((c) => c.dataset.genre === 'point' && /allergènes à confirmer/.test(c.textContent));
+  assert.ok(carte);
+  assert.match(carte.textContent, /Composition à définir : tant que ce composant n'est ni un produit simple ni une préparation maison/);
+  assert.equal(boutons(carte).length, 1);
+  parTexte(carte, /^Définir la composition$/).click();
+  assert.ok(ouverts().some((x) => new RegExp(`Modifier ${e.composants[id].nom}`).test(x.textContent)), 'ouvre la modification du type et de la recette');
+  parTexte(d, /^OK$/).click(); // ferme la feuille (libère son verrou) avant le nettoyage
+  nettoyer();
+});
+
+test('allergènes : le panneau dit pourquoi la liste ne compte pas, et Enregistrer le redit au lieu de se taire', async () => {
+  nettoyer();
+  const { e, id } = avecAllergenesSansComposition();
+  magasin.remplacer(e);
+  const { dialogAllergenes } = await import('../app/js/ui/vue-composant.js');
+  dialogAllergenes(magasin.etat().composants[id]);
+  const d = ouverts().at(-1);
+  assert.match(d.textContent, /Ici, valider ne suffit pas\. Composition à définir/);
+  await d.enfants[0].declencher('submit');
+  assert.match(messagesAffiches(), /Liste enregistrée, mais elle reste « à confirmer ». Composition à définir/);
+  nettoyer();
 });
 
 test('compte unique : decisionsDuJour = les cartes datées du jour, texteDecisions dit « décision(s) à prendre »', () => {

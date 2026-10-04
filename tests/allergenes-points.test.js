@@ -47,7 +47,7 @@ test('statutAllergenes : validé seulement avec base restaurant ; générique et
   assert.equal(allergenes.statutAllergenes(e, composantVideTest()).statut, 'a_confirmer');
   modifierComposant(e, prep, { recetteId: recetteValidee(e, J.RECETTE_TEST) }, h());
   assert.equal(allergenes.statutAllergenes(e, e.composants[prep]).statut, 'valide');
-  assert.deepEqual(Object.keys(allergenes).sort(), ['alertesAllergenes', 'statutAllergenes']);
+  assert.deepEqual(Object.keys(allergenes).sort(), ['alertesAllergenes', 'obstacleValidationAllergenes', 'statutAllergenes']);
 });
 const composantVideTest = () => ({ type: 'produit_simple', allergenes: { statut: 'a_confirmer', liste: [] } });
 

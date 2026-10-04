@@ -14,7 +14,7 @@ import { ouvrirProposition, ouvrirValidation, texteFourchette } from './feuille-
 import { qteNoeuds, quantite } from './format.js';
 import { panneau } from './panneau.js';
 import { dialogDecider, dialogPlanifier } from './taches.js';
-import { dialogChoisirSauce } from './vue-composant.js';
+import { dialogAllergenes, dialogChoisirSauce, dialogModifier, texteObstacleAllergenes } from './vue-composant.js';
 
 const ETIQUETTE_POINT = {
   allergenes: 'Allergènes à confirmer', conservation: 'Conservation à confirmer', composant_inconnu: 'À classer',
@@ -79,6 +79,22 @@ function carte(c, fermer) {
       etiquette = ETIQUETTE_POINT[c.type] ?? 'À confirmer';
       titre = c.texte;
       const href = c.composantId ? `#/fiche/${encodeURIComponent(c.composantId)}` : c.date ? `#/semaine/${c.date}` : '#/reglages';
+      if (c.type === 'allergenes' && c.composantId && etatCourant().composants[c.composantId]) {
+        // Valider la liste ne règle rien quand la composition manque : l'action proposée est celle qui règle vraiment.
+        const composant = () => etatCourant().composants[c.composantId];
+        const fiche = versLien(`#/fiche/${encodeURIComponent(c.composantId)}`, 'Ouvrir la fiche');
+        if (c.obstacle === 'composition à définir') {
+          detail = texteObstacleAllergenes(c.obstacle);
+          actions = [principal('Définir la composition', () => dialogModifier(composant()), { 'aria-label': `Définir la composition : ${composant().nom}` }), fiche];
+        } else if (c.obstacle) {
+          detail = texteObstacleAllergenes(c.obstacle);
+          actions = [h('a', { href, classe: 'btn dec-btn btn-decision', onClick: fermer }, 'Ouvrir la fiche'),
+            secondaire('Renseigner les allergènes', () => dialogAllergenes(composant()), { 'aria-label': `Renseigner les allergènes : ${composant().nom}` })];
+        } else {
+          actions = [principal('Renseigner les allergènes', () => dialogAllergenes(composant()), { 'aria-label': `Renseigner les allergènes : ${composant().nom}` }), fiche];
+        }
+        break;
+      }
       actions = [h('a', { href, classe: 'btn dec-btn btn-decision', onClick: fermer }, 'Ouvrir')];
       break;
     }

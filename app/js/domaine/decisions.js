@@ -3,6 +3,7 @@
 // valeurs à valider). Une quantité absente n'est JAMAIS une décision : grammage, prévision manquante et composant à
 // préciser (points de chiffrage) n'y figurent pas. Pur : ni DOM ni heure courante.
 
+import { obstacleValidationAllergenes } from './allergenes.js';
 import { calculerComposant } from './calcul.js';
 import { propositionsApprentissage } from './apprentissage.js';
 import { ajouterJours, jourSemaine, lundiDe } from './dates.js';
@@ -33,7 +34,7 @@ function datesDe(aujourd) {
  * - avance_hors_regle : productionId, composantId, nom, dateService, jours, limiteDepassee
  * - sauce : composantId, nom, date
  * - repartition : ficheId, numero, date, couverts
- * - point (autre point « à confirmer » sans quantité) : type, texte, composantId?, ficheId?, date?
+ * - point (autre point « à confirmer » sans quantité) : type, texte, composantId?, ficheId?, date?, obstacle? (allergènes : ce qui empêche la validation)
  * - apprentissage : proposition (de `propositionsApprentissage`)
  * - valeur : valeur (de `valeursAValider`)
  * @returns {{total:number, cartes:object[]}}
@@ -85,7 +86,10 @@ export function decisionsDe(etat, aujourd) {
         const id = `point:${pt.type}:${pt.composantId ?? pt.ficheId}:${date}`;
         if (vus.has(id)) continue;
         vus.add(id);
-        cartes.push({ id, genre: 'point', type: pt.type, texte: pt.texte, composantId: pt.composantId ?? null, ficheId: pt.ficheId ?? null, date });
+        const carte = { id, genre: 'point', type: pt.type, texte: pt.texte, composantId: pt.composantId ?? null, ficheId: pt.ficheId ?? null, date };
+        // Allergènes : dire pourquoi valider la liste ne suffirait pas (composition ou recette), sinon la liste seule suffit.
+        if (pt.type === 'allergenes') carte.obstacle = obstacleValidationAllergenes(etat, etat.composants[pt.composantId]);
+        cartes.push(carte);
       }
     }
   }
