@@ -369,6 +369,35 @@ test('choisir la sauce : pour un risotto, le safran est habituel et la tomate es
   dialogue.close();
 });
 
+test('choisir la sauce : pour un plat au poisson ou au saumon, les sauces de poisson d\'abord, avant pesto et arrabbiata, sans présélection', () => {
+  for (const plat of ['Penne au saumon', 'Risotto, filet de cabillaud', 'Tagliatelles et poisson du jour']) {
+    const e = etatVide();
+    definirMenu(e, S.lundi, 1, plat, h());
+    const sauce = sauceDe(e);
+    assert.ok(sauce, `${plat} : une sauce à confirmer`);
+    magasin.remplacer(e);
+    vueComposant.dialogChoisirSauce(magasin.etat().composants[sauce.id]);
+    const [dialogue] = panneauxOuverts(dom.corps);
+    const noms = dialogue.tous((x) => x.balise === 'label' && x.className === 'case').map((l) => l.textContent);
+    assert.equal(noms.length, SAUCES.length, 'toutes les sauces restent accessibles');
+    for (const nom of ['crème et fond de poisson', 'beurre blanc', 'sauce à la crème']) {
+      assert.ok(noms.indexOf(nom) >= 0 && noms.indexOf(nom) < noms.indexOf('pesto'), `${plat} : « ${nom} » avant le pesto`);
+      assert.ok(noms.indexOf(nom) < noms.indexOf('sauce arrabbiata'), `${plat} : « ${nom} » avant l'arrabbiata`);
+    }
+    assert.equal(noms[0], 'crème et fond de poisson', 'la première proposition est une sauce de poisson');
+    assert.equal(dialogue.tous((x) => x.balise === 'input' && x.attributs.type === 'radio').some((r) => r.checked), false);
+    dialogue.close();
+  }
+  // Un plat sans poisson garde l'ordre des pâtes : la tomate d'abord.
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'Penne aux courgettes', h());
+  magasin.remplacer(e);
+  vueComposant.dialogChoisirSauce(magasin.etat().composants[sauceDe(e).id]);
+  const [dialogue] = panneauxOuverts(dom.corps);
+  assert.equal(dialogue.tous((x) => x.balise === 'label' && x.className === 'case')[0].textContent, 'sauce tomate');
+  dialogue.close();
+});
+
 test('style : le bloc du lot est en fin de feuille, cibles de 44 px, mouvement réduit', () => {
   const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
   const i = css.indexOf('Lot Production');

@@ -92,9 +92,16 @@ const SAUCES_RISOTTO = ['safran', 'champignons', 'gorgonzola', 'bisque', 'creme_
 /** Le plat décrit-il un risotto ? (nom d'origine « base de risotto à confirmer » ou intitulé du menu) sinon des pâtes. */
 const estRisotto = (c, intitule) => /risotto/.test(normaliser(`${c.nom} ${typeof c.implicite === 'string' ? c.implicite : ''} ${intitule}`));
 
+// Plat au poisson : ses sauces d'abord (clés du vocabulaire existant), avant celles des pâtes ou du risotto.
+const SAUCES_POISSON = ['creme_fumet', 'beurre_blanc', 'creme', 'meuniere', 'tartare'];
+const MOTS_POISSON = /\b(poissons?|saumons?|cabillauds?|colins?|thons?|lottes?|merlus?|truites?|dorades?|soles?|lieu|merlans?|fletans?|perches?|ombles?|sandres?|brochets?)\b/;
+/** Le plat parle-t-il d'un poisson ? (nom du composant, sauce implicite d'origine ou intitulé du menu). */
+const estPoisson = (c, intitule) => MOTS_POISSON.test(normaliser(`${c.nom} ${typeof c.implicite === 'string' ? c.implicite : ''} ${intitule}`));
+
 /** { habituelles, autres } : les sauces du vocabulaire qui vont avec ce plat, puis toutes les autres, chacune une seule fois. */
 export function saucesPourPlat(c, intitule = '') {
-  const cles = estRisotto(c, intitule) ? SAUCES_RISOTTO : SAUCES_PATES;
+  const deBase = estRisotto(c, intitule) ? SAUCES_RISOTTO : SAUCES_PATES;
+  const cles = estPoisson(c, intitule) ? [...new Set([...SAUCES_POISSON, ...deBase])] : deBase;
   const habituelles = cles.map((cle) => SAUCES.find((x) => x.cle === cle)).filter(Boolean);
   return { habituelles, autres: SAUCES.filter((x) => !habituelles.includes(x)) };
 }
