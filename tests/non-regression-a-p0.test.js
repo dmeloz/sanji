@@ -31,7 +31,7 @@ before(async () => {
     tableau: await import('../app/js/ui/vue-tableau.js'),
     menus: await import('../app/js/ui/vue-menus.js'),
     detail: await import('../app/js/ui/vue-detail.js'),
-    jour: await import('../app/js/ui/vue-jour.js'),
+    jour: await import('../app/js/ui/vue-production.js'),
     composant: await import('../app/js/ui/vue-composant.js'),
     produits: await import('../app/js/ui/vue-produits.js'),
   };

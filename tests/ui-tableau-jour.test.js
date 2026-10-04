@@ -28,7 +28,7 @@ before(async () => {
     tableau: await import('../app/js/ui/vue-tableau.js'),
     menus: await import('../app/js/ui/vue-menus.js'),
     detail: await import('../app/js/ui/vue-detail.js'),
-    jour: await import('../app/js/ui/vue-jour.js'),
+    jour: await import('../app/js/ui/vue-production.js'),
     composant: await import('../app/js/ui/vue-composant.js'),
     produits: await import('../app/js/ui/vue-produits.js'),
   };
@@ -181,7 +181,7 @@ test('Jour : barre de jours horizontale, en-tête minimal (date, couverts, jauge
   assert.equal(classes(noeud, 'jour-puce-actif').length, 1);
   assert.match(classes(noeud, 'jour-tete')[0].textContent, /Lundi 5 octobre/);
   assert.match(classes(noeud, 'jour-tete')[0].textContent, /\d+ couverts/);
-  assert.match(classes(noeud, 'jour-tete')[0].textContent, /\d sur \d fait/);
+  assert.match(classes(noeud, 'jour-tete')[0].textContent, /\d \/ \d faites/);
   const menus = classes(noeud, 'jour-menu');
   assert.equal(menus.length, 3, 'deux menus et un banquet');
   for (const a of menus) assert.equal(a.attributs.href, `#/semaine/${S.lundi}`);
@@ -236,7 +236,7 @@ test('Jour : une tâche faite = case cochée, nom accessible « Marquer non fait
   assert.equal(caseFaite.balise, 'button');
   assert.equal(caseFaite.attributs['aria-checked'], 'true');
   assert.match(caseFaite.textContent, /Marquer non fait : ELEMENT_FAIT_TEST/);
-  assert.match(classes(ligneFaite, 'mep-meta')[0].textContent, /fait/, 'l\'état est dit en texte');
+  assert.ok(classes(ligneFaite, 'mep-meta').some((m) => /fait/.test(m.textContent)), 'l\'état est dit en texte');
   assert.equal(classes(ligneFaite, 'mep-qte').length, 1, 'quantité réelle affichée');
   assert.equal(classes(bloc2, 'case-fait').filter((c) => c.attributs['aria-checked'] === 'true').length, 1);
 });
