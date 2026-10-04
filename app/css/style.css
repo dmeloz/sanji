@@ -817,3 +817,31 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .mep-ligne.mep-fait .mep-nom { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--texte-doux); }
 .mep-ligne.mep-fait .mep-qte { color: var(--texte-doux); }
 .mep-ligne.mep-fait .mep-meta { color: var(--texte-doux); }
+
+/* ===== Fiche technique (refonte 1, #/fiche/<id>) ===== */
+.vue-fiche { display: grid; gap: 12px; }
+.fiche-retour { display: inline-flex; align-items: center; gap: 2px; min-height: var(--cible); margin-left: -6px; color: var(--action-fonce); font-size: var(--t0); text-decoration: none; justify-self: start; }
+.fiche-entete { display: grid; gap: 6px; }
+.fiche-etiquettes { display: flex; flex-wrap: wrap; gap: 6px; }
+.fiche-quantite { display: grid; gap: 10px; padding: 16px; border-radius: var(--r-carte); background: var(--encre); color: var(--sur-encre); }
+.fiche-legende { font-size: var(--t-legende); color: var(--sur-encre); overflow-wrap: anywhere; }
+.fiche-qte-grande { font-family: var(--police-qte); font-size: var(--t-qte-grande); font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.fiche-qte-grande small { font-family: var(--police); font-size: var(--t-legende); font-weight: 400; }
+.fiche-qte-inconnue { font-size: var(--t-section); }
+.fiche-repartition { display: grid; gap: 6px; padding-top: 8px; border-top: 1px solid var(--sur-encre); }
+.fiche-repartition li { display: flex; align-items: center; gap: 10px; min-height: 28px; font-size: var(--t-corps); }
+.fiche-rep-nom { flex: none; min-width: 90px; }
+.fiche-rep-nom small { font-size: var(--t-legende); }
+.fiche-jauge { flex: 1; height: 6px; border-radius: 3px; background: var(--bordure-forte); overflow: hidden; }
+.fiche-jauge > span { display: block; height: 6px; background: var(--sur-encre); }
+.fiche-qte { font-family: var(--police-qte); font-size: var(--t-qte); font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; }
+.fiche-bloc { display: grid; gap: 8px; }
+.fiche-titre-bloc { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); }
+.fiche-ligne { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fiche-ingredients li { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 42px; border-bottom: 1px solid var(--bordure); }
+.fiche-ingredients li:last-child { border-bottom: 0; }
+.fiche-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.fiche-actions .btn { flex: 1 1 140px; min-height: 52px; border-radius: 14px; font-size: var(--t0); font-weight: 600; text-decoration: none; }
+.fiche-actions .fiche-poste { flex: 2 1 200px; }
+.fiche-reglages > :not(summary) { margin-top: 12px; }
+@media (prefers-reduced-motion: reduce) { .fiche-actions .btn:active { transform: none; } }
