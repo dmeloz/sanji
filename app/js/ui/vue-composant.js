@@ -7,7 +7,7 @@ import { statutAllergenes } from '../domaine/allergenes.js';
 import { chercherBase } from '../domaine/base.js';
 import { calculerComposant } from '../domaine/calcul.js';
 import { libelleJour } from '../domaine/dates.js';
-import { estSauceAConfirmer, lireMemoire } from '../domaine/etat.js';
+import { estSauceAConfirmer, lireMemoire, normaliser } from '../domaine/etat.js';
 import { SAUCES } from '../domaine/vocabulaire-plats.js';
 import { etapesComposant } from '../domaine/planification.js';
 import { cleStandardDe, valeurPour } from '../domaine/validation.js';
@@ -19,7 +19,7 @@ import { agir, agirStrict, aujourdhui, etat as etatCourant } from '../magasin.js
 import { champs } from './champs.js';
 import { ouvrirValidation } from './feuille-validation.js';
 import { h } from './dom.js';
-import { bouton, ligneVide, lien, pastille } from './elements.js';
+import { bouton, ligneVide, lien, pastille, repliable } from './elements.js';
 import {
   coefficientDepuis, formaterNombre, libelleCoefficient, milieu, modeDepuisCoefficient, pluriel, quantite, quantiteNoeuds,
 } from './format.js';
@@ -84,22 +84,54 @@ function dialogMelange(c) {
 
 // ------------------------------------------------------------------ choisir la sauce
 
+// Sauces habituelles selon la nature du plat (clés du vocabulaire existant `SAUCES`) : proposées d'abord, les autres sont
+// repliées sous « Autres sauces ». Un classement d'affichage, jamais une décision : rien n'est présélectionné.
+const SAUCES_PATES = ['tomate', 'arrabbiata', 'pesto', 'champignons', 'gorgonzola', 'creme', 'carbonara', 'amatriciana', 'bolognaise', 'creme_fumet', 'fruits_de_mer_tomate'];
+const SAUCES_RISOTTO = ['safran', 'champignons', 'gorgonzola', 'bisque', 'creme_fumet', 'pesto'];
+
+/** Le plat décrit-il un risotto ? (nom d'origine « base de risotto à confirmer » ou intitulé du menu) sinon des pâtes. */
+const estRisotto = (c, intitule) => /risotto/.test(normaliser(`${c.nom} ${typeof c.implicite === 'string' ? c.implicite : ''} ${intitule}`));
+
+/** { habituelles, autres } : les sauces du vocabulaire qui vont avec ce plat, puis toutes les autres, chacune une seule fois. */
+export function saucesPourPlat(c, intitule = '') {
+  const cles = estRisotto(c, intitule) ? SAUCES_RISOTTO : SAUCES_PATES;
+  const habituelles = cles.map((cle) => SAUCES.find((x) => x.cle === cle)).filter(Boolean);
+  return { habituelles, autres: SAUCES.filter((x) => !habituelles.includes(x)) };
+}
+
+let compteurSauces = 0;
+
 /**
- * Sauce implicite « à confirmer » : le chef choisit parmi les sauces du vocabulaire (aucune présélectionnée : la crème
- * n'est jamais le défaut) ou tape la sienne. Valider renomme le composant ; la saisie libre prime sur la liste.
+ * Sauce implicite « à confirmer » : le titre dit le plat, le jour et le menu ; le chef choisit d'abord parmi les sauces qui
+ * vont avec le plat, puis éventuellement parmi « Autres sauces » (repliées), ou tape la sienne. Aucune sauce n'est
+ * présélectionnée (la crème n'est jamais le défaut). Valider renomme le composant ; la saisie libre prime sur la liste.
  */
 export function dialogChoisirSauce(c) {
-  const f = champs([
-    { cle: 'choix', type: 'radio', libelle: 'Sauces possibles', valeur: null, options: SAUCES.map((s) => [s.nom, s.nom]) },
-    { cle: 'libre', type: 'texte', libelle: 'Une autre sauce', valeur: '', placeholder: 'nom de la sauce' },
-  ]);
+  const intitule = String(etatCourant().jours?.[c.date]?.menus?.[c.menu]?.intitule ?? '').trim();
+  const { habituelles, autres } = saucesPourPlat(c, intitule);
+  compteurSauces += 1;
+  const groupe = `choix-sauce-${compteurSauces}`;
+  const radios = [];
+  const ligne = (sauce, i) => {
+    const r = h('input', { id: `${groupe}-${i}`, type: 'radio', name: groupe });
+    r.checked = false;
+    radios.push([r, sauce.nom]);
+    return h('label', { classe: 'case', pour: `${groupe}-${i}` }, r, h('span', null, sauce.nom));
+  };
+  const f = champs([{ cle: 'libre', type: 'texte', libelle: 'Ou tapez la sauce', valeur: '', placeholder: 'nom de la sauce' }]);
+  const titreDuPlat = [intitule || c.nom, c.date ? libelleJour(c.date) : null, c.menu ? `menu ${c.menu}` : null].filter(Boolean).join(', ');
   panneau({
-    titre: `Choisir la sauce : ${c.nom}`,
-    corps: [h('p', { classe: 'aide' }, 'Rien n\'est choisi à votre place : cochez une sauce ou tapez la vôtre.'), ...f.noeuds],
+    titre: `Choisir la sauce : ${titreDuPlat}`,
+    corps: [
+      h('p', { classe: 'aide' }, 'Rien n\'est choisi à votre place : cochez une sauce ou tapez la vôtre.'),
+      h('fieldset', { classe: 'champ' }, h('legend', null, 'Sauces qui vont avec ce plat'), habituelles.map((x, i) => ligne(x, i))),
+      repliable('Autres sauces', false, h('fieldset', { classe: 'champ' }, h('legend', { classe: 'sr' }, 'Autres sauces'),
+        autres.map((x, i) => ligne(x, habituelles.length + i)))),
+      ...f.noeuds],
     libelleEnregistrer: 'Valider la sauce',
     surEnregistrer: () => {
       const libre = String(f.valeur('libre') ?? '').trim();
-      const nom = libre !== '' ? libre : f.valeur('choix');
+      const nom = libre !== '' ? libre : (radios.find(([r]) => r.checked)?.[1] ?? null);
       if (!nom) throw new Error('Choisissez une sauce dans la liste ou tapez son nom.');
       agirStrict((x, t) => modifierComposant(x, c.id, { nom }, t));
     },

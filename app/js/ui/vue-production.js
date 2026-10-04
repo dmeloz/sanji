@@ -50,10 +50,21 @@ function barreDeJours(date, aujourd) {
     h('a', { href: `#/production/${ajouterJours(lundi, 7)}`, classe: 'jour-puce jour-puce-fleche', 'aria-label': 'Semaine suivante' }, '›'));
 }
 
+/**
+ * « x / n faites » : les tâches décidées pour ce jour ; sans aucune tâche décidée mais avec des tâches à la liste (rien n'est
+ * encore planifié), les lignes de travail du jour, pour que le compte soit dit dès qu'il y a des tâches.
+ */
+function avancement(feuille) {
+  if (feuille.avancement.total > 0) return feuille.avancement;
+  const { service1, service2, autres, apres } = feuille.lecture;
+  const lignes = [...service1, ...service2, ...autres, ...apres].filter((l) => l.source !== 'suggestion');
+  return { faites: lignes.filter((l) => l.fait).length, total: lignes.length };
+}
+
 /** « Mardi 6 octobre · 2 / 5 faites » et l'état hors ligne, puis le titre et les couverts connus. */
 function entete(date, aujourd, feuille) {
   const { couverts, menus } = feuille.lecture;
-  const { faites, total } = feuille.avancement;
+  const { faites, total } = avancement(feuille);
   const unMenuSaisi = menus.some((m) => m.intitule !== '');
   let texteCouverts = null;
   if (couverts.total !== null) texteCouverts = pluriel(couverts.total, 'couvert', 'couverts');
@@ -69,7 +80,7 @@ function entete(date, aujourd, feuille) {
       lien(`#/semaine/${date}`, 'Prévisions →', 'jour-lien')));
 }
 
-/** Second point d'entrée vers la feuille « À décider » : même source que le bandeau d'Aujourd'hui (`decisionsDe`), rien s'il n'y a rien à décider. */
+/** Seul point d'entrée vers les décisions sur Production (la feuille « À décider » les porte toutes) : même source que le bandeau d'Aujourd'hui (`decisionsDe`), rien s'il n'y a rien à décider. */
 function accesDecisions(etat, aujourd) {
   const { total } = decisionsDe(etat, aujourd);
   if (total === 0) return null;

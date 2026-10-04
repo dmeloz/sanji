@@ -1189,3 +1189,18 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 /* ===== Lot « Décisions et comptes » (audit UI v56) : bouton « OK » de la feuille « À décider » ===== */
 .dec-fin { display: flex; justify-content: flex-end; margin-top: 12px; }
 .dec-ok { min-width: var(--cible); min-height: var(--cible); }
+/* ===== Lot Production, Fiche, choix de la sauce (audit v56) : montrer l'exception, pas la normalité. Jetons du socle seulement. ===== */
+/* Nom de la ligne : un bouton (toucher = ouvrir les actions), suivi de « ⋯ » ; cibles de 44 px. */
+.prod-nom-ligne { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.prod-nom { flex: 1 1 auto; min-width: 0; min-height: var(--cible); padding: 0; background: transparent; border: 0; font: inherit; font-weight: 600; text-align: left; color: var(--texte); cursor: pointer; overflow-wrap: anywhere; }
+.prod-nom:focus-visible, .prod-plus:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.prod-plus { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; min-width: var(--cible); min-height: var(--cible); padding: 0; background: transparent; border: 0; border-radius: 8px; font: inherit; font-size: 1.4rem; line-height: 1; color: var(--texte-moyen); cursor: pointer; }
+.prod-plus[aria-expanded="true"] { background: var(--carte-2); color: var(--texte); }
+/* Panneau des actions, replié par défaut : il se place sous la ligne, aligné sur le nom. */
+.prod-actions { margin: 0 0 8px var(--cible); }
+.prod-actions[hidden] { display: none; }
+.prod-ligne .prod-directes { margin-top: 4px; }
+.prod-ligne .prod-directes .btn { min-height: var(--cible); }
+/* Fiche : la précision de quantité reste sur la ligne de la quantité. */
+.fiche-qte-grande small { font-weight: 500; }
+@media (prefers-reduced-motion: reduce) { .prod-plus, .prod-nom { transition: none; } }

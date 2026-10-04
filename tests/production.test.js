@@ -77,30 +77,33 @@ test('en-tête : « date · x / n faites » et « hors ligne prêt » (pas de sy
   assert.match(classes(page(e), 'prod-tete')[0].textContent, /1 \/ 2 faites/);
 });
 
-test('ligne Recette : étiquette, destination menu, créneau, provenance, quantité, chevron vers la fiche', () => {
+test('ligne Recette : étiquette, créneau (le menu est dit par le titre du groupe), provenance seulement si hors ordinaire, quantité, chevron vers la fiche', () => {
   const { e, recette } = lundi();
-  const ligne = ligneDe(page(e), 'RECETTE_TEST');
+  const noeud = page(e);
+  const ligne = ligneDe(noeud, 'RECETTE_TEST');
   const etiquette = classes(ligne, 'prod-etiquette')[0];
   assert.equal(etiquette.textContent, 'Recette');
-  assert.match(classes(ligne, 'prod-etiquettes')[0].textContent, /Recette.*menu 2 · après le service de midi/);
-  assert.match(classes(ligne, 'prod-provenance')[0].textContent, /provenance : (calculé|standard de base|validé restaurant|saisi au service)/);
+  assert.match(classes(ligne, 'prod-etiquettes')[0].textContent, /Recette.*après le service de midi/);
+  assert.doesNotMatch(classes(ligne, 'prod-etiquettes')[0].textContent, /menu/, 'le titre « Menu 2 » le dit déjà');
+  assert.ok(classes(noeud, 'jour-bloc').some((b) => b.querySelector('h2').textContent.startsWith('Menu 2') && b.tous((x) => x === ligne).length));
+  for (const p of classes(ligne, 'prod-provenance')) assert.match(p.textContent, /provenance : (standard de base|inconnu)/, 'seulement l\'exception');
   assert.equal(classes(ligne, 'mep-qte').length, 1);
   const chevron = classes(ligne, 'prod-chevron')[0];
   assert.equal(chevron.attributs.href, `#/fiche/${encodeURIComponent(recette)}`);
   assert.match(chevron.attributs['aria-label'], /Ouvrir la fiche : RECETTE_TEST/);
 });
 
-test('ligne Brut : seulement nom, étiquette, créneau et quantité ; pas de destination, de provenance ni de chevron', () => {
+test('ligne Brut : seulement nom, créneau et quantité ; ni pastille « Brut », ni destination, provenance ou chevron', () => {
   const { e, brut } = lundi();
   const ligne = ligneDe(page(e), 'BRUT_TEST');
-  assert.equal(classes(ligne, 'prod-etiquette')[0].textContent, 'Brut');
+  assert.equal(classes(ligne, 'prod-etiquette').length, 0, 'l\'absence de chevron suffit à dire « produit brut »');
   const ligneEtiquettes = classes(ligne, 'prod-etiquettes')[0].textContent;
   assert.match(ligneEtiquettes, /avant le service de midi/);
   assert.doesNotMatch(ligneEtiquettes, /menu/);
   assert.equal(classes(ligne, 'prod-provenance').length, 0);
   assert.equal(classes(ligne, 'prod-chevron').length, 0);
   assert.equal(classes(ligne, 'mep-qte').length, 1);
-  // La fiche du produit reste accessible, repliée sous « Actions ».
+  // La fiche du produit reste accessible, derrière « ⋯ » (Actions : <plat>).
   const hrefs = ligne.tous((x) => x.balise === 'a').map((a) => a.attributs.href);
   assert.deepEqual(hrefs, [`#/fiche/${encodeURIComponent(brut)}`]);
 });

@@ -137,7 +137,8 @@ test('vue Jour : le riz à J-2 porte l\'avertissement en texte et sa provenance 
   assert.match(avert[0].textContent, /^Se garde 1 jour · avance de 2 jours standard de base$/);
   const aide = noeud.tous((x) => classes(x).includes('mep-aide-froid'));
   assert.equal(aide.length, 1);
-  assert.match(aide[0].textContent, /2 h \(de 50 à 10 °C\) au plus/);
+  assert.match(aide[0].textContent, /^Refroidir vite après la cuisson : 2 h au plus\.$/, 'une ligne courte : le détail des températures reste dans la fiche');
+  assert.doesNotMatch(aide[0].textContent, /°C/);
   planifier(e, prodDe(e, 'riz'), S.mercredi, 'avant_midi', h());
   magasin.remplacer(e);
   assert.doesNotMatch(vueJour.rendre(magasin.etat(), S.mercredi).textContent, /Se garde 1 jour/);

@@ -46,6 +46,17 @@ export function repartition(c, calc) {
   });
 }
 
+/**
+ * Précision écrite après la quantité. Une quantité en portions dit déjà « portions » : « 25 portions portions, composition à
+ * définir » (bug B3) devient « 25 portions · composition à définir ».
+ */
+export function precisionQuantite(calc) {
+  const t = String(calc.libelleQuantite ?? '');
+  if (calc.uniteTravail !== 'portion' || calc.statut !== 'CALCULE') return t;
+  const reste = t.replace(/^portions?\s*,\s*/i, '');
+  return reste === t ? t : `· ${reste}`;
+}
+
 const icone = (d) => svg('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'aria-hidden': 'true' },
   svg('path', { d }));
 
@@ -53,22 +64,30 @@ function sectionQuantite(etat, c, calc) {
   const p = principaleDuComposant(etat, c.id);
   const jourMeme = (p?.jourDecide ?? c.date) === aujourdhui();
   const lignes = repartition(c, calc);
+  // Une barre de répartition n'a de sens qu'à partir de deux destinations : seule, elle serait pleine.
+  const avecBarre = lignes.length >= 2;
   return h('section', { classe: 'fiche-quantite' },
     h('p', { classe: 'fiche-legende' }, `${jourMeme ? 'À produire aujourd\'hui' : 'À produire'} · pour ${libelleJour(c.date)}`),
     calc.statut === 'CALCULE'
-      ? h('p', { classe: 'fiche-qte-grande' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail), h('small', null, ` ${calc.libelleQuantite}`))
+      ? h('p', { classe: 'fiche-qte-grande' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail), h('small', null, ` ${precisionQuantite(calc)}`))
       : h('p', { classe: 'fiche-qte-grande fiche-qte-inconnue' }, 'quantité inconnue', h('small', null, ` ${calc.libelleQuantite}`)),
     lignes.length === 0 ? h('p', { classe: 'fiche-legende' }, 'Aucune répartition : aucune portion saisie pour ce menu.')
       : h('ul', { classe: 'fiche-repartition' }, lignes.map((l) => h('li', null,
         h('span', { classe: 'fiche-rep-nom' }, l.libelle, h('small', null, ` ${l.certitude}`)),
-        l.part !== null ? h('span', { classe: 'fiche-jauge', 'aria-hidden': 'true' }, h('span', { style: `width:${Math.round(l.ratio * 100)}%` })) : null,
+        avecBarre && l.part !== null ? h('span', { classe: 'fiche-jauge', 'aria-hidden': 'true' }, h('span', { style: `width:${Math.round(l.ratio * 100)}%` })) : null,
         h('span', { classe: 'fiche-qte' }, l.part !== null ? quantiteNoeuds(l.part, calc.uniteTravail) : qteNoeuds(`${l.portions} portions`))))),
     h('p', { classe: 'fiche-legende' }, `Calcul : ${calc.formule}`));
 }
 
-/** « Portions : 55 portions (hors groupes 40 ; groupes confirmés 10 ; groupes provisoires 5) » : le détail de l'ancienne vue composant. */
+/**
+ * « Portions : 55 portions (hors groupes 40 ; groupes confirmés 10 ; groupes provisoires 5) » : le détail de l'ancienne vue
+ * composant, sans énumérer les groupes à 0 (une absence n'est pas une information).
+ */
 function detailPortions(p) {
-  return `Portions : ${pluriel(p.total, 'portion')} (hors groupes ${p.prevision}${p.previsionManquante ? ', non saisie' : ''} ; groupes confirmés ${p.groupesConfirmes} ; groupes provisoires ${p.groupesProvisoires})`;
+  const parties = [`hors groupes ${p.prevision}${p.previsionManquante ? ', non saisie' : ''}`];
+  if (p.groupesConfirmes > 0) parties.push(`groupes confirmés ${p.groupesConfirmes}`);
+  if (p.groupesProvisoires > 0) parties.push(`groupes provisoires ${p.groupesProvisoires}`);
+  return `Portions : ${pluriel(p.total, 'portion')} (${parties.join(' ; ')})`;
 }
 
 /** « ven. 2 » : jour abrégé et numéro. */
@@ -148,7 +167,9 @@ export function rendre(etat, id) {
   const sections = [
     h('a', { href: `#/production/${c.date}`, classe: 'fiche-retour' }, icone('M15 6l-6 6 6 6'), 'Production'),
     h('header', { classe: 'fiche-entete' }, h('h1', { classe: 'page-titre' }, c.nom),
-      h('div', { classe: 'fiche-etiquettes' }, pastille(etiquetteType(c), 'vert'), pastille(c.attribue ? 'attribué au poste' : 'non attribué', c.attribue ? 'gris' : 'ambre'))),
+      h('div', { classe: 'fiche-etiquettes' }, pastille(etiquetteType(c), c.type === 'produit_simple' ? 'gris' : 'vert'),
+        // Montrer l'exception : « attribué au poste » est la normale et ne s'écrit pas.
+        c.attribue ? null : pastille('non attribué', 'ambre'))),
     sectionQuantite(etat, c, calc),
     sectionProvenance(c, calc),
     sectionIngredients(etat, c, calc),
