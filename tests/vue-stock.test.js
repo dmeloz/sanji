@@ -114,7 +114,7 @@ test('restes : aujourd\'hui est le jour par défaut quand il est dans la semaine
 test('restes : la quantité prévue vient du calcul et se lit en mono ; une quantité absente n\'est ni une alerte ni une décision', () => {
   mondeRestes();
   const page = stock.rendre(magasin.etat(), S.lundi, 'restes');
-  assert.match(page.textContent, /prévu 2 400 g/);
+  assert.match(page.textContent.replace(/[\u202f\u00a0]/g, ' '), /prévu 2400 g/, 'quatre chiffres : pas de groupement des milliers');
   assert.ok(parClasse(page, 'stock-qte').length > 0);
   assert.equal(page.tous((x) => x.attributs.role === 'alert').length, 0);
   magasin.remplacer(etatVide());
@@ -139,7 +139,7 @@ test('dlc : productions faites regroupées Aujourd\'hui, Demain, Plus tard, avec
   assert.match(page.textContent, /ELEMENT_DLC_0_TEST/);
   assert.match(page.textContent, /produit le jeudi 1er octobre/);
   assert.match(parClasse(page, 'stock-groupe')[2].textContent, /pour le service du vendredi 9 octobre/);
-  assert.match(page.textContent, /2 400 g/);
+  assert.match(page.textContent.replace(/[\u202f\u00a0]/g, ' '), /2400 g/);
   assert.doesNotMatch(page.textContent, /en stock|lot |frigo|chambre froide|température/i);
 });
 
@@ -182,8 +182,11 @@ test('achats : cartes par fournisseur, « Imprimer la liste », « vérifié dis
   assert.equal(groupes.length, 1);
   assert.match(groupes[0].textContent, /Fournisseur non précisé/);
   const resume = parClasse(page, 'produit-resume')[0];
-  assert.match(resume.textContent, /besoin 2 400 g · vérifié disponible non vérifié/);
-  assert.match(resume.textContent, /proposé après vérification/);
+  assert.match(resume.textContent, /besoin 2 400 g · disponible : à vérifier/);
+  assert.doesNotMatch(resume.textContent, /non vérifié|proposé après vérification/);
+  const chiffre = parClasse(resume, 'produit-chiffre')[0].textContent.replace(/[\u202f\u00a0]/g, ' ');
+  assert.equal(chiffre, '2400 g', 'la quantité proposée (besoin avec marge) remplace le « – »');
+  assert.match(resume.textContent, /proposé · standard de base/);
   assert.match(resume.textContent, /standard de base/);
   assert.ok(parClasse(resume, 'produit-chiffre').length === 1);
   assert.equal(page.querySelector('h1').textContent, 'Stock', 'un seul titre de page : celui de l\'écran Stock');
@@ -199,8 +202,9 @@ test('achats : après contrôle d\'une quantité vérifiée, la quantité propos
   magasin.remplacer(e);
   const page = stock.rendre(magasin.etat(), S.lundi, 'achats');
   const resume = parClasse(page, 'produit-resume')[0];
-  assert.match(resume.textContent, /vérifié disponible 400 g/);
-  assert.match(resume.textContent, /proposé$|proposé/);
+  assert.match(resume.textContent.replace(/[\u202f\u00a0]/g, ' '), /vérifié disponible : 400 g/);
+  assert.match(resume.textContent, /proposé · standard de base/);
+  assert.equal(parClasse(resume, 'produit-chiffre')[0].textContent.replace(/[\u202f\u00a0]/g, ' '), '2000 g');
   assert.match(parClasse(resume, 'produit-chiffre')[0].textContent, /g$/);
 });
 

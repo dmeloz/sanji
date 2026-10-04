@@ -10,7 +10,7 @@ import { libelle } from '../domaine/statuts.js';
 import { h } from './dom.js';
 import { ecranAllumePossible } from './ecran-allume.js';
 import { bouton, imprimer, encadre, ligneVide, lien, pastille, repliable } from './elements.js';
-import { formaterHeure, quantite } from './format.js';
+import { formaterHeure, phraseConservation, qteNoeuds, quantite } from './format.js';
 import {
   actionsTache, carteTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, defaireEnUnToucher, noeudEvaluation, pastilleCreneau, texteCharge,
 } from './taches.js';
@@ -102,7 +102,7 @@ function badgesEtMeta(l, ev, { groupe }) {
 function avertissementConservation(ev) {
   if (!ev || ev.conservation !== 'referentiel' || !ev.repere?.depasse) return null;
   return h('p', { classe: 'mep-conservation' },
-    h('strong', null, 'Attention : '), `${ev.repere.texte}, avance de ${ev.jours} jours. `,
+    h('strong', null, phraseConservation(ev.repere.texte, ev.jours)), ' ',
     h('span', { classe: 'mep-provenance' }, ev.repere.provenance));
 }
 
@@ -180,7 +180,7 @@ function ligneTache(etat, ligneBrute, date, options) {
         badges.length > 0 || autres.length > 0 ? h('p', { classe: 'mep-meta' }, badges, autres.join(' · ')) : null,
         avertissementConservation(ev)),
       h('div', { classe: 'mep-quantite' },
-        q ? h('strong', { classe: 'mep-qte feutre' }, q) : (l.genre === 'preparatoire' ? null : h('span', { classe: 'mep-neutre' }, 'quantité à compléter')),
+        q ? h('strong', { classe: 'mep-qte' }, qteNoeuds(q)) : (l.genre === 'preparatoire' ? null : h('span', { classe: 'mep-neutre' }, 'quantité à compléter')),
         q && poids ? h('span', { classe: 'mep-poids' }, poids) : null),
       brut ? h('span', { classe: 'prod-chevron-vide', 'aria-hidden': 'true' })
         : h('a', {

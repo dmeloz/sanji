@@ -17,7 +17,7 @@ import { h } from './dom.js';
 import { bouton, lien, pastille, repliable } from './elements.js';
 import { ouvrirFiche } from './fiches.js';
 import { libelleHorsLigne } from './horsligne.js';
-import { quantite } from './format.js';
+import { qteNoeuds, quantite } from './format.js';
 import {
   actionsTache, defaireEnUnToucher, dialogCorriger, dialogPlanifier, faireEnUnToucher, ligneProduction, noeudEvaluation,
 } from './taches.js';
@@ -171,7 +171,7 @@ function ficheDuJour(etat, f, alertes) {
   return h('li', { classe: 'sem-fiche' },
     h('div', { classe: 'sem-ligne' },
       h('span', { classe: 'sem-fiche-titre' }, [f.numero ? `Fiche ${f.numero}` : 'Fiche', f.service, f.horaire || null].filter(Boolean).join(' · ')),
-      h('span', { classe: 'sem-qte' }, pluriel(Number(f.couverts) || 0, 'personne', 'personnes'))),
+      h('span', null, h('span', { classe: 'sem-qte' }, String(Number(f.couverts) || 0)), (Number(f.couverts) || 0) >= 2 ? ' personnes' : ' personne')),
     certitude ? h('p', { classe: 'sem-couverts' }, pastille(`répartition ${LIBELLES.CERTITUDE[certitude]}`, certitude === 'confirmee' ? 'vert' : 'gris')) : null,
     String(f.allergies ?? '').trim() ? h('p', { classe: 'sem-allergies' }, h('strong', null, 'Allergies : '), f.allergies) : null,
     aConfirmer ? h('p', null, pastille('allergènes à confirmer', 'ambre')) : null,
@@ -207,8 +207,8 @@ function texteSousTitre(etat, date, l) {
 function noeudQuantite(etat, l) {
   const p = etat.productions[l.productionId];
   if (l.genre === 'preparatoire') return null;
-  if (p?.etat === 'fait') return Number.isFinite(l.quantiteReelle) ? h('span', { classe: 'sem-qte sem-qte-ligne' }, quantite(l.quantiteReelle, l.unite)) : null;
-  if (l.cible !== null) return h('span', { classe: 'sem-qte sem-qte-ligne' }, quantite(l.cible, l.unite));
+  if (p?.etat === 'fait') return Number.isFinite(l.quantiteReelle) ? h('span', { classe: 'sem-qte sem-qte-ligne' }, qteNoeuds(quantite(l.quantiteReelle, l.unite))) : null;
+  if (l.cible !== null) return h('span', { classe: 'sem-qte sem-qte-ligne' }, qteNoeuds(quantite(l.cible, l.unite)));
   // Une quantité absente n'est ni une décision ni une alerte : une mention neutre.
   return h('span', { classe: 'sem-neutre sem-qte-absente' }, 'quantité à compléter');
 }

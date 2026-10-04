@@ -621,6 +621,13 @@ function aConsommerDe(etat, aujourd) {
   return { total: lignes.length, lignes: lignes.slice(0, A_CONSOMMER_MAX) };
 }
 
+/** Première date ouverte après `date` (le dimanche est fermé : le lundi suivant). */
+function prochainJourOuvert(date) {
+  let d = ajouterJours(date, 1);
+  while (!estOuvert(d)) d = ajouterJours(d, 1);
+  return d;
+}
+
 /**
  * Données de l'écran Aujourd'hui : couverts des menus 1 et 2 et des fiches avec leur certitude, prochaine tâche
  * (« Maintenant »), décisions en attente (points « À confirmer » existants, sans quantité manquante), à consommer en
@@ -634,6 +641,8 @@ export function aujourdhuiDe(etat, aujourd) {
   const datesSemaine = [0, 1, 2, 3, 4, 5].map((i) => ajouterJours(lundi, i)).filter((d) => d >= aujourd);
   return {
     date: aujourd, lundi, ouvert,
+    // Jour fermé : la prochaine journée ouverte (information seule, aucun calcul de production).
+    prochainOuvert: ouvert ? null : prochainJourOuvert(aujourd),
     menus: aMenuDuJour(aujourd) ? [1, 2].map((m) => couvertsDuMenu(etat, aujourd, m)) : [],
     fiches: fichesDuJour(etat, aujourd),
     maintenant: maintenantDe(feuille),

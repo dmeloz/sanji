@@ -10,7 +10,7 @@ import { LIBELLE_ESTIMATION_A_VALIDER, libelle } from '../domaine/statuts.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { bouton, ligneVide, lien, pastille, repliable } from './elements.js';
-import { quantite } from './format.js';
+import { qteNoeuds, quantiteNoeuds } from './format.js';
 import { libelleAllergene } from './reference.js';
 import { blocReperes } from './reperes-metier.js';
 import { defaireEnUnToucher, dialogCorriger, faireEnUnToucher } from './taches.js';
@@ -56,13 +56,13 @@ function sectionQuantite(etat, c, calc) {
   return h('section', { classe: 'fiche-quantite' },
     h('p', { classe: 'fiche-legende' }, `${jourMeme ? 'À produire aujourd\'hui' : 'À produire'} · pour ${libelleJour(c.date)}`),
     calc.statut === 'CALCULE'
-      ? h('p', { classe: 'fiche-qte-grande' }, quantite(calc.quantiteTravail, calc.uniteTravail), h('small', null, ` ${calc.libelleQuantite}`))
+      ? h('p', { classe: 'fiche-qte-grande' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail), h('small', null, ` ${calc.libelleQuantite}`))
       : h('p', { classe: 'fiche-qte-grande fiche-qte-inconnue' }, 'quantité inconnue', h('small', null, ` ${calc.libelleQuantite}`)),
     lignes.length === 0 ? h('p', { classe: 'fiche-legende' }, 'Aucune répartition : aucune portion saisie pour ce menu.')
       : h('ul', { classe: 'fiche-repartition' }, lignes.map((l) => h('li', null,
         h('span', { classe: 'fiche-rep-nom' }, l.libelle, h('small', null, ` ${l.certitude}`)),
         l.part !== null ? h('span', { classe: 'fiche-jauge', 'aria-hidden': 'true' }, h('span', { style: `width:${Math.round(l.ratio * 100)}%` })) : null,
-        h('span', { classe: 'fiche-qte' }, l.part !== null ? quantite(l.part, calc.uniteTravail) : `${l.portions} portions`)))),
+        h('span', { classe: 'fiche-qte' }, l.part !== null ? quantiteNoeuds(l.part, calc.uniteTravail) : qteNoeuds(`${l.portions} portions`))))),
     h('p', { classe: 'fiche-legende' }, `Calcul : ${calc.formule}`));
 }
 
@@ -85,7 +85,7 @@ function sectionIngredients(etat, c, calc) {
   return h('section', { classe: 'carte fiche-bloc' },
     h('h2', { classe: 'fiche-titre-bloc' }, 'Ingrédients recalculés'),
     calc.ingredients
-      ? h('ul', { classe: 'fiche-ingredients' }, calc.ingredients.map((i) => h('li', null, h('span', null, i.nom), h('span', { classe: 'fiche-qte' }, quantite(i.quantite, i.unite)))))
+      ? h('ul', { classe: 'fiche-ingredients' }, calc.ingredients.map((i) => h('li', null, h('span', null, i.nom), h('span', { classe: 'fiche-qte' }, quantiteNoeuds(i.quantite, i.unite)))))
       : ligneVide(recette ? (recette.valide ? 'Recette validée, mais rendement ou quantités inutilisables.' : 'Recette liée non validée : ingrédients non calculés.')
         : 'Aucune recette liée : ingrédients non calculés.'),
     recette ? h('p', { classe: 'meta' }, `Recette : ${recette.nom}, version ${recette.version}${recette.valide ? ', validée' : ', non validée'}`) : null);

@@ -15,7 +15,7 @@ import { agir, aujourdhui } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, lien, pastille } from './elements.js';
-import { formaterHeure, pluriel, quantite } from './format.js';
+import { formaterHeure, pluriel, qteNoeuds, quantite } from './format.js';
 import { afficherMessage } from './messages.js';
 import { ligneProduction } from './taches.js';
 import * as vueProduits from './vue-produits.js';
@@ -118,7 +118,7 @@ function formulaireRestes(etat, date) {
           h('div', { classe: 'stock-reste-tete' },
             lien(`#/fiche/${encodeURIComponent(c.id)}`, c.nom, 'stock-reste-nom'),
             h('span', { classe: 'stock-legende' }, `menu ${c.menu} · ${prevu === null ? 'quantité prévue à préciser' : 'prévu '}`,
-              prevu === null ? null : h('span', { classe: 'stock-qte' }, prevu))),
+              prevu === null ? null : h('span', { classe: 'stock-qte' }, qteNoeuds(prevu)))),
           noeuds.get(`s:${c.id}`), noeuds.get(`r:${c.id}`), noeuds.get(`n:${c.id}`),
           h('p', { classe: 'aide' }, 'Le rebut n\'est pas une perte normale de parage ou de cuisson : il ne modifie aucun coefficient.')))),
     h('div', { classe: 'stock-valider' }, bouton('Enregistrer', enregistrer, 'principal')));
@@ -184,7 +184,7 @@ function carteDlc(etat, p, avecService) {
         lien(`#/fiche/${encodeURIComponent(l.composantId)}`, nom, 'stock-dlc-nom'),
         h('span', { classe: 'stock-legende' },
           `${produit ? `produit le ${libelleJour(produit)}` : 'date de production non décidée'}${avecService ? ` · pour le service du ${libelleJour(p.dateService)}` : ''}`)),
-      h('span', { classe: 'stock-qte' }, preparatoire || !Number.isFinite(p.quantiteReelle) ? 'sans quantité' : quantite(p.quantiteReelle, l.unite))),
+      h('span', { classe: 'stock-qte' }, qteNoeuds(preparatoire || !Number.isFinite(p.quantiteReelle) ? 'sans quantité' : quantite(p.quantiteReelle, l.unite)))),
     mentions.map((m) => h('p', { classe: m.alerte ? 'stock-mention stock-mention-alerte' : 'stock-mention' },
       m.alerte ? pastille('à lire', 'ambre') : null, m.alerte ? ' ' : null, m.texte)));
 }

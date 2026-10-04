@@ -6,7 +6,7 @@ import { valeurEffective } from './ajustements.js';
 import { calculerComposant, arrondirQuantite, portionsMenu } from './calcul.js';
 import { normaliser, jourOuVide } from './etat.js';
 import { familleParCle } from './savoir.js';
-import { reperesConservation, standardDeBase, texteProvenance } from './standards-base.js';
+import { reperesConservation, standardDeBase } from './standards-base.js';
 import { POINTS_CHARGE } from './statuts.js';
 
 const AVANCE_HABITUELLE = 2;
@@ -75,8 +75,8 @@ export function repereConservation(composant, etat = null) {
       const u = eff.valeur > 1 ? 'jours' : 'jour';
       return {
         jours: eff.valeur,
-        texte: `se garde ${String(eff.valeur).replace('.', ',')} ${u} (${eff.libelle})`,
-        provenance: `${eff.libelle}, à la place du standard de base`,
+        texte: `se garde ${String(eff.valeur).replace('.', ',')} ${u}`,
+        provenance: 'votre valeur',
       };
     }
   }
@@ -84,8 +84,8 @@ export function repereConservation(composant, etat = null) {
   const unite = std.valeur > 1 ? 'jours' : 'jour';
   return {
     jours: std.valeur,
-    texte: `se garde ${String(std.valeur).replace('.', ',')} ${unite} (standard de base, ${std.provenance.id})`,
-    provenance: texteProvenance(std),
+    texte: `se garde ${String(std.valeur).replace('.', ',')} ${unite}`,
+    provenance: 'standard de base',
   };
 }
 

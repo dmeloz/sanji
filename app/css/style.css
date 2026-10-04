@@ -1168,3 +1168,18 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .poste-nav .btn { min-height: 80px; font-size: 20px; font-weight: 700; border-radius: 18px; justify-content: center; text-decoration: none; }
 .poste-quitter:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .vue-poste .btn { transition: none; } .vue-poste .btn:active { transform: none; } }
+/* ===== Finition (refonte 1) : quantités, avertissement de conservation, ligne Achats, Production. Jetons du socle seulement. ===== */
+/* Séparateurs d'une quantité en chasse fixe : l'espace du milieu (milliers) et celle devant l'unité sont rendues étroites. Le texte copié reste complet. */
+.sep-milliers, .sep-unite { display: inline-block; width: 0.3em; font-size: 0; line-height: 0; }
+.qte-unite { font-size: var(--t-corps); font-weight: 500; }
+.qte-mot { font-family: var(--police); font-weight: 500; font-size: var(--t-corps); letter-spacing: 0; }
+.tache-quantite { font-family: var(--police); }
+/* Avertissement de conservation : une phrase, puis la provenance courte. */
+.mep-conservation strong, .au-attention strong { font-weight: 600; }
+/* Ligne Achats : la quantité proposée reste lisible à droite. */
+.produit-commande { text-align: right; max-width: 45%; }
+.produit-legende { overflow-wrap: anywhere; }
+/* Production : quantité de la ligne en grand, alignée à droite, unité plus petite. */
+.prod-ligne .mep-quantite { align-items: flex-end; text-align: right; }
+.prod-ligne .mep-qte { font-size: max(var(--t-qte), 20px); font-weight: 600; text-align: right; }
+.prod-ligne .mep-qte .qte-unite { font-size: var(--t-corps); }

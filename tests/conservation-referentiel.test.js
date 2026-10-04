@@ -41,8 +41,9 @@ test('repère : le riz cuit se garde 1 jour, avec sa provenance ; sans famille, 
   const e = jeudi();
   const r = repereConservation(composantDe(e, 'riz'));
   assert.equal(r.jours, 1);
-  assert.match(r.texte, /^se garde 1 jour \(standard de base, feculents\.riz\.conservation\.cuit\)$/);
-  assert.match(r.provenance, /standard de base, référentiel culinaire/);
+  assert.equal(r.texte, 'se garde 1 jour');
+  assert.equal(r.provenance, 'standard de base', 'provenance courte, sans identifiant technique');
+  assert.doesNotMatch(`${r.texte} ${r.provenance}`, /feculents|hygiene\.|\(|conservation\.cuit/);
   assert.equal(repereConservation(composantDe(e, 'carottes')).jours, 2, 'règle générale des légumes cuits');
   assert.equal(repereConservation(null), null);
   assert.equal(repereConservation({ famille: null }), null);
@@ -58,7 +59,7 @@ test('sans limite saisie : le repère remplace « conservation à confirmer » ;
   const j2 = evaluerAvance(S.mardi, S.jeudi, null, repere);
   assert.equal(j2.conservation, 'referentiel');
   assert.equal(j2.repere.depasse, true);
-  assert.ok(j2.alertes.some((a) => /avertissement de conservation : se garde 1 jour \(standard de base/.test(a)));
+  assert.ok(j2.alertes.some((a) => /avertissement de conservation : se garde 1 jour, avance de 2 jours$/.test(a)));
   assert.ok(!j2.alertes.some((a) => /conservation à confirmer|hors règle/.test(a)), 'ni « à confirmer » ni « hors règle »');
   assert.ok(j2.autorisee && j2.couvre, 'J-2 : averti, mais autorisé et couvrant (règle des 2 jours)');
   assert.equal(j2.exception, false);
@@ -133,13 +134,13 @@ test('vue Jour : le riz à J-2 porte l\'avertissement en texte et sa provenance 
   const noeud = vueJour.rendre(magasin.etat(), S.mardi);
   const avert = noeud.tous((x) => classes(x).includes('mep-conservation'));
   assert.equal(avert.length, 1);
-  assert.match(avert[0].textContent, /^Attention : se garde 1 jour \(standard de base, feculents\.riz\.conservation\.cuit\), avance de 2 jours\. standard de base, référentiel culinaire/);
+  assert.match(avert[0].textContent, /^Se garde 1 jour · avance de 2 jours standard de base$/);
   const aide = noeud.tous((x) => classes(x).includes('mep-aide-froid'));
   assert.equal(aide.length, 1);
   assert.match(aide[0].textContent, /2 h \(de 50 à 10 °C\) au plus/);
   planifier(e, prodDe(e, 'riz'), S.mercredi, 'avant_midi', h());
   magasin.remplacer(e);
-  assert.doesNotMatch(vueJour.rendre(magasin.etat(), S.mercredi).textContent, /Attention : se garde/);
+  assert.doesNotMatch(vueJour.rendre(magasin.etat(), S.mercredi).textContent, /Se garde 1 jour/);
 });
 
 // ---------------------------------------------------------------- la valeur de la propriétaire passe devant
@@ -149,14 +150,15 @@ test('repère : la valeur de la propriétaire (riz réglé à 3 jours) remplace 
   ajusterStandard(e, 'riz', 'conservation', 3, h());
   const r = repereConservation(composantDe(e, 'riz'), e);
   assert.equal(r.jours, 3);
-  assert.equal(r.texte, 'se garde 3 jours (votre valeur)');
+  assert.equal(r.texte, 'se garde 3 jours');
+  assert.equal(r.provenance, 'votre valeur');
   const ev = (jour) => evaluerAvance(jour, S.jeudi, null, r);
   assert.deepEqual(ev(S.mardi).alertes, [], 'J-2 : plus d\'avertissement « se garde 1 jour »');
   assert.equal(ev(S.mardi).repere.depasse, false);
   assert.equal(planifier(e, prodDe(e, 'riz'), S.mardi, 'avant_midi', h()).alertes.filter((a) => /conservation/.test(a)).length, 0);
   ajusterStandard(e, 'riz', 'conservation', 1.5, h());
   const court = evaluerAvance(S.mardi, S.jeudi, null, repereConservation(composantDe(e, 'riz'), e));
-  assert.ok(court.alertes.some((a) => /se garde 1,5 jours \(votre valeur\)/.test(a)));
+  assert.ok(court.alertes.some((a) => /se garde 1,5 jours/.test(a)));
   assert.equal(court.conservation, 'referentiel', 'avertit seulement : seule la limite saisie bloque');
   assert.equal(court.couvre, true);
 });
@@ -165,14 +167,15 @@ test('repère : une valeur plus courte que le standard avertit ; la règle gén�
   const e = jeudi();
   ajusterStandard(e, 'carottes', 'conservation', 1, h());
   const r = repereConservation(composantDe(e, 'carottes'), e);
-  assert.equal(r.texte, 'se garde 1 jour (votre valeur)');
+  assert.equal(r.texte, 'se garde 1 jour');
   assert.equal(evaluerAvance(S.mercredi, S.jeudi, null, r).alertes.length, 0);
-  assert.ok(evaluerAvance(S.mardi, S.jeudi, null, r).alertes.some((a) => /se garde 1 jour \(votre valeur\)/.test(a)));
+  assert.ok(evaluerAvance(S.mardi, S.jeudi, null, r).alertes.some((a) => /se garde 1 jour/.test(a)));
   const f = jeudi();
   ajusterStandard(f, 'regle:feculents_legumes_cuits', 'conservation', 1, h());
   const rg = repereConservation(composantDe(f, 'carottes'), f);
   assert.equal(rg.jours, 1);
-  assert.match(rg.texte, /\(votre valeur\)$/);
+  assert.equal(rg.texte, 'se garde 1 jour');
+  assert.equal(rg.provenance, 'votre valeur');
 });
 
 test('repère : sans état, comportement inchangé ; la limite saisie reste seule à bloquer', () => {

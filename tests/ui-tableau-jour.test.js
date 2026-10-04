@@ -327,7 +327,7 @@ test('Jour : une action préparatoire est une autre tâche ; avec un standard, l
   const prep = Object.values(e.productions).find((p) => p.genre === 'preparatoire');
   planifier(e, prep.id, S.lundi, 'avant_midi', h());
   const noeud = jour(S.lundi, e);
-  assert.match(classes(noeud, 'jour-bloc')[0].textContent, /700 g/);
+  assert.match(classes(noeud, 'jour-bloc')[0].textContent.replace(/[\u202f\u00a0]/g, ' '), /700 g/);
   assert.match(classes(noeud, 'jour-bloc')[0].textContent, /poids sec/);
   assert.ok(classes(noeud, 'jour-bloc').some((b) => b.querySelector('h2').textContent === 'Autres tâches'));
 });
