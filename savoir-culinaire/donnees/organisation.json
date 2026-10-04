@@ -1,0 +1,1770 @@
+{
+  "etiquette": "SAVOIR_CULINAIRE",
+  "theme": "organisation",
+  "titre": "Organisation, calculs et cadre du brevet",
+  "genere_le": "2026-10-04",
+  "entrees": [
+    {
+      "id": "organisation.brigade.entremetier.role",
+      "sujet": "Poste d'entremétier",
+      "type": "definition",
+      "enonce": "L'entremétier prépare surtout les garnitures de féculents et de légumes et reprend les autres tâches de la cuisine chaude ; potage, légumes, œufs et entremets en dépendent parfois comme sous-postes.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Source de vulgarisation professionnelle en allemand ; la répartition exacte varie selon la taille de la maison.",
+      "sources": [
+        {
+          "titre": "Küchenbrigade: Aufbau & Posten",
+          "organisme": "g-wie-gastro.de",
+          "url": "https://g-wie-gastro.de/mehr-zur-gastronomie/glossar/gastro-wissen-allgemein/organigramm-kueche-kuechenbrigade-aufbau/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Küche Organisation: Küchenbrigade",
+          "organisme": "g-wie-gastro.de",
+          "url": "https://g-wie-gastro.de/gastronomie-glossar/kuechenbrigade/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.brigade.saucier.limite",
+      "sujet": "Postes voisins de l'entremétier",
+      "type": "definition",
+      "enonce": "Le saucier assure plats chauds principaux, viande et poisson avec leurs sauces ; le garde-manger tient la cuisine froide : ce sont les deux postes avec lesquels l'entremétier coordonne ses cuissons et ses envois.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Organisation classique en brigade ; une petite cuisine fusionne souvent ces postes.",
+      "sources": [
+        {
+          "titre": "Küchenbrigade: Aufbau & Posten",
+          "organisme": "g-wie-gastro.de",
+          "url": "https://g-wie-gastro.de/mehr-zur-gastronomie/glossar/gastro-wissen-allgemein/organigramm-kueche-kuechenbrigade-aufbau/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.brigade.hierarchie.niveaux",
+      "sujet": "Hiérarchie de brigade",
+      "type": "definition",
+      "enonce": "Le chef de cuisine dirige, le sous-chef le seconde et le remplace, les chefs de partie puis demi-chefs de partie répondent chacun de leur poste.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Küchenbrigade: Aufbau & Posten",
+          "organisme": "g-wie-gastro.de",
+          "url": "https://g-wie-gastro.de/mehr-zur-gastronomie/glossar/gastro-wissen-allgemein/organigramm-kueche-kuechenbrigade-aufbau/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Küche Organisation: Küchenbrigade",
+          "organisme": "g-wie-gastro.de",
+          "url": "https://g-wie-gastro.de/gastronomie-glossar/kuechenbrigade/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.brigade.chef-de-partie.responsabilite",
+      "sujet": "Chef de partie",
+      "type": "regle",
+      "enonce": "Le chef de partie répond de la mise en place et du dressage de son poste.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Cadre de brigade classique.",
+      "sources": [
+        {
+          "titre": "Küchenbrigade: Aufbau & Posten",
+          "organisme": "g-wie-gastro.de",
+          "url": "https://g-wie-gastro.de/mehr-zur-gastronomie/glossar/gastro-wissen-allgemein/organigramm-kueche-kuechenbrigade-aufbau/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.brigade.chef-de-cuisine.taches",
+      "sujet": "Tâches du chef de cuisine",
+      "type": "definition",
+      "enonce": "Le chef de cuisine répond de la planification du personnel, des achats, de la calculation des prix et de la vente.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Recoupé par les domaines du brevet : denrées et art culinaire, marketing, organisation, conduite, finances.",
+      "sources": [
+        {
+          "titre": "Küchenbrigade: Aufbau & Posten",
+          "organisme": "g-wie-gastro.de",
+          "url": "https://g-wie-gastro.de/mehr-zur-gastronomie/glossar/gastro-wissen-allgemein/organigramm-kueche-kuechenbrigade-aufbau/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Chefköchin/Chefkoch EFA",
+          "organisme": "Hotel & Gastro formation",
+          "url": "https://www.hotelgastro.ch/eidgenoessischer-fachausweis?c=Chefkoechin_mit_eidgenoessischem_FachausweisChefkoch_mit_eidgenoessischem_Fachausweis",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.mise-en-place.definition",
+      "sujet": "Mise en place",
+      "type": "definition",
+      "enonce": "La mise en place est la préparation organisée des denrées et du poste avant le service.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Küchenbrigade: Aufbau & Posten",
+          "organisme": "g-wie-gastro.de",
+          "url": "https://g-wie-gastro.de/mehr-zur-gastronomie/glossar/gastro-wissen-allgemein/organigramm-kueche-kuechenbrigade-aufbau/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.mise-en-place.priorite-fefo",
+      "sujet": "Mise en place et rotation",
+      "type": "regle",
+      "enonce": "Les denrées à date la plus proche se préparent et se consomment en premier ; la file de priorité de la rotation fait office de politique de mise en place.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Non recoupé en externe ; la base Sanji parle de FEFO (premier expiré, premier sorti) et non de PEPS.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 16",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §16",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.planification.besoin-production-reassort",
+      "sujet": "Planification et commandes",
+      "type": "regle",
+      "enonce": "Le besoin brut calculé pour la production planifiée alimente directement le réassort ; la perte de production n'est jamais confondue avec le rebut.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Principe de chaîne planification, calcul, commande ; la planification hebdomadaire détaillée n'a pas de source externe retenue.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 12",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §12",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        },
+        {
+          "titre": "Base métier Sanji, section 19",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §19",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.avance.cook-chill.definition",
+      "sujet": "Cuisson avancée refroidie",
+      "type": "definition",
+      "enonce": "Le cook and chill consiste à cuire selon les principes HACCP, refroidir vite, stocker au froid puis remettre en température avant le service.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Cook and Chill: Heute kochen, morgen servieren",
+          "organisme": "dish.co",
+          "url": "https://www.dish.co/DE/de/blog/cook-and-chill/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.avance.cook-chill.refroidissement-duree",
+      "sujet": "Durée de refroidissement rapide",
+      "type": "repere",
+      "enonce": "La durée de refroidissement rapide de référence est celle de hygiene.temperature.refroidissement (50 à 10 °C en 2 h au plus) ; pour le cook and chill en cellule, dish.co cite 90 min pour atteindre 3 °C à cœur.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Renvoi : la référence unique du référentiel est hygiene.temperature.refroidissement (écarts entre GVG, cantons et base Sanji décrits là). Les 90 min de dish.co visent 3 °C à cœur ; la base Sanji (65 à 10 °C en 3 h) est un autre repère, non repris ici. Le plan HACCP de l'établissement et le canton priment.",
+      "sources": [
+        {
+          "titre": "Cook and Chill: Heute kochen, morgen servieren",
+          "organisme": "dish.co",
+          "url": "https://www.dish.co/DE/de/blog/cook-and-chill/",
+          "consulte": "2026-10-04",
+          "extrait": "innerhalb von 90 Minuten auf eine Kerntemperatur von 3 °C abgekühlt",
+          "type_source": "web"
+        },
+        {
+          "titre": "Base métier Sanji, section 6",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §6",
+          "consulte": "2026-10-04",
+          "extrait": "Refroidissement : traverser 65 → 10 °C en ≤ 3 h",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.avance.cook-chill.stockage-duree",
+      "sujet": "Durée de tenue après refroidissement",
+      "type": "repere",
+      "enonce": "Un plat refroidi vite et tenu sans rupture du froid se garde jusqu'à 7 j à 3 °C max selon dish.co ; base Sanji 3 j (repère prudent).",
+      "valeur": {
+        "min": 3,
+        "max": 7,
+        "unite": "j"
+      },
+      "etat_poids": null,
+      "conditions": "Correction : une version antérieure citait 5 j pour dish.co ; la page dit « jusqu'à sept jours » à 3 °C au plus, selon le type de plat. Fourchette la plus large gardée ; durées de qualité, pas des dates limites ; à rapprocher des durées légales de hygiene.duree.sauces-cuites et des aide-mémoires cantonaux. Marquer chaque lot à la production.",
+      "sources": [
+        {
+          "titre": "Cook and Chill: Heute kochen, morgen servieren",
+          "organisme": "dish.co",
+          "url": "https://www.dish.co/DE/de/blog/cook-and-chill/",
+          "consulte": "2026-10-04",
+          "extrait": "bei maximal 3 °C lagern ... bis zu sieben Tage",
+          "type_source": "web"
+        },
+        {
+          "titre": "Base métier Sanji, section 8",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §8",
+          "consulte": "2026-10-04",
+          "extrait": "Plats cuisinés maison : frigo fermé 3 j",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.avance.remise-en-temperature",
+      "sujet": "Remise en température",
+      "type": "repere",
+      "enonce": "La remise en température vise 70 à 75 °C à cœur avant le service.",
+      "valeur": {
+        "min": 70,
+        "max": 75,
+        "unite": "°C"
+      },
+      "etat_poids": null,
+      "conditions": "Le repère de la base Sanji est 70 °C pendant 2 min à cœur ; le haut de fourchette vient d'un fournisseur d'équipement.",
+      "sources": [
+        {
+          "titre": "Cook and Chill: Heute kochen, morgen servieren",
+          "organisme": "dish.co",
+          "url": "https://www.dish.co/DE/de/blog/cook-and-chill/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Base métier Sanji, section 6",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §6",
+          "consulte": "2026-10-04",
+          "extrait": "Cuisson / décontamination : ≥ 70 °C à cœur pendant 2 min",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.avance.zone-danger",
+      "sujet": "Zone de danger et temps cumulé",
+      "type": "regle",
+      "enonce": "Entre environ 10 et 65 °C les bactéries se multiplient ; le temps passé dans cette zone est cumulatif, d'où refroidissement rapide, petites portions et récipients plats.",
+      "valeur": {
+        "min": 10,
+        "max": 65,
+        "unite": "°C"
+      },
+      "etat_poids": null,
+      "conditions": "Raisonnement à enseigner, pas seulement les chiffres ; relève du thème hygiène pour les seuils. Pour le refroidissement et le maintien au chaud, voir hygiene.temperature.refroidissement et hygiene.temperature.maintien-chaud (référence du référentiel).",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 6",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §6",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.avance.etapes-parage-cuisson-portion",
+      "sujet": "Chaîne de préparation",
+      "type": "technique",
+      "enonce": "Toute production subit trois pertes en chaîne : parage, cuisson, portionnement ; chaque étape se pèse séparément et se planifie dans cet ordre.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 10",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §10",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.lots.reassort-buffet",
+      "sujet": "Cuisson en lots et buffet",
+      "type": "technique",
+      "enonce": "Réapprovisionner un buffet par petites quantités et produire à la demande plutôt que de tout garder garni jusqu'à la fermeture réduit les restes.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Cas d'un hôtel ; l'étude cite -43 % de déchets au buffet du petit déjeuner par an, valeur propre à ce cas.",
+      "sources": [
+        {
+          "titre": "Schritt für Schritt weniger Food Waste",
+          "organisme": "United Against Waste",
+          "url": "https://united-against-waste.ch/schritt-fuer-schritt-weniger-food-waste/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.lots.production-a-la-demande",
+      "sujet": "Production à la demande",
+      "type": "technique",
+      "enonce": "Remplacer des plats précuits exposés par une préparation sur commande supprime la production spéculative.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Schritt für Schritt weniger Food Waste",
+          "organisme": "United Against Waste",
+          "url": "https://united-against-waste.ch/schritt-fuer-schritt-weniger-food-waste/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.banquet.exemple-brut-n-couverts",
+      "sujet": "Banquet : calcul de brut pour N couverts",
+      "type": "repere",
+      "enonce": "Pour N couverts d'une pièce de viande poêlée, le brut à commander est le net cuit servi multiplié par un multiplicateur, par exemple environ 1,74 avec un parage de 20 %, une cuisson de 25 % et un tranchage de 4 %.",
+      "valeur": {
+        "min": 1.74,
+        "max": 1.74,
+        "unite": "kg brut par kg cuit servi"
+      },
+      "etat_poids": "cuit",
+      "conditions": "Exemple illustratif tiré de la base Sanji, seul le mécanisme (net cuit × multiplicateur = brut) est à retenir ; chiffre recalculé 1 / (0,80 × 0,75 × 0,96), non recoupé en externe. Les pertes de l'établissement remplacent ces valeurs génériques.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 28",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §28",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.banquet.piece-entiere-basse-temperature",
+      "sujet": "Banquet : cuisson basse température",
+      "type": "repere",
+      "enonce": "Un rôti de 3 kg perd environ 12 % en basse température contre 28 % au four traditionnel, soit près de 480 g gagnés par pièce.",
+      "valeur": {
+        "min": 12,
+        "max": 28,
+        "unite": "% de perte de cuisson"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Exemple illustratif ; l'écart dépend de la pièce, de l'appareil et de la température à cœur.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 28",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §28",
+          "consulte": "2026-10-04",
+          "extrait": "GT vs rôti classique",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.service-assiette.perte-dressage",
+      "sujet": "Service à l'assiette",
+      "type": "repere",
+      "enonce": "La perte de dressage est de 2 à 4 % pour une viande poêlée portionnée en amont et de 2 à 3 % pour un légume de garniture.",
+      "valeur": {
+        "min": 2,
+        "max": 4,
+        "unite": "% du cuit"
+      },
+      "etat_poids": "cuit",
+      "conditions": "Valeurs génériques à remplacer par la pesée de la maison.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 11.3",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §11.3",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.service-assiette.perte-tranchage",
+      "sujet": "Service à l'assiette et tranchage",
+      "type": "repere",
+      "enonce": "Un rôti tranché en salle ou en cuisine perd 5 à 8 % au portionnement.",
+      "valeur": {
+        "min": 5,
+        "max": 8,
+        "unite": "% du cuit"
+      },
+      "etat_poids": "cuit",
+      "conditions": "Valeurs génériques à remplacer par la pesée de la maison.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 11.3",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §11.3",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.rendement.definition",
+      "sujet": "Rendement",
+      "type": "definition",
+      "enonce": "Le rendement est la part du produit qui reste à une étape ; le multiplicateur d'une étape est l'inverse du rendement.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 10",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §10",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.perte.trois-etapes",
+      "sujet": "Perte de production",
+      "type": "definition",
+      "enonce": "La perte de production (parage, cuisson, portionnement) est une constante technique mesurée par pesée, distincte du rebut qui est une anomalie motivée.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 10",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §10",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        },
+        {
+          "titre": "Base métier Sanji, section 20",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §20",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.multiplicateurs.chaine",
+      "sujet": "Étapes chaînées",
+      "type": "technique",
+      "enonce": "Les multiplicateurs des étapes se multiplient entre eux ; l'exemple type est 1,18 pour l'épluchage et 1,43 pour l'étuvage, soit 1,69 au total.",
+      "valeur": {
+        "min": 1.69,
+        "max": 1.69,
+        "unite": "x brut par kg servi"
+      },
+      "etat_poids": "cuit",
+      "conditions": "Exemple carottes glacées ; pour 10 kg nets, 16,9 kg bruts.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 10",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §10",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.quantite.commande-formule",
+      "sujet": "Quantité à commander",
+      "type": "technique",
+      "enonce": "Le brut à commander est le nombre de portions multiplié par la grammage net et par le multiplicateur total.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Le grammage doit toujours porter son état de poids (cuit, cru net).",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 12",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §12",
+          "consulte": "2026-10-04",
+          "extrait": "brut à commander = portions × gramature nette × multiplicateur total",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.conversion.facteur",
+      "sujet": "Facteur de conversion",
+      "type": "technique",
+      "enonce": "Le facteur de conversion entre états de poids est 1 divisé par le rendement de l'étape traversée ; il s'applique dans le sens net vers brut pour commander.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 10",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §10",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.cout-matiere.formule",
+      "sujet": "Coût matière par portion",
+      "type": "technique",
+      "enonce": "Le coût matière par portion est le poids brut par portion multiplié par le prix brut au kilo ; le prix net au kilo est le prix brut multiplié par le multiplicateur total.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 12",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §12",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        },
+        {
+          "titre": "Kalkulation in der Gastronomie: Preise richtig berechnen",
+          "organisme": "gastrolaunch.ch",
+          "url": "https://gastrolaunch.ch/ratgeber/artikel/kalkulation-gastronomie-preise-richtig-berechnen",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.prix-net.exemple-piece",
+      "sujet": "Prix net d'une pièce de viande",
+      "type": "repere",
+      "enonce": "Une pièce de viande achetée à un prix P par kilo brut, avec parage 20 %, cuisson poêlée 20 % et dressage 3 %, a un multiplicateur d'environ 1,61 : le kilo servi coûte P × 1,61.",
+      "valeur": {
+        "min": 1.61,
+        "max": 1.61,
+        "unite": "x brut par kg servi"
+      },
+      "etat_poids": "cuit",
+      "conditions": "Exemple illustratif (1 / (0,80 × 0,80 × 0,97)), sans prix réel ; seul le mécanisme est à retenir ; non recoupé en externe.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 12",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §12",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.rendement.riz-gain",
+      "sujet": "Gain de cuisson d'un féculent",
+      "type": "repere",
+      "enonce": "Un riz cuit à l'eau gagne 2,75 fois son poids sec ; le multiplicateur total tombe sous 1 et le prix net peut passer sous le prix brut.",
+      "valeur": {
+        "min": 2.75,
+        "max": 2.75,
+        "unite": "x poids sec"
+      },
+      "etat_poids": "sec",
+      "conditions": "Un rendement supérieur à 100 % se traite comme une perte inversée, sans blocage.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 12",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §12",
+          "consulte": "2026-10-04",
+          "extrait": "gain ×2,75 (cuisson à l'eau)",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.cuisson.perte-poele-four-vapeur",
+      "sujet": "Pertes de cuisson courantes",
+      "type": "repere",
+      "enonce": "La base Sanji retient comme repères de perte de cuisson 20 % poêlé, 27,5 % au four traditionnel et 12,5 % à la vapeur.",
+      "valeur": {
+        "min": 12.5,
+        "max": 27.5,
+        "unite": "% du paré"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Valeurs génériques de la base ; la pesée de la maison fait foi.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 12",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §12",
+          "consulte": "2026-10-04",
+          "extrait": "tableau prix net multi-produits",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.coefficient.formule",
+      "sujet": "Coefficient de vente",
+      "type": "technique",
+      "enonce": "Le prix de vente net est le coût matière multiplié par le coefficient ; le coefficient est le prix de vente divisé par le coût matière.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Kalkulation in der Gastronomie: Preise richtig berechnen",
+          "organisme": "gastrolaunch.ch",
+          "url": "https://gastrolaunch.ch/ratgeber/artikel/kalkulation-gastronomie-preise-richtig-berechnen",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.coefficient.valeurs-speisen",
+      "sujet": "Coefficient des plats",
+      "type": "repere",
+      "enonce": "Le coefficient indicatif des plats est de 2,8 à 3,5 (part matière de 28 à 35 %) selon gastrolaunch ; resmio cite la règle empirique du facteur 3 et déconseille les facteurs fixes.",
+      "valeur": {
+        "min": 2.8,
+        "max": 3.5,
+        "unite": "coefficient"
+      },
+      "etat_poids": null,
+      "conditions": "Fourchette de gastrolaunch retenue. Divergence : resmio indique la règle du facteur 3, un outil de prix avec des facteurs de 3 à 5 (vins surtout) et un plat de pâtes à environ 2 en coûts complets ; l'ancienne borne de 4,0 n'est pas retrouvée sur resmio pour les plats et est retirée. Repères d'éditeurs privés, pas une norme ; chaque maison fixe le sien selon sa structure de charges.",
+      "sources": [
+        {
+          "titre": "Kalkulation in der Gastronomie: Preise richtig berechnen",
+          "organisme": "gastrolaunch.ch (plateforme de conseil pour la gastronomie)",
+          "url": "https://gastrolaunch.ch/ratgeber/artikel/kalkulation-gastronomie-preise-richtig-berechnen",
+          "consulte": "2026-10-04",
+          "extrait": "Speisen: 2.8 – 3.5",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Kalkulation in der Gastronomie",
+          "organisme": "resmio GmbH (éditeur de logiciel de gestion de restaurant)",
+          "url": "https://www.resmio.com/spoon-bytes/kalkulation-gastronomie/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.food-cost.cible",
+      "sujet": "Part matière (food cost)",
+      "type": "repere",
+      "enonce": "La part matière cible des plats se situe entre 25 et 35 % du prix de vente net ; la base Sanji donne 30 à 35 % pour la restauration.",
+      "valeur": {
+        "min": 25,
+        "max": 35,
+        "unite": "% du prix de vente net"
+      },
+      "etat_poids": null,
+      "conditions": "Dépend du type d'établissement ; le prix de vente net est hors TVA.",
+      "sources": [
+        {
+          "titre": "Kalkulation in der Gastronomie: Preise richtig berechnen",
+          "organisme": "gastrolaunch.ch",
+          "url": "https://gastrolaunch.ch/ratgeber/artikel/kalkulation-gastronomie-preise-richtig-berechnen",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base métier Sanji, section 12",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §12",
+          "consulte": "2026-10-04",
+          "extrait": "dans la fourchette cible 30–35 %",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.prix-vente.tva",
+      "sujet": "Prix de vente TTC",
+      "type": "technique",
+      "enonce": "Le prix TTC est le prix net multiplié par 1 plus le taux de TVA ; sur place le taux cité est 8,1 %.",
+      "valeur": {
+        "min": 8.1,
+        "max": 8.1,
+        "unite": "% de TVA (sur place)"
+      },
+      "etat_poids": null,
+      "conditions": "Taux en vigueur à vérifier auprès de l'AFC ; les taux changent. Le taux à l'emporter diffère.",
+      "sources": [
+        {
+          "titre": "Kalkulation in der Gastronomie: Preise richtig berechnen",
+          "organisme": "gastrolaunch.ch",
+          "url": "https://gastrolaunch.ch/ratgeber/artikel/kalkulation-gastronomie-preise-richtig-berechnen",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.marge.reperes",
+      "sujet": "Marge et charges",
+      "type": "repere",
+      "enonce": "Une marge bénéficiaire de 5 à 15 % du chiffre d'affaires est citée comme réaliste, avec des coûts de personnel de 30 à 40 % au plus.",
+      "valeur": {
+        "min": 5,
+        "max": 15,
+        "unite": "% du chiffre d'affaires"
+      },
+      "etat_poids": null,
+      "conditions": "Repère de blog professionnel, non officiel ; ne pas utiliser pour juger une maison.",
+      "sources": [
+        {
+          "titre": "Kalkulation in der Gastronomie: Preise richtig berechnen",
+          "organisme": "gastrolaunch.ch",
+          "url": "https://gastrolaunch.ch/ratgeber/artikel/kalkulation-gastronomie-preise-richtig-berechnen",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.prix-de-revient.definition",
+      "sujet": "Prix de revient",
+      "type": "definition",
+      "enonce": "Le prix de revient d'un plat part du coût matière de tous les composants et s'enrichit des autres charges avant de fixer un prix de vente.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Le détail des charges (personnel, frais généraux) n'a pas été détaillé dans une source officielle.",
+      "sources": [
+        {
+          "titre": "Kalkulation in der Gastronomie: Preise richtig berechnen",
+          "organisme": "gastrolaunch.ch",
+          "url": "https://gastrolaunch.ch/ratgeber/artikel/kalkulation-gastronomie-preise-richtig-berechnen",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.reassort.formule",
+      "sujet": "Réassort",
+      "type": "technique",
+      "enonce": "Le manque est le maximum de zéro et de la cible moins le stock ; l'achat se déclenche quand le manque dépasse une marge, et la quantité se convertit en conditionnement en arrondissant au-dessus.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 19",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §19",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.calcul.reassort.seuil-dynamique",
+      "sujet": "Seuil dynamique",
+      "type": "technique",
+      "enonce": "Le seuil dynamique est la consommation moyenne multipliée par la couverture cible en jours ; il n'est fiable qu'avec assez d'historique mesuré.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 19",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §19",
+          "consulte": "2026-10-04",
+          "extrait": "seuil dynamique = consommation moyenne × couverture cible",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.stock.rotation-fefo",
+      "sujet": "Rotation des stocks",
+      "type": "regle",
+      "enonce": "La rotation correcte est premier expiré, premier sorti ; en rayon on prend la date la plus proche, à la réception une date courte devient priorité.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 16",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §16",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.stock.preavis-grosse-piece",
+      "sujet": "Préavis selon le type de produit",
+      "type": "repere",
+      "enonce": "Repère de préavis avant la date limite : 3 à 5 jours pour une grosse pièce, 1 à 2 jours pour un produit standard, 0 à 1 jour pour un produit fragile.",
+      "valeur": {
+        "min": 0,
+        "max": 5,
+        "unite": "j avant la limite"
+      },
+      "etat_poids": null,
+      "conditions": "Estimation de la base Sanji, non norme et non recoupée en externe ; à fixer par l'établissement selon ses produits.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 16",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §16",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.stock.inventaire.mensuel-valorise",
+      "sujet": "Inventaire",
+      "type": "regle",
+      "enonce": "En contexte professionnel l'inventaire mensuel complet est valorisé et sert de base au calcul du coût matière ; un inventaire tournant par zone complète le dispositif.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 18",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §18",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.stock.inventaire.ecarts",
+      "sujet": "Écarts d'inventaire",
+      "type": "regle",
+      "enonce": "Un écart se corrige par un ajustement motivé et écrit, jamais en silence ; des écarts répétés sur un produit signalent un mauvais mode de quantité.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 18",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §18",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.stock.valorisation",
+      "sujet": "Valorisation du stock",
+      "type": "technique",
+      "enonce": "La valeur du stock est la somme des quantités multipliées par le prix des lots actifs ; elle sert aussi à valoriser le gaspillage.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 19",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §19",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.gaspillage.motifs-lecture",
+      "sujet": "Motifs de rebut",
+      "type": "regle",
+      "enonce": "Chaque rebut reçoit un motif (périmé, abîmé, restes, erreur d'achat, incident, rappel) ; le motif dominant désigne l'action corrective à mener.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 20",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §20",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.gaspillage.rebut-sanitaire-evitable",
+      "sujet": "Rebut sanitaire et évitable",
+      "type": "regle",
+      "enonce": "Le rebut sanitaire n'est pas négociable alors que le rebut évitable est la cible d'amélioration.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 20",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §20",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.gaspillage.mesure-et-portions",
+      "sujet": "Mesurer et ajuster les portions",
+      "type": "technique",
+      "enonce": "Réduire le gaspillage commence par mesurer où et quand il survient, puis par ajuster les portions au besoin réel.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Schritt für Schritt weniger Food Waste",
+          "organisme": "United Against Waste",
+          "url": "https://united-against-waste.ch/schritt-fuer-schritt-weniger-food-waste/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Food Waste in der Gastronomie",
+          "organisme": "United Against Waste",
+          "url": "https://united-against-waste.ch/event/food-waste-in-der-gastronomie/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.gaspillage.resultat-portion-hotel",
+      "sujet": "Effet d'un ajustement de portions",
+      "type": "repere",
+      "enonce": "Dans un cas d'hôtel, le déchet par client est passé de 153 g à 97 g, soit -37 %.",
+      "valeur": {
+        "min": 97,
+        "max": 153,
+        "unite": "g par client"
+      },
+      "etat_poids": "cuit",
+      "conditions": "Cas unique ; ne pas généraliser. État du poids non précisé par la source (restes d'assiette).",
+      "sources": [
+        {
+          "titre": "Schritt für Schritt weniger Food Waste",
+          "organisme": "United Against Waste",
+          "url": "https://united-against-waste.ch/schritt-fuer-schritt-weniger-food-waste/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.gaspillage.resultats-projets",
+      "sujet": "Résultats de projets en restauration",
+      "type": "repere",
+      "enonce": "Dix établissements conseillés en 2015 ont réduit leurs déchets de 25 % en moyenne ; un projet lucernois 2022-2023 a obtenu 35 % en moyenne, jusqu'à 50 %.",
+      "valeur": {
+        "min": 25,
+        "max": 50,
+        "unite": "% de réduction"
+      },
+      "etat_poids": null,
+      "conditions": "Moyennes de projets accompagnés ; pas une promesse pour une cuisine donnée.",
+      "sources": [
+        {
+          "titre": "Food Waste in der Gastronomie",
+          "organisme": "United Against Waste",
+          "url": "https://united-against-waste.ch/event/food-waste-in-der-gastronomie/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Food Waste vermeiden (résultats de projets)",
+          "organisme": "United Against Waste",
+          "url": "https://united-against-waste.ch/medien-article/aktuelles-zum-thema-lebensmittelabfall/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.gaspillage.volume-gastronomie-suisse",
+      "sujet": "Volume en Suisse",
+      "type": "repere",
+      "enonce": "La restauration suisse produit environ 210 000 à 240 000 tonnes de déchets alimentaires par an, soit environ un dixième du total.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Deux sources divergent (OFEV 210 000 t, United Against Waste 240 000 t) ; fourchette la plus large dans l'énoncé. Total de déchets, pas un état de produit : valeur laissée dans l'énoncé.",
+      "sources": [
+        {
+          "titre": "Lebensmittelverluste",
+          "organisme": "Office fédéral de l'environnement (OFEV/BAFU)",
+          "url": "https://www.bafu.admin.ch/de/foodwaste",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "officielle"
+        },
+        {
+          "titre": "Food Waste in der Gastronomie",
+          "organisme": "United Against Waste",
+          "url": "https://united-against-waste.ch/event/food-waste-in-der-gastronomie/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.gaspillage.objectif-federal",
+      "sujet": "Objectif fédéral",
+      "type": "repere",
+      "enonce": "Le Conseil fédéral vise de réduire de moitié les pertes alimentaires évitables d'ici 2030 par rapport à 2017.",
+      "valeur": {
+        "min": 50,
+        "max": 50,
+        "unite": "% de réduction d'ici 2030"
+      },
+      "etat_poids": null,
+      "conditions": "Plan d'action de la Confédération ; vérifier l'état actuel du plan.",
+      "sources": [
+        {
+          "titre": "Lebensmittelverluste",
+          "organisme": "Office fédéral de l'environnement (OFEV/BAFU)",
+          "url": "https://www.bafu.admin.ch/de/foodwaste",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "officielle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.securite.risques-cuisine",
+      "sujet": "Dangers en cuisine",
+      "type": "definition",
+      "enonce": "Les checklists officielles de cuisine regroupent les dangers en sols glissants, objets coupants, machines, chaleur, charges, produits chimiques et incendie.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Checkliste Küche (06802)",
+          "organisme": "CFST/EKAS",
+          "url": "https://www.ekas.admin.ch/fileadmin/Dokumente/Checklisten/06802_D.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "officielle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.securite.accidents-repartition",
+      "sujet": "Types d'accidents",
+      "type": "repere",
+      "enonce": "Dans le secteur de l'hôtellerie-restauration, la liste de contrôle EKAS/Suva « Küche » attribue 35 % des accidents aux coupures et piqûres, 25 % aux glissades et trébuchements et 5 % aux brûlures et ébouillantements.",
+      "valeur": {
+        "min": 5,
+        "max": 35,
+        "unite": "% des accidents"
+      },
+      "etat_poids": null,
+      "conditions": "Chiffres de la liste de contrôle EKAS 6802.d « Küche » (révision de juillet 2025), relus sur le PDF ; l'année et la base statistique ne sont pas indiquées dans le document. Les sources web antérieures (wirtepatent.ch) sont retirées.",
+      "sources": [
+        {
+          "titre": "Checkliste Küche : Wie sicher wird in Ihrer Küche gearbeitet ? (EKAS 6802.d, révision juillet 2025)",
+          "organisme": "CFST/EKAS (Commission fédérale de coordination pour la sécurité au travail) et Suva",
+          "url": "https://www.ekas.admin.ch/fileadmin/Dokumente/Checklisten/06802_D.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "35 % der Unfälle durch Stechen und Schneiden ; 25 % ... Ausgleiten und Stolpern",
+          "type_source": "officielle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.securite.branche-solution",
+      "sujet": "Branche de sécurité",
+      "type": "definition",
+      "enonce": "La solution de branche du secteur offre manuel, check-lists, formation (KOPAS) et soutien de spécialistes pour appliquer la sécurité au travail.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Arbeitssicherheit (Branchenlösung)",
+          "organisme": "GastroSuisse",
+          "url": "https://gastrosuisse.ch/de/recht/mitarbeitende/arbeitssicherheit",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "KOPAS im Gastgewerbe, Arbeitssicherheit in Küche und Service",
+          "organisme": "wirtepatent.ch",
+          "url": "https://www.wirtepatent.ch/de/wissen/kopas-im-gastgewerbe-n-arbeitssicherheit-in-kueche-und-service-176.html",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.ergonomie.charges-reperes-suva",
+      "sujet": "Charges et manutention",
+      "type": "repere",
+      "enonce": "La Suva cite 15 kg pour une femme et 25 kg pour un homme en manutention occasionnelle, et une évaluation dès 7 kg et 12 kg au-delà de quatre levées par heure.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Poids de charges de manutention, pas des poids de denrées : valeur laissée dans l'énoncé. Chiffres relevés via résultats de recherche ; recouper avec la publication Suva avant usage. Hauteur, rotation et prise changent l'appréciation.",
+      "sources": [
+        {
+          "titre": "Lasten clever heben",
+          "organisme": "Suva (assurance accidents, établissement de droit public)",
+          "url": "https://www.suva.ch/de-ch/praevention/nach-gefahren/gefaehrliche-materialien-strahlungen-und-situationen/koerperliche-belastung-und-ergonomie/umgang-mit-schweren-lasten/heben-sie-lasten-clever",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.ergonomie.technique-levage",
+      "sujet": "Technique de levage",
+      "type": "technique",
+      "enonce": "Lever dos droit, genoux fléchis, charge près du corps, prise à deux mains.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Lasten clever heben",
+          "organisme": "Suva (assurance accidents, établissement de droit public)",
+          "url": "https://www.suva.ch/de-ch/praevention/nach-gefahren/gefaehrliche-materialien-strahlungen-und-situationen/koerperliche-belastung-und-ergonomie/umgang-mit-schweren-lasten/heben-sie-lasten-clever",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.nutrition.cinq-par-jour",
+      "sujet": "Fruits et légumes",
+      "type": "repere",
+      "enonce": "La recommandation suisse est de 5 portions par jour, 3 de légumes et 2 de fruits, une portion pesant environ 120 g.",
+      "valeur": {
+        "min": 120,
+        "max": 120,
+        "unite": "g par portion"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Poids de portion cru ; recouper avec la brochure officielle avant usage.",
+      "sources": [
+        {
+          "titre": "Schweizer Ernährungsempfehlungen, Kurzversion 2024",
+          "organisme": "SGE (association) avec l'OSAV",
+          "url": "https://www.sge-ssn.ch/media/e23asbw5/schweizer-ernaehrungsempfehlungen_kurzversion_de-1.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.nutrition.legumineuses-pyramide",
+      "sujet": "Légumineuses",
+      "type": "regle",
+      "enonce": "La pyramide suisse 2024 place les protéines végétales et les légumineuses devant la viande et le poisson, avec une portion par jour pour le groupe des protéines.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Schweizer Ernährungsempfehlungen, Kurzversion 2024",
+          "organisme": "SGE (association) avec l'OSAV",
+          "url": "https://www.sge-ssn.ch/media/e23asbw5/schweizer-ernaehrungsempfehlungen_kurzversion_de-1.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.regime.vegan.b12",
+      "sujet": "Régime végétalien",
+      "type": "regle",
+      "enonce": "Une alimentation végane est possible pour un adulte en bonne santé avec un supplément de vitamine B12, et déconseillée aux enfants, adolescents, femmes enceintes ou allaitantes et personnes âgées.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Le PDF de la SGE n'a pas pu être lu ; énoncé reposant sur le résumé de recherche et la recommandation officielle.",
+      "sources": [
+        {
+          "titre": "Merkblatt vegane Ernährung",
+          "organisme": "SGE",
+          "url": "https://www.sge-ssn.ch/media/qejpveze/merkblatt-vegane-ernaehrung.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Schweizer Ernährungsempfehlungen, Kurzversion 2024",
+          "organisme": "SGE (association) avec l'OSAV",
+          "url": "https://www.sge-ssn.ch/media/e23asbw5/schweizer-ernaehrungsempfehlungen_kurzversion_de-1.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.regime.vegetarien.vigilance",
+      "sujet": "Régime végétarien",
+      "type": "regle",
+      "enonce": "Un régime végétarien demande une sélection consciente des aliments pour couvrir les besoins, notamment en B12.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Source non lue en entier ; à compléter.",
+      "sources": [
+        {
+          "titre": "Merkblatt vegane Ernährung",
+          "organisme": "SGE",
+          "url": "https://www.sge-ssn.ch/media/qejpveze/merkblatt-vegane-ernaehrung.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.regime.sans-gluten.seuils",
+      "sujet": "Sans gluten",
+      "type": "repere",
+      "enonce": "En Suisse un aliment est dit sans gluten jusqu'à 20 mg de gluten par kg à la vente ; la mention gluten très réduit va jusqu'à 100 mg/kg pour des ingrédients spécialement traités.",
+      "valeur": {
+        "min": 20,
+        "max": 100,
+        "unite": "mg de gluten par kg"
+      },
+      "etat_poids": null,
+      "conditions": "Seuil de désignation de produits préemballés ; la cuisine sans gluten en restauration relève aussi des contaminations croisées à vérifier avec le chimiste cantonal.",
+      "sources": [
+        {
+          "titre": "Verordnung des EDI über die Information über Lebensmittel (LIV)",
+          "organisme": "Fedlex",
+          "url": "https://fedlex.data.admin.ch/filestore/fedlex.data.admin.ch/eli/cc/2017/158/20180612/de/pdf-a/fedlex-data-admin-ch-eli-cc-2017-158-20180612-de-pdf-a.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "officielle"
+        },
+        {
+          "titre": "Verordnung des EDI über Speziallebensmittel 817.022.104",
+          "organisme": "lexfind.ch (site privé reproduisant le texte de l'ordonnance)",
+          "url": "https://www.lexfind.ch/tolv/149819/de?download=true",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.regime.sans-lactose.seuil",
+      "sujet": "Sans lactose",
+      "type": "repere",
+      "enonce": "Un aliment est dit sans lactose s'il contient moins de 0,1 g de lactose pour 100 g ou 100 ml à la consommation.",
+      "valeur": {
+        "min": 0,
+        "max": 0.1,
+        "unite": "g de lactose pour 100 g ou 100 ml"
+      },
+      "etat_poids": null,
+      "conditions": "Définition réglementaire des produits ; vérifier la version de l'ordonnance en vigueur.",
+      "sources": [
+        {
+          "titre": "Verordnung des EDI über Speziallebensmittel 817.022.104",
+          "organisme": "lexfind.ch (site privé reproduisant le texte de l'ordonnance)",
+          "url": "https://www.lexfind.ch/tolv/149819/de?download=true",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Laktosefreie Produkte: Fakten zur Kennzeichnung",
+          "organisme": "biolytix.ch",
+          "url": "https://www.biolytix.ch/laktosefreie-produkte-wichtige-fakten-zur-lebensmittelkennzeichnung/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.regime.allergenes-liste",
+      "sujet": "Allergènes à déclarer",
+      "type": "regle",
+      "enonce": "La liste des allergènes à déclarer relève du droit (LIV annexe 6) : voir hygiene.allergenes.liste-14 ; elle n'est pas répétée ici.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Renvoi à hygiene.allergenes.liste-14 (LIV, texte relu à l'état au 01.07.2025) et à hygiene.allergenes.seuil-sulfites. La base Sanji §24 parle de quatorze allergènes, ce qui concorde. Droit alimentaire : vérifier la version de l'ordonnance et le canton.",
+      "sources": [
+        {
+          "titre": "Base métier Sanji, section 24",
+          "organisme": "Sanji (base interne)",
+          "url": "base-officielle-production-stock-hygiene.md §24",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.equipe.competences-brevet",
+      "sujet": "Conduite d'équipe",
+      "type": "definition",
+      "enonce": "Le domaine conduite du brevet couvre la direction d'équipe, le développement du personnel, le droit du travail et la résolution de conflits.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Description de domaine, pas contenu d'examen.",
+      "sources": [
+        {
+          "titre": "Chefköchin/Chefkoch EFA",
+          "organisme": "Hotel & Gastro formation",
+          "url": "https://www.hotelgastro.ch/eidgenoessischer-fachausweis?c=Chefkoechin_mit_eidgenoessischem_FachausweisChefkoch_mit_eidgenoessischem_Fachausweis",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.equipe.sensibilisation-gaspillage",
+      "sujet": "Implication de l'équipe",
+      "type": "technique",
+      "enonce": "Impliquer l'équipe dans le suivi des quantités produites aide à réduire les pertes, y compris au restaurant du personnel.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Schritt für Schritt weniger Food Waste",
+          "organisme": "United Against Waste",
+          "url": "https://united-against-waste.ch/schritt-fuer-schritt-weniger-food-waste/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "organisation.brevet.domaines-hg",
+      "sujet": "Domaines du brevet",
+      "type": "definition",
+      "enonce": "Selon Hotel & Gastro formation, le brevet de chef de cuisine comprend cinq domaines : denrées et art culinaire, marketing et vente, organisation de l'entreprise, conduite du personnel, finances.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Voir COUVERTURE-BREVET.md ; règlement non lu en entier.",
+      "sources": [
+        {
+          "titre": "Cheffe cuisinière / Chef cuisinier BF",
+          "organisme": "Hotel & Gastro formation",
+          "url": "https://hotelgastro.ch/fr/ausbildung/cheffe-de-cuisine-chef-de-cuisine-avec-brevet-federal/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Chefköchin/Chefkoch EFA",
+          "organisme": "Hotel & Gastro formation",
+          "url": "https://www.hotelgastro.ch/eidgenoessischer-fachausweis?c=Chefkoechin_mit_eidgenoessischem_FachausweisChefkoch_mit_eidgenoessischem_Fachausweis",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    }
+  ],
+  "lacunes": [
+    {
+      "sujet": "Planification hebdomadaire détaillée",
+      "raison": "Aucune source externe fiable retenue ; le calendrier se construit à partir des menus de la maison."
+    },
+    {
+      "sujet": "Fiches de fonction et fiches banquet",
+      "raison": "Pas de source publique retenue sur le contenu type ; modèles à construire avec la propriétaire."
+    },
+    {
+      "sujet": "Calcul du prix de revient complet (charges, personnel)",
+      "raison": "Aucune source officielle ; seul le coût matière est documenté."
+    },
+    {
+      "sujet": "Durées de conservation et refroidissement légaux",
+      "raison": "Les repères cook-chill divergent ; la directive cantonale et le plan HACCP priment, non vérifiés ici."
+    },
+    {
+      "sujet": "Limites de manutention : texte Suva complet",
+      "raison": "Chiffres issus de résultats de recherche ; publication Suva à recouper."
+    },
+    {
+      "sujet": "Nutrition : besoins en énergie et nutriments, tableaux de composition",
+      "raison": "Non cherchés (base de données suisse des valeurs nutritives à consulter)."
+    },
+    {
+      "sujet": "Brochure de la Commission fédérale / guide de la restauration collective (BLV)",
+      "raison": "Le PDF du guide n'a pas répondu (erreur 502) ; contenu non intégré."
+    },
+    {
+      "sujet": "Textes SGE vegan et OFSP/BLV en PDF",
+      "raison": "PDF non lisibles par l'outil d'extraction ; énoncés prudents."
+    },
+    {
+      "sujet": "Ergonomie du poste (hauteurs de travail, équipements)",
+      "raison": "Aucune valeur sourcée retenue."
+    },
+    {
+      "sujet": "Calculs de rotation du stock (indicateurs de rotation en jours)",
+      "raison": "Aucune formule sourcée retenue."
+    },
+    {
+      "sujet": "Durée de 7 jours du cook and chill (dish.co)",
+      "raison": "dish.co est un fournisseur privé ; la durée de 7 j à 3 °C n'est pas recoupée par une source officielle."
+    }
+  ]
+}

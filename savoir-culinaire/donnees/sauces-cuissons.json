@@ -1,0 +1,2256 @@
+{
+  "etiquette": "SAVOIR_CULINAIRE",
+  "theme": "sauces-cuissons",
+  "titre": "Fonds, sauces et méthodes de cuisson",
+  "genere_le": "2026-10-04",
+  "entrees": [
+    {
+      "id": "sauces-cuissons.fonds.definition",
+      "sujet": "Fonds (définition)",
+      "type": "definition",
+      "enonce": "Un fond est un liquide clair, non lié, fait d'un élément de base (os, parures, arêtes), d'une garniture aromatique et d'un mouillement ; il sert à mouiller, réduire et préparer les sauces.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.brun-vs-blanc",
+      "sujet": "Fond brun et fond blanc",
+      "type": "definition",
+      "enonce": "Le fond est brun quand les éléments de base sont colorés (four ou rissolage) avant le mouillement ; il est blanc quand ils cuisent directement dans le liquide, éventuellement après blanchiment.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Fumet de poisson, bouillon de légumes et marmite sont rangés avec les fonds blancs.",
+      "sources": [
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.depart-eau-froide",
+      "sujet": "Départ des fonds",
+      "type": "technique",
+      "enonce": "On part d'eau froide, on écume souvent surtout au début, on cuit à frémissement (une forte ébullition trouble le fond), puis on passe au chinois sans fouler.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.assaisonnement",
+      "sujet": "Sel dans les fonds",
+      "type": "regle",
+      "enonce": "Un fond n'est pas salé au départ : seuls les produits finis sont assaisonnés, car le fond se réduit et se concentre.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "les fonds ne sont pas assaisonnés au départ",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.brun-proportions",
+      "sujet": "Fond brun, proportions",
+      "type": "repere",
+      "enonce": "Repère de proportion d'un fond brun : environ 1,2 L d'eau froide par kg d'os et parures, garniture de carottes, oignons et tomates en complément.",
+      "valeur": {
+        "min": 1.2,
+        "max": 1.2,
+        "unite": "L d'eau par kg d'os"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Source unique, support de cours personnel : les colonnes d'un tableau ont été lues par déduction, donc à vérifier ; seul le rapport eau/os est retenu, la garniture reste un ordre de grandeur modeste par rapport aux os.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.blanc-proportions",
+      "sujet": "Fond blanc, proportions",
+      "type": "repere",
+      "enonce": "Repère de proportion d'un fond blanc : environ 1,2 L d'eau froide par kg d'os et parures, garniture de légumes sans tomate, plus légère qu'en fond brun.",
+      "valeur": {
+        "min": 1.2,
+        "max": 1.2,
+        "unite": "L d'eau par kg d'os"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Source unique, support de cours personnel : les colonnes d'un tableau ont été lues par déduction, donc à vérifier ; seul le rapport eau/os est retenu, la garniture reste un ordre de grandeur modeste par rapport aux os.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.fumet-proportions",
+      "sujet": "Fumet de poisson, proportions",
+      "type": "repere",
+      "enonce": "Repère de proportion d'un fumet : environ 1,2 L d'eau par kg d'arêtes dégorgées, avec vin blanc, échalotes, champignons et oignons.",
+      "valeur": {
+        "min": 1.2,
+        "max": 1.2,
+        "unite": "L d'eau par kg d'arêtes"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Source unique, support de cours personnel : les colonnes d'un tableau ont été lues par déduction, donc à vérifier ; seul le rapport eau/os est retenu, la garniture reste un ordre de grandeur modeste par rapport aux os.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.brun-duree",
+      "sujet": "Fond brun, durée de cuisson",
+      "type": "repere",
+      "enonce": "Un fond brun cuit de 2 h 30 à 4 h à frémissement selon la source ; un fond de veau est donné à 3 à 4 h.",
+      "valeur": {
+        "min": 150,
+        "max": 240,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Écart : 2 h 30 à 3 h (support SDC) contre 3 à 4 h (fiche EDM, fond de veau). Fourchette large retenue.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "le fond de veau cuit 3 à 4 heures",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.blanc-duree",
+      "sujet": "Fond blanc, durée de cuisson",
+      "type": "repere",
+      "enonce": "Un fond blanc de volaille cuit environ 1 h selon une source, 2 h 30 à 3 h selon une autre (veau et volaille).",
+      "valeur": {
+        "min": 60,
+        "max": 180,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Écart important entre sources : la volaille seule va vite, le veau demande plus. Confiance abaissée.",
+      "sources": [
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "le fond de volaille cuit environ 1 heure",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.fumet-duree",
+      "sujet": "Fumet de poisson, durée",
+      "type": "repere",
+      "enonce": "Un fumet de poisson cuit environ 20 minutes à frémissement.",
+      "valeur": {
+        "min": 20,
+        "max": 20,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Concordance des deux supports.",
+      "sources": [
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "le fumet de poisson cuit environ 20 minutes",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.marmite-duree",
+      "sujet": "Bouillon de bœuf (marmite), durée",
+      "type": "repere",
+      "enonce": "Le bouillon de bœuf se cuit 2 h 30 à 4 h à frémissement avec écumage régulier.",
+      "valeur": {
+        "min": 150,
+        "max": 240,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "2 h 30 à 3 h (SDC, marmite) ; 3 à 4 h pour une pièce à bouillir (base Sanji §14).",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.glace",
+      "sujet": "Glace de viande ou de volaille",
+      "type": "technique",
+      "enonce": "Une glace est un fond réduit jusqu'à ce qu'il nappe la spatule ; elle concentre sucs et gélatine.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Aucun rendement chiffré trouvé.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.mirepoix-ratio",
+      "sujet": "Mirepoix, ratio classique",
+      "type": "repere",
+      "enonce": "La mirepoix classique se compose de 2 parts d'oignon pour 1 de céleri et 1 de carotte, en poids.",
+      "valeur": {
+        "min": 2,
+        "max": 2,
+        "unite": "parts d'oignon pour 1 de céleri et 1 de carotte"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Source web générale uniquement, non recoupée par un manuel ; ne pas confondre avec les proportions par fond du tableau SDC.",
+      "sources": [
+        {
+          "titre": "What Is Mirepoix? French Aromatic Base and Ratio",
+          "organisme": "fond.kitchen",
+          "url": "https://fond.kitchen/glossary/mirepoix/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.refroidissement",
+      "sujet": "Refroidissement des fonds et sauces",
+      "type": "repere",
+      "enonce": "Règle suisse de branche (GVG) : de 65 °C à moins de 5 °C en 90 min ; la référence prudente du référentiel est de 50 à 10 °C en 2 h au plus (voir hygiene.temperature.refroidissement).",
+      "valeur": {
+        "min": 90,
+        "max": 90,
+        "unite": "min (de 65 à moins de 5 °C, GVG)"
+      },
+      "etat_poids": null,
+      "conditions": "Voir hygiene.temperature.refroidissement (référence : de 50 à 10 °C en 2 h au plus, aide-mémoires cantonaux AG et BS, prudent). Écart signalé : GVG 65 vers moins de 5 °C en 90 min ; fiche EDM 63 vers 10 °C en moins de 2 h ; base Sanji 65 vers 10 °C en 3 h. Appliquer la référence prudente tant que l'établissement n'a pas tranché. GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Abkühlen, Einfrieren und Auftauen » : valeur confirmée).",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Lebensmittel innert 90 Minuten von 65 °C auf weniger als 5 °C abkühlen",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "refroidir de +63 °C à +10 °C en moins de deux heures",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §6",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.conservation",
+      "sujet": "Conservation des fonds au froid",
+      "type": "repere",
+      "enonce": "Un fond refroidi vite se garde au froid de 2 à 4 jours selon la source ; sans refroidissement rapide, le fond s'emploie dans la journée.",
+      "valeur": {
+        "min": 2,
+        "max": 4,
+        "unite": "jours"
+      },
+      "etat_poids": null,
+      "conditions": "Fiche EDM : jusqu'à 3 j si refroidi en cellule. Support SDC : 48 h à +3 °C (règlement français). Base Sanji : 3 à 4 j. GVG : J+2 pour légumes cuits et produits précuits dont les sauces ; les fonds n'y sont pas nommés, la transposition aux fonds n'est donc pas confirmée. Valeur à fixer localement. GVG lue en texte intégral le 2026-10-04 (PDF p. 62, §6.3.1 « Maximale Lagerzeiten für die Kühlhaltung », ligne alignée par position dans la page : J+2 retrouvé pour les sauces, non pour les fonds).",
+      "sources": [
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "jusqu'à trois jours s'il a été refroidi en cellule",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §8",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.fonds.congelation",
+      "sujet": "Congélation des fonds",
+      "type": "repere",
+      "enonce": "La base Sanji donne 90 à 120 jours au congélateur pour fond et fumet maison (durée de qualité, non sanitaire).",
+      "valeur": {
+        "min": 90,
+        "max": 120,
+        "unite": "jours"
+      },
+      "etat_poids": null,
+      "conditions": "Une seule source (base Sanji), non recoupée.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §32 (fiche fond/fumet maison)",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.schema-meres",
+      "sujet": "Sauces mères, schéma",
+      "type": "definition",
+      "enonce": "Les sauces mères se classent par liquide et liaison : fond brun et fécule, velouté (fond blanc ou fumet, roux blanc), béchamel (lait, roux blanc), tomate (coulis, farine singée).",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Source unique, support de cours personnel lu sans citation ; schéma général à recouper avec un manuel de référence.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.roux-proportion",
+      "sujet": "Roux, proportions",
+      "type": "repere",
+      "enonce": "Un roux se fait à poids égaux de beurre et de farine ; le repère de cours est 70 g de chacun par litre de fond ou de lait.",
+      "valeur": {
+        "min": 70,
+        "max": 70,
+        "unite": "g de beurre et 70 g de farine par L de liquide"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Poids égaux confirmés ; la quantité par litre varie de 60 à 100 g selon l'épaisseur voulue (voir béchamel).",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "70 gr de beurre et 70 gr de farine",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "La sauce béchamel (fiche recette de restauration collective)",
+          "organisme": "Référentiel Restauration Collective (France)",
+          "url": "https://www.referentiel-restauration-collective.fr/recette/la-sauce-bechamel/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.roux-technique",
+      "sujet": "Roux, technique",
+      "type": "technique",
+      "enonce": "Cuire la farine dans le beurre fondu en remuant jusqu'à la couleur voulue (blanc, brun), refroidir le roux, verser dessus le liquide bouillant et cuire 1 à 2 minutes en remuant.",
+      "valeur": {
+        "min": 1,
+        "max": 2,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Une source dit 1 minute, l'autre 2 minutes de cuisson après mélange.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.bechamel-proportion",
+      "sujet": "Béchamel, proportion de roux",
+      "type": "repere",
+      "enonce": "La béchamel se fait à 60 à 100 g de beurre et autant de farine par litre de lait selon l'épaisseur : 70 g en restauration collective, 100 g pour une sauce de gratin.",
+      "valeur": {
+        "min": 60,
+        "max": 100,
+        "unite": "g de beurre et autant de farine par L de lait"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "70/70 : fiche de restauration collective. 50 g pour 50 cl (soit 100 g par litre) : source web. Fourchette large.",
+      "sources": [
+        {
+          "titre": "La sauce béchamel (fiche recette de restauration collective)",
+          "organisme": "Référentiel Restauration Collective (France)",
+          "url": "https://www.referentiel-restauration-collective.fr/recette/la-sauce-bechamel/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Dosage béchamel : les bonnes quantités",
+          "organisme": "maitreblogueur.fr",
+          "url": "https://www.maitreblogueur.fr/actu/342/dosage-bechamel-quelles-quantites-pour-une-sauce-parfaite",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.bechamel-technique",
+      "sujet": "Béchamel, technique",
+      "type": "technique",
+      "enonce": "Verser le lait chaud sur le roux, jamais l'inverse, en fouettant sans arrêt dès le départ ; cuire environ 20 min pour une fiche de 10 L ; la sauce doit être lisse et nappante avant l'assaisonnement.",
+      "valeur": {
+        "min": 20,
+        "max": 20,
+        "unite": "min de cuisson (fiche pour 10 L)"
+      },
+      "etat_poids": null,
+      "conditions": "Durée valable pour la fiche de 10 L de lait ; elle varie avec le volume.",
+      "sources": [
+        {
+          "titre": "La sauce béchamel (fiche recette de restauration collective)",
+          "organisme": "Référentiel Restauration Collective (France)",
+          "url": "https://www.referentiel-restauration-collective.fr/recette/la-sauce-bechamel/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.espagnole",
+      "sujet": "Espagnole",
+      "type": "definition",
+      "enonce": "L'espagnole est un fond brun additionné de tomates, lié au roux, base des sauces brunes classiques.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Aucune proportion de roux ni durée trouvées : voir lacunes.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.demi-glace",
+      "sujet": "Demi-glace, réduction",
+      "type": "repere",
+      "enonce": "La demi-glace est un fond brun lié (ou une espagnole) réduit lentement de moitié.",
+      "valeur": {
+        "min": 50,
+        "max": 50,
+        "unite": "% de réduction du volume"
+      },
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "fond brun lié réduit de moitié",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.tomate-conservation",
+      "sujet": "Sauce tomate, conservation",
+      "type": "repere",
+      "enonce": "Sauce tomate maison : jour de production + 2 selon la GVG ; +3 (SO) ou +4 (LU) selon les cantons ; base Sanji 4 à 5 j au froid et 90 à 120 jours congelée, sans trancher.",
+      "valeur": {
+        "min": 2,
+        "max": 5,
+        "unite": "jours au froid après le jour de production"
+      },
+      "etat_poids": null,
+      "conditions": "Écart non tranché entre GVG (+2), cantons (SO +3, LU +4, voir hygiene.duree.sauces-cuites) et base Sanji (4 à 5 j, source unique pour la tomate). Voir sauces-cuissons.sauces.vorgekocht-conservation. À fixer localement. GVG lue en texte intégral le 2026-10-04 (PDF p. 62, §6.3.1 « Maximale Lagerzeiten für die Kühlhaltung », ligne alignée par position dans la page : valeur +2 confirmée pour les produits précuits dont les sauces).",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §32.1 sauce tomate maison",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.hollandaise-proportion",
+      "sujet": "Hollandaise, proportion",
+      "type": "repere",
+      "enonce": "Une hollandaise se fait à 12 à 16 jaunes par kg de beurre clarifié (environ 2 jaunes pour 125 g).",
+      "valeur": {
+        "min": 12,
+        "max": 16,
+        "unite": "jaunes par kg de beurre clarifié"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "12 jaunes par kg (support SDC) ; 2 jaunes pour 125 g, soit 16 par kg (sources web). Eau ou réduction et citron à doser au goût.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Comment réaliser une sauce hollandaise",
+          "organisme": "Radio-Canada, Mordu",
+          "url": "https://ici.radio-canada.ca/mordu/techniques/3192/realiser-sauce-hollandaise",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.hollandaise-temperature",
+      "sujet": "Hollandaise, température",
+      "type": "repere",
+      "enonce": "Les jaunes se fouettent sur la chaleur vers 60 à 65 °C ; au-dessus d'environ 80 °C ils coagulent et l'émulsion casse.",
+      "valeur": {
+        "min": 60,
+        "max": 65,
+        "unite": "°C"
+      },
+      "etat_poids": null,
+      "conditions": "Coagulation vers 80 °C confirmée par la fiche sur les liaisons.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "au-dessus la liaison est détruite par la coagulation",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Sauce hollandaise réussie et facile à rattraper",
+          "organisme": "darocca.fr",
+          "url": "https://darocca.fr/sauce-hollandaise-reussie-et-facile-a-rattraper",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.hollandaise-maintien",
+      "sujet": "Hollandaise, maintien",
+      "type": "repere",
+      "enonce": "Une hollandaise ne se tient pas longtemps : 30 minutes au bain-marie vers 55 °C au plus selon une source web.",
+      "valeur": {
+        "min": 30,
+        "max": 30,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Source web seule. La GVG impose de consommer le jour même les plats à œufs crus ou peu cuits ; la règle de 65 °C pendant 3 h concerne les plats cuits, pas cette émulsion. À fixer par l'établissement. GVG lue en texte intégral le 2026-10-04 (PDF p. 62, §6.3.1 « Maximale Lagerzeiten für die Kühlhaltung », ligne alignée par position dans la page : plats à œufs crus à consommer le jour de production ; maintien au chaud 65 °C max 3 h, PDF p. 26, section « Garen, Regenerieren und Warmhalten » : confirmés).",
+      "sources": [
+        {
+          "titre": "Comment réaliser une sauce hollandaise",
+          "organisme": "Radio-Canada, Mordu",
+          "url": "https://ici.radio-canada.ca/mordu/techniques/3192/realiser-sauce-hollandaise",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.hollandaise-rattrapage",
+      "sujet": "Hollandaise et béarnaise, rattrapage",
+      "type": "technique",
+      "enonce": "Une sauce tournée se rattrape avec un peu d'eau, ou en remontant un sabayon avant d'y incorporer la sauce tournée ; ajouter le beurre hors du feu et progressivement.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.beurre-blanc",
+      "sujet": "Beurre blanc",
+      "type": "technique",
+      "enonce": "Réduire le vin blanc et le citron avec l'assaisonnement, puis monter avec du beurre froid en parcelles au fouet ; un beurre viré se rattrape avec un peu de beurre frais en parcelles.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Cause d'échec citée : trop de liquide ou chaleur trop forte.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.mayonnaise-proportion",
+      "sujet": "Mayonnaise, proportion",
+      "type": "repere",
+      "enonce": "La mayonnaise se fait à 4 à 6 jaunes par litre d'huile, avec moutarde ; tous les éléments à même température.",
+      "valeur": {
+        "min": 4,
+        "max": 6,
+        "unite": "jaunes par L d'huile"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Lecture d'un tableau à colonnes brouillées, confiance moyenne. Source web : 1 jaune pour environ 1 volume d'huile par part d'œuf.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "The Principles Of Emulsification",
+          "organisme": "chefsnotes.com",
+          "url": "https://chefsnotes.com/emulsification-principles/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.mayonnaise-securite",
+      "sujet": "Mayonnaise, œufs",
+      "type": "regle",
+      "enonce": "Pour mayonnaise et préparations aux œufs crus, employer des œufs très frais ou pasteurisés et consommer le jour de production.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Rappel suisse pour les plats à œufs crus ou peu cuits. GVG lue en texte intégral le 2026-10-04 (PDF p. 27, section « Eier » (œufs très frais ou pasteurisés) et PDF p. 62, §6.3.1 « Maximale Lagerzeiten für die Kühlhaltung », ligne alignée par position dans la page (consommation le jour de production) : confirmés).",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "ganz frische oder pasteurisierte Eier verwenden",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Hygienetipps für den Umgang mit Eiern",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/tipps-tricks/hygienetipps-fuer-den-umgang-mit-eiern/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.vinaigrette-proportion",
+      "sujet": "Vinaigrette, proportion",
+      "type": "repere",
+      "enonce": "Une vinaigrette se fait avec environ 3 à 4 parts d'huile pour 1 de vinaigre ; le cours donne 1 L d'huile pour 0,35 L de vinaigre.",
+      "valeur": {
+        "min": 2.9,
+        "max": 4,
+        "unite": "parts d'huile pour 1 part de vinaigre"
+      },
+      "etat_poids": null,
+      "conditions": "SDC : 1 L / 0,35 L, soit 2,9 : 1. Sources web : 3 : 1 à 4 : 1.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "Everything I Know About Vinaigrette",
+          "organisme": "chefsnotes.com",
+          "url": "https://chefsnotes.com/everything-i-know-about-vinaigrette/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.emulsion-principe",
+      "sujet": "Émulsions, principe",
+      "type": "technique",
+      "enonce": "Une émulsion est la suspension stable de deux liquides non miscibles ; le jaune (lécithine) et la moutarde stabilisent ; la vinaigrette est instable, la mayonnaise stable.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        },
+        {
+          "titre": "The Principles Of Emulsification",
+          "organisme": "chefsnotes.com",
+          "url": "https://chefsnotes.com/emulsification-principles/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "haute",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.salade-conservation",
+      "sujet": "Sauces à salade, conservation",
+      "type": "repere",
+      "enonce": "La GVG donne jour de production + 6 jours pour les sauces à salade au froid.",
+      "valeur": {
+        "min": 6,
+        "max": 6,
+        "unite": "jours après le jour de production"
+      },
+      "etat_poids": null,
+      "conditions": "Application à une vinaigrette sans œuf cru ; une sauce à œuf cru se consomme le jour même. GVG lue en texte intégral le 2026-10-04 (PDF p. 62, §6.3.1 « Maximale Lagerzeiten für die Kühlhaltung », ligne alignée par position dans la page : J+6 confirmé pour les Salatsaucen).",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Salatsaucen Produktionstag + 6 Tage",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.vorgekocht-conservation",
+      "sujet": "Sauces cuites, conservation",
+      "type": "repere",
+      "enonce": "Sauces cuites : jour de production + 2 selon la GVG ; +3 (SO) ou +4 (LU) selon les cantons ; base Sanji 4 à 5 j pour la sauce tomate, sans trancher.",
+      "valeur": {
+        "min": 2,
+        "max": 5,
+        "unite": "jours après le jour de production"
+      },
+      "etat_poids": null,
+      "conditions": "Trois valeurs coexistent et ne sont pas tranchées : GVG +2 ; cantons SO +3 et LU +4 (voir hygiene.duree.sauces-cuites, sources cantonales non reprises ici) ; base Sanji 4 à 5 j (sauce tomate). Repère d'orientation, la décision se prend à l'examen sensoriel ; à fixer par l'établissement et le canton. Béchamel : 3 j selon la fiche RRC. GVG lue en texte intégral le 2026-10-04 (PDF p. 62, §6.3.1 « Maximale Lagerzeiten für die Kühlhaltung », ligne alignée par position dans la page : valeur +2 confirmée).",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Produktionstag + 2 Tage",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "La sauce béchamel (fiche recette de restauration collective)",
+          "organisme": "Référentiel Restauration Collective (France)",
+          "url": "https://www.referentiel-restauration-collective.fr/recette/la-sauce-bechamel/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §32.1 sauce tomate maison",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.sauces.reheating",
+      "sujet": "Sauces, réchauffage",
+      "type": "repere",
+      "enonce": "Remettre les sauces à 70 °C à cœur au moins 2 minutes au réchauffage ; une fiche française demande de passer de 10 à 63 °C en 1 h.",
+      "valeur": {
+        "min": 70,
+        "max": 70,
+        "unite": "°C à cœur, 2 min"
+      },
+      "etat_poids": null,
+      "conditions": "GVG : au moins 70 °C pendant 2 minutes lors du régénérer ; la durée de 2 min vient de la GVG seule (voir sauces-cuissons.securite.noyau-70). Fiche RRC : 63 °C visés en 1 h. GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Garen, Regenerieren und Warmhalten » : confirmé).",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "mindestens 2 Minuten eine Kerntemperatur von mindestens 70 °C",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "La sauce béchamel (fiche recette de restauration collective)",
+          "organisme": "Référentiel Restauration Collective (France)",
+          "url": "https://www.referentiel-restauration-collective.fr/recette/la-sauce-bechamel/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.liaisons.beurre-manie",
+      "sujet": "Beurre manié",
+      "type": "technique",
+      "enonce": "Le beurre manié est un mélange cru de beurre et de farine à poids égaux, jeté par petits morceaux dans le liquide bouillant en fouettant, puis cuit 5 à 6 minutes ; il sert à rectifier une liaison.",
+      "valeur": {
+        "min": 5,
+        "max": 6,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Poids égaux de beurre et de farine.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.liaisons.amidon-liquide",
+      "sujet": "Liaison à l'amidon",
+      "type": "technique",
+      "enonce": "Fécule, arrow-root ou maïzena se délaient à froid puis se versent en filet dans le liquide bouillant en fouettant ; l'épaississement démarre vers 50 °C et est maximal à l'ébullition.",
+      "valeur": {
+        "min": 50,
+        "max": 50,
+        "unite": "°C, début de l'épaississement"
+      },
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.liaisons.amidon-effets",
+      "sujet": "Amidon, facteurs",
+      "type": "regle",
+      "enonce": "Un acide réduit la liaison à l'amidon (lier avant d'acidifier, finir au citron) ; un chauffage rapide donne une liaison ferme, une cuisson prolongée la liquéfie ; farine opaque, fécule visqueuse, crème de riz translucide.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.liaisons.jaune-oeuf",
+      "sujet": "Liaison au jaune d'œuf",
+      "type": "technique",
+      "enonce": "Le jaune lie vers 80 °C au plus ; au-delà il coagule ; avec de la farine, le mélange supporte 100 °C pendant 2 à 3 minutes. Tempérer les jaunes avec un peu de liquide chaud avant de verser sur le reste.",
+      "valeur": {
+        "min": 80,
+        "max": 80,
+        "unite": "°C maximum sans farine"
+      },
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.liaisons.creme-reduction",
+      "sujet": "Liaison à la crème",
+      "type": "technique",
+      "enonce": "Pour une sauce de poisson : réduire le jus de cuisson aux 3/4, ajouter la crème, réduire de moitié, puis monter au beurre.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Enchaînement de réductions donné par le support SDC.",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.liaisons.monter-au-beurre",
+      "sujet": "Monter au beurre",
+      "type": "technique",
+      "enonce": "Monter au beurre, c'est incorporer du beurre froid en parcelles dans la sauce en finition pour la rendre onctueuse ; le gras donne du velouté mais n'est pas une liaison stable.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.liaisons.reduction",
+      "sujet": "Liaison par réduction",
+      "type": "technique",
+      "enonce": "La réduction concentre sucs et gélatine d'un fond riche en gélatine jusqu'à une consistance sirupeuse ; elle renforce saveur, couleur et épaisseur.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.pates.pesto-proportion",
+      "sujet": "Pesto genovese, proportions",
+      "type": "repere",
+      "enonce": "Pesto genovese préparé cru : environ 50 g de basilic pour 600 g de pâtes assaisonnées ; avec parmesan, pecorino, huile d'olive, pignons et ail ; pilé ou mixé sans cuisson.",
+      "valeur": {
+        "min": 50,
+        "max": 50,
+        "unite": "g de basilic pour 600 g de pâtes"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "État des pâtes non précisé par la source (600 g de pâtes assaisonnées). Page ouverte le 2026-10-04 : seule la proportion de basilic est retenue ; les autres quantités ne sont pas reprises.",
+      "sources": [
+        {
+          "titre": "Pesto genovese, recette du Consortium",
+          "organisme": "Consorzio del Pesto Genovese (via mangiareinliguria.it)",
+          "url": "https://www.mangiareinliguria.it/pesto-genovese/ricetta-pesto-genovese",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.pates.pesto-conservation",
+      "sujet": "Pesto, conservation",
+      "type": "repere",
+      "enonce": "La base Sanji donne 5 à 7 jours au froid pour un pesto maison, sans congélation (texture) ; allergène fruits à coque.",
+      "valeur": {
+        "min": 5,
+        "max": 7,
+        "unite": "jours"
+      },
+      "etat_poids": null,
+      "conditions": "Source unique.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §32.1 pesto maison",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.pates.ragu-composition",
+      "sujet": "Ragù bolognaise, composition",
+      "type": "repere",
+      "enonce": "Ragù bolognaise : environ 400 g de bœuf haché gros pour 6 personnes, avec pancetta, mirepoix (oignon, carotte, céleri), passata, vin et bouillon léger ; cuisson lente.",
+      "valeur": {
+        "min": 400,
+        "max": 400,
+        "unite": "g de bœuf pour 6 personnes"
+      },
+      "etat_poids": "cru_net",
+      "conditions": "Page ouverte le 2026-10-04 : seule la proportion de bœuf est retenue, les autres quantités ne sont pas reprises. Durée de cuisson non trouvée : voir lacunes.",
+      "sources": [
+        {
+          "titre": "Ragù classico bolognese (recette déposée, mise à jour du 20.04.2023)",
+          "organisme": "Accademia Italiana della Cucina",
+          "url": "https://www.accademiaitalianadellacucina.it/it/ricette/ricetta/rag%C3%B9-classico-bolognese",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.pates.pilaf-fond",
+      "sujet": "Riz pilaf, fond",
+      "type": "repere",
+      "enonce": "Pilaf : repère d'environ 1,4 L de fond blanc par kg de riz sec, en cuisson à absorption après suée d'oignon au beurre.",
+      "valeur": {
+        "min": 1.4,
+        "max": 1.4,
+        "unite": "L de fond par kg de riz"
+      },
+      "etat_poids": "sec",
+      "conditions": "Repère interne Sanji tiré d'une fiche type, source unique non recoupée ; valable pour un pilaf et non pour un risotto. Plus aucun nom de plat repris.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §34 (fiche type de pilaf)",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.assaisonnement.equilibre",
+      "sujet": "Équilibre et rectification",
+      "type": "technique",
+      "enonce": "On ajuste une sauce sur quatre axes : salé, acide, sucré, amer ; vin, alcool, fruits, épices, jus de citron en finition, liaison rectifiée en fin de cuisson.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Les fonds de cuisine, liaisons et sauces (support de cours)",
+          "organisme": "lesiteduchef.info (France)",
+          "url": "https://www.lesiteduchef.info/assets/files/Les-fondsliaisonsetsauces.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.assaisonnement.degustation",
+      "sujet": "Dégustation avant assaisonnement",
+      "type": "regle",
+      "enonce": "Assaisonner en dernier, sur une sauce ayant sa consistance nappante, car réduction et cuisson concentrent le sel.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "La sauce béchamel (fiche recette de restauration collective)",
+          "organisme": "Référentiel Restauration Collective (France)",
+          "url": "https://www.referentiel-restauration-collective.fr/recette/la-sauce-bechamel/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Les fonds (fiche de technologie culinaire)",
+          "organisme": "École des métiers (France)",
+          "url": "https://www.ecoledesmetiers.fr/sites/default/files/ressources/fichiers/2019-07/fonds.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "manuel"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.sauter",
+      "sujet": "Sauter",
+      "type": "technique",
+      "enonce": "Sauter : feu vif, peu de gras, petites pièces saisies rapidement ; adapté aux émincés.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.rotir",
+      "sujet": "Rôtir",
+      "type": "technique",
+      "enonce": "Rôtir : chaleur sèche et arrosage, au four ou à la rôtissoire, pour les pièces nobles ; repos de 10 à 15 min avant tranchage.",
+      "valeur": {
+        "min": 10,
+        "max": 15,
+        "unite": "min de repos"
+      },
+      "etat_poids": null,
+      "conditions": "Source unique.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14, temps indicatifs",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.pocher",
+      "sujet": "Pocher",
+      "type": "repere",
+      "enonce": "Pocher : liquide sans ébullition entre 65 et 80 °C pour œufs, poisson, volaille, fruits ; filet de poisson de 150 g en 8 à 12 min selon l'épaisseur.",
+      "valeur": {
+        "min": 65,
+        "max": 80,
+        "unite": "°C"
+      },
+      "etat_poids": null,
+      "conditions": "Source unique.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.mijoter",
+      "sujet": "Mijoter et bouillir (frémissement)",
+      "type": "repere",
+      "enonce": "Frémissement vers 95 à 98 °C, jamais de gros bouillons ; pièce à bouillir 3 à 4 h avec écumage.",
+      "valeur": {
+        "min": 95,
+        "max": 98,
+        "unite": "°C"
+      },
+      "etat_poids": null,
+      "conditions": "Source unique.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.braiser",
+      "sujet": "Braiser",
+      "type": "repere",
+      "enonce": "Braiser : saisir puis cuire longuement à couvert avec peu de liquide ; épaule, jarret, joue : 2,5 à 4 h, jusqu'à ce que la viande se détache.",
+      "valeur": {
+        "min": 150,
+        "max": 240,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Le résultat se juge à la texture, pas à l'horloge. Source unique.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.etuver",
+      "sujet": "Étuver",
+      "type": "repere",
+      "enonce": "Étuver : à couvert, peu de liquide, sans coloration ; légumes tels que courgettes et poireaux en 8 à 15 min.",
+      "valeur": {
+        "min": 8,
+        "max": 15,
+        "unite": "min"
+      },
+      "etat_poids": null,
+      "conditions": "Source unique.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.griller",
+      "sujet": "Griller",
+      "type": "repere",
+      "enonce": "Griller : rayonnement intense pour pièces minces ; une entrecôte de 2 à 3 cm demande 3 à 4 min par face pour saignant, selon l'épaisseur.",
+      "valeur": {
+        "min": 3,
+        "max": 4,
+        "unite": "min par face"
+      },
+      "etat_poids": null,
+      "conditions": "Source unique.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.frire",
+      "sujet": "Frire, températures",
+      "type": "repere",
+      "enonce": "Friture en deux temps : préfriture à 130-150 °C puis finition à 170-180 °C (frites 3 à 4 min, base Sanji) ; plafond du bain : 170 °C (aide-mémoires AG et BS) ou 175 °C (GVG).",
+      "valeur": {
+        "min": 130,
+        "max": 180,
+        "unite": "°C"
+      },
+      "etat_poids": null,
+      "conditions": "Écart signalé : base Sanji jusqu'à 180 °C, GVG 175 °C au plus, aide-mémoires cantonaux AG et BS 170 °C au plus (voir hygiene.temperature.friture, source cantonale non reprise ici). Fourchette large gardée ; le plafond le plus bas relevé est 170 °C ; à fixer par l'établissement et le canton. GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Garen, Regenerieren und Warmhalten », section « Frittieröl/Frittierfett » : 175 °C confirmé).",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Maximaltemperatur von 175 °C nicht überschritten",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.huile-controle",
+      "sujet": "Huile de friture, contrôle",
+      "type": "regle",
+      "enonce": "Contrôler régulièrement l'huile (bandelettes ou testeur) ; limite de composés polaires : 27 %.",
+      "valeur": {
+        "min": 27,
+        "max": 27,
+        "unite": "% de composés polaires"
+      },
+      "etat_poids": null,
+      "conditions": "GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Garen, Regenerieren und Warmhalten », section « Frittieröl/Frittierfett » : 27 % confirmé).",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Höchstwert polare Anteile 27 %",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.vapeur",
+      "sujet": "Vapeur et blanchir",
+      "type": "repere",
+      "enonce": "Vapeur : cuisson douce, peu de lessivage, sans temps de cuisson chiffré ici ; la valeur donnée est seulement le temps de blanchiment des légumes verts (1 à 3 min, puis rafraîchir).",
+      "valeur": {
+        "min": 1,
+        "max": 3,
+        "unite": "min de blanchiment (pas un temps de cuisson vapeur)"
+      },
+      "etat_poids": null,
+      "conditions": "Source unique. Aucune durée de cuisson vapeur trouvée.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.reactions",
+      "sujet": "Seuils physiques de cuisson",
+      "type": "repere",
+      "enonce": "Coagulation des protéines vers 60-70 °C, collagène en gélatine au-delà de 60 °C sur longue durée, Maillard au-dessus de 140 °C, caramélisation au-dessus de 160 °C.",
+      "valeur": {
+        "min": 60,
+        "max": 160,
+        "unite": "°C (jalons)"
+      },
+      "etat_poids": null,
+      "conditions": "Jalons de référence, non recoupés.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14, physique utile",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.sonde",
+      "sujet": "Sonde à cœur",
+      "type": "regle",
+      "enonce": "La température à cœur relevée à la sonde fait foi sur l'horloge ; le temps au poids ne vaut qu'au four traditionnel.",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Source unique (base Sanji), non recoupée. La GVG (lue en texte intégral le 2026-10-04) ne dit pas que la sonde prime sur le temps ; elle demande seulement une mesure à cœur par sondage (p. 26) : lien retiré.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14, temps indicatifs",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "general",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.sous-vide-minimum",
+      "sujet": "Sous vide, températures minimales",
+      "type": "repere",
+      "enonce": "Sous vide : minimum 55 °C pour les viandes et 60 °C pour la volaille, et jamais plus de 4 h en dessous de 55 °C.",
+      "valeur": {
+        "min": 55,
+        "max": 60,
+        "unite": "°C"
+      },
+      "etat_poids": null,
+      "conditions": "Directive canadienne (ministère de la Santé du Nouveau-Brunswick, adoptée par le BCCDC), non suisse ; page ouverte le 2026-10-04 : 55 °C minimum, 4 h au plus sous 55 °C. La GVG exige seulement des recettes définies et un refroidissement sous 5 °C. GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Rezepturen und Zubereitungshinweise » : principes seulement, aucune température).",
+      "sources": [
+        {
+          "titre": "Lignes directrices de salubrité pour la cuisson sous vide dans les restaurants au Nouveau-Brunswick",
+          "organisme": "Ministère de la Santé du Nouveau-Brunswick (Canada), version française de novembre 2017, hébergée et adoptée par le BCCDC (Colombie-Britannique)",
+          "url": "https://www.bccdc.ca/resource-gallery/Documents/Educational%20Materials/EH/FPS/Food/Sous%20Vide%20Guidelines%20FRENCH%20TRANSLATION.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "Sous-vide-Garen",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.sous-vide-pasteurisation",
+      "sujet": "Sous vide, pasteurisation",
+      "type": "repere",
+      "enonce": "La sécurité vient du couple température et temps : poulet à 65 °C à cœur, environ 28 min dans un bain à 67 °C ; 63 °C pendant 9,2 min ou 66 °C pendant 2,8 min.",
+      "valeur": {
+        "min": 63,
+        "max": 66,
+        "unite": "°C à cœur"
+      },
+      "etat_poids": null,
+      "conditions": "Les durées sont des temps à cœur : ajouter 1 h à partir de réfrigéré, 2 h de congelé (Anova). L'exemple du poulet (28 min à 67 °C) est dans la directive canadienne ouverte le 2026-10-04 ; les couples 63 °C 9,2 min et 66 °C 2,8 min n'ont pas été retrouvés dans ce texte et viennent d'Anova seule.",
+      "sources": [
+        {
+          "titre": "Lignes directrices de salubrité pour la cuisson sous vide dans les restaurants au Nouveau-Brunswick",
+          "organisme": "Ministère de la Santé du Nouveau-Brunswick (Canada), version française de novembre 2017, hébergée et adoptée par le BCCDC (Colombie-Britannique)",
+          "url": "https://www.bccdc.ca/resource-gallery/Documents/Educational%20Materials/EH/FPS/Food/Sous%20Vide%20Guidelines%20FRENCH%20TRANSLATION.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Pasteurization with Sous Vide",
+          "organisme": "Anova Culinary",
+          "url": "https://anovaculinary.com/pages/sous-vide-pasteurization-guide",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.cuisson.sous-vide-refroidissement",
+      "sujet": "Sous vide, refroidissement et stockage",
+      "type": "repere",
+      "enonce": "Après sous vide, refroidir à moins de 3 °C en 2 h (eau et glace à parts égales) ; GVG : moins de 5 °C ; stocker à 3,3 °C au plus, 3 jours (7 max si pasteurisé).",
+      "valeur": {
+        "min": 2,
+        "max": 2,
+        "unite": "h pour descendre sous 3 °C"
+      },
+      "etat_poids": null,
+      "conditions": "Directive canadienne ; page ouverte le 2026-10-04 : moins de 3 °C en 2 h, stockage 3,3 °C au plus. La GVG ne donne ni durée ni stockage, seulement moins de 5 °C au choc thermique ou à l'eau glacée. GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Rezepturen und Zubereitungshinweise » : confirmé, sans durée).",
+      "sources": [
+        {
+          "titre": "Lignes directrices de salubrité pour la cuisson sous vide dans les restaurants au Nouveau-Brunswick",
+          "organisme": "Ministère de la Santé du Nouveau-Brunswick (Canada), version française de novembre 2017, hébergée et adoptée par le BCCDC (Colombie-Britannique)",
+          "url": "https://www.bccdc.ca/resource-gallery/Documents/Educational%20Materials/EH/FPS/Food/Sous%20Vide%20Guidelines%20FRENCH%20TRANSLATION.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.securite.noyau-70",
+      "sujet": "Température à cœur de base",
+      "type": "regle",
+      "enonce": "Viande, volaille, poisson et fruits de mer se chauffent à au moins 70 °C à cœur ; la durée de 2 minutes vient de la GVG ; exceptions connues comme la viande de boucherie rosée.",
+      "valeur": {
+        "min": 70,
+        "max": 70,
+        "unite": "°C à cœur, 2 min"
+      },
+      "etat_poids": null,
+      "conditions": "70 °C : OSAV (page BLV) et GVG, sans durée côté OSAV. 2 min : GVG seule (lue en texte intégral) et base Sanji ; non recoupée par l'OSAV ni par les aide-mémoires cantonaux (hygiene.temperature.cuisson-coeur : durée non imposée). GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Garen, Regenerieren und Warmhalten » et PDF p. 38, tableau des dangers : 70 °C pendant 2 min confirmé).",
+      "sources": [
+        {
+          "titre": "Hygiene (page d'information)",
+          "organisme": "OSAV / BLV",
+          "url": "https://www.blv.admin.ch/blv/de/home/lebensmittel-und-ernaehrung/lebensmittelsicherheit/krankheitserreger-und-hygiene/hygiene.html",
+          "consulte": "2026-10-04",
+          "extrait": "auf mindestens 70 Grad erhitzen",
+          "type_source": "officielle"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "mindestens 2 Minuten eine Kerntemperatur von mindestens 70 °C",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §6",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.securite.volaille-porc",
+      "sujet": "Volaille et porc, cible de cuisson",
+      "type": "repere",
+      "enonce": "Volaille et porc se cuisent à 72 °C et plus à cœur d'après Swissmilk ; la base Sanji donne 72-75 °C pour la volaille et 62-65 °C pour le porc.",
+      "valeur": {
+        "min": 62,
+        "max": 75,
+        "unite": "°C à cœur"
+      },
+      "etat_poids": null,
+      "conditions": "Écart sur le porc : 62-65 °C (base Sanji, pièce rosée) sous le seuil de 70 °C de la GVG, utilisable seulement comme exception documentée. GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Garen, Regenerieren und Warmhalten » : seuil 70 °C et exception du Schlachtfleisch rosa confirmés).",
+      "sources": [
+        {
+          "titre": "Garstufen Fleisch",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/tipps-tricks/garstufen-fleisch/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.securite.boeuf-garstufen",
+      "sujet": "Bœuf, degrés de cuisson",
+      "type": "repere",
+      "enonce": "Swissmilk : bleu dès 45 °C, saignant dès 50 °C, à point dès 60 °C (bœuf, gibier, agneau, canard) ; base Sanji : rosé 52-54 °C, à point 60-65 °C ; agneau rosé 56-58 °C.",
+      "valeur": {
+        "min": 45,
+        "max": 65,
+        "unite": "°C à cœur"
+      },
+      "etat_poids": null,
+      "conditions": "Sous le seuil 70 °C de la GVG : cuissons admises comme exceptions pour viande de boucherie entière. GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Garen, Regenerieren und Warmhalten » : seuil 70 °C et exception du Schlachtfleisch rosa confirmés).",
+      "sources": [
+        {
+          "titre": "Garstufen Fleisch",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/tipps-tricks/garstufen-fleisch/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.securite.poisson",
+      "sujet": "Poisson, cible de cuisson",
+      "type": "repere",
+      "enonce": "Cible à cœur du poisson : 55-60 °C (base Sanji) ; 60 °C minimum (source web) ; 70 °C selon le texte général de l'OSAV.",
+      "valeur": {
+        "min": 55,
+        "max": 70,
+        "unite": "°C à cœur"
+      },
+      "etat_poids": null,
+      "conditions": "Écart large, source suisse officielle non précise par espèce. Confiance faible.",
+      "sources": [
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        },
+        {
+          "titre": "Kerntemperatur Tabellen für Fleisch, Geflügel, Wild und Fisch",
+          "organisme": "kerntemperatur-tabelle.de",
+          "url": "https://kerntemperatur-tabelle.de/kerntemperatur-tabellen/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "web"
+        },
+        {
+          "titre": "Hygiene (page d'information)",
+          "organisme": "OSAV / BLV",
+          "url": "https://www.blv.admin.ch/blv/de/home/lebensmittel-und-ernaehrung/lebensmittelsicherheit/krankheitserreger-und-hygiene/hygiene.html",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "officielle"
+        }
+      ],
+      "confiance": "faible",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.securite.oeufs",
+      "sujet": "Œufs, cuisson et plats à œuf cru",
+      "type": "regle",
+      "enonce": "Plats à œuf cru ou peu cuit : œufs très frais ou pasteurisés, froid, consommation rapide. Œuf mollet : environ 6 min pour un œuf moyen, départ eau tiède, temps compté dès l'ébullition, sans piquer ni passer sous l'eau froide (GalloSuisse) ; œuf poché : 3 à 4 min à l'eau frémissante (base Sanji).",
+      "valeur": null,
+      "etat_poids": null,
+      "conditions": "Écart avec la base Sanji (3 à 4 min, calibre et départ non précisés) : pour le mollet, la durée dépend du calibre, du départ et de la quantité ; 6 min vaut pour un calibre moyen, départ eau tiède (voir legumes.oeuf.mollet). Température à cœur visée : aucune valeur trouvée, voir lacunes. GVG lue en texte intégral le 2026-10-04 (PDF p. 27, section « Eier » : œufs frais ou pasteurisés pour les plats crus ; PDF p. 62, §6.3.1 « Maximale Lagerzeiten für die Kühlhaltung », ligne alignée par position dans la page : consommation le jour de production).",
+      "sources": [
+        {
+          "titre": "Hygienetipps für den Umgang mit Eiern",
+          "organisme": "Swissmilk",
+          "url": "https://www.swissmilk.ch/de/rezepte-kochideen/tipps-tricks/hygienetipps-fuer-den-umgang-mit-eiern/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "ABC des œufs, section « Eier perfekt kochen »",
+          "organisme": "GalloSuisse",
+          "url": "https://www.gallosuisse.ch/it/oeufs/abc-des-oeufs",
+          "consulte": "2026-10-04",
+          "extrait": "Bei mittelgrossen Eiern genügen rund sechs Minuten",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §14, temps indicatifs",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    },
+    {
+      "id": "sauces-cuissons.securite.maintien-chaud",
+      "sujet": "Maintien au chaud",
+      "type": "repere",
+      "enonce": "Maintenir au chaud à 65 °C à cœur pendant 3 h au plus (GVG) ; une fiche française vise 63 °C.",
+      "valeur": {
+        "min": 65,
+        "max": 65,
+        "unite": "°C à cœur, 3 h max"
+      },
+      "etat_poids": null,
+      "conditions": "Écart : fiche RRC 63 °C, GVG 65 °C ; valeur GVG gardée. GVG lue en texte intégral le 2026-10-04 (PDF p. 26, section « Garen, Regenerieren und Warmhalten » : 65 °C, 3 h au plus confirmés).",
+      "sources": [
+        {
+          "titre": "Leitlinie Gute Verfahrenspraxis im Gastgewerbe (GVG), approuvée par l'OSAV le 21.09.2018",
+          "organisme": "GastroSuisse, hotelleriesuisse, CafetierSuisse, SVG",
+          "url": "https://gastrosuisse.ch/assets/de/branchenwissen/hygiene-und-lebensmittelsicherheit/selbstkontrolle/gastrosuisse-merkblatt-hygiene-verfahrenspraxis-im-gastgewerbe-gvg-hygiene-leitlinie.pdf",
+          "consulte": "2026-10-04",
+          "extrait": "bei mindestens 65 °C Kerntemperatur während höchstens 3 Stunden",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "La sauce béchamel (fiche recette de restauration collective)",
+          "organisme": "Référentiel Restauration Collective (France)",
+          "url": "https://www.referentiel-restauration-collective.fr/recette/la-sauce-bechamel/",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "professionnelle"
+        },
+        {
+          "titre": "Base officielle production, stock, hygiène",
+          "organisme": "Sanji (base métier)",
+          "url": "base-officielle-production-stock-hygiene.md §6",
+          "consulte": "2026-10-04",
+          "extrait": "",
+          "type_source": "base_sanji"
+        }
+      ],
+      "confiance": "moyenne",
+      "statut": "a_valider",
+      "portee": "a_valider_localement",
+      "usage_calcul": false
+    }
+  ],
+  "lacunes": [
+    {
+      "sujet": "Sauce espagnole, proportions de roux",
+      "raison": "Aucune quantité trouvée dans les sources lues (seulement le principe fond brun, tomates, roux)."
+    },
+    {
+      "sujet": "Sauce tomate, proportions et durée",
+      "raison": "Seul le principe (coulis lié à la farine singée) et la conservation de la base Sanji."
+    },
+    {
+      "sujet": "Bouillon de légumes, proportions et durée",
+      "raison": "Aucun chiffre trouvé."
+    },
+    {
+      "sujet": "Jus de rôti et jus lié, rendement",
+      "raison": "Pas de proportion ni de durée trouvée."
+    },
+    {
+      "sujet": "Glace de viande, rendement de réduction",
+      "raison": "Pas de rapport volume initial/final trouvé."
+    },
+    {
+      "sujet": "Roux blond et brun, durées de cuisson",
+      "raison": "Seules les couleurs sont citées, sans durée ni température."
+    },
+    {
+      "sujet": "Sauces de pâtes : beurre-citron, huile-ail, crème",
+      "raison": "Aucune source fiable lue avec des proportions ; pas de chiffre inventé."
+    },
+    {
+      "sujet": "Risotto, rapport fond/riz et durée",
+      "raison": "Seul un pilaf est chiffré dans la base Sanji ; rien trouvé pour le risotto."
+    },
+    {
+      "sujet": "Ragù, durée de cuisson",
+      "raison": "La recette déposée a été lue par résumé de recherche, sans durée explicite."
+    },
+    {
+      "sujet": "Température à cœur de l'œuf (Suisse)",
+      "raison": "Aucune valeur chiffrée trouvée dans une source suisse officielle ; température à cœur visée pour l'œuf mollet ou poché non trouvée (GalloSuisse ne donne que des minutes)."
+    },
+    {
+      "sujet": "Poisson, cible par espèce (Suisse)",
+      "raison": "Seul le seuil général de 70 °C trouvé côté OSAV ; les cibles de 55-60 °C viennent de la base Sanji."
+    },
+    {
+      "sujet": "Sous vide en Suisse",
+      "raison": "La GVG, lue en texte intégral, ne donne que des principes (recettes définies, refroidissement sous 5 °C) ; la directive chiffrée lue est canadienne."
+    },
+    {
+      "sujet": "Durée de vie des sauces chaudes",
+      "raison": "Sources divergentes (J+2 GVG, +3 SO, +4 LU, 4 à 5 j base Sanji) ; les documents cantonaux SO et LU sont repris de hygiene.json et n'ont pas été rouverts ici."
+    },
+    {
+      "sujet": "Cuisson basse température au four (GT), températures par pièce",
+      "raison": "Seulement des repères de la base Sanji, non recoupés."
+    },
+    {
+      "sujet": "Manuels de référence (Hotel & Gastro formation, ouvrages de brevet)",
+      "raison": "Aucun accès ; les supports de cours français lus ne sont pas des sources suisses."
+    },
+    {
+      "sujet": "Conservation des fonds au froid (Suisse)",
+      "raison": "La GVG fixe J+2 pour les produits précuits dont les sauces mais ne nomme pas les fonds ; aucune source suisse lue pour les fonds."
+    },
+    {
+      "sujet": "Pasteurisation sous vide, couples 63 °C et 66 °C",
+      "raison": "Les durées 9,2 min et 2,8 min viennent d'Anova seule ; non retrouvées dans la directive canadienne ouverte."
+    }
+  ]
+}
