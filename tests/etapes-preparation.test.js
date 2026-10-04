@@ -234,7 +234,7 @@ let vueReglages;
 before(async () => {
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
-  vueJour = await import('../app/js/ui/vue-jour.js');
+  vueJour = await import('../app/js/ui/vue-production.js');
   vueComposant = await import('../app/js/ui/vue-composant.js');
   vueReglages = await import('../app/js/ui/vue-reglages.js');
 });

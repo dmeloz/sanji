@@ -3,20 +3,19 @@
 // tâche, la quantité et l'état du poids en point focal. Aucun filtre ne cache de tâche ; une tâche faite aujourd'hui
 // reste à sa place (cochée, barrée, grisée) ; seules les préparations faites un jour précédent pour plus tard sont repliées ; les décisions sont résumées en 1 à 3 lignes qui mènent au centre « À confirmer » de la même page.
 
-import { ajouterJours, estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js';
+import { calculerComposant } from '../domaine/calcul.js';
+import { estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js';
 import { aideRefroidissement, evaluationProduction, feuilleDuJour } from '../domaine/planification.js';
 import { libelle } from '../domaine/statuts.js';
-import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
 import { ecranAllumePossible } from './ecran-allume.js';
 import { bouton, imprimer, encadre, ligneVide, lien, pastille, repliable } from './elements.js';
 import { formaterHeure, quantite } from './format.js';
-import { activerGlisser } from './glisser.js';
 import {
   actionsTache, carteTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, defaireEnUnToucher, noeudEvaluation, pastilleCreneau, texteCharge,
 } from './taches.js';
 
-export const titre = () => 'Jour';
+export const titre = () => 'Production';
 
 const MOTIF = {
   a_planifier: 'Jour et créneau à décider.',
@@ -26,57 +25,14 @@ const COCHABLES = new Set(['a_planifier', 'a_faire', 'en_cours', 'ecart']);
 const VARIANTE_ETAT = { a_preciser: 'gris', a_planifier: 'ambre', en_cours: 'vert', ecart: 'rouge' };
 const POIDS = { fini: 'quantité finie' };
 
-const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 /** « mar. 6 » : jour abrégé et numéro. */
 const courtJour = (date) => `${libelleJour(date).slice(0, 3)}. ${Number(date.slice(8))}`;
-/** « Lun 5 » pour la barre de jours. */
-const puceJour = (date) => `${majuscule(libelleJour(date).slice(0, 3))} ${Number(date.slice(8))}`;
 const pluriel = (n, un, plusieurs) => `${n} ${n >= 2 ? plusieurs : un}`;
 
-// ------------------------------------------------------------------ en-tête
-
-function barreDeJours(date, aujourd) {
-  const lundi = lundiDe(date);
-  const dates = [0, 1, 2, 3, 4, 5].map((i) => ajouterJours(lundi, i));
-  if (!dates.includes(date)) dates.push(date);
-  const puce = (d) => h('a', {
-    href: `#/production/${d}`, classe: `jour-puce${d === date ? ' jour-puce-actif' : ''}${d === aujourd ? ' jour-puce-aujourdhui' : ''}`,
-    'aria-label': `${libelleJour(d)}${d === aujourd ? ", aujourd'hui" : ''}${d === date ? ', jour affiché' : ''}`,
-    'aria-current': d === date ? 'date' : null,
-  }, puceJour(d));
-  const puces = dates.map(puce);
-  // Sur un petit écran la barre défile : le jour affiché doit être visible, pas caché à droite (le samedi).
-  setTimeout(() => puces[dates.indexOf(date)]?.scrollIntoView?.({ inline: 'center', block: 'nearest' }), 0);
-  return h('nav', { classe: 'jour-barre', 'aria-label': 'Jours de la semaine' },
-    h('a', { href: `#/production/${ajouterJours(lundi, -7)}`, classe: 'jour-puce jour-puce-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
-    puces,
-    h('a', { href: `#/production/${ajouterJours(lundi, 7)}`, classe: 'jour-puce jour-puce-fleche', 'aria-label': 'Semaine suivante' }, '›'));
-}
-
-function jauge(feuille) {
-  const { faites, total } = feuille.avancement;
-  if (total === 0) return null;
-  return h('div', { classe: 'avancement' },
-    h('progress', { classe: 'avancement-barre', value: faites, max: total, 'aria-label': 'Avancement du jour' }),
-    h('p', { classe: 'avancement-texte' }, `${faites} sur ${total} fait${faites >= 2 ? 's' : ''}`));
-}
-
-function enteteJour(date, aujourd, feuille) {
-  const { couverts, menus } = feuille.lecture;
-  const unMenuSaisi = menus.some((m) => m.intitule !== '');
-  let texteCouverts = null;
-  if (couverts.total !== null) texteCouverts = pluriel(couverts.total, 'couvert', 'couverts');
-  else if (unMenuSaisi) texteCouverts = 'couverts : prévision à saisir';
-  return h('header', { classe: 'jour-tete' },
-    h('h1', { classe: 'page-titre' }, majuscule(libelleJour(date)), date === aujourd ? [' ', pastille("aujourd'hui", 'vert')] : null),
-    h('p', { classe: 'jour-meta' },
-      texteCouverts ? h('span', { classe: 'jour-couverts feutre' }, texteCouverts) : null,
-      lien(`#/semaine/${date}`, 'Prévisions →', 'jour-lien')),
-    jauge(feuille));
-}
+// L'en-tête, le sélecteur Aujourd'hui / Demain et la barre de jours vivent dans vue-production.js.
 
 /** Rappel compact des deux menus et des fiches de fonction du jour : des liens vers le détail du jour. */
-function rappelMenus(date, feuille) {
+export function rappelMenus(date, feuille) {
   const { menus, fiches } = feuille.lecture;
   const lignes = menus.filter((m) => m.intitule !== '').map((m) => h('li', null,
     h('a', { href: `#/semaine/${date}`, classe: 'jour-menu', 'aria-label': `Menu ${m.menu} : ${m.intitule}, ouvrir le détail du jour` },
@@ -163,35 +119,73 @@ function actionsDeLigne(etat, l, date) {
   return actionsTache(l, p).filter((n) => n.textContent !== 'Fait');
 }
 
+/** Provenance de la quantité d'une ligne, avec le vocabulaire existant ; null quand la quantité n'est pas calculée. */
+export function provenanceQuantite(etat, composantId) {
+  if (!etat.composants?.[composantId]) return null;
+  const calc = calculerComposant(etat, composantId);
+  if (calc.statut !== 'CALCULE') return null;
+  if (calc.standardBase) return libelle('PROVENANCE', 'STANDARD_BASE');
+  const grammage = calc.dependances.find((d) => d.parametre === 'grammage');
+  if (grammage && ['RESTAURANT_VALIDE', 'SAISI_SERVICE'].includes(grammage.statut)) return libelle('PROVENANCE', grammage.statut);
+  return libelle('PROVENANCE', 'CALCULE');
+}
+
+/** Étiquette de la ligne : « Recette » (préparation maison) ou « Brut » (produit simple) ; rien pour les autres types. */
+const ETIQUETTE = { preparation_maison: 'Recette', produit_simple: 'Brut' };
+
+/**
+ * Ligne de mise en place (maquette Production) : case, nom, étiquette Recette ou Brut, destination, créneau, provenance de la
+ * quantité, quantité à droite ; chevron vers la fiche pour une recette. Un produit brut n'affiche que sa quantité et son
+ * créneau (les avertissements d'avance et de conservation restent dits). Les autres gestes sont repliés sous « Actions ».
+ */
 function ligneTache(etat, ligneBrute, date, options) {
   const l = { ...ligneBrute, avanceJours: ligneBrute.avanceJours ?? Math.max(0, joursEntre(date, ligneBrute.dateService)) };
   const p = etat.productions[l.productionId];
   const fait = p?.etat === 'fait';
   const q = texteQuantite(etat, l);
+  const composant = etat.composants?.[l.composantId] ?? null;
+  const etiquette = ETIQUETTE[composant?.type] ?? null;
+  const brut = composant?.type === 'produit_simple';
+  const nom = l.genre === 'principale' ? l.nom : (l.libelle || l.nom);
   // L'évaluation de l'avance (limite d'utilisation, règle) reste lisible, derrière « Actions ».
   const ev = l.evaluation ?? evaluationProduction(etat, l.productionId);
   const { meta, badges } = badgesEtMeta({ ...l, fait }, ev, options);
+  // Destination et créneau sont placés par la ligne elle-même : on retire les doublons de la liste de méta.
+  const creneau = l.creneau ? libelle('CRENEAU', l.creneau) : null;
+  const autres = meta.filter((m) => m !== creneau && !/^menu \d$/.test(m));
   if (fait) badges.unshift(pastille('fait', 'gris'));
   if (fait && l.hFait) {
     const avantAujourdhui = l.hFait.slice(0, 10) < date;
     // Une étape faite avant ce jour : « déjà avancé sam. 3 » (le jour où elle a été faite).
     const dejaAvance = l.etapeCle && avantAujourdhui ? `, déjà avancé ${courtJour(l.hFait.slice(0, 10))}`
       : (avantAujourdhui && l.dateService === date ? ', déjà avancé' : '');
-    meta.push(`fait le ${formaterHeure(l.hFait)}${dejaAvance}`);
+    autres.push(`fait le ${formaterHeure(l.hFait)}${dejaAvance}`);
   }
   const poids = poidsDe(l);
+  const destination = !brut && l.menu ? `menu ${l.menu}` : null;
+  const provenance = !brut && q && l.genre !== 'preparatoire' ? provenanceQuantite(etat, l.composantId) : null;
   const actions = actionsDeLigne(etat, l, date).filter(Boolean);
+  // Un produit brut n'a pas de chevron : sa fiche reste ouverte par « Actions ».
+  if (brut) actions.push(lien(`#/fiche/${encodeURIComponent(l.composantId)}`, 'Ouvrir la fiche', 'btn btn-court'));
   const evaluation = ev && ev.jours > 0 ? noeudEvaluation(ev) : null;
-  return h('li', { classe: `mep-ligne mep-${fait ? 'fait' : l.etat}` },
-    h('div', { classe: 'mep-principal' },
+  return h('li', { classe: `mep-ligne prod-ligne mep-${fait ? 'fait' : l.etat}` },
+    h('div', { classe: 'prod-principal' },
       fait ? caseFaite(l) : COCHABLES.has(l.etat) ? caseFait(l) : h('span', { classe: 'case-fait case-fait-vide' }),
       h('div', { classe: 'mep-corps' },
-        lien(`#/fiche/${encodeURIComponent(l.composantId)}`, l.genre === 'principale' ? l.nom : (l.libelle || l.nom), 'tache-nom mep-nom'),
-        h('p', { classe: 'mep-meta' }, badges, meta.join(' · ')),
+        h('span', { classe: 'tache-nom mep-nom' }, nom),
+        h('p', { classe: 'mep-meta prod-etiquettes' },
+          etiquette ? h('span', { classe: `prod-etiquette prod-etiquette-${brut ? 'brut' : 'recette'}` }, etiquette) : null,
+          [destination, creneau].filter(Boolean).join(' · ')),
+        provenance ? h('p', { classe: 'mep-meta prod-provenance' }, `provenance : ${provenance}`) : null,
+        badges.length > 0 || autres.length > 0 ? h('p', { classe: 'mep-meta' }, badges, autres.join(' · ')) : null,
         avertissementConservation(ev)),
       h('div', { classe: 'mep-quantite' },
         q ? h('strong', { classe: 'mep-qte feutre' }, q) : (l.genre === 'preparatoire' ? null : h('span', { classe: 'mep-neutre' }, 'quantité à compléter')),
-        q && poids ? h('span', { classe: 'mep-poids' }, poids) : null)),
+        q && poids ? h('span', { classe: 'mep-poids' }, poids) : null),
+      brut ? h('span', { classe: 'prod-chevron-vide', 'aria-hidden': 'true' })
+        : h('a', {
+          href: `#/fiche/${encodeURIComponent(l.composantId)}`, classe: 'prod-chevron', 'aria-label': `Ouvrir la fiche : ${nom}`,
+        }, h('span', { 'aria-hidden': 'true' }, '›'))),
     actions.length > 0 || evaluation
       ? h('details', { classe: 'mep-plus' }, h('summary', null, 'Actions'), evaluation, h('div', { classe: 'actions' }, actions))
       : null);
@@ -278,50 +272,46 @@ function chargeDesCreneaux(feuille) {
 
 // ------------------------------------------------------------------ la page
 
-export function rendre(etat, date) {
-  const aujourd = aujourdhui();
-  const racine = h('div', { classe: 'vue vue-jour' });
-  const feuille = feuilleDuJour(etat, date);
+/**
+ * Corps de la page Production pour un jour : rappel des menus, décisions, blocs de mise en place, replis, rubriques
+ * et pied de page. L'en-tête et la navigation entre jours sont dans vue-production.js.
+ */
+export function corps(etat, date, feuille) {
   const { lecture } = feuille;
-  racine.appendChild(barreDeJours(date, aujourd));
-  racine.appendChild(enteteJour(date, aujourd, feuille));
+  const noeuds = [];
   const rappel = rappelMenus(date, feuille);
-  if (rappel) racine.appendChild(rappel);
+  if (rappel) noeuds.push(rappel);
   if (!estOuvert(date)) {
-    racine.appendChild(h('p', { classe: 'ferme' }, 'fermé'));
-    racine.appendChild(h('p', { classe: 'aide' }, 'Le dimanche est non travaillé : aucune tâche. Il reste compté dans le temps de conservation.'));
+    noeuds.push(h('p', { classe: 'ferme' }, 'fermé'));
+    noeuds.push(h('p', { classe: 'aide' }, 'Le dimanche est non travaillé : aucune tâche. Il reste compté dans le temps de conservation.'));
   }
   if (feuille.revueMiSemaine) {
-    racine.appendChild(encadre('info', 'Mardi : revue de mi-semaine après le service, pour les préparations de mercredi à vendredi.'));
+    noeuds.push(encadre('info', 'Mardi : revue de mi-semaine après le service, pour les préparations de mercredi à vendredi.'));
   }
   const centre = centreAConfirmer(etat, lecture.decisions);
   const resume = resumeDecisions(lecture.decisions, centre);
-  if (resume) racine.appendChild(resume);
+  if (resume) noeuds.push(resume);
 
   const lignesDeTravail = lecture.service1.length + lecture.service2.length + lecture.autres.length + lecture.apres.length;
   if (lignesDeTravail === 0) {
-    racine.appendChild(ligneVide(lecture.pretsPlusTard.length > 0 || feuille.avancement.total > 0 ? 'Tout est fait.' : 'Aucune tâche décidée pour ce jour.'));
+    noeuds.push(ligneVide(lecture.pretsPlusTard.length > 0 || feuille.avancement.total > 0 ? 'Tout est fait.' : 'Aucune tâche décidée pour ce jour.'));
   }
   for (const b of [
     bloc('Menu 1 · pour le service du jour', lecture.service1, etat, date, 'service'),
     bloc('Menu 2 · pour le service du jour', lecture.service2, etat, date, 'service'),
     bloc('Autres tâches', lecture.autres, etat, date, 'autres'),
     bloc('Après service · avances pour les jours suivants', lecture.apres, etat, date, 'apres'),
-  ]) if (b) racine.appendChild(b);
+  ]) if (b) noeuds.push(b);
   if (lecture.pretsPlusTard.length > 0) {
-    racine.appendChild(repliable(`Déjà prêt pour plus tard ${lecture.pretsPlusTard.length}`, false,
+    noeuds.push(repliable(`Déjà prêt pour plus tard ${lecture.pretsPlusTard.length}`, false,
       h('ul', { classe: 'mep-liste' }, lecture.pretsPlusTard.map((l) => ligneTache(etat, { ...l, etat: 'fait' }, date, { groupe: 'faites' }))),
       { classe: 'jour-faites' }));
   }
   for (const r of [rubriqueQuantites(feuille), rubriqueLots(feuille), chargeDesCreneaux(feuille), centre]) {
-    if (r) racine.appendChild(r);
+    if (r) noeuds.push(r);
   }
-  racine.appendChild(h('div', { classe: 'barre-jour pas-imprime' },
+  noeuds.push(h('div', { classe: 'barre-jour pas-imprime' },
     bouton('Imprimer la feuille du jour', imprimer, 'court'),
     ecranAllumePossible() ? h('span', { classe: 'meta' }, 'L\'écran reste allumé sur cette page.') : null));
-  activerGlisser(racine, {
-    suivant: () => { location.hash = `#/production/${ajouterJours(date, 1)}`; },
-    precedent: () => { location.hash = `#/production/${ajouterJours(date, -1)}`; },
-  });
-  return racine;
+  return noeuds;
 }

@@ -15,7 +15,7 @@ let vueJour;
 before(async () => {
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
-  vueJour = await import('../app/js/ui/vue-jour.js');
+  vueJour = await import('../app/js/ui/vue-production.js');
 });
 after(() => dom.restaurer());
 
