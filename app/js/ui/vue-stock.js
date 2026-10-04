@@ -139,7 +139,7 @@ function formulaireRestes(etat, date) {
       ouvrir.textContent = champsReste.hidden ? '+ Surplus / rebut' : '− Surplus / rebut';
     });
     const resume = [a.surplus != null ? `surplus ${quantite(a.surplus, unite)}` : null, a.rebut != null ? `rebut ${quantite(a.rebut, unite)}` : null,
-      String(a.note ?? '').trim() !== '' ? 'note' : null].filter(Boolean).join(' · ');
+      String(a.note ?? '').trim() !== '' ? `note : ${String(a.note).trim()}` : null].filter(Boolean).join(' · ');
     return h('div', { classe: 'stock-reste', role: 'group', 'aria-label': `Reste de ${c.nom}` },
       h('div', { classe: 'stock-reste-tete' },
         h('span', { classe: 'stock-reste-texte' },

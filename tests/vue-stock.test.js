@@ -282,6 +282,15 @@ test('restes : une ligne par produit, « + Surplus / rebut » ouvre les champs a
   assert.equal(zone.enfants.at(-1).className, 'stock-valider', 'Enregistrer en bas, collant');
 });
 
+test('restes : la note saisie est affichée dans le résumé, pas seulement le mot « note »', () => {
+  const id = mondeRestes();
+  magasin.agir((e) => { e.composants[id].apresService = { surplus: 300, rebut: null, note: 'trop cuit, à servir demain' }; });
+  const resume = sansEspaceFin(parClasse(stock.rendre(magasin.etat(), S.lundi, 'restes'), 'stock-reste-resume')[0].textContent);
+  assert.match(resume, /surplus 300 g · note : trop cuit, à servir demain/);
+  magasin.agir((e) => { e.composants[id].apresService = { surplus: null, rebut: null, note: '   ' }; });
+  assert.equal(parClasse(stock.rendre(magasin.etat(), S.lundi, 'restes'), 'stock-reste-resume').length, 0, 'une note blanche ne dit rien');
+});
+
 test('restes : une saisie existante ouvre la ligne et reste résumée (exception visible)', () => {
   const id = mondeRestes();
   magasin.agir((e) => { e.composants[id].apresService = { surplus: 300, rebut: 50, note: '' }; });

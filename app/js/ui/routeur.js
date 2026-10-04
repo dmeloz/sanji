@@ -84,6 +84,12 @@ function majOnglets(vue) {
   }
 }
 
+/** Ferme les dialogues ouverts (leur fermeture nettoie leurs abonnements et rend le focus). */
+function fermerPanneaux() {
+  const zone = parId('panneaux');
+  for (const d of zone?.querySelectorAll?.('dialog[open]') ?? []) d.close();
+}
+
 /** Dessine la vue courante. Même vue et même paramètre : le défilement est conservé ; sinon retour en haut. */
 export function rendre() {
   const racine = parId('vue');
@@ -91,6 +97,8 @@ export function rendre() {
   const { vue, param, sous } = analyserHash(location.hash, aujourdhui());
   const cle = `${vue}/${sous ?? ''}/${param ?? ''}`;
   const defilement = cle === cleCourante ? window.scrollY : 0;
+  // Changement de page : un dialogue resté ouvert (fiche, saisie, « À décider ») ne suit pas dans la nouvelle page.
+  if (cle !== cleCourante) fermerPanneaux();
   let noeud;
   try {
     noeud = VUES[vue].rendre(etat(), param, sous);

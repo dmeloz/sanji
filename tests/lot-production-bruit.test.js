@@ -98,6 +98,23 @@ test('ligne : plus de « Actions ▸ » sous chaque ligne ; un bouton « ⋯ » 
   assert.equal(panneau.hidden, false);
 });
 
+test('ligne : « ⋯ » occupe sa propre colonne, la même à chaque ligne (aligné quelle que soit la longueur du nom)', () => {
+  const { e, m1, mardi } = lundi();
+  e.composants[m1].nom = 'A';
+  e.composants[mardi].nom = 'Un nom de produit beaucoup plus long que l\'autre pour la ligne';
+  const noeud = production(e);
+  const lignes = classes(noeud, 'prod-ligne');
+  assert.ok(lignes.length >= 3);
+  for (const l of lignes) {
+    const enfants = classes(l, 'prod-principal')[0].enfants.filter((x) => x.balise);
+    assert.equal(enfants.length, 5, 'case, corps, quantité, « ⋯ » (ou son emplacement vide), chevron');
+    assert.match(enfants[3].className, /prod-plus/, 'la 4e colonne est celle de « ⋯ »');
+    assert.equal(classes(enfants[1], 'prod-plus').length, 0, '« ⋯ » ne suit plus le nom dans la colonne du corps');
+  }
+  const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
+  assert.match(css, /\.prod-principal \{[^}]*grid-template-columns: var\(--cible\) minmax\(0, 1fr\) auto var\(--cible\) var\(--cible\)/);
+});
+
 test('ligne : une proposition à planifier montre « Planifier » directement, et seulement « Pour mer. 7 » en mention', () => {
   const noeud = production(lundi().e);
   const ligne = ligneDe(noeud, 'ELEMENT_MERCREDI_TEST');
