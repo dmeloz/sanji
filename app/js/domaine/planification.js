@@ -479,7 +479,7 @@ const rangCreneau = (c) => (ORDRE_CRENEAU_LECTURE.includes(c) ? ORDRE_CRENEAU_LE
 /**
  * Ordre de lecture de la feuille Jour (une seule liste, aucun filtre) : tâches pour le service du jour du menu 1,
  * du menu 2, autres tâches (préparatoires), puis « après service » = tout ce qui sert un jour suivant (avances
- * décidées ou seulement possibles). Les tâches faites sont à part (`faites`, repliées par la vue). Chaque ligne dit
+ * décidées ou seulement possibles). Les tâches faites aujourd'hui restent dans leur section (`fait: true`) ; `pretsPlusTard` = faites un jour précédent pour un service à venir. Chaque ligne dit
  * d'où elle vient (`source`) et son écart de service en jours (`avanceJours`). Aucune tâche ne dépend d'une donnée
  * qui manque : une quantité inconnue donne une ligne « à préciser », pas une absence.
  */
@@ -498,15 +498,21 @@ function lectureDuJour(etat, date, f) {
   const autres = [];
   const apres = [];
   const classees = new Set();
-  const classer = (l, source, creneau = l.creneauDecide ?? null) => {
+  const classer = (l, source, creneau = l.creneauDecide ?? null, fait = false) => {
     classees.add(l.productionId);
-    const ligneLue = { ...l, source, creneau, avanceJours: Math.max(0, joursEntre(date, l.dateService)) };
+    const ligneLue = { ...l, source, creneau, fait, avanceJours: Math.max(0, joursEntre(date, l.dateService)) };
     if (l.dateService > date) apres.push(ligneLue);
     else if (l.genre === 'preparatoire') autres.push(ligneLue);
     else if (l.menu === 1) service1.push(ligneLue);
     else if (l.menu === 2) service2.push(ligneLue);
     else autres.push(ligneLue);
   };
+  // Une tâche faite aujourd'hui (décidée ce jour, faite ce jour ou servie ce jour) reste à sa place, marquée `fait`.
+  for (const p of Object.values(etat.productions ?? {})) {
+    if (p.etat !== 'fait' || !etat.composants?.[p.composantId]) continue;
+    const faitCeJour = typeof p.hFait === 'string' && p.hFait.slice(0, 10) === date;
+    if (p.jourDecide === date || p.dateService === date || faitCeJour) classer(ligne(etat, p), 'faite', p.creneauDecide ?? null, true);
+  }
   for (const g of f.aFaire) for (const t of g.taches) classer(t, 'decidee', g.creneau);
   for (const t of f.attendus) classer(t, 'attendue');
   // Un service du jour pas encore planifié reste dans la liste de travail (jamais seulement dans les décisions).
@@ -530,11 +536,8 @@ function lectureDuJour(etat, date, f) {
     liste.sort((a, b) => rang(a) - rang(b) || (place(a) === place(b) ? 0 : place(a) < place(b) ? -1 : 1) || parNom(a, b));
   }
   apres.sort((a, b) => a.dateService.localeCompare(b.dateService) || parNom(a, b));
-  const faites = [...f.dejaPret];
-  const vues = new Set(faites.map((x) => x.productionId));
-  for (const p of Object.values(etat.productions ?? {})) {
-    if (p.etat === 'fait' && p.jourDecide === date && !vues.has(p.id) && etat.composants?.[p.composantId]) faites.push(ligne(etat, p));
-  }
+  // Seules restent à part les productions faites un jour précédent pour un service à venir.
+  const pretsPlusTard = f.dejaPret.filter((x) => !classees.has(x.productionId));
   const aAvancerIds = new Set(f.aAvancer.map((a) => a.productionId));
   const decisions = f.decisions.filter((d) => !dejaPlacees.has(d.productionId)
     && !(d.motif === 'a_planifier' && aAvancerIds.has(d.productionId)));
@@ -549,7 +552,7 @@ function lectureDuJour(etat, date, f) {
   const fiches = Object.values(etat.fiches ?? {}).filter((x) => x.statut === 'active' && x.date === date)
     .sort((a, b) => String(a.horaire).localeCompare(String(b.horaire)));
   return {
-    service1, service2, autres, apres, faites, decisions, menus, fiches,
+    service1, service2, autres, apres, pretsPlusTard, decisions, menus, fiches,
     couverts: { 1: couverts[1], 2: couverts[2], total: connus.length > 0 ? connus.reduce((s, n) => s + n, 0) : null },
   };
 }

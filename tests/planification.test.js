@@ -248,7 +248,7 @@ test('avancesPossibles : 4 jours, pas décidées pour un autre jour, premier cr�
 test('feuilleDuJour : rubriques, créneaux, décisions, revue de mi-semaine', () => {
   const e = etatVide();
   const { lecture, ...ancienneFeuille } = feuilleDuJour(e, S.mardi);
-  assert.deepEqual(Object.keys(lecture).sort(), ['apres', 'autres', 'couverts', 'decisions', 'faites', 'fiches', 'menus', 'service1', 'service2'],
+  assert.deepEqual(Object.keys(lecture).sort(), ['apres', 'autres', 'couverts', 'decisions', 'fiches', 'menus', 'pretsPlusTard', 'service1', 'service2'],
     'l\'ordre de lecture A-P1 s\'ajoute aux rubriques, il ne les remplace pas');
   assert.deepEqual(ancienneFeuille, {
     aFaire: [{ creneau: 'avant_midi', etatCreneau: 'libre', charge: chargeCreneau(e, S.mardi, 'avant_midi'), taches: [] },

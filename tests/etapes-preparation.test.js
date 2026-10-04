@@ -219,8 +219,9 @@ test('feuille Jour du lundi : l\'étape faite le samedi est dans « faites », l
   planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
   marquerFait(e, couper.id, null, SAMEDI);
   const feuille = feuilleDuJour(e, S.lundi);
-  assert.ok(feuille.lecture.faites.some((l) => l.productionId === couper.id));
-  const aFaire = feuille.lecture.autres.map((l) => l.libelle);
+  assert.ok(feuille.lecture.autres.some((l) => l.productionId === couper.id && l.fait === true), 'reste dans sa section, marquée faite');
+  assert.equal(feuille.lecture.pretsPlusTard.some((l) => l.productionId === couper.id), false);
+  const aFaire = feuille.lecture.autres.filter((l) => !l.fait).map((l) => l.libelle);
   assert.ok(aFaire.includes('Blanchir : carottes'));
   assert.ok(!aFaire.includes('Couper : carottes'));
 });

@@ -1,7 +1,7 @@
 // Jour (feuille quotidienne) : une seule liste de mise en place, dans l'ordre de lecture du poste.
 // Menu 1, menu 2, autres tâches, puis « Après service » (avances pour les jours suivants). Une ligne cochable par
-// tâche, la quantité et l'état du poids en point focal. Aucun filtre ne cache de tâche ; les tâches faites sont
-// repliées ; les décisions sont résumées en 1 à 3 lignes qui mènent au centre « À confirmer » de la même page.
+// tâche, la quantité et l'état du poids en point focal. Aucun filtre ne cache de tâche ; une tâche faite aujourd'hui
+// reste à sa place (cochée, barrée, grisée) ; seules les préparations faites un jour précédent pour plus tard sont repliées ; les décisions sont résumées en 1 à 3 lignes qui mènent au centre « À confirmer » de la même page.
 
 import { ajouterJours, estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js';
 import { aideRefroidissement, evaluationProduction, feuilleDuJour } from '../domaine/planification.js';
@@ -13,7 +13,7 @@ import { bouton, imprimer, encadre, ligneVide, lien, pastille, repliable } from 
 import { formaterHeure, quantite } from './format.js';
 import { activerGlisser } from './glisser.js';
 import {
-  actionsTache, carteTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, noeudEvaluation, pastilleCreneau, texteCharge,
+  actionsTache, carteTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, defaireEnUnToucher, noeudEvaluation, pastilleCreneau, texteCharge,
 } from './taches.js';
 
 export const titre = () => 'Jour';
@@ -99,8 +99,12 @@ function caseFait(l) {
   }, h('span', { classe: 'case-fait-boite', 'aria-hidden': 'true' }), h('span', { classe: 'sr' }, `Marquer fait : ${l.genre === 'principale' ? l.nom : (l.libelle || l.nom)}`));
 }
 
-const caseFaite = () => h('span', { classe: 'case-fait case-fait-ok' },
-  h('span', { classe: 'case-fait-boite', 'aria-hidden': 'true' }, '✓'), h('span', { classe: 'sr' }, 'fait : '));
+/** Case cochée d'une tâche faite : la toucher la décoche (annulerFait ; un refus est dit en texte, rien ne change). */
+const caseFaite = (l) => h('button', {
+  type: 'button', role: 'checkbox', 'aria-checked': 'true', classe: 'case-fait case-fait-ok',
+  onClick: () => defaireEnUnToucher(l.productionId),
+}, h('span', { classe: 'case-fait-boite', 'aria-hidden': 'true' }, '✓'),
+h('span', { classe: 'sr' }, `Marquer non fait : ${l.genre === 'principale' ? l.nom : (l.libelle || l.nom)}`));
 
 function texteQuantite(etat, l) {
   const p = etat.productions[l.productionId];
@@ -126,12 +130,12 @@ function badgesEtMeta(l, ev, { groupe }) {
     meta.unshift(`Pour ${courtJour(l.dateService)}`);
     badges.push(pastille(`Avance J+${l.avanceJours}`, 'gris'));
   }
-  if (ev && ev.jours > 0 && !ev.autorisee) {
+  if (!l.fait && ev && ev.jours > 0 && !ev.autorisee) {
     badges.push(pastille('hors règle', 'ambre'));
     // La cause est dite sur la ligne : une avance d'un jour peut être hors règle (maximum de l'étape dépassé).
     meta.push(ev.alertes.some((a) => /plus de deux jours/.test(a)) ? 'plus de deux jours d\'avance' : 'au-delà du maximum de l\'étape');
   }
-  if (l.etat !== 'a_faire' && l.etat !== 'a_preciser') badges.push(pastille(libelle('ETAT_TACHE', l.etat), VARIANTE_ETAT[l.etat] ?? 'gris'));
+  if (l.etat !== 'a_faire' && l.etat !== 'a_preciser' && l.etat !== 'fait') badges.push(pastille(libelle('ETAT_TACHE', l.etat), VARIANTE_ETAT[l.etat] ?? 'gris'));
   return { meta, badges };
 }
 
@@ -166,7 +170,8 @@ function ligneTache(etat, ligneBrute, date, options) {
   const q = texteQuantite(etat, l);
   // L'évaluation de l'avance (limite d'utilisation, règle) reste lisible, derrière « Actions ».
   const ev = l.evaluation ?? evaluationProduction(etat, l.productionId);
-  const { meta, badges } = badgesEtMeta(l, ev, options);
+  const { meta, badges } = badgesEtMeta({ ...l, fait }, ev, options);
+  if (fait) badges.unshift(pastille('fait', 'gris'));
   if (fait && l.hFait) {
     const avantAujourdhui = l.hFait.slice(0, 10) < date;
     // Une étape faite avant ce jour : « déjà avancé sam. 3 » (le jour où elle a été faite).
@@ -179,7 +184,7 @@ function ligneTache(etat, ligneBrute, date, options) {
   const evaluation = ev && ev.jours > 0 ? noeudEvaluation(ev) : null;
   return h('li', { classe: `mep-ligne mep-${fait ? 'fait' : l.etat}` },
     h('div', { classe: 'mep-principal' },
-      fait ? caseFaite() : COCHABLES.has(l.etat) ? caseFait(l) : h('span', { classe: 'case-fait case-fait-vide' }),
+      fait ? caseFaite(l) : COCHABLES.has(l.etat) ? caseFait(l) : h('span', { classe: 'case-fait case-fait-vide' }),
       h('div', { classe: 'mep-corps' },
         lien(`#/composant/${encodeURIComponent(l.composantId)}`, l.genre === 'principale' ? l.nom : (l.libelle || l.nom), 'tache-nom mep-nom'),
         h('p', { classe: 'mep-meta' }, badges, meta.join(' · ')),
@@ -193,7 +198,7 @@ function ligneTache(etat, ligneBrute, date, options) {
 }
 
 const LIGNES_VISIBLES = 8;
-const estHorsRegle = (l) => Boolean(l.evaluation) && l.evaluation.jours > 0 && !l.evaluation.autorisee;
+const estHorsRegle = (l) => !l.fait && Boolean(l.evaluation) && l.evaluation.jours > 0 && !l.evaluation.autorisee;
 
 function bloc(titreTexte, lignes, etat, date, groupe) {
   if (lignes.length === 0) return null;
@@ -295,7 +300,7 @@ export function rendre(etat, date) {
 
   const lignesDeTravail = lecture.service1.length + lecture.service2.length + lecture.autres.length + lecture.apres.length;
   if (lignesDeTravail === 0) {
-    racine.appendChild(ligneVide(lecture.faites.length > 0 || feuille.avancement.total > 0 ? 'Tout est fait.' : 'Aucune tâche décidée pour ce jour.'));
+    racine.appendChild(ligneVide(lecture.pretsPlusTard.length > 0 || feuille.avancement.total > 0 ? 'Tout est fait.' : 'Aucune tâche décidée pour ce jour.'));
   }
   for (const b of [
     bloc('Menu 1 · pour le service du jour', lecture.service1, etat, date, 'service'),
@@ -303,9 +308,9 @@ export function rendre(etat, date) {
     bloc('Autres tâches', lecture.autres, etat, date, 'autres'),
     bloc('Après service · avances pour les jours suivants', lecture.apres, etat, date, 'apres'),
   ]) if (b) racine.appendChild(b);
-  if (lecture.faites.length > 0) {
-    racine.appendChild(repliable(`Terminé ${lecture.faites.length}`, false,
-      h('ul', { classe: 'mep-liste' }, lecture.faites.map((l) => ligneTache(etat, { ...l, etat: 'fait' }, date, { groupe: 'faites' }))),
+  if (lecture.pretsPlusTard.length > 0) {
+    racine.appendChild(repliable(`Déjà prêt pour plus tard ${lecture.pretsPlusTard.length}`, false,
+      h('ul', { classe: 'mep-liste' }, lecture.pretsPlusTard.map((l) => ligneTache(etat, { ...l, etat: 'fait' }, date, { groupe: 'faites' }))),
       { classe: 'jour-faites' }));
   }
   for (const r of [rubriqueQuantites(feuille), rubriqueLots(feuille), chargeDesCreneaux(feuille), centre]) {

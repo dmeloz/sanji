@@ -185,7 +185,7 @@ test('Jour : ordre de lecture menu 1, menu 2, autres, après service ; une ligne
   assert.deepEqual(titres, ['Menu 1 · pour le service du jour', 'Menu 2 · pour le service du jour', 'Après service · avances pour les jours suivants']);
   assert.equal(classes(noeud, 'tache').length, 0, 'aucune grosse carte dans la liste');
   const lignes = classes(noeud, 'mep-ligne');
-  const cases = classes(noeud, 'case-fait').filter((c) => c.balise === 'button');
+  const cases = classes(noeud, 'case-fait').filter((c) => c.balise === 'button' && c.attributs['aria-checked'] === 'false');
   assert.equal(cases.length, 4, 'une case à cocher par tâche à faire : M1, M2, avance J+1, avance J+2');
   for (const c of cases) assert.equal(c.attributs.role, 'checkbox');
   assert.ok(lignes.length >= 5);
@@ -207,13 +207,62 @@ test('Jour : les avances sont dans la même liste, avec « Pour mar. 6 » et le 
   assert.ok(textes.some((t) => /Pour mer\. 7/.test(t) && /Avance J\+2/.test(t) && /ELEMENT_MERCREDI_TEST/.test(t)), 'même une avance seulement possible est visible');
 });
 
-test('Jour : « Fait » en un toucher, annulable ; les tâches faites sont repliées', async () => {
+test('Jour : une tâche faite aujourd\'hui reste dans sa section, barrée et grisée, sans repli « Terminé »', () => {
   const { e } = lundiTravail();
   const noeud = jour(S.lundi, e);
-  const faites = classes(noeud, 'jour-faites')[0];
-  assert.equal(faites.open, false, 'repliées par défaut');
-  assert.match(faites.querySelector('summary').textContent, /Terminé 1/);
-  assert.match(faites.textContent, /ELEMENT_FAIT_TEST/);
+  assert.equal(classes(noeud, 'jour-faites').length, 0, 'plus de repli « Terminé »');
+  assert.doesNotMatch(noeud.textContent, /Terminé/);
+  const ligneFaite = classes(noeud, 'mep-ligne').find((l) => /ELEMENT_FAIT_TEST/.test(l.textContent));
+  assert.ok(ligneFaite, 'la tâche faite est dans sa section');
+  assert.ok(classes(classes(noeud, 'jour-bloc')[1], 'mep-fait').includes(ligneFaite), 'dans le menu 2, à sa place');
+});
+
+test('Jour : une tâche faite = case cochée, nom accessible « Marquer non fait », mention « fait », quantité réelle, même ordre', () => {
+  const { e } = lundiTravail();
+  const bloc2 = classes(jour(S.lundi, e), 'jour-bloc')[1];
+  const nomsLus = classes(bloc2, 'mep-ligne').map((l) => classes(l, 'mep-nom')[0].textContent);
+  assert.deepEqual(nomsLus, [...nomsLus].sort(), 'ordre de lecture du poste (ici alphabétique), la tâche faite n\'en sort pas');
+  const ligneFaite = classes(bloc2, 'mep-fait')[0];
+  const caseFaite = classes(ligneFaite, 'case-fait')[0];
+  assert.equal(caseFaite.balise, 'button');
+  assert.equal(caseFaite.attributs['aria-checked'], 'true');
+  assert.match(caseFaite.textContent, /Marquer non fait : ELEMENT_FAIT_TEST/);
+  assert.match(classes(ligneFaite, 'mep-meta')[0].textContent, /fait/, 'l\'état est dit en texte');
+  assert.equal(classes(ligneFaite, 'mep-qte').length, 1, 'quantité réelle affichée');
+  assert.equal(classes(bloc2, 'case-fait').filter((c) => c.attributs['aria-checked'] === 'true').length, 1);
+});
+
+test('Jour : toucher la case d\'une tâche faite la décoche ; passé les 2 minutes, le refus est dit en texte et rien ne change', async () => {
+  const { e } = lundiTravail();
+  const messages = [];
+  const quitter = magasin.surMessage((texte, type) => messages.push({ texte, type }));
+  try {
+    // Fait le 1er octobre : l'annulation est refusée.
+    let noeud = jour(S.lundi, e);
+    await classes(classes(noeud, 'mep-fait')[0], 'case-fait')[0].click();
+    assert.equal(Object.values(magasin.etat().productions).filter((p) => p.etat === 'fait').length, 1, 'rien n\'a changé');
+    assert.ok(messages.some((m) => m.type === 'erreur' && /Trop tard pour annuler/.test(m.texte)), 'message de refus existant');
+    // Cochée à l'instant, puis décochée.
+    noeud = jour(S.lundi, magasin.etat());
+    await classes(classes(noeud, 'jour-bloc')[0], 'case-fait')[0].click();
+    const apres = jour(S.lundi, magasin.etat());
+    const ligneCochee = classes(classes(apres, 'jour-bloc')[0], 'mep-fait')[0];
+    assert.ok(ligneCochee, 'cochée : reste dans le menu 1, marquée faite');
+    await classes(ligneCochee, 'case-fait')[0].click();
+    assert.equal(Object.values(magasin.etat().productions).filter((p) => p.etat === 'fait').length, 1, 'décochée');
+  } finally { quitter(); }
+});
+
+test('style : la ligne faite est barrée et grisée, la cible tactile reste de 44 px', () => {
+  assert.match(css, /\.mep-ligne\.mep-fait \.mep-nom[^{]*\{[^}]*text-decoration:\s*line-through/);
+  assert.match(css, /\.mep-ligne\.mep-fait\s*\{[^}]*background/);
+  assert.match(css, /--cible:\s*44px/);
+  assert.match(css, /\.case-fait\s*\{[^}]*min-width:\s*var\(--cible\)[^}]*min-height:\s*var\(--cible\)/);
+});
+
+test('Jour : « Fait » en un toucher, annulable', async () => {
+  const { e } = lundiTravail();
+  const noeud = jour(S.lundi, e);
   const case1 = classes(classes(noeud, 'jour-bloc')[0], 'case-fait')[0];
   await case1.click();
   const attendu = Object.values(magasin.etat().productions).filter((p) => p.etat === 'fait').length;
@@ -311,7 +360,7 @@ test('Accessibilité : chaque case « Fait » porte le nom du plat ; le rang de 
   for (const nom of ['ELEMENT_M1_TEST', 'ELEMENT_M2_TEST', 'ELEMENT_MARDI_TEST']) {
     assert.equal(cases.filter((c) => c.textContent === `Marquer fait : ${nom}`).length, 1, `case de ${nom}`);
   }
-  assert.ok(cases.every((c) => /^Marquer fait : \S/.test(c.textContent)), 'aucune case ne s\'appelle seulement « Fait »');
+  assert.ok(cases.every((c) => /^(✓)?Marquer (non )?fait : \S/.test(c.textContent)), 'aucune case ne s\'appelle seulement « Fait »');
   const noeud = tableau(S.mardi, semaine());
   const rangs = classes(noeud, 'tb-rang');
   assert.ok(rangs.length > 0);
