@@ -6,6 +6,8 @@ import {
   confirmerSemaineType, creerRecette, definirCapacite, definirFournisseur, definirMargeSecurite, definirRegle, definirSemaineType,
   definirStandard, modifierRecette, noterExport, supprimerFournisseur, supprimerRegle, supprimerStandard, validerRecette,
 } from '../domaine/actions.js';
+import { ajusterStandard, revenirAuStandard } from '../domaine/actions-ajustements.js';
+import { lignesStandardsBase } from '../domaine/ajustements.js';
 import { creneauxDuJourSemaine } from '../domaine/dates.js';
 import { valeurPour } from '../domaine/validation.js';
 import { exporter, importer } from '../domaine/etat.js';
@@ -141,6 +143,68 @@ function sectionStandards(etat) {
     h('input', { type: 'search', classe: 'recherche-standards', 'aria-label': 'Rechercher un standard', placeholder: 'rechercher une famille ou une catégorie',
       autocomplete: 'off', onInput: chercher }),
     zone);
+}
+
+// ------------------------------------------------------------------ standards de base et ajustements
+
+const UNITE_BASE = { '%': '% de perte', x: '× le poids de départ', jours: 'jours', min: 'min', '°C': '°C' };
+const uniteBase = (u) => UNITE_BASE[u] ?? u;
+const PROVENANCE_BASE = { propriete: 'votre valeur', referentiel: 'référentiel', base_metier: 'base métier' };
+
+function texteBornes(f, unite) {
+  if (!f) return '';
+  const n = formaterNombre;
+  const t = f.min !== null && f.max !== null ? (f.min === f.max ? n(f.min) : `${n(f.min)}–${n(f.max)}`)
+    : f.min !== null ? `au moins ${n(f.min)}` : `au plus ${n(f.max)}`;
+  return `${t} ${uniteBase(unite)}`;
+}
+
+function dialogAjustement(l) {
+  const f = champs([
+    { cle: 'valeur', type: 'nombre', libelle: `Votre valeur (${uniteBase(l.base.unite)})`, valeur: l.effectif.valeur,
+      aide: `Standard de base : ${formaterNombre(l.base.valeur)} ${uniteBase(l.base.unite)}. La virgule est acceptée.` },
+  ]);
+  panneau({
+    titre: `Changer : ${l.libelle} (${l.usageTitre})`,
+    corps: [h('p', { classe: 'aide' }, 'Votre valeur passe devant le standard de base, pour tous les plats concernés.'), ...f.noeuds],
+    extras: l.ajuste ? [{ libelle: 'Revenir au standard', action: (api) => { agirStrict((e, t) => revenirAuStandard(e, l.sujet, l.usage, t)); api.fermer(); } }] : [],
+    surEnregistrer: () => {
+      const v = f.lire().valeur;
+      if (v === null) throw new Error('Saisissez la valeur.');
+      const res = agirStrict((e, t) => ajusterStandard(e, l.sujet, l.usage, v, t));
+      if (res.avertissement) afficherMessage(res.avertissement, 'alerte');
+    },
+  });
+}
+
+function ligneBase(l) {
+  const eff = l.effectif;
+  const nom = `${l.libelle} (${l.usageTitre})`;
+  return h('li', { classe: 'ligne-standard ligne-standard-base' },
+    h('div', { classe: 'standard-texte' },
+      h('p', null, h('strong', null, l.libelle)),
+      h('p', { classe: 'standard-valeur' }, `${formaterNombre(eff.valeur)} ${uniteBase(eff.unite)}`, ' ',
+        pastille(PROVENANCE_BASE[eff.origine] ?? eff.origine, eff.ajuste ? 'vert' : 'gris')),
+      h('p', { classe: 'meta' }, `Fourchette : ${texteBornes(l.base.fourchette, l.base.unite)}`),
+      l.base.ecart ? h('p', { classe: 'meta' },
+        `Écart : référentiel ${texteBornes(l.base.ecart.referentiel, l.base.unite)}, base métier ${texteBornes(l.base.ecart.base_metier, l.base.unite)}`) : null,
+      l.ajuste && eff.ajustement.avant?.valeur !== null && eff.ajustement.avant?.valeur !== undefined
+        ? h('p', { classe: 'meta' }, `Standard de base : ${formaterNombre(eff.ajustement.avant.valeur)} ${uniteBase(eff.unite)}`) : null),
+    h('div', { classe: 'actions' },
+      bouton('Changer', () => dialogAjustement(l), 'court', { 'aria-label': `Changer la valeur : ${nom}` }),
+      l.ajuste ? bouton('Revenir au standard', () => agir((e, t) => revenirAuStandard(e, l.sujet, l.usage, t)), 'court',
+        { 'aria-label': `Revenir au standard de base : ${nom}` }) : null));
+}
+
+/** Standards de base : une ligne par sujet rattaché, repliée par usage ; « Changer » ouvre un panneau, la valeur passe devant. */
+function sectionStandardsBase(etat) {
+  return h('section', { classe: 'carte' },
+    titreSection('Standards de base', 'standards-base'),
+    h('p', { classe: 'aide' }, 'On part de ce que disent les manuels. Quand la réalité de votre cuisine est différente, changez la valeur : '
+      + 'votre valeur passe devant, pour toujours. « Revenir au standard » rétablit la valeur de base.'),
+    lignesStandardsBase(etat).map((u) => (u.lignes.length === 0 ? null
+      : repliable(`${u.titre} · ${u.lignes.filter((l) => l.ajuste).length} changé(s) sur ${u.lignes.length}`, u.lignes.some((l) => l.ajuste),
+        h('ul', { classe: 'liste-standards' }, u.lignes.map((l) => ligneBase({ ...l, usageTitre: u.titre }))), { classe: 'repliable-groupe' }))));
 }
 
 // ------------------------------------------------------------------ semaine type et capacité
@@ -553,7 +617,11 @@ const compteStandards = (etat) => {
 const RUBRIQUES = [
   { cle: 'standards', titre: 'Standards de production',
     resume: (e) => { const c = compteStandards(e); return `${pluriel(c.regles, 'standard réglé', 'standards réglés')} · ${c.aRegler} à régler`; },
-    blocs: (e) => [sectionStandards(e), sectionMemoire(e)] },
+    blocs: (e) => [h('p', { classe: 'aide' }, h('a', { href: '#/reglages/standards-base' }, 'Standards de base : changer une valeur de départ ›')),
+      sectionStandards(e), sectionMemoire(e)] },
+  { cle: 'standards-base', titre: 'Standards de base',
+    resume: (e) => { const n = Object.keys(e.ajustements ?? {}).length; return `${pluriel(n, 'valeur changée', 'valeurs changées')} par vous`; },
+    blocs: (e) => [sectionStandardsBase(e)] },
   { cle: 'organisation', titre: 'Organisation du poste',
     resume: (e) => `${e.reglages.semaineTypeConfirmee ? 'semaine type confirmée' : 'semaine type à confirmer'} · ${pluriel(Object.keys(e.regles).length, 'règle')} de préparation`,
     blocs: (e) => [sectionSemaineType(e), sectionRegles(e)] },

@@ -2,6 +2,7 @@
 // Aucune quantité n'est inventée : un paramètre manquant donne un statut INCONNU.
 
 import { aMenuDuJour } from './dates.js';
+import { valeurEffective } from './ajustements.js';
 import { grammageEffectif } from './savoir.js';
 import { ETAT_POIDS, estStandardBase, libelle } from './statuts.js';
 
@@ -193,7 +194,13 @@ export function calculerComposant(etat, composantId) {
     const lignes = (c.etapes ?? []).filter((e) => e.etape === nom);
     if (lignes.length === 0) continue;
     if (lignes.length > 1) { signaler(`étape en double (${nom})`); continue; }
-    const e = lignes[0];
+    let e = lignes[0];
+    // La valeur de la propriétaire (Réglages) passe devant le standard de base ; une correction du plat (étape qui n'est
+    // pas un standard de base) passe devant les deux.
+    if ((nom === 'parage' || nom === 'cuisson') && c.famille && estStandardBase(e.statut)) {
+      const eff = valeurEffective(etat, c.famille, `rendement_${nom}`);
+      if (eff?.ajuste) e = { ...e, coefficient: eff.coefficient, statut: eff.statut };
+    }
     if (!Number.isFinite(e.coefficient) || e.coefficient <= 0) { signaler(`coefficient ${nom}`); continue; }
     const appliquee = dansLaChaine(nom);
     etapes.push({ etape: nom, coefficient: e.coefficient, statut: e.statut, appliquee });
