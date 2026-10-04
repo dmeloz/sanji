@@ -155,7 +155,8 @@ test('avances : seules les avances autorisées et chiffrées sont proposées, le
   const avances = c.lignes.filter((l) => l.genre === 'avance');
   assert.equal(avances.length, 3, 'les trois préparations du lundi');
   assert.ok(avances.every((l) => /pour lundi 5 octobre/.test(l.texte) && l.symbole === 'a_faire' && l.quantite));
-  assert.ok(avances.every((l) => l.detail === "2 jours d'avance, conservation à confirmer"));
+  // Les familles connues (carottes, riz) ont un repère de conservation du référentiel : plus de « conservation à confirmer ».
+  assert.ok(avances.every((l) => l.detail === "2 jours d'avance"));
   assert.ok(textes(c).includes("3 préparations pourraient être avancées dès aujourd'hui avec une règle de préparation validée."));
   // Avec une règle validée pour une préparation du mardi, elle devient une avance proposée.
   definirRegle(e, { nom: 'quinoa', avanceMaxJours: 3, limiteUtilisationJours: 3 }, h());

@@ -11,7 +11,7 @@ import {
 } from './etat.js';
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
-import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, refusOrdreEtape, regleDe } from './planification.js';
+import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
 import { besoinsProduits, cleSuivi } from './produits.js';
 import { GROUPES, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
@@ -654,7 +654,7 @@ function deplacer(etat, productionId, date, creneau, h, action) {
   const refus = refusOrdreEtape(etat, p, { date });
   if (refus) throw new Error(refus);
   const c = etat.composants[p.composantId];
-  const evaluation = evaluerAvance(date, p.dateService, regleDe(etat, c, p.etapeCle ?? null));
+  const evaluation = evaluerAvance(date, p.dateService, regleDe(etat, c, p.etapeCle ?? null), repereConservation(c));
   p.jourDecide = date;
   p.creneauDecide = creneau;
   const alertes = [...evaluation.alertes, ...chargeCreneau(etat, date, creneau).alertes];

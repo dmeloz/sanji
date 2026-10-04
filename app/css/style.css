@@ -754,3 +754,8 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 
 /* Tableau : élément implicite (sauce ou base « à confirmer »), distinct de ce que le chef a écrit. */
 .tb-implicite { font-size: var(--t-1); font-style: italic; color: var(--texte-doux); text-decoration: none; }
+
+/* Jour : avertissement de conservation du référentiel (texte, jamais la couleur seule) et aide au refroidissement. */
+.mep-conservation { margin-top: 4px; font-size: var(--t-1); }
+.mep-provenance { display: block; color: var(--texte-doux); overflow-wrap: anywhere; }
+.mep-aide-froid { margin: 4px 0 6px; font-size: var(--t-1); color: var(--texte-doux); }
