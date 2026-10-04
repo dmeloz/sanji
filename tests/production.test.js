@@ -136,7 +136,9 @@ test('vocabulaire : aucun terme écarté par la propriétaire sur l\'écran', ()
 });
 
 test('accessibilité : cibles de 44 px, légendes de 13 px, quantités en police dédiée, mouvement réduit déjà respecté', () => {
-  const bloc = css.slice(css.indexOf('Production (refonte 1, onglet 2)'));
+  const debut = css.indexOf('Production (refonte 1, onglet 2)');
+  const fin = css.indexOf('/* =====', debut);
+  const bloc = css.slice(debut, fin > debut ? fin : undefined); // le seul bloc Production, pas ceux des écrans suivants
   assert.match(bloc, /\.prod-segment \{[^}]*min-height: var\(--cible\)/);
   assert.match(bloc, /\.prod-chevron \{[^}]*min-width: var\(--cible\)[^}]*min-height: var\(--cible\)/);
   assert.match(bloc, /\.prod-ligne \.mep-qte \{ font-family: var\(--police-qte\)/);
