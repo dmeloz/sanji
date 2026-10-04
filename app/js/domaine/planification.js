@@ -213,6 +213,26 @@ function sommeReelsCouvrants(etat, composantId, exclureId = null) {
   return somme;
 }
 
+/**
+ * Quantités réellement faites que l'écart ne compte PAS (même règle que `sommeReelsCouvrants`) et pourquoi : un réel fait
+ * un dimanche (jour non travaillé), après le service, hors règle ou au-delà de la limite d'utilisation ne couvre pas le
+ * besoin. Sert à dire pourquoi « il manque » une quantité alors que le réel égale la cible.
+ * @returns {{quantite:number, raison:string}|null} null quand tout le réel est compté
+ */
+export function reelNonCompte(etat, composantId) {
+  const composant = etat.composants?.[composantId];
+  let quantite = 0;
+  let raison = '';
+  for (const p of Object.values(etat.productions ?? {})) {
+    if (p.composantId !== composantId || p.etat !== 'fait' || p.genre === 'preparatoire' || !Number.isFinite(p.quantiteReelle)) continue;
+    const ev = evaluationDe(etat, p, composant);
+    if (!ev || ev.couvre) continue;
+    quantite += p.quantiteReelle;
+    if (!raison) raison = ev.alertes[0] ?? 'ne couvre pas le besoin';
+  }
+  return quantite > 0 ? { quantite, raison } : null;
+}
+
 /** Quantité de travail arrondie du composant, ou null si le calcul est inconnu. */
 function quantiteTravailArrondie(etat, composantId) {
   if (!etat.composants?.[composantId]) return null;

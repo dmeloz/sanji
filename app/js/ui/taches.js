@@ -4,7 +4,7 @@
 import { creneauxDuJour, estDateValide, libelleJour } from '../domaine/dates.js';
 import { calculerComposant } from '../domaine/calcul.js';
 import {
-  chargeCreneau, cibleProduction, ecartProduction, etatCreneau, etatTache, evaluerAvance, regleDe, repereConservation, suggererCreneau,
+  chargeCreneau, cibleProduction, ecartProduction, etatCreneau, etatTache, evaluerAvance, regleDe, reelNonCompte, repereConservation, suggererCreneau,
 } from '../domaine/planification.js';
 import {
   ajouterPreparatoire, annulerFait, corrigerReel, deciderEcart, demarrer, marquerFait, planifier, reporter, supprimerProduction,
@@ -249,8 +249,11 @@ export function dialogDecider(productionId) {
   if (fait) resume.push(`réel : ${quantite(p.quantiteReelle, unite)}`);
   if (ecart !== null && ecart > 0) resume.push(`il manque ${quantite(ecart, unite)}`);
   if (ecart !== null && ecart < 0) resume.push(`surplus de ${quantite(-ecart, unite)}`);
+  const nonCompte = reelNonCompte(e, p.composantId);
+  if (nonCompte) resume.push(`${quantite(nonCompte.quantite, unite)} non comptés : ${nonCompte.raison}`);
+  const nomCourant = p.genre === 'principale' ? e.composants[p.composantId]?.nom ?? p.libelle : p.libelle;
   panneau({
-    titre: `Écart à arbitrer : ${p.libelle}`,
+    titre: `Écart à arbitrer : ${nomCourant}`,
     corps: [h('p', null, resume.join(' · ')),
       h('p', { classe: 'aide' }, 'La modification des prévisions ne change jamais le réel : c\'est à vous de décider.'),
       ...f.noeuds],

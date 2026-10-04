@@ -417,6 +417,29 @@ test('allergènes : le panneau dit pourquoi la liste ne compte pas, et Enregistr
   nettoyer();
 });
 
+test('« cible 5399 · réel 5399 · il manque 5399 » : un réel fait un dimanche n\'est pas compté, et la carte le dit au lieu d\'afficher des chiffres incohérents', () => {
+  const e = calme(etatVide());
+  definirMenu(e, S.lundi, 1, 'pommes de terre', h());
+  definirStandard(e, 'pommes_de_terre', 'plat_principal', { valeur: 250, unite: 'g', etat: 'cru_net' }, h());
+  definirPrevision(e, S.lundi, 1, 20, h());
+  const p = Object.values(e.productions).find((x) => x.genre === 'principale');
+  marquerFait(e, p.id, undefined, `${S.dimanchePrecedent}T10:00:00.000Z`); // fait la veille, un dimanche (jour non travaillé)
+  const carte = decisionsDe(e, S.lundi).cartes.find((c) => c.genre === 'ecart');
+  assert.ok(carte, 'la production faite ne couvre pas le besoin : écart à arbitrer');
+  assert.equal(carte.reel, carte.cible, 'le réel égale la cible');
+  assert.equal(carte.ecart, carte.cible, 'et tout le besoin « manque » : la cause est la règle du dimanche');
+  assert.equal(carte.reelNonCompte.quantite, carte.reel);
+  assert.match(carte.reelNonCompte.raison, /dimanche : jour non travaillé/);
+  magasin.remplacer(e);
+  nettoyer();
+  aDate(S.lundi, () => feuille.ouvrirDecisions());
+  const d = ouverts()[0];
+  const texte = classes(d, 'dec-carte').find((c) => c.dataset.genre === 'ecart').textContent;
+  assert.match(texte, /il manque/);
+  assert.match(texte, /non comptés? : dimanche : jour non travaillé/);
+  parTexte(d, /^OK$/).click();
+});
+
 test('nom courant : après un changement de nom du composant (sauce choisie), l\'écart et le journal ne gardent pas l\'ancien nom', () => {
   const { e, p } = avecEcart();
   const ancien = e.composants[p.composantId].nom;

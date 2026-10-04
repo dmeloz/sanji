@@ -8,7 +8,7 @@ import { calculerComposant } from './calcul.js';
 import { propositionsApprentissage } from './apprentissage.js';
 import { ajouterJours, jourSemaine, lundiDe } from './dates.js';
 import { estSauceAConfirmer } from './etat.js';
-import { cibleProduction, ecartProduction, etatTache, evaluationProduction } from './planification.js';
+import { cibleProduction, ecartProduction, etatTache, evaluationProduction, reelNonCompte } from './planification.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
 import { valeursAValider } from './validation.js';
 
@@ -30,7 +30,7 @@ function datesDe(aujourd) {
 /**
  * Décisions à prendre.
  * Carte : { id, genre, date?, ... } selon le genre :
- * - ecart : productionId, composantId, nom, cible, reel, unite, ecart (nombres ou null)
+ * - ecart : productionId, composantId, nom, cible, reel, unite, ecart (nombres ou null), reelNonCompte ({quantite, raison} ou null : réel qui ne couvre pas le besoin)
  * - avance_hors_regle : productionId, composantId, nom, dateService, jours, limiteDepassee, fait (déjà faite : plus replanifiable)
  * - sauce : composantId, nom, date
  * - repartition : ficheId, numero, date, couverts
@@ -59,7 +59,7 @@ export function decisionsDe(etat, aujourd) {
       id: `ecart:${p.id}`, genre: 'ecart', productionId: p.id, composantId: p.composantId,
       nom: p.genre === 'complement' ? `Complément : ${composant.nom}` : composant.nom, cible: cibleProduction(etat, p.id), date: p.dateService,
       reel: Number.isFinite(p.quantiteReelle) ? p.quantiteReelle : null, unite: p.unite ?? calculerComposant(etat, composant.id)?.uniteTravail ?? null,
-      ecart: ecartProduction(etat, p.composantId),
+      ecart: ecartProduction(etat, p.composantId), reelNonCompte: reelNonCompte(etat, p.composantId),
     });
   }
 

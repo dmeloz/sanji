@@ -48,6 +48,9 @@ function carte(c, fermer) {
       if (c.ecart !== null && c.ecart > 0) morceaux.push(['il manque ', quantite(c.ecart, c.unite)]);
       if (c.ecart !== null && c.ecart < 0) morceaux.push(['surplus de ', quantite(-c.ecart, c.unite)]);
       detail = [morceaux.map(([mot, q], i) => [i > 0 ? ' · ' : null, mot, h('span', { classe: 'dec-qte' }, qteNoeuds(q))]),
+        // Un réel non compté (fait un dimanche, hors règle…) : dit pourquoi « il manque » même si le réel égale la cible.
+        c.reelNonCompte ? [' · ', h('span', { classe: 'dec-qte' }, qteNoeuds(quantite(c.reelNonCompte.quantite, c.unite))),
+          ` non comptés : ${c.reelNonCompte.raison}`] : null,
         h('span', { classe: 'dec-choix' }, 'Complément (produire le reste), ajustement (écart réglé, rien de plus) ou aucune production supplémentaire.')];
       actions = [principal('Décider', () => dialogDecider(c.productionId), { 'aria-label': `Décider de l'écart : ${c.nom}` }),
         versLien(`#/fiche/${encodeURIComponent(c.composantId)}`, 'Ouvrir la fiche')];
