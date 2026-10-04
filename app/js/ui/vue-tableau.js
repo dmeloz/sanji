@@ -8,7 +8,7 @@ import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { lien } from './elements.js';
 import { ouvrirProposition } from './feuille-validation.js';
-import { libelleHorsLigne } from './horsligne.js';
+import { problemeHorsLigne } from './horsligne.js';
 import { dialogPrevision } from './vue-detail.js';
 
 export function titre() { return 'Tableau'; }
@@ -185,7 +185,7 @@ function entete(tb) {
       h('a', { href: `#/semaine/${tb.semainePrecedente}/tableau`, classe: 'btn btn-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
       h('div', { classe: 'bord-semaine' },
         h('h1', { classe: 'bord-titre feutre' }, `Semaine du ${libelleJour(tb.lundi).replace(/^lundi\s+/, '')}`),
-        h('p', { classe: 'bord-sous-titre' }, `Semaine ${e.semaine} · ${libelleHorsLigne()}`)),
+        h('p', { classe: 'bord-sous-titre' }, `Semaine ${e.semaine}${problemeHorsLigne() ? ` · ${problemeHorsLigne()}` : ''}`)),
       h('a', { href: `#/semaine/${tb.semaineSuivante}/tableau`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')),
     h('div', { classe: 'bord-aujourdhui-ligne' },
       h('p', { classe: 'bord-date' }, `Aujourd'hui, ${libelleJour(e.date)}`),

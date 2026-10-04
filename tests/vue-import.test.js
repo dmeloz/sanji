@@ -25,14 +25,15 @@ const liens = (n) => n.tous((x) => x.balise === 'a').map((a) => a.attributs.href
 const saisir = (n, id, valeur) => { champ(n, id).value = valeur; return champ(n, id).declencher('input'); };
 const ligneDuJour = (n, jour) => parClasse(n, 'imp-jour').find((d) => d.textContent.startsWith(jour));
 
-test('routage : #/import mène à cette vue ; titre, retour vers la semaine, numéro de semaine, hors ligne', () => {
+test('routage : #/import mène à cette vue ; titre, retour vers la semaine, numéro de semaine, rien sur le hors ligne', () => {
   assert.equal(routeur.VUES.import, vue);
   assert.equal(vue.titre(), 'Import des menus');
   magasin.remplacer(etatVide());
   const noeud = vue.rendre(magasin.etat(), S.lundi);
   const texte = noeud.textContent;
   assert.match(texte, /Importer les menus/);
-  assert.match(texte, /Semaine \d+ · du lundi 5 octobre · hors ligne/);
+  assert.match(texte, /Semaine \d+ · du lundi 5 octobre/);
+  assert.doesNotMatch(texte, /hors ligne/);
   assert.ok(liens(noeud).includes(`#/semaine/${S.lundi}/tableau`), 'retour à la semaine');
   assert.ok(liens(noeud).includes(`#/import/${S.lundiSuivant}`) && liens(noeud).includes(`#/import/${S.lundiPrecedent ?? '2026-09-28'}`));
   assert.doesNotMatch(texte, /synchronis/i);

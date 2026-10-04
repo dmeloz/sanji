@@ -8,7 +8,7 @@ import { feuilleDuJour } from '../domaine/planification.js';
 import { ouvrirDecisions } from './feuille-decisions.js';
 import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
-import { libelleHorsLigne } from './horsligne.js';
+import { problemeHorsLigne } from './horsligne.js';
 import { lien } from './elements.js';
 import { activerGlisser } from './glisser.js';
 import { pluriel } from './format.js';
@@ -73,7 +73,7 @@ function entete(date, aujourd, feuille) {
   return h('header', { classe: 'jour-tete prod-tete' },
     h('div', { classe: 'prod-tete-ligne' },
       h('p', { classe: 'prod-date' }, dateEtAvancement),
-      h('span', { classe: 'prod-horsligne' }, h('span', { classe: 'prod-horsligne-point', 'aria-hidden': 'true' }), libelleHorsLigne())),
+      problemeHorsLigne() ? h('span', { classe: 'prod-horsligne' }, h('span', { classe: 'prod-horsligne-point', 'aria-hidden': 'true' }), problemeHorsLigne()) : null),
     h('h1', { classe: 'page-titre' }, 'Production'),
     h('p', { classe: 'jour-meta' },
       texteCouverts ? h('span', { classe: 'jour-couverts feutre' }, texteCouverts) : null,

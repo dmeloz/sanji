@@ -16,7 +16,7 @@ import { champs } from './champs.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, lien, pastille } from './elements.js';
 import { formaterHeure, pluriel, qteNoeuds, quantite } from './format.js';
-import { libelleHorsLigne } from './horsligne.js';
+import { problemeHorsLigne } from './horsligne.js';
 import { afficherMessage } from './messages.js';
 import { ligneProduction } from './taches.js';
 import * as vueProduits from './vue-produits.js';
@@ -221,7 +221,7 @@ export function rendre(etat, lundi, sous = 'achats') {
   if (vue !== 'restes') jourChoisi = null; // quitter les restes oublie le jour choisi : on y revient sur aujourd'hui
   const racine = h('div', { classe: 'vue vue-stock' });
   racine.appendChild(h('header', { classe: 'stock-entete' },
-    h('p', { classe: 'stock-sous' }, `${LEGENDES[vue]} · `, h('span', { classe: 'stock-horsligne' }, libelleHorsLigne())),
+    h('p', { classe: 'stock-sous' }, LEGENDES[vue], problemeHorsLigne() ? [' · ', h('span', { classe: 'stock-horsligne' }, problemeHorsLigne())] : null),
     h('h1', { classe: 'page-titre' }, 'Stock')));
   racine.appendChild(selecteur(semaine, vue));
   if (vue === 'restes') racine.appendChild(corpsRestes(etat, semaine));

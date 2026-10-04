@@ -150,6 +150,13 @@ function standardsBuffet() {
  * Bloc replié « Buffet » d'une fiche de fonction : quantités par couvert, multipliées par les couverts quand ils
  * sont connus. Lecture seule : aucun effet sur les portions du menu ni sur les commandes.
  */
+/** Provenance d'un repère de buffet, en mots du métier : jamais l'identifiant technique de l'entrée du référentiel. */
+function provenanceBuffet(s) {
+  if (s.origine === 'base_metier') return `${LIBELLE_STANDARD_BASE} (${texteProvenance(s, { prefixe: false })})`;
+  const verif = LIBELLE_VERIFICATION[s.provenance.verification];
+  return `${LIBELLE_STANDARD_BASE} (référentiel culinaire${verif ? `, ${verif}` : ''})`;
+}
+
 export function blocBuffet(couverts) {
   const n = Number.isFinite(Number(couverts)) && Number(couverts) > 0 ? Number(couverts) : 0;
   const standards = standardsBuffet();
@@ -165,7 +172,7 @@ export function blocBuffet(couverts) {
         n > 0 && min !== null && max !== null
           ? h('p', null, `Pour ${pluriel(n, 'couvert')} : ${grammes(min * n)}–${grammes(max * n)}`) : null,
         s.etatPoids ? null : h('p', { classe: 'alerte-texte' }, 'État de poids non établi (cru ou cuit), à confirmer avant tout calcul.'),
-        h('p', { classe: 'meta' }, `Provenance : ${texteProvenance(s, { prefixe: false })}`));
+        h('p', { classe: 'meta' }, `Provenance : ${provenanceBuffet(s)}`));
     })),
   ], { classe: 'sous-carte buffet-couvert' });
 }

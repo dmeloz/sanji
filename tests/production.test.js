@@ -67,11 +67,11 @@ test('sélecteur Aujourd\'hui / Demain : deux liens vers les jours, le jour affi
   assert.ok(classes(plusLoin, 'jour-barre').length === 1, 'la barre de jours reste pour aller plus loin');
 });
 
-test('en-tête : « date · x / n faites » et « hors ligne prêt » (pas de synchronisation)', () => {
+test('en-tête : « date · x / n faites », aucun état hors ligne quand tout est normal (pas de synchronisation)', () => {
   const { e, brut } = lundi();
   const texte = classes(page(e), 'prod-tete')[0].textContent;
   assert.match(texte, /Lundi 5 octobre \(aujourd'hui\) · 0 \/ 2 faites/);
-  assert.match(texte, /hors ligne/);
+  assert.doesNotMatch(texte, /hors ligne/, 'la normalité ne s\'affiche pas (vérification en cours ou prêt)');
   assert.doesNotMatch(texte, /synchronis|en attente/i);
   marquerFait(e, principaleDe(e, brut), undefined, h(1));
   assert.match(classes(page(e), 'prod-tete')[0].textContent, /1 \/ 2 faites/);

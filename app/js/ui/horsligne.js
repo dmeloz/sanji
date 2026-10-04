@@ -1,4 +1,4 @@
-// État du mode hors ligne : « hors ligne prêt » ou « hors ligne indisponible ici » avec la raison.
+// État du mode hors ligne : « hors ligne prêt » ou « hors ligne indisponible ici » avec la raison (Réglages), et le seul problème à montrer ailleurs (`problemeHorsLigne`).
 // Aucun accès à navigator, window ni caches au niveau supérieur.
 
 const PREFIXE_CACHE = 'sanji-';
@@ -19,6 +19,16 @@ function definir(pret, raison) {
 export function libelleHorsLigne(s = situation) {
   if (s.attente) return 'hors ligne : vérification en cours';
   return s.pret ? 'hors ligne prêt' : `hors ligne indisponible ici : ${s.raison}`;
+}
+
+/**
+ * Montrer l'exception, pas la normalité : le texte d'un problème seulement, `null` quand tout est normal (prêt, ou
+ * vérification encore en cours au démarrage). Les écrans n'affichent rien dans ce cas ; l'état complet reste dans
+ * Réglages (`libelleHorsLigne`).
+ */
+export function problemeHorsLigne(s = situation) {
+  if (s.attente || s.pret) return null;
+  return s.raison ? `hors ligne pas encore prêt : ${s.raison}` : 'hors ligne pas encore prêt';
 }
 
 /** Enregistre le service worker si le navigateur et le contexte le permettent, puis vérifie le cache. */

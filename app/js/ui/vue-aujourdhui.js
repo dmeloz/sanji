@@ -6,14 +6,15 @@
 // Interface commune des vues : `titre(param, sous)` et `rendre(etat, param, sous)`.
 
 import { libelleJour } from '../domaine/dates.js';
+import { alertesAllergenes } from '../domaine/allergenes.js';
 import { decisionsDe, texteDecisions } from '../domaine/decisions.js';
 import { aujourdhuiDe } from '../domaine/tableau-blanc.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
-import { lien, repliable } from './elements.js';
+import { lien, pastille, repliable } from './elements.js';
 import { ouvrirDecisions } from './feuille-decisions.js';
 import { ouvrirProposition } from './feuille-validation.js';
-import { abonnerHorsLigne, libelleHorsLigne, situationHorsLigne } from './horsligne.js';
+import { problemeHorsLigne } from './horsligne.js';
 import { phraseConservation, pluriel, qteNoeuds, quantite } from './format.js';
 import { faireEnUnToucher } from './taches.js';
 
@@ -22,19 +23,6 @@ export function titre() { return "Aujourd'hui"; }
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 const CERTITUDE = { estimee: 'estimée', provisoire: 'provisoire', confirmee: 'confirmée', hors_menu: 'hors menu' };
 const courtJour = (date) => `${libelleJour(date).slice(0, 3)}. ${Number(date.slice(8))}`;
-
-// L'état « hors ligne » est connu après le rendu : la pastille courante se met à jour toute seule.
-let pastilleCourante = null;
-let texteCourant = null;
-let abonnement = null;
-function suivreHorsLigne(noeud, texte) {
-  pastilleCourante = noeud;
-  texteCourant = texte;
-  abonnement ??= abonnerHorsLigne((s) => {
-    if (texteCourant) texteCourant.textContent = libelleHorsLigne(s);
-    if (pastilleCourante) pastilleCourante.dataset.pret = s.pret ? 'oui' : 'non';
-  });
-}
 
 function icone(chemins, classe = 'au-icone') {
   return svg('svg', { classe, viewBox: '0 0 24 24', width: 20, height: 20, fill: 'none', stroke: 'currentColor', 'stroke-width': 2,
@@ -45,15 +33,13 @@ const CHEVRON = ['M9 6l6 6-6 6'];
 
 // ------------------------------------------------------------------ en-tête
 
+/** L'état « hors ligne » n'apparaît que s'il y a un problème (`problemeHorsLigne`, null sinon) ; main.js redessine quand il change. L'état complet est dans Réglages. */
 function entete(donnees) {
-  const texte = h('span', null, libelleHorsLigne());
-  const pastille = h('p', { classe: 'au-hors-ligne', dataset: { pret: situationHorsLigne().pret ? 'oui' : 'non' } },
-    h('span', { classe: 'au-point', 'aria-hidden': 'true' }), texte);
-  suivreHorsLigne(pastille, texte);
+  const probleme = problemeHorsLigne();
   return h('header', { classe: 'au-tete' },
     h('p', { classe: 'au-date' }, majuscule(libelleJour(donnees.date))),
     h('h1', { classe: 'au-titre' }, "Aujourd'hui"),
-    pastille);
+    probleme ? h('p', { classe: 'au-hors-ligne', role: 'status' }, h('span', { classe: 'au-point', 'aria-hidden': 'true' }), h('span', null, probleme)) : null);
 }
 
 // ------------------------------------------------------------------ couverts
@@ -102,7 +88,8 @@ function carteMaintenant(d, aujourd) {
       h('h2', { classe: 'au-etiquette' }, 'Maintenant'),
       total > 0 ? h('span', { classe: 'au-jauge-texte' }, h('span', { classe: 'au-qte' }, `${faites} / ${total}`), ' faites') : null)];
   if (!m) {
-    corps.push(h('p', { classe: 'au-maintenant-vide' }, !d.ouvert ? ["Fermé aujourd'hui", d.prochainOuvert ? ` · Prochaine production : ${libelleJour(d.prochainOuvert).split(' ').slice(0, 2).join(' ')}` : null]
+    corps.push(h('p', { classe: 'au-maintenant-vide' }, !d.ouvert ? ["Fermé aujourd'hui", d.prochainOuvert ? [' · ', 'Prochaine production : ',
+        h('a', { href: `#/production/${d.prochainOuvert}`, classe: 'au-lien-prochaine' }, libelleJour(d.prochainOuvert).split(' ').slice(0, 2).join(' '))] : null]
       : total > 0 ? 'Tout est fait pour aujourd\'hui.' : 'Aucune tâche décidée pour aujourd\'hui.'));
   } else {
     corps.push(
@@ -205,19 +192,29 @@ function zoneAConsommer(d) {
 
 // ------------------------------------------------------------------ prochaine fiche de fonction
 
-function carteFiche(d, aujourd) {
+/** Même règle que Semaine : « allergènes à confirmer » tant que la liste d'un composant concerné n'est pas validée. */
+function allergenesAConfirmer(etat, f) {
+  if (!f.allergies) return false;
+  const alerte = alertesAllergenes(etat, f.date).find((a) => a.ficheId === f.id);
+  return Boolean(alerte?.composants.some((c) => c.statut === 'a_confirmer'));
+}
+
+function carteFiche(d, aujourd, etat) {
   const f = d.prochaineFiche;
   if (!f) return null;
   const quand = f.date === aujourd ? "aujourd'hui" : libelleJour(f.date);
   const titreFiche = ['Fiche de fonction', quand, f.horaire || null, `${pluriel(f.couverts, 'pers.', 'pers.')}`].filter(Boolean).join(' · ');
-  const statut = f.certitude ? CERTITUDE[f.certitude] : f.modeTexte;
-  return h('a', { href: f.lien, classe: 'au-fiche', 'aria-label': `${titreFiche}, ouvrir le détail du jour` },
+  // La certitude porte sur la répartition des couverts, jamais sur les allergènes : on l'écrit comme telle.
+  const statut = f.certitude ? `répartition ${CERTITUDE[f.certitude]}` : f.modeTexte;
+  const aConfirmer = allergenesAConfirmer(etat, f);
+  return h('a', { href: f.lien, classe: 'au-fiche', 'aria-label': `${titreFiche}${aConfirmer ? ', allergènes à confirmer' : ''}, ouvrir le détail du jour` },
     h('span', { classe: 'au-fiche-corps' },
       h('span', { classe: 'au-fiche-titre' }, titreFiche),
       h('span', { classe: 'au-sous' },
         [f.numero ? `fiche ${f.numero}` : null, f.modeTexte || null].filter(Boolean).join(' · '),
         f.allergies ? [' · ', h('strong', { classe: 'au-allergie' }, 'allergies'), ` : ${f.allergies}`] : ' · aucune allergie notée',
-        ' · ', h('strong', { classe: f.certitude ? 'au-statut-certitude' : 'au-statut' }, statut))),
+        ' · ', h('strong', { classe: f.certitude ? 'au-statut-certitude' : 'au-statut' }, statut)),
+      aConfirmer ? h('span', { classe: 'au-fiche-pastille' }, pastille('allergènes à confirmer', 'ambre')) : null),
     icone(CHEVRON, 'au-icone au-chevron'));
 }
 
@@ -248,7 +245,7 @@ export function rendre(etat) {
   const racine = h('div', { classe: 'vue vue-aujourdhui' });
   const repli = repliConfirmer(donnees);
   const morceaux = [entete(donnees), zoneCouverts(donnees), carteMaintenant(donnees, aujourd), bandeauDecisions(decisionsDe(etat, aujourd), repli),
-    zoneAConsommer(donnees), carteFiche(donnees, aujourd), zoneLiens(donnees, aujourd), repli];
+    zoneAConsommer(donnees), carteFiche(donnees, aujourd, etat), zoneLiens(donnees, aujourd), repli];
   for (const m of morceaux) if (m) racine.appendChild(m);
   return racine;
 }

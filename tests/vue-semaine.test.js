@@ -49,10 +49,11 @@ test('titre et routage : un jour = détail, sans date ou /tableau = semaine glob
   assert.equal(routeur.VUES.semaine, vue);
 });
 
-test('jour : en-tête « Semaine n° · ouvert lun → sam », hors ligne prêt, import et sept puces', () => {
+test('jour : en-tête « Semaine n° · ouvert lun → sam », sans état hors ligne normal, import et sept puces', () => {
   magasin.remplacer(semaine());
   const n = vue.rendre(magasin.etat(), S.lundiSuivant);
-  assert.match(texte(n), /Semaine \d+ · ouvert lun → sam · hors ligne/);
+  assert.match(texte(n), /Semaine \d+ · ouvert lun → sam/);
+  assert.doesNotMatch(texte(n), /hors ligne/);
   assert.ok(liens(n).includes(`#/import/${S.lundiSuivant}`));
   assert.equal(parClasse(n, 'sem-puce').length, 7);
   const actifs = parClasse(n, 'sem-puce').filter((p) => p.attributs['aria-current'] === 'date');
@@ -96,7 +97,8 @@ test('services : menus 1 et 2, couverts avec leur certitude, attribution au post
   assert.match(t, /prévision à saisir/);
   assert.match(t, /Attribution au poste : \d+ sur \d+/);
   assert.ok(n.tous((x) => x.balise === 'input' && x.attributs.role === 'switch').length >= 2, 'un interrupteur « au poste » par composant');
-  assert.match(t, /Carte.*aucune quantité calculée/s);
+  assert.match(t, /Carte.*contexte du service/s, 'la carte reste en contexte');
+  assert.doesNotMatch(texte(parClasse(n, 'sem-carte')[0]), /aucune quantité calculée/, 'l\'aide permanente a quitté la carte (elle est dans le repli du détail)');
   assert.match(t, /Fiche F7/);
   assert.match(t, /répartition confirmée/);
   assert.match(t, /Allergies : arachides/);

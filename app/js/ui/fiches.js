@@ -10,6 +10,7 @@ import { definitions, lien } from './elements.js';
 import { formaterHeure } from './format.js';
 import { confirmer, panneau } from './panneau.js';
 import { LIBELLE_MODE, LIBELLE_SERVICE } from './reference.js';
+import { blocBuffet } from './reperes-metier.js';
 
 const sommeRepartition = (f) => (Number(f.repartition?.[1]) || 0) + (Number(f.repartition?.[2]) || 0);
 
@@ -25,6 +26,16 @@ export function resumeChoix(f) {
 
 /** Vrai si la répartition d'un choix libre ne correspond pas aux couverts. */
 export const repartitionIncoherente = (f) => f.mode === 'choix_libre' && sommeRepartition(f) !== Number(f.couverts);
+
+/**
+ * Buffet par couvert (repère en lecture seule), visible depuis la fiche elle-même : sans objet pour une fiche annulée,
+ * dit « sans objet en menu fixe » pour un menu fixe (les portions sont celles du menu), affiché sinon.
+ */
+export function buffetDeLaFiche(f) {
+  if (f.statut === 'annulee') return null;
+  if (f.mode === 'menu_fixe') return h('p', { classe: 'meta' }, 'Buffet par couvert : sans objet en menu fixe.');
+  return blocBuffet(f.couverts);
+}
 
 /** Détail d'une fiche (lecture) : personnes, horaire, choix, allergies, remarques, version. */
 export function ouvrirFiche(ficheId) {
@@ -45,6 +56,7 @@ export function ouvrirFiche(ficheId) {
       ]),
       repartitionIncoherente(f)
         ? h('p', { classe: 'alerte-texte' }, `La répartition (${sommeRepartition(f)}) ne correspond pas aux couverts (${f.couverts}).`) : null,
+      buffetDeLaFiche(f),
       lien(`#/semaine/${f.date}`, 'Ouvrir le jour pour modifier', 'lien'),
     ],
   });
