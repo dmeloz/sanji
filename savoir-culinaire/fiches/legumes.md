@@ -44,7 +44,7 @@ Légende confiance : H haute, M moyenne, F faible. Un chiffre unique venant de l
 |---|---|---|---|---|
 | Julienne | Bâtonnets très fins : section de 1 à 2 mm, longueur d'environ 5 à 6 cm. _Les dimensions varient selon les écoles et les sites : fourchette large retenue._ | 1-2 mm de section (longueur 50-60 mm) | M | Cuisine De Base, chef-fabien.com |
 | Brunoise | Petits dés de 1 à 3 mm de côté (la fine brunoise descend à 1 mm). _Les dimensions varient selon les écoles et les sites : fourchette large retenue. Sources : 2 mm / 1-2 mm / 2-3 mm._ | 1-3 mm de côté | M | Cuisine De Base, chef-fabien.com |
-| Macédoine | Dés de 4 à 6 mm de côté. _Les dimensions varient selon les écoles et les sites : fourchette large retenue. Sources : 5 mm / 4-5 mm._ | 4-6 mm de côté | M | Cuisine De Base, chef-fabien.com |
+| Macédoine | Dés de 4 à 5 mm de côté. _Sources : 5 mm (cuisinedebase), 4 à 5 mm (chef-fabien) ; 6 mm n'est étayé par aucune source._ | 4-5 mm de côté | M | Cuisine De Base, chef-fabien.com |
 | Mirepoix | Gros dés irréguliers de 1 à 2 cm, pour fonds et braisages (cuisson longue). _Les dimensions varient selon les écoles et les sites : fourchette large retenue._ | 10-20 mm de côté | M | Cuisine De Base, chef-fabien.com |
 | Paysanne | Carrés, triangles ou rondelles minces : environ 5 à 10 mm de côté pour 1 à 2 mm d'épaisseur. _Sources contradictoires : 1 cm x 1 mm ; carré ou triangle de 2 mm d'épaisseur. Fourchette large, confiance faible._ | 5-10 mm de côté (épaisseur 1-2 mm) | F | Cuisine De Base, chef-fabien.com |
 | Jardinière | Bâtonnets de 4 à 5 mm de section et de 3 à 5 cm de long. _Sources : 5 x 5 x 50 mm ; 3-4 cm x 4-5 mm._ | 4-5 mm de section (longueur 30-50 mm) | M | Cuisine De Base, chef-fabien.com |
@@ -119,7 +119,7 @@ Légende confiance : H haute, M moyenne, F faible. Un chiffre unique venant de l
 | Position des œufs | Stocker pointe en bas, sans laver. | - | M | GalloSuisse, Base Sanji §8 |
 | Œufs durs | Œufs durs : 1 à 2 semaines au froid ; noter la date de cuisson sur la coquille. _Pour la restauration, durée interne plus courte possible._ | 1-2 semaines | M | Swissmilk |
 | Œuf à la coque | Environ 3 minutes à l'eau frémissante. | 3 min | M | lesoeufs.fr (interprofession) |
-| Œuf mollet | Œuf mollet : environ 3 à 6 minutes selon le calibre et le départ (eau frémissante ou eau tiède portée à ébullition) ; la valeur reste large. _lesoeufs.fr : 6 min en eau frémissante puis eau froide ; GalloSuisse : environ 6 min pour un œuf moyen, départ en eau tiède, minutage dès l'ébullition, refroidissement naturel (pas d'eau froide). L'autre thème du référentiel (sauces-cuissons) donne 3 à 4 min pour un œuf mollet ou poché peu cuit : écart non résolu, calibre et départ non précisés partout._ | 3-6 min | F | lesoeufs.fr (interprofession), GalloSuisse |
+| Œuf mollet | Œuf mollet : environ 6 minutes (œuf de calibre moyen, minutage dès l'ébullition) ; 3 minutes correspond à l'œuf à la coque. _lesoeufs.fr : 6 min en eau frémissante puis eau froide ; GalloSuisse : environ 6 min pour un œuf moyen, départ en eau tiède, minutage dès l'ébullition, refroidissement naturel (pas d'eau froide). L'autre thème du référentiel (sauces-cuissons) donne 3 à 4 min pour un œuf mollet ou poché peu cuit : écart à rapprocher (3 min correspond à l'œuf à la coque, selon le sondage du 2026-10-04)._ | 6 min | M | lesoeufs.fr (interprofession), GalloSuisse |
 | Œuf dur | Environ 9 à 10 minutes à petits bouillons (9 à 12 selon les sites). _Taille moyenne ; départ eau froide ou bouillante selon la méthode._ | 9-12 min | M | lesoeufs.fr (interprofession) |
 | Œuf poché | Environ 3 à 4 minutes dans une eau frémissante (65 à 80 °C), sans ébullition forte. _Base : pocher 65-80 °C, œuf poché 3-4 min ; lesoeufs.fr : environ 3 min._ | 3-4 min | M | Base Sanji §14, lesoeufs.fr (interprofession) |
 | Fraîcheur et écalage | Les œufs très frais s'écalent mal ; attendre environ une semaine avant de les cuire durs ; meilleur goût après 5 à 7 jours. | 5-7 jours | M | GalloSuisse |
@@ -146,7 +146,7 @@ Légende confiance : H haute, M moyenne, F faible. Un chiffre unique venant de l
 | Fromages à gratin | Fromage entier : 5-10 °C, jusqu'à 3 semaines ; pâte dure fermée 21-30 jours, ouverte 10-14 jours (base). _Swissmilk : 3 semaines pièce entière. Gruyère, emmental, parmesan._ | 10-30 jours | M | Swissmilk, Base Sanji §32.1 |
 | Fromage râpé | Le fromage râpé se congèle, environ 6 mois. _Concorde avec la base (180 j)._ | 6 mois | M | Swissmilk, Base Sanji §32.1 |
 | Allergènes lait et œufs | Crème, beurre, fromage portent du lait ; la liaison au jaune porte de l'œuf : une garniture gratinée ou liée cumule les allergènes. | - | M | Base Sanji §24, Base Sanji §34 |
-| Lait au froid | Lait : au plus 6 °C selon une source de branche ; la base Sanji tolère 8 °C. La crème se garde à 5 °C au plus. _Voir hygiene.temperature.lait-produits-laitiers (fourchette prudente 6 °C, base Sanji 8 °C). Fromage et beurre : voir legumes.lait.temperature-fromage-beurre. Crème : voir legumes.lait.creme-stockage._ | ≤ 6 °C maximum (lait) | M | gastronomie-hygiene.ch, Base Sanji §6 |
+| Lait au froid | Lait : au plus 6 °C selon une source de branche ; la base Sanji tolère 8 °C. Pour l'ensemble des produits laitiers, la source donne moins de 6 °C ; aucune valeur propre à la crème n'est étayée. _Voir hygiene.temperature.lait-produits-laitiers (fourchette prudente 6 °C, base Sanji 8 °C). Fromage et beurre : voir legumes.lait.temperature-fromage-beurre. Crème : voir legumes.lait.creme-stockage._ | ≤ 6 °C maximum (lait) | M | gastronomie-hygiene.ch, Base Sanji §6 |
 | Fromage et beurre au froid | Fromage et beurre : jusqu'à 10 °C selon la base Sanji ; une fiche de branche admet 10 °C pour certains produits laitiers préemballés. _À distinguer du lait (6 °C, voir hygiene.temperature.lait-produits-laitiers) ; la fiche de branche parle de 7 °C pour les denrées périssables préemballées, 10 °C parfois pour les produits laitiers. Suivre l'étiquette du fabricant._ | ≤ 10 °C maximum (fromage, beurre) | F | Base Sanji §6, gastronomie-hygiene.ch |
 
 ## Lacunes et points non vérifiés
@@ -165,7 +165,7 @@ Légende confiance : H haute, M moyenne, F faible. Un chiffre unique venant de l
 - **Ordonnance sur les œufs (délai de vente de 21 jours, base légale)** : Fedlex illisible par l'outil ; 21 jours annoncé par GalloSuisse (« par la loi ») mais non vérifié dans le texte.
 - **Durée de cuisson longue de certains champignons sauvages** : Le chiffre de 20 min n'a pas été retrouvé sur les pages VAPKO et OSAV.
 - **Minimum de matière grasse de la crème à fouetter** : Non indiqué sur la page Swissmilk ouverte.
-- **Temps de mollet par calibre et mode de départ** : Sources divergentes (3-4 min dans un autre thème, 6 min ici) ; fourchette large gardée.
+- **Temps de mollet par calibre et mode de départ** : Calibre et départ ne sont pas précisés partout ; 6 min retenu pour un œuf moyen.
 
 ## Divergences notables
 

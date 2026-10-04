@@ -6,7 +6,7 @@ Fichier généré par `npm run culinaire` : ne pas éditer. Tout est à valider 
 |---|---|---|---|---|---|
 | Féculents et pommes de terre | 62 | 43 | 16 | 9 | 15 |
 | Hygiène, HACCP, allergènes et conservation | 71 | 32 | 8 | 70 | 14 |
-| Légumes, champignons, herbes, œufs et produits laitiers | 99 | 70 | 46 | 28 | 15 |
+| Légumes, champignons, herbes, œufs et produits laitiers | 99 | 70 | 45 | 28 | 15 |
 | Organisation, calculs et cadre du brevet | 64 | 23 | 16 | 15 | 11 |
 | Fonds, sauces et méthodes de cuisson | 70 | 50 | 22 | 20 | 17 |
 

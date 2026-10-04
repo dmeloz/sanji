@@ -5058,14 +5058,14 @@
    "id": "legumes.coupe.macedoine",
    "sujet": "Macédoine",
    "type": "repere",
-   "enonce": "Dés de 4 à 6 mm de côté.",
+   "enonce": "Macédoine : dés de 4 à 5 mm de côté.",
    "valeur": {
     "min": 4,
-    "max": 6,
+    "max": 5,
     "unite": "mm de côté"
    },
    "etat_poids": null,
-   "conditions": "Les dimensions varient selon les écoles et les sites : fourchette large retenue. Sources : 5 mm / 4-5 mm.",
+   "conditions": "Sources : 5 mm (cuisinedebase), 4 à 5 mm (chef-fabien). Les dimensions varient selon les écoles ; la valeur de 6 mm n'est étayée par aucune source.",
    "sources": [
     {
      "titre": "Tailles des légumes",
@@ -6565,14 +6565,14 @@
    "id": "legumes.oeuf.mollet",
    "sujet": "Œuf mollet",
    "type": "repere",
-   "enonce": "Œuf mollet : environ 3 à 6 minutes selon le calibre et le départ (eau frémissante ou eau tiède portée à ébullition) ; la valeur reste large.",
+   "enonce": "Œuf mollet : environ 6 minutes (œuf de calibre moyen, minutage dès l'ébullition) ; 3 minutes correspond à l'œuf à la coque.",
    "valeur": {
-    "min": 3,
+    "min": 6,
     "max": 6,
     "unite": "min"
    },
    "etat_poids": null,
-   "conditions": "lesoeufs.fr : 6 min en eau frémissante puis eau froide ; GalloSuisse : environ 6 min pour un œuf moyen, départ en eau tiède, minutage dès l'ébullition, refroidissement naturel (pas d'eau froide). L'autre thème du référentiel (sauces-cuissons) donne 3 à 4 min pour un œuf mollet ou poché peu cuit : écart non résolu, calibre et départ non précisés partout.",
+   "conditions": "lesoeufs.fr : 6 min en eau frémissante puis eau froide ; GalloSuisse : environ 6 min pour un œuf moyen, départ en eau tiède, minutage dès l'ébullition, refroidissement naturel (pas d'eau froide). L'autre thème du référentiel (sauces-cuissons) donne 3 à 4 min pour un œuf mollet ou poché peu cuit : écart non résolu, calibre et départ non précisés partout. Sondage du 2026-10-04 : les sources disent 6 min ; la borne de 3 min n'était étayée par aucune. L'entrée sauces-cuissons.securite.oeufs, qui parle de 3 à 4 min, est à rapprocher (œuf à la coque ou poché).",
    "sources": [
     {
      "titre": "Se faire cuire un œuf",
@@ -6591,7 +6591,7 @@
      "type_source": "professionnelle"
     }
    ],
-   "confiance": "faible",
+   "confiance": "moyenne",
    "statut": "a_valider",
    "portee": "general",
    "usage_calcul": false
@@ -7207,7 +7207,7 @@
    "id": "legumes.lait.temperature-stockage",
    "sujet": "Lait",
    "type": "regle",
-   "enonce": "Lait : au plus 6 °C selon une source de branche ; la base Sanji tolère 8 °C. La crème se garde à 5 °C au plus.",
+   "enonce": "Lait : au plus 6 °C selon une source de branche ; la base Sanji tolère 8 °C. Pour l'ensemble des produits laitiers, la source donne moins de 6 °C ; aucune valeur propre à la crème n'est étayée.",
    "valeur": {
     "max": 6,
     "unite": "°C maximum (lait)"
