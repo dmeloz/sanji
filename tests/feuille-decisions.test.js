@@ -192,6 +192,27 @@ test('feuille : avance hors règle écrite « hors règle », « Replanifier » 
   d.close();
 });
 
+test('feuille : une avance hors règle sur une tâche déjà FAITE ne propose plus « Replanifier » (inerte) mais corriger le réel, la règle de préparation et la fiche', () => {
+  nettoyer();
+  const { e, p } = avecAvanceHorsRegle();
+  marquerFait(e, p.id, undefined, `${S.lundi}T08:00:00.000Z`);
+  assert.equal(decisionsDe(e, S.lundi).cartes.find((x) => x.genre === 'avance_hors_regle')?.fait, true);
+  magasin.remplacer(e);
+  aDate(S.lundi, () => feuille.ouvrirDecisions());
+  const [d] = ouverts();
+  const carte = classes(d, 'dec-carte').find((c) => c.dataset.genre === 'avance_hors_regle');
+  assert.ok(carte);
+  assert.equal(parTexte(carte, /^Replanifier$/), undefined);
+  assert.match(carte.textContent, /Déjà faite : elle ne se replanifie plus/);
+  assert.match(carte.textContent, /règle de préparation/);
+  const liens = carte.tous((x) => x.balise === 'a').map((a) => a.attributs.href);
+  assert.ok(liens.includes('#/reglages/organisation'));
+  aDate(S.lundi, () => parTexte(carte, /^Corriger le réel$/).click());
+  assert.ok(ouverts().some((x) => /Corriger le réel :/.test(x.textContent)));
+  ouverts().at(-1).close();
+  d.close();
+});
+
 test('feuille : sauce à confirmer = « Choisir la sauce » ouvre le panneau existant ; valider la sauce retire la carte', async () => {
   nettoyer();
   magasin.remplacer(avecSauce());

@@ -13,7 +13,7 @@ import { dialogRepartition } from './fiches.js';
 import { ouvrirProposition, ouvrirValidation, texteFourchette } from './feuille-validation.js';
 import { qteNoeuds, quantite } from './format.js';
 import { panneau } from './panneau.js';
-import { dialogDecider, dialogPlanifier } from './taches.js';
+import { dialogCorriger, dialogDecider, dialogPlanifier } from './taches.js';
 import { dialogAllergenes, dialogChoisirSauce, dialogModifier, texteObstacleAllergenes } from './vue-composant.js';
 
 const ETIQUETTE_POINT = {
@@ -58,6 +58,16 @@ function carte(c, fermer) {
       titre = `${c.nom} pour ${libelleJour(c.dateService)}`;
       detail = [h('strong', { classe: 'dec-mot' }, c.limiteDepassee ? "limite d'utilisation dépassée" : 'hors règle'),
         ` : avance de ${c.jours} jour${c.jours > 1 ? 's' : ''}, le besoin n'est pas couvert.`];
+      if (c.fait) {
+        // Déjà faite : replanifier ne changerait rien. Aucune exception « gardée » par production n'existe : seule une règle
+        // de préparation (avance maximale, limite d'utilisation) autorise une telle avance ; sinon on corrige le réel.
+        detail.push(h('span', { classe: 'dec-choix' }, ' Déjà faite : elle ne se replanifie plus. Si cette avance est voulue, '
+          + 'la règle de préparation (avance maximale et limite d\'utilisation) la rend conforme ; sinon corrigez la quantité réellement faite.'));
+        actions = [principal('Corriger le réel', () => dialogCorriger(c.productionId), { 'aria-label': `Corriger le réel : ${c.nom}` }),
+          versLien('#/reglages/organisation', 'Règle de préparation'),
+          versLien(`#/fiche/${encodeURIComponent(c.composantId)}`, 'Ouvrir la fiche')];
+        break;
+      }
       actions = [principal('Replanifier', () => dialogPlanifier(c.productionId, 'reporter'), { 'aria-label': `Replanifier : ${c.nom}` }),
         versLien(`#/fiche/${encodeURIComponent(c.composantId)}`, 'Ouvrir la fiche')];
       break;

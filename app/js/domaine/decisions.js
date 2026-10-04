@@ -31,7 +31,7 @@ function datesDe(aujourd) {
  * Décisions à prendre.
  * Carte : { id, genre, date?, ... } selon le genre :
  * - ecart : productionId, composantId, nom, cible, reel, unite, ecart (nombres ou null)
- * - avance_hors_regle : productionId, composantId, nom, dateService, jours, limiteDepassee
+ * - avance_hors_regle : productionId, composantId, nom, dateService, jours, limiteDepassee, fait (déjà faite : plus replanifiable)
  * - sauce : composantId, nom, date
  * - repartition : ficheId, numero, date, couverts
  * - point (autre point « à confirmer » sans quantité) : type, texte, composantId?, ficheId?, date?, obstacle? (allergènes : ce qui empêche la validation)
@@ -77,7 +77,7 @@ export function decisionsDe(etat, aujourd) {
           if (vus.has(id)) continue;
           vus.add(id);
           cartes.push({ id, genre: 'avance_hors_regle', productionId: p.id, composantId: pt.composantId,
-            nom: etat.composants[pt.composantId].nom, dateService: date, date, jours: ev.jours, limiteDepassee });
+            nom: etat.composants[pt.composantId].nom, dateService: date, date, jours: ev.jours, limiteDepassee, fait: p.etat === 'fait' });
         }
       } else if (pt.type === 'repartition_provisoire') {
         const f = etat.fiches[pt.ficheId];
