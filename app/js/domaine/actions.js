@@ -12,7 +12,7 @@ import {
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
 import { chargeCreneau, cibleProduction, ecartProduction, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
-import { besoinsProduits, cleSuivi } from './produits.js';
+import { besoinsProduits, cleSuivi, suiviProduit } from './produits.js';
 import { GROUPES, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
   CATEGORIE, CHARGE, ETAPE, ETAT_CRENEAU, ETAT_POIDS, PROVENANCE, ROLE, TYPE_COMPOSANT, UNITE, VERIF,
@@ -1111,14 +1111,24 @@ export function definirAchat(etat, lundi, cle, unite, champs, h) {
   return terminer(etat, h, 'definirAchat', cle, suivi);
 }
 
-/** Marque une ligne commandée (une quantité à acheter doit avoir été saisie). */
+/**
+ * Marque une ligne commandée. Une quantité à acheter doit avoir été saisie, sauf pour une ligne NOTÉE sans valeur inconnue :
+ * elle se commande pour la quantité notée (calculée au moment de la note, standard de base compris). `quantiteAcheter` n'est
+ * jamais remplie par le calcul.
+ */
 export function marquerCommande(etat, lundi, cle, unite, h) {
   verifierH(h);
   const suivi = suiviDe(etat, lundi, cle, unite);
   if (suivi.etatLigne === 'retire') throw new Error('Cette ligne est retirée de la liste : remettez-la avant de la marquer commandée.');
-  if (!Number.isFinite(suivi.quantiteAcheter)) throw new Error("Saisissez d'abord la quantité réellement achetée.");
+  let detail = cle;
+  if (!Number.isFinite(suivi.quantiteAcheter)) {
+    const ligne = besoinsProduits(etat, lundi).lignes.find((l) => l.cle === cle && l.unite === unite);
+    const commandable = ligne ? suiviProduit(etat, lundi, ligne).quantiteCommandable : null;
+    if (suivi.etatLigne !== 'note' || !Number.isFinite(commandable)) throw new Error("Saisissez d'abord la quantité réellement achetée.");
+    detail = `${cle} : ${commandable} ${unite} notés${ligne.standardBase ? ' (standard de base)' : ''}`;
+  }
   suivi.commandeLe = h;
-  return terminer(etat, h, 'marquerCommande', cle, suivi);
+  return terminer(etat, h, 'marquerCommande', detail, suivi);
 }
 
 // ---------------------------------------------------------------- après service

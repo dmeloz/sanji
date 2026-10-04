@@ -122,7 +122,9 @@ function carteLigne(etat, lundi, ligne, aujourd) {
           suivi.aRelire ? ' · à relire' : ''),
         ligne.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre')
           : ligne.standardBase ? pastille(LIBELLE_STANDARD_BASE, 'gris') : null)),
-    suivi.aRelire ? h('p', { classe: 'meta' }, 'À relire : le besoin a changé depuis que vous l\'avez noté ; la quantité notée n\'a pas bougé.') : null,
+    suivi.aRelire ? h('p', { classe: 'meta' }, suivi.raisonARelire === 'quantite'
+      ? `À relire : la quantité calculée est maintenant ${quantite(suivi.quantiteCalculee, ligne.unite)} ; vous aviez noté ${quantite(suivi.quantiteNotee, ligne.unite)}, qui n'a pas bougé.`
+      : 'À relire : le besoin a changé depuis que vous l\'avez noté ; la quantité notée n\'a pas bougé.') : null,
     ligne.aValider ? h('p', { classe: 'meta' }, 'Le besoin repose sur une valeur inconnue : quantité à taper pour la noter.')
       : ligne.standardBase ? h('p', { classe: 'meta' }, 'Le besoin repose sur des standards de base (modifiables dans Réglages).') : null,
     h('dl', { classe: 'definitions' },
@@ -151,7 +153,7 @@ function carteLigne(etat, lundi, ligne, aujourd) {
       bouton('Achat', () => dialogAchat(lundi, ligne), 'court'),
       suivi.etatLigne === 'retire' ? null
         : bouton('Marquer commandé', () => agir((e, t) => marquerCommande(e, lundi, ligne.cle, ligne.unite, t)), 'court',
-          { disabled: suivi.quantiteAcheter === null }),
+          { disabled: suivi.quantiteAcheter === null && !(suivi.etatLigne === 'note' && suivi.quantiteCommandable !== null) }),
     ));
 }
 

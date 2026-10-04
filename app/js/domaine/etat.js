@@ -162,13 +162,14 @@ export function standardVide() {
 
 /**
  * Suivi d'une ligne de besoin. `etatLigne` : 'suggere' (la ligne vient du calcul), 'note' (la propriétaire l'a notée
- * à commander, `besoinAuNote` garde le besoin vu à ce moment) ou 'retire' ; `historique` garde chaque changement d'état.
+ * à commander, `besoinAuNote` garde le besoin vu à ce moment, `quantiteNotee` la quantité calculée à ce moment quand aucune
+ * quantité n'a été tapée) ou 'retire' ; `historique` garde chaque changement d'état.
  */
 export function suiviProduitVide() {
   return {
     statut: 'a_verifier', quantiteVerifiee: null, besoinAuControle: null, quantiteAcheter: null,
     conditionnement: '', fournisseurId: null, commandeLe: null,
-    etatLigne: 'suggere', besoinAuNote: null, historique: [],
+    etatLigne: 'suggere', besoinAuNote: null, quantiteNotee: null, historique: [],
   };
 }
 
