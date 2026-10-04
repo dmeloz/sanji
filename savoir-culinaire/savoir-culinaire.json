@@ -4381,7 +4381,7 @@
     "unite": "jours après le jour de production"
    },
    "etat_poids": null,
-   "conditions": "Recommandations cantonales (pas de loi) ; le jour de production ne compte pas dans les 2 jours. Écart avec la base Sanji (plats cuisinés maison 3 j) : valeur suisse gardée, compatible si le jour de production est compté.",
+   "conditions": "Recommandations cantonales (pas de loi) ; le jour de production ne compte pas dans les 2 jours. Écart avec la base Sanji (plats cuisinés maison 3 j) : valeur suisse gardée, compatible si le jour de production est compté. Pour le riz cuit, voir feculents.riz.conservation.cuit (1 jour, valeur plus prudente).",
    "sources": [
     {
      "titre": "Vorproduzierte, leicht verderbliche Lebensmittel : Lagerung und Haltbarkeitsfristen (juin 2013)",
@@ -8078,7 +8078,7 @@
     "unite": "jours"
    },
    "etat_poids": "cuit",
-   "conditions": "Sources divergentes : GVG (gekochte, in Wasser abgekühlte Eier, max. 3 Tage) et Swissmilk (1-2 semaines, usage domestique). Fourchette la plus large gardée ; la mention « noter la date sur la coquille » n'est pas dans les sources : retirée.",
+   "conditions": "Sources divergentes : GVG (gekochte, in Wasser abgekühlte Eier, max. 3 Tage) et Swissmilk (1-2 semaines, usage domestique). Fourchette la plus large gardée ; Swissmilk recommande aussi d'écrire la date de cuisson sur l'œuf.",
    "sources": [
     {
      "titre": "Eier-Haltbarkeit",
@@ -10095,7 +10095,7 @@
     "unite": "x poids sec"
    },
    "etat_poids": "sec",
-   "conditions": "Un rendement supérieur à 100 % se traite comme une perte inversée, sans blocage. Correction : la version antérieure donnait 2,75 seul ; la table §11.2 de la base donne ×2,5 à 3 et n'utilise 2,75 que comme valeur de calcul. Recoupé en gros par reisbereich.de (« etwa das Dreifache »), source web faible.",
+   "conditions": "Un rendement supérieur à 100 % se traite comme une perte inversée, sans blocage. Correction : la version antérieure donnait 2,75 seul ; la table §11.2 de la base donne ×2,5 à 3 et n'utilise 2,75 que comme valeur de calcul. Recoupé en gros par reisbereich.de (« etwa das Dreifache »), source web faible. Le thème féculents (feculents.riz.rendement.cuit) donne 2 à 3 : la borne basse de 2 vaut pour certains riz (basmati, riz complet).",
    "sources": [
     {
      "titre": "Base métier Sanji, section 12",

@@ -17,7 +17,7 @@ Construit le 2026-10-04, en autonomie, sur demande de la propriétaire. **Tout e
 3. Calculs et commandes : rien sans validation écrite.
 
 ## Limites connues
-- Vérification externe par sondage seulement (voir `refonte-journal.md` section « Savoir culinaire » ou le compte rendu) : la plupart des entrées n'ont pas été recontrôlées une à une.
-- Le règlement d'examen du brevet a été retrouvé (version de 2011) mais sa validité actuelle n'est pas confirmée : les compétences détaillées ne sont pas reprises.
+- Vérification à la source (2e passe du 2026-10-04) : sur 262 entrées chiffrées, 201 confirmées, 56 appuyées par la seule base de Sanji, 5 partielles (champ `verification` de chaque entrée). Un contrôle croisé indépendant a jugé méritées 25 « confirmées » sur 25 tirées au hasard. Les entrées sans valeur chiffrée (techniques, définitions) n'ont pas été recontrôlées une à une.
+- Le règlement d'examen du brevet (2011) est toujours en vigueur selon Hotel & Gastro formation (rapport d'août 2025), une révision étant en projet ; le SEFRI ne l'a pas confirmé. Les compétences détaillées ne sont pas reprises.
 - Droit et hygiène : tout est « à valider localement » (cantons, version de la loi).
 - Plusieurs lacunes assumées : pâtes fraîches, riz suisse, rapports du risotto, proportions de l'espagnole, bouillon de légumes, planification hebdomadaire, prix de revient complet. Elles sont listées dans chaque fiche.

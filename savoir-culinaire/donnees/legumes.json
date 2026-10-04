@@ -2497,7 +2497,7 @@
     "unite": "jours"
    },
    "etat_poids": "cuit",
-   "conditions": "Sources divergentes : GVG (gekochte, in Wasser abgekühlte Eier, max. 3 Tage) et Swissmilk (1-2 semaines, usage domestique). Fourchette la plus large gardée ; la mention « noter la date sur la coquille » n'est pas dans les sources : retirée.",
+   "conditions": "Sources divergentes : GVG (gekochte, in Wasser abgekühlte Eier, max. 3 Tage) et Swissmilk (1-2 semaines, usage domestique). Fourchette la plus large gardée ; Swissmilk recommande aussi d'écrire la date de cuisson sur l'œuf.",
    "sources": [
     {
      "titre": "Eier-Haltbarkeit",
