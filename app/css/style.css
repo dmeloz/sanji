@@ -876,6 +876,7 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .au-decisions-titre { font-size: var(--t-corps); font-weight: 600; }
 .au-decisions-detail { font-size: var(--t-legende); overflow-wrap: anywhere; }
 .au-decisions .au-chevron { color: currentColor; }
+.prod-decisions { margin: 0 0 10px; }
 
 /* Cartes et lignes */
 .au-carte { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 6px; border-radius: var(--r-carte); background: var(--carte); }

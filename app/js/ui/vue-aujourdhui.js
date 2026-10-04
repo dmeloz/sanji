@@ -6,6 +6,7 @@
 // Interface commune des vues : `titre(param, sous)` et `rendre(etat, param, sous)`.
 
 import { libelleJour } from '../domaine/dates.js';
+import { decisionsDe } from '../domaine/decisions.js';
 import { aujourdhuiDe } from '../domaine/tableau-blanc.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
@@ -125,9 +126,22 @@ function carteMaintenant(d, aujourd) {
 
 // ------------------------------------------------------------------ décisions en attente
 
-/** Le bandeau appelle la feuille « À décider » ; le repli « À confirmer » de la page reste le détail (liens et propositions). */
-function bandeauDecisions(d, repli) {
-  const { total, lignes } = d.decisions;
+/** Résumé du bandeau : un mot par genre de carte de la feuille, avec le nombre. */
+const GENRE_EN_CLAIR = {
+  ecart: ['écart à arbitrer', 'écarts à arbitrer'], avance_hors_regle: ['avance hors règle', 'avances hors règle'],
+  sauce: ['sauce à confirmer', 'sauces à confirmer'], repartition: ['répartition provisoire', 'répartitions provisoires'],
+  point: ['point à confirmer', 'points à confirmer'], apprentissage: ['proposition', 'propositions'],
+  valeur: ['valeur à valider', 'valeurs à valider'],
+};
+function resumeDecisions(cartes) {
+  const n = {};
+  for (const c of cartes) n[c.genre] = (n[c.genre] ?? 0) + 1;
+  return Object.keys(GENRE_EN_CLAIR).filter((g) => n[g]).map((g) => `${n[g]} ${GENRE_EN_CLAIR[g][n[g] > 1 ? 1 : 0]}`).join(' · ');
+}
+
+/** Le bandeau appelle la feuille « À décider » et compte avec la même source qu'elle (`decisionsDe`) ; le repli « À confirmer » de la page reste le détail (liens et propositions). */
+function bandeauDecisions(feuille, repli) {
+  const { total, cartes } = feuille;
   if (total === 0) return null;
   const surClic = () => {
     if (repli) repli.open = true;
@@ -137,7 +151,7 @@ function bandeauDecisions(d, repli) {
     icone(['M12 3l10 18H2z', 'M12 10v5M12 18v.5']),
     h('span', { classe: 'au-decisions-texte' },
       h('span', { classe: 'au-decisions-titre' }, total === 1 ? '1 décision en attente' : `${total} décisions en attente`),
-      h('span', { classe: 'au-decisions-detail' }, lignes.map((l) => l.texte).join(' · '))),
+      h('span', { classe: 'au-decisions-detail' }, resumeDecisions(cartes))),
     icone(CHEVRON, 'au-icone au-chevron'));
 }
 
@@ -233,7 +247,7 @@ export function rendre(etat) {
   const donnees = aujourdhuiDe(etat, aujourd);
   const racine = h('div', { classe: 'vue vue-aujourdhui' });
   const repli = repliConfirmer(donnees);
-  const morceaux = [entete(donnees), zoneCouverts(donnees), carteMaintenant(donnees, aujourd), bandeauDecisions(donnees, repli),
+  const morceaux = [entete(donnees), zoneCouverts(donnees), carteMaintenant(donnees, aujourd), bandeauDecisions(decisionsDe(etat, aujourd), repli),
     zoneAConsommer(donnees), carteFiche(donnees, aujourd), zoneLiens(donnees, aujourd), repli];
   for (const m of morceaux) if (m) racine.appendChild(m);
   return racine;

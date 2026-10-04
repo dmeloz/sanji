@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom } from './aide-dom.js';
 import { creerFiche, definirMenu, definirPrevision, definirRegle, definirStandard, marquerFait, planifier } from '../app/js/domaine/actions.js';
+import { decisionsDe } from '../app/js/domaine/decisions.js';
 import { aujourdhuiDe } from '../app/js/domaine/tableau-blanc.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h, principaleDe } from './aide.js';
@@ -118,7 +119,11 @@ test('couverts : sans prévision, aucun « 0 » inventé et aucune alerte', () =
   assert.equal(d.menus[0].previsionASaisir, true);
   const p = page(S.mercredi, e);
   assert.match(classes(p, 'au-tuile')[0].textContent, /prévision à saisir/);
-  assert.equal(classes(p, 'au-decisions').length, 0, 'une quantité absente n\'est jamais une décision');
+  // La sauce implicite du menu 1 est une vraie décision de la feuille (donc du bandeau) ; la prévision absente n'en est jamais une.
+  const bandeau = classes(p, 'au-decisions')[0];
+  assert.match(bandeau.textContent, /2 décisions en attente/, 'une sauce à confirmer et une valeur à valider, comme la feuille');
+  assert.match(bandeau.textContent, /sauce à confirmer/);
+  assert.doesNotMatch(bandeau.textContent, /prévision|quantité|portion/);
   assert.equal(d.decisions.total, 0);
 });
 
@@ -179,7 +184,8 @@ test('décisions : le bandeau compte les points « À confirmer » existants et 
   const p = page(S.mercredi, e);
   const bandeau = classes(p, 'au-decisions')[0];
   assert.ok(bandeau, 'bandeau présent');
-  assert.match(bandeau.textContent, new RegExp(`${d.decisions.total} décision`));
+  // Le bandeau compte comme la feuille « À décider » (decisionsDe), le repli garde le détail des points.
+  assert.match(bandeau.textContent, new RegExp(`${aDate(S.mercredi, () => decisionsDe(e, S.mercredi).total)} décisions en attente`));
   assert.match(bandeau.textContent, /répartition provisoire/);
   const repli = classes(p, 'au-repli')[0];
   assert.equal(repli.open, false);
@@ -305,4 +311,26 @@ test('le bloc CSS de l\'écran est en fin de fichier', () => {
   const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
   const marque = css.lastIndexOf('/* ------------------------------------------------------------ ');
   assert.match(css.slice(marque, marque + 120), /Écran Aujourd'hui/);
+});
+
+test('bandeau : même nombre que la feuille « À décider » (sauce implicite seule, plusieurs répartitions provisoires), et accès depuis Production', async () => {
+  const production = await import('../app/js/ui/vue-production.js');
+  const sauce = calme(etatVide());
+  definirMenu(sauce, S.mercredi, 1, 'Penne aux courgettes', h());
+  const trois = calme(etatVide());
+  ['F1', 'F2', 'F3'].forEach((numero) => creerFiche(trois, { numero, date: S.mercredi, service: 'midi', horaire: '12:30', couverts: 6, mode: 'choix_libre', repartition: { 1: 4, 2: 2 } }, h()));
+  for (const [nom, e] of [['sauce implicite', sauce], ['trois répartitions', trois]]) {
+    const attendu = aDate(S.mercredi, () => decisionsDe(e, S.mercredi).total);
+    assert.ok(attendu >= 1, `${nom} : la feuille a des cartes`);
+    const bandeau = classes(page(S.mercredi, e), 'au-decisions')[0];
+    assert.ok(bandeau, `${nom} : bandeau présent`);
+    assert.match(bandeau.textContent, new RegExp(`${attendu} décisions? en attente`), nom);
+    const prod = aDate(S.mercredi, () => { magasin.remplacer(structuredClone(e)); return production.rendre(magasin.etat(), S.mercredi); });
+    const acces = classes(prod, 'prod-decisions')[0];
+    assert.ok(acces, `${nom} : second accès dans Production`);
+    assert.match(acces.textContent, new RegExp(`${attendu} décisions? en attente`));
+    assert.equal(acces.balise, 'button');
+  }
+  const calmeProd = aDate(S.mercredi, () => { magasin.remplacer(calme(etatVide())); return production.rendre(magasin.etat(), S.mercredi); });
+  assert.equal(classes(calmeProd, 'prod-decisions').length, 0, 'rien à décider : pas d\'accès');
 });
