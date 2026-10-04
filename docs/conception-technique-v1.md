@@ -428,3 +428,13 @@ Décision validée : « Standards de base et ajustement terrain ». Rangement pr
 - **Interface** : Réglages > Standards de base (changer, revenir au standard, écarts) ; Réglages > Repères métier (consultation repliée) ; bloc « Repères métier » dans la fiche de composant ; buffet par couvert sur les fiches de fonction ; source légale des allergènes.
 - **Vérification** : 639 tests ; relecture indépendante (0 critique, 4 importants et 6 mineurs corrigés) ; captures réelles à 390 px. Non vérifié : un vrai iPhone.
 
+## 20. Refonte 1 : onglets et direction visuelle (2026-10-04, versions 43 à 56)
+
+Décisions validées : « Onglets et écrans de la refonte 1 » et « Direction visuelle de la refonte 1 ». Paquet : `docs/maquette-refonte-1/` (brief, jetons, maquettes). Règle d'or : structure et apparence seulement ; aucune logique métier changée (relecture indépendante : rien de modifié dans le domaine hors fonctions de données pures `aujourdhuiDe`, `prochainOuvert`, `decisions.js`).
+
+- **Onglets** : Aujourd'hui (`vue-aujourdhui.js`), Production (`vue-production.js` + `vue-jour.js`), Semaine (`vue-semaine.js` + `vue-detail.js`), Stock (`vue-stock.js` : Restes, DLC, Achats via `vue-produits.js`). Réglages par le bouton de l'accueil. Écrans hors onglets : Fiche technique (`vue-fiche.js`, gestes avancés de `vue-composant.js` dans « Plus de réglages »), Mode en poste (`vue-poste.js`, étapes de la règle de préparation, au moins 2), Import des menus (`vue-import.js`), feuille À décider (`feuille-decisions.js`, même compte que le bandeau d'accueil, `decisionsDe`).
+- **Routes** : `#/aujourdhui`, `#/production[/d]`, `#/semaine[/d]`, `#/stock[/restes|dlc|achats][/d]`, `#/fiche/<id>`, `#/poste/<id>`, `#/import[/d]`, `#/reglages[/rubrique]` ; anciennes adresses redirigées.
+- **Apparence** : jetons de `tokens.css` fusionnés dans `style.css` ; police IBM Plex Mono embarquée (`app/polices/`, licence OFL, mise en cache) pour les quantités ; groupement des milliers étroit, nombres de 4 chiffres non groupés ; thème sombre ; contrastes testés (4,5:1).
+- **Choix par défaut validés avec le plan** : pas de synchronisation (« hors ligne prêt »), couverts par menu et fiches (pas midi/soir), ni minuteur, ni lots/emplacements, ni relevé de températures, ni réglage d'avance « −/+ », ni planning personnel ; « vérifié disponible », jamais « en stock ».
+- **Vérification** : 783 tests ; relecture indépendante (0 critique, 4 importants, 6 mineurs corrigés) ; captures réelles à 390 px en clair et en sombre. Non vérifié : un vrai iPhone.
+
