@@ -4,7 +4,7 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { boutons, installerFauxDom } from './aide-dom.js';
-import { creerFiche, definirRegle } from '../app/js/domaine/actions.js';
+import { creerFiche, definirRegle, marquerFait, planifier } from '../app/js/domaine/actions.js';
 import { calculerComposant } from '../app/js/domaine/calcul.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
@@ -114,6 +114,41 @@ test('fiche : étapes de la règle avec leur état ; mode en poste seulement à 
   assert.match(racine.textContent, /Finir/);
   assert.match(racine.textContent, /Mode en poste/);
   assert.ok(liens(racine).includes(`#/poste/${deux.c}`));
+});
+
+test('fiche : pastille « à mesurer », détail des portions et mentions « déjà avancé / prévu » (repris de l\'ancienne vue)', () => {
+  const e0 = etatVide();
+  prevision(e0, S.lundi, 1, 40);
+  const c0 = composantValide(e0, S.lundi, 1, J.PRODUIT_CRU_TEST, { nom: 'carottes', etapes: [{ etape: 'parage', coefficient: 0.8, statut: 'STANDARD_BASE', source: 'ESTIMATION_TEST' }] });
+  creerFiche(e0, { numero: 'FICHE_TEST_1', date: S.lundi, service: 'midi', horaire: '12:00', couverts: 10, mode: 'menu_fixe', menuFixe: 1 }, h());
+  creerFiche(e0, { numero: 'FICHE_TEST_2', date: S.lundi, service: 'midi', horaire: '12:00', couverts: 10, mode: 'choix_libre', repartition: { 1: 5, 2: 5 } }, h());
+  definirRegle(e0, { nom: 'carottes', etapes: [{ libelle: 'Couper', avanceMaxJours: 3 }, { libelle: 'Blanchir', avanceMaxJours: 1 }, { libelle: 'Finir', avanceMaxJours: 0 }] }, h());
+  const couper = Object.values(e0.productions).find((p) => p.composantId === c0 && p.etapeCle === 'couper');
+  const blanchir = Object.values(e0.productions).find((p) => p.composantId === c0 && p.etapeCle === 'blanchir');
+  planifier(e0, couper.id, S.samediPrecedent, 'avant_midi', h());
+  marquerFait(e0, couper.id, null, '2026-10-03T08:00:00.000Z');
+  planifier(e0, blanchir.id, S.samediPrecedent, 'apres_midi', h());
+  magasin.remplacer(e0);
+  const e = magasin.etat();
+  const calc = calculerComposant(e, c0);
+  assert.equal(calc.aMesurer, true);
+  const racine = vue.rendre(e, c0);
+  const texte = racine.textContent;
+  assert.match(texte, /à mesurer/);
+  const p = calc.portions;
+  assert.match(texte, new RegExp(`hors groupes ${p.prevision} ; groupes confirmés ${p.groupesConfirmes} ; groupes provisoires ${p.groupesProvisoires}`));
+  assert.match(texte, /déjà avancé/);
+  assert.match(texte, /prévu/);
+  const etapes = racine.tous((x) => x.className.includes('fiche-etapes'))[0];
+  assert.match(etapes.textContent, /Couper[\s\S]*déjà avancé sam\. 3/);
+  assert.match(etapes.textContent, /Blanchir[\s\S]*prévu sam\. 3/);
+  assert.doesNotMatch(etapes.textContent.split('Blanchir')[0], /prévu/);
+});
+
+test('fiche : sans standard de base à mesurer, pas de pastille « à mesurer »', () => {
+  const { e, c } = scenario();
+  assert.equal(calculerComposant(e, c).aMesurer, false);
+  assert.doesNotMatch(vue.rendre(e, c).textContent, /à mesurer/);
 });
 
 test('fiche : allergènes « à confirmer » tant que non validés', () => {

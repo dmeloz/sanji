@@ -49,7 +49,7 @@ function productionsDuJour(etat, date) {
 const estHorsRegle = (etat, l) => {
   if (etat.productions?.[l.productionId]?.etat === 'fait') return false;
   const ev = evaluationProduction(etat, l.productionId);
-  return Boolean(ev && ev.jours > 0 && !ev.autorisee);
+  return Boolean(ev && ev.jours > 0 && ev.exception && !ev.autorisee);
 };
 
 /** « Jour off » : tous les créneaux du jour sont indisponibles dans la semaine type (ou sur ce jour). Rien d'autre n'est présumé. */

@@ -29,6 +29,11 @@ const nettoyer = () => { for (const d of dom.corps.tous((x) => x.balise === 'dia
 const ouverts = () => panneauxOuverts(dom.corps);
 const classes = (noeud, classe) => noeud.tous((x) => x.className.split(' ').includes(classe));
 const parTexte = (noeud, re) => boutons(noeud).find((b) => re.test(b.textContent));
+const h2 = (noeuds) => {
+  const p = globalThis.document.createElement('div');
+  for (const n of noeuds) p.appendChild(n);
+  return p;
+};
 function aDate(iso, fonction) {
   const reelle = Date;
   globalThis.Date = class extends reelle {
@@ -260,6 +265,21 @@ test('feuille : un lien ferme la feuille avant de changer de page', () => {
   assert.ok(lien);
   lien.click();
   assert.equal(ouverts().length, 0);
+});
+
+test('feuille : la classe RENDUE des gestes est « dec-btn » (jamais « btn-dec-btn »), le geste principal garde « btn-decision »', () => {
+  for (const [nom, e, date] of [['écart', avecEcart().e, S.lundi], ['apprentissage', avecApprentissage(), S.lundi], ['sauce', avecSauce(), S.lundi],
+    ['avance', avecAvanceHorsRegle().e, S.lundi], ['répartition', avecRepartition(), S.lundi]]) {
+    const noeud = aDate(date, () => h2(feuille.contenuDecisions(e, date)));
+    const gestes = noeud.tous((x) => x.balise === 'button' || (x.balise === 'a' && x.className.includes('dec-btn')));
+    assert.ok(gestes.length > 0, nom);
+    for (const g of gestes) {
+      const cl = g.className.split(' ');
+      assert.ok(cl.includes('dec-btn'), `${nom} : « ${g.textContent} » porte dec-btn (${g.className})`);
+      assert.ok(!cl.includes('btn-dec-btn'), `${nom} : « ${g.textContent} » ne porte pas btn-dec-btn`);
+    }
+    assert.ok(gestes.some((g) => g.className.split(' ').includes('btn-decision')), `${nom} : un geste principal`);
+  }
 });
 
 test('style et source : cibles de 44 px, quantités en police des quantités, mouvement réduit, bloc en fin de fichier', () => {

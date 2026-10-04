@@ -116,6 +116,30 @@ const contraste = (a, b) => {
   return (x + 0.05) / (y + 0.05);
 };
 
+test('défilement vers une ancre : doux par défaut, immédiat si le mouvement réduit est demandé', async () => {
+  const { Element } = await import('./aide-dom.js');
+  const { versAncre } = await import('../app/js/ui/vue-detail.js');
+  const cible = globalThis.document.createElement('section');
+  cible.attributs.id = 'ancre-test';
+  globalThis.document.body.appendChild(cible);
+  const appels = [];
+  Element.prototype.scrollIntoView = function scrollIntoView(options) { appels.push(options); };
+  const avant = Object.getOwnPropertyDescriptor(globalThis, 'matchMedia');
+  const reduit = (valeur) => Object.defineProperty(globalThis, 'matchMedia', { configurable: true, writable: true,
+    value: (q) => ({ matches: valeur && /prefers-reduced-motion: reduce/.test(q) }) });
+  try {
+    reduit(false);
+    versAncre('ancre-test')();
+    reduit(true);
+    versAncre('ancre-test')();
+    assert.deepEqual(appels.map((o) => o.behavior), ['smooth', 'auto']);
+  } finally {
+    delete Element.prototype.scrollIntoView;
+    if (avant) Object.defineProperty(globalThis, 'matchMedia', avant); else delete globalThis.matchMedia;
+    cible.remove();
+  }
+});
+
 test('variantes claire et sombre : aucune paire texte / fond sous 4,5:1', () => {
   const debutSombre = css.indexOf('@media (prefers-color-scheme: dark)');
   const clair = jetons(css.slice(css.indexOf(':root {'), debutSombre));

@@ -8,6 +8,7 @@ import { etapesComposant, refusOrdreEtape } from '../domaine/planification.js';
 import { libelle } from '../domaine/statuts.js';
 import { etat as etatCourant } from '../magasin.js';
 import { h, svg } from './dom.js';
+import { ecranAllumePossible } from './ecran-allume.js';
 import { bouton, pastille } from './elements.js';
 import { quantiteNoeuds } from './format.js';
 import { defaireEnUnToucher, faireEnUnToucher } from './taches.js';
@@ -78,7 +79,8 @@ function remplir(racine, etat, id) {
         h('h1', { classe: 'poste-nom' }, c.nom, ' · ',
           calc.statut === 'CALCULE' ? h('span', { classe: 'poste-qte' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail))
             : h('span', { classe: 'poste-qte-inconnue' }, 'quantité inconnue')),
-        h('span', { classe: 'poste-allume' }, h('span', { classe: 'poste-point', 'aria-hidden': 'true' }), 'Écran maintenu allumé')),
+        h('span', { classe: 'poste-allume' }, h('span', { classe: 'poste-point', 'aria-hidden': 'true' }),
+          ecranAllumePossible() ? 'Écran maintenu allumé' : "l'écran peut se mettre en veille")),
       h('span', { classe: 'poste-cale', 'aria-hidden': 'true' })),
     h('div', { classe: 'poste-segments', 'aria-hidden': 'true' },
       etapes.map((x, k) => h('span', { classe: `poste-segment${k <= i ? ' poste-segment-plein' : ''}` }))),

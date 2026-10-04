@@ -876,6 +876,7 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .au-decisions-titre { font-size: var(--t-corps); font-weight: 600; }
 .au-decisions-detail { font-size: var(--t-legende); overflow-wrap: anywhere; }
 .au-decisions .au-chevron { color: currentColor; }
+.prod-decisions { margin: 0 0 10px; }
 
 /* Cartes et lignes */
 .au-carte { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 6px; border-radius: var(--r-carte); background: var(--carte); }
@@ -902,6 +903,7 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .au-hors-regle::before { content: "\25B3\00A0"; }
 .au-allergie { font-weight: 600; }
 .au-statut { font-weight: 600; }
+.au-statut-certitude { font-weight: 600; color: var(--texte-moyen); }
 
 /* Prochaine fiche de fonction */
 .au-fiche { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 14px; border: 1px solid var(--bordure); border-radius: 16px; background: var(--carte); color: var(--texte); text-decoration: none; }

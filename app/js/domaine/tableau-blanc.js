@@ -581,17 +581,18 @@ function prochaineFiche(etat, aujourd) {
 }
 
 /** Prochaine tâche à faire : première ligne non faite de la lecture du jour (service 1, service 2, autres, après service) ; une simple suggestion d'avance n'est pas une tâche décidée. */
-function maintenantDe(feuille) {
+function maintenantDe(etat, feuille) {
   if (!feuille) return null;
   const { service1, service2, autres, apres } = feuille.lecture;
   const l = [...service1, ...service2, ...autres, ...apres].find((x) => !x.fait && x.source !== 'suggestion');
   if (!l) return null;
-  const ev = l.evaluation ?? null;
+  const ev = evaluationProduction(etat, l.productionId);
   return {
     productionId: l.productionId, composantId: l.composantId, genre: l.genre,
     nom: l.genre === 'principale' ? l.nom : (l.libelle || l.nom), menu: l.menu ?? null, dateService: l.dateService,
     cible: l.cible ?? null, unite: l.unite ?? null, creneau: l.creneau ?? null,
-    horsRegle: Boolean(ev) && ev.jours > 0 && !ev.autorisee,
+    // Même définition que la feuille « À décider » et points.js : une exception (plus de deux jours) non autorisée.
+    horsRegle: Boolean(ev) && ev.jours > 0 && ev.exception && !ev.autorisee,
   };
 }
 
@@ -611,7 +612,7 @@ function aConsommerDe(etat, aujourd) {
       productionId: p.id, composantId: composant.id, nom: p.genre === 'complement' ? `Complément : ${composant.nom}` : composant.nom,
       dateService: p.dateService, dateFait: p.hFait ? String(p.hFait).slice(0, 10) : null, avanceJours: ev.jours,
       quantite: Number.isFinite(p.quantiteReelle) ? p.quantiteReelle : null, unite: p.unite ?? null,
-      horsRegle: !ev.autorisee,
+      horsRegle: ev.exception && !ev.autorisee,
       limiteDepassee: ev.conservation === 'depassee',
       conservation: ev.repere?.depasse ? { texte: ev.repere.texte, provenance: ev.repere.provenance } : null,
     });
@@ -645,7 +646,7 @@ export function aujourdhuiDe(etat, aujourd) {
     prochainOuvert: ouvert ? null : prochainJourOuvert(aujourd),
     menus: aMenuDuJour(aujourd) ? [1, 2].map((m) => couvertsDuMenu(etat, aujourd, m)) : [],
     fiches: fichesDuJour(etat, aujourd),
-    maintenant: maintenantDe(feuille),
+    maintenant: maintenantDe(etat, feuille),
     avancement: feuille ? feuille.avancement : { faites: 0, total: 0 },
     decisions: aConfirmerDuBord(etat, datesSemaine, aujourd),
     aConsommer: aConsommerDe(etat, aujourd),

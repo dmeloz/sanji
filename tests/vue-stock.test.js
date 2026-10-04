@@ -13,9 +13,11 @@ import { composantValide, etatVide, h, menuValide, prevision, principaleDe } fro
 let dom;
 let magasin;
 let stock;
+let horsligne;
 
 before(async () => {
   dom = installerFauxDom();
+  horsligne = await import('../app/js/ui/horsligne.js');
   magasin = await import('../app/js/magasin.js');
   stock = await import('../app/js/ui/vue-stock.js');
 });
@@ -48,7 +50,9 @@ test('en-tête : titre Stock, « hors ligne prêt », sélecteur à trois liens,
   for (const sous of stock.SOUS_VUES) {
     const page = stock.rendre(magasin.etat(), S.lundi, sous);
     assert.match(page.querySelector('h1').textContent, /^Stock$/);
-    assert.match(page.textContent, /hors ligne prêt/);
+    // L'état hors ligne vient de libelleHorsLigne() (jamais un « prêt » écrit en dur : ici la vérification est en cours).
+    assert.equal(parClasse(page, 'stock-horsligne')[0].textContent, horsligne.libelleHorsLigne());
+    assert.doesNotMatch(page.textContent, /hors ligne prêt/);
     assert.doesNotMatch(page.textContent, /synchronis|en stock/i);
     const liens = parClasse(page, 'stock-segment');
     assert.deepEqual(liens.map((a) => a.attributs.href), stock.SOUS_VUES.map((v) => `#/stock/${v}/${S.lundi}`));

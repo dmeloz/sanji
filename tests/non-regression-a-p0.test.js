@@ -83,12 +83,28 @@ const RENDUS = (e) => {
   ];
 };
 
+// `analyserHash` renvoie toujours une vue (route inconnue = accueil) : seul le premier segment dit si une adresse est connue.
+const ADRESSES_HISTORIQUES = ['accueil', 'tableau', 'jour', 'produits', 'detail', 'composant', 'menus'];
+const adresseConnue = (href) => {
+  const premier = href.replace(/^#\/?/, '').split('/')[0];
+  return Object.hasOwn(routeur.VUES, premier) || ADRESSES_HISTORIQUES.includes(premier);
+};
+
+test('liens : le premier segment d\'une adresse doit être connu (« #/fihce/x » est signalé)', () => {
+  assert.equal(adresseConnue('#/fihce/x'), false);
+  assert.equal(adresseConnue('#/stok/dlc'), false);
+  for (const ok of ['#/fiche/x', '#/production/2026-10-05', '#/stock/dlc', '#/reglages', '#/aujourdhui', '#/composant/x', '#/menus/2026-10-05']) {
+    assert.equal(adresseConnue(ok), true, ok);
+  }
+});
+
 test('liens : chaque lien interne de chaque écran mène à une vue qui existe, avec une cible qui existe', () => {
   for (const [nom, e] of [['sans quantités', semaineSansQuantites()], ['complète', semaineComplete()]]) {
     for (const [vue, param] of RENDUS(e)) {
       magasin.remplacer(structuredClone(e));
       const noeud = aDate(S.samedi, () => vues[vue].rendre(magasin.etat(), param));
       for (const href of liensDe(noeud)) {
+        assert.ok(adresseConnue(href), `${nom} / ${vue} ${param} : lien ${href} vers une adresse inconnue (premier segment)`);
         const { vue: cible, param: p } = routeur.analyserHash(href, S.samedi);
         assert.ok(Object.hasOwn(vues, cible), `${nom} / ${vue} ${param} : lien ${href} vers une vue inconnue`);
         if (cible === 'fiche') {

@@ -3,7 +3,9 @@
 // de la feuille Jour (`feuilleDuJour`), les gestes de `taches.js`, le corps de la page de `vue-jour.js`.
 
 import { ajouterJours, libelleJour, lundiDe } from '../domaine/dates.js';
+import { decisionsDe } from '../domaine/decisions.js';
 import { feuilleDuJour } from '../domaine/planification.js';
+import { ouvrirDecisions } from './feuille-decisions.js';
 import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
 import { libelleHorsLigne } from './horsligne.js';
@@ -67,11 +69,23 @@ function entete(date, aujourd, feuille) {
       lien(`#/semaine/${date}`, 'Prévisions →', 'jour-lien')));
 }
 
+/** Second point d'entrée vers la feuille « À décider » : même source que le bandeau d'Aujourd'hui (`decisionsDe`), rien s'il n'y a rien à décider. */
+function accesDecisions(etat, aujourd) {
+  const { total } = decisionsDe(etat, aujourd);
+  if (total === 0) return null;
+  return h('button', { type: 'button', classe: 'au-decisions prod-decisions', onClick: () => ouvrirDecisions() },
+    h('span', { classe: 'au-decisions-texte' },
+      h('span', { classe: 'au-decisions-titre' }, total === 1 ? '1 décision en attente' : `${total} décisions en attente`),
+      h('span', { classe: 'au-decisions-detail' }, 'Ouvrir « À décider »')));
+}
+
 export function rendre(etat, date) {
   const aujourd = aujourdhui();
   const racine = h('div', { classe: 'vue vue-jour vue-production' });
   const feuille = feuilleDuJour(etat, date);
   racine.appendChild(entete(date, aujourd, feuille));
+  const acces = accesDecisions(etat, aujourd);
+  if (acces) racine.appendChild(acces);
   racine.appendChild(selecteur(date, aujourd));
   racine.appendChild(barreDeJours(date, aujourd));
   for (const n of corps(etat, date, feuille)) racine.appendChild(n);

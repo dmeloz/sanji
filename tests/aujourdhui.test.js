@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom } from './aide-dom.js';
 import { creerFiche, definirMenu, definirPrevision, definirRegle, definirStandard, marquerFait, planifier } from '../app/js/domaine/actions.js';
+import { decisionsDe } from '../app/js/domaine/decisions.js';
 import { aujourdhuiDe } from '../app/js/domaine/tableau-blanc.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h, principaleDe } from './aide.js';
@@ -118,7 +119,11 @@ test('couverts : sans prévision, aucun « 0 » inventé et aucune alerte', () =
   assert.equal(d.menus[0].previsionASaisir, true);
   const p = page(S.mercredi, e);
   assert.match(classes(p, 'au-tuile')[0].textContent, /prévision à saisir/);
-  assert.equal(classes(p, 'au-decisions').length, 0, 'une quantité absente n\'est jamais une décision');
+  // La sauce implicite du menu 1 est une vraie décision de la feuille (donc du bandeau) ; la prévision absente n'en est jamais une.
+  const bandeau = classes(p, 'au-decisions')[0];
+  assert.match(bandeau.textContent, /2 décisions en attente/, 'une sauce à confirmer et une valeur à valider, comme la feuille');
+  assert.match(bandeau.textContent, /sauce à confirmer/);
+  assert.doesNotMatch(bandeau.textContent, /prévision|quantité|portion/);
   assert.equal(d.decisions.total, 0);
 });
 
@@ -179,7 +184,8 @@ test('décisions : le bandeau compte les points « À confirmer » existants et 
   const p = page(S.mercredi, e);
   const bandeau = classes(p, 'au-decisions')[0];
   assert.ok(bandeau, 'bandeau présent');
-  assert.match(bandeau.textContent, new RegExp(`${d.decisions.total} décision`));
+  // Le bandeau compte comme la feuille « À décider » (decisionsDe), le repli garde le détail des points.
+  assert.match(bandeau.textContent, new RegExp(`${aDate(S.mercredi, () => decisionsDe(e, S.mercredi).total)} décisions en attente`));
   assert.match(bandeau.textContent, /répartition provisoire/);
   const repli = classes(p, 'au-repli')[0];
   assert.equal(repli.open, false);
@@ -252,6 +258,15 @@ test('prochaine fiche de fonction : jour, personnes, allergies écrites, certitu
   assert.match(f.textContent, /18 pers\./);
   assert.match(f.textContent, /allergies : ALLERGIE_TEST/);
   assert.match(f.textContent, /provisoire/);
+  // La certitude n'a pas le style « hors règle » : style neutre propre aux certitudes (classe rendue, puis CSS).
+  const mot = f.tous((x) => x.balise === 'strong' && /provisoire/.test(x.textContent))[0];
+  assert.ok(mot, 'certitude écrite en toutes lettres');
+  assert.ok(!mot.className.split(' ').includes('au-hors-regle'), mot.className);
+  assert.ok(mot.className.split(' ').includes('au-statut-certitude'), mot.className);
+  const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
+  const regle = css.match(/\.au-statut-certitude \{([^}]*)\}/);
+  assert.ok(regle, 'style défini');
+  assert.doesNotMatch(regle[1], /exception|background/, 'ni ambre ni fond d\'alerte');
   assert.doesNotMatch(f.textContent, /F_PASSEE/);
   assert.equal(f.attributs.href, `#/semaine/${S.jeudi}`);
 });
@@ -305,4 +320,75 @@ test('le bloc CSS de l\'écran est en fin de fichier', () => {
   const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
   const marque = css.lastIndexOf('/* ------------------------------------------------------------ ');
   assert.match(css.slice(marque, marque + 120), /Écran Aujourd'hui/);
+});
+
+test('hors règle : même définition partout (exception ET non autorisée) ; une étape à J-1 au-delà de son maximum n\'est pas « hors règle » sur Aujourd\'hui ni Semaine', async () => {
+  const semaine = await import('../app/js/ui/vue-semaine.js');
+  const e = calme(etatVide());
+  definirMenu(e, S.mardi, 1, 'carottes', h());
+  definirPrevision(e, S.mardi, 1, 20, h());
+  definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
+  definirRegle(e, { nom: 'carottes', etapes: [{ libelle: 'Couper', avanceMaxJours: 0 }, { libelle: 'Finir', avanceMaxJours: 0 }] }, h());
+  const couper = Object.values(e.productions).find((p) => p.etapeCle === 'couper');
+  planifier(e, couper.id, S.lundi, 'avant_midi', h());
+  const dec = aDate(S.lundi, () => decisionsDe(e, S.lundi));
+  assert.ok(!dec.cartes.some((c) => c.genre === 'avance_hors_regle'), 'la feuille « À décider » ne la classe pas hors règle');
+  // Aujourd'hui, « Maintenant » : la ligne n'est pas marquée.
+  const d = aujourdhuiDe(e, S.lundi);
+  assert.equal(d.maintenant.productionId, couper.id);
+  assert.equal(d.maintenant.horsRegle, false);
+  assert.doesNotMatch(classes(page(S.lundi, e), 'au-maintenant')[0].textContent, /hors règle/);
+  // Semaine : aucune mention « hors règle » (jour, puces) tant que la feuille ne la classe pas ainsi.
+  const e2 = calme(etatVide());
+  definirMenu(e2, S.mardi, 1, 'carottes', h());
+  definirPrevision(e2, S.mardi, 1, 20, h());
+  definirStandard(e2, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
+  definirRegle(e2, { nom: 'carottes', etapes: [{ libelle: 'Couper', avanceMaxJours: 0 }, { libelle: 'Finir', avanceMaxJours: 0 }] }, h());
+  planifier(e2, Object.values(e2.productions).find((p) => p.etapeCle === 'couper').id, S.lundi, 'avant_midi', h());
+  magasin.remplacer(e2);
+  const sem = aDate(S.lundi, () => semaine.rendre(magasin.etat(), S.lundi));
+  // (la légende « hors règle » des puces et le texte d'alerte du domaine restent : seuls les marqueurs dépendent de la définition)
+  assert.equal(classes(sem, 'sem-prod-hors-regle').length, 0);
+  assert.equal(classes(sem, 'sem-hors-regle').length, 0);
+  assert.ok(classes(sem, 'sem-puce').every((p) => !/hors règle/.test(p.attributs['aria-label'] ?? '')), 'aucune puce de jour marquée');
+});
+
+test('hors règle : une vraie avance hors règle (plus de 2 jours sans règle) reste signalée partout', async () => {
+  const semaine = await import('../app/js/ui/vue-semaine.js');
+  const e = calme(etatVide());
+  definirMenu(e, S.vendredi, 1, 'carottes', h());
+  definirPrevision(e, S.vendredi, 1, 20, h());
+  definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
+  const p = Object.values(e.productions).find((x) => x.genre === 'principale');
+  planifier(e, p.id, S.lundi, 'avant_midi', h());
+  assert.equal(aujourdhuiDe(e, S.lundi).maintenant.horsRegle, true);
+  magasin.remplacer(structuredClone(e));
+  const sem = aDate(S.lundi, () => semaine.rendre(magasin.etat(), S.lundi));
+  assert.ok(classes(sem, 'sem-prod-hors-regle').length >= 1);
+  assert.ok(classes(sem, 'sem-puce').some((x) => /hors règle/.test(x.attributs['aria-label'] ?? '')));
+  marquerFait(e, p.id, 100, h());
+  const conso = aujourdhuiDe(e, S.lundi).aConsommer.lignes.find((l) => l.composantId === p.composantId);
+  assert.equal(conso?.horsRegle, true, 'à consommer : même définition');
+});
+
+test('bandeau : même nombre que la feuille « À décider » (sauce implicite seule, plusieurs répartitions provisoires), et accès depuis Production', async () => {
+  const production = await import('../app/js/ui/vue-production.js');
+  const sauce = calme(etatVide());
+  definirMenu(sauce, S.mercredi, 1, 'Penne aux courgettes', h());
+  const trois = calme(etatVide());
+  ['F1', 'F2', 'F3'].forEach((numero) => creerFiche(trois, { numero, date: S.mercredi, service: 'midi', horaire: '12:30', couverts: 6, mode: 'choix_libre', repartition: { 1: 4, 2: 2 } }, h()));
+  for (const [nom, e] of [['sauce implicite', sauce], ['trois répartitions', trois]]) {
+    const attendu = aDate(S.mercredi, () => decisionsDe(e, S.mercredi).total);
+    assert.ok(attendu >= 1, `${nom} : la feuille a des cartes`);
+    const bandeau = classes(page(S.mercredi, e), 'au-decisions')[0];
+    assert.ok(bandeau, `${nom} : bandeau présent`);
+    assert.match(bandeau.textContent, new RegExp(`${attendu} décisions? en attente`), nom);
+    const prod = aDate(S.mercredi, () => { magasin.remplacer(structuredClone(e)); return production.rendre(magasin.etat(), S.mercredi); });
+    const acces = classes(prod, 'prod-decisions')[0];
+    assert.ok(acces, `${nom} : second accès dans Production`);
+    assert.match(acces.textContent, new RegExp(`${attendu} décisions? en attente`));
+    assert.equal(acces.balise, 'button');
+  }
+  const calmeProd = aDate(S.mercredi, () => { magasin.remplacer(calme(etatVide())); return production.rendre(magasin.etat(), S.mercredi); });
+  assert.equal(classes(calmeProd, 'prod-decisions').length, 0, 'rien à décider : pas d\'accès');
 });
