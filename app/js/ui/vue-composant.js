@@ -342,14 +342,25 @@ function sectionEntete(etat, c, calc) {
       calc.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre') : null, ' ',
       calc.aMesurer ? pastille('à mesurer', 'ambre') : null),
     h('p', { classe: 'meta' }, `Portions : ${pluriel(p.total, 'portion')} (hors groupes ${p.prevision}${p.previsionManquante ? ', non saisie' : ''} ; groupes confirmés ${p.groupesConfirmes} ; groupes provisoires ${p.groupesProvisoires})`),
-    h('div', { classe: 'actions' },
-      bouton('Modifier', () => dialogModifier(c), 'court'),
-      estSauceAConfirmer(c) ? bouton('Choisir la sauce', () => dialogChoisirSauce(c), 'court') : null,
-      c.recetteId ? null : bouton('Composer un mélange', () => dialogMelange(c), 'court'),
-      bouton('Supprimer', () => confirmer({
-        titre: 'Supprimer ce composant ?', texte: `${c.nom} et ses tâches non faites seront supprimés.`, libelleOk: 'Supprimer', danger: true,
-        action: () => { agirStrict((e, t) => supprimerComposant(e, c.id, t)); location.hash = `#/semaine/${c.date}`; },
-      }), 'court danger')));
+    blocGestes(c));
+}
+
+/** Gestes de l'en-tête : modifier, choisir la sauce, composer un mélange, supprimer (partagés avec la fiche technique). */
+export function blocGestes(c) {
+  return h('div', { classe: 'actions' },
+    bouton('Modifier', () => dialogModifier(c), 'court'),
+    estSauceAConfirmer(c) ? bouton('Choisir la sauce', () => dialogChoisirSauce(c), 'court') : null,
+    c.recetteId ? null : bouton('Composer un mélange', () => dialogMelange(c), 'court'),
+    bouton('Supprimer', () => confirmer({
+      titre: 'Supprimer ce composant ?', texte: `${c.nom} et ses tâches non faites seront supprimés.`, libelleOk: 'Supprimer', danger: true,
+      action: () => { agirStrict((e, t) => supprimerComposant(e, c.id, t)); location.hash = `#/semaine/${c.date}`; },
+    }), 'court danger'));
+}
+
+/** Gestes avancés de la fiche technique (repli « Plus de réglages ») : tout ce que vue-composant offrait, sans l'en-tête. */
+export function sectionsReglages(etat, c, calc) {
+  return [blocPortion(c, calc), blocGestes(c), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionProductions(etat, c),
+    sectionMemoire(etat, c), sectionAllergenes(etat, c), sectionApresService(c, calc)].filter(Boolean);
 }
 
 function sectionCalcul(c, calc) {
