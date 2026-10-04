@@ -121,7 +121,7 @@ test('couverts : sans prévision, aucun « 0 » inventé et aucune alerte', () =
   assert.match(classes(p, 'au-tuile')[0].textContent, /prévision à saisir/);
   // La sauce implicite du menu 1 est une vraie décision de la feuille (donc du bandeau) ; la prévision absente n'en est jamais une.
   const bandeau = classes(p, 'au-decisions')[0];
-  assert.match(bandeau.textContent, /2 décisions en attente/, 'une sauce à confirmer et une valeur à valider, comme la feuille');
+  assert.match(bandeau.textContent, /2 décisions à prendre/, 'une sauce à confirmer et une valeur à valider, comme la feuille');
   assert.match(bandeau.textContent, /sauce à confirmer/);
   assert.doesNotMatch(bandeau.textContent, /prévision|quantité|portion/);
   assert.equal(d.decisions.total, 0);
@@ -185,7 +185,7 @@ test('décisions : le bandeau compte les points « À confirmer » existants et 
   const bandeau = classes(p, 'au-decisions')[0];
   assert.ok(bandeau, 'bandeau présent');
   // Le bandeau compte comme la feuille « À décider » (decisionsDe), le repli garde le détail des points.
-  assert.match(bandeau.textContent, new RegExp(`${aDate(S.mercredi, () => decisionsDe(e, S.mercredi).total)} décisions en attente`));
+  assert.match(bandeau.textContent, new RegExp(`${aDate(S.mercredi, () => decisionsDe(e, S.mercredi).total)} décisions à prendre`));
   assert.match(bandeau.textContent, /répartition provisoire/);
   const repli = classes(p, 'au-repli')[0];
   assert.equal(repli.open, false);
@@ -290,7 +290,7 @@ test('une proposition d\'apprentissage garde son bouton dans le repli « À conf
       attribue: true, valide: true, grammage: { valeur, unite: 'g', etat: 'sec', statut: 'RESTAURANT_VALIDE', source: 'corrigé pour ce plat' } };
   });
   const p = page(S.lundi, e);
-  assert.match(classes(p, 'au-decisions')[0].textContent, /1 décision en attente/);
+  assert.match(classes(p, 'au-decisions')[0].textContent, /1 décision à prendre/);
   const bouton = parTexte(classes(p, 'au-repli')[0], /Vous corrigez souvent riz/);
   assert.ok(bouton);
   aDate(S.lundi, () => bouton.click());
@@ -382,11 +382,11 @@ test('bandeau : même nombre que la feuille « À décider » (sauce implicite s
     assert.ok(attendu >= 1, `${nom} : la feuille a des cartes`);
     const bandeau = classes(page(S.mercredi, e), 'au-decisions')[0];
     assert.ok(bandeau, `${nom} : bandeau présent`);
-    assert.match(bandeau.textContent, new RegExp(`${attendu} décisions? en attente`), nom);
+    assert.match(bandeau.textContent, new RegExp(`${attendu} décisions? à prendre`), nom);
     const prod = aDate(S.mercredi, () => { magasin.remplacer(structuredClone(e)); return production.rendre(magasin.etat(), S.mercredi); });
     const acces = classes(prod, 'prod-decisions')[0];
     assert.ok(acces, `${nom} : second accès dans Production`);
-    assert.match(acces.textContent, new RegExp(`${attendu} décisions? en attente`));
+    assert.match(acces.textContent, new RegExp(`${attendu} décisions? à prendre`));
     assert.equal(acces.balise, 'button');
   }
   const calmeProd = aDate(S.mercredi, () => { magasin.remplacer(calme(etatVide())); return production.rendre(magasin.etat(), S.mercredi); });

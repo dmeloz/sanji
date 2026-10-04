@@ -1185,3 +1185,7 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prod-ligne .mep-quantite { align-items: flex-end; text-align: right; }
 .prod-ligne .mep-qte { font-size: max(var(--t-qte), 20px); font-weight: 600; text-align: right; }
 .prod-ligne .mep-qte .qte-unite { font-size: var(--t-corps); }
+
+/* ===== Lot « Décisions et comptes » (audit UI v56) : bouton « OK » de la feuille « À décider » ===== */
+.dec-fin { display: flex; justify-content: flex-end; margin-top: 12px; }
+.dec-ok { min-width: var(--cible); min-height: var(--cible); }
