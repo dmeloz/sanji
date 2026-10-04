@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Extrait les tables 11.1 (parage), 11.2 (cuisson) et 11.3 (portionnement) de
-// base-officielle-production-stock-hygiene.md et génère app/js/donnees/base-metier.js.
+// savoir/base-metier/base-officielle-production-stock-hygiene.md et génère app/js/donnees/base-metier.js.
 // Extrait aussi, SI ELLE EXISTE, la table de la sous-section « ### 11.4 Repères de portion » vers PORTIONS_BASE
 // (colonnes repérées par leur titre : Catégorie, Produit, Rôle, État, Portion, Sources, Notes). Sans cette section,
 // PORTIONS_BASE est vide. Une ligne sans produit, sans rôle, sans état ou sans portion reconnus est ignorée.
@@ -18,7 +18,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SOURCE_PAR_DEFAUT = resolve(RACINE, 'base-officielle-production-stock-hygiene.md');
+const SOURCE_PAR_DEFAUT = resolve(RACINE, 'savoir/base-metier/base-officielle-production-stock-hygiene.md');
 const SORTIE_PAR_DEFAUT = resolve(RACINE, 'app/js/donnees/base-metier.js');
 
 const TABLES = [

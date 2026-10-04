@@ -1,6 +1,6 @@
 // FICHIER GÉNÉRÉ : NE PAS ÉDITER À LA MAIN.
 // Produit par outils/generer-savoir-metier.mjs (commande : npm run savoir) à partir de
-// connaissances/savoir-metier.json.
+// savoir/reperes-portion/savoir-metier.json.
 //
 // Repères de portion VALIDÉS par la propriétaire (statut « valide_chef »). Une fourchette est donnée par min et max,
 // jamais par une moyenne. `appliquee: false` : validé, mais pas encore branché sur le calcul.

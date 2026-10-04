@@ -1,4 +1,4 @@
-// B-P0 : les six repères de portion validés par la propriétaire le 2026-10-03 (source connaissances/savoir-metier.json,
+// B-P0 : les six repères de portion validés par la propriétaire le 2026-10-03 (source savoir/reperes-portion/savoir-metier.json,
 // module généré donnees/savoir-metier.js), leur effet sur la portion effective, et les deux nouvelles collections d'état.
 
 import test from 'node:test';
@@ -53,7 +53,7 @@ test('aucune moyenne n\'est stockée : min et max séparés, rien d\'autre de nu
 });
 
 test('les données générées sont gelées et identiques à ce que produit le générateur', () => {
-  const source = JSON.parse(readFileSync(chemin('../connaissances/savoir-metier.json'), 'utf8'));
+  const source = JSON.parse(readFileSync(chemin('../savoir/reperes-portion/savoir-metier.json'), 'utf8'));
   assert.equal(readFileSync(chemin('../app/js/donnees/savoir-metier.js'), 'utf8'), genererFichier(source), 'relancer « npm run savoir »');
   assert.match(readFileSync(chemin('../app/js/donnees/savoir-metier.js'), 'utf8'), /^\/\/ FICHIER GÉNÉRÉ : NE PAS ÉDITER/);
   assert.deepEqual(JSON.parse(JSON.stringify(REPERES_VALIDES)), source.reperes);

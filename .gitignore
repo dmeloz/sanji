@@ -13,3 +13,6 @@ outils/sorties/
 
 # Espaces de travail temporaires des agents
 .claude/
+
+# Échanges avec Perplexity : gardés en local, hors dépôt
+archives/perplexity-2026-10-03/

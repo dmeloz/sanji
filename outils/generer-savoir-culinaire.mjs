@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Valide savoir-culinaire/donnees/*.json (règles de savoir-culinaire/FORMAT.md) et génère l'index
-// savoir-culinaire/savoir-culinaire.json et savoir-culinaire/INDEX.md. N'écrit rien dans app/ : le référentiel
+// Valide savoir/culinaire/donnees/*.json (règles de savoir/culinaire/FORMAT.md) et génère l'index
+// savoir/culinaire/savoir-culinaire.json et savoir/culinaire/INDEX.md. N'écrit rien dans app/ : le référentiel
 // n'est pas branché sur l'application. Usage : node outils/generer-savoir-culinaire.mjs   (ou : npm run culinaire)
 
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -8,7 +8,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-export const DOSSIER = resolve(RACINE, 'savoir-culinaire');
+export const DOSSIER = resolve(RACINE, 'savoir/culinaire');
 
 const TYPES = new Set(['repere', 'technique', 'regle', 'definition']);
 const ETATS_POIDS = new Set(['sec', 'cru_net', 'cuit']);

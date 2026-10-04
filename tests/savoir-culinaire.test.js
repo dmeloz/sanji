@@ -1,4 +1,4 @@
-// Référentiel de savoir culinaire (savoir-culinaire/) : conforme à FORMAT.md, jamais branché sur l'application.
+// Référentiel de savoir culinaire (savoir/culinaire/) : conforme à FORMAT.md, jamais branché sur l'application.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
@@ -70,8 +70,8 @@ test('le référentiel publié est conforme et ses identifiants sont uniques', (
 });
 
 test('chaque thème de données a sa fiche lisible', () => {
-  for (const f of readdirSync(resolve(RACINE, 'savoir-culinaire/donnees')).filter((n) => n.endsWith('.json'))) {
-    assert.ok(existsSync(resolve(RACINE, 'savoir-culinaire/fiches', f.replace('.json', '.md'))), `fiche manquante pour ${f}`);
+  for (const f of readdirSync(resolve(RACINE, 'savoir/culinaire/donnees')).filter((n) => n.endsWith('.json'))) {
+    assert.ok(existsSync(resolve(RACINE, 'savoir/culinaire/fiches', f.replace('.json', '.md'))), `fiche manquante pour ${f}`);
   }
 });
 
@@ -84,7 +84,7 @@ test('le référentiel n\'est branché sur rien : aucun fichier de app/ ne le li
 
 test('aucun secret ni jeton dans le référentiel', () => {
   const lire = (d) => readdirSync(d, { withFileTypes: true }).flatMap((x) => (x.isDirectory() ? lire(resolve(d, x.name)) : [resolve(d, x.name)]));
-  for (const f of lire(resolve(RACINE, 'savoir-culinaire'))) {
+  for (const f of lire(resolve(RACINE, 'savoir/culinaire'))) {
     assert.doesNotMatch(readFileSync(f, 'utf8'), /(sk-[A-Za-z0-9]{20,}|api[_-]?key\s*[:=]|Bearer\s+[A-Za-z0-9._-]{20,}|password\s*[:=])/i, f);
   }
 });

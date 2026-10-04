@@ -398,7 +398,7 @@ Non vérifié : appareil iPhone ou iPad réel, collage depuis la photo sur iOS, 
 
 ## 18. Refonte du 2026-10-03 et 2026-10-04 (versions 16 à 37)
 
-Cette section résume ce qui a changé depuis la section 17. Le détail des choix par défaut et des limites est dans `refonte-journal.md` ; l'inventaire de départ est dans `inventaire-v23.md`.
+Cette section résume ce qui a changé depuis la section 17. Le détail des choix par défaut et des limites est dans `docs/refonte-journal.md` ; l'inventaire de départ est dans `inventaire-v23.md`.
 
 **Principes** (décisions de la propriétaire dans le coffre) : les quantités sont facultatives et tout se recalcule ; enregistrer un menu suffit ; direction visuelle épurée et professionnelle ; reprises de l'ancienne application Kōzō validées.
 
@@ -410,7 +410,7 @@ Cette section résume ce qui a changé depuis la section 17. Le détail des choi
 
 **Logique métier**
 - `lirePlat` (analyse-menu.js) : menu 1 = recette de pâtes ou de risotto entièrement au poste, sauce implicite « à confirmer » jamais choisie ; menu 2 = protéine hors poste, garnitures au poste. « X aux Y » donne deux éléments. Vocabulaire générique dans `vocabulaire-plats.js`. Mémoire d'attribution et de référence par `nom|menu`.
-- Repères de portion : les six repères validés le 2026-10-03 sont créés dans `connaissances/savoir-metier.json` (généré vers `app/js/donnees/savoir-metier.js`). Ils restent des estimations (milieu de la fourchette, jamais dans une commande) ; le standard maison passe avant. Viande sans os et œufs sont stockés mais pas encore utilisés.
+- Repères de portion : les six repères validés le 2026-10-03 sont créés dans `savoir/reperes-portion/savoir-metier.json` (généré vers `app/js/donnees/savoir-metier.js`). Ils restent des estimations (milieu de la fourchette, jamais dans une commande) ; le standard maison passe avant. Viande sans os et œufs sont stockés mais pas encore utilisés.
 - Assistant de validation (`validation.js`, `actions-validation.js`, `feuille-validation.js`) : valider, corriger, seulement cette fois, plus tard ; la valeur est toujours choisie par la propriétaire.
 - Étapes de préparation à avance propre (règle de préparation, `etapes`) : définies par la propriétaire, aucune par défaut ; l'ordre est respecté ; une étape faite n'est jamais supprimée.
 - Les pâtes et le risotto du menu 1 ne sont pas avançables par défaut ; une herbe ou une sauce implicite n'est jamais comptée en portions.

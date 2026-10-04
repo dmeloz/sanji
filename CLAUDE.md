@@ -3,15 +3,15 @@
 Statut : créé par délégation le 2026-10-02, en attente de validation de la propriétaire.
 
 ## À lire avant d'agir
-1. `plan-final-copilote-entremetier-v1.md` : fait foi pour le métier.
-2. `conception-technique-v1.md` : fait foi pour la technique (structure, état, fonctions).
+1. `docs/plan-final-copilote-entremetier-v1.md` : fait foi pour le métier.
+2. `docs/conception-technique-v1.md` : fait foi pour la technique (structure, état, fonctions).
 3. Fiche projet : `~/Atelier-Claude/Cerveau-Obsidian/01-Projets/Sanji.md`.
 
 ## Commandes
-- Tests : `npm test` (Node 22, aucun paquet à installer). 539 tests au 2026-10-04.
+- Tests : `npm test` (Node 22, aucun paquet à installer). 541 tests au 2026-10-04.
 - Régénérer la base métier embarquée : `npm run base`.
-- Régénérer les repères de portion validés (`app/js/donnees/savoir-metier.js`, généré depuis `connaissances/savoir-metier.json`) : `npm run savoir`. Ne pas éditer le module à la main.
-- Référentiel de savoir culinaire (brevet fédéral de chef de cuisine, proposition à valider, non branché sur l'application) : dossier `savoir-culinaire/` (lire `LISEZ-MOI.md`) ; `npm run culinaire` valide et régénère l'index ; `npm test` échoue si une entrée n'est pas conforme à `savoir-culinaire/FORMAT.md`.
+- Régénérer les repères de portion validés (`app/js/donnees/savoir-metier.js`, généré depuis `savoir/reperes-portion/savoir-metier.json`) : `npm run savoir`. Ne pas éditer le module à la main.
+- Référentiel de savoir culinaire (brevet fédéral de chef de cuisine, contenu validé le 2026-10-04, pas encore branché sur l'application) : `savoir/culinaire/` (lire `LISEZ-MOI.md`) ; `npm run culinaire` valide et régénère l'index ; `npm test` échoue si une entrée n'est pas conforme à `savoir/culinaire/FORMAT.md`.
 - Servir en local : `npm run serve`, puis http://localhost:5173.
 - Essai sur iPhone ou iPad, sur le réseau de la maison seulement : `sh outils/creer-certificat-local.sh` (une fois), puis `node outils/serveur-https-local.mjs`. Les clés vivent dans `.certificats-locaux/` (hors Git). Rien n'est publié.
 
@@ -29,7 +29,9 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 - Identité visuelle (décision du 2026-10-03, remplace le « tableau blanc » de la section 16) : épurée et professionnelle. Surfaces claires et opaques, filets fins plutôt que cadres et ombres, un seul accent (bleu) et une encre (`--encre`) pour l'action principale, police système, pas de dégradé, pas de police téléchargée. `.feutre` ne désigne plus qu'une graisse (le nom est resté). Ne jamais réintroduire écriture manuscrite, post-it ni cadre d'aluminium.
 - `app/sw.js` : cache hors ligne. `VERSION` y est égale à `VERSION_APP` de `app/js/version.js`.
 - `tests/aide-dom.js` : faux DOM qui fait tourner les vues sous Node.
-- `archives/` : anciennes versions du plan et anciens écrans. Rien n'y fait foi.
+- `savoir/` : tout le savoir métier, au même endroit (carte : `savoir/LISEZ-MOI.md`). `base-metier/` = la base officielle de production, stock et hygiène (référence) ; `reperes-portion/` = les six repères validés ; `culinaire/` = le référentiel du brevet fédéral.
+- `docs/` : plan métier, conception technique, patch du workflow, inventaire v23, journal de refonte.
+- `archives/` : anciennes versions du plan, anciens écrans, échanges avec Perplexity (`perplexity-2026-10-03/`, hors Git). Rien n'y fait foi.
 
 ## Règles du projet
 - Aucune dépendance, aucun build. Ne pas lancer `npm install`.
@@ -47,5 +49,5 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 - CSS : la classe `.case` est celle des cases à cocher des panneaux ; les cases dessinées du tableau s'appellent `.coche`.
 - Piège du cache : après un changement, le navigateur sert encore l'ancienne version au premier rechargement. Recharger deux fois et vérifier « Version de l'application » dans Réglages avant de tester.
 - Jamais de publication ni d'hébergement sans accord de la propriétaire.
-- `base-officielle-production-stock-hygiene.md` est une donnée de référence : la lire, ne pas la modifier.
+- `savoir/base-metier/base-officielle-production-stock-hygiene.md` est une donnée de référence : la lire, ne pas la modifier.
 - Le dépôt Git local existe depuis le 2026-10-03 (branche `main`, premier commit `76f894b`), sans dépôt distant. Le dossier contient un `.obsidian` et un canvas « Sans titre » : ils sont exclus par `.gitignore`.

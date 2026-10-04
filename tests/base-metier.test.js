@@ -9,7 +9,7 @@ import { extraireBase, genererFichier, lireCoefficients, lirePortion } from '../
 import { BASE_METIER, PORTIONS_BASE, PROVENANCE_BASE, VERSION_BASE } from '../app/js/donnees/base-metier.js';
 
 const RACINE = fileURLToPath(new URL('..', import.meta.url));
-const SOURCE = join(RACINE, 'base-officielle-production-stock-hygiene.md');
+const SOURCE = join(RACINE, 'savoir/base-metier/base-officielle-production-stock-hygiene.md');
 const SCRIPT = join(RACINE, 'outils/extraire-base-metier.mjs');
 
 test('lireCoefficients : coefficient = sortie / entrée', () => {
