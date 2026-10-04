@@ -768,3 +768,9 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .mep-conservation { margin-top: 4px; font-size: var(--t-1); }
 .mep-provenance { display: block; color: var(--texte-doux); overflow-wrap: anywhere; }
 .mep-aide-froid { margin: 4px 0 6px; font-size: var(--t-1); color: var(--texte-doux); }
+/* Jour : une tâche faite reste à sa place, barrée, grisée et dite « fait » en texte (jamais la couleur seule).
+   Jetons seulement : le mode sombre les redéfinit, le contraste du texte reste lisible dans les deux modes. */
+.mep-ligne.mep-fait { background: var(--carte-2); }
+.mep-ligne.mep-fait .mep-nom { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--texte-doux); }
+.mep-ligne.mep-fait .mep-qte { color: var(--texte-doux); }
+.mep-ligne.mep-fait .mep-meta { color: var(--texte-doux); }

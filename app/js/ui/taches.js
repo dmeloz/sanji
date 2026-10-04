@@ -179,6 +179,12 @@ export function faireEnUnToucher(productionId) {
   ]);
 }
 
+/** Décoche une tâche faite : `annulerFait` ; s'il refuse (délai dépassé, étape suivante faite…), son message est dit en texte. */
+export function defaireEnUnToucher(productionId) {
+  const r = agir((x, t) => annulerFait(x, productionId, t));
+  if (r.ok) afficherMessage('Remis à faire', 'ok');
+}
+
 /** « Fait » avec panneau : propose la cible et permet de saisir le réel. */
 export function dialogFait(productionId) {
   const e = etatCourant();

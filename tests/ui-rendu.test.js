@@ -220,11 +220,11 @@ test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide
   const { e } = etatRiche();
   magasin.remplacer(e);
   const texte = vues.jour.rendre(magasin.etat(), S.mardi).textContent;
-  // Ordre de lecture A-P1 : menu 1, menu 2, autres tâches, après service, puis les faites repliées ; les décisions
+  // Ordre de lecture A-P1 : menu 1, menu 2, autres tâches, après service, puis le repli « déjà prêt pour plus tard » ; les décisions
   // sont résumées avant la liste et détaillées dans le centre « À confirmer » en fin de page.
   const lundi = vues.jour.rendre(magasin.etat(), S.lundi).textContent;
   const ordre = ['Menu 1 · pour le service du jour', 'Menu 2 · pour le service du jour', 'Autres tâches',
-    'Après service · avances pour les jours suivants', 'Terminé'];
+    'Après service · avances pour les jours suivants', 'Déjà prêt pour plus tard'];
   // Une rubrique vide n'est plus affichée (page moins chargée) : seules les rubriques présentes gardent leur ordre.
   const presentes = ordre.filter((r) => lundi.includes(r));
   assert.ok(presentes.length >= 3, `plusieurs rubriques présentes dans cet état riche : ${lundi.slice(0, 900)}`);
@@ -236,7 +236,7 @@ test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide
   }
   assert.ok(lundi.indexOf('À confirmer') < lundi.indexOf(presentes[0]), 'le résumé des décisions précède la liste');
   const vide = vues.jour.rendre(magasin.etat(), S.jeudi).textContent;
-  for (const r of ['Terminé', 'À confirmer', 'Après service']) {
+  for (const r of ['Déjà prêt pour plus tard', 'À confirmer', 'Après service']) {
     assert.doesNotMatch(vide, new RegExp(r), `la rubrique vide « ${r} » n'est pas affichée`);
   }
   assert.match(texte, /revue de mi-semaine/);

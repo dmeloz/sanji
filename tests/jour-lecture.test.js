@@ -63,17 +63,48 @@ test('lecture : une avance seulement possible (pas encore planifiée) est dans �
   assert.equal(lecture.apres[0].source, 'suggestion');
 });
 
-test('lecture : une tâche faite va dans « faites », une tâche du jour pas encore planifiée reste dans la liste de travail', () => {
+test('lecture : une tâche faite aujourd\'hui reste dans sa section (marquée faite) ; une tâche du jour pas encore planifiée reste dans la liste de travail', () => {
   const { e, m1 } = lundiType();
+  const avant = feuilleDuJour(e, S.lundi).lecture;
   marquerFait(e, principaleDe(e, m1), undefined, h(1));
   const nonPlanifie = composantValide(e, S.lundi, 2, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_LIBRE_TEST' });
   const { lecture } = feuilleDuJour(e, S.lundi);
-  assert.deepEqual(noms(lecture.faites), ['ELEMENT_M1_TEST']);
-  assert.equal(lecture.service1.length, 0);
+  assert.deepEqual(noms(lecture.pretsPlusTard), [], 'rien dans le repli « déjà prêt pour plus tard »');
+  assert.equal(lecture.faites, undefined, 'plus de repli « Terminé »');
+  const m1Ligne = lecture.service1.find((l) => l.nom === 'ELEMENT_M1_TEST');
+  assert.ok(m1Ligne, 'la tâche faite reste dans le menu 1');
+  assert.equal(m1Ligne.fait, true);
+  assert.deepEqual(noms(lecture.service1), noms(avant.service1), 'même ordre qu\'avant le marquage');
   const libre = lecture.service2.find((l) => l.composantId === nonPlanifie);
   assert.ok(libre, 'visible dans la liste de travail');
   assert.equal(libre.source, 'a_planifier');
+  assert.equal(libre.fait, false);
   assert.equal(lecture.decisions.some((d) => d.composantId === nonPlanifie), false, 'pas répétée dans les décisions');
+});
+
+test('lecture : faite aujourd\'hui pour un service futur = « après service » ; faite un jour précédent pour un service futur = « prêt pour plus tard »', () => {
+  const { e, mardi } = lundiType();
+  const samedi = composantValide(e, S.mardi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_AVANCE_SAMEDI_TEST' });
+  planifier(e, principaleDe(e, samedi), S.samediPrecedent, 'apres_midi', h());
+  marquerFait(e, principaleDe(e, samedi), undefined, '2026-10-03T09:00:00.000Z');
+  marquerFait(e, principaleDe(e, mardi), undefined, h(1));
+  const { lecture, avancement } = feuilleDuJour(e, S.lundi);
+  assert.deepEqual(noms(lecture.pretsPlusTard), ['ELEMENT_AVANCE_SAMEDI_TEST']);
+  assert.equal(lecture.apres.find((l) => l.nom === 'ELEMENT_MARDI_TEST').fait, true);
+  assert.equal(lecture.apres.some((l) => l.nom === 'ELEMENT_AVANCE_SAMEDI_TEST'), false);
+  assert.deepEqual(avancement, { faites: 1, total: 3 }, 'la jauge ne compte que les tâches décidées ce jour');
+  const toutes = [...lecture.service1, ...lecture.service2, ...lecture.autres, ...lecture.apres, ...lecture.pretsPlusTard].map((l) => l.productionId);
+  assert.equal(new Set(toutes).size, toutes.length, 'aucune tâche comptée deux fois');
+  assert.ok(toutes.includes(principaleDe(e, samedi)) && toutes.includes(principaleDe(e, mardi)), 'aucune tâche perdue');
+});
+
+test('lecture : une tâche cochée aujourd\'hui sans avoir été planifiée reste dans sa section', () => {
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 10);
+  const c = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_DIRECT_TEST' });
+  marquerFait(e, principaleDe(e, c), undefined, '2026-10-05T07:00:00.000Z');
+  const { lecture } = feuilleDuJour(e, S.lundi);
+  assert.equal(lecture.service1.find((l) => l.composantId === c)?.fait, true);
 });
 
 test('lecture : une quantité inconnue ne retire aucune ligne et ne devient pas une décision', () => {
