@@ -21,7 +21,7 @@ import { ouvrirValidation } from './feuille-validation.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, lien, pastille, repliable } from './elements.js';
 import {
-  coefficientDepuis, formaterNombre, libelleCoefficient, milieu, modeDepuisCoefficient, pluriel, quantite, quantiteNoeuds,
+  coefficientDepuis, formaterNombre, libelleCoefficient, milieu, modeDepuisCoefficient, pluriel, precisionQuantite, quantite, quantiteNoeuds,
 } from './format.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
@@ -379,8 +379,8 @@ function sectionEntete(etat, c, calc) {
     h('p', null, pastille(c.attribue ? 'attribué au poste' : 'non attribué', c.attribue ? 'gris' : 'ambre'), ' ',
       pastille(libelle('TYPE_COMPOSANT', c.type), 'gris')),
     calc.statut === 'CALCULE'
-      ? h('p', { classe: 'quantite-grande' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail), h('small', null, ` ${calc.libelleQuantite}`))
-      : h('p', { classe: 'quantite-grande discret' }, 'quantité inconnue', h('small', null, ` ${calc.libelleQuantite}`)),
+      ? h('p', { classe: 'quantite-grande' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail), h('small', null, ` ${precisionQuantite(calc)}`))
+      : h('p', { classe: 'quantite-grande discret' }, 'quantité inconnue', h('small', null, ` ${precisionQuantite(calc)}`)),
     blocPortion(c, calc),
     h('p', null,
       calc.statut === 'CALCULE' ? pastille(libelle('PROVENANCE', 'CALCULE'), 'vert') : pastille(libelle('PROVENANCE', 'INCONNU'), 'gris'), ' ',

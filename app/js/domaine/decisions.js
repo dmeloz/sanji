@@ -112,17 +112,6 @@ export function decisionsDe(etat, aujourd) {
   return { total: cartes.length, cartes };
 }
 
-/**
- * Le même compte, pour un jour choisi (écran Semaine) : les cartes de `decisionsDe` qui portent la date de ce jour
- * (écart, avance hors règle, sauce, répartition, point). Les décisions sans jour (semaine type, apprentissage, valeur à
- * valider) restent dans le compte général. Mêmes règles, même mot : « décision(s) à prendre ».
- * @returns {{total:number, cartes:object[]}}
- */
-export function decisionsDuJour(etat, date) {
-  const cartes = decisionsDe(etat, date).cartes.filter((c) => c.date === date);
-  return { total: cartes.length, cartes };
-}
-
 /** « 1 décision à prendre » / « N décisions à prendre » : le même mot partout. */
 export function texteDecisions(total) {
   return total === 1 ? '1 décision à prendre' : `${total} décisions à prendre`;

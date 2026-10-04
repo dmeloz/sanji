@@ -9,7 +9,7 @@ import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { creerFiche, deciderEcart, definirMenu, definirPrevision, definirStandard, marquerFait, modifierComposant, planifier } from '../app/js/domaine/actions.js';
 import { composantVide } from '../app/js/domaine/etat.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
-import { decisionsDe, decisionsDuJour, POINTS_SANS_DECISION, texteDecisions } from '../app/js/domaine/decisions.js';
+import { decisionsDe, POINTS_SANS_DECISION, texteDecisions } from '../app/js/domaine/decisions.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, etatVide, h } from './aide.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
@@ -431,12 +431,14 @@ test('nom courant : après un changement de nom du composant (sauce choisie), l\
   assert.doesNotMatch(JSON.stringify(e.journal.at(-1)), new RegExp(ancien));
 });
 
-test('compte unique : decisionsDuJour = les cartes datées du jour, texteDecisions dit « décision(s) à prendre »', () => {
+test('compte unique : le total de decisionsDe suit les cartes, texteDecisions dit « décision(s) à prendre »', () => {
   const { e } = avecEcart();
   definirMenu(e, S.mercredi, 1, 'Penne aux courgettes', h());
-  assert.equal(decisionsDuJour(e, S.lundi).total, 1);
-  assert.equal(decisionsDuJour(e, S.mercredi).cartes[0].genre, 'sauce');
-  assert.equal(decisionsDuJour(e, S.jeudi).total, 0);
+  const duJour = (jour) => decisionsDe(e, jour).cartes.filter((c) => c.date === jour);
+  assert.equal(duJour(S.lundi).length, 1);
+  assert.equal(duJour(S.mercredi)[0].genre, 'sauce');
+  assert.equal(duJour(S.jeudi).length, 0);
+  assert.equal(decisionsDe(e, S.lundi).total, decisionsDe(e, S.lundi).cartes.length);
   assert.equal(texteDecisions(1), '1 décision à prendre');
   assert.equal(texteDecisions(3), '3 décisions à prendre');
 });

@@ -299,6 +299,17 @@ test('fiche, bug B3 : « 25 portions » n\'est pas écrit deux fois', () => {
   assert.match(grande, /composition à définir/, 'le reste de la précision est gardé');
 });
 
+test('composant (page complète) : « 25 portions » n\'est pas écrit deux fois non plus', () => {
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 25);
+  const c = composantValide(e, S.lundi, 1, { ...J.PRODUIT_SEC_TEST, type: 'generique' }, { nom: 'GENERIQUE_TEST', type: 'generique' });
+  e.composants[c].type = 'generique';
+  magasin.remplacer(e);
+  const texte = vueComposant.rendre(magasin.etat(), c).textContent;
+  assert.doesNotMatch(texte, /portions?\s+portions?/i);
+  assert.match(texte, /composition à définir/);
+});
+
 // ------------------------------------------------------------------ 6. choisir la sauce
 
 function sauceDe(e) { return Object.values(e.composants).find((c) => c.categorie === 'sauce'); }

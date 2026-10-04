@@ -10,7 +10,7 @@ import { LIBELLE_ESTIMATION_A_VALIDER, libelle } from '../domaine/statuts.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { bouton, ligneVide, lien, pastille, repliable } from './elements.js';
-import { pluriel, qteNoeuds, quantiteNoeuds } from './format.js';
+import { pluriel, precisionQuantite, qteNoeuds, quantiteNoeuds } from './format.js';
 import { libelleAllergene } from './reference.js';
 import { blocReperes } from './reperes-metier.js';
 import { defaireEnUnToucher, dialogCorriger, faireEnUnToucher } from './taches.js';
@@ -44,17 +44,6 @@ export function repartition(c, calc) {
       source: d.source,
     };
   });
-}
-
-/**
- * Précision écrite après la quantité. Une quantité en portions dit déjà « portions » : « 25 portions portions, composition à
- * définir » (bug B3) devient « 25 portions · composition à définir ».
- */
-export function precisionQuantite(calc) {
-  const t = String(calc.libelleQuantite ?? '');
-  if (calc.uniteTravail !== 'portion' || calc.statut !== 'CALCULE') return t;
-  const reste = t.replace(/^portions?\s*,\s*/i, '');
-  return reste === t ? t : `· ${reste}`;
 }
 
 const icone = (d) => svg('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'aria-hidden': 'true' },

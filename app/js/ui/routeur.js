@@ -29,8 +29,9 @@ export const ONGLET_DE_VUE = {
  * Analyse un hash (« #/production/2026-10-05 ») : { vue, param, sous? }. Fonction pure, sans DOM.
  * Adresses : #/aujourdhui (accueil, défaut), #/production[/date], #/semaine[/date[/tableau]], #/stock[/restes|dlc|achats][/date],
  * #/fiche/<composantId>, #/poste/<composantId>, #/import[/date], #/reglages[/rubrique].
- * Défauts : production = aujourd'hui ; import et stock = lundi de la semaine donnée ou en cours ; stock sans sous-vue = « achats »
- * (« #/stock/<date> » vaut « achats ») ; semaine sans date = tableau de la semaine (param null), avec date = détail du jour,
+ * Défauts : production = aujourd'hui ; import et stock = lundi de la semaine donnée ou en cours ; stock sans sous-vue précise
+ * (« #/stock », « #/stock/<date> ») : `sous` est absent et la vue Stock choisit (dernière choisie, sinon DLC s'il y a à consommer
+ * en priorité, sinon Achats ; l'ancienne adresse #/produits vaut « achats ») ; semaine sans date = tableau de la semaine (param null), avec date = détail du jour,
  * « /tableau » en plus = tableau de cette semaine (ramenée au lundi). Une adresse inconnue, ou fiche/poste sans identifiant, mène à l'accueil.
  * Réglages : une clé de rubrique inconnue donne la racine.
  * Anciennes adresses, redirigées pour les favoris : #/accueil et #/tableau → aujourdhui (#/tableau/<date> → tableau de la semaine),
