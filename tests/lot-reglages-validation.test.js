@@ -78,6 +78,33 @@ test('journal : retour au standard en phrase ; entrée inconnue = texte neutre, 
   assert.doesNotMatch(casse.titre, /ajusterStandard/);
 });
 
+test('journal : retour d\'un gain de cuisson dit « Gain », pas « Perte » ; restauration, produits, écarts et champs en phrases', () => {
+  const e = etatVide();
+  const phrase = (action, detail) => reglages.phraseJournal(e, { h: h(), action, detail });
+  assert.equal(phrase('revenirAuStandard', 'rendement_cuisson|pates_seches : retour au standard de base').titre,
+    'Gain de cuisson, pâtes sèches : valeur de base rétablie');
+  assert.equal(phrase('revenirAuStandard', 'rendement_cuisson|riz : retour au standard de base').titre.split(',')[0], 'Gain de cuisson');
+  const restauree = phrase('restaurer', 'sanji-2026-10-04.json');
+  assert.equal(restauree.titre, 'Sauvegarde restaurée');
+  assert.match(restauree.detail, /sanji-2026-10-04\.json/);
+  assert.equal(phrase('restaurer', '').detail, '');
+  const achat = phrase('noterAchat', 'carottes|kg : 5 kg calculés (standard de base)');
+  assert.equal(achat.detail, 'carottes (kg) : 5 kg calculés (standard de base)');
+  assert.equal(phrase('controlerProduit', 'pommes_de_terre|g : a_commander').detail, 'pommes de terre (g) : à commander');
+  assert.equal(phrase('retirerAchat', 'carottes|piece').detail, 'carottes (pièce)');
+  assert.equal(phrase('deciderEcart', 'Sauce bolognaise : complement').detail, 'Sauce bolognaise : complément à produire');
+  assert.equal(phrase('deciderEcart', 'Riz : ajustement').detail, 'Riz : écart réglé par ajustement');
+  assert.equal(phrase('deciderEcart', 'Riz : aucune').detail, 'Riz : aucune production supplémentaire');
+  assert.equal(phrase('modifierComposant', 'Bolets : nom, allergenes, produitNom').detail, 'Bolets : nom, allergènes, produit acheté');
+  assert.equal(phrase('reprendreMemoire', 'Riz : type, etapes').detail, 'Riz : type, étapes');
+  assert.equal(phrase('modifierFiche', 'F1 : menuFixe, couverts').detail, 'F1 : menu fixé, couverts');
+  assert.equal(phrase('definirCreneau', '2026-10-05 avant_midi : charge').detail, '05/10/2026 avant midi : chargé');
+  assert.equal(phrase('noterExport', '2026-10-04T08:00:00.000Z').detail, '');
+  for (const [action, detail] of [['noterAchat', 'carottes|kg : 5 kg'], ['deciderEcart', 'X : complement'], ['modifierComposant', 'X : allergenes']]) {
+    assert.doesNotMatch(`${phrase(action, detail).titre} ${phrase(action, detail).detail}`, /\||complement|allergenes|ajustement|aucune$/);
+  }
+});
+
 test('journal affiché : aucun identifiant technique à l\'écran', () => {
   const e = etatVide();
   ajusterStandard(e, 'pates_seches', 'rendement_cuisson', 2.5, h());
