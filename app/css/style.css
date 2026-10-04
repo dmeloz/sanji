@@ -1172,7 +1172,7 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 @media (prefers-reduced-motion: reduce) { .vue-poste .btn { transition: none; } .vue-poste .btn:active { transform: none; } }
 /* ===== Finition (refonte 1) : quantités, avertissement de conservation, ligne Achats, Production. Jetons du socle seulement. ===== */
 /* Séparateurs d'une quantité en chasse fixe : l'espace du milieu (milliers) et celle devant l'unité sont rendues étroites. Le texte copié reste complet. */
-.sep-milliers, .sep-unite { display: inline-block; width: 0.3em; font-size: 0; line-height: 0; }
+.sep-milliers, .sep-unite { display: inline-block; width: 0.28em; overflow: hidden; white-space: nowrap; vertical-align: baseline; }
 .qte-unite { font-size: var(--t-corps); font-weight: 500; }
 .qte-mot { font-family: var(--police); font-weight: 500; font-size: var(--t-corps); letter-spacing: 0; }
 .tache-quantite { font-family: var(--police); }

@@ -622,7 +622,7 @@ const RUBRIQUES = [
     blocs: (e) => [h('p', { classe: 'aide' }, h('a', { href: '#/reglages/standards-base' }, 'Standards de base : changer une valeur de départ ›')),
       sectionStandards(e), sectionMemoire(e)] },
   { cle: 'standards-base', titre: 'Standards de base',
-    resume: (e) => { const n = Object.keys(e.ajustements ?? {}).length; return `${pluriel(n, 'valeur changée', 'valeurs changées')} par vous`; },
+    resume: (e) => { const n = Object.keys(e.ajustements ?? {}).length; return n === 0 ? 'aucune valeur changée' : `${pluriel(n, 'valeur changée', 'valeurs changées')} par vous`; },
     blocs: (e) => [sectionStandardsBase(e)] },
   { cle: 'reperes', titre: 'Repères métier',
     resume: () => 'temps, températures, conservation, techniques : consultation',

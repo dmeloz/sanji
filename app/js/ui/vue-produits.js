@@ -132,7 +132,7 @@ function carteLigne(etat, lundi, ligne, aujourd) {
         h('span', { classe: 'produit-etat-texte' }, ETAT_COURT[suivi.etatLigne] ?? ETAT_COURT.suggere,
           suivi.aRelire ? ' · à relire' : ''),
         ligne.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre')
-          : ligne.standardBase ? pastille(LIBELLE_STANDARD_BASE, 'gris') : null)),
+          : null)),
     suivi.aRelire ? h('p', { classe: 'meta' }, suivi.raisonARelire === 'quantite'
       ? `À relire : la quantité calculée est maintenant ${quantite(suivi.quantiteCalculee, ligne.unite)} ; vous aviez noté ${quantite(suivi.quantiteNotee, ligne.unite)}, qui n'a pas bougé.`
       : 'À relire : le besoin a changé depuis que vous l\'avez noté ; la quantité notée n\'a pas bougé.') : null,
@@ -185,7 +185,7 @@ function groupesParFournisseur(etat, lundi, lignes, aujourd) {
 }
 
 function texteGroupe(g) {
-  if (!g.fournisseur) return 'fournisseur non précisé';
+  if (!g.fournisseur) return '';
   const datees = g.echeances.filter((e) => e.dateLimite).sort((a, b) => a.dateLimite.localeCompare(b.dateLimite));
   if (datees.length === 0) return 'délai fournisseur à renseigner';
   const e = datees[0];
