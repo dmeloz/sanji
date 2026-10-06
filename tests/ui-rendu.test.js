@@ -21,6 +21,14 @@ import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, etatVide, h, menuValide, prevision, principaleDe, recetteValidee } from './aide.js';
 import { etatReglette } from './aide-tableau.js';
 
+// Le tableau s'ouvre sur le jour courant : sans date figée, le test dépend du jour où on le lance (la fixture met les menus le lundi).
+const dateDuJour = (jour, fonction) => {
+  const original = Date;
+  const [a, m, j] = jour.split('-').map(Number);
+  globalThis.Date = class extends original { constructor(...x) { super(...(x.length ? x : [a, m - 1, j, 9, 0, 0])); } };
+  try { return fonction(); } finally { globalThis.Date = original; }
+};
+
 let dom;
 let magasin;
 let vues;
@@ -118,7 +126,7 @@ test('chaque vue se dessine avec un état riche', () => {
 test('contenus attendus : tableau, détail, produits, réglages', () => {
   const { e } = etatRiche();
   magasin.remplacer(e);
-  const tab = vues.tableau.rendre(magasin.etat(), S.lundi).textContent;
+  const tab = dateDuJour(S.lundi, () => vues.tableau.rendre(magasin.etat(), S.lundi)).textContent;
   assert.match(tab, /Semaine du 5 octobre/);
   assert.match(tab, /INTITULE_TEST_1/);
   // Trois lignes au plus : selon le jour réel (l'écart compte aussi un jour fermé), la semaine type est une ligne ou fait partie du « reste ».

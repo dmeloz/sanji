@@ -16,8 +16,10 @@ import { ETAT_CRENEAU, ETAT_POIDS, UNITE, libelle } from '../domaine/statuts.js'
 import { VERSION_BASE } from '../donnees/base-metier.js';
 import { VERSION_APP } from '../version.js';
 import { agir, agirStrict, aujourdhui, etat as etatCourant, maintenant, redessiner, remplacer, statutStockage } from '../magasin.js';
+import { assistantPret, cleMasquee, effacerReglagesIA, enregistrerReglagesIA, lireReglagesIA } from './assistant-reglages.js';
 import { champs } from './champs.js';
 import { ouvrirValidation } from './feuille-validation.js';
+import { MODELES } from './fournisseur-web.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, pastille, repliable, titreSection } from './elements.js';
 import { formaterHeure, formaterNombre, nomFichierSauvegarde, parseNombre, pluriel } from './format.js';
@@ -692,6 +694,58 @@ function sectionEtat() {
       h('dt', null, 'Version de la base métier'), h('dd', null, VERSION_BASE)));
 }
 
+// ------------------------------------------------------------------ assistant IA (hors sauvegarde)
+
+function dialogCleAssistant() {
+  const f = champs([{ cle: 'cle', type: 'motdepasse', libelle: "Clé d'API Anthropic", valeur: '', placeholder: 'sk-ant-…',
+    aide: 'Collez la clé (elle commence par sk-ant-). Elle reste sur cet appareil, n\'est jamais dans la sauvegarde ni dans le journal, et n\'est jamais affichée en entier.' }]);
+  panneau({
+    titre: "Clé d'API",
+    corps: f.noeuds,
+    surEnregistrer: () => {
+      enregistrerReglagesIA({ cle: f.valeur('cle') });
+      afficherMessage('Clé enregistrée sur cet appareil.', 'ok');
+      redessiner();
+    },
+  });
+}
+
+function dialogModeleAssistant() {
+  const reglages = lireReglagesIA();
+  const f = champs([{ cle: 'modele', type: 'choix', libelle: 'Modèle', valeur: reglages.modele,
+    options: MODELES.map((m) => [m.id, `${m.libelle} (${m.note})`]) }]);
+  panneau({
+    titre: "Modèle de l'assistant",
+    corps: f.noeuds,
+    surEnregistrer: () => { enregistrerReglagesIA({ modele: f.valeur('modele') }); redessiner(); },
+  });
+}
+
+/** Assistant IA : réglages stockés HORS de l'état (donc hors sauvegarde). Rien n'est envoyé tant que l'assistant n'est pas activé. */
+function sectionAssistant() {
+  const r = lireReglagesIA();
+  const statut = r.actif && r.cle !== '' ? pastille('activé', 'vert') : r.actif ? pastille('clé manquante', 'ambre') : pastille('désactivé', 'gris');
+  const modele = MODELES.find((m) => m.id === r.modele);
+  return carte('Assistant IA',
+    h('p', { classe: 'aide' }, 'Sanji calcule toujours seul. L\'assistant, s\'il est activé, propose un planning que Sanji recontrôle entièrement ; vous validez avant tout enregistrement. '
+      + 'Il reçoit les noms des composants, les portions et un brouillon de départ ; les fiches de fonction et les allergies ne sont pas transmises. '
+      + 'Les noms viennent de vos menus : évitez d\'y écrire des remarques sur une personne. '
+      + 'La clé est enregistrée en clair sur cet appareil : utilisez une clé réservée à Sanji, avec une limite de dépense basse chez Anthropic.'),
+    h('dl', { classe: 'definitions' },
+      h('dt', null, 'État'), h('dd', null, statut),
+      h('dt', null, 'Clé'), h('dd', null, cleMasquee(r.cle)),
+      h('dt', null, 'Modèle'), h('dd', null, modele ? modele.libelle : r.modele)),
+    h('p', { classe: 'meta' }, 'Les réglages restent sur cet appareil. Chaque proposition envoie une requête à Anthropic et coûte quelques centimes, à votre charge.'),
+    h('div', { classe: 'actions' },
+      bouton(r.actif ? 'Désactiver' : 'Activer', () => { enregistrerReglagesIA({ actif: !r.actif }); redessiner(); }, r.actif ? '' : 'principal'),
+      bouton(r.cle === '' ? 'Saisir la clé' : 'Changer la clé', dialogCleAssistant, 'court'),
+      bouton('Choisir le modèle', dialogModeleAssistant, 'court'),
+      r.cle === '' ? null : bouton('Effacer la clé', () => confirmer({
+        titre: 'Effacer la clé ?', texte: "La clé sera supprimée de cet appareil et l'assistant désactivé.", libelleOk: 'Effacer', danger: true,
+        action: () => { effacerReglagesIA(); afficherMessage('Clé effacée.', 'ok'); redessiner(); },
+      }), 'court')));
+}
+
 // ------------------------------------------------------------------ racine et sous-pages
 
 const compteStandards = (etat) => {
@@ -718,6 +772,9 @@ const RUBRIQUES = [
   { cle: 'produits', titre: 'Produits et commandes',
     resume: (e) => `${pluriel(Object.keys(e.recettes).length, 'recette')} · ${pluriel(Object.keys(e.fournisseurs).length, 'fournisseur')}`,
     blocs: (e) => [sectionRecettes(e), sectionFournisseurs(e), sectionMarge(e)] },
+  { cle: 'assistant-ia', titre: 'Assistant IA',
+    resume: () => { const r = lireReglagesIA(); return assistantPret(r) ? `activé · ${r.modele}` : 'désactivé : Sanji calcule seul'; },
+    blocs: () => [sectionAssistant()] },
   { cle: 'donnees', titre: 'Données et hors ligne',
     resume: (e) => (e.reglages.dernierExport ? `dernier export : ${formaterHeure(e.reglages.dernierExport)}` : 'aucun export noté sur cet appareil'),
     blocs: (e) => [sectionSauvegarde(), sectionEtat(), sectionJournal(e)] },
@@ -775,6 +832,7 @@ export function rendre(etat, param = null) {
       groupe('Affichage',
         ligneInfo('Apparence', 'suit le réglage du téléphone (clair / sombre)'),
         ligneInfo('Écran allumé', 'en Production et en mode poste')),
+      groupe('Assistant', ligneRubrique('assistant-ia', etat)),
       groupe('Données', ligneRubrique('donnees', etat)),
       h('p', { classe: 'reglages-pied' }, pastilleHorsLigne(hl), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
   }

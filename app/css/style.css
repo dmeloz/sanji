@@ -1279,3 +1279,13 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .poste-jour { margin: 0; font-size: var(--t-corps); color: var(--texte-moyen); }
 .poste-note { margin: 0; padding: 10px 12px; font-size: var(--t-corps); border: 1px solid var(--bordure); border-radius: var(--r-carte-petite); overflow-wrap: anywhere; }
 .poste-quitter-aide { margin: 0; font-size: var(--t-corps); color: var(--texte-doux); text-align: center; }
+
+/* Assistant IA : bouton « Proposer un planning » et feuille « Brouillon » (aucune couleur nouvelle). */
+.prod-assistant { margin: 0 0 12px; }
+.ia-liste { list-style: none; margin: 0; padding: 0; }
+.ia-ligne { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 10px 0; border-top: 1px solid var(--bordure); }
+.ia-liste > .ia-ligne:first-child { border-top: 0; }
+.ia-ligne-texte { min-width: 0; }
+.ia-ligne-quand { flex: none; text-align: right; }
+.ia-avertissement { display: block; margin-top: 4px; }
+.ia-pourquoi { margin: 8px 0 0; padding-left: 18px; }

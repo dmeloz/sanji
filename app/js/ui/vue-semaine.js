@@ -13,6 +13,7 @@ import { pointsAConfirmer } from '../domaine/points.js';
 import { tableauBlanc } from '../domaine/tableau-blanc.js';
 import { LIBELLES, libelle } from '../domaine/statuts.js';
 import { aujourdhui } from '../magasin.js';
+import { boutonProposerPlanning } from './assistant-planning.js';
 import { h } from './dom.js';
 import { bouton, lien, pastille, repliable } from './elements.js';
 import { ouvrirFiche } from './fiches.js';
@@ -279,7 +280,8 @@ function rendreJour(etat, date) {
 function rendreGlobale(etat, lundi) {
   const interieur = vueTableau.rendre(etat, lundi ?? null);
   const racine = h('div', { classe: 'vue-semaine-globale' },
-    h('p', { classe: 'sem-globale-outils' }, lien(`#/import/${lundi ?? lundiDe(aujourdhui())}`, 'Importer les menus', 'btn btn-court')),
+    h('p', { classe: 'sem-globale-outils' }, lien(`#/import/${lundi ?? lundiDe(aujourdhui())}`, 'Importer les menus', 'btn btn-court'),
+      boutonProposerPlanning(lundi ?? aujourdhui())),
     interieur);
   return racine;
 }

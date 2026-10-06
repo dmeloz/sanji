@@ -5,6 +5,7 @@
 import { ajouterJours, libelleJour, lundiDe } from '../domaine/dates.js';
 import { decisionsDe, texteDecisions } from '../domaine/decisions.js';
 import { feuilleDuJour } from '../domaine/planification.js';
+import { boutonProposerPlanning } from './assistant-planning.js';
 import { ouvrirDecisions } from './feuille-decisions.js';
 import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
@@ -97,6 +98,7 @@ export function rendre(etat, date) {
   racine.appendChild(entete(date, aujourd, feuille));
   const acces = accesDecisions(etat, aujourd);
   if (acces) racine.appendChild(acces);
+  racine.appendChild(h('p', { classe: 'prod-assistant' }, boutonProposerPlanning(date)));
   racine.appendChild(selecteur(date, aujourd));
   racine.appendChild(barreDeJours(date, aujourd));
   for (const n of corps(etat, date, feuille)) racine.appendChild(n);
