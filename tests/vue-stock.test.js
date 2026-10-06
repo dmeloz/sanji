@@ -36,6 +36,8 @@ const dateDuJour = (jour, fonction) => {
   globalThis.Date = class extends original { constructor(...x) { super(...(x.length ? x : [a, m - 1, j, 9, 0, 0])); } };
   try { return fonction(); } finally { globalThis.Date = original; }
 };
+// Restes ouvre le jour courant : sans date figée, ces tests dépendent du jour où on les lance (la fixture met les menus le lundi).
+const rendreRestes = () => dateDuJour(S.lundi, () => stock.rendre(magasin.etat(), S.lundi, 'restes'));
 
 function mondeRestes() {
   const e = etatVide();
@@ -66,7 +68,7 @@ test('en-tête : titre Stock, sans état hors ligne quand tout est normal, séle
 
 test('restes : ventes par menu, surplus, rebut et note d\'un seul « Enregistrer » ; recalcul automatique, pas de « recalculer demain »', () => {
   const id = mondeRestes();
-  const page = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const page = rendreRestes();
   assert.doesNotMatch(page.textContent, /recalculer|demain/i);
   assert.ok(parTexte(page, 'Enregistrer'));
   controleDe(page, 'Ventes du menu 1 (portions)').value = '31';
@@ -78,18 +80,18 @@ test('restes : ventes par menu, surplus, rebut et note d\'un seul « Enregistrer
   const e = magasin.etat();
   assert.deepEqual([e.jours[S.lundi].ventes[1], e.jours[S.lundi].ventes[2]], [31, 12]);
   assert.deepEqual(e.composants[id].apresService, { surplus: 300, rebut: 50, note: 'trop cuit' });
-  const apres = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const apres = rendreRestes();
   assert.equal(controleDe(apres, 'Surplus utilisable (g)').value, '300', 'la saisie enregistrée est reprise');
 });
 
 test('restes : une valeur illisible est refusée sans rien écrire ; vider un champ efface la valeur', () => {
   const id = mondeRestes();
-  const page = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const page = rendreRestes();
   controleDe(page, 'Surplus utilisable (g)').value = 'beaucoup';
   parTexte(page, 'Enregistrer').click();
   assert.equal(magasin.etat().composants[id].apresService.surplus, null);
   magasin.agir((e) => { e.composants[id].apresService = { surplus: 100, rebut: null, note: '' }; });
-  const p2 = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const p2 = rendreRestes();
   controleDe(p2, 'Surplus utilisable (g)').value = '';
   parTexte(p2, 'Enregistrer').click();
   assert.equal(magasin.etat().composants[id].apresService.surplus, null);
@@ -97,7 +99,7 @@ test('restes : une valeur illisible est refusée sans rien écrire ; vider un ch
 
 test('restes : le jour se choisit parmi lundi à samedi (cibles d\'au moins un bouton par jour), le samedi n\'a pas de ventes par menu', () => {
   mondeRestes();
-  const page = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const page = rendreRestes();
   const puces = parClasse(page, 'stock-jour');
   assert.equal(puces.length, 6);
   assert.deepEqual(puces.map((b) => b.attributs['aria-pressed']), ['true', 'false', 'false', 'false', 'false', 'false']);
@@ -106,7 +108,7 @@ test('restes : le jour se choisit parmi lundi à samedi (cibles d\'au moins un b
   assert.match(page.textContent, /Pas de menu du jour le samedi/);
   assert.equal(parClasse(page, 'stock-jour')[5].attributs['aria-pressed'], 'true');
   stock.rendre(magasin.etat(), S.lundi, 'achats'); // quitter les restes oublie le jour choisi
-  const retour = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const retour = rendreRestes();
   assert.equal(parClasse(retour, 'stock-jour')[0].attributs['aria-pressed'], 'true');
 });
 
@@ -118,12 +120,12 @@ test('restes : aujourd\'hui est le jour par défaut quand il est dans la semaine
 
 test('restes : la quantité prévue vient du calcul et se lit en mono ; une quantité absente n\'est ni une alerte ni une décision', () => {
   mondeRestes();
-  const page = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const page = rendreRestes();
   assert.match(page.textContent.replace(/[\u202f\u00a0]/g, ' '), /prévu 2400 g/, 'quatre chiffres : pas de groupement des milliers');
   assert.ok(parClasse(page, 'stock-qte').length > 0);
   assert.equal(page.tous((x) => x.attributs.role === 'alert').length, 0);
   magasin.remplacer(etatVide());
-  const vide = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const vide = rendreRestes();
   assert.match(vide.textContent, /Aucun composant au poste/);
   assert.equal(vide.tous((x) => x.attributs.role === 'alert').length, 0);
 });
@@ -262,7 +264,7 @@ function mondeRizFait(jourService) {
 
 test('restes : une ligne par produit, « + Surplus / rebut » ouvre les champs au toucher, l\'aide du rebut une seule fois, Enregistrer en dernier', () => {
   mondeDeuxRestes();
-  const page = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const page = rendreRestes();
   const lignes = parClasse(page, 'stock-reste');
   assert.ok(lignes.length >= 2);
   const ouvrir = parClasse(page, 'stock-reste-ouvrir');
@@ -285,16 +287,16 @@ test('restes : une ligne par produit, « + Surplus / rebut » ouvre les champs a
 test('restes : la note saisie est affichée dans le résumé, pas seulement le mot « note »', () => {
   const id = mondeRestes();
   magasin.agir((e) => { e.composants[id].apresService = { surplus: 300, rebut: null, note: 'trop cuit, à servir demain' }; });
-  const resume = sansEspaceFin(parClasse(stock.rendre(magasin.etat(), S.lundi, 'restes'), 'stock-reste-resume')[0].textContent);
+  const resume = sansEspaceFin(parClasse(rendreRestes(), 'stock-reste-resume')[0].textContent);
   assert.match(resume, /surplus 300 g · note : trop cuit, à servir demain/);
   magasin.agir((e) => { e.composants[id].apresService = { surplus: null, rebut: null, note: '   ' }; });
-  assert.equal(parClasse(stock.rendre(magasin.etat(), S.lundi, 'restes'), 'stock-reste-resume').length, 0, 'une note blanche ne dit rien');
+  assert.equal(parClasse(rendreRestes(), 'stock-reste-resume').length, 0, 'une note blanche ne dit rien');
 });
 
 test('restes : une saisie existante ouvre la ligne et reste résumée (exception visible)', () => {
   const id = mondeRestes();
   magasin.agir((e) => { e.composants[id].apresService = { surplus: 300, rebut: 50, note: '' }; });
-  const page = stock.rendre(magasin.etat(), S.lundi, 'restes');
+  const page = rendreRestes();
   assert.equal(parClasse(page, 'stock-reste-champs')[0].hidden, false);
   assert.match(sansEspaceFin(parClasse(page, 'stock-reste-resume')[0].textContent), /surplus 300 g · rebut 50 g/);
   assert.equal(parClasse(page, 'stock-reste-ouvrir')[0].textContent, '− Surplus / rebut');
