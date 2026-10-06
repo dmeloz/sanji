@@ -104,6 +104,18 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 3. Ajouter le test de contrat (`tests/harness-socle.test.js`) et un test de non-mutation.
 4. Ne jamais ajouter un nom de la liste `ACTIONS_RESERVEES_AU_CHEF`.
 
+## Essai avec l'API Anthropic (hors application)
+
+`outils/fournisseur-anthropic.mjs` implémente l'interface `Fournisseur` par une requête HTTP directe (Node 22, aucune dépendance) ; `outils/essai-anthropic.mjs` lance le harness sur des données `TEST_ONLY`. Rien de réel n'est envoyé, rien n'est branché dans `app/`.
+
+```
+read -s ANTHROPIC_API_KEY && export ANTHROPIC_API_KEY && node outils/essai-anthropic.mjs --montrer
+```
+
+- La clé n'est lue que dans `ANTHROPIC_API_KEY` ; sans elle, aucun appel n'est fait. Un test vérifie qu'aucune clé n'est écrite dans le dépôt.
+- Modèle par défaut `claude-opus-5-5` (changer avec `SANJI_MODELE`), effort `low`, un seul échange, un seul outil `rendre_brouillon` (schéma du brouillon). Seuls le contexte minimal et le brouillon de départ sont envoyés ; `--montrer` affiche exactement la requête.
+- Non activé : le repli serveur `fallbacks` (un refus du modèle laisse simplement le calcul déterministe répondre).
+
 ## Ajouter un fournisseur d'IA (après accord de la propriétaire)
 
 1. Écrire un objet `{nom, disponible(), demander(requete, {signal})}` dans `ui/` ou dans un module d'amorçage, jamais dans `domaine/` ni `harness/` (règle : aucun `fetch` dans ces dossiers, un test le vérifie).
@@ -113,4 +125,4 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 
 ## Tests
 
-`npm test` : 934 tests au 2026-10-06 (865 d'origine, 12 d'import des nouveaux fichiers, 57 du harness, dont `tests/harness-horloge.test.js`). Une revue indépendante a relevé un point haut (application sans rejeu des contrôles) et six moyens, corrigés sauf la décision métier ci-dessus. Les tests du harness : `tests/harness-socle.test.js` (contrats, politiques, registre, contexte, trace, fournisseur, hygiène) et `tests/harness-parcours.test.js` (parcours complet, conflits, modèle scripté, refus, boucles, indisponibilité, magasin réel, export/import). Données `TEST_ONLY` uniquement ; outils : `tests/aide-harness.js`.
+`npm test` : 941 tests au 2026-10-06 (865 d'origine, 12 d'import des nouveaux fichiers, 64 du harness, dont `tests/harness-horloge.test.js` et `tests/fournisseur-anthropic.test.js`). Une revue indépendante a relevé un point haut (application sans rejeu des contrôles) et six moyens, corrigés sauf la décision métier ci-dessus. Les tests du harness : `tests/harness-socle.test.js` (contrats, politiques, registre, contexte, trace, fournisseur, hygiène) et `tests/harness-parcours.test.js` (parcours complet, conflits, modèle scripté, refus, boucles, indisponibilité, magasin réel, export/import). Données `TEST_ONLY` uniquement ; outils : `tests/aide-harness.js`.

@@ -8,7 +8,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 3. Fiche projet : `~/Atelier-Claude/Cerveau-Obsidian/01-Projets/Sanji.md`.
 
 ## Commandes
-- Tests : `npm test` (Node 22, aucun paquet à installer). 934 tests au 2026-10-06 (version 66).
+- Tests : `npm test` (Node 22, aucun paquet à installer). 941 tests au 2026-10-06 (version 66).
 - Régénérer la base métier embarquée : `npm run base`.
 - Régénérer les repères de portion validés (`app/js/donnees/savoir-metier.js`, généré depuis `savoir/reperes-portion/savoir-metier.json`) : `npm run savoir`. Ne pas éditer le module à la main.
 - Référentiel de savoir culinaire (brevet fédéral de chef de cuisine, contenu validé le 2026-10-04) : `savoir/culinaire/` (lire `LISEZ-MOI.md`) ; `npm run culinaire` valide les thèmes et `savoir/culinaire/rattachements.json` (choisi à la main, aucun chiffre), régénère l'index et le module embarqué `app/js/donnees/savoir-culinaire.js` (généré, environ 405 Ko, ne pas l'éditer) ; `npm test` échoue si une entrée ou un rattachement n'est pas conforme, ou si le module n'est pas à jour.
