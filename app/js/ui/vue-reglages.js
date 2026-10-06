@@ -728,7 +728,9 @@ function sectionAssistant() {
   const modele = MODELES.find((m) => m.id === r.modele);
   return carte('Assistant IA',
     h('p', { classe: 'aide' }, 'Sanji calcule toujours seul. L\'assistant, s\'il est activé, propose un planning que Sanji recontrôle entièrement ; vous validez avant tout enregistrement. '
-      + 'Il reçoit les noms des composants, les portions et un brouillon de départ : jamais les fiches de fonction, ni les allergies.'),
+      + 'Il reçoit les noms des composants, les portions et un brouillon de départ ; les fiches de fonction et les allergies ne sont pas transmises. '
+      + 'Les noms viennent de vos menus : évitez d\'y écrire des remarques sur une personne. '
+      + 'La clé est enregistrée en clair sur cet appareil : utilisez une clé réservée à Sanji, avec une limite de dépense basse chez Anthropic.'),
     h('dl', { classe: 'definitions' },
       h('dt', null, 'État'), h('dd', null, statut),
       h('dt', null, 'Clé'), h('dd', null, cleMasquee(r.cle)),

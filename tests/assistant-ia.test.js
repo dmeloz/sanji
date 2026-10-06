@@ -147,7 +147,8 @@ test('rubrique Réglages > Assistant IA : état, clé masquée, jamais la clé e
   assert.match(page.textContent, /Assistant IA/);
   assert.match(page.textContent, /désactivé/);
   assert.match(page.textContent, /aucune clé/);
-  assert.match(page.textContent, /jamais les fiches de fonction, ni les allergies/);
+  assert.match(page.textContent, /les fiches de fonction et les allergies ne sont pas transmises/);
+  assert.match(page.textContent, /clé réservée à Sanji, avec une limite de dépense basse/);
   assert.ok(parTexte(page, /^Saisir la clé$/));
   assert.equal(parTexte(page, /Effacer la clé/), undefined);
   reglages.enregistrerReglagesIA({ cle: FAUSSE_CLE, actif: true });
@@ -258,9 +259,55 @@ test('flux : si l\'état change avant la validation, la proposition est refusée
   const { definirCreneau } = await import('../app/js/domaine/actions.js');
   magasin.agir((etat, t) => definirCreneau(etat, S.lundi, 'avant_midi', 'charge', t));
   await aDate(S.lundi, () => brouillon.querySelector('form').declencher('submit'));
-  assert.match(brouillon.textContent, /L'état a changé|n'est plus valide/);
+  assert.equal(ouverts().length, 0, 'le brouillon périmé est fermé : pas d\'impasse avec un second clic');
+  const messages = dom.document.getElementById('messages').textContent;
+  assert.match(messages, /L'état a changé|n'est plus valide/);
+  assert.match(messages, /Rien n'a été planifié : relancez « Proposer un planning »/);
   assert.equal(magasin.etat().productions[pSec].jourDecide, null);
+  // Le bouton redevient utilisable : une nouvelle proposition tient compte du créneau devenu chargé (rien n'est forcé).
+  await aDate(S.lundi, () => assistant.ouvrirAssistantPlanning({ date: S.lundi }));
+  assert.match(ouverts()[0].textContent, /Rien à planifier sur cette période/);
+  assert.match(ouverts()[0].textContent, /aucun créneau libre/);
   fermerTout();
+});
+
+test('le bouton ne reste jamais bloqué : un échec d\'ouverture de la fenêtre est dit et le clic suivant fonctionne', async () => {
+  fermerTout();
+  const { Element } = await import('./aide-dom.js');
+  magasin.remplacer(etatLundi().e);
+  const original = Element.prototype.showModal;
+  Element.prototype.showModal = () => { throw new Error('affichage impossible'); };
+  try {
+    await aDate(S.lundi, () => assistant.ouvrirAssistantPlanning({ date: S.lundi }));
+  } finally {
+    Element.prototype.showModal = original;
+  }
+  assert.match(dom.document.getElementById('messages').textContent, /Planning impossible : affichage impossible/);
+  fermerTout();
+  await aDate(S.lundi, () => assistant.ouvrirAssistantPlanning({ date: S.lundi }));
+  assert.ok(ouverts().find((d) => /Brouillon de planning/.test(d.textContent)), 'le verrou a été relâché');
+  fermerTout();
+});
+
+test('le brouillon rappelle la période concernée', async () => {
+  fermerTout();
+  magasin.remplacer(etatLundi().e);
+  await aDate(S.lundi, () => assistant.ouvrirAssistantPlanning({ date: S.lundi }));
+  assert.match(ouverts()[0].textContent, /Période : du lundi 5 octobre au samedi 10 octobre\./);
+  fermerTout();
+});
+
+test('effacer la clé : un échec du stockage est dit, jamais présenté comme un succès', () => {
+  globalThis.localStorage = {
+    getItem: () => JSON.stringify({ actif: true, cle: FAUSSE_CLE, modele: 'claude-opus-5-5' }),
+    setItem: () => {}, removeItem: () => { throw new Error('refusé'); },
+  };
+  try {
+    assert.throws(() => reglages.effacerReglagesIA(), /Impossible d'effacer la clé/);
+  } finally {
+    delete globalThis.localStorage;
+    reglages.effacerReglagesIA();
+  }
 });
 
 test('flux avec le modèle : la proposition affiche son origine et reste soumise à la validation', async () => {

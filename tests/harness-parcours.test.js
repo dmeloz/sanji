@@ -359,6 +359,41 @@ test('modèle scripté : outils lus puis brouillon valide accepté, quantités e
   assert.ok(!JSON.stringify(fournisseur.requetes[0]).includes('allergies'));
 });
 
+test('modèle : son texte libre est borné (5 éléments de 200 caractères) et préfixé', async () => {
+  const { e, pSec, pCru } = lundi();
+  const ref = { etat: e };
+  const longues = Array.from({ length: 9 }, (_, i) => `${i}${'x'.repeat(500)}`);
+  const f = fournisseurScripte([brouillon(
+    [{ productionId: pSec, date: S.lundi, creneau: 'avant_midi' }, { productionId: pCru, date: S.lundi, creneau: 'avant_midi' }],
+    { hypotheses: longues, incertitudes: longues },
+  )]);
+  const { proposition } = await proposerPlanningAssiste(demande(ref, creerRegistre(), { fournisseur: f }));
+  const duModele = (liste) => liste.filter((x) => x.startsWith('modèle : '));
+  assert.equal(duModele(proposition.hypotheses).length, 5);
+  assert.equal(duModele(proposition.incertitudes).length, 5);
+  for (const x of [...duModele(proposition.hypotheses), ...duModele(proposition.incertitudes)]) assert.ok(x.length <= 'modèle : '.length + 200);
+});
+
+test('validateur : une clé de prototype n\'est jamais une production', () => {
+  const { e } = lundi();
+  for (const cle of ['constructor', '__proto__', 'toString']) {
+    const r = controlerBrouillon({ type: 'planning', items: [{ productionId: cle, date: S.lundi, creneau: 'avant_midi' }] }, e, { h: h(), aujourdhui: AUJOURDHUI });
+    assert.match(r.erreurs[0], /production inconnue/, cle);
+  }
+});
+
+test('decider : la trace est écrite avant le registre ; un refus du registre n\'écrit rien dans le journal', async () => {
+  const { e } = lundi();
+  const ref = { etat: e };
+  const executeur = executeurDe(ref);
+  const registre = creerRegistre();
+  const { proposition } = await proposerPlanningAssiste(demande(ref, registre));
+  decider(registre, proposition.id, { choix: 'refuser' }, { executeur });
+  const avant = ref.etat.journal.length;
+  assert.throws(() => decider(registre, proposition.id, { choix: 'valider' }, { executeur }), (x) => x.code === CODES.STATUT_INCOMPATIBLE);
+  assert.equal(ref.etat.journal.length, avant, 'aucune ligne de journal pour une validation refusée');
+});
+
 const REFUS = [
   ['production inconnue', (c) => [{ productionId: 'prod-fantome', date: S.lundi, creneau: 'avant_midi' }], /inconnue/],
   ['champ inconnu', (c) => [{ productionId: c.pSec, date: S.lundi, creneau: 'avant_midi', commande: 'planifier' }], /champ inconnu/],

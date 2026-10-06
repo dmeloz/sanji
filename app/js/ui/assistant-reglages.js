@@ -85,7 +85,8 @@ export function effacerReglagesIA() {
     try {
       s.removeItem(CLE_STOCKAGE);
     } catch {
-      // Rien à faire : sans stockage, il n'y a rien à effacer.
+      // Une clé qui reste stockée ne doit jamais passer pour effacée.
+      throw new Error("Impossible d'effacer la clé sur cet appareil.");
     }
   }
 }

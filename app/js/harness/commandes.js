@@ -16,17 +16,18 @@ const OPTIONS_SILENCIEUSES = { afficher: false };
 
 /** Écrit la décision du chef dans le registre et dans le journal (le texte libre d'un refus n'y entre pas). */
 function enregistrerDecision(registre, id, decision, etat, h) {
+  // La trace est écrite AVANT de toucher au registre : si l'écriture du journal échoue, le registre reste inchangé ;
+  // si le registre refuse, l'action `agir` est annulée et la trace avec elle.
+  const avant = registre.lire(id);
   if (decision.choix === 'valider') {
-    const proposition = registre.valider(id, h, decision);
     tracer(etat, h, 'validee', {
       provenance: PROVENANCES.CORRECTION_HUMAINE, propositionId: id,
-      resume: `${proposition.items.length} item(s), ${proposition.decision.itemsConfirmes.length} confirmé(s), ${proposition.decision.itemsRetires.length} retiré(s)`,
+      resume: `${avant.items.length} item(s), ${(decision.itemsConfirmes ?? []).length} confirmé(s), ${(decision.itemsRetires ?? []).length} retiré(s)`,
     });
-    return proposition;
+    return registre.valider(id, h, decision);
   }
-  const proposition = registre.refuser(id, h, decision.raison ?? '');
   tracer(etat, h, 'refusee', { provenance: PROVENANCES.CORRECTION_HUMAINE, propositionId: id, resume: 'refus du chef' });
-  return proposition;
+  return registre.refuser(id, h, decision.raison ?? '');
 }
 
 /**

@@ -1,6 +1,6 @@
 // Adaptateur de modèle : une interface minimale, indépendante de tout fournisseur. Ce module ne contient aucun appel
-// réseau (règle du projet : aucun envoi hors de l'appareil). Un futur fournisseur est injecté par l'appelant ;
-// choisir un fournisseur externe est une décision de la propriétaire, jamais du code.
+// réseau : le fournisseur est injecté par l'appelant (en production `ui/fournisseur-web.js`, seul fichier de l'application
+// qui parle au réseau, activé par la propriétaire dans Réglages > Assistant IA). Choisir un fournisseur reste sa décision.
 //
 // Interface `Fournisseur` :
 //   nom: string

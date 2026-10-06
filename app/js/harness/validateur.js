@@ -56,10 +56,10 @@ export function quantiteDe(etat, composantId) {
  */
 function controlerItem(sim, brut, aujourdhui, h, exclure) {
   const { productionId, date, creneau } = brut;
-  const p = sim.productions?.[productionId];
+  const p = Object.hasOwn(sim.productions ?? {}, productionId) ? sim.productions[productionId] : null;
   const erreurs = [];
   if (!p) return { erreurs: [`production inconnue : ${productionId}`] };
-  const composant = sim.composants?.[p.composantId];
+  const composant = Object.hasOwn(sim.composants ?? {}, p.composantId) ? sim.composants[p.composantId] : null;
   if (!composant) return { erreurs: [`composant introuvable pour ${productionId}`] };
   if (p.etat !== 'a_faire' || p.jourDecide || p.creneauDecide) erreurs.push(`${composant.nom} : déjà planifiée, commencée ou faite`);
   if (!estOuvert(date)) erreurs.push(`${composant.nom} : ${date} est un jour non travaillé`);

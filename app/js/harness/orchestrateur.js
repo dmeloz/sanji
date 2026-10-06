@@ -13,6 +13,11 @@ import { controlerBrouillon } from './validateur.js';
 
 export const MAX_ITERATIONS = 4;
 
+/** Le texte libre d'un modèle est borné (nombre et longueur) avant d'être montré au chef, toujours préfixé « modèle : ». */
+const NB_TEXTES_MAX = 5;
+const LONGUEUR_TEXTE_MAX = 200;
+const bornerTextes = (textes) => (textes ?? []).slice(0, NB_TEXTES_MAX).map((x) => `modèle : ${String(x).slice(0, LONGUEUR_TEXTE_MAX)}`);
+
 const SOURCES = Object.freeze([
   'Menus, composants et prévisions de l\'état local (aucune donnée externe)',
   'Quantités : calculerComposant (standards de base, valeurs du chef, état du poids)',
@@ -107,8 +112,8 @@ export async function proposerPlanningAssiste({
       }
       return {
         proposition: enregistrer(registre, etat, h, ORIGINES.MODELE, controle, {
-          hypotheses: (reponse.brouillon.hypotheses ?? []).map((x) => `modèle : ${x}`),
-          incertitudes: (reponse.brouillon.incertitudes ?? []).map((x) => `modèle : ${x}`),
+          hypotheses: bornerTextes(reponse.brouillon.hypotheses),
+          incertitudes: bornerTextes(reponse.brouillon.incertitudes),
           aDeciderEn: nonTraitees(etat, periode, controle), avecHeure: Boolean(exclure),
         }),
         mode: 'modele', avertissements,

@@ -52,12 +52,13 @@ function ligneItem(item) {
  * @param {{mode:string, avertissements:string[]}} infos
  * @returns {Node[]}
  */
-export function contenuProposition(proposition, { mode, avertissements }) {
+export function contenuProposition(proposition, { mode, avertissements, periode = null }) {
   const nodes = [
     h('p', { classe: 'meta' },
       mode === 'modele' ? pastille("proposé par l'IA, recontrôlé", 'gris') : pastille('calculé par Sanji', 'vert'),
       ` ${proposition.items.length} préparation${proposition.items.length > 1 ? 's' : ''} à planifier. Rien n'est enregistré avant votre validation.`),
   ];
+  if (periode) nodes.push(h('p', { classe: 'meta' }, `Période : du ${libelleJour(periode.dateDebut)} au ${libelleJour(periode.dateFin)}.`));
   for (const a of avertissements) nodes.push(encadre('alerte', a));
   if (proposition.items.length > 0) nodes.push(h('ul', { classe: 'ia-liste' }, proposition.items.map(ligneItem)));
   else nodes.push(h('p', { classe: 'vide' }, 'Rien à planifier sur cette période.'));
@@ -90,10 +91,16 @@ function ouvrirBrouillon(resultat) {
         api.fermer();
       },
     }],
-    surEnregistrer: () => {
-      decider(registre, proposition.id, { choix: 'valider' }, { executeur: agir });
+    surEnregistrer: (api) => {
+      // Une proposition n'est validée qu'une fois : après un échec d'application, un second clic ne rejoue pas la validation.
+      if (registre.lire(proposition.id).statut === 'brouillon') decider(registre, proposition.id, { choix: 'valider' }, { executeur: agir });
       const r = appliquerProposition(registre, proposition.id, { executeur: agir, aujourdhui: aujourdhui() });
-      if (!r.ok) throw new Error(r.message);
+      if (!r.ok) {
+        // Rien n'a été écrit. Le brouillon ne peut plus servir : on le dit et on ferme, au lieu de laisser une impasse.
+        afficherMessage(`${r.message} Rien n'a été planifié : relancez « Proposer un planning ».`, 'alerte');
+        api.fermer();
+        return;
+      }
       afficherMessage(`${r.appliques.length} préparation${r.appliques.length > 1 ? 's' : ''} planifiée${r.appliques.length > 1 ? 's' : ''}.`, 'ok');
     },
   });
@@ -103,34 +110,37 @@ function ouvrirBrouillon(resultat) {
 export async function ouvrirAssistantPlanning({ date }) {
   if (enCours) return;
   enCours = true;
-  const controleur = new AbortController();
-  const reglages = lireReglagesIA();
-  const attente = panneau({
-    titre: 'Planning proposé',
-    lectureSeule: true,
-    corps: [
-      h('p', null, 'Calcul en cours…'),
-      assistantPret(reglages)
-        ? h('p', { classe: 'meta' }, `Le modèle ${reglages.modele} est consulté : il reçoit les noms des composants, les portions et un brouillon de départ, jamais les fiches de fonction ni les allergies.`)
-        : h('p', { classe: 'meta' }, 'Calcul par Sanji seul, sans IA.'),
-    ],
-  });
+  let attente = null;
   let termine = false;
-  attente.addEventListener('close', () => { if (!termine) controleur.abort(); });
   try {
+    const controleur = new AbortController();
+    const reglages = lireReglagesIA();
+    attente = panneau({
+      titre: 'Planning proposé',
+      lectureSeule: true,
+      corps: [
+        h('p', null, 'Calcul en cours…'),
+        assistantPret(reglages)
+          ? h('p', { classe: 'meta' }, `Le modèle ${reglages.modele} est consulté : il reçoit les noms des composants, les portions et un brouillon de départ ; les fiches de fonction et les allergies ne sont pas transmises.`)
+          : h('p', { classe: 'meta' }, 'Calcul par Sanji seul, sans IA.'),
+      ],
+    });
+    attente.addEventListener('close', () => { if (!termine) controleur.abort(); });
     const aujourd = aujourdhui();
+    const periode = periodeDePlanning(date, aujourd);
     const resultat = await proposerPlanningAssiste({
-      etat: etatCourant(), h: maintenant(), aujourdhui: aujourd, ...periodeDePlanning(date, aujourd), registre,
+      etat: etatCourant(), h: maintenant(), aujourdhui: aujourd, ...periode, registre,
       fournisseur: fournisseurDepuisReglages(reglages), signal: controleur.signal, delaiMs: DELAI_MODELE_MS,
     });
     termine = true;
     attente.close();
-    if (!controleur.signal.aborted) ouvrirBrouillon(resultat);
+    if (!controleur.signal.aborted) ouvrirBrouillon({ ...resultat, periode });
   } catch (erreur) {
     termine = true;
-    attente.close();
+    attente?.close();
     afficherMessage(`Planning impossible : ${erreur?.message ?? erreur}`, 'erreur');
   } finally {
+    // Quoi qu'il arrive (échec d'ouverture du panneau compris), le bouton redevient utilisable.
     enCours = false;
   }
 }

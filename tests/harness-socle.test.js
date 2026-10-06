@@ -132,6 +132,20 @@ test('contexte : séparé par certitude, versionné, sans fiche ni allergie, pé
   assert.throws(() => construireContexte(e, { tache: 'x', dateDebut: 'n/a', dateFin: S.lundi, aujourdhui: AUJOURDHUI }), /dates invalides/);
 });
 
+test('contexte : un nom long ou qui ressemble à une remarque sur une personne n\'est pas transmis au modèle', async () => {
+  const { nomTransmissible } = await import('../app/js/harness/contexte.js');
+  assert.equal(nomTransmissible('Riz pilaf'), 'Riz pilaf');
+  for (const nom of ['x'.repeat(61), 'Purée sans lait, allergie de Mme X', 'régime sans gluten', 'plat pour Mme Dupont', '', null]) {
+    assert.equal(nomTransmissible(nom), 'composant (nom non transmis)', String(nom).slice(0, 30));
+  }
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 10);
+  composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'Purée, allergie arachide de Mme X' });
+  const texte = JSON.stringify(construireContexte(e, { tache: 'planning', dateDebut: S.lundi, dateFin: S.lundi, aujourdhui: AUJOURDHUI }));
+  assert.ok(!texte.includes('arachide') && !texte.includes('Mme X'));
+  assert.ok(texte.includes('composant (nom non transmis)'));
+});
+
 test('contexte : un composant à quantité inconnue est « manquant », un composant non validé « provisoire »', () => {
   const e = etatVide();
   prevision(e, S.lundi, 1, 10);

@@ -10,6 +10,16 @@ import { evenementsHarness } from './trace.js';
 
 export const JOURS_MAX = 14;
 const NB_DECISIONS_ANTERIEURES = 10;
+const LONGUEUR_NOM_MAX = 60;
+const NOM_NON_TRANSMIS = 'composant (nom non transmis)';
+// Un nom vient d'un menu importé : texte libre. Un nom long ou qui ressemble à une remarque sur une personne ne part pas.
+const MARQUEURS_PERSONNELS = /(allergi|intol[ée]ran|c[œo]eliaque|r[ée]gime|\bpour (m\.|mme|mr|monsieur|madame|le client|la cliente))/i;
+
+/** Nom d'un composant ou d'une règle tel qu'il peut être transmis au modèle (heuristique prudente, jamais une garantie). */
+export function nomTransmissible(nom) {
+  const texte = String(nom ?? '').trim();
+  return texte !== '' && texte.length <= LONGUEUR_NOM_MAX && !MARQUEURS_PERSONNELS.test(texte) ? texte : NOM_NON_TRANSMIS;
+}
 
 /**
  * @param {object} etat
@@ -37,7 +47,7 @@ export function construireContexte(etat, { tache, dateDebut, dateFin, aujourdhui
     for (const c of Object.values(etat.composants ?? {}).filter((x) => x.date === date && x.attribue).sort((a, b) => a.id.localeCompare(b.id))) {
       const production = Object.values(etat.productions ?? {}).find((p) => p.composantId === c.id && p.genre === 'principale');
       // L'identifiant de la production relie un composant aux items d'un brouillon : le modèle n'a pas à le deviner.
-      const entree = { type: 'composant', id: c.id, date, menu: c.menu, nom: c.nom, categorie: c.categorie, productionId: production?.id ?? null };
+      const entree = { type: 'composant', id: c.id, date, menu: c.menu, nom: nomTransmissible(c.nom), categorie: c.categorie, productionId: production?.id ?? null };
       (c.valide ? donnees.confirmees : donnees.provisoires).push(entree);
       if (production && etatTache(etat, production.id) === 'a_preciser') {
         donnees.manquantes.push({ type: 'quantite', composantId: c.id, texte: `${c.nom} : quantité inconnue` });
@@ -45,7 +55,7 @@ export function construireContexte(etat, { tache, dateDebut, dateFin, aujourdhui
     }
   }
   const regles = Object.values(etat.regles ?? {}).filter((r) => r.valideLe)
-    .map((r) => ({ nom: r.nom, avanceMaxJours: r.avanceMaxJours, limiteUtilisationJours: r.limiteUtilisationJours }));
+    .map((r) => ({ nom: nomTransmissible(r.nom), avanceMaxJours: r.avanceMaxJours, limiteUtilisationJours: r.limiteUtilisationJours }));
   // Seuls l'heure et le type d'événement : le détail du journal peut contenir un texte libre du chef.
   const decisionsAnterieures = evenementsHarness(etat, NB_DECISIONS_ANTERIEURES).map(({ h, action }) => ({ h, action }));
   return { version: VERSION_CONTEXTE, tache, periode: { debut: dateDebut, fin: dateFin, aujourdhui }, donnees, regles, decisionsAnterieures };
