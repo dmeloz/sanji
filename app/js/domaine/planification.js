@@ -328,10 +328,10 @@ function candidatsAvance(dateService, avanceMax) {
 /**
  * Suggestion de jour et de créneau : le jour du service avant midi si possible, sinon on remonte créneau par
  * créneau (2 jours au plus, ou l'avance maximale de la règle). Jamais un créneau chargé ou indisponible,
- * jamais le dimanche, jamais une avance qui ne couvre pas le besoin.
+ * jamais le dimanche, jamais une avance qui ne couvre pas le besoin. `depuis` (date) écarte les jours déjà passés.
  * @returns {{date:string, creneau:string, evaluation:object}|null}
  */
-export function suggererCreneau(etat, productionId) {
+export function suggererCreneau(etat, productionId, depuis = null) {
   const p = etat.productions?.[productionId];
   if (!p || p.etat === 'fait') return null;
   const composant = etat.composants?.[p.composantId] ?? null;
@@ -339,6 +339,7 @@ export function suggererCreneau(etat, productionId) {
   const avanceMax = Number.isInteger(regle?.avanceMaxJours) && regle.avanceMaxJours >= 0 ? regle.avanceMaxJours : AVANCE_HABITUELLE;
   const points = POINTS_CHARGE[composant?.charge] ?? 0;
   for (const { date, creneau } of candidatsAvance(p.dateService, avanceMax)) {
+    if (depuis && date < depuis) continue;
     if (etatCreneau(etat, date, creneau) !== 'libre') continue;
     const charge = chargeCreneau(etat, date, creneau);
     const dejaLa = p.jourDecide === date && p.creneauDecide === creneau ? points : 0;
@@ -354,7 +355,7 @@ export function suggererCreneau(etat, productionId) {
  * principal. Elle se fait le jour même : pas d'avance proposée, sauf si la règle de préparation du nom définit
  * explicitement une avance maximale supérieure à 0 (exception validée par la propriétaire).
  */
-function sansAvanceParDefaut(etat, composant, p) {
+export function sansAvanceParDefaut(etat, composant, p) {
   if (!composant || p.genre !== 'principale') return false;
   if (composant.menu !== 1 || composant.categorie !== 'feculent' || composant.role !== 'plat_principal') return false;
   const avance = regleDe(etat, composant, p.etapeCle ?? null)?.avanceMaxJours;
