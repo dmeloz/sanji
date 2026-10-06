@@ -137,7 +137,25 @@ test('hygiène : seul fournisseur-web.js nomme l\'API Anthropic ou lit le fetch 
   });
   const fichiers = parcourir(racine).filter((f) => /\.(js|html|css|webmanifest)$/.test(f));
   const nomment = fichiers.filter((f) => /api\.anthropic\.com|globalThis\.fetch/.test(readFileSync(f, 'utf8'))).map((f) => f.slice(racine.length));
-  assert.deepEqual(nomment, ['js/ui/fournisseur-web.js']);
+  // index.html cite l'API seulement dans la CSP (autorisation de connexion), jamais pour l'appeler.
+  assert.deepEqual(nomment, ['index.html', 'js/ui/fournisseur-web.js']);
+});
+
+test('CSP : scripts de l\'application seulement, réseau limité à elle-même et à l\'API Anthropic', () => {
+  const html = readFileSync(new URL('../app/index.html', import.meta.url), 'utf8');
+  const csp = html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
+  assert.ok(csp, 'une CSP est déclarée');
+  const directives = Object.fromEntries(csp.split(';').map((d) => d.trim().split(/\s+/)).map(([nom, ...valeurs]) => [nom, valeurs]));
+  assert.deepEqual(directives['script-src'], ["'self'"]);
+  assert.deepEqual(directives['connect-src'], ["'self'", 'https://api.anthropic.com']);
+  assert.deepEqual(directives['object-src'], ["'none'"]);
+  assert.deepEqual(directives['base-uri'], ["'none'"]);
+  assert.ok(!/unsafe-eval|unsafe-inline|\*|data:|http:/.test(directives['script-src'].join(' ') + directives['connect-src'].join(' ')));
+  // Elle ne bloquerait ni script en ligne ni gestionnaire en ligne : il n'y en a pas.
+  assert.ok(!/<script(?![^>]*\bsrc=)[^>]*>/i.test(html), 'aucun script en ligne');
+  assert.ok(!/\son[a-z]+\s*=/i.test(html), 'aucun gestionnaire d\'événement en ligne');
+  // La CSP est la première règle du <head>, avant tout chargement.
+  assert.ok(html.indexOf('Content-Security-Policy') < html.indexOf('<link'));
 });
 
 test('rubrique Réglages > Assistant IA : état, clé masquée, jamais la clé entière', () => {

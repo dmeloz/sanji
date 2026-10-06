@@ -2,6 +2,8 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
+  <!-- Seuls les scripts de l'application s'exécutent ; le réseau n'est ouvert qu'à elle-même et à l'API Anthropic (assistant IA optionnel). -->
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; connect-src 'self' https://api.anthropic.com; object-src 'none'; base-uri 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Sanji — Copilote entremétier</title>
   <meta name="description" content="Menus du jour, prévisions, fiches de fonction, quantités et feuille de travail du poste entremétier.">
