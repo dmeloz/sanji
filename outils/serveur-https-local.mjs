@@ -6,7 +6,7 @@
 import { createServer as http } from 'node:http';
 import { createServer as https } from 'node:https';
 import { readFileSync, existsSync, statSync } from 'node:fs';
-import { extname, join, normalize, resolve } from 'node:path';
+import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const racine = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -21,9 +21,16 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
   '.png': 'image/png', '.ico': 'image/x-icon' };
 
 function servir(req, rep) {
-  const chemin = decodeURIComponent(new URL(req.url, 'https://x').pathname);
+  let chemin;
+  try {
+    chemin = decodeURIComponent(new URL(req.url, 'https://x').pathname);
+  } catch {
+    rep.writeHead(400, { 'content-type': 'text/plain; charset=utf-8' });
+    rep.end('Adresse illisible');
+    return;
+  }
   let fichier = normalize(join(app, chemin === '/' ? 'index.html' : chemin));
-  if (!fichier.startsWith(app) || !existsSync(fichier) || statSync(fichier).isDirectory()) {
+  if (!(fichier === app || fichier.startsWith(app + sep)) || !existsSync(fichier) || statSync(fichier).isDirectory()) {
     rep.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
     rep.end('Introuvable');
     return;

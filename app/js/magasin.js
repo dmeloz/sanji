@@ -69,7 +69,8 @@ export async function charger() {
     statut.utilisable = true;
     statut.enregistre = true;
     statut.raison = '';
-    statut.persistant = await demanderPersistance();
+    // Sans attendre : le navigateur peut afficher une invite et tarder, ce qui ne doit pas retarder le démarrage.
+    demanderPersistance().then((persistant) => { statut.persistant = persistant; });
     if (brut) {
       try {
         etatCourant = importer(exporter(brut, maintenant()), aujourdhui());

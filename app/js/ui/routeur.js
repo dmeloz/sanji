@@ -38,10 +38,15 @@ export const ONGLET_DE_VUE = {
  * #/jour/<d> → production/<d>, #/produits/<d> → stock/achats/<d>, #/detail/<d> → semaine/<d>,
  * #/composant/<id> → fiche/<id>, #/menus/<d> → import/<d>.
  */
+/** Décode un morceau d'adresse ; une adresse mal formée (« %E0 ») vaut « absent » au lieu de faire échouer le routeur. */
+function decoder(morceau) {
+  try { return decodeURIComponent(morceau); } catch { return null; }
+}
+
 export function analyserHash(hash, aujourd) {
   const morceaux = String(hash ?? '').replace(/^#\/?/, '').split('/').filter((m) => m !== '');
   const vue = morceaux[0];
-  const param = morceaux[1] ? decodeURIComponent(morceaux[1]) : null;
+  const param = morceaux[1] ? decoder(morceaux[1]) : null;
   const dateValide = param && estDateValide(param);
   if (vue === 'production' || vue === 'jour') return { vue: 'production', param: dateValide ? param : aujourd };
   if (vue === 'semaine') {
@@ -107,8 +112,12 @@ export function rendre() {
       h('p', null, h('a', { href: '#/aujourdhui' }, "Retour à Aujourd'hui")));
   }
   racine.replaceChildren(noeud);
+  const titrePage = VUES[vue].titre(param, sous);
   const titreVue = parId('barre-titre');
-  if (titreVue) titreVue.textContent = VUES[vue].titre(param, sous);
+  if (titreVue) titreVue.textContent = titrePage;
+  document.title = `${titrePage} — Sanji`;
+  // Vraie nouvelle page (pas un simple redessin) : le focus passe au contenu, pour le clavier et VoiceOver.
+  if (cleCourante !== null && cle !== cleCourante) racine.focus?.({ preventScroll: true });
   majOnglets(vue);
   const reglages = parId('barre-reglages');
   if (reglages) reglages.hidden = vue !== 'aujourdhui';

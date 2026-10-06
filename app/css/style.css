@@ -19,6 +19,7 @@
   --texte-moyen: #3A3F45;
   --bordure: #E2E4DF;
   --bordure-forte: #9AA09A;
+  --bordure-champ: #767C76;
   --case: #9AA09A;
 
   /* Action (basilic) */
@@ -109,6 +110,7 @@
     --texte-moyen: #C9CDD1;
     --bordure: #2A2E31;
     --bordure-forte: #4a5864;
+    --bordure-champ: #7A8791;
     --action: #7CC28F;
     --action-fonce: #A6D9B3;
     --action-fond: #1F3326;
@@ -385,7 +387,7 @@ input[type="text"], input[type="date"], select, textarea {
   width: 100%;
   min-height: var(--haut-bouton);
   padding: 8px 12px;
-  border: 1px solid var(--bordure-forte);
+  border: 1px solid var(--bordure-champ);
   border-radius: 10px;
   background: var(--carte);
   color: var(--texte);
@@ -1026,7 +1028,7 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .sem-globale-outils { display: flex; justify-content: flex-end; margin: 4px 0 0; }
 .vue-semaine-globale .bord-zone { background: var(--carte); border: 0; border-radius: var(--r-carte); padding: 12px 16px; margin-top: 12px; }
 .vue-semaine-globale .bord-zone-titre { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); }
-.vue-semaine-globale .bord-titre { font-size: var(--t-titre); font-weight: 700; letter-spacing: -0.02em; }
+.vue-semaine-globale .bord-titre { font-size: clamp(20px, 5.6vw, var(--t-titre)); font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
 .vue-semaine-globale .bord-aujourdhui { border-radius: var(--r-carte-petite); }
 /* ===== Écran Stock (refonte 1) : sélecteur segmenté, Restes, DLC, Achats en cartes. Jetons du socle seulement. ===== */
 .stock-entete { display: flex; flex-direction: column; gap: 4px; }
@@ -1248,7 +1250,8 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .nav-semaine-retour { display: inline-flex; align-items: center; min-height: var(--cible); font-size: var(--t-legende); font-weight: 600; color: var(--action); }
 .produit-etat-texte { font-weight: 600; }
 /* Restes : une ligne par produit, champs ouverts au toucher, Enregistrer à portée du pouce. */
-.stock-ventes-champs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.stock-ventes-champs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.stock-restes-corps > .vide { margin-top: 12px; }
 .stock-reste-tete { align-items: center; }
 .stock-reste-texte { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .stock-reste-resume { overflow-wrap: anywhere; }
