@@ -34,6 +34,7 @@ Seule `appliquerProposition` écrit, et seulement à travers l'exécuteur inject
 | `commandes.js` | `decider`, `appliquerProposition` : atomique, refus en cas de conflit ou de double exécution. |
 | `fournisseur.js` | Interface d'un modèle, `fournisseurDesactive`, `interroger` (délai, annulation, réponse validée). Aucun appel réseau. |
 | `orchestrateur.js` | `proposerPlanningAssiste` : calcul d'abord, modèle ensuite (4 échanges au plus, appels répétés interdits), repli toujours possible. |
+| `horloge.js` | Montre interne : horloge injectable, bornes de fin de créneau (réglages de la propriétaire), `creneauPasse`, `exclusionDuPasse`. |
 | `trace.js` | `tracer` (journal existant, détail borné à 240 caractères), `expliquer`, `evenementsHarness`. |
 
 ## Registre des outils
@@ -62,7 +63,7 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 4. Une proposition s'applique une seule fois.
 5. Les quantités affichées viennent toujours du domaine ; une quantité annoncée par un modèle qui diffère du calcul refuse le brouillon.
 6. Une avance hors règle, un jour non travaillé, un créneau chargé ou plein, un jour passé ne sont jamais proposés ; la base du menu 1 reste au jour même.
-7. Conservation non validée (avance d'au moins un jour sans limite saisie ni repère) : l'item exige une confirmation explicite, porte le motif « ne doit pas être présenté comme couvert » et reste hors de la décision sans confirmation.
+7. Conservation non validée (avance d'au moins un jour sans limite saisie ni repère) : avertissement léger porté par l'item (« ne doit pas être présenté comme couvert »), `couvre` faux, aucune confirmation exigée. Le mécanisme de confirmation par item (`exigeConfirmation`) reste disponible pour de futures commandes.
 8. Quantité inconnue ou absence de créneau compatible : « À décider », jamais devinée. Ce qu'un modèle omet reste « À décider ».
 9. Le contexte et le journal ne contiennent ni allergies, ni remarques, ni fiches de fonction.
 10. Sans modèle, hors ligne, en panne, en délai dépassé, annulé ou incohérent : le calcul déterministe répond et l'état reste identique.
@@ -78,10 +79,14 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 
 ## Décisions métier ouvertes (accord requis)
 
-- **Conservation à confirmer** : le harness exige une confirmation par item. Le domaine, lui, juge une avance de 1 à 2 jours « autorisée et couvrant le besoin » avec l'alerte « conservation à confirmer ». À valider : cette exigence plus stricte du harness est-elle la règle voulue ?
-- **Conservation « référentiel » dépassée** : pour une avance d'au plus 2 jours dont la durée dépasse le repère du standard de base, le domaine avertit seulement et le harness n'exige aucune confirmation (le standard de base n'est pas une valeur validée par la propriétaire). À valider : faut-il aussi exiger une confirmation ?
-- **Créneau du jour courant** : le domaine ne connaît pas l'heure ; un créneau du matin peut être proposé l'après-midi. À valider : faut-il une règle d'heure limite par créneau ?
-- **Fournisseur d'IA** : aucun choix fait. Choisir un fournisseur, une clé ou un envoi de menus hors de l'appareil lève la règle « aucun envoi réseau » : décision de la propriétaire.
+- **Heures de fin de créneau** : l'horloge interne est en place (`horloge.js`) mais aucune borne n'est renseignée ; sans borne, un créneau du matin peut être proposé l'après-midi. À fournir par la propriétaire.
+- **Fournisseur d'IA** : aucun choix fait. La règle « aucun envoi réseau » est levée pour une couche d'IA optionnelle (décision du 2026-10-06), mais rien ne part tant que le fournisseur, la clé et les données transmises ne sont pas validés.
+
+## Décisions prises (2026-10-06, la propriétaire)
+
+- Une conservation non validée donne un **avertissement léger**, jamais une confirmation, et n'est jamais présentée comme couverte (`evaluation.couvre` reste faux). Une conservation « référentiel » dépassée avertit aussi, sans confirmation.
+- **Pas de parcours « conservation »** dans le harness : il n'ajoute rien au domaine sur ce sujet.
+- **Horloge interne** : `creerHorloge` / `horlogeFixe`, bornes de fin de créneau `{avant_midi?, apres_midi?, avant_soir?}` validées en `HH:MM`, `creneauPasse`, `exclusionDuPasse`. Le calcul (`suggererCreneau(etat, id, depuis, exclure)`), le validateur et l'application d'une proposition écartent un créneau terminé ; l'application rejoue ce contrôle (conflit si l'heure de fin passe entre la validation et l'application). Sans borne : comportement inchangé.
 - **Parcours suivants** (écarts à arbitrer, actions préparatoires, apprentissage des portions, allergies, liste à commander) : non commencés, un par un.
 
 ## Limites
@@ -108,4 +113,4 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 
 ## Tests
 
-`npm test` : 924 tests au 2026-10-06 (865 d'origine, 11 d'import des nouveaux fichiers, 48 du harness). Une revue indépendante a relevé un point haut (application sans rejeu des contrôles) et six moyens, corrigés sauf la décision métier ci-dessus. Les tests du harness : `tests/harness-socle.test.js` (contrats, politiques, registre, contexte, trace, fournisseur, hygiène) et `tests/harness-parcours.test.js` (parcours complet, conflits, modèle scripté, refus, boucles, indisponibilité, magasin réel, export/import). Données `TEST_ONLY` uniquement ; outils : `tests/aide-harness.js`.
+`npm test` : 934 tests au 2026-10-06 (865 d'origine, 12 d'import des nouveaux fichiers, 57 du harness, dont `tests/harness-horloge.test.js`). Une revue indépendante a relevé un point haut (application sans rejeu des contrôles) et six moyens, corrigés sauf la décision métier ci-dessus. Les tests du harness : `tests/harness-socle.test.js` (contrats, politiques, registre, contexte, trace, fournisseur, hygiène) et `tests/harness-parcours.test.js` (parcours complet, conflits, modèle scripté, refus, boucles, indisponibilité, magasin réel, export/import). Données `TEST_ONLY` uniquement ; outils : `tests/aide-harness.js`.
