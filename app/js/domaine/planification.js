@@ -328,10 +328,11 @@ function candidatsAvance(dateService, avanceMax) {
 /**
  * Suggestion de jour et de créneau : le jour du service avant midi si possible, sinon on remonte créneau par
  * créneau (2 jours au plus, ou l'avance maximale de la règle). Jamais un créneau chargé ou indisponible,
- * jamais le dimanche, jamais une avance qui ne couvre pas le besoin. `depuis` (date) écarte les jours déjà passés.
+ * jamais le dimanche, jamais une avance qui ne couvre pas le besoin. `depuis` (date) écarte les jours déjà passés ;
+ * `exclure(date, creneau)` (facultatif) écarte un créneau que l'appelant sait terminé (le domaine ne connaît pas l'heure).
  * @returns {{date:string, creneau:string, evaluation:object}|null}
  */
-export function suggererCreneau(etat, productionId, depuis = null) {
+export function suggererCreneau(etat, productionId, depuis = null, exclure = null) {
   const p = etat.productions?.[productionId];
   if (!p || p.etat === 'fait') return null;
   const composant = etat.composants?.[p.composantId] ?? null;
@@ -340,6 +341,7 @@ export function suggererCreneau(etat, productionId, depuis = null) {
   const points = POINTS_CHARGE[composant?.charge] ?? 0;
   for (const { date, creneau } of candidatsAvance(p.dateService, avanceMax)) {
     if (depuis && date < depuis) continue;
+    if (exclure?.(date, creneau)) continue;
     if (etatCreneau(etat, date, creneau) !== 'libre') continue;
     const charge = chargeCreneau(etat, date, creneau);
     const dejaLa = p.jourDecide === date && p.creneauDecide === creneau ? points : 0;

@@ -49,7 +49,7 @@ export function quantiteDe(etat, composantId) {
  * Contrôle un item sur la copie de simulation `sim` (qui reçoit ensuite l'item, pour que les suivants voient la charge).
  * @returns {{erreurs:string[], item?:object, aDecider?:object}}
  */
-function controlerItem(sim, brut, aujourdhui, h) {
+function controlerItem(sim, brut, aujourdhui, h, exclure) {
   const { productionId, date, creneau } = brut;
   const p = sim.productions?.[productionId];
   const erreurs = [];
@@ -61,6 +61,7 @@ function controlerItem(sim, brut, aujourdhui, h) {
   else if (!creneauxDuJour(date).includes(creneau)) erreurs.push(`${composant.nom} : le créneau ${creneau} n'existe pas le ${date}`);
   if (joursEntre(date, p.dateService) < 0) erreurs.push(`${composant.nom} : ${date} est après le service du ${p.dateService}`);
   if (aujourdhui && date < aujourdhui) erreurs.push(`${composant.nom} : ${date} est déjà passé`);
+  else if (exclure?.(date, creneau)) erreurs.push(`${composant.nom} : le créneau ${creneau} du ${date} est déjà terminé`);
   if (erreurs.length) return { erreurs };
 
   if (etatCreneau(sim, date, creneau) !== 'libre') return { erreurs: [`${composant.nom} : le créneau ${creneau} du ${date} n'est pas libre`] };
@@ -91,13 +92,14 @@ function controlerItem(sim, brut, aujourdhui, h) {
   } catch (erreur) {
     return { erreurs: [`${composant.nom} : ${erreur.message}`] };
   }
-  const aConfirmer = evaluation.jours > 0 && evaluation.conservation === 'a_confirmer';
-  const motifs = aConfirmer ? ['Conservation non validée : ce produit ne doit pas être présenté comme couvert.'] : [];
+  // Décision de la propriétaire (2026-10-06) : une conservation non validée donne un avertissement léger, jamais une confirmation.
+  const avertir = evaluation.jours > 0 && evaluation.conservation === 'a_confirmer';
+  const motifs = avertir ? ['Avertissement : conservation non validée, ce produit ne doit pas être présenté comme couvert.'] : [];
   return {
     erreurs: [],
     item: {
       id: `item-${productionId}`, productionId, composantId: composant.id, nom: composant.nom, dateService: p.dateService,
-      date, creneau, quantite, evaluation: resumerEvaluation(evaluation), exigeConfirmation: aConfirmer, motifs,
+      date, creneau, quantite, evaluation: resumerEvaluation(evaluation), exigeConfirmation: false, motifs,
       commande: { outil: 'planifier_production', entrees: { productionId, date, creneau } },
     },
   };
@@ -107,10 +109,10 @@ function controlerItem(sim, brut, aujourdhui, h) {
  * Contrôle un brouillon de planning contre l'état courant, sans rien modifier.
  * @param {unknown} brouillon
  * @param {object} etat
- * @param {{h:string, aujourdhui?:string|null}} options
+ * @param {{h:string, aujourdhui?:string|null, exclure?:Function|null}} options `exclure(date, creneau)` : créneau terminé (horloge)
  * @returns {{erreurs:string[], items:object[], aDecider:object[], controles:{nom:string, ok:boolean, detail?:string}[]}}
  */
-export function controlerBrouillon(brouillon, etat, { h, aujourdhui = null }) {
+export function controlerBrouillon(brouillon, etat, { h, aujourdhui = null, exclure = null }) {
   const structure = verifierSchema(brouillon, SCHEMA_BROUILLON, 'brouillon');
   const controles = [{ nom: 'structure fermée du brouillon', ok: structure.length === 0, detail: structure[0] }];
   if (structure.length) return { erreurs: structure, items: [], aDecider: [], controles };
@@ -123,7 +125,7 @@ export function controlerBrouillon(brouillon, etat, { h, aujourdhui = null }) {
   for (const brut of brouillon.items) {
     if (vus.has(brut.productionId)) { erreurs.push(`production en double : ${brut.productionId}`); continue; }
     vus.add(brut.productionId);
-    const r = controlerItem(sim, brut, aujourdhui, h);
+    const r = controlerItem(sim, brut, aujourdhui, h, exclure);
     erreurs.push(...r.erreurs);
     if (r.item) items.push(r.item);
     if (r.aDecider) aDecider.push({ id: `decider-${r.aDecider.productionId}`, ...r.aDecider });

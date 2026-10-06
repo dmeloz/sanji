@@ -244,7 +244,7 @@ test('empreinte : stable sans changement, sensible au planning, aux créneaux et
   assert.equal(empreinteEtat(e, { productionIds: ['absente'], dates: [] }).length, 8);
 });
 
-test('conservation non validée : l\'avance exige une confirmation explicite item par item et n\'est jamais « couverte »', async () => {
+test('conservation non validée : avertissement léger (décision du 2026-10-06), jamais « couverte », sans confirmation à donner', async () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 20);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
@@ -257,21 +257,37 @@ test('conservation non validée : l\'avance exige une confirmation explicite ite
   const item = proposition.items[0];
   assert.equal(item.date, S.mardi);
   assert.equal(item.evaluation.conservation, 'a_confirmer');
-  assert.equal(item.exigeConfirmation, true);
-  assert.match(item.motifs[0], /ne doit pas être présenté comme couvert/);
-  assert.ok(proposition.incertitudes.some((x) => x.includes('conservation non validée')));
+  assert.equal(item.evaluation.couvre, false, 'jamais présenté comme couvert');
+  assert.equal(item.exigeConfirmation, false, 'aucune confirmation exigée');
+  assert.match(item.motifs[0], /^Avertissement : conservation non validée.*couvert/);
+  assert.ok(proposition.incertitudes.some((x) => x.includes('conservation non validée (avertissement)')));
 
   decider(registre, proposition.id, { choix: 'valider' }, { executeur });
-  const sans = appliquerProposition(registre, proposition.id, { executeur });
-  assert.deepEqual([sans.ok, sans.code], [false, CODES.PRECONDITION], 'sans confirmation : rien à appliquer');
-  assert.equal(principaleDe(ref.etat, c) && ref.etat.productions[principaleDe(ref.etat, c)].jourDecide, null);
-
-  const registre2 = creerRegistre();
-  const second = (await proposerPlanningAssiste(demande(ref, registre2, { dateDebut: S.mercredi, dateFin: S.mercredi }))).proposition;
-  assert.throws(() => registre2.valider(second.id, h(), { itemsConfirmes: ['inconnu'] }), (x) => x.code === CODES.REFERENCE_INCONNUE);
-  decider(registre2, second.id, { choix: 'valider', itemsConfirmes: [second.items[0].id] }, { executeur });
-  assert.equal(appliquerProposition(registre2, second.id, { executeur }).ok, true);
+  assert.equal(appliquerProposition(registre, proposition.id, { executeur }).ok, true, 'validé par le chef puis appliqué directement');
   assert.equal(ref.etat.productions[principaleDe(ref.etat, c)].jourDecide, S.mardi);
+});
+
+test('mécanisme de confirmation par item (disponible pour de futures commandes) : sans confirmation, rien n\'est appliqué', async () => {
+  const { e, pSec } = lundi();
+  const ref = { etat: e };
+  const executeur = executeurDe(ref);
+  const registre = creerRegistre();
+  const item = {
+    id: 'item-manuel', productionId: pSec, composantId: e.productions[pSec].composantId, nom: 'MANUEL_TEST', dateService: S.lundi,
+    date: S.lundi, creneau: 'avant_midi', exigeConfirmation: true, motifs: [],
+    commande: { outil: 'planifier_production', entrees: { productionId: pSec, date: S.lundi, creneau: 'avant_midi' } },
+  };
+  const creer = () => registre.creer({ origine: ORIGINES.DETERMINISTE, items: [item], aDecider: [], controles: [] }, ref.etat, h());
+  const sans = creer();
+  decider(registre, sans.id, { choix: 'valider' }, { executeur });
+  const r = appliquerProposition(registre, sans.id, { executeur });
+  assert.deepEqual([r.ok, r.code], [false, CODES.PRECONDITION]);
+  assert.equal(ref.etat.productions[pSec].jourDecide, null);
+  const avec = creer();
+  assert.throws(() => registre.valider(avec.id, h(), { itemsConfirmes: ['inconnu'] }), (x) => x.code === CODES.REFERENCE_INCONNUE);
+  decider(registre, avec.id, { choix: 'valider', itemsConfirmes: ['item-manuel'] }, { executeur });
+  assert.equal(appliquerProposition(registre, avec.id, { executeur }).ok, true);
+  assert.equal(ref.etat.productions[pSec].jourDecide, S.lundi);
 });
 
 test('confirmer un item qui n\'en exige pas, ou retirer un item : contrôlé', async () => {

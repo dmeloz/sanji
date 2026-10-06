@@ -22,10 +22,10 @@ export function productionsAPlanifier(etat, dateDebut, dateFin) {
  * Propose un créneau pour chaque production à planifier. La copie de simulation reçoit chaque choix pour que la charge
  * des créneaux soit comptée d'une production à l'autre. Ce qui ne peut pas être placé sans règle validée reste « à décider ».
  * @param {object} etat
- * @param {{h:string, aujourdhui:string, dateDebut:string, dateFin:string}} periode
+ * @param {{h:string, aujourdhui:string, dateDebut:string, dateFin:string, exclure?:Function|null}} periode `exclure(date, creneau)` écarte un créneau terminé (horloge)
  * @returns {{brouillon:object, nonPlacees:{productionId:string, composantId:string, texte:string}[]}}
  */
-export function proposerPlanning(etat, { h, aujourdhui, dateDebut, dateFin }) {
+export function proposerPlanning(etat, { h, aujourdhui, dateDebut, dateFin, exclure = null }) {
   const sim = structuredClone(etat);
   const items = [];
   const nonPlacees = [];
@@ -36,7 +36,7 @@ export function proposerPlanning(etat, { h, aujourdhui, dateDebut, dateFin }) {
       nonPlacees.push({ productionId: id, composantId: composant.id, texte: `${composant.nom} : quantité inconnue, à préciser avant de planifier` });
       continue;
     }
-    const suggestion = suggererCreneau(sim, id, aujourdhui);
+    const suggestion = suggererCreneau(sim, id, aujourdhui, exclure);
     // Base du menu 1 (pâtes, risotto) : jour même uniquement, sans règle d'avance validée.
     const sansAvance = sansAvanceParDefaut(sim, composant, p);
     if (!suggestion || (sansAvance && suggestion.date !== p.dateService)) {

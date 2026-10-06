@@ -7,6 +7,7 @@ import { planifier } from '../domaine/actions.js';
 import { CODES, ErreurHarness, PROVENANCES, STATUTS_PROPOSITION } from './contrats.js';
 import { outil } from './outils.js';
 import { evaluerPolitique, ORIGINE_CHEF } from './politiques.js';
+import { exclusionDuPasse, verifierBornes } from './horloge.js';
 import { empreinteEtat, itemsAppliquables } from './propositions.js';
 import { tracer } from './trace.js';
 import { controlerBrouillon } from './validateur.js';
@@ -60,10 +61,13 @@ export function decider(registre, id, decision, { executeur }) {
  * jour, créneau, capacité, règles d'avance) sur l'état courant. Ne lève pas : renvoie `{ok:false, code, message}`.
  * @param {object} registre
  * @param {string} id
- * @param {{executeur:Function, aujourdhui?:string|null}} options `aujourdhui` écarte une date devenue passée
+ * @param {{executeur:Function, aujourdhui?:string|null, horloge?:object|null, bornes?:object|null}} options `aujourdhui` écarte une
+ *   date devenue passée ; `horloge` et `bornes` (fin de créneau) écartent un créneau devenu terminé
  * @returns {{ok:true, appliques:string[]}|{ok:false, code:string, message:string}}
  */
-export function appliquerProposition(registre, id, { executeur, aujourdhui = null }) {
+export function appliquerProposition(registre, id, { executeur, aujourdhui = null, horloge = null, bornes = null }) {
+  const jour = aujourdhui ?? horloge?.aujourdhui() ?? null;
+  const exclure = exclusionDuPasse(horloge, verifierBornes(bornes));
   const p = registre.lire(id);
   if (p.statut === STATUTS_PROPOSITION.APPLIQUEE) return { ok: false, code: CODES.STATUT_INCOMPATIBLE, message: 'Cette proposition a déjà été appliquée.' };
   if (p.statut !== STATUTS_PROPOSITION.VALIDEE || p.decision?.choix !== 'valider') {
@@ -82,7 +86,7 @@ export function appliquerProposition(registre, id, { executeur, aujourdhui = nul
     const rejeu = controlerBrouillon({
       type: 'planning',
       items: items.map(({ commande: { entrees } }) => ({ productionId: entrees.productionId, date: entrees.date, creneau: entrees.creneau })),
-    }, etat, { h, aujourdhui });
+    }, etat, { h, aujourdhui: jour, exclure });
     if (rejeu.erreurs.length) refuser(`Le brouillon n'est plus valide : ${rejeu.erreurs[0]}`);
     for (const { commande: { entrees } } of items) planifier(etat, entrees.productionId, entrees.date, entrees.creneau, h);
     tracer(etat, h, 'appliquee', { provenance: PROVENANCES.CORRECTION_HUMAINE, propositionId: id, resume: `${items.length} production(s) planifiée(s)` });

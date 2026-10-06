@@ -43,6 +43,7 @@ const FICHIERS = [
   'js/harness/contexte.js',
   'js/harness/contrats.js',
   'js/harness/fournisseur.js',
+  'js/harness/horloge.js',
   'js/harness/orchestrateur.js',
   'js/harness/outils.js',
   'js/harness/parcours-planning.js',
