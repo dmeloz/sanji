@@ -35,9 +35,10 @@ export function construireContexte(etat, { tache, dateDebut, dateFin, aujourdhui
       if (p.groupesProvisoires > 0) donnees.provisoires.push({ type: 'groupes', date, menu, portions: p.groupesProvisoires, certitude: 'provisoire' });
     }
     for (const c of Object.values(etat.composants ?? {}).filter((x) => x.date === date && x.attribue).sort((a, b) => a.id.localeCompare(b.id))) {
-      const entree = { type: 'composant', id: c.id, date, menu: c.menu, nom: c.nom, categorie: c.categorie };
-      (c.valide ? donnees.confirmees : donnees.provisoires).push(entree);
       const production = Object.values(etat.productions ?? {}).find((p) => p.composantId === c.id && p.genre === 'principale');
+      // L'identifiant de la production relie un composant aux items d'un brouillon : le modèle n'a pas à le deviner.
+      const entree = { type: 'composant', id: c.id, date, menu: c.menu, nom: c.nom, categorie: c.categorie, productionId: production?.id ?? null };
+      (c.valide ? donnees.confirmees : donnees.provisoires).push(entree);
       if (production && etatTache(etat, production.id) === 'a_preciser') {
         donnees.manquantes.push({ type: 'quantite', composantId: c.id, texte: `${c.nom} : quantité inconnue` });
       }

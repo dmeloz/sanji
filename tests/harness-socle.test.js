@@ -122,7 +122,9 @@ test('contexte : séparé par certitude, versionné, sans fiche ni allergie, pé
   assert.ok(ctx.donnees.estimees.some((x) => x.type === 'prevision' && x.menu === 1 && x.portions === 40));
   assert.ok(ctx.donnees.confirmees.some((x) => x.type === 'groupes' && x.portions === 12));
   assert.ok(ctx.donnees.manquantes.some((x) => x.type === 'prevision' && x.date === S.mardi));
-  assert.ok(ctx.donnees.confirmees.some((x) => x.type === 'composant'));
+  const composant = ctx.donnees.confirmees.find((x) => x.type === 'composant');
+  assert.ok(composant);
+  assert.equal(composant.productionId, principaleDe(e, composant.id), 'le contexte relie chaque composant à sa production');
   const texte = JSON.stringify(ctx);
   assert.ok(!texte.includes('ALLERGIE_TEST_SECRETE') && !texte.includes('REMARQUE_TEST'));
   assert.throws(() => construireContexte(e, { tache: 'x', dateDebut: S.mardi, dateFin: S.lundi, aujourdhui: AUJOURDHUI }), /période/);
