@@ -6,7 +6,7 @@ Sans titre.canvas
 .DS_Store
 
 # Clés de l essai HTTPS local : jamais dans Git
-.certificats-locaux/
+.certificats-locaux
 
 # Sauvegardes d essai fabriquées par outils/creer-semaine-test.mjs
 outils/sorties/
