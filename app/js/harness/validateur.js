@@ -4,7 +4,7 @@
 
 import { creneauxDuJour, estOuvert, joursEntre } from '../domaine/dates.js';
 import { planifier } from '../domaine/actions.js';
-import { calculerComposant } from '../domaine/calcul.js';
+import { arrondirQuantite, calculerComposant } from '../domaine/calcul.js';
 import {
   chargeCreneau, etatCreneau, etatTache, evaluerAvance, regleDe, repereConservation, sansAvanceParDefaut,
 } from '../domaine/planification.js';
@@ -42,7 +42,12 @@ function resumerEvaluation(evaluation) {
 /** Quantité recalculée par le domaine : seule valeur affichée, quoi que dise le brouillon. */
 export function quantiteDe(etat, composantId) {
   const calc = calculerComposant(etat, composantId);
-  return { libelle: calc.libelleQuantite, statut: calc.statut, aValider: Boolean(calc.aValider), standardBase: Boolean(calc.standardBase) };
+  // `valeur` et `unite` : la quantité de travail arrondie comme partout dans l'application, null tant que le calcul est inconnu.
+  const valeur = calc.statut === 'CALCULE' ? arrondirQuantite(calc.quantiteTravail, calc.uniteTravail) : null;
+  return {
+    libelle: calc.libelleQuantite, statut: calc.statut, aValider: Boolean(calc.aValider), standardBase: Boolean(calc.standardBase),
+    valeur, unite: calc.uniteTravail ?? null,
+  };
 }
 
 /**

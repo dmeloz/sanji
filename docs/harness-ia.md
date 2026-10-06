@@ -1,6 +1,15 @@
 # Harness IA de Sanji
 
-Statut : socle et premier parcours vertical (planning) construits le 2026-10-06, version 66. Aucun fournisseur d'IA n'est branché : le modèle est un composant optionnel, désactivé par défaut. Rien n'est publié.
+Statut : socle, premier parcours vertical (planning) et intégration dans l'interface construits le 2026-10-06, version 67. Le modèle (Claude, API Anthropic) est un composant optionnel, désactivé par défaut : il ne s'active que dans Réglages > Assistant IA. Rien n'est publié.
+
+## Intégration dans l'application (version 67)
+
+- **Bouton « Proposer un planning »** : en tête de Production et dans la barre d'outils de la semaine globale (`ui/assistant-planning.js`). Période : de la date affichée (ou d'aujourd'hui) au samedi ; un dimanche vise la semaine suivante.
+- **Feuille « Brouillon de planning »** : préparations proposées (jour, créneau, quantité calculée), avertissements, « À décider », et « Pourquoi cette proposition » (sources, hypothèses, incertitudes, contrôles). Trois gestes : « Valider et planifier » (validation puis application atomique), « Refuser » (seule la trace est écrite), « Fermer sans décider » (rien n'est écrit). Fermer la fenêtre « Calcul en cours » annule la demande au modèle.
+- **Réglages > Assistant IA** : activation, clé d'API (champ masqué), choix du modèle (`claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-4-5`). Les réglages sont stockés dans le stockage local du navigateur (`sanji-assistant-ia`), **hors de l'état** : ils ne sont ni dans la sauvegarde exportée, ni dans le journal. Une clé collée est nettoyée (caractères invisibles, texte autour) ; un texte qui n'est pas une clé `sk-ant-…` est refusé.
+- **Fournisseur** : `ui/fournisseur-web.js` est le seul fichier de `app/` qui parle au réseau (un test le vérifie). Il envoie le contexte minimal et le brouillon de départ : noms des composants, portions, créneaux ; jamais les fiches de fonction ni les allergies. En-tête `anthropic-dangerous-direct-browser-access` obligatoire pour un appel navigateur : la clé reste sur l'appareil, sous la responsabilité de la propriétaire.
+- **Sans clé ou désactivé** : Sanji calcule seul, comme avant. En cas de panne, de clé refusée ou de réponse invalide, le calcul répond avec un avertissement.
+- **À vérifier sur appareil** : l'appel depuis l'enveloppe iPhone (origine `sanji://app`) dépend du CORS de l'API ; sinon un pont natif `URLSession` serait nécessaire. Non testé ici.
 
 Le harness est la couche entre l'état de l'application, le domaine, un éventuel modèle et le chef. Il encadre le modèle ; il ne lui délègue rien. Le domaine reste utilisable sans modèle, sans réseau et sans harness.
 
@@ -106,7 +115,7 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 
 ## Essai avec l'API Anthropic (hors application)
 
-`outils/fournisseur-anthropic.mjs` implémente l'interface `Fournisseur` par une requête HTTP directe (Node 22, aucune dépendance) ; `outils/essai-anthropic.mjs` lance le harness sur des données `TEST_ONLY`. Rien de réel n'est envoyé, rien n'est branché dans `app/`.
+`outils/fournisseur-anthropic.mjs` relaie vers `app/js/ui/fournisseur-web.js` (une seule implémentation, requête HTTP directe, Node 22, aucune dépendance) ; `outils/essai-anthropic.mjs` lance le harness sur des données `TEST_ONLY`. Rien de réel n'est envoyé, rien n'est branché dans `app/`.
 
 ```
 read -s ANTHROPIC_API_KEY && export ANTHROPIC_API_KEY && node outils/essai-anthropic.mjs --montrer
@@ -125,4 +134,4 @@ read -s ANTHROPIC_API_KEY && export ANTHROPIC_API_KEY && node outils/essai-anthr
 
 ## Tests
 
-`npm test` : 941 tests au 2026-10-06 (865 d'origine, 12 d'import des nouveaux fichiers, 64 du harness, dont `tests/harness-horloge.test.js` et `tests/fournisseur-anthropic.test.js`). Une revue indépendante a relevé un point haut (application sans rejeu des contrôles) et six moyens, corrigés sauf la décision métier ci-dessus. Les tests du harness : `tests/harness-socle.test.js` (contrats, politiques, registre, contexte, trace, fournisseur, hygiène) et `tests/harness-parcours.test.js` (parcours complet, conflits, modèle scripté, refus, boucles, indisponibilité, magasin réel, export/import). Données `TEST_ONLY` uniquement ; outils : `tests/aide-harness.js`.
+`npm test` : 962 tests au 2026-10-06 (865 d'origine, 15 d'import des nouveaux fichiers, 82 du harness et de son interface, dont `tests/harness-horloge.test.js`, `tests/fournisseur-anthropic.test.js` et `tests/assistant-ia.test.js`). Une revue indépendante a relevé un point haut (application sans rejeu des contrôles) et six moyens, corrigés sauf la décision métier ci-dessus. Les tests du harness : `tests/harness-socle.test.js` (contrats, politiques, registre, contexte, trace, fournisseur, hygiène) et `tests/harness-parcours.test.js` (parcours complet, conflits, modèle scripté, refus, boucles, indisponibilité, magasin réel, export/import). Données `TEST_ONLY` uniquement ; outils : `tests/aide-harness.js`.

@@ -76,6 +76,12 @@ export function champs(definitions) {
           (def.options ?? []).map(([, libelle, detail], i) => h('label', { classe: 'case', pour: `${id}-${i}` }, entree.controles[i],
             h('span', null, libelle, detail ? h('small', { classe: 'aide' }, detail) : null))))];
         break;
+      case 'motdepasse':
+        // Saisie masquée (clé d'API) : jamais de correction automatique, de majuscule ni de mémorisation par le navigateur.
+        entree.controle = h('input', { id, type: 'password', autocomplete: 'off', autocapitalize: 'off', autocorrect: 'off', spellcheck: false, placeholder: def.placeholder, ...decrit });
+        entree.controle.value = def.valeur ?? '';
+        corps = [h('label', { pour: id }, def.libelle), entree.controle];
+        break;
       default:
         entree.controle = h('input', { id, type: 'text', autocomplete: 'off', placeholder: def.placeholder, ...decrit });
         entree.controle.value = def.valeur ?? '';
