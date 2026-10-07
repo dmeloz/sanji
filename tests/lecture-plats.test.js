@@ -289,3 +289,16 @@ test('les éléments hors poste ne sont pas attribués sans exception mémorisé
   const p = proposerComposants('Suprême de poulet, riz', 2);
   assert.deepEqual(p.map((c) => c.attribue), [false, true]);
 });
+
+test('vocabulaire : légumes, féculents et sauces courants d\'une feuille imprimée sont reconnus, sans rien inventer', () => {
+  const lu = (texte, menu) => lirePlat(texte, menu).elements.map((e) => `${e.nom}/${e.categorie}`);
+  assert.ok(lu('Risotto au pesto, artichaud', 1).includes('artichaud/legume'));
+  assert.ok(lu('Macaroni tomates, roquette', 1).includes('roquette/legume'));
+  assert.ok(lu('Poisson sauce safran, quinotto, piperade', 2).includes('quinotto/feculent'));
+  assert.ok(lu('Poisson sauce safran, quinotto, piperade', 2).includes('piperade/legume'));
+  assert.ok(lu('Onglet, pommes paillasson, carottes', 2).includes('pommes paillasson/feculent'));
+  assert.ok(lu('Dos de lieu, orge perlé, pack Choï', 2).includes('pack Choï/legume'));
+  assert.ok(lu('Darne de saumon, salsa chimichuri, riz', 2).some((e) => e.endsWith('/sauce')));
+  // Un nom de plat ou une garniture inconnue reste « à préciser » : rien n'est deviné.
+  assert.ok(lu('Union Cheese burger, salade Waldorf', 2).some((e) => e.endsWith('/a_preciser')));
+});

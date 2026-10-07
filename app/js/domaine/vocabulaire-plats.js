@@ -19,6 +19,8 @@ export const ALIAS = geler([
   ['parmigiano', 'parmesan'], ['zafferano', 'safran'], ['gamberoni', 'gambas'], ['gamberi', 'gambas'],
   ['capesante', 'noix de saint-jacques'], ['nero di seppia', 'encre de seiche'],
   ['bolognese', 'bolognaise'], ['arrabiata', 'arrabbiata'],
+  // Variantes d'écriture courantes sur une feuille imprimée.
+  ['artichaud', 'artichaut'], ['pack choi', 'pak choi'], ['chimichuri', 'chimichurri'],
 ]);
 
 /** Formes de pâtes (et assimilées) : le féculent de base d'une recette de pâtes. */
@@ -51,10 +53,11 @@ export const CHAMPIGNONS = geler([
 export const PRODUITS = geler({
   proteine: ['bar', 'loup', 'homard', 'langouste', 'scampi', 'crabe', 'noix de saint-jacques', 'saint-jacques', 'fruits de mer',
     'encre de seiche', 'nduja', 'chorizo', 'pancetta', 'speck', 'lardon', 'saumon fume', 'truite fumee', 'anchois', 'thon',
-    'poisson', 'mozzarella'],
+    'poisson', 'mozzarella', 'brochette', 'salami', 'chili con carne'],
   fromage: ['gorgonzola', 'parmesan', 'ricotta', 'ricotta salee', 'fromage', 'pecorino', 'chevre', 'feta', 'emmental',
     'gruyere', 'mascarpone', 'burrata', 'beurre'],
-  legume: ['pickles', 'citron'],
+  legume: ['pickles', 'citron', 'roquette', 'pak choi', 'piperade'],
+  feculent: ['quinotto', 'pomme paillasson', 'pomme miette'],
   autre: ['champagne', 'vin', 'vin blanc', 'vin rouge', 'bouillon', 'noix', 'pignon', 'amande'],
 });
 
@@ -85,6 +88,8 @@ export const SAUCES = geler([
   { cle: 'huile_herbes', nom: 'huile d\'olive et herbes', alias: [], ingredients: ['huile d\'olive', 'herbes'], allergenes: [], recette: false },
   { cle: 'tartare', nom: 'sauce tartare', alias: ['tartare'], ingredients: ['mayonnaise', 'cornichon', 'capres'], allergenes: ['oeuf', 'moutarde'], recette: false },
   { cle: 'aigre_douce', nom: 'sauce aigre-douce', alias: ['aigre-douce'], ingredients: ['vinaigre', 'sucre'], allergenes: [], recette: false },
+  { cle: 'salsa_verde', nom: 'salsa verde', alias: ['salsa verde'], ingredients: ['persil', 'capres', 'ail', 'huile'], allergenes: ['poisson'], recette: true },
+  { cle: 'chimichurri', nom: 'chimichurri', alias: ['chimichurri'], ingredients: ['persil', 'ail', 'origan', 'vinaigre', 'huile'], allergenes: [], recette: true },
   { cle: 'meuniere', nom: 'beurre meunière', alias: [], ingredients: ['beurre', 'citron'], allergenes: ['lait', 'gluten'], recette: false },
 ]);
 
