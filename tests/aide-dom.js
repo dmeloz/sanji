@@ -4,6 +4,8 @@
 class Noeud {
   constructor() { this.enfants = []; this.parent = null; }
   get textContent() { return this.enfants.map((e) => e.textContent).join(''); }
+  /** Comme le vrai DOM : `children` (le code de l'application ne doit jamais lire `enfants`, propre à ce faux DOM). */
+  get children() { return this.enfants; }
 }
 
 class Texte extends Noeud {

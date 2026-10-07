@@ -6,7 +6,7 @@
 
 import { ecarterApprentissage } from '../domaine/actions-apprentissage.js';
 import { libelleJour } from '../domaine/dates.js';
-import { decisionsDe, texteDecisions } from '../domaine/decisions.js';
+import { decisionsDe } from '../domaine/decisions.js';
 import { abonner, agir, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { dialogRepartition } from './fiches.js';

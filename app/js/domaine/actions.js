@@ -355,7 +355,9 @@ export function saisirMenusSemaine(etat, lundi, saisie, h) {
       }
       const prevision = saisie[date][`prevision${menu}`];
       if (Number.isInteger(prevision)) {
-        assurerJour(etat, date).previsions[menu] = { portions: prevision, h };
+        const jourImporte = assurerJour(etat, date);
+        jourImporte.previsions[menu] = { portions: prevision, h };
+        jourImporte.couverts = null; // les prévisions importées ne sont plus le total saisi dans Couverts midi
         previsions += 1;
       }
     }

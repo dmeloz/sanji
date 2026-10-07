@@ -22,7 +22,8 @@ const CHOIX_RAPIDES = [40, 50, 60, 70, 80];
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 const pluriel = (n, un, plusieurs) => `${n} ${n >= 2 ? plusieurs : un}`;
 
-let feuilleOuverte = false;
+/** La feuille actuellement ouverte : on interroge son état réel (`open`), car `close` n'est signalé qu'un peu plus tard par le navigateur. */
+let feuilleCourante = null;
 
 /** Bouton rond − / + : 44 px au moins, nom accessible dit ce qu'il fait. */
 function pas(symbole, nom, surClic, desactive = false) {
@@ -31,13 +32,12 @@ function pas(symbole, nom, surClic, desactive = false) {
 
 /** Pose la feuille : un seul exemplaire ouvert à la fois, le focus revient à l'appelant à la fermeture. */
 function ouvrirFeuille({ titre, corps, surEnregistrer, libelleAnnuler = 'Annuler', extras = [] }) {
-  if (typeof document === 'undefined' || feuilleOuverte) return null;
-  feuilleOuverte = true;
+  if (typeof document === 'undefined' || feuilleCourante?.open) return null;
   const appelant = document.activeElement ?? null;
   const dialogue = panneau({ titre, corps, surEnregistrer, libelleAnnuler, extras });
   dialogue.className = `${dialogue.className} feuille-decisions feuille-couverts`;
+  feuilleCourante = dialogue;
   dialogue.addEventListener('close', () => {
-    feuilleOuverte = false;
     if (appelant && appelant.isConnected !== false) appelant.focus?.();
   });
   return dialogue;
@@ -186,6 +186,8 @@ export function ouvrirVentesMidi(date) {
     libelleAnnuler: 'Plus tard',
     extras: [{ libelle: 'Modifier les couverts', action: (api) => { api.fermer(); ouvrirCouvertsMidi(date); } }],
     surEnregistrer: () => {
+      // Un 0 / 0 jamais touché n'est pas une vente : il fausserait la moyenne des 3 derniers jours identiques.
+      if (valeurs[1] + valeurs[2] === 0 && !Number.isFinite(jour.ventes[1]) && !Number.isFinite(jour.ventes[2])) throw new Error('Saisissez au moins une vente, ou fermez avec « Plus tard ».');
       agirStrict((x, t) => { saisirVentes(x, date, 1, valeurs[1], t); saisirVentes(x, date, 2, valeurs[2], t); });
       afficherMessage(`Ventes enregistrées · ${pluriel(valeurs[1] + valeurs[2], 'couvert servi', 'couverts servis')}`, 'ok');
     },

@@ -8,7 +8,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 3. Fiche projet : `~/Atelier-Claude/Cerveau-Obsidian/01-Projets/Sanji.md`.
 
 ## Commandes
-- Tests : `npm test` (Node 22, aucun paquet à installer). 1020 tests au 2026-10-07 (version 78).
+- Tests : `npm test` (Node 22, aucun paquet à installer). 1023 tests au 2026-10-07 (version 79).
 - Régénérer la base métier embarquée : `npm run base`.
 - Régénérer les repères de portion validés (`app/js/donnees/savoir-metier.js`, généré depuis `savoir/reperes-portion/savoir-metier.json`) : `npm run savoir`. Ne pas éditer le module à la main.
 - Référentiel de savoir culinaire (brevet fédéral de chef de cuisine, contenu validé le 2026-10-04) : `savoir/culinaire/` (lire `LISEZ-MOI.md`) ; `npm run culinaire` valide les thèmes et `savoir/culinaire/rattachements.json` (choisi à la main, aucun chiffre), régénère l'index et le module embarqué `app/js/donnees/savoir-culinaire.js` (généré, environ 405 Ko, ne pas l'éditer) ; `npm test` échoue si une entrée ou un rattachement n'est pas conforme, ou si le module n'est pas à jour.
@@ -52,7 +52,7 @@ Statut : créé par délégation le 2026-10-02, en attente de validation de la p
 - Plus aucune validation manuelle : un menu enregistré crée seul ses composants, valides et attribués. Ne jamais réintroduire un bouton « valider ».
 - La portion d'un plat se résout au calcul (`grammageEffectif`) : correction du plat, référence du nom, standard maison de la famille, standard maison de la catégorie (clé `groupe:…` dans `etat.standards` ; un légume sans famille en dépend), standard de base (repère validé ou de la base, origine `standard_base`, `repere: 'valide'|'base'`). Elle porte toujours son état de poids ; le calcul part de cet état.
 - `BASE_METIER_ESTIMATION` est l'ancien nom de `STANDARD_BASE` (données enregistrées avant le 2026-10-04) : il se lit pareil (`estStandardBase` de `statuts.js`).
-- Faux DOM : `querySelector` n'y cherche que par nom de balise. Garder les champs dans une table plutôt que les retrouver par sélecteur.
+- Faux DOM : `querySelector` n'y cherche que par nom de balise. Garder les champs dans une table plutôt que les retrouver par sélecteur. Le code de `app/js/` ne doit jamais lire une propriété propre au faux DOM (`enfants`, `tous`, `declencher` : un test le vérifie) ; un `<dialog>` signale `close` en différé, tester `open` plutôt qu'un drapeau.
 - CSS : la classe `.case` est celle des cases à cocher des panneaux ; les cases dessinées du tableau s'appellent `.coche`.
 - Piège du cache : après un changement, le navigateur sert encore l'ancienne version au premier rechargement. Recharger deux fois et vérifier « Version de l'application » dans Réglages avant de tester.
 - Jamais de publication ni d'hébergement sans accord de la propriétaire.

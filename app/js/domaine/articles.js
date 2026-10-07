@@ -13,8 +13,8 @@ function premierJourOuvert(date) {
   return d;
 }
 
-/** Clé d'une ligne cochable : le composant et l'article (nom normalisé) ; stable tant que les menus ne changent pas. */
-export const cleArticle = (composantId, nom) => `${composantId}|${normaliser(nom)}`;
+/** Clé d'une ligne cochable : le composant, l'article (nom normalisé) et son unité ; stable tant que les menus ne changent pas. */
+export const cleArticle = (composantId, nom, unite = null) => `${composantId}|${normaliser(nom)}${unite ? `|${unite}` : ''}`;
 
 /**
  * Les articles du poste de la semaine du prochain jour ouvert, du jour à la fin de la semaine (du lundi au samedi).
@@ -32,7 +32,7 @@ export function articlesDuPoste(etat, aujourd) {
   const ajouter = (date, composantId, nom, quantite, unite) => {
     if (date < depart) return;
     const composant = etat.composants[composantId];
-    const cle = cleArticle(composantId, nom);
+    const cle = cleArticle(composantId, nom, unite);
     const article = {
       cle, composantId, nom, menu: composant.menu, quantite, unite, aCompleter: quantite === null, coche: Boolean(coches[cle]),
     };

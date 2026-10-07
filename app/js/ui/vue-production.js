@@ -3,7 +3,7 @@
 // de la feuille Jour (`feuilleDuJour`), les gestes de `taches.js`, le corps de la page de `vue-jour.js`.
 
 import { ajouterJours, libelleJour, lundiDe } from '../domaine/dates.js';
-import { decisionsDe, texteDecisions } from '../domaine/decisions.js';
+import { decisionsDe } from '../domaine/decisions.js';
 import { feuilleDuJour } from '../domaine/planification.js';
 import { boutonProposerPlanning } from './assistant-planning.js';
 import { ouvrirDecisions } from './feuille-decisions.js';

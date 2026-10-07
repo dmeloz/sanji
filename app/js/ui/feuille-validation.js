@@ -32,12 +32,12 @@ const icone = (chemin, taille = 18) => svg('svg', { viewBox: '0 0 24 24', width:
  */
 function rendreFermable(dialogue, position = null) {
   dialogue.addEventListener('click', (evenement) => { if (evenement.target === dialogue) dialogue.close(); });
-  const formulaire = dialogue.enfants[0];
+  const formulaire = dialogue.children[0];
   const titre = formulaire.querySelector('h2');
   const fermer = h('button', { type: 'button', classe: 'vp-fermer', 'aria-label': 'Fermer', onClick: () => dialogue.close() }, icone('M6 6l12 12M18 6L6 18'));
   const entete = h('div', { classe: 'vp-entete' }, titre,
     position ? h('span', { classe: 'vp-position' }, `${position.i + 1} / ${position.total}`) : null, fermer);
-  const reste = formulaire.enfants.filter((x) => x !== titre);
+  const reste = Array.from(formulaire.children).filter((x) => x !== titre);
   formulaire.replaceChildren(entete, ...(position ? [segments(position)] : []), ...reste);
 }
 

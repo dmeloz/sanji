@@ -28,20 +28,6 @@ const pluriel = (n, un, plusieurs) => `${n} ${n >= 2 ? plusieurs : un}`;
 
 // L'en-tête, le sélecteur Aujourd'hui / Demain et la barre de jours vivent dans vue-production.js.
 
-/** Rappel compact des deux menus et des fiches de fonction du jour : des liens vers le détail du jour. */
-export function rappelMenus(date, feuille) {
-  const { menus, fiches } = feuille.lecture;
-  const lignes = menus.filter((m) => m.intitule !== '').map((m) => h('li', null,
-    h('a', { href: `#/semaine/${date}`, classe: 'jour-menu', 'aria-label': `Menu ${m.menu} : ${m.intitule}, ouvrir le détail du jour` },
-      h('span', { classe: 'jour-menu-rang feutre' }, `M${m.menu}`), h('span', { classe: 'jour-menu-texte' }, m.intitule))));
-  for (const f of fiches) {
-    lignes.push(h('li', null, h('a', { href: `#/semaine/${date}`, classe: 'jour-menu jour-banquet' },
-      h('span', { classe: 'jour-menu-rang feutre' }, 'Banquet'),
-      h('span', { classe: 'jour-menu-texte' }, [f.horaire || null, `${Number(f.couverts) || 0} personnes`, f.numero ? `fiche ${f.numero}` : null].filter(Boolean).join(' · ')))));
-  }
-  return lignes.length === 0 ? null : h('ul', { classe: 'jour-menus' }, lignes);
-}
-
 // ------------------------------------------------------------------ une ligne de mise en place
 
 /** Case à cocher : « Fait » en un toucher, sans bandeau ; toucher la case cochée remet la tâche à faire. */

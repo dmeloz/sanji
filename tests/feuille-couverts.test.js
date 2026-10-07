@@ -158,3 +158,29 @@ test('case « Couverts midi » : avant 14 h elle ouvre les couverts ; dès 14 h,
   magasin.remplacer(e);
   assert.match(caseDe(rendre('15:00')).textContent, /servis M1 18 · M2 35/);
 });
+
+test('vrai navigateur : « close » n\'est signalé qu\'un peu plus tard ; « Modifier les couverts » rouvre quand même la feuille Couverts midi', async () => {
+  magasin.remplacer(lundi());
+  aLHeure(S.lundi, '14:30', () => feuille.ouvrirVentesMidi(S.lundi));
+  const ventes = feuilleOuverte();
+  // Comme un vrai <dialog> : `open` passe à faux tout de suite, l'événement « close » vient dans une tâche différée.
+  const vraiClose = ventes.close.bind(ventes);
+  ventes.close = () => { ventes.open = false; Promise.resolve().then(vraiClose); };
+  await bouton(ventes, 'Modifier les couverts').click();
+  const ouvertes = panneauxOuverts(dom.corps).filter((d) => d !== ventes);
+  assert.equal(ouvertes.length, 1, 'la feuille Couverts midi s\'ouvre tout de suite');
+  assert.equal(ouvertes[0].querySelector('h2').textContent, 'Couverts midi');
+  await Promise.resolve();
+  await Promise.resolve();
+  fermerTout();
+});
+
+test('Ventes du midi : un 0 / 0 jamais touché n\'est pas enregistré (il fausserait la moyenne des 3 derniers jours)', async () => {
+  magasin.remplacer(lundi());
+  aLHeure(S.lundi, '14:30', () => feuille.ouvrirVentesMidi(S.lundi));
+  const d = feuilleOuverte();
+  await soumettre(d);
+  assert.match(d.textContent, /Saisissez au moins une vente/);
+  assert.equal(jourOuVide(magasin.etat(), S.lundi).ventes[1], null);
+  fermerTout();
+});
