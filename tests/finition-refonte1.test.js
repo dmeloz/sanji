@@ -78,7 +78,7 @@ test('Aujourd\'hui, dimanche : « Fermé aujourd\'hui » une seule fois, avec la
   magasin.remplacer(etatVide());
   const page = aDate(S.dimanche, () => aujourdhuiVue.rendre(magasin.etat()));
   assert.equal((page.textContent.match(/Fermé aujourd'hui/g) ?? []).length, 1);
-  assert.match(classes(page, 'au-maintenant')[0].textContent, /Fermé aujourd'hui · Prochaine production : lundi 12/);
+  assert.match(classes(page, 'prochaine')[0].textContent, /Fermé aujourd'hui · Prochaine production : lundi 12/);
 });
 
 test('Production : la quantité de chaque ligne est en grand (graisse 600, à droite), l\'unité plus petite', () => {

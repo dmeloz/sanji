@@ -1305,3 +1305,49 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prod-avances { margin-top: 8px; }
 .prod-avances > summary { display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: var(--texte-doux); cursor: pointer; }
 .prod-pied { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: 12px; }
+
+/* ===== Aujourd'hui, tableau de bord (refonte 2, décision du 2026-10-07) : menus sur 3 jours, cases, À avancer, À confirmer, Prochaine fixe. ===== */
+.vue-aujourdhui { padding-bottom: 190px; } /* la carte « Prochaine » est fixe : la page garde de la place sous le dernier bloc */
+.tdb-section { display: flex; flex-direction: column; gap: 4px; }
+.tdb-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tdb-jours { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tdb-jour { display: flex; flex-direction: column; gap: 6px; min-height: 150px; padding: 10px 10px 12px; border-radius: var(--r-carte-petite); background: var(--carte); color: var(--texte); text-decoration: none; }
+.tdb-jour:focus-visible, .tdb-case:focus-visible, .tdb-avance:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.tdb-jour-auj { background: var(--encre); color: var(--sur-encre); }
+.tdb-j { font-size: var(--t-legende); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.tdb-m { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.tdb-m b { font-size: var(--t-legende); font-weight: 700; opacity: 0.75; }
+.tdb-intitule { font-size: var(--t-corps); line-height: 1.3; font-weight: 600; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.tdb-jour-auj .au-neutre { color: inherit; opacity: 0.8; }
+/* Jour sans menu : pointillés, jamais un trou muet. */
+.tdb-jour-vide { background: transparent; border: 1.5px dashed var(--bordure-forte); }
+.tdb-a-importer { margin-top: 4px; font-size: var(--t-legende); color: var(--texte-doux); }
+.tdb-etiquette { align-self: flex-start; margin-top: auto; padding: 4px 10px; border: 1px solid var(--bordure-forte); border-radius: 999px; font-size: var(--t-legende); font-weight: 600; }
+.tdb-chiffres { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tdb-case { display: flex; flex-direction: column; gap: 2px; min-height: 76px; padding: 10px 12px; border-radius: var(--r-carte-petite); background: var(--carte); color: var(--texte); text-decoration: none; }
+.tdb-chiffre { font-family: var(--police-qte); font-weight: 600; font-size: 24px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tdb-case .prod-jauge { margin-top: 6px; }
+.tdb-avance { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 56px; border-bottom: 1px solid var(--bordure); color: var(--texte); text-decoration: none; }
+.tdb-avance-nom { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.tdb-avance .nom { font-weight: 600; }
+.tdb-confirmer { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border: 1px solid var(--exception-bord); border-radius: var(--r-carte-petite); background: var(--exception-fond); color: var(--exception); }
+.tdb-confirmer-titre { display: flex; align-items: center; gap: 6px; font-size: var(--t-corps); font-weight: 700; }
+.tdb-confirmer .au-ligne { color: var(--exception); border-bottom-color: var(--exception-bord); }
+.tdb-confirmer .au-sous { color: var(--exception); }
+.tdb-tout-voir { background: none; border: 0; cursor: pointer; color: var(--exception); }
+.tdb-rappels { display: flex; flex-direction: column; }
+/* Prochaine : carte fixe au-dessus des onglets, près du pouce. */
+.prochaine { position: fixed; left: 0; right: 0; bottom: var(--haut-onglets); z-index: 15; display: flex; flex-direction: column; gap: 8px; margin: 0 var(--marge-ecran); padding: 12px 14px; border-radius: var(--r-carte-petite); background: var(--encre); color: var(--sur-encre); box-shadow: 0 -1px 0 var(--bordure); }
+.prochaine-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: var(--t-legende); }
+.prochaine-etiquette { font-size: var(--t-legende); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; }
+.prochaine-ligne { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.prochaine-nom { font-size: 22px; font-weight: 700; overflow-wrap: anywhere; }
+.prochaine-qte { font-size: 20px; font-weight: 600; white-space: nowrap; }
+.prochaine-neutre, .prochaine-vide-texte { font-size: var(--t-corps); opacity: 0.9; }
+.prochaine-vide { background: var(--carte); color: var(--texte); border: 1px solid var(--bordure); }
+.prochaine .au-btn-action { flex: 1; background: var(--action); color: var(--sur-action); border: 1px solid var(--action); }
+.prochaine .au-btn:focus-visible { outline: 3px solid var(--sur-encre); outline-offset: 2px; }
+@media (prefers-color-scheme: dark) {
+  .prochaine .au-btn-clair { background: var(--sur-encre); color: var(--encre); border-color: var(--sur-encre); }
+}
+@media (min-width: 981px) { .prochaine { left: 50%; right: auto; width: min(var(--largeur-max), 100% - 2 * var(--marge-ecran)); transform: translateX(-50%); margin: 0; } }

@@ -220,7 +220,7 @@ test('fiche de fonction à menu fixe : pas de buffet, et la fiche dit « sans ob
 
 test('Aujourd\'hui, dimanche : « Prochaine production : lundi 12 » est un lien vers la Production de ce jour', () => {
   const p = rendreAu(S.dimanche, calme(etatVide()));
-  const maintenant = classes(p, 'au-maintenant')[0];
+  const maintenant = classes(p, 'prochaine')[0];
   assert.match(maintenant.textContent, /Fermé aujourd'hui · Prochaine production : lundi 12/);
   const liens = maintenant.tous((x) => x.balise === 'a');
   assert.equal(liens.length, 1);

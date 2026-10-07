@@ -630,6 +630,56 @@ function prochainJourOuvert(date) {
   return d;
 }
 
+const A_AVANCER_MAX = 3;
+const JOURS_A_MENU_VISIBLES = 3;
+
+/** Les menus du jour et des deux jours à menu suivants (le samedi et le dimanche n'ont pas de menu du jour) ; un jour sans aucun intitulé est « à importer ». */
+function menusSurTrois(etat, aujourd) {
+  const jours = [];
+  for (let i = 0; i < 14 && jours.length < JOURS_A_MENU_VISIBLES; i += 1) {
+    const date = ajouterJours(aujourd, i);
+    if (!aMenuDuJour(date)) continue;
+    const jour = jourOuVide(etat, date);
+    const menus = [1, 2].map((menu) => ({ menu, intitule: String(jour.menus[menu].intitule ?? '').trim() }));
+    jours.push({ date, estAujourdhui: date === aujourd, menus, aImporter: menus.every((m) => m.intitule === '') });
+  }
+  return jours;
+}
+
+/**
+ * « À avancer » : les avances que la règle des deux jours autorise et qui ne sont que proposées (pas encore décidées), avec le jour
+ * du service et la quantité calculée. Les avances hors règle restent dans Production ; une action préparatoire n'a pas de quantité.
+ */
+function aAvancerDe(feuille) {
+  if (!feuille) return { total: 0, lignes: [] };
+  const propositions = feuille.lecture.apres.filter((l) => l.source === 'suggestion' && l.genre !== 'preparatoire' && l.evaluation?.autorisee);
+  return {
+    total: propositions.length,
+    lignes: propositions.slice(0, A_AVANCER_MAX).map((l) => ({
+      composantId: l.composantId, nom: l.genre === 'principale' ? l.nom : (l.libelle || l.nom),
+      dateService: l.dateService, quantite: l.cible ?? null, unite: l.unite ?? null,
+    })),
+  };
+}
+
+/**
+ * « faites / total » du jour, comme sur Production : les tâches décidées ; sans aucune tâche décidée mais avec des lignes de
+ * travail (rien n'est encore planifié), ces lignes, pour que le compte soit dit dès qu'il y a du travail.
+ */
+function avancementDuJour(feuille) {
+  if (!feuille) return { faites: 0, total: 0 };
+  if (feuille.avancement.total > 0) return feuille.avancement;
+  const { service1, service2, autres, apres } = feuille.lecture;
+  const lignes = [...service1, ...service2, ...autres, ...apres].filter((l) => l.source !== 'suggestion');
+  return { faites: lignes.filter((l) => l.fait).length, total: lignes.length };
+}
+
+/** Couverts du midi du jour : total et répartition M1 / M2 d'après les prévisions déjà saisies (null tant qu'aucun menu n'a de chiffre). */
+function couvertsMidiDe(menus) {
+  const [m1, m2] = [1, 2].map((n) => menus.find((m) => m.menu === n)?.couverts ?? null);
+  return { total: m1 === null && m2 === null ? null : (m1 ?? 0) + (m2 ?? 0), m1, m2 };
+}
+
 /**
  * Données de l'écran Aujourd'hui : couverts des menus 1 et 2 et des fiches avec leur certitude, prochaine tâche
  * (« Maintenant »), décisions en attente (points « À confirmer » existants, sans quantité manquante), à consommer en
@@ -647,11 +697,17 @@ export function aujourdhuiDe(etat, aujourd) {
     prochainOuvert: ouvert ? null : prochainJourOuvert(aujourd),
     menus: aMenuDuJour(aujourd) ? [1, 2].map((m) => couvertsDuMenu(etat, aujourd, m)) : [],
     fiches: fichesDuJour(etat, aujourd),
+    menusSurTrois: menusSurTrois(etat, aujourd),
+    couvertsMidi: couvertsMidiDe(aMenuDuJour(aujourd) ? [1, 2].map((m) => couvertsDuMenu(etat, aujourd, m)) : []),
+    aAvancer: aAvancerDe(feuille),
     maintenant: maintenantDe(etat, feuille),
     avancement: feuille ? feuille.avancement : { faites: 0, total: 0 },
+    avancementJour: avancementDuJour(feuille),
     decisions: aConfirmerDuBord(etat, datesSemaine, aujourd),
     aConsommer: aConsommerDe(etat, aujourd),
     prochaineFiche: prochaineFiche(etat, aujourd),
+    // Fiche de fonction du tableau de bord : seulement si elle tombe aujourd'hui ou demain.
+    ficheProche: (() => { const f = prochaineFiche(etat, aujourd); return f && f.date <= ajouterJours(aujourd, 1) ? f : null; })(),
     production: productionDuBord(etat, aujourd, lundi),
     sauvegarde: rappelSauvegarde(etat, aujourd),
     semaineSansMenu: semaineSansMenu(etat, lundi),

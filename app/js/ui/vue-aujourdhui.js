@@ -1,17 +1,18 @@
-// Aujourd'hui (onglet 1, accueil), maquette « Main » de la refonte 1. La vue ne calcule rien : tout vient de
-// `aujourdhuiDe(...)` (domaine/tableau-blanc.js). Couverts des menus 1 et 2 et des fiches avec leur certitude,
-// carte « Maintenant » (prochaine tâche, « Fait » annulable), décisions en attente, à consommer en priorité,
-// prochaine fiche de fonction. Les zones de l'ancien tableau (menus de la semaine, production et commandes,
-// « À confirmer » détaillé) restent à une touche : liens vers Semaine et Production, repli « À confirmer ».
-// Interface commune des vues : `titre(param, sous)` et `rendre(etat, param, sous)`.
+// Aujourd'hui (onglet 1, accueil), tableau de bord de la refonte 2 (décision du 2026-10-07). La vue ne calcule rien : tout vient
+// de `aujourdhuiDe(...)` (domaine/tableau-blanc.js). De haut en bas : en-tête (jour, date, heure), menus sur 3 jours, cases
+// Production et Couverts midi, « À avancer » (règle des 2 jours, 3 lignes), fiche de fonction (aujourd'hui ou demain),
+// « À confirmer » (3 lignes), rappels discrets ; la carte « Prochaine » reste fixe en bas, au-dessus des onglets.
+// Retirés de l'accueil : créneaux du jour, case ambre « À confirmer » dans les chiffres, raccourci Articles, À consommer en
+// priorité (DLC masquées). Interface commune des vues : `titre(param, sous)` et `rendre(etat, param, sous)`.
 
-import { libelleJour } from '../domaine/dates.js';
+import { libelleJour, lundiDe } from '../domaine/dates.js';
+import { libelle } from '../domaine/statuts.js';
 import { alertesAllergenes } from '../domaine/allergenes.js';
-import { decisionsDe, texteDecisions } from '../domaine/decisions.js';
+import { decisionsDe } from '../domaine/decisions.js';
 import { aujourdhuiDe } from '../domaine/tableau-blanc.js';
-import { aujourdhui } from '../magasin.js';
+import { aujourdhui, maintenant } from '../magasin.js';
 import { h, svg } from './dom.js';
-import { lien, pastille, repliable } from './elements.js';
+import { lien, pastille } from './elements.js';
 import { ouvrirDecisions } from './feuille-decisions.js';
 import { ouvrirProposition } from './feuille-validation.js';
 import { problemeHorsLigne } from './horsligne.js';
@@ -33,114 +34,80 @@ const CHEVRON = ['M9 6l6 6-6 6'];
 
 // ------------------------------------------------------------------ en-tête
 
-/** L'état « hors ligne » n'apparaît que s'il y a un problème (`problemeHorsLigne`, null sinon) ; main.js redessine quand il change. L'état complet est dans Réglages. */
+/** Jour, date et heure du rendu ; l'état « hors ligne » n'apparaît que s'il y a un problème (`problemeHorsLigne`, null sinon). */
 function entete(donnees) {
   const probleme = problemeHorsLigne();
   return h('header', { classe: 'au-tete' },
-    h('p', { classe: 'au-date' }, majuscule(libelleJour(donnees.date))),
+    h('p', { classe: 'au-date' }, `${majuscule(libelleJour(donnees.date))} · ${maintenant().slice(11, 16)}`),
     h('h1', { classe: 'au-titre' }, "Aujourd'hui"),
     probleme ? h('p', { classe: 'au-hors-ligne', role: 'status' }, h('span', { classe: 'au-point', 'aria-hidden': 'true' }), h('span', null, probleme)) : null);
 }
 
-// ------------------------------------------------------------------ couverts
+// ------------------------------------------------------------------ menus sur trois jours
 
-function certitudes(liste, cle) {
-  return liste.map((c) => h('span', { classe: `au-certitude au-certitude-${c.certitude}` },
-    h('span', { classe: 'au-certitude-mot' }, CERTITUDE[c.certitude]), ' ', h('span', { classe: 'au-qte' }, String(c[cle]))));
-}
+const NOM_COURT = (date) => majuscule(libelleJour(date).slice(0, 3));
 
-function tuileMenu(m) {
-  const nombre = m.couverts !== null
-    ? [h('span', { classe: 'au-qte au-couverts' }, String(m.couverts)), h('span', { classe: 'au-unite' }, ' couv.')]
-    : h('span', { classe: 'au-neutre' }, m.saisi ? 'prévision à saisir' : 'menu non saisi');
-  return h('li', { classe: 'au-tuile', 'aria-label': `Menu ${m.menu}` },
-    h('span', { classe: 'au-tuile-titre' }, `Menu ${m.menu}`), h('span', { classe: 'au-tuile-valeur' }, nombre),
-    h('span', { classe: 'au-tuile-suite' }, certitudes(m.certitudes, 'portions')));
-}
-
-function tuileFiches(f) {
-  return h('li', { classe: 'au-tuile', 'aria-label': 'Fiches de fonction' },
-    h('span', { classe: 'au-tuile-titre' }, 'Fiches'),
-    h('span', { classe: 'au-tuile-valeur' }, f.total !== null
-      ? [h('span', { classe: 'au-qte au-couverts' }, String(f.total)), h('span', { classe: 'au-unite' }, ' couv.')]
-      : h('span', { classe: 'au-neutre' }, 'aucune fiche')),
-    h('span', { classe: 'au-tuile-suite' }, certitudes(f.certitudes, 'couverts')));
-}
-
-function zoneCouverts(d) {
-  if (!d.ouvert) return null; // jour fermé : une seule mention, dans la carte « Maintenant »
-  return h('ul', { classe: 'au-couverts-grille', 'aria-label': 'Couverts du jour' }, [...d.menus.map(tuileMenu), tuileFiches(d.fiches)]);
-}
-
-// ------------------------------------------------------------------ Maintenant
-
-function destination(m, aujourd) {
-  const pour = m.dateService === aujourd ? 'pour le service du jour' : `pour ${libelleJour(m.dateService)}`;
-  return [pour, m.menu ? `menu ${m.menu}` : null].filter(Boolean).join(' · ');
-}
-
-function carteMaintenant(d, aujourd) {
-  const m = d.maintenant;
-  const { faites, total } = d.avancement;
-  const q = m && m.genre !== 'preparatoire' ? (m.cible !== null ? quantite(m.cible, m.unite) : null) : null;
-  const corps = [
-    h('div', { classe: 'au-maintenant-tete' },
-      h('h2', { classe: 'au-etiquette' }, 'Maintenant'),
-      total > 0 ? h('span', { classe: 'au-jauge-texte' }, h('span', { classe: 'au-qte' }, `${faites} / ${total}`), ' faites') : null)];
-  if (!m) {
-    corps.push(h('p', { classe: 'au-maintenant-vide' }, !d.ouvert ? ["Fermé aujourd'hui", d.prochainOuvert ? [' · ', 'Prochaine production : ',
-        h('a', { href: `#/production/${d.prochainOuvert}`, classe: 'au-lien-prochaine' }, libelleJour(d.prochainOuvert).split(' ').slice(0, 2).join(' '))] : null]
-      : total > 0 ? 'Tout est fait pour aujourd\'hui.' : 'Aucune tâche décidée pour aujourd\'hui.'));
-  } else {
-    corps.push(
-      h('div', { classe: 'au-maintenant-ligne' },
-        h('p', { classe: 'au-maintenant-nom' }, m.nom),
-        q ? h('p', { classe: 'au-qte au-maintenant-qte' }, qteNoeuds(q)) : (m.genre === 'preparatoire' ? null : h('p', { classe: 'au-maintenant-neutre' }, 'quantité à compléter'))),
-      h('p', { classe: 'au-maintenant-dest' }, destination(m, aujourd),
-        m.horsRegle ? [' · ', h('strong', { classe: 'au-hors-regle' }, 'hors règle')] : null));
+function colonneJour(jour, lundi) {
+  const nom = libelleJour(jour.date).split(' ')[0];
+  if (jour.aImporter) {
+    return h('a', { href: `#/import/${lundi(jour.date)}`, classe: 'tdb-jour tdb-jour-vide', 'aria-label': `${majuscule(nom)}, menu à importer` },
+      h('span', { classe: 'tdb-j' }, NOM_COURT(jour.date)),
+      h('span', { classe: 'tdb-a-importer' }, 'menu à importer'),
+      h('span', { classe: 'tdb-etiquette' }, 'Importer'));
   }
-  if (total > 0) {
-    corps.push(h('progress', { classe: 'au-jauge', value: faites, max: total, 'aria-label': `${faites} sur ${total} faites` }));
-  }
-  if (m) {
-    corps.push(h('div', { classe: 'au-maintenant-actions' },
-      h('a', { href: `#/fiche/${encodeURIComponent(m.composantId)}`, classe: 'au-btn au-btn-clair' }, 'Ouvrir la fiche'),
-      h('button', { type: 'button', classe: 'au-btn au-btn-contour', onClick: () => faireEnUnToucher(m.productionId),
-        'aria-label': `Fait : ${m.nom}` }, 'Fait')));
-  }
-  return h('section', { classe: 'au-maintenant', 'aria-label': 'Maintenant' }, corps);
+  const dits = jour.menus.map((m) => `menu ${m.menu} : ${m.intitule || 'non saisi'}`).join(', ');
+  return h('a', { href: `#/semaine/${jour.date}`, classe: `tdb-jour${jour.estAujourdhui ? ' tdb-jour-auj' : ''}`,
+    'aria-label': `${majuscule(nom)}${jour.estAujourdhui ? ", aujourd'hui" : ''}, ${dits}` },
+  h('span', { classe: 'tdb-j' }, `${NOM_COURT(jour.date)}${jour.estAujourdhui ? ' · auj.' : ''}`),
+  jour.menus.map((m) => h('span', { classe: 'tdb-m' }, h('b', null, `M${m.menu}`),
+    h('span', { classe: m.intitule ? 'tdb-intitule' : 'tdb-intitule au-neutre' }, m.intitule || 'non saisi'))));
 }
 
-// ------------------------------------------------------------------ décisions en attente
-
-/** Résumé du bandeau : un mot par genre de carte de la feuille, avec le nombre. */
-const GENRE_EN_CLAIR = {
-  ecart: ['écart à arbitrer', 'écarts à arbitrer'], avance_hors_regle: ['avance hors règle', 'avances hors règle'],
-  sauce: ['sauce à confirmer', 'sauces à confirmer'], repartition: ['répartition provisoire', 'répartitions provisoires'],
-  point: ['point à confirmer', 'points à confirmer'], apprentissage: ['proposition', 'propositions'],
-  valeur: ['valeur à valider', 'valeurs à valider'],
-};
-function resumeDecisions(cartes) {
-  const n = {};
-  for (const c of cartes) n[c.genre] = (n[c.genre] ?? 0) + 1;
-  return Object.keys(GENRE_EN_CLAIR).filter((g) => n[g]).map((g) => `${n[g]} ${GENRE_EN_CLAIR[g][n[g] > 1 ? 1 : 0]}`).join(' · ');
+function sectionMenus(d, lundiDe) {
+  if (d.menusSurTrois.length === 0) return null;
+  return h('section', { classe: 'tdb-section', 'aria-label': 'Menus sur trois jours' },
+    h('div', { classe: 'tdb-tete' }, h('h2', { classe: 'au-etiquette' }, 'Menus'), lien('#/semaine', 'Semaine ›', 'au-lien-court')),
+    h('div', { classe: 'tdb-jours' }, d.menusSurTrois.map((j) => colonneJour(j, lundiDe))));
 }
 
-/** Le bandeau appelle la feuille « À décider » et compte avec la même source qu'elle (`decisionsDe`) ; le repli « À confirmer » de la page reste le détail (liens et propositions). */
-function bandeauDecisions(feuille, repli) {
-  const { total, cartes } = feuille;
+// ------------------------------------------------------------------ la journée en chiffres
+
+function caseProduction(d, aujourd) {
+  const { faites, total } = d.avancementJour;
+  return h('a', { href: `#/production/${aujourd}`, classe: 'tdb-case', 'aria-label': total > 0 ? `Production : ${faites} faites sur ${total}` : 'Production du jour' },
+    h('span', { classe: 'au-sous' }, 'Production'),
+    h('span', { classe: 'tdb-chiffre' }, total > 0 ? `${faites}/${total}` : '—'),
+    total > 0 ? h('span', { classe: 'prod-jauge', 'aria-hidden': 'true' }, h('span', { style: `width: ${Math.round((faites / total) * 100)}%` })) : null);
+}
+
+/** Couverts du midi (prévisions saisies) : la touche mène aux prévisions du jour ; la feuille de saisie vient avec l'étape suivante. */
+function caseCouverts(d, aujourd) {
+  const { total, m1, m2 } = d.couvertsMidi;
+  const repartition = total === null ? 'à saisir' : `M1 ${m1 ?? '—'} · M2 ${m2 ?? '—'}`;
+  return h('a', { href: `#/semaine/${aujourd}`, classe: 'tdb-case', 'aria-label': `Couverts midi aujourd'hui : ${total === null ? 'à saisir' : total}. Modifier` },
+    h('span', { classe: 'au-sous' }, 'Couverts midi'),
+    h('span', { classe: 'tdb-chiffre' }, total === null ? '—' : String(total)),
+    h('span', { classe: 'au-sous' }, repartition));
+}
+
+function sectionChiffres(d, aujourd) {
+  if (!d.ouvert) return null; // jour fermé : une seule mention, dans la carte « Prochaine »
+  return h('section', { classe: 'tdb-chiffres', 'aria-label': 'La journée en chiffres' }, caseProduction(d, aujourd), caseCouverts(d, aujourd));
+}
+
+// ------------------------------------------------------------------ à avancer
+
+function sectionAAvancer(d, aujourd) {
+  const { total, lignes } = d.aAvancer;
   if (total === 0) return null;
-  const surClic = () => {
-    if (repli) repli.open = true;
-    ouvrirDecisions();
-  };
-  return h('button', { type: 'button', classe: 'au-decisions', onClick: surClic },
-    icone(['M12 3l10 18H2z', 'M12 10v5M12 18v.5']),
-    h('span', { classe: 'au-decisions-texte' },
-      h('span', { classe: 'au-decisions-titre' }, texteDecisions(total)),
-      h('span', { classe: 'au-decisions-detail' }, resumeDecisions(cartes))),
-    icone(CHEVRON, 'au-icone au-chevron'));
+  return h('section', { classe: 'tdb-section', 'aria-label': 'À avancer' },
+    h('div', { classe: 'tdb-tete' }, h('h2', { classe: 'au-etiquette' }, 'À avancer'), lien(`#/production/${aujourd}`, 'Production ›', 'au-lien-court')),
+    lignes.map((l) => h('a', { href: `#/fiche/${encodeURIComponent(l.composantId)}`, classe: 'tdb-avance' },
+      h('span', { classe: 'tdb-avance-nom' }, h('span', { classe: 'nom' }, l.nom), h('span', { classe: 'au-sous' }, `pour ${libelleJour(l.dateService).split(' ')[0]}`)),
+      l.quantite !== null ? h('span', { classe: 'au-qte' }, qteNoeuds(quantite(l.quantite, l.unite))) : h('span', { classe: 'au-neutre' }, '—'))));
 }
+
+// ------------------------------------------------------------------ à confirmer
 
 function ligneAConfirmer(l) {
   const contenu = [h('span', { classe: 'au-confirmer-mot' }, 'à décider'), h('span', { classe: 'au-confirmer-texte' }, l.texte,
@@ -151,14 +118,16 @@ function ligneAConfirmer(l) {
   return h('li', null, h('a', { href: l.lien, classe: 'au-ligne' }, contenu));
 }
 
-/** Détail des points « À confirmer » existants (3 lignes au plus, comme l'ancien tableau) : rien ne disparaît. */
-function repliConfirmer(d) {
-  const { total, lignes, reste } = d.decisions;
+/** « À confirmer · N » : même compte que la feuille « À décider » (`decisionsDe`) ; trois lignes au plus, « Tout voir » ouvre la feuille. */
+function sectionAConfirmer(d, feuille) {
+  const { total } = feuille;
   if (total === 0) return null;
-  return repliable(`À confirmer (${total})`, false, [
-    h('ul', { classe: 'au-lignes' }, lignes.map(ligneAConfirmer)),
-    reste > 0 ? h('p', { classe: 'au-sous' }, `et ${pluriel(reste, 'autre sujet', 'autres sujets')}, à voir sur le détail des jours`) : null,
-  ], { classe: 'au-repli', id: 'bord-titre-confirmer' });
+  const { lignes } = d.decisions;
+  return h('section', { classe: 'tdb-confirmer', 'aria-label': 'À confirmer' },
+    h('div', { classe: 'tdb-tete' },
+      h('h2', { classe: 'tdb-confirmer-titre' }, icone(['M12 3l10 18H2z', 'M12 10v5M12 18v.5']), `À confirmer · ${total}`),
+      h('button', { type: 'button', classe: 'au-lien-court tdb-tout-voir', onClick: () => ouvrirDecisions() }, 'Tout voir ›')),
+    lignes.length > 0 ? h('ul', { classe: 'au-lignes' }, lignes.map(ligneAConfirmer)) : null);
 }
 
 // ------------------------------------------------------------------ à consommer en priorité
@@ -180,12 +149,13 @@ function ligneAConsommer(l) {
       h('span', { classe: 'au-sous' }, l.conservation.provenance)) : null);
 }
 
+/** Masquée depuis le 2026-10-07 (pas de DLC pour l'instant) : gardée pour le jour où les DLC reviennent. */
 function zoneAConsommer(d) {
   const { total, lignes } = d.aConsommer;
   return h('section', { classe: 'au-carte', 'aria-labelledby': 'au-titre-conso' },
     h('div', { classe: 'au-carte-tete' },
       h('h2', { classe: 'au-etiquette', id: 'au-titre-conso' }, 'À consommer en priorité'),
-      lien('#/stock/dlc', 'Tout voir', 'au-lien-court')),
+      null),
     total === 0 ? h('p', { classe: 'au-neutre' }, 'Rien de fait à l\'avance pour un service à venir.')
       : h('ul', { classe: 'au-lignes' }, lignes.map(ligneAConsommer)));
 }
@@ -200,7 +170,7 @@ function allergenesAConfirmer(etat, f) {
 }
 
 function carteFiche(d, aujourd, etat) {
-  const f = d.prochaineFiche;
+  const f = d.ficheProche;
   if (!f) return null;
   const quand = f.date === aujourd ? "aujourd'hui" : libelleJour(f.date);
   const titreFiche = ['Fiche de fonction', quand, f.horaire || null, `${pluriel(f.couverts, 'pers.', 'pers.')}`].filter(Boolean).join(' · ');
@@ -218,23 +188,41 @@ function carteFiche(d, aujourd, etat) {
     icone(CHEVRON, 'au-icone au-chevron'));
 }
 
-// ------------------------------------------------------------------ le reste de l'ancien tableau, à une touche
+// ------------------------------------------------------------------ rappels
 
-function zoneLiens(d, aujourd) {
-  const p = d.production;
+/** Ce que l'ancien tableau disait encore et qui garde une action : menus de la semaine à saisir, portions à régler, sauvegarde. */
+function sectionRappels(d) {
   const lignes = [];
-  const { faites, total } = p.avancement;
-  lignes.push(lien(`#/production/${aujourd}`, total > 0 ? `Production : ${faites}/${total} faites aujourd'hui` : 'Production du jour', 'au-ligne au-ligne-lien'));
-  if (p.avances > 0) {
-    lignes.push(lien(`#/production/${aujourd}`, `${pluriel(p.avances, 'avance possible', 'avances possibles')} après le service`, 'au-ligne au-ligne-lien'));
-  }
-  lignes.push(lien('#/semaine', 'Semaine : menus et fiches de fonction', 'au-ligne au-ligne-lien'));
-  lignes.push(lien(`#/import/${d.lundi}`, d.semaineSansMenu ? 'Saisir les menus de la semaine' : 'Menus de la semaine', 'au-ligne au-ligne-lien'));
-  if (p.commande) lignes.push(lien(p.commande.lien, p.commande.texte, 'au-ligne au-ligne-lien'));
-  for (const l of p.chiffrage) lignes.push(lien(l.lien, l.detail ? `${l.texte} : ${l.detail}` : l.texte, 'au-ligne au-ligne-lien'));
+  if (d.semaineSansMenu) lignes.push(lien(`#/import/${d.lundi}`, 'Saisir les menus de la semaine', 'au-ligne au-ligne-lien'));
+  for (const l of d.production.chiffrage) lignes.push(lien(l.lien, l.detail ? `${l.texte} : ${l.detail}` : l.texte, 'au-ligne au-ligne-lien'));
   if (d.sauvegarde) lignes.push(lien(d.sauvegarde.lien, `${d.sauvegarde.texte} : ${d.sauvegarde.detail}`, 'au-ligne au-ligne-lien'));
-  return h('nav', { classe: 'au-carte au-liens', 'aria-label': 'Semaine et production' },
-    h('h2', { classe: 'au-etiquette' }, 'Semaine et production'), lignes);
+  if (lignes.length === 0) return null;
+  return h('nav', { classe: 'tdb-rappels', 'aria-label': 'Rappels' }, h('h2', { classe: 'au-etiquette' }, 'Rappels'), lignes);
+}
+
+// ------------------------------------------------------------------ Prochaine (fixe en bas)
+
+function carteProchaine(d, aujourd) {
+  const m = d.maintenant;
+  if (!m) {
+    return h('section', { classe: 'prochaine prochaine-vide', 'aria-label': 'Prochaine tâche' },
+      h('p', { classe: 'prochaine-vide-texte' }, !d.ouvert
+        ? ["Fermé aujourd'hui", d.prochainOuvert ? [' · Prochaine production : ',
+          h('a', { href: `#/production/${d.prochainOuvert}`, classe: 'au-lien-prochaine' }, libelleJour(d.prochainOuvert).split(' ').slice(0, 2).join(' '))] : null]
+        : d.avancement.total > 0 ? "Tout est fait pour aujourd'hui." : "Aucune tâche décidée pour aujourd'hui."));
+  }
+  const q = m.genre !== 'preparatoire' && m.cible !== null ? quantite(m.cible, m.unite) : null;
+  const quand = m.dateService === aujourd ? (m.creneau ? libelle('CRENEAU', m.creneau) : null) : `pour ${libelleJour(m.dateService).split(' ')[0]}`;
+  return h('section', { classe: 'prochaine', 'aria-label': 'Prochaine tâche' },
+    h('div', { classe: 'prochaine-tete' },
+      h('h2', { classe: 'prochaine-etiquette' }, ['Prochaine', quand ? ` · ${quand}` : null]),
+      h('span', { classe: 'prochaine-menu' }, [m.menu ? `menu ${m.menu}` : null, m.horsRegle ? h('strong', { classe: 'au-hors-regle' }, ' · hors règle') : null])),
+    h('div', { classe: 'prochaine-ligne' },
+      h('p', { classe: 'prochaine-nom' }, m.nom),
+      q ? h('p', { classe: 'au-qte prochaine-qte' }, qteNoeuds(q)) : (m.genre === 'preparatoire' ? null : h('p', { classe: 'prochaine-neutre' }, 'quantité à compléter'))),
+    h('div', { classe: 'au-maintenant-actions' },
+      h('a', { href: `#/fiche/${encodeURIComponent(m.composantId)}`, classe: 'au-btn au-btn-clair' }, 'Ouvrir la fiche'),
+      h('button', { type: 'button', classe: 'au-btn au-btn-action', onClick: () => faireEnUnToucher(m.productionId), 'aria-label': `Fait : ${m.nom}` }, 'Fait')));
 }
 
 // ------------------------------------------------------------------ page
@@ -243,9 +231,8 @@ export function rendre(etat) {
   const aujourd = aujourdhui();
   const donnees = aujourdhuiDe(etat, aujourd);
   const racine = h('div', { classe: 'vue vue-aujourdhui' });
-  const repli = repliConfirmer(donnees);
-  const morceaux = [entete(donnees), zoneCouverts(donnees), carteMaintenant(donnees, aujourd), bandeauDecisions(decisionsDe(etat, aujourd), repli),
-    zoneAConsommer(donnees), carteFiche(donnees, aujourd, etat), zoneLiens(donnees, aujourd), repli];
+  const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), sectionAAvancer(donnees, aujourd),
+    carteFiche(donnees, aujourd, etat), sectionAConfirmer(donnees, decisionsDe(etat, aujourd)), sectionRappels(donnees), carteProchaine(donnees, aujourd)];
   for (const m of morceaux) if (m) racine.appendChild(m);
   return racine;
 }
