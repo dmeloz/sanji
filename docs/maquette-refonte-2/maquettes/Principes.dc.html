@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — principes de la refonte 2</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="planche" style="width: 1240px; height: 960px; padding: 48px; display: flex; flex-direction: column; gap: 36px; background: #FFFFFF">
+
+<header style="display: flex; align-items: baseline; justify-content: space-between; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 34px; font-weight: 700; letter-spacing: -0.02em">Sanji · principes</h1>
+<p style="margin: 0; font-size: 17px; color: var(--texte-doux)">iPhone uniquement, 390 × 844. L'application propose, calcule et montre sa formule. Le chef décide.</p>
+</div>
+<span class="etq">Données : à importer après validation du design</span>
+</header>
+
+<section style="display: flex; flex-direction: column; gap: 14px">
+<h2 class="section" style="margin: 0">Le workflow, de bout en bout</h2>
+<div style="display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 10px">
+<div style="background: var(--fond); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span class="qte">1</span><strong>Saisir les menus</strong><span class="petit doux">texte collé ou tapé</span></div>
+<div style="background: var(--fond); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span class="qte">2</span><strong>Lecture des plats</strong><span class="petit doux">au poste, hors poste, à confirmer</span></div>
+<div style="background: var(--fond); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span class="qte">3</span><strong>Prévisions et fiches</strong><span class="petit doux">estimée, provisoire, confirmée</span></div>
+<div style="background: var(--fond); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span class="qte">4</span><strong>Calcul</strong><span class="petit doux">servi → brut, formule et provenance</span></div>
+<div style="background: var(--fond); border: 1.5px dashed var(--bordure-forte); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span class="qte">5</span><strong>Proposer un planning</strong><span class="petit doux">brouillon IA, facultatif ; vous validez</span></div>
+<div style="background: var(--fond); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span class="qte">6</span><strong>Planification</strong><span class="petit doux">par créneau ; Fait en un toucher</span></div>
+<div style="background: var(--fond); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span class="qte">7</span><strong>Après service</strong><span class="petit doux">apprentissage proposé</span></div>
+<div style="background: var(--fond); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span class="qte">8</span><strong>Articles</strong><span class="petit doux">liste simple, par menu</span></div>
+<div style="background: var(--exception-fond); border: 1px solid var(--exception-bord); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; color: var(--exception)"><span class="qte">9</span><strong>À décider</strong><span class="petit">tout ce que le chef tranche</span></div>
+</div>
+<p class="petit doux" style="margin: 0">L'étape 5 est facultative : sans elle, vous planifiez directement à l'étape 6. Les étapes 2 à 8 envoient leurs écarts et confirmations à l'étape 9. Tout se recalcule à chaque changement d'entrée.</p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 14px">
+<h2 class="section" style="margin: 0">Trois rôles, trois signes, jamais mélangés</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<div style="background: var(--fond); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<span class="etq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 9h14M5 15h14"></path></svg>calculé</span>
+<strong style="font-size: 20px">La vérité</strong>
+<p style="margin: 0">Saisies, standards et calculs. Chaque quantité montre sa formule et sa provenance : validé restaurant, standard de base, saisi au service, calculé, inconnu.</p>
+<p class="petit doux" style="margin: 0">Signe : surface pleine, pastille neutre.</p>
+</div>
+<div style="background: var(--fond); border: 1.5px dashed var(--bordure-forte); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<span class="etq etq-ia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>brouillon IA</span>
+<strong style="font-size: 20px">Le jugement de l'IA</strong>
+<p style="margin: 0">Facultatif. Propose un planning à partir des calculs, jamais une quantité. Rien n'est appliqué avant la décision du chef.</p>
+<p class="petit doux" style="margin: 0">Signe : contour en pointillés, étoile, mot « brouillon ».</p>
+</div>
+<div style="background: var(--fond); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<span class="etq etq-chef"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>décidé par vous</span>
+<strong style="font-size: 20px">La décision du chef</strong>
+<p style="margin: 0">Valider, refuser, corriger, planifier, marquer fait. Seule source qui change le planning ; tracée avec la date.</p>
+<p class="petit doux" style="margin: 0">Signe : encre (bouton et pastille). L'ambre signale ce qui l'attend.</p>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 14px">
+<h2 class="section" style="margin: 0">Parcours de démonstration : un lundi</h2>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px">
+<div style="border-top: 3px solid var(--encre); padding-top: 8px; display: flex; flex-direction: column; gap: 2px"><span class="qte">07:00</span><span>Aujourd'hui : prochaine action</span></div>
+<div style="border-top: 3px solid var(--exception-point); padding-top: 8px; display: flex; flex-direction: column; gap: 2px"><span class="qte">07:05</span><span>À décider : sauce, écart</span></div>
+<div style="border-top: 3px solid var(--encre); padding-top: 8px; display: flex; flex-direction: column; gap: 2px"><span class="qte">07:15</span><span>Production, fiche, mode en poste</span></div>
+<div style="border-top: 3px solid var(--encre); padding-top: 8px; display: flex; flex-direction: column; gap: 2px"><span class="qte">11:30</span><span>Service de midi</span></div>
+<div style="border-top: 3px dashed var(--bordure-forte); padding-top: 8px; display: flex; flex-direction: column; gap: 2px"><span class="qte">14:30</span><span>Proposer un planning (IA), valider</span></div>
+<div style="border-top: 3px solid var(--encre); padding-top: 8px; display: flex; flex-direction: column; gap: 2px"><span class="qte">15:00</span><span>Apprentissage, articles</span></div>
+<div style="border-top: 3px solid var(--encre); padding-top: 8px; display: flex; flex-direction: column; gap: 2px"><span class="qte">17:30</span><span>Avant le service du soir</span></div>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1240,"height":960}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

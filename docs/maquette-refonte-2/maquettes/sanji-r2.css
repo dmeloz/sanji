@@ -1,0 +1,115 @@
+/* Sanji · refonte 2 (iPhone 390 × 844) — feuille partagée des planches du canevas.
+   Palette G « Grand large » choisie le 7 octobre 2026 (parchemin, océan, paille, rouge, noir). */
+@font-face { font-family: "Sanji Mono"; src: url("/_blob/c9baa9d1ee1fbbd641da7213cb8f0994") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Sanji Mono"; src: url("/_blob/e07916fb8d224ffa91d2aa221e127820") format("woff2"); font-weight: 600; font-display: swap; }
+
+.ecran, .planche {
+  --fond: #F4EAD5; --carte: #FFF9EC; --carte-2: #EFE3C8; --encre: #161513; --sur-encre: #FFF9EC;
+  --texte: #161513; --texte-doux: #655C4C; --texte-moyen: #3D372C; --bordure: #E6D9BE; --bordure-forte: #A3967C;
+  --action: #1D5AA6; --action-fonce: #164A8A; --action-fond: #E1EAF6; --sur-action: #FFFFFF;
+  --exception: #8A5E00; --exception-fond: #F6E3B8; --exception-bord: #E2C47F; --exception-point: #B07A00;
+  --rouge: #B8232A; --rouge-fond: #F8E0DC; --rouge-texte: #8E1A20;
+  --voile: rgba(14, 22, 34, 0.5);
+  --police: -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --mono: "Sanji Mono", ui-monospace, monospace;
+  font: 15px/1.4 var(--police); color: var(--texte); background: var(--fond);
+  box-sizing: border-box;
+}
+.ecran.sombre, .sombre {
+  --fond: #0E1622; --carte: #172233; --carte-2: #1F2C40; --encre: #F4EAD5; --sur-encre: #0E1622;
+  --texte: #F4EAD5; --texte-doux: #A9B3C2; --texte-moyen: #CBD3DE; --bordure: #26344A; --bordure-forte: #4A5D78;
+  --action: #6FA8F0; --action-fonce: #A3C8F7; --action-fond: #17304F; --sur-action: #0E1622;
+  --exception: #F0B94A; --exception-fond: #2C2312; --exception-bord: #4D3B17; --exception-point: #F0B94A;
+  --rouge: #FF7369; --rouge-fond: #3D1A1A; --rouge-texte: #FF9F97;
+}
+.ecran *, .planche * { box-sizing: border-box; }
+.ecran { width: 390px; height: 844px; position: relative; overflow: hidden; }
+.ecran h1, .ecran h2, .ecran h3, .ecran p, .ecran ul, .ecran ol { margin: 0; }
+.ecran ul { padding: 0; list-style: none; }
+.ecran a { color: var(--action-fonce); text-decoration: none; }
+.sombre a { color: var(--action); }
+
+/* Gabarit : zone sûre en haut (encoche), contenu, zone du pouce, onglets */
+.haut { padding: 54px 20px 0; display: flex; flex-direction: column; gap: 12px; }
+.tete { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.tete-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.surtitre { font-size: 13px; font-weight: 500; color: var(--texte-doux); }
+.titre { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+.titre-feuille { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+.retour { min-height: 44px; display: inline-flex; align-items: center; gap: 2px; font-size: 16px; font-weight: 500; margin-left: -6px; align-self: flex-start; }
+.pouce { position: absolute; left: 0; right: 0; bottom: 84px; padding: 12px 20px; display: flex; flex-direction: column; gap: 8px; background: var(--fond); border-top: 1px solid var(--bordure); }
+.pouce.nu { bottom: 34px; }
+.onglets { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; display: flex; justify-content: space-around; padding: 6px 8px 26px; background: var(--carte); border-top: 1px solid var(--bordure); }
+.onglet { min-width: 76px; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 13px; font-weight: 500; color: var(--texte-doux) !important; }
+.onglet[aria-current="page"] { color: var(--action) !important; font-weight: 650; }
+.onglet svg { width: 24px; height: 24px; }
+
+/* Boutons */
+.btn { min-height: 48px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--bordure); background: var(--carte); color: var(--texte); font: inherit; font-size: 16px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.btn-action { background: var(--action); border-color: var(--action); color: var(--sur-action); }
+.btn-decision { background: var(--encre); border-color: var(--encre); color: var(--sur-encre); }
+.btn-ambre { background: var(--carte); border-color: var(--exception-bord); color: var(--exception); }
+.btn-court { min-height: 44px; padding: 0 14px; font-size: 15px; }
+.btn-large { width: 100%; min-height: 52px; font-size: 17px; }
+.btn-rond { width: 44px; height: 44px; padding: 0; border-radius: 22px; }
+.rangee { display: flex; gap: 8px; }
+.rangee > .btn { flex: 1; }
+
+/* Surfaces */
+.carte { background: var(--carte); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.carte-encre { background: var(--encre); color: var(--sur-encre); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.carte-ambre { background: var(--exception-fond); border: 1px solid var(--exception-bord); color: var(--exception); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.carte-ia { background: var(--carte); border: 1.5px dashed var(--bordure-forte); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.liste { background: var(--carte); border-radius: 18px; padding: 0 16px; }
+.ligne { min-height: 52px; padding: 10px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--bordure); }
+.ligne:last-child { border-bottom: 0; }
+.ligne-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.nom { font-size: 16px; font-weight: 600; }
+.doux { color: var(--texte-doux); }
+.petit { font-size: 13px; }
+.section { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); }
+.qte { font-family: var(--mono); font-weight: 600; font-size: 15px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.qte-grande { font-family: var(--mono); font-weight: 600; font-size: 34px; letter-spacing: -0.02em; line-height: 1; }
+.qte-moy { font-family: var(--mono); font-weight: 600; font-size: 22px; }
+.unite { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--texte-doux); }
+
+/* Étiquettes : toujours icône + mot */
+.etq { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: var(--carte-2); color: var(--texte-moyen); white-space: nowrap; }
+.etq svg { width: 13px; height: 13px; }
+.etq-action { background: var(--action-fond); color: var(--action-fonce); }
+.etq-ambre { background: var(--exception-fond); color: var(--exception); }
+.etq-rouge { background: var(--rouge-fond); color: var(--rouge-texte); }
+.etq-ia { background: transparent; border: 1px dashed var(--bordure-forte); color: var(--texte-moyen); }
+.etq-chef { background: var(--encre); color: var(--sur-encre); }
+.etiquettes { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Tâche de production */
+.tache { min-height: 72px; padding: 10px 12px 10px 4px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--bordure); }
+.tache:last-child { border-bottom: 0; }
+.case { width: 44px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; padding: 0; }
+.case span { width: 26px; height: 26px; border-radius: 8px; border: 2px solid var(--bordure-forte); background: var(--carte); display: flex; align-items: center; justify-content: center; }
+.tache.faite .case span { background: var(--action); border-color: var(--action); }
+.tache.faite .nom { color: var(--texte-doux); text-decoration: line-through; }
+.tache.faite .qte { color: var(--texte-doux); }
+.tache.faite { opacity: 0.72; }
+
+/* Feuilles montantes */
+.voile { position: absolute; inset: 0; background: var(--voile); }
+.feuille { position: absolute; left: 0; right: 0; bottom: 0; background: var(--fond); border-radius: 24px 24px 0 0; padding: 8px 20px 34px; display: flex; flex-direction: column; gap: 12px; }
+.poignee { align-self: center; width: 36px; height: 5px; border-radius: 3px; background: var(--bordure-forte); }
+
+/* Divers */
+.bandeau { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 14px; font-size: 15px; }
+.jauge { height: 6px; border-radius: 3px; background: var(--carte-2); overflow: hidden; }
+.jauge > span { display: block; height: 6px; background: var(--action); border-radius: 3px; }
+.seg { display: grid; gap: 4px; padding: 4px; border-radius: 12px; background: var(--bordure); }
+.seg > * { min-height: 40px; border: 0; border-radius: 9px; background: transparent; color: var(--texte-doux); font: inherit; font-size: 15px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+.seg > [aria-pressed="true"] { background: var(--carte); color: var(--texte); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+.champ { display: flex; flex-direction: column; gap: 6px; }
+.champ label { font-size: 13px; font-weight: 600; color: var(--texte-doux); }
+.champ input, .champ textarea, .champ select { min-height: 48px; border: 1px solid var(--bordure-forte); border-radius: 12px; background: var(--carte); color: var(--texte); font: inherit; font-size: 16px; padding: 10px 12px; }
+.interrupteur { width: 51px; height: 31px; border-radius: 16px; border: 0; padding: 2px; display: flex; background: var(--bordure-forte); }
+.interrupteur span { width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.interrupteur[aria-pressed="true"] { background: var(--action); justify-content: flex-end; }
+.pastille-point { width: 7px; height: 7px; border-radius: 4px; display: inline-block; }
+.formule { font-family: var(--mono); font-size: 13px; color: var(--texte-moyen); }

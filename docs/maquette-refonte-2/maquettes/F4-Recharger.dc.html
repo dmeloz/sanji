@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Nouvelle version</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut">
+<header class="tete-texte"><span class="surtitre">Lundi · 15:10</span><h1 class="titre">Aujourd'hui</h1></header>
+<section class="carte"><span class="section">Production du jour</span><span class="nom">4 / 6 faites</span><span class="jauge"><span style="width: 66%"></span></span></section>
+<section class="carte"><span class="section">Après service</span><span>5 avances planifiées · décidé par vous</span></section>
+</div>
+<div class="pouce">
+<div class="bandeau" style="background: var(--encre); color: var(--sur-encre); justify-content: space-between; min-height: 60px">
+<span class="ligne-texte"><strong>Nouvelle version prête</strong><span class="petit" style="opacity: 0.8">Sanji 63 · vos données restent sur l'iPhone</span></span>
+<button class="btn btn-court" style="background: var(--sur-encre); color: var(--encre); border-color: var(--sur-encre)">Recharger</button>
+</div>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px"><dc-import name="Onglets" actif="aujourdhui" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

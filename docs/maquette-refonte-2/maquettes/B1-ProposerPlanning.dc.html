@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Proposer un planning</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut"><span class="surtitre">Lundi · 14:30</span><h1 class="titre">Production</h1></div>
+<div class="voile" aria-hidden="true"></div>
+<section class="feuille" aria-label="Proposer un planning" style="top: 150px">
+<div class="poignee" aria-hidden="true"></div>
+<span class="etq etq-ia" style="align-self: flex-start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>assistant IA · facultatif</span>
+<h2 class="titre-feuille">Proposer un planning</h2>
+<p>L'assistant place les 5 avances à planifier sur des créneaux. Il ne touche à aucune quantité et ne change rien sans vous.</p>
+<div class="liste">
+<div class="ligne"><span class="ligne-texte"><span class="nom">Ce qui est envoyé</span><span class="petit doux">intitulés, quantités calculées, créneaux libres, règle des 2 jours</span></span></div>
+<div class="ligne"><span class="ligne-texte"><span class="nom">Ce qui n'est pas envoyé</span><span class="petit doux">fiches de fonction, allergies, remarques, notes</span></span></div>
+<div class="ligne"><span class="ligne-texte"><span class="nom">Modèle</span><span class="petit doux">[modèle choisi dans Réglages]</span></span><a class="petit" href="E3-AssistantIA.dc.html">Changer</a></div>
+</div>
+<p class="petit doux">Hors ligne, l'assistant est indisponible. Planifier vous-même reste toujours possible.</p>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px">
+<a class="btn btn-decision btn-large" href="B2-Brouillon.dc.html">Demander un brouillon</a>
+<a class="btn btn-large" href="A3-Production.dc.html">Planifier moi-même</a>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

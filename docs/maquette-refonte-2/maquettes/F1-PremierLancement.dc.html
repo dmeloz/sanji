@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Premier lancement</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="padding-top: 120px; gap: 18px">
+<h1 style="font-size: 40px; font-weight: 700; letter-spacing: -0.02em">Sanji</h1>
+<p style="font-size: 17px">Le copilote de mise en place de l'entremétier. Il calcule et propose ; vous décidez.</p>
+<ol class="liste" style="padding: 0 16px">
+<li class="ligne"><span class="qte">1</span><span class="ligne-texte"><span class="nom">Saisir les menus de la semaine</span><span class="petit doux">texte collé ou tapé</span></span></li>
+<li class="ligne"><span class="qte">2</span><span class="ligne-texte"><span class="nom">Confirmer la semaine type</span><span class="petit doux">vos créneaux libres, rien n'est présumé</span></span></li>
+<li class="ligne"><span class="qte">3</span><span class="ligne-texte"><span class="nom">Saisir les prévisions</span><span class="petit doux">facultatif ; les quantités se recalculent</span></span></li>
+</ol>
+<p class="petit doux">Tout reste sur cet iPhone et fonctionne hors ligne.</p>
+</div>
+<div class="pouce nu" style="bottom: 0; padding-bottom: 34px; border-top: 0">
+<a class="btn btn-action btn-large" href="C3-Import.dc.html">Saisir les menus</a>
+<a class="btn btn-large" href="E4-Donnees.dc.html">Restaurer une sauvegarde</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

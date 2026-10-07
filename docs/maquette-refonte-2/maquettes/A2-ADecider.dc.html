@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — À décider</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut"><span class="surtitre">Lundi</span><h1 class="titre">Aujourd'hui</h1></div>
+<div class="voile" aria-hidden="true"></div>
+<section class="feuille" aria-label="À décider" style="top: 64px">
+<div class="poignee" aria-hidden="true"></div>
+<header style="display: flex; flex-direction: column; gap: 2px">
+<h2 class="titre-feuille">À décider <span class="qte" style="font-size: 22px; color: var(--exception)">{{ count }}</span></h2>
+<p class="doux">Sanji a calculé le reste. Ici, c'est vous qui tranchez.</p>
+</header>
+<sc-for list="{{ items }}" as="it" hint-placeholder-count="3">
+<article class="carte" style="border: 1px solid var(--exception-bord); gap: 6px">
+<span class="etq etq-ambre" style="align-self: flex-start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18v.5"></path></svg>{{ it.genre }}</span>
+<span class="nom">{{ it.titre }}</span>
+<span class="doux">{{ it.detail }}</span>
+<div class="rangee" style="margin-top: 4px"><button class="btn btn-decision btn-court" onClick="{{ it.regler }}">{{ it.a }}</button><button class="btn btn-court" onClick="{{ it.regler }}">{{ it.b }}</button></div>
+</article>
+</sc-for>
+<sc-if value="{{ vide }}" hint-placeholder-val="{{ false }}">
+<div class="carte" style="align-items: center; text-align: center; padding: 28px 16px"><span class="etq etq-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>rien à décider</span><span class="doux">Tout est tranché pour l'instant.</span></div>
+</sc-if>
+<a class="ligne" href="D3-ValidationPortions.dc.html" style="background: var(--carte); border-radius: 14px; padding: 10px 16px"><span class="ligne-texte"><span class="nom">+ 3 valeurs de base à valider</span><span class="petit doux">assistant de validation des portions</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></a>
+<a class="btn btn-large" href="A1-Aujourdhui.dc.html" style="margin-top: auto">Fermer</a>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { faits: {} }; }
+renderVals() {
+var self = this;
+var tous = [
+{ id: "s", genre: "sauce à confirmer", titre: "[plat du menu 1]", detail: "Sauce non mentionnée dans le menu. Proposée : base crème.", a: "Confirmer base crème", b: "Autre sauce" },
+{ id: "e", genre: "écart à arbitrer", titre: "[composant] · mar.", detail: "Faites sam. : 3 jours calendaires, hors règle. Le besoin n'est pas couvert.", a: "Corriger le réel", b: "Règle de préparation" },
+{ id: "t", genre: "semaine type", titre: "Créneaux de la semaine à confirmer", detail: "Le samedi n'est pas présumé disponible.", a: "Régler", b: "Plus tard" }
+];
+var items = tous.filter(function (x) { return !self.state.faits[x.id]; }).map(function (x) {
+return Object.assign({}, x, { regler: function () { var f = Object.assign({}, self.state.faits); f[x.id] = true; self.setState({ faits: f }); } });
+});
+return { items: items, count: String(items.length + 3), vide: items.length === 0 };
+}
+}
+</script>
+</body>
+</html>

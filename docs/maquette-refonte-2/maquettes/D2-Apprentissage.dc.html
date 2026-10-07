@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Apprentissage</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut"><span class="surtitre">Lundi</span><h1 class="titre">Production</h1></div>
+<div class="voile" aria-hidden="true"></div>
+<section class="feuille" aria-label="Apprentissage" style="top: 250px">
+<div class="poignee" aria-hidden="true"></div>
+<span class="etq etq-ambre" style="align-self: flex-start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18v.5"></path></svg>proposé, jamais appliqué seul</span>
+<h2 class="titre-feuille">Mettre à jour le standard ?</h2>
+<p>Vous avez réduit la portion de <strong>[composant]</strong> 3 fois en 30 jours, toujours dans le même sens.</p>
+<div class="carte" style="flex-direction: row; justify-content: space-between; align-items: center">
+<span class="ligne-texte"><span class="petit doux">standard maison actuel</span><span class="qte-moy">[valeur]</span></span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+<span class="ligne-texte" style="align-items: flex-end"><span class="petit doux">moyenne de vos corrections</span><span class="qte-moy">[valeur]</span></span>
+</div>
+<p class="petit doux">Une correction sur un plat reste sur ce plat tant que vous ne mettez pas à jour le standard.</p>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px">
+<button class="btn btn-decision btn-large">Mettre à jour le standard</button>
+<div class="rangee"><button class="btn">Garder l'actuel</button><button class="btn">Plus tard</button></div>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

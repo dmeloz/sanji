@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Fiche technique</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="padding-top: 46px; gap: 10px">
+<a class="retour" href="A3-Production.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Production</a>
+<header class="tete-texte"><h1 class="titre">[composant]</h1>
+<span class="etiquettes"><span class="etq">menu 2 · garniture</span><span class="etq">avant midi</span><span class="etq">à faire</span></span></header>
+
+<section class="carte" style="gap: 4px">
+<span class="section">À produire · pour [jour], midi</span>
+<span><span class="qte-grande">[qté]</span> <span class="unite">g cru net</span></span>
+<span class="petit doux">[n] portions · prévision menu 2 <span class="etq">estimée</span></span>
+</section>
+
+<section class="liste" aria-label="Calcul">
+<div class="ligne" style="align-items: flex-start"><span class="ligne-texte"><span>Quantité servie</span><span class="formule">[n] × [g] cuit</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span class="qte">[qté] <span class="unite">g cuit</span></span><span class="etq etq-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>validé restaurant</span></span></div>
+<div class="ligne" style="align-items: flex-start"><span class="ligne-texte"><span>Avant cuisson</span><span class="formule">[qté] ÷ [coef.] (cuisson)</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span class="qte">[qté] <span class="unite">g cru net</span></span><span class="etq">standard de base</span></span></div>
+<div class="ligne" style="align-items: flex-start"><span class="ligne-texte"><span>Brut à prévoir</span><span class="formule">[qté] ÷ parage</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span class="qte doux">—</span><span class="etq">inconnu · forme achetée à préciser</span></span></div>
+</section>
+
+<section class="liste" aria-label="Recette et allergènes">
+<div class="ligne"><span>Recette</span><span class="doux">non saisie</span></div>
+<div class="ligne"><span>Allergènes</span><span class="etq etq-ambre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18v.5"></path></svg>à confirmer</span></div>
+</section>
+<p class="petit doux">Données à importer.</p>
+</div>
+
+<div class="pouce nu" style="bottom: 0; padding-bottom: 34px">
+<div class="rangee"><a class="btn btn-action btn-large" href="A5-Poste.dc.html" style="flex: 2">Mode en poste</a><button class="btn btn-large" style="flex: 1">Corriger</button></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

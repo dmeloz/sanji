@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Production du jour</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.p-onglets{display:flex;gap:24px;border-bottom:1px solid var(--bordure)}
+.p-onglets button{background:none;border:0;padding:10px 0;font:inherit;font-size:16px;font-weight:500;color:var(--texte-doux);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;min-height:44px}
+.p-onglets button[aria-pressed="true"]{color:var(--texte);font-weight:650;border-bottom-color:var(--texte)}
+.p-groupe{display:flex;flex-direction:column}
+.p-titre{font-size:13px;font-weight:600;color:var(--texte-doux);padding:14px 0 2px}
+.p-groupe .tache{min-height:56px;padding:4px 0;gap:8px;opacity:1}
+.p-groupe .tache:last-child{border-bottom:1px solid var(--bordure)}
+.p-groupe .tache .case{margin-left:-9px}
+.p-groupe .tache.faite .nom{text-decoration:none;color:var(--texte-doux)}
+.p-groupe .tache.faite .qte{color:var(--texte-doux)}
+.p-nom{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1;color:var(--texte)!important}
+.p-note{font-size:13px;font-weight:600}
+.p-note.ambre{color:var(--exception)}
+.p-note.doux{color:var(--texte-doux);font-weight:500}
+.p-q{display:flex;align-items:baseline;gap:4px;white-space:nowrap}
+.p-q .unite{font-size:13px}
+.haut a.etq-ambre{color:var(--exception)}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="gap: 12px">
+<header class="tete" style="align-items: center">
+<div class="tete-texte" style="gap: 6px; flex: 1"><span class="surtitre">Lundi</span>
+<div style="display: flex; align-items: baseline; gap: 10px"><h1 class="titre">Production</h1><span class="qte doux" style="font-size: 17px">{{ faites }}/6</span></div>
+<span class="jauge" style="width: 100%"><span style="width: {{ pct }}"></span></span></div>
+</header>
+<a class="etq etq-ambre" href="A2-ADecider.dc.html" style="align-self: flex-start; min-height: 32px; padding: 4px 10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18v.5"></path></svg>6 à décider</a>
+<div class="p-onglets"><button aria-pressed="true">Aujourd'hui</button><button aria-pressed="false">Demain</button></div>
+
+<div class="p-groupe">
+<span class="p-titre">Menu 1</span>
+<sc-for list="{{ m1 }}" as="t" hint-placeholder-count="3">
+<div class="{{ t.classe }}">
+<button class="case" aria-label="{{ t.aria }}" onClick="{{ t.basculer }}"><span><sc-if value="{{ t.fait }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></sc-if></span></button>
+<a class="p-nom" href="A4-Fiche.dc.html"><span class="nom">{{ t.nom }}</span><sc-if value="{{ t.aNote }}" hint-placeholder-val="{{ false }}"><span class="{{ t.noteClasse }}">{{ t.note }}</span></sc-if></a>
+<span class="p-q"><span class="qte">{{ t.q }}</span><span class="unite">{{ t.u }}</span></span>
+</div>
+</sc-for>
+</div>
+
+<div class="p-groupe">
+<span class="p-titre">Menu 2</span>
+<sc-for list="{{ m2 }}" as="t" hint-placeholder-count="2">
+<div class="{{ t.classe }}">
+<button class="case" aria-label="{{ t.aria }}" onClick="{{ t.basculer }}"><span><sc-if value="{{ t.fait }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></sc-if></span></button>
+<a class="p-nom" href="A4-Fiche.dc.html"><span class="nom">{{ t.nom }}</span><sc-if value="{{ t.aNote }}" hint-placeholder-val="{{ false }}"><span class="{{ t.noteClasse }}">{{ t.note }}</span></sc-if></a>
+<span class="p-q"><span class="qte">{{ t.q }}</span><span class="unite">{{ t.u }}</span></span>
+</div>
+</sc-for>
+</div>
+
+<a href="B1-ProposerPlanning.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: var(--texte-doux)"><span>5 avances à planifier</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></a>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px"><dc-import name="Onglets" actif="production" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { fait: { trofie: true, carottes: true } }; }
+renderVals() {
+var self = this;
+var t = function (id, nom, note, ton, q, u) {
+var f = !!self.state.fait[id];
+var n = f && id === "carottes" ? "déjà avancé" : note;
+return { nom: nom, aNote: !!n, note: n || "", noteClasse: "p-note " + (f ? "doux" : (ton || "doux")), q: q, u: u, fait: f,
+classe: f ? "tache faite" : "tache", aria: (f ? "Marquer non fait : " : "Marquer fait : ") + nom,
+basculer: function () { var x = Object.assign({}, self.state.fait); x[id] = !x[id]; self.setState({ fait: x }); } };
+};
+var tri = function (a) { return a.filter(function (x) { return !x.fait; }).concat(a.filter(function (x) { return x.fait; })); };
+var m1 = tri([t("trofie", "[composant]", "", "", "[qté]", "g sec"),
+t("saumon", "[composant]", "", "", "[n]", "portions"),
+t("sauce", "sauce", "à préciser", "ambre", "—", "")]);
+var m2 = tri([t("puree", "[composant]", "", "", "[n]", "portions"),
+t("carottes", "[composant]", "", "", "[qté]", "g cru net")]);
+var n = Object.keys(self.state.fait).filter(function (k) { return self.state.fait[k]; }).length;
+return { m1: m1, m2: m2, faites: String(n), pct: Math.round(n / 6 * 100) + "%" };
+}
+}
+</script>
+</body>
+</html>

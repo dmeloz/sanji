@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Brouillon validé</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="gap: 10px">
+<header class="tete-texte"><span class="surtitre">Lundi · 14:32</span><h1 class="titre">Production</h1></header>
+<span class="section">Après service · avances</span>
+<div class="liste" style="padding: 0 4px">
+<div class="tache"><button class="case" aria-label="Marquer fait : [composant]"><span></span></button><span class="ligne-texte"><span class="nom">[composant]</span><span class="etiquettes"><span class="etq">après midi · pour mar.</span><span class="etq etq-chef"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>décidé par vous</span></span></span><span class="qte">[qté] <span class="unite">g</span></span></div>
+<div class="tache"><button class="case" aria-label="Marquer fait : [composant]"><span></span></button><span class="ligne-texte"><span class="nom">[composant]</span><span class="etiquettes"><span class="etq">à planifier</span><span class="etq">pour mar.</span></span></span><span class="qte">[qté] <span class="unite">g</span></span></div>
+</div>
+<span class="section">Plus tard cette semaine</span>
+<div class="liste">
+<div class="ligne"><span class="ligne-texte"><span class="nom">[composants]</span><span class="petit doux">mar. après midi · pour mer.</span></span><span class="etq etq-chef">décidé par vous</span></div>
+<div class="ligne"><span class="ligne-texte"><span class="nom">[composant]</span><span class="petit doux">mer. après midi · pour jeu.</span></span><span class="etq etq-chef">décidé par vous</span></div>
+</div>
+<section class="carte" aria-label="Trace">
+<span class="section">Trace</span>
+<div style="display: flex; gap: 10px"><span class="qte">14:31</span><span>Brouillon demandé · <span class="etq etq-ia">brouillon IA</span><br><span class="petit doux">[modèle] · 4 avances proposées, 1 non placée</span></span></div>
+<div style="display: flex; gap: 10px"><span class="qte">14:32</span><span>Brouillon validé par vous · <span class="etq etq-chef">décidé par vous</span><br><span class="petit doux">4 avances planifiées ; quantités inchangées</span></span></div>
+</section>
+</div>
+<div class="pouce" style="border-top: 0; background: transparent">
+<div class="bandeau" style="background: var(--encre); color: var(--sur-encre); justify-content: space-between; min-height: 52px"><span>Brouillon appliqué · 4 avances</span><button class="btn btn-court" style="background: transparent; color: var(--sur-encre); border-color: rgba(255,255,255,0.35)">Annuler</button></div>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px"><dc-import name="Onglets" actif="production" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

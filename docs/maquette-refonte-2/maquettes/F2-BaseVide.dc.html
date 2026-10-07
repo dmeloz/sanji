@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Aujourd'hui, base vide</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut">
+<header class="tete">
+<div class="tete-texte"><span class="surtitre">Lundi · 07:00</span><h1 class="titre">Aujourd'hui</h1></div>
+<a class="btn btn-rond" href="E1-Reglages.dc.html" aria-label="Réglages"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg></a>
+</header>
+<section class="carte" style="align-items: flex-start; padding: 24px 18px; gap: 10px">
+<span class="section">Cette semaine</span>
+<span class="nom" style="font-size: 20px">Aucun menu saisi</span>
+<span class="doux">Sans menu, il n'y a rien à produire. Ce n'est pas une alerte.</span>
+</section>
+<section class="liste">
+<div class="ligne"><span class="ligne-texte"><span class="nom">Fiches de fonction</span><span class="petit doux">aucune</span></span></div>
+<div class="ligne"><span class="ligne-texte"><span class="nom">À confirmer</span><span class="petit doux">rien</span></span></div>
+</section>
+</div>
+<div class="pouce"><a class="btn btn-action btn-large" href="C3-Import.dc.html">Saisir les menus de la semaine</a></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px"><dc-import name="Onglets" actif="aujourdhui" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

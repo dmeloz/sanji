@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Hors ligne</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="gap: 10px">
+<header class="tete-texte"><span class="surtitre">Lundi · 2 / 6 faites</span><h1 class="titre">Production</h1></header>
+<div class="bandeau" style="background: var(--carte); border: 1px solid var(--bordure)">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"></path><path d="M3 3l18 18"></path></svg>
+<span class="ligne-texte"><strong>Hors ligne</strong><span class="petit doux">Tout fonctionne sur l'iPhone. L'assistant IA attend le réseau.</span></span>
+</div>
+<span class="section">Menu 1 · pour le service de midi</span>
+<div class="liste" style="padding: 0 4px">
+<div class="tache faite"><button class="case" aria-label="Marquer non fait : [composant]"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></span></button><span class="ligne-texte"><span class="nom">[composant]</span><span class="petit doux">fait 09:42</span></span><span class="qte">[qté] <span class="unite">g sec</span></span></div>
+<div class="tache"><button class="case" aria-label="Marquer fait : [composant]"><span></span></button><span class="ligne-texte"><span class="nom">[composant]</span><span class="petit doux">avant midi · [n] portions estimée</span></span><span class="qte">[n] <span class="unite">portions</span></span></div>
+</div>
+<a class="btn btn-large" href="B1-ProposerPlanning.dc.html" aria-disabled="true" style="border-style: dashed; color: var(--texte-doux)">Proposer un planning · indisponible hors ligne</a>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px"><dc-import name="Onglets" actif="production" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

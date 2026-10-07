@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Ce que Sanji a lu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="padding-top: 46px; gap: 12px">
+<a class="retour" href="C3-Import.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Texte</a>
+<header class="tete-texte"><span class="surtitre">Semaine du [date] · 10 plats lus</span><h1 class="titre">Ce que Sanji a lu</h1></header>
+
+<section class="carte">
+<span class="section">Lundi</span>
+<span><strong class="doux">M1</strong> [plat du menu 1]</span>
+<span class="etiquettes"><span class="etq etq-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>au poste : [composant]</span><span class="etq etq-action">au poste : [composant]</span><span class="etq etq-action">au poste : [composant]</span><span class="etq etq-ambre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18v.5"></path></svg>sauce : à confirmer</span></span>
+<span style="border-top: 1px solid var(--bordure); padding-top: 8px"><strong class="doux">M2</strong> [plat du menu 2]</span>
+<span class="etiquettes"><span class="etq etq-action">au poste : [féculent]</span><span class="etq etq-action">au poste : [légume]</span><span class="etq" style="border: 1px dashed var(--bordure-forte); background: transparent">hors poste : [protéine]</span></span>
+</section>
+
+<section class="liste">
+<div class="ligne"><span>Mardi</span><span class="petit doux">2 plats · rien à confirmer</span></div>
+<div class="ligne"><span>Mercredi</span><span class="etq etq-ambre">1 mot à préciser</span></div>
+<div class="ligne"><span>Jeudi</span><span class="petit doux">2 plats · sauce à confirmer</span></div>
+<div class="ligne"><span>Vendredi</span><span class="petit doux">2 plats · rien à confirmer</span></div>
+</section>
+<p class="petit doux">Les composants du poste sont créés seuls à l'enregistrement. Vous ne corrigez qu'une exception ; la sauce n'est jamais choisie à votre place.</p>
+</div>
+<div class="pouce nu" style="bottom: 0; padding-bottom: 34px">
+<a class="btn btn-decision btn-large" href="C1-Semaine.dc.html">Enregistrer la semaine</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

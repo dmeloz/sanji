@@ -1,0 +1,66 @@
+/* Sanji — tokens de la refonte 2, palette G « Grand large ».
+   Décision : « 2026-10-07 - Sanji - Ecrans et direction visuelle de la refonte 2 ».
+   À fusionner dans app/css/style.css : MÊMES NOMS de variables que la v69, seules les VALEURS changent.
+   Contrastes vérifiés (WCAG AA) : texte ≥ 4,5:1 sur --fond et --carte ; contours de champ et cases ≥ 3:1.
+   Polices inchangées : SF Pro (système) pour le texte et les titres, IBM Plex Mono embarquée (« Sanji Mono ») pour les quantités. */
+
+:root {
+  /* Surfaces et texte (clair) : parchemin, crème, noir */
+  --fond: #F4EAD5;
+  --carte: #FFF9EC;
+  --carte-2: #EFE3C8;
+  --encre: #161513;          /* décision : bouton Valider, carte « Prochaine », jour en cours */
+  --sur-encre: #FFF9EC;
+  --texte: #161513;
+  --texte-doux: #655C4C;
+  --texte-moyen: #3D372C;
+  --bordure: #E6D9BE;
+  --bordure-forte: #A3967C;
+  --bordure-champ: #857961;
+  --case: #8A7D63;
+
+  /* Action : bleu océan (remplace le basilic) */
+  --action: #1D5AA6;
+  --action-fonce: #164A8A;
+  --action-fond: #E1EAF6;
+  --sur-action: #FFFFFF;
+
+  /* À trancher : or paille (remplace l'ambre) — réservé à ce que le chef doit décider */
+  --exception: #8A5E00;
+  --exception-fond: #F6E3B8;
+  --exception-bord: #E2C47F;
+  --exception-point: #B07A00;
+
+  /* Alerte, erreur, hors règle */
+  --rouge: #B8232A;
+  --rouge-fond: #F8E0DC;
+  --rouge-texte: #8E1A20;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Nuit marine, texte parchemin */
+    --fond: #0E1622;
+    --carte: #172233;
+    --carte-2: #1F2C40;
+    --encre: #F4EAD5;
+    --sur-encre: #0E1622;
+    --texte: #F4EAD5;
+    --texte-doux: #A9B3C2;
+    --texte-moyen: #CBD3DE;
+    --bordure: #26344A;
+    --bordure-forte: #4A5D78;
+    --bordure-champ: #7D8DA5;
+    --action: #6FA8F0;
+    --action-fonce: #A3C8F7;
+    --action-fond: #17304F;
+    --sur-action: #0E1622;
+    --exception: #F0B94A;
+    --exception-fond: #2C2312;
+    --exception-bord: #4D3B17;
+    --exception-point: #F0B94A;
+    --rouge: #FF7369;
+    --rouge-fond: #3D1A1A;
+    --rouge-texte: #FF9F97;
+  }
+}

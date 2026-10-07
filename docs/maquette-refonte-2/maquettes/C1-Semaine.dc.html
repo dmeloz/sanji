@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Semaine</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="gap: 10px">
+<header class="tete">
+<div class="tete-texte"><span class="surtitre">Semaine du [date]</span><h1 class="titre">Semaine</h1></div>
+<a class="btn btn-rond" href="C3-Import.dc.html" aria-label="Saisir les menus"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></a>
+</header>
+
+<div role="group" aria-label="Jours" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+<sc-for list="{{ jours }}" as="j" hint-placeholder-count="7">
+<button onClick="{{ j.choisir }}" aria-pressed="{{ j.pressed }}" disabled="{{ j.ferme }}" aria-label="{{ j.aria }}" style="{{ j.style }}">
+<span style="font-size: 13px; font-weight: 600">{{ j.court }}</span>
+<span class="qte" style="font-size: 15px">{{ j.num }}</span>
+<span style="font-size: 13px; line-height: 1">{{ j.signe }}</span>
+</button>
+</sc-for>
+</div>
+<p class="petit doux" style="display: flex; justify-content: space-between"><span>‹ glissez pour changer de jour ›</span><span>! à trancher · ✓ tout fait</span></p>
+
+<section class="carte" style="gap: 6px">
+<span class="section">{{ jour.nom }} · menus</span>
+<span><strong class="doux">M1</strong> {{ jour.m1 }}</span>
+<span><strong class="doux">M2</strong> {{ jour.m2 }}</span>
+<span class="petit doux">Carte : contexte seulement · {{ jour.carte }}</span>
+<sc-if value="{{ jour.aFiche }}" hint-placeholder-val="{{ true }}"><span class="etiquettes"><span class="etq">[fiche] · midi · [n] pers.</span><span class="etq etq-ambre">allergènes à confirmer</span></span></sc-if>
+</section>
+
+<sc-for list="{{ jour.creneaux }}" as="c" hint-placeholder-count="2">
+<section style="display: flex; flex-direction: column; gap: 6px">
+<span class="section">{{ c.nom }}</span>
+<div class="liste">
+<sc-for list="{{ c.lignes }}" as="l" hint-placeholder-count="2">
+<div class="ligne"><span class="ligne-texte"><span class="nom">{{ l.nom }}</span><span class="{{ l.infoClasse }}">{{ l.info }}</span></span><span class="qte">{{ l.q }}</span></div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+</div>
+
+<div class="pouce">
+<a class="btn btn-large" href="B1-ProposerPlanning.dc.html" style="border-style: dashed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>Proposer un planning</a>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px"><dc-import name="Onglets" actif="semaine" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { j: 1 }; }
+renderVals() {
+var self = this;
+var L = function (nom, info, q, ambre) { return { nom: nom, info: info, q: q, infoClasse: ambre ? "etq etq-ambre" : "petit doux", ambre: !!ambre }; };
+var semaine = [
+{ court: "Lun", num: "", signe: "!", nom: "Lundi", m1: "[plat du menu 1]", m2: "[plat du menu 2]", carte: "après midi libre", aFiche: false,
+creneaux: [{ nom: "Avant midi", lignes: [L("[composant]", "menu 1 · jour même", "[qté] g"), L("[composant]", "menu 2", "25 p.")] }, { nom: "Après midi", lignes: [L("[composant]", "pour mar. · J+1", "[qté] g")] }] },
+{ court: "Mar", num: "", signe: "!", nom: "Mardi", m1: "[plat du menu 1]", m2: "[plat du menu 2]", carte: "après midi chargé", aFiche: true,
+creneaux: [{ nom: "Avant midi", lignes: [L("[composant]", "menu 1 · jour même", "[qté]"), L("[composant]", "faites sam. · hors règle, 3 jours", "[qté] g", true)] }, { nom: "Après midi · revue de mi-semaine", lignes: [L("[composants]", "pour mer. · J+1", "[qté]")] }] },
+{ court: "Mer", num: "", signe: "", nom: "Mercredi", m1: "[plat du menu 1]", m2: "[plat du menu 2]", carte: "avant soir chargé", aFiche: false,
+creneaux: [{ nom: "Avant midi", lignes: [L("[composant]", "menu 1 · jour même", "[qté]")] }] },
+{ court: "Jeu", num: "", signe: "", nom: "Jeudi", m1: "[plat du menu 1]", m2: "[plat du menu 2]", carte: "—", aFiche: false, creneaux: [{ nom: "Avant midi", lignes: [L("[composant]", "menu 1 · jour même", "[qté]")] }] },
+{ court: "Ven", num: "", signe: "", nom: "Vendredi", m1: "[plat du menu 1]", m2: "[plat du menu 2]", carte: "—", aFiche: false, creneaux: [{ nom: "Avant midi", lignes: [L("[composant]", "menu 1 · jour même", "[qté]")] }] },
+{ court: "Sam", num: "", signe: "?", nom: "Samedi", m1: "pas de menu du jour", m2: "pas de menu du jour", carte: "créneaux à confirmer", aFiche: false, creneaux: [{ nom: "Créneaux non présumés", lignes: [L("Semaine type à confirmer", "Réglages › organisation du poste", "")] }] },
+{ court: "Dim", num: "", signe: "", nom: "Dimanche", ferme: true }
+];
+var jours = semaine.map(function (d, i) {
+var on = self.state.j === i;
+var st = "min-height: 64px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 0; font: inherit; ";
+if (d.ferme) st += "background: var(--carte-2); color: var(--texte-doux); border: 1px dashed var(--bordure-forte)";
+else st += on ? "background: var(--encre); color: var(--sur-encre); border: 1px solid var(--encre)" : "background: var(--carte); color: var(--texte); border: 1px solid var(--bordure)";
+return { court: d.court, num: d.num, signe: d.ferme ? "fermé" : (d.signe || " "), pressed: on ? "true" : "false", ferme: !!d.ferme,
+aria: d.ferme ? "Dimanche, fermé" : d.nom + (d.signe === "!" ? ", à trancher" : ""), style: st,
+choisir: function () { if (!d.ferme) self.setState({ j: i }); } };
+});
+return { jours: jours, jour: semaine[this.state.j] };
+}
+}
+</script>
+</body>
+</html>

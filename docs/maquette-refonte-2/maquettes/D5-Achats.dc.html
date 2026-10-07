@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Articles de la semaine</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="gap: 10px">
+<header class="tete-texte"><span class="surtitre">Semaine du [date] · pour le poste</span><h1 class="titre">Articles</h1></header>
+<div class="seg" style="grid-template-columns: repeat(2, minmax(0, 1fr))"><button aria-pressed="{{ pSemaine }}" onClick="{{ voirSemaine }}">Semaine</button><button aria-pressed="{{ pJour }}" onClick="{{ voirJour }}">Aujourd'hui</button></div>
+<sc-for list="{{ jours }}" as="j" hint-placeholder-count="2">
+<section style="display: flex; flex-direction: column; gap: 6px">
+<span class="section">{{ j.titre }}</span>
+<div class="liste" style="padding: 0 4px">
+<sc-for list="{{ j.articles }}" as="a" hint-placeholder-count="3">
+<div class="{{ a.classe }}" style="min-height: 60px">
+<button class="case" aria-label="{{ a.aria }}" onClick="{{ a.cocher }}"><span><sc-if value="{{ a.coche }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></sc-if></span></button>
+<span class="ligne-texte"><span class="nom">{{ a.nom }}</span><span class="petit doux">{{ a.pour }}</span></span>
+<span class="qte">{{ a.q }} <span class="unite">{{ a.u }}</span></span>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+<p class="petit doux">Quantités brutes calculées depuis les menus. Une quantité inconnue reste « à compléter », sans alerte.</p>
+</div>
+<div class="pouce"><button class="btn btn-large"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"></path><path d="M5 12v8h14v-8"></path></svg>Partager la liste</button></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px"><dc-import name="Onglets" actif="stock" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { vue: "semaine", coche: { a1: true } }; }
+renderVals() {
+var self = this;
+var A = function (id, nom, pour, q, u) {
+var c = !!self.state.coche[id];
+return { nom: nom, pour: pour, q: q, u: u, coche: c, classe: c ? "tache faite" : "tache",
+aria: (c ? "Décocher : " : "Cocher : ") + nom,
+cocher: function () { var x = Object.assign({}, self.state.coche); x[id] = !x[id]; self.setState({ coche: x }); } };
+};
+var lun = { titre: "Lundi · aujourd'hui", articles: [
+A("a1", "[article]", "menu 1", "[qté]", "g"),
+A("a2", "[article]", "menu 1", "[n]", "portions"),
+A("a3", "[article]", "menu 1 · à compléter", "—", ""),
+A("a4", "[article]", "menu 2", "[qté]", "g")
+] };
+var mar = { titre: "Mardi", articles: [
+A("a5", "[article]", "menu 1", "[qté]", "g"),
+A("a6", "[article]", "menu 1", "[qté]", "g"),
+A("a7", "[article]", "menu 2", "[qté]", "g")
+] };
+var jours = this.state.vue === "jour" ? [lun] : [lun, mar];
+return { jours: jours, pSemaine: this.state.vue === "semaine" ? "true" : "false", pJour: this.state.vue === "jour" ? "true" : "false",
+voirSemaine: function () { self.setState({ vue: "semaine" }); }, voirJour: function () { self.setState({ vue: "jour" }); } };
+}
+}
+</script>
+</body>
+</html>

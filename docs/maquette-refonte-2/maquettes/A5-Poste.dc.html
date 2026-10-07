@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Mode en poste</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="padding-top: 50px; gap: 16px">
+<header style="display: flex; align-items: center; gap: 12px">
+<a class="btn btn-court" href="A4-Fiche.dc.html">Quitter</a>
+<span class="ligne-texte"><span class="nom">[composant] · <span class="qte">[qté] g</span></span><span class="petit doux">écran maintenu allumé</span></span>
+</header>
+<div aria-hidden="true" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{ segs }}" as="s" hint-placeholder-count="4"><span style="{{ s.style }}"></span></sc-for>
+</div>
+<span class="qte" style="font-size: 17px; color: var(--texte-doux)">Étape {{ num }} sur 4</span>
+<p style="font-size: 32px; font-weight: 650; line-height: 1.2; letter-spacing: -0.01em">{{ texte }}</p>
+<div class="carte" style="flex-direction: row; align-items: baseline; justify-content: space-between">
+<span style="font-size: 20px">{{ ing }}</span><span><span class="qte-moy">{{ q }}</span> <span class="unite">{{ u }}</span></span>
+</div>
+</div>
+<div class="pouce nu" style="bottom: 0; padding-bottom: 34px; border-top: 0">
+<div class="rangee">
+<button class="btn" onClick="{{ prec }}" style="min-height: 80px; font-size: 20px">Précédente</button>
+<button class="btn btn-action" onClick="{{ suiv }}" style="min-height: 80px; font-size: 20px">{{ libSuiv }}</button>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { i: 1 }; }
+renderVals() {
+var self = this;
+var e = [
+{ t: "[Étape 1 de votre recette]", ing: "[composant]", q: "[qté]", u: "g cru net" },
+{ t: "[Étape 2 de votre recette]", ing: "[ingrédient]", q: "[qté]", u: "" },
+{ t: "[Étape 3 de votre recette]", ing: "[ingrédient]", q: "[qté]", u: "" },
+{ t: "[Étape 4 de votre recette]", ing: "[ingrédient]", q: "[qté]", u: "" }
+];
+var i = this.state.i;
+return {
+segs: e.map(function (x, k) { return { style: "height: 6px; border-radius: 3px; background: " + (k <= i ? "var(--action)" : "var(--bordure)") }; }),
+num: String(i + 1), texte: e[i].t, ing: e[i].ing, q: e[i].q, u: e[i].u,
+libSuiv: i === e.length - 1 ? "Fait" : "Suivante",
+prec: function () { self.setState({ i: Math.max(0, self.state.i - 1) }); },
+suiv: function () { self.setState({ i: Math.min(e.length - 1, self.state.i + 1) }); }
+};
+}
+}
+</script>
+</body>
+</html>

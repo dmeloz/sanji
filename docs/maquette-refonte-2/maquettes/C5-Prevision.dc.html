@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Prévisions du jour choisi</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.tdb-jours{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tdb-jour{background:var(--carte);border-radius:16px;padding:10px 10px 12px;display:flex;flex-direction:column;gap:6px;color:var(--texte)!important;min-height:150px}
+.tdb-jour.auj{background:var(--encre);color:var(--sur-encre)!important}
+.tdb-jour .j{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.tdb-jour .m{display:flex;flex-direction:column;gap:1px}
+.tdb-jour .m b{font-size:13px;font-weight:700;opacity:.7}
+.tdb-jour .m span{font-size:15px;line-height:1.3;font-weight:600}
+.tdb-chiffres{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tdb-case{background:var(--carte);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;color:var(--texte)!important;min-height:76px}
+.tdb-case .qte-moy{line-height:1.1}
+.tdb-case.ambre{background:var(--exception-fond);border:1px solid var(--exception-bord);color:var(--exception)!important}
+.haut a.ligne,.haut a.carte{color:var(--texte)}
+.haut a.carte-ambre{color:var(--exception)}
+.pouce a.btn{color:var(--texte)}
+.pouce a.btn-action{color:var(--sur-action)}
+.tdb-puces{display:flex;gap:6px;flex-wrap:wrap}
+.tdb-puces .btn{min-height:44px;padding:0 14px;font-family:var(--mono)}
+.tdb-puces .btn[aria-pressed="true"]{background:var(--encre);color:var(--sur-encre);border-color:var(--encre)}
+.tdb-pas{width:48px;height:48px;padding:0;border-radius:24px;font-size:22px}
+.tdb-menu{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;min-height:56px;border-bottom:1px solid var(--bordure)}
+.tdb-menu:last-child{border-bottom:0}
+.av-titre{font-size:13px;font-weight:600;color:var(--texte-doux)}
+.av-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;border-bottom:1px solid var(--bordure);color:var(--texte)!important}
+.av-nom{display:flex;flex-direction:column;gap:1px;min-width:0}
+.p-q{display:flex;align-items:baseline;gap:4px;white-space:nowrap}
+.p-q .unite{font-size:13px}
+.tdb-tete{display:flex;align-items:baseline;justify-content:space-between}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut"><span class="surtitre">Semaine du [date]</span><h1 class="titre">Semaine</h1></div>
+<div class="voile" aria-hidden="true"></div>
+<section class="feuille" role="dialog" aria-label="Sanji — Prévisions du jour choisi" style="top: 96px; gap: 12px">
+<div class="poignee" aria-hidden="true"></div>
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px"><div><span class="surtitre">Mardi [date] · midi</span><h2 class="titre-feuille">Couverts midi</h2></div><a class="btn btn-rond" href="C1-Semaine.dc.html" aria-label="Fermer" style="width: 44px; height: 44px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></a></div>
+<div class="carte" style="gap: 10px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+<button class="btn tdb-pas" aria-label="Un couvert de moins">−</button>
+<span style="display: flex; flex-direction: column; align-items: center"><span class="qte-grande">[n]</span><span class="petit doux">couverts au total</span></span>
+<button class="btn tdb-pas" aria-label="Un couvert de plus">+</button>
+</div>
+<div class="tdb-puces"><button class="btn" aria-pressed="false">40</button><button class="btn" aria-pressed="false">50</button><button class="btn" aria-pressed="false">60</button><button class="btn" aria-pressed="false">70</button><button class="btn" aria-pressed="false">80</button></div>
+</div>
+<div class="liste">
+<div class="tdb-menu"><span class="ligne-texte"><span class="nom">Menu 1</span><span class="petit doux">[plat du menu 1]</span></span><span style="display: flex; align-items: center; gap: 8px"><button class="btn tdb-pas" style="width: 44px; height: 44px" aria-label="Un couvert du menu 1 vers le menu 2">−</button><span class="qte-moy" style="min-width: 36px; text-align: center">[n]</span><button class="btn tdb-pas" style="width: 44px; height: 44px" aria-label="Un couvert du menu 2 vers le menu 1">+</button></span></div>
+<div class="tdb-menu"><span class="ligne-texte"><span class="nom">Menu 2</span><span class="petit doux">[plat du menu 2]</span></span><span class="qte-moy" style="min-width: 36px; text-align: center; margin-right: 52px">[n]</span></div>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; min-height: 44px"><span style="display: flex; align-items: center; gap: 8px"><span class="etq">calculé</span><span class="etq">provisoire</span><span class="petit doux">Détail du calcul</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+<a class="ligne" href="C1-Semaine.dc.html" style="color: var(--texte); border-top: 1px solid var(--bordure); border-bottom: 0"><span class="ligne-texte"><span class="nom">Fiche de fonction · [fiche]</span><span class="petit doux">[n] pers. · menu fixe</span></span><span class="etq etq-ambre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18v.5"></path></svg>allergènes à confirmer</span></a>
+<div class="rangee" style="margin-top: auto"><a class="btn btn-large" href="C1-Semaine.dc.html" style="color: var(--texte)">Annuler</a><a class="btn btn-decision btn-large" href="C1-Semaine.dc.html" style="flex: 2; color: var(--sur-encre)">Enregistrer</a></div>
+<p class="petit doux" style="text-align: center">Même feuille que sur Aujourd'hui, pour le jour choisi dans Semaine.</p>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

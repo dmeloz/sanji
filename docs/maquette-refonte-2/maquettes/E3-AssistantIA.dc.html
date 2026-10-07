@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Assistant IA</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="padding-top: 46px; gap: 10px">
+<a class="retour" href="E1-Reglages.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Réglages</a>
+<h1 class="titre">Assistant IA</h1>
+<p class="doux">Propose un brouillon de planning. Ne calcule aucune quantité, n'applique rien sans vous.</p>
+<div class="carte" style="flex-direction: row; align-items: center; justify-content: space-between">
+<span class="ligne-texte"><span class="nom">Activer « Proposer un planning »</span><span class="petit doux">{{ etat }}</span></span>
+<button class="interrupteur" aria-pressed="{{ pressed }}" aria-label="Activer l'assistant IA" onClick="{{ basculer }}"><span></span></button>
+</div>
+<sc-if value="{{ actif }}" hint-placeholder-val="{{ true }}">
+<div class="carte" style="gap: 12px">
+<div class="champ"><label for="modele">Modèle</label><select id="modele"><option>[modèle choisi]</option></select></div>
+<div class="champ"><label for="cle">Clé d'accès</label><input id="cle" value="•••• •••• •••• 3f9a" readonly="" style="font-family: var(--mono)"></div>
+<div class="rangee"><button class="btn btn-court">Remplacer</button><button class="btn btn-court">Effacer</button><button class="btn btn-court">Tester</button></div>
+</div>
+<p class="petit doux">La clé reste sur cet iPhone. Elle n'est jamais affichée en entier ni incluse dans un export.</p>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { on: true }; }
+renderVals() {
+var self = this;
+var on = this.state.on;
+return { actif: on, pressed: on ? "true" : "false", etat: on ? "activé · connexion vérifiée le [date]" : "désactivé", basculer: function () { self.setState({ on: !self.state.on }); } };
+}
+}
+</script>
+</body>
+</html>

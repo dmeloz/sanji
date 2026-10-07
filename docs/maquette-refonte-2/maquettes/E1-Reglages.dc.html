@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Réglages</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="padding-top: 46px; gap: 8px">
+<a class="retour" href="A1-Aujourdhui.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Aujourd'hui</a>
+<h1 class="titre">Réglages</h1>
+<span class="section" style="margin-top: 6px">Production</span>
+<nav class="liste">
+<a class="ligne" href="E2-StandardsBase.dc.html"><span class="ligne-texte"><span class="nom">Standards de base</span><span class="petit doux">manuels et référentiel · 0 changée par vous</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></a>
+<a class="ligne" href="E2-StandardsBase.dc.html"><span class="ligne-texte"><span class="nom">Standards maison</span><span class="petit doux">portions par famille et catégorie</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></a>
+</nav>
+<span class="section">Poste</span>
+<nav class="liste">
+<a class="ligne" href="C2-SemaineType.dc.html"><span class="ligne-texte"><span class="nom">Organisation du poste</span><span class="petit doux">semaine type, règles de préparation</span></span><span class="etq etq-ambre">à confirmer</span></a>
+<a class="ligne" href="C3-Import.dc.html"><span class="ligne-texte"><span class="nom">Import des menus</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></a>
+</nav>
+<span class="section">Assistant</span>
+<nav class="liste">
+<a class="ligne" href="E3-AssistantIA.dc.html"><span class="ligne-texte"><span class="nom">Assistant IA</span><span class="petit doux">Proposer un planning · facultatif</span></span><span class="etq etq-action">activé</span></a>
+</nav>
+<span class="section">Données</span>
+<nav class="liste">
+<a class="ligne" href="E4-Donnees.dc.html"><span class="ligne-texte"><span class="nom">Données et hors ligne</span><span class="petit doux">dernier export : [date]</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></a>
+<a class="ligne" href="E4-Donnees.dc.html"><span class="ligne-texte"><span class="nom">Version</span><span class="petit doux">Sanji 62 · à jour</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></a>
+</nav>
+<p class="petit doux">Apparence : suit le réglage du téléphone (clair ou sombre).</p>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px"><dc-import name="Onglets" actif="aujourdhui" hint-size="390px,84px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
