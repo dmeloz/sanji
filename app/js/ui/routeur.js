@@ -6,36 +6,34 @@ import { h, parId } from './dom.js';
 import { maintenirAllume } from './ecran-allume.js';
 import { encadre } from './elements.js';
 import * as vueAujourdhui from './vue-aujourdhui.js';
+import * as vueArticles from './vue-articles.js';
 import * as vueFiche from './vue-fiche.js';
 import * as vueImport from './vue-import.js';
 import * as vuePoste from './vue-poste.js';
 import * as vueProduction from './vue-production.js';
 import * as vueReglages from './vue-reglages.js';
 import * as vueSemaine from './vue-semaine.js';
-import * as vueStock from './vue-stock.js';
 
 export const VUES = {
-  aujourdhui: vueAujourdhui, production: vueProduction, semaine: vueSemaine, stock: vueStock,
+  aujourdhui: vueAujourdhui, production: vueProduction, semaine: vueSemaine, articles: vueArticles,
   fiche: vueFiche, poste: vuePoste, import: vueImport, reglages: vueReglages,
 };
 
 /** Onglet actif selon la vue. Réglages n'a plus d'onglet : il s'ouvre depuis Aujourd'hui, dont l'onglet reste marqué. */
 export const ONGLET_DE_VUE = {
   aujourdhui: 'aujourdhui', reglages: 'aujourdhui', production: 'production', fiche: 'production', poste: 'production',
-  semaine: 'semaine', import: 'semaine', stock: 'stock',
+  semaine: 'semaine', import: 'semaine', articles: 'articles',
 };
 
 /**
  * Analyse un hash (« #/production/2026-10-05 ») : { vue, param, sous? }. Fonction pure, sans DOM.
- * Adresses : #/aujourdhui (accueil, défaut), #/production[/date], #/semaine[/date[/tableau]], #/stock[/restes|dlc|achats][/date],
+ * Adresses : #/aujourdhui (accueil, défaut), #/production[/date], #/semaine[/date[/tableau]], #/articles,
  * #/fiche/<composantId>, #/poste/<composantId>, #/import[/date], #/reglages[/rubrique].
- * Défauts : production = aujourd'hui ; import et stock = lundi de la semaine donnée ou en cours ; stock sans sous-vue précise
- * (« #/stock », « #/stock/<date> ») : `sous` est absent et la vue Stock choisit (dernière choisie, sinon DLC s'il y a à consommer
- * en priorité, sinon Achats ; l'ancienne adresse #/produits vaut « achats ») ; semaine sans date = tableau de la semaine (param null), avec date = détail du jour,
+ * Défauts : production = aujourd'hui ; import = lundi de la semaine donnée ou en cours ; articles : aucun paramètre ; semaine sans date = tableau de la semaine (param null), avec date = détail du jour,
  * « /tableau » en plus = tableau de cette semaine (ramenée au lundi). Une adresse inconnue, ou fiche/poste sans identifiant, mène à l'accueil.
  * Réglages : une clé de rubrique inconnue donne la racine.
  * Anciennes adresses, redirigées pour les favoris : #/accueil et #/tableau → aujourdhui (#/tableau/<date> → tableau de la semaine),
- * #/jour/<d> → production/<d>, #/produits/<d> → stock/achats/<d>, #/detail/<d> → semaine/<d>,
+ * #/jour/<d> → production/<d>, #/stock[/…] et #/produits[/…] → articles (Restes, DLC et Achats sont masqués, décision du 2026-10-07), #/detail/<d> → semaine/<d>,
  * #/composant/<id> → fiche/<id>, #/menus/<d> → import/<d>.
  */
 /** Décode un morceau d'adresse ; une adresse mal formée (« %E0 ») vaut « absent » au lieu de faire échouer le routeur. */
@@ -56,14 +54,7 @@ export function analyserHash(hash, aujourd) {
   if (vue === 'detail') return { vue: 'semaine', param: dateValide ? param : aujourd };
   if (vue === 'tableau' && dateValide) return { vue: 'semaine', param: lundiDe(param), sous: 'tableau' };
   if (vue === 'import' || vue === 'menus') return { vue: 'import', param: lundiDe(dateValide ? param : aujourd) };
-  if (vue === 'stock' || vue === 'produits') {
-    // Sans sous-vue précise (« #/stock », date seule, inconnue), `sous` est absent : la vue Stock choisit (dernière choisie,
-    // sinon DLC s'il y a à consommer, sinon Achats). L'ancienne adresse #/produits vaut toujours « achats ».
-    const choisie = vue === 'stock' && vueStock.SOUS_VUES.includes(param);
-    const sous = choisie ? param : vue === 'produits' ? 'achats' : undefined;
-    const date = choisie ? morceaux[2] : param;
-    return { vue: 'stock', param: lundiDe(date && estDateValide(date) ? date : aujourd), ...(sous ? { sous } : {}) };
-  }
+  if (vue === 'articles' || vue === 'stock' || vue === 'produits') return { vue: 'articles', param: null };
   if ((vue === 'fiche' || vue === 'composant') && param) return { vue: 'fiche', param };
   if (vue === 'poste' && param) return { vue: 'poste', param };
   if (vue === 'reglages') return { vue, param: vueReglages.CLES_RUBRIQUES.includes(morceaux[1]) ? morceaux[1] : null };

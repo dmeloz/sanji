@@ -84,14 +84,12 @@ test('analyserHash : routes, défauts et dates invalides', () => {
   assert.deepEqual(analyserHash('#/semaine/2026-10-14', j), { vue: 'semaine', param: '2026-10-14' }, 'avec date : détail du jour');
   assert.deepEqual(analyserHash('#/semaine/pas-une-date', j), { vue: 'semaine', param: null });
   assert.deepEqual(analyserHash('#/semaine/2026-10-14/tableau', j), { vue: 'semaine', param: '2026-10-12', sous: 'tableau' }, 'ramenée au lundi');
-  // Sans sous-vue précise, `sous` est absent : la vue Stock choisit (dernière choisie, DLC à consommer, sinon Achats).
-  assert.deepEqual(analyserHash('#/stock', j), { vue: 'stock', param: lundi });
-  for (const sous of ['restes', 'dlc', 'achats']) {
-    assert.deepEqual(analyserHash(`#/stock/${sous}`, j), { vue: 'stock', param: lundi, sous });
-    assert.deepEqual(analyserHash(`#/stock/${sous}/2026-10-14`, j), { vue: 'stock', param: '2026-10-12', sous });
+  // Articles (décision du 2026-10-07) : aucun paramètre ; les anciennes adresses #/stock[/…] y mènent (Restes, DLC et Achats sont masqués).
+  assert.deepEqual(analyserHash('#/articles', j), { vue: 'articles', param: null });
+  assert.deepEqual(analyserHash('#/articles/2026-10-14', j), { vue: 'articles', param: null });
+  for (const ancienne of ['#/stock', '#/stock/restes', '#/stock/dlc/2026-10-14', '#/stock/achats', '#/stock/2026-10-14', '#/stock/inconnu']) {
+    assert.deepEqual(analyserHash(ancienne, j), { vue: 'articles', param: null }, ancienne);
   }
-  assert.deepEqual(analyserHash('#/stock/2026-10-14', j), { vue: 'stock', param: '2026-10-12' });
-  assert.deepEqual(analyserHash('#/stock/inconnu', j), { vue: 'stock', param: lundi });
   assert.deepEqual(analyserHash('#/fiche/comp_1abc', j), { vue: 'fiche', param: 'comp_1abc' });
   assert.deepEqual(analyserHash('#/fiche', j), { vue: 'aujourdhui', param: null }, 'fiche sans identifiant : accueil');
   assert.deepEqual(analyserHash('#/poste/comp_1abc', j), { vue: 'poste', param: 'comp_1abc' });
@@ -114,8 +112,8 @@ test('analyserHash : les anciennes adresses sont redirigées sans casse', () => 
   assert.deepEqual(analyserHash('#/jour/2026-10-10', j), { vue: 'production', param: '2026-10-10' });
   assert.deepEqual(analyserHash('#/detail/2026-10-10', j), { vue: 'semaine', param: '2026-10-10' });
   assert.deepEqual(analyserHash('#/detail/2026-13-45', j), { vue: 'semaine', param: j });
-  assert.deepEqual(analyserHash('#/produits/2026-10-08', j), { vue: 'stock', param: '2026-10-05', sous: 'achats' });
-  assert.deepEqual(analyserHash('#/produits', j), { vue: 'stock', param: '2026-10-05', sous: 'achats' });
+  assert.deepEqual(analyserHash('#/produits/2026-10-08', j), { vue: 'articles', param: null });
+  assert.deepEqual(analyserHash('#/produits', j), { vue: 'articles', param: null });
   assert.deepEqual(analyserHash('#/composant/comp_1abc', j), { vue: 'fiche', param: 'comp_1abc' });
   assert.deepEqual(analyserHash('#/composant', j), { vue: 'aujourdhui', param: null });
   assert.deepEqual(analyserHash('#/menus', j), { vue: 'import', param: '2026-10-05' });
@@ -132,5 +130,5 @@ test('routeur : chaque vue a un onglet, quatre onglets, Aujourd\'hui est l\'accu
     assert.ok(ONGLET_DE_VUE[vue], `onglet manquant : ${vue}`);
   }
   assert.equal(VUES.aujourdhui.titre(), 'Aujourd\'hui');
-  assert.deepEqual([...new Set(Object.values(ONGLET_DE_VUE))].sort(), ['aujourdhui', 'production', 'semaine', 'stock']);
+  assert.deepEqual([...new Set(Object.values(ONGLET_DE_VUE))].sort(), ['articles', 'aujourdhui', 'production', 'semaine']);
 });

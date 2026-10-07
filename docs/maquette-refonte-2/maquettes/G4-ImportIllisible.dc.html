@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sanji — Import illisible</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="sanji-r2.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.tdb-jours{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tdb-jour{background:var(--carte);border-radius:16px;padding:10px 10px 12px;display:flex;flex-direction:column;gap:6px;color:var(--texte)!important;min-height:150px}
+.tdb-jour.auj{background:var(--encre);color:var(--sur-encre)!important}
+.tdb-jour .j{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.tdb-jour .m{display:flex;flex-direction:column;gap:1px}
+.tdb-jour .m b{font-size:13px;font-weight:700;opacity:.7}
+.tdb-jour .m span{font-size:15px;line-height:1.3;font-weight:600}
+.tdb-chiffres{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tdb-case{background:var(--carte);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;color:var(--texte)!important;min-height:76px}
+.tdb-case .qte-moy{line-height:1.1}
+.tdb-case.ambre{background:var(--exception-fond);border:1px solid var(--exception-bord);color:var(--exception)!important}
+.haut a.ligne,.haut a.carte{color:var(--texte)}
+.haut a.carte-ambre{color:var(--exception)}
+.pouce a.btn{color:var(--texte)}
+.pouce a.btn-action{color:var(--sur-action)}
+.tdb-puces{display:flex;gap:6px;flex-wrap:wrap}
+.tdb-puces .btn{min-height:44px;padding:0 14px;font-family:var(--mono)}
+.tdb-puces .btn[aria-pressed="true"]{background:var(--encre);color:var(--sur-encre);border-color:var(--encre)}
+.tdb-pas{width:48px;height:48px;padding:0;border-radius:24px;font-size:22px}
+.tdb-menu{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;min-height:56px;border-bottom:1px solid var(--bordure)}
+.tdb-menu:last-child{border-bottom:0}
+.av-titre{font-size:13px;font-weight:600;color:var(--texte-doux)}
+.av-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;border-bottom:1px solid var(--bordure);color:var(--texte)!important}
+.av-nom{display:flex;flex-direction:column;gap:1px;min-width:0}
+.p-q{display:flex;align-items:baseline;gap:4px;white-space:nowrap}
+.p-q .unite{font-size:13px}
+.vide{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:20px 0;border-top:1px solid var(--bordure);border-bottom:1px solid var(--bordure)}
+.hist-l{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;border-bottom:1px solid var(--bordure);color:var(--texte)!important}
+.tdb-tete{display:flex;align-items:baseline;justify-content:space-between}
+</style>
+</helmet>
+<div class="ecran">
+<div class="haut" style="padding-top: 46px; gap: 12px">
+<a class="retour" href="C3-Import.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Texte collé</a>
+<header class="tete-texte"><span class="surtitre">Semaine du [date]</span><h1 class="titre">Ce que Sanji a lu</h1></header>
+<div class="carte-ambre" style="gap: 6px"><strong style="display: flex; align-items: center; gap: 6px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18v.5"></path></svg>3 lignes non comprises</strong>
+<span>« [ligne] »</span><span>« [ligne] »</span><span>« [ligne] »</span>
+<span class="petit">Rien n'est deviné : ces lignes ne sont pas enregistrées.</span></div>
+<div style="display: flex; flex-direction: column">
+<div class="hist-l"><span class="nom">Lundi</span><span class="petit doux">2 menus · lu</span></div>
+<div class="hist-l"><span class="nom">Mardi</span><span class="petit doux">2 menus · lu</span></div>
+<div class="hist-l"><span class="nom">Mercredi</span><span class="petit" style="color: var(--exception); font-weight: 600">1 à vérifier</span></div>
+<div class="hist-l"><span class="nom">Jeudi</span><span class="petit doux">non saisi</span></div>
+</div>
+</div>
+<div class="pouce nu" style="bottom: 0; padding-bottom: 34px"><div class="rangee"><a class="btn btn-large" href="C3-Import.dc.html" style="color: var(--texte)">Corriger le texte</a><a class="btn btn-decision btn-large" href="C4-Lu.dc.html" style="color: var(--sur-encre)">Enregistrer le lu</a></div></div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

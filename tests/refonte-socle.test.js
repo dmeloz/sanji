@@ -21,7 +21,8 @@ before(async () => {
     production: await import('../app/js/ui/vue-production.js'),
     fiche: await import('../app/js/ui/vue-fiche.js'),
     semaine: await import('../app/js/ui/vue-semaine.js'),
-    stock: await import('../app/js/ui/vue-stock.js'),
+    articles: await import('../app/js/ui/vue-articles.js'),
+    stock: await import('../app/js/ui/vue-stock.js'), // vue masquée (décision du 2026-10-07) : gardée dans le code, plus de route
     import: await import('../app/js/ui/vue-import.js'),
     poste: await import('../app/js/ui/vue-poste.js'),
   };
@@ -31,8 +32,8 @@ after(() => dom.restaurer());
 test('barre d\'onglets : quatre onglets fixes, dans l\'ordre, sans Réglages', () => {
   const html = lire('index.html');
   const nav = html.slice(html.indexOf('<nav id="onglets"'), html.indexOf('</nav>'));
-  assert.deepEqual([...nav.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ['#/aujourdhui', '#/production', '#/semaine', '#/stock']);
-  assert.deepEqual([...nav.matchAll(/data-onglet="([^"]+)"/g)].map((m) => m[1]), ['aujourdhui', 'production', 'semaine', 'stock']);
+  assert.deepEqual([...nav.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ['#/aujourdhui', '#/production', '#/semaine', '#/articles']);
+  assert.deepEqual([...nav.matchAll(/data-onglet="([^"]+)"/g)].map((m) => m[1]), ['aujourdhui', 'production', 'semaine', 'articles']);
   assert.doesNotMatch(nav, /Réglages/);
   assert.match(html, /id="barre-reglages"[^>]*href="#\/reglages"/, 'le bouton Réglages de l\'en-tête');
 });

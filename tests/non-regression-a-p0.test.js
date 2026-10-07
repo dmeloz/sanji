@@ -34,6 +34,7 @@ before(async () => {
     jour: await import('../app/js/ui/vue-production.js'),
     composant: await import('../app/js/ui/vue-composant.js'),
     produits: await import('../app/js/ui/vue-produits.js'),
+    stock: await import('../app/js/ui/vue-stock.js'), // vue masquée (2026-10-07) : toujours rendue ici pour vérifier ses liens
   };
 });
 after(() => dom.restaurer());
@@ -76,7 +77,7 @@ const RENDUS = (e) => {
   return [
     ['tableau', null], ['tableau', S.lundiSuivant], ['menus', S.lundiSuivant], ['detail', S.lundiSuivant], ['detail', S.samedi],
     ['jour', S.samedi], ['jour', S.lundiSuivant], ['produits', S.lundiSuivant], ['reglages', null],
-    ['aujourdhui', null], ['production', S.samedi], ['semaine', null], ['semaine', S.samedi], ['stock', S.lundiSuivant], ['import', S.lundiSuivant],
+    ['aujourdhui', null], ['production', S.samedi], ['semaine', null], ['semaine', S.samedi], ['articles', null], ['stock', S.lundiSuivant], ['import', S.lundiSuivant],
     ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees'],
     ...composants.slice(0, 4).map((id) => ['composant', id]),
     ...composants.slice(0, 2).map((id) => ['fiche', id]),
@@ -84,7 +85,7 @@ const RENDUS = (e) => {
 };
 
 // `analyserHash` renvoie toujours une vue (route inconnue = accueil) : seul le premier segment dit si une adresse est connue.
-const ADRESSES_HISTORIQUES = ['accueil', 'tableau', 'jour', 'produits', 'detail', 'composant', 'menus'];
+const ADRESSES_HISTORIQUES = ['accueil', 'tableau', 'jour', 'produits', 'stock', 'detail', 'composant', 'menus'];
 const adresseConnue = (href) => {
   const premier = href.replace(/^#\/?/, '').split('/')[0];
   return Object.hasOwn(routeur.VUES, premier) || ADRESSES_HISTORIQUES.includes(premier);
@@ -119,7 +120,7 @@ test('liens : les adresses historiques mènent toujours à une page, et une rout
   for (const hash of ['#/accueil', '#/tableau', '#/', '', '#/inconnu']) {
     assert.equal(routeur.analyserHash(hash, S.samedi).vue, 'aujourdhui', hash);
   }
-  const attendu = { '#/jour': 'production', '#/detail': 'semaine', '#/produits': 'stock', '#/menus': 'import', [`#/composant/${'x'}`]: 'fiche' };
+  const attendu = { '#/jour': 'production', '#/detail': 'semaine', '#/produits': 'articles', '#/stock/dlc/2026-10-05': 'articles', '#/menus': 'import', [`#/composant/${'x'}`]: 'fiche' };
   for (const [hash, vue] of Object.entries(attendu)) assert.equal(routeur.analyserHash(hash, S.samedi).vue, vue, hash);
 });
 
@@ -251,9 +252,9 @@ test('routeur : #/reglages est la racine, #/reglages/<rubrique> une sous-page, u
 });
 
 test('inventaire : les quatre onglets et les huit vues du routeur sont déclarés, les vues d\'origine existent encore', () => {
-  assert.deepEqual(Object.keys(routeur.VUES).sort(), ['aujourdhui', 'fiche', 'import', 'poste', 'production', 'reglages', 'semaine', 'stock']);
-  assert.deepEqual(Object.keys(vues).sort(), [...Object.keys(routeur.VUES), 'composant', 'detail', 'jour', 'menus', 'produits', 'tableau'].sort());
-  assert.deepEqual([...new Set(Object.values(routeur.ONGLET_DE_VUE))].sort(), ['aujourdhui', 'production', 'semaine', 'stock']);
+  assert.deepEqual(Object.keys(routeur.VUES).sort(), ['articles', 'aujourdhui', 'fiche', 'import', 'poste', 'production', 'reglages', 'semaine']);
+  assert.deepEqual(Object.keys(vues).sort(), [...Object.keys(routeur.VUES), 'composant', 'detail', 'jour', 'menus', 'produits', 'stock', 'tableau'].sort());
+  assert.deepEqual([...new Set(Object.values(routeur.ONGLET_DE_VUE))].sort(), ['articles', 'aujourdhui', 'production', 'semaine']);
 });
 
 // ---------------------------------------------------------------- défaut connu, à corriger en A-P1 (test « rouge » assumé)

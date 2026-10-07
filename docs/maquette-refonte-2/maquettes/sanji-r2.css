@@ -28,6 +28,7 @@
 .ecran ul { padding: 0; list-style: none; }
 .ecran a { color: var(--action-fonce); text-decoration: none; }
 .sombre a { color: var(--action); }
+.ecran a.ligne, .ecran a.carte { color: var(--texte); } /* lignes et cartes cliquables : texte, pas lien bleu */
 
 /* Gabarit : zone sûre en haut (encoche), contenu, zone du pouce, onglets */
 .haut { padding: 54px 20px 0; display: flex; flex-direction: column; gap: 12px; }
@@ -60,7 +61,7 @@
 .carte-encre { background: var(--encre); color: var(--sur-encre); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .carte-ambre { background: var(--exception-fond); border: 1px solid var(--exception-bord); color: var(--exception); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
 .carte-ia { background: var(--carte); border: 1.5px dashed var(--bordure-forte); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
-.liste { background: var(--carte); border-radius: 18px; padding: 0 16px; }
+.liste { background: transparent; border-radius: 0; padding: 0; border-top: 1px solid var(--bordure); border-bottom: 1px solid var(--bordure); } /* style épuré (7 octobre) : listes à plat */
 .ligne { min-height: 52px; padding: 10px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--bordure); }
 .ligne:last-child { border-bottom: 0; }
 .ligne-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
