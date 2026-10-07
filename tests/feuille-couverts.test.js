@@ -184,3 +184,23 @@ test('Ventes du midi : un 0 / 0 jamais touché n\'est pas enregistré (il fausse
   assert.equal(jourOuVide(magasin.etat(), S.lundi).ventes[1], null);
   fermerTout();
 });
+
+test('Couverts midi rouverte : la répartition enregistrée reste affichée tant que le total ne change pas (pas de nouveau calcul en silence)', async () => {
+  const e = lundi();
+  magasin.remplacer(e);
+  aLHeure(S.lundi, '10:00', () => feuille.ouvrirCouvertsMidi(S.lundi));
+  await bouton(feuilleOuverte(), '60').click();
+  await soumettre(feuilleOuverte());
+  assert.deepEqual([1, 2].map((m) => jourOuVide(magasin.etat(), S.lundi).previsions[m].portions), [20, 40], '1/3 – 2/3 sans historique');
+  // Des ventes arrivent ensuite : le calcul d'aujourd'hui donnerait 30 / 30.
+  const e2 = magasin.etat();
+  for (const [d, a, b] of [['2026-09-28', 30, 30], ['2026-09-21', 30, 30], ['2026-09-14', 30, 30]]) { saisirVentes(e2, d, 1, a, h()); saisirVentes(e2, d, 2, b, h()); }
+  magasin.remplacer(e2);
+  aLHeure(S.lundi, '10:00', () => feuille.ouvrirCouvertsMidi(S.lundi));
+  let d = feuilleOuverte();
+  assert.deepEqual(classes(d, 'cv-moyen').map((x) => x.textContent), ['20', '40'], 'la répartition enregistrée, pas 30 / 30');
+  await bouton(d, '50').click();
+  assert.notDeepEqual(classes(d, 'cv-moyen').map((x) => x.textContent), ['20', '40'], 'un nouveau total se recalcule');
+  assert.deepEqual(classes(d, 'cv-moyen').map((x) => x.textContent), ['25', '25']);
+  fermerTout();
+});

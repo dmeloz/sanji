@@ -82,9 +82,13 @@ function detailPortions(p) {
 /** « ven. 2 » : jour abrégé et numéro. */
 const courtJour = (date) => `${libelleJour(date).slice(0, 3)}. ${Number(date.slice(8))}`;
 
-/** « Brut à prévoir » : toujours là. Connu seulement quand le parage est appliqué ; sinon dit « inconnu », sans alerte. */
+/**
+ * « Brut à prévoir » : toujours là. Connu quand le parage est appliqué, ou quand la carte du haut dit déjà « brut à prévoir »
+ * (produit simple : la quantité de travail est le brut) ; sinon dit « inconnu », sans alerte. Jamais deux messages contraires.
+ */
 function ligneBrut(calc) {
-  const connu = calc.statut === 'CALCULE' && calc.etapes.some((e) => e.etape === 'parage' && e.appliquee);
+  const connu = calc.statut === 'CALCULE'
+    && (calc.etapes.some((e) => e.etape === 'parage' && e.appliquee) || /brut à prévoir/.test(calc.libelleQuantite));
   return h('section', { classe: 'fiche-brut', 'aria-label': 'Brut à prévoir' },
     h('span', { classe: 'fiche-brut-nom' }, 'Brut à prévoir'),
     connu ? h('span', { classe: 'fiche-qte' }, quantiteNoeuds(calc.brut, calc.uniteTravail))

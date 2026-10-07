@@ -1449,3 +1449,27 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .sa-groupe { display: flex; align-items: center; gap: 6px; flex: none; }
 .sa-fleche { display: inline-flex; align-items: center; justify-content: center; min-width: var(--cible); min-height: var(--cible); border: 1px solid var(--bordure-forte); border-radius: 50%; color: var(--texte); font-size: 1.5rem; line-height: 1; text-decoration: none; }
 .sa-fleche:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* Aujourd'hui, le samedi : la case Production seule occupe la largeur (pas de menu du jour, donc pas de couverts du midi). */
+.tdb-chiffres-seule { grid-template-columns: 1fr; }
+/* Paysage (iPhone couché) : barre d'onglets plus basse, pour laisser de la place au contenu. */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root { --haut-onglets: 52px; }
+  .onglets { min-height: 52px; padding-top: 2px; padding-bottom: max(env(safe-area-inset-bottom), 4px); }
+  .onglets a { gap: 0; }
+}
+
+/* ===== Brouillon de planning : « Écarter » / « Rétablir » (refonte 2) ===== */
+.ia-ligne { flex-wrap: wrap; align-items: center; }
+.ec-bouton { flex: none; min-height: 44px; min-width: 44px; padding: 0 14px; font-size: 15px; }
+/* Une ligne écartée est grisée ET dite « écartée » en texte (.ec-etat) : jamais la couleur seule. */
+.ec-ecartee .ia-ligne-texte strong { text-decoration: line-through; }
+.ec-ecartee .ia-ligne-texte, .ec-ecartee .ia-ligne-quand { opacity: 0.6; }
+.ec-etat { font-size: var(--t-legende); font-weight: 600; }
+
+/* Import des menus : un mot très long sans espace (adresse, texte collé par erreur) se coupe au lieu d'élargir la page. */
+.vue-import, .vue-menus { overflow-wrap: anywhere; }
+.imp-jour-tete, .imp-jour-tete > * { min-width: 0; }
+/* Brouillon : le détail d'une ligne (jour, créneau, quantité) passe à la ligne au lieu d'être coupé à droite. */
+.ia-ligne-texte, .ia-ligne-quand { min-width: 0; overflow-wrap: anywhere; }
+.ia-ligne-quand { flex: 1 1 100%; text-align: left; }

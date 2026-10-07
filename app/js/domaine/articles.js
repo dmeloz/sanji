@@ -4,7 +4,7 @@
 
 import { ajouterJours, estOuvert, lundiDe } from './dates.js';
 import { besoinsProduits } from './produits.js';
-import { normaliser } from './etat.js';
+import { estSauceAConfirmer, normaliser } from './etat.js';
 
 /** Premier jour ouvert à partir de `date` (le dimanche est fermé : le lundi suivant). */
 function premierJourOuvert(date) {
@@ -32,6 +32,7 @@ export function articlesDuPoste(etat, aujourd) {
   const ajouter = (date, composantId, nom, quantite, unite) => {
     if (date < depart) return;
     const composant = etat.composants[composantId];
+    if (estSauceAConfirmer(composant)) return; // la sauce implicite n'est pas encore choisie : ce n'est pas un article
     const cle = cleArticle(composantId, nom, unite);
     const article = {
       cle, composantId, nom, menu: composant.menu, quantite, unite, aCompleter: quantite === null, coche: Boolean(coches[cle]),

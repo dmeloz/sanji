@@ -103,7 +103,10 @@ function caseCouverts(d, aujourd) {
 
 function sectionChiffres(d, aujourd) {
   if (!d.ouvert) return null; // jour fermé : une seule mention, dans la carte « Prochaine »
-  return h('section', { classe: 'tdb-chiffres', 'aria-label': 'La journée en chiffres' }, caseProduction(d, aujourd), caseCouverts(d, aujourd));
+  // Le samedi, il n'y a pas de menu du jour : pas de couverts du midi à saisir, seule la case Production reste.
+  const avecCouverts = d.menus.length > 0;
+  return h('section', { classe: `tdb-chiffres${avecCouverts ? '' : ' tdb-chiffres-seule'}`, 'aria-label': 'La journée en chiffres' },
+    caseProduction(d, aujourd), avecCouverts ? caseCouverts(d, aujourd) : null);
 }
 
 // ------------------------------------------------------------------ à avancer

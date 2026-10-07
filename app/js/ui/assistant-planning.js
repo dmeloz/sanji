@@ -34,33 +34,66 @@ export function periodeDePlanning(date, aujourd) {
   return { dateDebut: debut, dateFin: ajouterJours(lundiDe(debut), 5) };
 }
 
-function ligneItem(item) {
+/**
+ * Une ligne du brouillon, avec son geste « Écarter » / « Rétablir ». L'état « écartée » est dit en texte et grisé
+ * (classe `ec-ecartee`), jamais par la couleur seule. `ecartes` (Set d'identifiants d'items) est mis à jour ici.
+ */
+function ligneItem(item, ecartes, surChangement) {
   const valeur = item.quantite.valeur === null ? null : quantite(item.quantite.valeur, item.quantite.unite);
-  return h('li', { classe: 'ia-ligne' },
-    h('div', { classe: 'ia-ligne-texte' },
-      h('strong', null, item.nom),
-      h('span', { classe: 'meta' }, ` · service ${libelleJour(item.dateService)}`),
-      item.motifs.map((m) => h('span', { classe: 'meta ia-avertissement' }, [' ', pastille('à confirmer', 'ambre'), ` ${m}`]))),
-    h('div', { classe: 'ia-ligne-quand' },
-      `${libelleJour(item.date)} · ${libelle('CRENEAU', item.creneau)}`,
-      valeur ? h('span', { classe: 'meta' }, ` · ${item.quantite.libelle} ${valeur}`) : null));
+  const etat = h('span', { classe: 'meta ec-etat' });
+  const li = h('li', { classe: 'ia-ligne' });
+  const geste = h('button', { type: 'button', classe: 'btn ec-bouton' });
+  const afficher = () => {
+    const ecartee = ecartes.has(item.id);
+    li.className = ecartee ? 'ia-ligne ec-ecartee' : 'ia-ligne';
+    etat.textContent = ecartee ? ' · écartée' : '';
+    geste.textContent = ecartee ? 'Rétablir' : 'Écarter';
+    geste.setAttribute('aria-label', `${ecartee ? 'Rétablir' : 'Écarter'} : ${item.nom}`);
+  };
+  geste.addEventListener('click', () => {
+    if (ecartes.has(item.id)) ecartes.delete(item.id); else ecartes.add(item.id);
+    afficher();
+    surChangement();
+  });
+  afficher();
+  li.appendChild(h('div', { classe: 'ia-ligne-texte' },
+    h('strong', null, item.nom),
+    etat,
+    h('span', { classe: 'meta' }, ` · service ${libelleJour(item.dateService)}`),
+    item.motifs.map((m) => h('span', { classe: 'meta ia-avertissement' }, [' ', pastille('à confirmer', 'ambre'), ` ${m}`]))));
+  li.appendChild(h('div', { classe: 'ia-ligne-quand' },
+    `${libelleJour(item.date)} · ${libelle('CRENEAU', item.creneau)}`,
+    valeur ? h('span', { classe: 'meta' }, ` · ${item.quantite.libelle} ${valeur}`) : null));
+  li.appendChild(geste);
+  return li;
 }
+
+const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
 
 /**
  * Contenu de la feuille « Brouillon » (testable sans ouvrir de panneau).
  * @param {object} proposition
- * @param {{mode:string, avertissements:string[]}} infos
+ * @param {{mode:string, avertissements:string[], periode?:object|null, ecartes?:Set<string>, surChangement?:(restantes:number)=>void}} infos
+ *   `ecartes` : identifiants des lignes écartées par le chef ; `surChangement` est appelé avec le nombre de lignes restantes
  * @returns {Node[]}
  */
-export function contenuProposition(proposition, { mode, avertissements, periode = null }) {
+export function contenuProposition(proposition, { mode, avertissements, periode = null, ecartes = new Set(), surChangement = () => {} }) {
+  const total = proposition.items.length;
+  const compteur = h('span');
+  const majCompteur = () => {
+    const restantes = total - ecartes.size;
+    compteur.textContent = ` ${pluriel(restantes, 'préparation')} à planifier${ecartes.size > 0 ? ` (${pluriel(ecartes.size, 'écartée')})` : ''}. Rien n'est enregistré avant votre validation.`;
+    return restantes;
+  };
+  majCompteur();
   const nodes = [
     h('p', { classe: 'meta' },
       mode === 'modele' ? pastille("proposé par l'IA, recontrôlé", 'gris') : pastille('calculé par Sanji', 'vert'),
-      ` ${proposition.items.length} préparation${proposition.items.length > 1 ? 's' : ''} à planifier. Rien n'est enregistré avant votre validation.`),
+      compteur),
   ];
   if (periode) nodes.push(h('p', { classe: 'meta' }, `Période : du ${libelleJour(periode.dateDebut)} au ${libelleJour(periode.dateFin)}.`));
   for (const a of avertissements) nodes.push(encadre('alerte', a));
-  if (proposition.items.length > 0) nodes.push(h('ul', { classe: 'ia-liste' }, proposition.items.map(ligneItem)));
+  if (proposition.items.length > 0) nodes.push(h('ul', { classe: 'ia-liste' }, proposition.items.map((i) => ligneItem(i, ecartes, () => surChangement(majCompteur())))));
   else nodes.push(h('p', { classe: 'vide' }, 'Rien à planifier sur cette période.'));
   if (proposition.aDecider.length > 0) {
     nodes.push(h('h3', { classe: 'section-titre' }, 'À décider'),
@@ -72,12 +105,18 @@ export function contenuProposition(proposition, { mode, avertissements, periode 
 
 function ouvrirBrouillon(resultat) {
   const { proposition } = resultat;
-  const corps = contenuProposition(proposition, resultat);
+  const ecartes = new Set();
+  let boutonValider = null;
+  const corps = contenuProposition(proposition, {
+    ...resultat,
+    ecartes,
+    surChangement: (restantes) => { if (boutonValider) boutonValider.disabled = restantes === 0; },
+  });
   if (proposition.items.length === 0) {
     panneau({ titre: 'Planning', corps, lectureSeule: true });
     return;
   }
-  panneau({
+  const dialogue = panneau({
     titre: 'Brouillon de planning',
     corps,
     libelleEnregistrer: 'Valider et planifier',
@@ -93,7 +132,8 @@ function ouvrirBrouillon(resultat) {
     }],
     surEnregistrer: (api) => {
       // Une proposition n'est validée qu'une fois : après un échec d'application, un second clic ne rejoue pas la validation.
-      if (registre.lire(proposition.id).statut === 'brouillon') decider(registre, proposition.id, { choix: 'valider' }, { executeur: agir });
+      if (ecartes.size === proposition.items.length) throw new Error('Toutes les préparations sont écartées : rétablissez-en une ou refusez le brouillon.');
+      if (registre.lire(proposition.id).statut === 'brouillon') decider(registre, proposition.id, { choix: 'valider', itemsRetires: [...ecartes] }, { executeur: agir });
       const r = appliquerProposition(registre, proposition.id, { executeur: agir, aujourdhui: aujourdhui() });
       if (!r.ok) {
         // Rien n'a été écrit. Le brouillon ne peut plus servir : on le dit et on ferme, au lieu de laisser une impasse.
@@ -104,6 +144,7 @@ function ouvrirBrouillon(resultat) {
       afficherMessage(`${r.appliques.length} préparation${r.appliques.length > 1 ? 's' : ''} planifiée${r.appliques.length > 1 ? 's' : ''}.`, 'ok');
     },
   });
+  boutonValider = dialogue.querySelectorAll('button').find((b) => b.getAttribute('type') === 'submit') ?? null;
 }
 
 /** Lance le calcul puis ouvre le brouillon. Une seule demande à la fois ; fermer la fenêtre d'attente l'annule. */

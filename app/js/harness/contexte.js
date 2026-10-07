@@ -50,7 +50,9 @@ export function construireContexte(etat, { tache, dateDebut, dateFin, aujourdhui
       const entree = { type: 'composant', id: c.id, date, menu: c.menu, nom: nomTransmissible(c.nom), categorie: c.categorie, productionId: production?.id ?? null };
       (c.valide ? donnees.confirmees : donnees.provisoires).push(entree);
       if (production && etatTache(etat, production.id) === 'a_preciser') {
-        donnees.manquantes.push({ type: 'quantite', composantId: c.id, texte: `${c.nom} : quantité inconnue` });
+        // Même filtre que l'entrée « composant » : un nom bloqué ne part pas, même dans ce texte.
+        const nom = entree.nom === NOM_NON_TRANSMIS ? 'un composant' : entree.nom;
+        donnees.manquantes.push({ type: 'quantite', composantId: c.id, texte: `${nom} : quantité inconnue` });
       }
     }
   }

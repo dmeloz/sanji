@@ -6,6 +6,9 @@ const DUREE_MS = 5000;
 
 const DUREE_AVEC_ACTIONS_MS = 9000;
 
+/** Au plus deux messages à l'écran : le plus ancien part quand un troisième arrive. */
+const MESSAGES_MAX = 2;
+
 /**
  * @param {'info'|'ok'|'alerte'|'erreur'} type
  * @param {{libelle:string, action:Function}[]} [actions] boutons du message (« Annuler », « Corriger »…) ; le message
@@ -15,10 +18,13 @@ export function afficherMessage(texte, type = 'info', actions = []) {
   const zone = parId('messages');
   if (!zone) return;
   const retirer = () => noeud.remove();
-  const noeud = h('div', { classe: `message message-${type}`, role: type === 'erreur' ? 'alert' : 'status' },
+  const noeud = h('div', { classe: `message message-${type}`, role: type === 'erreur' ? 'alert' : 'status', 'data-texte': texte },
     h('span', { classe: 'message-texte' }, texte),
     actions.map((a) => h('button', { type: 'button', classe: 'message-action', onClick: () => { retirer(); a.action(); } }, a.libelle)),
     h('button', { type: 'button', classe: 'message-fermer', 'aria-label': 'Fermer le message', onClick: retirer }, '×'));
+  // Un message identique encore à l'écran est remplacé (pas de pile de « Remis à faire »).
+  for (const ancien of [...zone.children]) if (ancien.getAttribute?.('data-texte') === texte) ancien.remove();
+  while (zone.children.length >= MESSAGES_MAX) zone.children[0].remove();
   zone.appendChild(noeud);
   if (type !== 'erreur') setTimeout(retirer, actions.length > 0 ? DUREE_AVEC_ACTIONS_MS : DUREE_MS);
 }

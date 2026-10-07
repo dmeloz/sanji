@@ -420,3 +420,13 @@ test('bandeau : même nombre que la feuille « À décider » (sauce implicite s
   const calmeProd = aDate(S.mercredi, () => { magasin.remplacer(calme(etatVide())); return production.rendre(magasin.etat(), S.mercredi); });
   assert.equal(classes(calmeProd, 'prod-adecider').length, 0, 'rien à décider : pas d\'accès');
 });
+
+test('samedi : pas de menu du jour, donc pas de case « Couverts midi » ; la case Production occupe la largeur', () => {
+  const p = page(S.samedi, mercredi());
+  assert.equal(classes(p, 'tdb-case').filter((c) => /Couverts midi/.test(c.textContent)).length, 0);
+  assert.equal(classes(p, 'tdb-chiffres-seule').length, 1);
+  assert.equal(classes(p, 'tdb-case').filter((c) => /Production/.test(c.textContent)).length, 1);
+  // Un jour de semaine garde les deux cases.
+  const semaine = page(S.mercredi, mercredi());
+  assert.equal(classes(semaine, 'tdb-case').length, 2);
+});

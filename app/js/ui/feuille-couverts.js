@@ -86,6 +86,10 @@ export function ouvrirCouvertsMidi(date) {
   /** Répartition affichée : la correction du chef si elle existe (bornée au total), sinon le calcul. */
   const repartition = () => {
     const total = etat.total ?? 0;
+    // Total inchangé et répartition calculée déjà enregistrée : on montre celle qui est enregistrée (pas un nouveau calcul qui la modifierait en silence).
+    if (etat.m1Manuel === null && depart.total !== null && total === depart.total && depart.m1 !== null && depart.m2 !== null) {
+      return { m1: depart.m1, m2: depart.m2, manuel: false };
+    }
     if (etat.m1Manuel !== null) {
       const m1 = Math.min(etat.m1Manuel, total);
       return { m1, m2: total - m1, manuel: true };

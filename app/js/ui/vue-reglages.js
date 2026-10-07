@@ -621,7 +621,7 @@ function lancerExport() {
         if (erreur?.name === 'AbortError') return;
         telecharger(fichier, nom);
         agir((e, t) => noterExport(e, t), { afficher: false });
-        afficherMessage('Partage impossible : la sauvegarde a été téléchargée.', 'alerte');
+        afficherMessage('Sauvegarde téléchargée.', 'ok');
       });
     return;
   }

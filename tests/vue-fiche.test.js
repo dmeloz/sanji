@@ -216,7 +216,17 @@ test('fiche : « Brut à prévoir » toujours visible ; sans parage connu, « in
   const ligne = racine.tous((x) => x.className.split(' ').includes('fiche-brut'))[0];
   assert.ok(ligne, 'la ligne est là');
   assert.match(ligne.textContent, /Brut à prévoir/);
-  if (calc.etapes.some((x) => x.etape === 'parage' && x.appliquee)) assert.match(ligne.textContent, /\d/);
+  if (calc.etapes.some((x) => x.etape === 'parage' && x.appliquee) || /brut à prévoir/.test(calc.libelleQuantite)) assert.match(ligne.textContent, /\d/);
   else assert.match(ligne.textContent, /inconnu · forme achetée à préciser/);
   assert.equal(ligne.tous((x) => x.attributs?.role === 'alert').length, 0, 'aucune alerte');
+});
+
+test('fiche : la carte du haut et la ligne « Brut à prévoir » ne se contredisent jamais (produit simple : même quantité, jamais « inconnu »)', () => {
+  const { e, c } = scenario();
+  const calc = calculerComposant(e, c);
+  assert.match(calc.libelleQuantite, /brut à prévoir/);
+  const racine = vue.rendre(e, c);
+  const ligne = racine.tous((x) => x.className.split(' ').includes('fiche-brut'))[0];
+  assert.doesNotMatch(ligne.textContent, /inconnu/);
+  assert.match(ligne.textContent.replace(/[  \s]/g, ''), new RegExp(String(Math.round(calc.brut))), 'la même quantité que la carte du haut');
 });

@@ -104,3 +104,15 @@ test('sauvegarde : les cases cochées voyagent dans l\'export ; une ancienne sau
   doc.etat.articlesCoches = 'texte';
   assert.deepEqual(importer(JSON.stringify(doc)).articlesCoches, {});
 });
+
+test('articles : la sauce implicite « à confirmer » n\'est pas un article (rien n\'est choisi, rien à acheter)', async () => {
+  const { definirMenu } = await import('../app/js/domaine/actions.js');
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'Tagliatelles', h());
+  prevision(e, S.lundi, 1, 10);
+  assert.ok(Object.values(e.composants).some((c) => /sauce à confirmer/.test(c.nom)), 'la lecture crée bien la sauce implicite');
+  for (const c of Object.values(e.composants)) { c.attribue = true; c.valide = true; }
+  const noms = aplatir(articlesDuPoste(e, S.lundi)).map((x) => x.nom);
+  assert.ok(noms.length > 0);
+  assert.ok(!noms.some((n) => /à confirmer/.test(n)), `articles : ${noms.join(', ')}`);
+});
