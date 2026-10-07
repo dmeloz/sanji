@@ -808,7 +808,7 @@ const ligneInfo = (titreTexte, valeur) => h('li', { classe: 'reglage-info' },
 
 const groupe = (titreTexte, ...lignes) => h('section', { classe: 'reglages-groupe' },
   h('h2', { classe: 'reglages-groupe-titre' }, titreTexte),
-  h('ul', { classe: 'liste-rubriques-reglages' }, lignes));
+  h('ul', { classe: 'liste liste-rubriques-reglages' }, lignes));
 
 /** Pastille du pied : neutre pendant la vérification, verte une fois prêt, ambre en cas de problème. */
 function pastilleHorsLigne(hl) {

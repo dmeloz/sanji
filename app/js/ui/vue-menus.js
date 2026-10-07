@@ -214,7 +214,7 @@ export function rendre(etat, lundi) {
     const jour = jourOuVide(etat, ajouterJours(lundi, decalage));
     return [1, 2].some((menu) => jour.menus[menu].intitule.trim() !== '');
   });
-  racine.appendChild(h('section', { classe: 'carte' },
+  racine.appendChild(h('section', { classe: 'imp-section-plate' },
     repliable(h('h2', { classe: 'section-titre', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie || reprise !== null, [
       h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
       h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),

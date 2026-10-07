@@ -7,6 +7,6 @@
     "base": "node outils/extraire-base-metier.mjs",
     "savoir": "node outils/generer-savoir-metier.mjs",
     "culinaire": "node outils/generer-savoir-culinaire.mjs",
-    "serve": "python3 -m http.server 5173 --directory app"
+    "serve": "node outils/serveur-local.mjs"
   }
 }

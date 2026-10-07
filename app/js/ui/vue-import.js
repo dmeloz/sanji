@@ -165,7 +165,7 @@ function blocPhoto(lundi, surLecture) {
     h('p', { classe: 'aide' }, lirePhotoIA ? AIDE_PHOTO_IA : AIDE_PHOTO_SANS_IA),
     zone,
     h('div', { classe: 'actions' }, h('label', { classe: 'btn btn-court' }, 'Prendre ou importer une photo', entree), lirePhotoIA, retirer),
-  ], { classe: 'carte imp-photo' });
+  ], { classe: 'imp-section-plate imp-photo' });
   urlPhoto(lundi).then((url) => { if (url) { montrer(url); bloc.open = true; } }).catch(() => {});
   return bloc;
 }
@@ -234,14 +234,14 @@ export function rendre(etat, lundi) {
       h('div', { classe: 'actions' }, bouton('Répartir dans la semaine', repartirEtLire)),
       champSaisi(champs, 'div', { id: 'feuille-retour', classe: 'saisie-retour', 'aria-live': 'polite' }),
     ]);
-  racine.appendChild(h('section', { classe: 'carte' }, sectionFeuille));
+  racine.appendChild(h('section', { classe: 'imp-section-plate' }, sectionFeuille));
 
   racine.appendChild(h('h2', { classe: 'imp-titre-section imp-titre-hors' }, 'Ou taper jour par jour'));
   for (const date of dates) racine.appendChild(blocJour(champs, etat, date, { repliable: true }));
   // La lecture suit la frappe ; les champs n'enregistrent rien avant « Enregistrer la semaine ».
   for (const date of dates) for (const menu of [1, 2]) champs.get(`menu-${date}-${menu}`).addEventListener('input', majLecture);
 
-  racine.appendChild(h('section', { classe: 'carte imp-lecture', 'aria-labelledby': 'titre-lecture' },
+  racine.appendChild(h('section', { classe: 'imp-section-plate imp-lecture', 'aria-labelledby': 'titre-lecture' },
     h('h2', { classe: 'imp-titre-section', id: 'titre-lecture' }, 'Ce que Sanji a lu · vérifie'),
     h('p', { classe: 'aide' }, 'Lecture des intitulés ci-dessus. Corrigez l\'intitulé dans son champ si la lecture est fausse : elle se met à jour.'),
     zoneLecture));
