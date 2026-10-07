@@ -16,3 +16,6 @@ outils/sorties/
 
 # Échanges avec Perplexity : gardés en local, hors dépôt
 archives/perplexity-2026-10-03/
+
+# Corpus réel de feuilles de menus (données de cuisine, local seulement jusqu'à décision de la propriétaire)
+corpus/

@@ -31,8 +31,9 @@ function estEnseigne(ligne) {
   return lettres >= 3 && !/\p{Ll}/u.test(ligne) && !ligne.includes(',') && ligne.split(' ').length <= 5;
 }
 
-// Titre de la feuille : « Menu du marché », « Menus de la semaine »…
-const MOTIF_TITRE = /^menus?\s+(?:du|de la|de|des)\s+\S+(?:\s+\S+)?$/i;
+// Titre de la feuille : « Menu du marché », « Menus de la semaine »…, avec son sous-titre de service facultatif :
+// « (à midi uniquement) », « / A midi uniquement », « [midi uniquement] ».
+const MOTIF_TITRE = /^menus?\s+(?:du|de la|de|des)\s+\S+(?:\s+\S+)?(?:\s*[(/[–-]?\s*(?:[aà]\s+)?(?:midi|soir)\b[^)\]]*[)\]]?)?$/i;
 
 /** Une annotation manuscrite ou un reste de lecture : trop court, ou un nombre suivi de peu de chose. */
 function estAnnotation(ligne) {

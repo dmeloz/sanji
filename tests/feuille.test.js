@@ -133,3 +133,16 @@ test('feuille : la date reste obligatoire, « lundi » seul n\'est pas reconnu',
   assert.equal(r.jours.length, 0);
   assert.match(r.avertissements[0], /Aucun jour reconnu/);
 });
+
+test('feuille : un titre avec son sous-titre de service est écarté, un plat reste un plat', () => {
+  const titres = ['Menu du marché (à midi uniquement)', 'Menu du marché A midi uniquement',
+    'Menu du marché / A midi uniquement', 'Menu du marché [midi uniquement]', 'Menus de la semaine à midi uniquement'];
+  for (const titre of titres) {
+    const r = analyserFeuille(`${titre}\nlundi 5 octobre\nPenne au pesto 19.-\nSauté de volaille, riz 24.-`);
+    assert.deepEqual(r.ignorees, [titre], titre);
+    assert.deepEqual(r.avertissements, [], titre);
+    assert.equal(r.jours[0].menu1, 'Penne au pesto', titre);
+  }
+  const plat = analyserFeuille('lundi 5 octobre\nMenu du chef au beurre blanc 19.-\nSauté de volaille, riz 24.-');
+  assert.equal(plat.jours[0].menu1, 'Menu du chef au beurre blanc');
+});
