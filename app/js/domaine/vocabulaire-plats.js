@@ -94,6 +94,18 @@ export const SAUCES = geler([
   { cle: 'meuniere', nom: 'beurre meunière', alias: [], ingredients: ['beurre', 'citron'], allergenes: ['lait', 'gluten'], recette: false },
 ]);
 
+/**
+ * Modes de préparation classiques, comprise comme des garnitures à confirmer : { cle, nom, alias, ingredients }.
+ *  - `alias` : seulement des noms de plusieurs mots (« bonne femme », « à la niçoise »), pour ne rien changer à la lecture des mots seuls.
+ *  - `ingredients` : ce qui s'y trouve POSSIBLEMENT, jamais ce qui est certain ; sans quantité. La recette de la maison décide.
+ */
+export const MODES = geler([
+  { cle: 'bonne_femme', nom: 'bonne femme', alias: ['bonne femme'], ingredients: ['champignons', 'échalotes', 'oignons grelots', 'lardons'] },
+  { cle: 'nicoise', nom: 'à la niçoise', alias: ['facon nicoise', 'a la nicoise'], ingredients: ['tomates', 'olives', 'anchois', 'ail', 'poivrons'] },
+  { cle: 'lyonnaise', nom: 'à la lyonnaise', alias: ['facon lyonnaise', 'a la lyonnaise'], ingredients: ['oignons', 'persil', 'vinaigre'] },
+  { cle: 'forestiere', nom: 'à la forestière', alias: ['facon forestiere', 'a la forestiere'], ingredients: ['champignons', 'lardons', 'persil'] },
+]);
+
 /** Mots de liaison : on ne coupe jamais à l'intérieur d'une expression, et on les retire au bord d'un élément. */
 export const MOTS_DE_LIAISON = geler(['de', 'du', 'des', 'd', 'au', 'aux', 'a', 'la', 'le', 'les', 'l', 'en', 'et', 'e', 'sur',
   'sous', 'avec', 'alla', 'al', 'ai', 'alle', 'agli', 'all', 'dei', 'di', '&']);

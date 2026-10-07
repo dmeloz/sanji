@@ -324,6 +324,22 @@ test('vocabulaire : rouille (sauce à confirmer) et gratins (féculent) lus ; le
   const lu = (texte, menu) => lirePlat(texte, menu).elements.map((e) => `${e.nom}/${e.categorie}`);
   assert.ok(lu('Choucroute de poisson, pomme nature, rouille safranée', 2).some((e) => e.endsWith('/sauce')));
   assert.ok(lu('Bavette de bœuf, gratin Lyonnais, tomates provençales', 2).includes('gratin Lyonnais/feculent'));
-  assert.ok(lu('Pavé de truite, bonne femme, riz', 2).some((e) => e === 'bonne femme/a_preciser'));
-  assert.ok(lu('Farfalle, façon niçoise', 1).some((e) => e.endsWith('/a_preciser')));
+  assert.ok(lu('Union Cheese burger, salade Waldorf', 2).some((e) => e.endsWith('/a_preciser')));
+});
+
+test('modes de préparation : reconnus comme garniture à confirmer, avec ce qu\'ils peuvent contenir, jamais décidés', () => {
+  const lecture = lirePlat('Pavé de truite, bonne femme, riz', 2);
+  const mode = lecture.elements.find((e) => e.nom === 'bonne femme');
+  assert.equal(mode.statut, 'a_confirmer');
+  assert.equal(mode.propriete, 'a_confirmer');
+  assert.equal(mode.categorie, 'autre');
+  assert.ok(mode.composition.includes('champignons'));
+  assert.ok(lecture.ambiguites.some((a) => a.type === 'preparation' && /bonne femme \(peut contenir : champignons/.test(a.texte)));
+  assert.ok(!lecture.ambiguites.some((a) => a.type === 'mot_inconnu'));
+  const nicoise = lirePlat('Farfalle, façon niçoise', 1).elements.find((e) => e.nom === 'façon niçoise');
+  assert.equal(nicoise.statut, 'a_confirmer');
+  // Un mot isolé comme « provençales » ne change rien à la lecture.
+  const tomates = lirePlat('Onglet de bœuf, tomates provençales', 2).elements.find((e) => /tomate/i.test(e.nom));
+  assert.equal(tomates.categorie, 'legume');
+  assert.equal(tomates.propriete, 'poste');
 });

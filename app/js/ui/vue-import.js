@@ -31,6 +31,7 @@ const MOTS_AMBIGUITE = {
   sauce: 'sauce à confirmer',
   sauce_implicite: 'sauce implicite à confirmer',
   mot_inconnu: 'mot à préciser',
+  preparation: 'préparation à confirmer',
 };
 
 const motAmbiguite = (a) => `${MOTS_AMBIGUITE[a.type] ?? 'à vérifier'} : ${a.texte}`;

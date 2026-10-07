@@ -5,7 +5,7 @@
 import { cleMemoire, lireMemoire, normaliser } from './etat.js';
 import { FAMILLES, MOTS_SANS_FAMILLE, lireNom } from './savoir.js';
 import {
-  ALIAS, CHAMPIGNONS, EPICES, FORMES_PATES, HERBES, MOTS_DE_LIAISON, PRODUITS, SAUCES,
+  ALIAS, CHAMPIGNONS, EPICES, FORMES_PATES, HERBES, MODES, MOTS_DE_LIAISON, PRODUITS, SAUCES,
 } from './vocabulaire-plats.js';
 
 // ---------------------------------------------------------------- mémoire d'attribution
@@ -113,6 +113,7 @@ const EXPRESSIONS = (() => {
     lot.forEach((mot) => ajouter(mot, categorie === 'fromage' ? 'autre' : categorie, { kind: categorie === 'fromage' ? 'fromage' : null }));
   }
   for (const s of SAUCES) s.alias.forEach((mot) => ajouter(mot, 'sauce', { kind: 'sauce', sauce: s }));
+  for (const m of MODES) m.alias.forEach((mot) => ajouter(mot, 'autre', { kind: 'mode', mode: m }));
   return liste.sort((a, b) => b.mots.length - a.mots.length);
 })();
 
@@ -310,6 +311,7 @@ function elementDe(fragment, menu) {
   if (categorie === 'a_preciser' || recetteFigee || fragment.alternatives) statut = 'a_confirmer';
   if (fragment.queueSauce?.recette) statut = 'a_confirmer';
   if (kind === 'sauce' && e?.sauce?.recette) statut = 'a_confirmer';
+  if (kind === 'mode') statut = 'a_confirmer';
 
   let role;
   if (categorie === 'sauce') role = 'sauce';
@@ -321,8 +323,11 @@ function elementDe(fragment, menu) {
   if (menu === 1) propriete = 'poste';
   else if (categorie === 'a_preciser') propriete = 'a_confirmer';
   else propriete = categorie === 'legume' || categorie === 'feculent' ? 'poste' : 'hors_poste';
+  // Une préparation reconnue mais composée de plusieurs produits : au poste ou non, c'est au chef de le dire.
+  if (kind === 'mode') propriete = 'a_confirmer';
 
   const element = { nom, canonique: canonDe(jetons), categorie, role, propriete, origine: 'intitule', statut };
+  if (kind === 'mode') element.composition = [...e.mode.ingredients];
   if (fragment.alternatives) element.alternatives = fragment.alternatives;
   return { element, base: estBase(jetons) ? kind : null, recette: recetteFigee ? recetteLisible(jetons) : null };
 }
@@ -378,6 +383,7 @@ export function lirePlat(intitule, menu, { lectures, memoire } = {}) {
     if (recette) ambiguites.push({ type: 'recette', texte: recette });
     if (element.categorie === 'sauce' && element.statut === 'a_confirmer') ambiguites.push({ type: 'sauce', texte: element.nom });
     if (element.categorie === 'a_preciser') ambiguites.push({ type: 'mot_inconnu', texte: element.nom });
+    if (element.composition) ambiguites.push({ type: 'preparation', texte: `${element.nom} (peut contenir : ${element.composition.join(', ')})` });
   }
 
   if (menu === 1 && bases.length > 0 && !elements.some((e) => e.categorie === 'sauce')) {
