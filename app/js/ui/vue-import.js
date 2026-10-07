@@ -43,7 +43,7 @@ function etiquetteElement(element) {
 /** La lecture d'un intitulé : null si le champ est vide. */
 function lire(etat, texte, menu) {
   const intitule = String(texte ?? '').replace(/\s+/g, ' ').trim();
-  return intitule === '' ? null : lirePlat(intitule, menu, { lectures: etat.lectures });
+  return intitule === '' ? null : lirePlat(intitule, menu, { lectures: etat.lectures, memoire: etat.memoire });
 }
 
 function blocLectureMenu(menu, lecture) {

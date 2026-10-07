@@ -6,6 +6,7 @@ import {
 import { obstacleValidationAllergenes, statutAllergenes } from '../domaine/allergenes.js';
 import { chercherBase } from '../domaine/base.js';
 import { calculerComposant } from '../domaine/calcul.js';
+import { apercuEnvoi, champsApresProposition, lirePropositionCategorie } from '../harness/precisions-ia.js';
 import { libelleJour } from '../domaine/dates.js';
 import { estSauceAConfirmer, lireMemoire, normaliser } from '../domaine/etat.js';
 import { SAUCES } from '../domaine/vocabulaire-plats.js';
@@ -16,6 +17,7 @@ import {
 } from '../domaine/statuts.js';
 import { VERSION_BASE } from '../donnees/base-metier.js';
 import { agir, agirStrict, aujourdhui, etat as etatCourant } from '../magasin.js';
+import { assistantPret, fournisseurDepuisReglages } from './assistant-reglages.js';
 import { champs } from './champs.js';
 import { ouvrirValidation } from './feuille-validation.js';
 import { h } from './dom.js';
@@ -397,11 +399,57 @@ function sectionEntete(etat, c, calc) {
     blocGestes(c));
 }
 
+/** Décision du 2026-10-07 : seul le texte du menu part, après aperçu, à chaque clic ; la réponse reste une proposition à confirmer. */
+function dialogPrecisionIA(c) {
+  const apercu = apercuEnvoi(c, etatCourant().jours?.[c.date]?.menus?.[c.menu]?.intitule);
+  if (!apercu) return afficherMessage("Le nom de cet élément ne peut pas être envoyé à l'IA.", 'alerte');
+  const attente = new AbortController();
+  const envoi = panneau({
+    titre: "Demander à l'IA",
+    corps: [h('p', null, `Sera envoyé à l'IA : ${apercu.texte}.`),
+      h('p', { classe: 'aide' }, 'Rien d\'autre ne part : ni quantité, ni fiche, ni nom de personne.')],
+    libelleEnregistrer: 'Envoyer',
+    surEnregistrer: async () => {
+      const fournisseur = fournisseurDepuisReglages();
+      if (!fournisseur.disponible() || typeof fournisseur.demanderPrecision !== 'function') {
+        return afficherMessage("L'assistant IA n'est pas activé : rien n'est envoyé.", 'alerte');
+      }
+      envoi.addEventListener('close', () => attente.abort());
+      let proposition;
+      try {
+        proposition = lirePropositionCategorie(await fournisseur.demanderPrecision(apercu, { signal: attente.signal }));
+      } catch (e) {
+        if (!envoi.open) return; // annulé par la propriétaire pendant l'attente : rien à dire
+        return afficherMessage(`L'IA n'a pas répondu : ${e?.message ?? e}`, 'erreur');
+      }
+      if (!envoi.open) return; // fermé pendant l'attente : la proposition n'est pas affichée
+      if (!proposition) return afficherMessage("Réponse de l'IA inexploitable : rien n'est modifié.", 'erreur');
+      panneau({
+        titre: "Proposition de l'IA",
+        corps: [h('p', null, `L'IA propose : ${libelle('CATEGORIE', proposition.categorie)} (à confirmer).`),
+          proposition.remarque ? h('p', { classe: 'aide' }, proposition.remarque) : null],
+        libelleEnregistrer: 'Accepter',
+        libelleAnnuler: 'Refuser',
+        surEnregistrer: () => agirStrict((x, t) => {
+          if (x.composants?.[c.id]?.categorie !== 'a_preciser') throw new Error("Cet élément a changé entre-temps : rien n'est modifié.");
+          return modifierComposant(x, c.id, champsApresProposition(proposition), t);
+        }),
+      });
+    },
+  });
+}
+
+/** Le geste « Demander à l'IA » : seulement pour un élément à préciser, et si l'assistant est prêt. */
+export function boutonPrecisionIA(c) {
+  return c.categorie === 'a_preciser' && assistantPret() ? bouton("Demander à l'IA", () => dialogPrecisionIA(c), 'court') : null;
+}
+
 /** Gestes de l'en-tête : modifier, choisir la sauce, composer un mélange, supprimer (partagés avec la fiche technique). */
-export function blocGestes(c) {
+export function blocGestes(c, { sansIA = false } = {}) {
   return h('div', { classe: 'actions' },
     bouton('Modifier', () => dialogModifier(c), 'court'),
     estSauceAConfirmer(c) ? bouton('Choisir la sauce', () => dialogChoisirSauce(c), 'court') : null,
+    sansIA ? null : boutonPrecisionIA(c),
     c.recetteId ? null : bouton('Composer un mélange', () => dialogMelange(c), 'court'),
     bouton('Supprimer', () => confirmer({
       titre: 'Supprimer ce composant ?', texte: `${c.nom} et ses tâches non faites seront supprimés.`, libelleOk: 'Supprimer', danger: true,
@@ -411,7 +459,7 @@ export function blocGestes(c) {
 
 /** Gestes avancés de la fiche technique (repli « Plus de réglages ») : tout ce que vue-composant offrait, sans l'en-tête. */
 export function sectionsReglages(etat, c, calc) {
-  return [blocPortion(c, calc), blocGestes(c), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionProductions(etat, c),
+  return [blocPortion(c, calc), blocGestes(c, { sansIA: true }), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionProductions(etat, c),
     sectionMemoire(etat, c), sectionAllergenes(etat, c), sectionApresService(c, calc)].filter(Boolean);
 }
 

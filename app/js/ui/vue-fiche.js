@@ -14,7 +14,7 @@ import { pluriel, precisionQuantite, qteNoeuds, quantiteNoeuds } from './format.
 import { libelleAllergene } from './reference.js';
 import { blocReperes } from './reperes-metier.js';
 import { defaireEnUnToucher, dialogCorriger, faireEnUnToucher } from './taches.js';
-import { sectionsReglages } from './vue-composant.js';
+import { boutonPrecisionIA, sectionsReglages } from './vue-composant.js';
 
 export const titre = () => 'Fiche technique';
 
@@ -172,6 +172,8 @@ export function rendre(etat, id) {
       h('div', { classe: 'fiche-etiquettes' }, pastille(etiquetteType(c), c.type === 'produit_simple' ? 'gris' : 'vert'),
         // Montrer l'exception : « attribué au poste » est la normale et ne s'écrit pas.
         c.attribue ? null : pastille('non attribué', 'ambre'))),
+    // Un élément à préciser : le geste « Demander à l'IA » se voit tout de suite, sans ouvrir « Plus de réglages ».
+    boutonPrecisionIA(c) ? h('div', { classe: 'fiche-actions' }, boutonPrecisionIA(c)) : null,
     sectionQuantite(etat, c, calc),
     ligneBrut(calc),
     sectionProvenance(c, calc),

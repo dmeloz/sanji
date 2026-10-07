@@ -13,12 +13,16 @@ const NB_DECISIONS_ANTERIEURES = 10;
 const LONGUEUR_NOM_MAX = 60;
 const NOM_NON_TRANSMIS = 'composant (nom non transmis)';
 // Un nom vient d'un menu importé : texte libre. Un nom long ou qui ressemble à une remarque sur une personne ne part pas.
-const MARQUEURS_PERSONNELS = /(allergi|intol[ée]ran|c[œo]eliaque|r[ée]gime|\bpour (m\.|mme|mr|monsieur|madame|le client|la cliente))/i;
+const MARQUEURS_PERSONNELS = /(allerg|intol[ée]?ran|c(?:oe|œ)?e?liaque|gluten|lactose|regime|\bpour (m\.|mme|mr|monsieur|madame|le client|la cliente))/i;
+/** Vrai si le texte parle d'une personne ou d'un régime (accents décomposés et sans accent compris). */
+export function contientMarqueurPersonnel(texte) {
+  return MARQUEURS_PERSONNELS.test(String(texte ?? '').normalize('NFD').replace(/[̀-ͯ]/g, ''));
+}
 
 /** Nom d'un composant ou d'une règle tel qu'il peut être transmis au modèle (heuristique prudente, jamais une garantie). */
 export function nomTransmissible(nom) {
   const texte = String(nom ?? '').trim();
-  return texte !== '' && texte.length <= LONGUEUR_NOM_MAX && !MARQUEURS_PERSONNELS.test(texte) ? texte : NOM_NON_TRANSMIS;
+  return texte !== '' && texte.length <= LONGUEUR_NOM_MAX && !contientMarqueurPersonnel(texte) ? texte : NOM_NON_TRANSMIS;
 }
 
 /**

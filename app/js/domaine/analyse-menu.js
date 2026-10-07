@@ -342,7 +342,7 @@ function recetteLisible(jetons) {
  * @param {{memoire?:object, lectures?:object}} [options] `lectures` : lectures corrigées, clé « intitulé normalisé|menu »
  * @returns {{original:string, normalise:string, elements:object[], ambiguites:object[]}}
  */
-export function lirePlat(intitule, menu, { lectures } = {}) {
+export function lirePlat(intitule, menu, { lectures, memoire } = {}) {
   const original = String(intitule ?? '');
   const jetons = remplacerAlias(tokeniser(original));
   const normalise = jetons.filter((t) => !t.sep).map((t) => t.n).join(' ');
@@ -366,6 +366,12 @@ export function lirePlat(intitule, menu, { lectures } = {}) {
   const bases = [];
   for (const fragment of segments.flatMap((seg) => decouper(seg, menu))) {
     const { element, base, recette } = elementDe(fragment, menu);
+    // Ce que la propriétaire a déjà appris à Sanji pour ce nom et ce menu : le mot n'est plus « à préciser ».
+    const appris = element.categorie === 'a_preciser' ? lireMemoire(memoire, element.nom, menu) : null;
+    if (appris && appris.categorie && appris.categorie !== 'a_preciser') {
+      Object.assign(element, { categorie: appris.categorie, statut: 'lu', origine: 'memoire',
+        propriete: appris.attribue === true ? 'poste' : 'hors_poste' });
+    }
     elements.push(element);
     if (base) bases.push(base);
     if (element.alternatives) ambiguites.push({ type: 'choix', texte: element.nom });

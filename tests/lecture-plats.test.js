@@ -302,3 +302,20 @@ test('vocabulaire : légumes, féculents et sauces courants d\'une feuille impri
   // Un nom de plat ou une garniture inconnue reste « à préciser » : rien n'est deviné.
   assert.ok(lu('Union Cheese burger, salade Waldorf', 2).some((e) => e.endsWith('/a_preciser')));
 });
+
+test('mémoire : un mot appris par la propriétaire n\'est plus « à préciser » dans le même menu, mais le reste inchangé', () => {
+  const memoire = { 'chayote verte|2': { nom: 'chayote verte', categorie: 'legume', attribue: true } };
+  const intitule = 'Sauté de veau, riz, chayote verte';
+  const avec = lirePlat(intitule, 2, { memoire });
+  const chayote = avec.elements.find((e) => e.nom === 'chayote verte');
+  assert.equal(chayote.categorie, 'legume');
+  assert.equal(chayote.statut, 'lu');
+  assert.equal(chayote.propriete, 'poste');
+  assert.ok(!avec.ambiguites.some((a) => a.type === 'mot_inconnu'));
+  // Sans mémoire, ou pour l'autre menu : toujours à préciser (la mémoire est par menu).
+  assert.equal(lirePlat(intitule, 2).elements.find((e) => e.nom === 'chayote verte').categorie, 'a_preciser');
+  assert.equal(lirePlat(intitule, 1, { memoire }).elements.find((e) => e.nom === 'chayote verte').categorie, 'a_preciser');
+  // Une mémoire qui ne précise rien n'écrase pas la lecture.
+  const vide = { 'chayote verte|2': { nom: 'chayote verte', categorie: 'a_preciser', attribue: true } };
+  assert.equal(lirePlat(intitule, 2, { memoire: vide }).elements.find((e) => e.nom === 'chayote verte').categorie, 'a_preciser');
+});
