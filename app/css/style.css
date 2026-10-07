@@ -1,5 +1,5 @@
-/* Sanji : feuille de style écrite à la main. Refonte 1 (décision « Direction visuelle de la refonte 1 », 2026-10-04) :
-   fond doux, surfaces claires et opaques, filets fins, un accent (basilic) pour l'action, l'ambre réservé à ce que le chef doit trancher,
+/* Sanji : feuille de style écrite à la main. Refonte 2 (décision « Écrans et direction visuelle de la refonte 2 », 2026-10-07, palette G « Grand large ») :
+   fond parchemin, cartes crème et opaques, filets fins, bleu océan pour l'action, or paille réservé à ce que le chef doit trancher, noir pour décider,
    quantités en IBM Plex Mono embarquée (app/polices/, jamais chargée en ligne). Mobile d'abord (390 px), lisible en cuisine.
    Règles : texte courant 15 px et plus, légendes 13 px au moins ; un état ne se lit jamais par la couleur seule ; mouvement réduit respecté. */
 
@@ -9,35 +9,35 @@
 
 :root {
   /* Surfaces et texte (clair) */
-  --fond: #F3F4F1;
-  --carte: #FFFFFF;
-  --carte-2: #ECEDEF;
-  --encre: #15171A;
-  --sur-encre: #FFFFFF;
-  --texte: #15171A;
-  --texte-doux: #5B6168;
-  --texte-moyen: #3A3F45;
-  --bordure: #E2E4DF;
-  --bordure-forte: #9AA09A;
-  --bordure-champ: #767C76;
-  --case: #9AA09A;
+  --fond: #F4EAD5;
+  --carte: #FFF9EC;
+  --carte-2: #EFE3C8;
+  --encre: #161513;
+  --sur-encre: #FFF9EC;
+  --texte: #161513;
+  --texte-doux: #655C4C;
+  --texte-moyen: #3D372C;
+  --bordure: #E6D9BE;
+  --bordure-forte: #A3967C;
+  --bordure-champ: #857961;
+  --case: #8A7D63;
 
-  /* Action (basilic) */
-  --action: #2C6A3E;
-  --action-fonce: #1F4E2D;
-  --action-fond: #E3EEE6;
+  /* Action (bleu océan) */
+  --action: #1D5AA6;
+  --action-fonce: #164A8A;
+  --action-fond: #E1EAF6;
   --sur-action: #FFFFFF;
 
-  /* Exception (ambre) : uniquement pour ce que le chef doit trancher */
-  --exception: #8A4108;
-  --exception-fond: #FBEEE2;
-  --exception-bord: #E9C7A6;
-  --exception-point: #C2600F;
+  /* Exception (or paille) : uniquement pour ce que le chef doit trancher */
+  --exception: #8A5E00;
+  --exception-fond: #F6E3B8;
+  --exception-bord: #E2C47F;
+  --exception-point: #B07A00;
 
   /* Rouge : erreurs et suppressions */
-  --rouge: #c2321f;
-  --rouge-fond: #fbe7e3;
-  --rouge-texte: #8e2012;
+  --rouge: #B8232A;
+  --rouge-fond: #F8E0DC;
+  --rouge-texte: #8E1A20;
 
   /* Anciens noms, conservés : seules les valeurs changent (l'ancien accent bleu devient l'action) */
   --bleu: var(--action);
@@ -100,27 +100,28 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --fond: #0F1112;
-    --carte: #1A1D1F;
-    --carte-2: #23272A;
-    --encre: #F1F2EF;
-    --sur-encre: #0F1112;
-    --texte: #F1F2EF;
-    --texte-doux: #A3A9AF;
-    --texte-moyen: #C9CDD1;
-    --bordure: #2A2E31;
-    --bordure-forte: #4a5864;
-    --bordure-champ: #7A8791;
-    --action: #7CC28F;
-    --action-fonce: #A6D9B3;
-    --action-fond: #1F3326;
-    --sur-action: #0F1112;
-    --exception: #F0A766;
-    --exception-fond: #2A1E14;
-    --exception-bord: #4A3420;
-    --rouge: #e0604d;
-    --rouge-fond: #47201a;
-    --rouge-texte: #ff9d8e;
+    --fond: #0E1622;
+    --carte: #172233;
+    --carte-2: #1F2C40;
+    --encre: #F4EAD5;
+    --sur-encre: #0E1622;
+    --texte: #F4EAD5;
+    --texte-doux: #A9B3C2;
+    --texte-moyen: #CBD3DE;
+    --bordure: #26344A;
+    --bordure-forte: #4A5D78;
+    --bordure-champ: #7D8DA5;
+    --action: #6FA8F0;
+    --action-fonce: #A3C8F7;
+    --action-fond: #17304F;
+    --sur-action: #0E1622;
+    --exception: #F0B94A;
+    --exception-fond: #2C2312;
+    --exception-bord: #4D3B17;
+    --exception-point: #F0B94A;
+    --rouge: #FF7369;
+    --rouge-fond: #3D1A1A;
+    --rouge-texte: #FF9F97;
   }
 }
 
@@ -851,8 +852,8 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .au-ferme { padding: 12px 14px; border-radius: var(--r-carte-petite); background: var(--carte); }
 
 /* Maintenant : carte d'encre */
-.au-maintenant { --jauge-trait: #7CC28F; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: var(--r-carte); background: var(--encre); color: var(--sur-encre); }
-@media (prefers-color-scheme: dark) { .au-maintenant { --jauge-trait: #2C6A3E; } }
+.au-maintenant { --jauge-trait: #6FA8F0; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: var(--r-carte); background: var(--encre); color: var(--sur-encre); }
+@media (prefers-color-scheme: dark) { .au-maintenant { --jauge-trait: #1D5AA6; } }
 .au-maintenant-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .au-maintenant .au-etiquette, .au-jauge-texte { color: var(--sur-encre); opacity: 0.85; }
 .au-jauge-texte { font-size: var(--t-legende); }
