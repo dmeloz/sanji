@@ -82,6 +82,7 @@ const FICHIERS = [
   'js/ui/horsligne.js',
   'js/ui/menu-du-jour.js',
   'js/ui/messages.js',
+  'js/ui/nouvelle-version.js',
   'js/ui/panneau.js',
   'js/ui/photo.js',
   'js/ui/reference.js',

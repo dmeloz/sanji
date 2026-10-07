@@ -164,6 +164,7 @@ a { color: var(--bleu-texte); }
 
 .bandeaux { max-width: var(--largeur-max); margin: 0 auto; padding: 0 calc(env(safe-area-inset-right) + 14px) 0 calc(env(safe-area-inset-left) + 14px); }
 .bandeaux .encadre { margin-top: 12px; }
+.bandeau-version { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--action-fond); border-color: var(--action); color: var(--action-fonce); }
 
 /* ------------------------------------------------------------ titres et texte */
 
