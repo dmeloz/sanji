@@ -84,6 +84,8 @@ export function etatInitial() {
     // Valeurs changées par la propriétaire sur les standards de base (clé « usage|sujet »).
     ajustements: {},
     produits: {},
+    // Onglet Articles : lignes cochées (clé « composant|article » → horodatage).
+    articlesCoches: {},
     // Lectures corrigées par le chef (clé « intitulé normalisé|menu ») et validations reportées.
     lectures: {},
     validations: {},
@@ -338,6 +340,13 @@ export function importer(texte, aujourdhui = null) {
         retenus[role] = fusionner(standardVide(), standard);
       }
       etat.standards[cle] = retenus;
+    }
+  }
+  if (source.articlesCoches !== undefined && estObjet(source.articlesCoches)) {
+    // « composant|article » → horodatage : une clé trop longue, dangereuse ou sans « | », ou une valeur qui n'est pas un horodatage lisible, est écartée.
+    for (const [cle, h] of Object.entries(source.articlesCoches)) {
+      if (CLES_INTERDITES.has(cle) || cle.length > 300 || !cle.includes('|')) continue;
+      if (typeof h === 'string' && !Number.isNaN(Date.parse(h))) etat.articlesCoches[cle] = h;
     }
   }
   if (source.ajustements !== undefined) {

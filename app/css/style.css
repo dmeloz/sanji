@@ -1417,3 +1417,22 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .vp-etat { display: inline-flex; align-items: center; gap: 4px; margin: 0; padding: 2px 8px; border-radius: 6px; background: var(--action-fond); color: var(--action-fonce); font-size: var(--t-legende); font-weight: 600; }
 .vp-phrase { margin: 8px 0 0; font-size: 20px; font-weight: 600; }
 .vp-retour { display: flex; align-items: center; justify-content: center; min-height: var(--cible); margin-top: 16px; text-decoration: none; }
+
+/* ===== Articles (refonte 2, décision du 2026-10-07) : liste simple à cocher par jour et par menu, partage. ===== */
+.vue-articles { display: flex; flex-direction: column; gap: 14px; padding-bottom: 150px; } /* la barre « Partager la liste » est fixe */
+.art-entete { display: flex; flex-direction: column; gap: 4px; }
+.art-segments { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: var(--r-bouton); background: var(--carte-2); }
+.art-segments .stock-segment { border: 1px solid transparent; background: none; font: inherit; cursor: pointer; }
+.art-jour { display: flex; flex-direction: column; gap: 6px; }
+.art-liste { display: flex; flex-direction: column; margin: 0; padding: 0 4px; list-style: none; }
+.art-ligne { display: grid; grid-template-columns: var(--cible) minmax(0, 1fr) auto; align-items: center; gap: 6px; min-height: 60px; border-bottom: 1px solid var(--bordure); }
+.art-ligne:last-child { border-bottom: 0; }
+.art-ligne .case-fait { margin-left: -8px; }
+.art-texte { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.art-nom { font-weight: 600; overflow-wrap: anywhere; }
+.art-ligne-faite .art-nom, .art-ligne-faite .art-qte { color: var(--texte-doux); }
+.art-qte { font-size: var(--t-qte); font-weight: 600; white-space: nowrap; }
+.art-pouce { position: fixed; left: 0; right: 0; bottom: var(--haut-onglets); z-index: 15; display: flex; margin: 0 var(--marge-ecran); padding: 10px 0; background: var(--fond); }
+.art-pouce .btn { flex: 1; min-height: var(--haut-bouton); }
+@media (min-width: 981px) { .art-pouce { left: 50%; right: auto; width: min(var(--largeur-max), 100% - 2 * var(--marge-ecran)); transform: translateX(-50%); margin: 0; } }
+.art-segments .stock-segment-actif { background: var(--carte); border-color: var(--encre); color: var(--texte); font-weight: 700; }
