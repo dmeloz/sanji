@@ -1473,3 +1473,19 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 /* Brouillon : le détail d'une ligne (jour, créneau, quantité) passe à la ligne au lieu d'être coupé à droite. */
 .ia-ligne-texte, .ia-ligne-quand { min-width: 0; overflow-wrap: anywhere; }
 .ia-ligne-quand { flex: 1 1 100%; text-align: left; }
+
+/* Historique des semaines (#/historique). À coller dans app/css/style.css. Variables existantes uniquement. */
+.vue-historique .hist-liste { display: flex; flex-direction: column; }
+.hist-semaine { border-bottom: 1px solid var(--bordure); }
+.hist-semaine > summary { list-style: none; cursor: pointer; }
+.hist-semaine > summary::-webkit-details-marker { display: none; }
+.hist-ligne, .hist-jour { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 56px; }
+.hist-jour { min-height: 64px; border-top: 1px solid var(--bordure); }
+.hist-jours { list-style: none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid var(--bordure); }
+.hist-texte { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.hist-qte { display: flex; align-items: baseline; gap: 4px; white-space: nowrap; font-size: var(--t-legende); }
+.hist-qte .qte { font-family: var(--police-qte); font-size: 1rem; }
+.vue-historique .doux { color: var(--texte-doux); font-weight: 400; }
+.vue-historique .nom { font-weight: 600; }
+.hist-semaine > summary .petit { font-weight: 400; }
+.hist-jour .nom { font-weight: 500; }

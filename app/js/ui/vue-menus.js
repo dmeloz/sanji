@@ -99,11 +99,28 @@ function dialogRestaurer(champs, lundi, ligne) {
   });
 }
 
-/** Remplit les champs à partir du texte collé. N'enregistre rien. */
-export function repartir(champs, lundi) {
+// Au moins trois jours dont la date est possible et qui désignent la même autre semaine : le texte est ouvert à sa place.
+const JOURS_D_ACCORD = 3;
+// Le texte collé sur une autre semaine suit la propriétaire d'un écran à l'autre (rien n'est enregistré).
+let texteAReprendre = null;
+
+/** Le texte à reprendre sur l'écran qui s'ouvre, une seule fois : { texte, depuis } ou null. */
+export function reprendreTexte() {
+  const reprise = texteAReprendre;
+  texteAReprendre = null;
+  return reprise;
+}
+
+/** Remplit les champs à partir du texte collé. N'enregistre rien. `deplaceeDepuis` : le lundi de l'écran où il a été collé. */
+export function repartir(champs, lundi, { deplaceeDepuis = null } = {}) {
   const retour = champs.get('feuille-retour');
   const analyse = analyserFeuille(champs.get('feuille-texte').value);
-  const { saisie, avertissements } = repartirSurSemaine(analyse, lundi);
+  const { saisie, avertissements, corrections, semaine } = repartirSurSemaine(analyse, lundi);
+  if (deplaceeDepuis === null && semaine && semaine.lundi !== lundi && semaine.accord >= JOURS_D_ACCORD) {
+    texteAReprendre = { texte: champs.get('feuille-texte').value, depuis: lundi };
+    location.hash = `#/import/${semaine.lundi}`;
+    return;
+  }
   const jours = Object.keys(saisie);
   // Des intitulés déjà écrits qui vont être remplacés dans les champs : on le dit (rien n'est enregistré avant « Enregistrer »).
   const remplaces = jours.filter((date) => [1, 2].some((m) => {
@@ -115,6 +132,14 @@ export function repartir(champs, lundi) {
     champs.get(`menu-${date}-2`).value = saisie[date].menu2;
   }
   const messages = [];
+  if (deplaceeDepuis !== null) {
+    messages.push(encadre('info', `Les dates de ce texte sont celles de la semaine du ${libelleJour(lundi)} : je l'ai ouverte à sa place `
+      + `(vous étiez sur la semaine du ${libelleJour(deplaceeDepuis)}). Rien n'est enregistré avant « Enregistrer la semaine ».`));
+  }
+  if (corrections.length > 0) {
+    messages.push(encadre('info', `Dates corrigées : ${corrections.map((c) => `${libelleJour(ajouterJours(lundi, c.jourSemaine - 1))} `
+      + `(la feuille disait le ${c.imprime})`).join(', ')}. Les plats restent sous leur jour.`));
+  }
   if (jours.length > 0) {
     messages.push(encadre('info', `${jours.length} jour${jours.length > 1 ? 's' : ''} rempli${jours.length > 1 ? 's' : ''}. `
       + 'Relisez les intitulés, puis enregistrez la semaine.'));
@@ -176,6 +201,7 @@ export function enregistrer(champs, etat, lundi) {
 
 export function rendre(etat, lundi) {
   const champs = new Map();
+  const reprise = reprendreTexte();
   const racine = h('div', { classe: 'vue vue-menus' });
   racine.appendChild(h('h1', { classe: 'page-titre' }, `Menus de la semaine du ${libelleJour(lundi)}`));
   racine.appendChild(h('nav', { classe: 'nav-periode', 'aria-label': 'Semaine' },
@@ -188,7 +214,7 @@ export function rendre(etat, lundi) {
     return [1, 2].some((menu) => jour.menus[menu].intitule.trim() !== '');
   });
   racine.appendChild(h('section', { classe: 'carte' },
-    repliable(h('h2', { classe: 'section-titre', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie, [
+    repliable(h('h2', { classe: 'section-titre', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie || reprise !== null, [
       h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
       h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),
       champSaisi(champs, 'textarea', { id: 'feuille-texte', rows: 6, placeholder: 'texte copié depuis la photo de la feuille', value: '' }),
@@ -201,5 +227,9 @@ export function rendre(etat, lundi) {
   racine.appendChild(h('div', { classe: 'barre-enregistrer' },
     lien(`#/semaine/${lundi}/tableau`, 'Annuler', 'btn'),
     bouton('Enregistrer la semaine', () => enregistrer(champs, etat, lundi), 'principal')));
+  if (reprise !== null) {
+    champs.get('feuille-texte').value = reprise.texte;
+    repartir(champs, lundi, { deplaceeDepuis: reprise.depuis });
+  }
   return racine;
 }

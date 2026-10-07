@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { analyserFeuille, repartirSurSemaine } from '../app/js/domaine/feuille.js';
+import { analyserFeuille, repartirSurSemaine, semaineDetectee } from '../app/js/domaine/feuille.js';
 
 // Jeu TEST_ONLY : mots de catégorie assemblés pour le test, aucun intitulé de vrai menu.
 const DEUX_JOURS_DATE_ENTRE = `Menu du marché
@@ -145,4 +145,47 @@ test('feuille : un titre avec son sous-titre de service est écarté, un plat re
   }
   const plat = analyserFeuille('lundi 5 octobre\nMenu du chef au beurre blanc 19.-\nSauté de volaille, riz 24.-');
   assert.equal(plat.jours[0].menu1, 'Menu du chef au beurre blanc');
+});
+
+test('feuille : une date collée à son mois (« 11mars ») est lue en entier', () => {
+  const r = analyserFeuille('Mercredi 11mars\nPenne au pesto\nSauté de veau, riz');
+  assert.deepEqual(r.jours.map((j) => [j.jourSemaine, j.numero, j.mois]), [[3, 11, 3]]);
+  assert.deepEqual(r.ignorees, []);
+});
+
+const SEMAINE_MARS = (mois) => ['Lundi 9', 'Mardi 10', 'Mercredi 11', 'Jeudi 12', 'Vendredi 13']
+  .map((j, i) => `${j}${mois}\nPlat ${i} menu 1\nPlat ${i} menu 2`).join('\n');
+
+test('semaine détectée : par les dates du texte, avec ou sans mois, la plus proche de la semaine affichée', () => {
+  const avecMois = semaineDetectee(analyserFeuille(SEMAINE_MARS(' mars')), '2026-10-05');
+  assert.deepEqual([avecMois.lundi, avecMois.accord], ['2026-03-09', 5]);
+  const sansMois = semaineDetectee(analyserFeuille(SEMAINE_MARS('')), '2026-03-02');
+  assert.equal(sansMois.lundi, '2026-03-09');
+  assert.equal(semaineDetectee(analyserFeuille('riz\npoulet'), '2026-10-05'), null);
+});
+
+test('semaine détectée : un jour dont la date ne tombe pas sur son jour ne vote pas', () => {
+  // Janvier 2026 : le 5 est un lundi, le 6 un mardi ; « mercredi 8 », « jeudi 7 » et « vendredi 8 » sont impossibles.
+  const texte = ['Lundi 5 janvier', 'a', 'b', 'Mardi 6 janvier', 'c', 'd', 'Mercredi 8 janvier', 'e', 'f',
+    'Jeudi 7 janvier', 'g', 'h', 'Vendredi 8 janvier', 'i', 'j'].join('\n');
+  const d = semaineDetectee(analyserFeuille(texte), '2026-01-05');
+  assert.deepEqual([d.lundi, d.accord, d.total], ['2026-01-05', 2, 5]);
+});
+
+test('semaine : des dates fausses dans la bonne semaine sont corrigées et dites, sans avertissement', () => {
+  const texte = ['Lundi 5 janvier', 'Penne au pesto', 'Sauté de volaille', 'Mardi 6 janvier', 'Casarecce au jambon', 'Dos de lieu',
+    'Mercredi 8 janvier', 'Risotto aux aubergines', 'Onglet de bœuf', 'Jeudi 7 janvier', 'Mafalda à la coppa', 'Blanquette de veau',
+    'Vendredi 8 janvier', 'Orecchiette au bleu', 'Filet de rascasse'].join('\n');
+  const r = repartirSurSemaine(analyserFeuille(texte), '2026-01-05');
+  assert.deepEqual(r.avertissements, []);
+  assert.deepEqual(r.corrections.map((c) => [c.jourSemaine, c.imprime, c.corrige]), [[3, 8, 7], [4, 7, 8], [5, 8, 9]]);
+  assert.deepEqual(Object.keys(r.saisie), ['2026-01-05', '2026-01-06', '2026-01-07', '2026-01-08', '2026-01-09']);
+  assert.equal(r.saisie['2026-01-07'].menu1, 'Risotto aux aubergines'); // le plat reste sous son jour de la semaine
+});
+
+test('semaine : un texte d\'une autre semaine garde ses avertissements et rend la semaine détectée', () => {
+  const r = repartirSurSemaine(analyserFeuille(SEMAINE_MARS(' mars')), '2026-10-05');
+  assert.equal(r.semaine.lundi, '2026-03-09');
+  assert.deepEqual(r.corrections, []);
+  assert.ok(r.avertissements.length > 0);
 });

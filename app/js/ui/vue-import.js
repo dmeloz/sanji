@@ -16,7 +16,7 @@ import { problemeHorsLigne } from './horsligne.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { importerPhoto, retirerPhoto, urlPhoto } from './photo.js';
-import { JOURS_A_MENU, blocJour, champSaisi, enregistrer, repartir } from './vue-menus.js';
+import { JOURS_A_MENU, blocJour, champSaisi, enregistrer, repartir, reprendreTexte } from './vue-menus.js';
 
 export function titre() { return 'Import des menus'; }
 
@@ -121,6 +121,7 @@ function blocPhoto(lundi) {
 export function rendre(etat, lundi) {
   const champs = new Map();
   const ouverts = new Map();
+  const reprise = reprendreTexte();
   const dates = JOURS_A_MENU.map((decalage) => ajouterJours(lundi, decalage));
   const numero = tableauBlanc(etat, aujourdhui(), lundi).bord.entete.semaine;
   const racine = h('div', { classe: 'vue vue-import vue-menus' });
@@ -142,7 +143,7 @@ export function rendre(etat, lundi) {
   const repartirEtLire = () => { repartir(champs, lundi); majLecture(); };
 
   racine.appendChild(h('section', { classe: 'carte' },
-    repliable(h('h2', { classe: 'imp-titre-section', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie, [
+    repliable(h('h2', { classe: 'imp-titre-section', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie || reprise !== null, [
       h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
       h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),
       champSaisi(champs, 'textarea', { id: 'feuille-texte', rows: 6, placeholder: 'texte copié depuis la photo de la feuille', value: '' }),
@@ -164,5 +165,10 @@ export function rendre(etat, lundi) {
   racine.appendChild(h('div', { classe: 'barre-enregistrer' },
     lien(`#/semaine/${lundi}/tableau`, 'Annuler', 'btn'),
     bouton('Enregistrer la semaine', () => enregistrer(champs, etat, lundi), 'principal')));
+  if (reprise !== null) {
+    champs.get('feuille-texte').value = reprise.texte;
+    repartir(champs, lundi, { deplaceeDepuis: reprise.depuis });
+    majLecture();
+  }
   return racine;
 }

@@ -66,6 +66,12 @@ function estJourOff(etat, date) {
 
 /** Le seul bouton d'action de Semaine : une feuille avec « Importer les menus » et « Proposer un planning ». */
 function boutonActions(lundi, date) {
+  return h('span', { classe: 'sa-groupe' },
+    h('a', { href: '#/historique', classe: 'sa-fleche', 'aria-label': 'Historique des semaines' }, '↺'),
+    boutonActionsFeuille(lundi, date));
+}
+
+function boutonActionsFeuille(lundi, date) {
   return h('button', {
     type: 'button', classe: 'sa-actions', 'aria-label': 'Actions de la semaine',
     onClick: () => panneau({

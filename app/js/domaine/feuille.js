@@ -1,7 +1,7 @@
 // Analyse du texte collé d'une feuille de menus de la semaine (logique pure, sans DOM).
 // Rien n'est deviné : en cas de doute, la fonction renvoie un avertissement et laisse les champs vides.
 
-import { ajouterJours, jourSemaine } from './dates.js';
+import { ajouterJours, joursEntre, jourSemaine } from './dates.js';
 
 const JOURS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 const MOIS = ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre',
@@ -11,7 +11,7 @@ const sansAccent = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toL
 
 // « lundi 05 octobre », « Mardi 1er juin 2026 » : jour, numéro, mois facultatif, année facultative.
 const MOTIF_DATE = new RegExp(
-  `(?:^|[^a-z])(${JOURS.join('|')})\\s+(\\d{1,2})(?:er)?(?:\\s+(${MOIS.join('|')}))?(?:\\s+\\d{4})?(?![a-z])`, 'i');
+  `(?:^|[^a-z])(${JOURS.join('|')})\\s+(\\d{1,2})(?:er)?(?:\\s*(${MOIS.join('|')}))?(?:\\s+\\d{4})?(?![a-z])`, 'i');
 
 // Prix en fin ou en début de ligne : « 19.- », « 24.– », « CHF 19.50 », « 21 fr. ».
 const PRIX = '(?:chf\\s*)?\\d{1,3}(?:[.,]\\d{1,2})?\\s*(?:\\.?\\s*[-–—]+|chf|fr\\.?|francs?)';
@@ -110,15 +110,57 @@ export function analyserFeuille(texte) {
 }
 
 /**
+ * La date la plus proche de la semaine affichée dont le jour de la semaine, le quantième et (s'il est écrit) le mois
+ * correspondent à ce que dit la feuille ; null si la feuille se trompe (« mercredi 8 » quand le 8 est un jeudi).
+ */
+function dateDuJour({ jourSemaine: js, numero, mois }, lundiAffiche) {
+  let meilleure = null;
+  for (let d = -366; d <= 366; d += 1) {
+    const date = ajouterJours(lundiAffiche, d);
+    if (Number(date.slice(8)) !== numero || jourSemaine(date) !== js) continue;
+    if (mois !== null && Number(date.slice(5, 7)) !== mois) continue;
+    if (meilleure === null || Math.abs(d) < Math.abs(meilleure.d)) meilleure = { date, d };
+  }
+  return meilleure?.date ?? null;
+}
+
+/**
+ * La semaine que décrivent les dates de la feuille : chaque jour dont la date est possible vote pour son lundi ; le lundi
+ * le plus voté l'emporte (à égalité, le plus proche de la semaine affichée). Un jour impossible ne vote pas.
+ * @param {ReturnType<typeof analyserFeuille>} analyse
+ * @param {string} lundiAffiche AAAA-MM-JJ
+ * @returns {{lundi:string, accord:number, total:number}|null} accord = nombre de jours d'accord, total = jours lus
+ */
+export function semaineDetectee(analyse, lundiAffiche) {
+  const votes = new Map();
+  for (const jour of analyse.jours) {
+    const date = dateDuJour(jour, lundiAffiche);
+    if (date === null) continue;
+    const lundi = ajouterJours(date, 1 - jour.jourSemaine);
+    votes.set(lundi, (votes.get(lundi) ?? 0) + 1);
+  }
+  const ecart = (lundi) => Math.abs(joursEntre(lundiAffiche, lundi));
+  const [gagnant] = [...votes.entries()].sort((a, b) => b[1] - a[1] || ecart(a[0]) - ecart(b[0]));
+  return gagnant ? { lundi: gagnant[0], accord: gagnant[1], total: analyse.jours.length } : null;
+}
+
+/**
  * Place le résultat de `analyserFeuille` sur les dates d'une semaine (lundi à vendredi).
+ * Une date fausse sur une feuille qui est bien celle de la semaine est corrigée (le plat reste sous son jour de la
+ * semaine) et rendue dans `corrections` ; si la feuille semble d'une autre semaine, la date reste un avertissement et
+ * `semaine` donne la semaine détectée, que l'écran peut proposer.
  * @param {ReturnType<typeof analyserFeuille>} analyse
  * @param {string} lundi date du lundi, AAAA-MM-JJ
- * @returns {{saisie:Object<string,{menu1:string, menu2:string}>, avertissements:string[]}}
+ * @returns {{saisie:Object<string,{menu1:string, menu2:string}>, avertissements:string[],
+ *   corrections:{jourSemaine:number, imprime:number, corrige:number}[], semaine:{lundi:string, accord:number, total:number}|null}}
  */
 export function repartirSurSemaine(analyse, lundi) {
   if (jourSemaine(lundi) !== 1) throw new Error('La semaine doit commencer un lundi.');
   const saisie = {};
   const avertissements = [...analyse.avertissements];
+  const corrections = [];
+  const semaine = semaineDetectee(analyse, lundi);
+  const bonneSemaine = semaine?.lundi === lundi;
   for (const jour of analyse.jours) {
     if (jour.jourSemaine > 5) {
       if (jour.menu1 || jour.menu2) avertissements.push('Pas de menu du jour le samedi ni le dimanche : ce jour est ignoré.');
@@ -129,10 +171,14 @@ export function repartirSurSemaine(analyse, lundi) {
     const numeroAttendu = Number(date.slice(8));
     const moisAttendu = Number(date.slice(5, 7));
     if (jour.numero !== numeroAttendu || (jour.mois !== null && jour.mois !== moisAttendu)) {
-      avertissements.push(`La feuille indique le ${jour.numero} pour ${JOURS[jour.jourSemaine - 1]}, `
-        + `la semaine affichée donne le ${numeroAttendu} : vérifiez que c'est la bonne semaine.`);
+      if (bonneSemaine) {
+        corrections.push({ jourSemaine: jour.jourSemaine, imprime: jour.numero, corrige: numeroAttendu });
+      } else {
+        avertissements.push(`La feuille indique le ${jour.numero} pour ${JOURS[jour.jourSemaine - 1]}, `
+          + `la semaine affichée donne le ${numeroAttendu} : vérifiez que c'est la bonne semaine.`);
+      }
     }
     saisie[date] = { menu1: jour.menu1, menu2: jour.menu2 };
   }
-  return { saisie, avertissements };
+  return { saisie, avertissements, corrections, semaine };
 }

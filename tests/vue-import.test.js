@@ -170,3 +170,31 @@ test('CSS (lot Stock et Import) : cible de 44 px sur le résumé d\'un jour, int
   assert.match(bloc, /\.champ-intitule \{[^}]*min-height: var\(--cible\)/);
   assert.match(bloc, /prefers-reduced-motion/);
 });
+
+test('dates fausses dans la bonne semaine : corrigées et dites, les plats restent sous leur jour', async () => {
+  magasin.remplacer(etatVide());
+  const noeud = vue.rendre(magasin.etat(), S.lundi);
+  // « mardi 7 octobre » n'existe pas en 2026 (le 7 est un mercredi) : la feuille se trompe, la semaine affichée est la bonne.
+  champ(noeud, 'feuille-texte').value = 'Lundi 5 octobre\nriz et carottes\npoulet, riz, carottes\nMardi 7 octobre\nPenne au pesto\nSauté de veau, riz';
+  await bouton(noeud, 'Répartir dans la semaine').click();
+  assert.match(noeud.textContent, /Dates corrigées : .*mardi 6 octobre.*la feuille disait le 7/i);
+  assert.equal(champ(noeud, 'menu-2026-10-06-1').value, 'Penne au pesto');
+  assert.equal(Object.keys(magasin.etat().composants).length, 0);
+});
+
+test('texte d\'une autre semaine : ouvert à sa place, sans rien enregistrer', async () => {
+  magasin.remplacer(etatVide());
+  const texte = 'Lundi 12 octobre\nriz et carottes\npoulet, riz\nMardi 13 octobre\nPenne au pesto\nSauté de veau, riz\n'
+    + 'Mercredi 14 octobre\nRisotto aux bolets\nOnglet de bœuf, polenta';
+  const ici = vue.rendre(magasin.etat(), S.lundi);
+  champ(ici, 'feuille-texte').value = texte;
+  await bouton(ici, 'Répartir dans la semaine').click();
+  assert.equal(globalThis.location.hash, '#/import/2026-10-12');
+  // Le routeur réel affiche alors la semaine cible : on rend la même vue.
+  const la = vue.rendre(magasin.etat(), '2026-10-12');
+  assert.match(la.textContent, /Les dates de ce texte sont celles de la semaine du .*12 octobre.*je l'ai ouverte à sa place/i);
+  assert.equal(champ(la, 'menu-2026-10-12-1').value, 'riz et carottes');
+  assert.equal(Object.keys(magasin.etat().composants).length, 0);
+  // Un deuxième affichage ne reprend plus le texte.
+  assert.equal(champ(vue.rendre(magasin.etat(), '2026-10-12'), 'feuille-texte').value, '');
+});

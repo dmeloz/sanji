@@ -266,7 +266,7 @@ test('bouton « ⋯ » : la feuille propose Importer les menus, Proposer un plan
   assert.equal(feuille[0].attributs.href, `#/import/${S.lundiSuivant}`);
   assert.equal(feuille[2].attributs.href, `#/semaine/${S.lundiSuivant}/tableau`);
   const fleches = parClasse(n, 'sa-fleche');
-  assert.deepEqual(fleches.map((a) => a.attributs['aria-label']), ['Semaine précédente', 'Semaine suivante']);
+  assert.deepEqual(fleches.map((a) => a.attributs['aria-label']), ['Semaine précédente', 'Semaine suivante', 'Historique des semaines']);
   assert.equal(parClasse(n, 'sem-nav').length, 0, 'plus de pile de trois boutons en haut');
 });
 

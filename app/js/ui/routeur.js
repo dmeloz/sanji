@@ -8,6 +8,7 @@ import { encadre } from './elements.js';
 import * as vueAujourdhui from './vue-aujourdhui.js';
 import * as vueArticles from './vue-articles.js';
 import * as vueFiche from './vue-fiche.js';
+import * as vueHistorique from './vue-historique.js';
 import * as vueImport from './vue-import.js';
 import * as vuePoste from './vue-poste.js';
 import * as vueProduction from './vue-production.js';
@@ -16,19 +17,19 @@ import * as vueSemaine from './vue-semaine.js';
 
 export const VUES = {
   aujourdhui: vueAujourdhui, production: vueProduction, semaine: vueSemaine, articles: vueArticles,
-  fiche: vueFiche, poste: vuePoste, import: vueImport, reglages: vueReglages,
+  fiche: vueFiche, poste: vuePoste, import: vueImport, reglages: vueReglages, historique: vueHistorique,
 };
 
 /** Onglet actif selon la vue. Réglages n'a plus d'onglet : il s'ouvre depuis Aujourd'hui, dont l'onglet reste marqué. */
 export const ONGLET_DE_VUE = {
   aujourdhui: 'aujourdhui', reglages: 'aujourdhui', production: 'production', fiche: 'production', poste: 'production',
-  semaine: 'semaine', import: 'semaine', articles: 'articles',
+  semaine: 'semaine', import: 'semaine', historique: 'semaine', articles: 'articles',
 };
 
 /**
  * Analyse un hash (« #/production/2026-10-05 ») : { vue, param, sous? }. Fonction pure, sans DOM.
  * Adresses : #/aujourdhui (accueil, défaut), #/production[/date], #/semaine[/date[/tableau]], #/articles,
- * #/fiche/<composantId>, #/poste/<composantId>, #/import[/date], #/reglages[/rubrique].
+ * #/fiche/<composantId>, #/poste/<composantId>, #/import[/date], #/reglages[/rubrique], #/historique.
  * Défauts : production = aujourd'hui ; import = lundi de la semaine donnée ou en cours ; articles : aucun paramètre ; semaine sans date = tableau de la semaine (param null), avec date = détail du jour,
  * « /tableau » en plus = tableau de cette semaine (ramenée au lundi). Une adresse inconnue, ou fiche/poste sans identifiant, mène à l'accueil.
  * Réglages : une clé de rubrique inconnue donne la racine.
@@ -56,6 +57,7 @@ export function analyserHash(hash, aujourd) {
   if (vue === 'import' || vue === 'menus') return { vue: 'import', param: lundiDe(dateValide ? param : aujourd) };
   if (vue === 'articles' || vue === 'stock' || vue === 'produits') return { vue: 'articles', param: null };
   if ((vue === 'fiche' || vue === 'composant') && param) return { vue: 'fiche', param };
+  if (vue === 'historique') return { vue, param: null };
   if (vue === 'poste' && param) return { vue: 'poste', param };
   if (vue === 'reglages') return { vue, param: vueReglages.CLES_RUBRIQUES.includes(morceaux[1]) ? morceaux[1] : null };
   return { vue: 'aujourdhui', param: null };
