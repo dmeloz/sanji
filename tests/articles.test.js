@@ -81,6 +81,7 @@ test('cocher : refuse une clé qui ne désigne aucun composant, un état non boo
   const { e } = semaine();
   assert.throws(() => cocherArticle(e, 'inconnu|riz', true, h()), /Article inconnu/);
   assert.throws(() => cocherArticle(e, 42, true, h()), /Article inconnu/);
+  for (const dangereuse of ['__proto__|x', 'constructor|x', 'toString|x']) assert.throws(() => cocherArticle(e, dangereuse, true, h()), /Article inconnu/, dangereuse);
   const cle = aplatir(articlesDuPoste(e, S.lundi))[0].cle;
   assert.throws(() => cocherArticle(e, cle, 'oui', h()), /vrai ou faux/);
   assert.throws(() => cocherArticle(e, cle, true, 'pas une date'), /Horodatage/);

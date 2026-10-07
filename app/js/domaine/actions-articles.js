@@ -17,7 +17,7 @@ function verifierH(h) {
 export function cocherArticle(etat, cle, coche, h) {
   verifierH(h);
   const composantId = typeof cle === 'string' && cle.length <= LONGUEUR_MAX_CLE ? cle.split('|')[0] : '';
-  if (!cle.includes?.('|') || !etat.composants?.[composantId]) throw new Error(`Article inconnu : ${String(cle).slice(0, 60)}.`);
+  if (!cle.includes?.('|') || !Object.hasOwn(etat.composants ?? {}, composantId)) throw new Error(`Article inconnu : ${String(cle).slice(0, 60)}.`);
   if (typeof coche !== 'boolean') throw new Error('Une case se coche ou se décoche : vrai ou faux attendu.');
   if (!etat.articlesCoches || typeof etat.articlesCoches !== 'object') etat.articlesCoches = {};
   if (coche) etat.articlesCoches[cle] = h;
