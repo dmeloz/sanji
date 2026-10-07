@@ -25,3 +25,31 @@ export function surveillerNouvelleVersion(conteneur, montrer) {
     montrer();
   });
 }
+
+/** Demande au navigateur de chercher une nouvelle version : 'a_jour' | 'en_cours' (le bandeau suivra) | 'indisponible'. */
+export async function verifierMiseAJour(conteneur) {
+  try {
+    const inscription = await conteneur?.getRegistration?.();
+    if (!inscription) return 'indisponible';
+    await inscription.update();
+    return inscription.installing || inscription.waiting ? 'en_cours' : 'a_jour';
+  } catch {
+    return 'indisponible';
+  }
+}
+
+const MESSAGES = {
+  a_jour: 'Sanji est à jour.',
+  en_cours: 'Une nouvelle version arrive : le bandeau « Mettre à jour » va s\'afficher.',
+  indisponible: 'Impossible de vérifier pour l\'instant (réseau ou mode hors ligne).',
+};
+
+/** Réglages : bouton « Vérifier les mises à jour » et le résultat dessous. `verifier` est injectable pour les tests. */
+export function ligneVerifierMiseAJour(verifier = () => verifierMiseAJour(typeof navigator === 'undefined' ? undefined : navigator.serviceWorker)) {
+  const message = h('p', { classe: 'meta', role: 'status' });
+  const declencheur = bouton('Vérifier les mises à jour', async () => {
+    message.textContent = 'Vérification…';
+    message.textContent = MESSAGES[await verifier()];
+  }, 'court');
+  return h('div', { classe: 'reglages-maj' }, declencheur, message);
+}

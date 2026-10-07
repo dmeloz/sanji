@@ -51,3 +51,26 @@ test('surveiller : première installation (aucun worker avant) ne montre rien', 
 test('surveiller : sans service worker (conteneur absent), rien ne plante', () => {
   assert.doesNotThrow(() => mod.surveillerNouvelleVersion(undefined, () => {}));
 });
+
+function fauxRegistration({ installing = null, waiting = null, echec = false } = {}) {
+  return { installing, waiting, update: async () => { if (echec) throw new Error('réseau'); } };
+}
+
+test('verifier : rien en attente = « a_jour » ; un worker qui s\'installe = « en_cours » ; échec ou absence = « indisponible »', async () => {
+  const conteneur = (reg) => ({ getRegistration: async () => reg });
+  assert.equal(await mod.verifierMiseAJour(conteneur(fauxRegistration())), 'a_jour');
+  assert.equal(await mod.verifierMiseAJour(conteneur(fauxRegistration({ installing: {} }))), 'en_cours');
+  assert.equal(await mod.verifierMiseAJour(conteneur(fauxRegistration({ waiting: {} }))), 'en_cours');
+  assert.equal(await mod.verifierMiseAJour(conteneur(fauxRegistration({ echec: true }))), 'indisponible');
+  assert.equal(await mod.verifierMiseAJour(conteneur(undefined)), 'indisponible');
+  assert.equal(await mod.verifierMiseAJour(undefined), 'indisponible');
+});
+
+test('ligne de vérification : un bouton « Vérifier les mises à jour » et un message qui dit le résultat', async () => {
+  const ligne = mod.ligneVerifierMiseAJour(async () => 'a_jour');
+  const [bouton] = ligne.tous((x) => x.balise === 'button');
+  assert.equal(bouton.textContent, 'Vérifier les mises à jour');
+  bouton.click();
+  for (let i = 0; i < 5; i += 1) await Promise.resolve();
+  assert.match(ligne.textContent, /à jour/);
+});
