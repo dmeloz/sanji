@@ -1,6 +1,6 @@
 // Import des menus (#/import[/date]), selon la maquette « Import » de la refonte 1.
 // `param` = le lundi de la semaine (le routeur le donne). Saisie : texte collé (feuille.js) ou intitulés tapés jour par jour ;
-// la photo reste une AIDE visuelle (photo.js), jamais lue par Sanji. « Ce que Sanji a lu » est la lecture des intitulés
+// la photo reste une AIDE visuelle (photo.js) ; seule l'IA, si la propriétaire la demande après aperçu, en transcrit le texte. « Ce que Sanji a lu » est la lecture des intitulés
 // saisis (lirePlat) : elle se met à jour pendant la frappe, sans rien enregistrer. Les morceaux de saisie, de répartition
 // et d'enregistrement viennent de vue-menus.js (aucune règle métier ici).
 
@@ -8,14 +8,16 @@ import { ajouterJours, libelleJour } from '../domaine/dates.js';
 import { lirePlat } from '../domaine/analyse-menu.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { tableauBlanc } from '../domaine/tableau-blanc.js';
+import { lireLignesFeuille } from '../harness/lecture-photo-ia.js';
 import { aujourdhui } from '../magasin.js';
+import { assistantPret, fournisseurDepuisReglages } from './assistant-reglages.js';
 import { h } from './dom.js';
 import { bouton, lien, repliable } from './elements.js';
 import { pluriel } from './format.js';
 import { problemeHorsLigne } from './horsligne.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
-import { importerPhoto, retirerPhoto, urlPhoto } from './photo.js';
+import { importerPhoto, photoEnBase64, retirerPhoto, urlPhoto } from './photo.js';
 import { JOURS_A_MENU, blocJour, champSaisi, enregistrer, repartir, reprendreTexte } from './vue-menus.js';
 
 export function titre() { return 'Import des menus'; }
@@ -80,15 +82,61 @@ function ligneLectureJour(etat, champs, date, ouverts) {
   return details;
 }
 
-/** Photo du menu papier : une aide pour recopier ou copier le texte, jamais lue. Gardée sur l'appareil, non exportée. */
-function blocPhoto(lundi) {
+const TEXTE_ENVOI_PHOTO = 'La photo va être envoyée à l\'IA pour transcrire le texte imprimé. Les notes écrites à la main sont ignorées. Rien d\'autre ne part.';
+const AIDE_PHOTO_IA = 'La photo peut être lue par l\'IA, après un aperçu et à chaque fois que vous le demandez : seules les lignes imprimées reviennent, vous les relisez avant d\'enregistrer. Réduite à 1600 px, gardée sur l\'appareil, non exportée.';
+const AIDE_PHOTO_SANS_IA = 'Sanji ne lit pas la photo : elle reste à côté pour que vous recopiiez les intitulés ou copiiez son texte. Réduite à 1600 px, gardée sur l\'appareil, non exportée.';
+
+/** Décision du 2026-10-07 : la photo ne part qu'après aperçu, à chaque clic ; la réponse ne fait que remplir le champ de texte. */
+async function dialogLecturePhoto(lundi, url, surLecture) {
+  const attente = new AbortController();
+  const envoi = panneau({
+    titre: 'Lire la photo avec l\'IA',
+    corps: [h('img', { classe: 'photo-grande photo-apercu', src: url, alt: 'Photo de la feuille qui sera envoyée' }), h('p', null, TEXTE_ENVOI_PHOTO)],
+    libelleEnregistrer: 'Envoyer',
+    // Une erreur est levée : le panneau reste ouvert avec le message, « Envoyer » permet de réessayer.
+    surEnregistrer: async () => {
+      const fournisseur = fournisseurDepuisReglages();
+      if (!fournisseur.disponible() || typeof fournisseur.demanderLecturePhoto !== 'function') {
+        throw new Error('L\'assistant IA n\'est pas activé : rien n\'est envoyé.');
+      }
+      const image = await photoEnBase64(lundi);
+      if (!image) throw new Error('La photo n\'est plus sur cet appareil : rien n\'est envoyé.');
+      envoi.addEventListener('close', () => attente.abort());
+      let lecture;
+      try {
+        lecture = lireLignesFeuille(await fournisseur.demanderLecturePhoto(image, { signal: attente.signal }));
+      } catch (e) {
+        if (!envoi.open) return; // annulé pendant l'attente : rien à dire
+        throw new Error(`L'IA n'a pas répondu : ${e?.message ?? e}`);
+      }
+      if (!envoi.open) return; // fermé pendant l'attente : la réponse est ignorée
+      if (!lecture || lecture.lignes.length === 0) throw new Error('Réponse de l\'IA inexploitable : rien n\'est modifié.');
+      surLecture(lecture);
+    },
+  });
+}
+
+/** Photo du menu papier : gardée sur l'appareil, non exportée. `surLecture` reçoit les lignes que l'IA a transcrites. */
+function blocPhoto(lundi, surLecture) {
   const zone = h('div', { classe: 'photo-zone' }, h('p', { classe: 'vide' }, 'Aucune photo.'));
   const retirer = bouton('Retirer la photo', () => confirmer({
     titre: 'Retirer la photo ?', texte: 'La photo sera supprimée de cet appareil.', libelleOk: 'Retirer', danger: true,
     action: async () => { await retirerPhoto(lundi); montrer(null); },
   }), 'court', { hidden: true });
+  let ouverture = false;
+  const lirePhotoIA = assistantPret()
+    ? bouton('Lire la photo avec l\'IA', async () => {
+      if (ouverture) return; // un seul aperçu à la fois : le deuxième clic pendant la lecture de la photo est ignoré
+      ouverture = true;
+      try {
+        const url = await urlPhoto(lundi);
+        if (url) dialogLecturePhoto(lundi, url, surLecture);
+      } finally { ouverture = false; }
+    }, 'court', { hidden: true })
+    : null;
   function montrer(url) {
     retirer.hidden = !url;
+    if (lirePhotoIA) lirePhotoIA.hidden = !url;
     if (!url) { zone.replaceChildren(h('p', { classe: 'vide' }, 'Aucune photo.')); return; }
     zone.replaceChildren(h('button', { type: 'button', classe: 'photo-miniature', 'aria-label': 'Agrandir la photo du menu papier',
       onClick: () => panneau({ titre: 'Menu papier', lectureSeule: true, corps: [h('img', { classe: 'photo-grande', src: url, alt: 'Photo du menu papier' })] }) },
@@ -110,9 +158,9 @@ function blocPhoto(lundi) {
     },
   });
   const bloc = repliable(h('h2', { classe: 'imp-titre-section' }, 'Photo du menu (aide visuelle)'), false, [
-    h('p', { classe: 'aide' }, 'Sanji ne lit pas la photo : elle reste à côté pour que vous recopiiez les intitulés ou copiiez son texte. Réduite à 1600 px, gardée sur l\'appareil, non exportée.'),
+    h('p', { classe: 'aide' }, lirePhotoIA ? AIDE_PHOTO_IA : AIDE_PHOTO_SANS_IA),
     zone,
-    h('div', { classe: 'actions' }, h('label', { classe: 'btn btn-court' }, 'Prendre ou importer une photo', entree), retirer),
+    h('div', { classe: 'actions' }, h('label', { classe: 'btn btn-court' }, 'Prendre ou importer une photo', entree), lirePhotoIA, retirer),
   ], { classe: 'carte imp-photo' });
   urlPhoto(lundi).then((url) => { if (url) { montrer(url); bloc.open = true; } }).catch(() => {});
   return bloc;
@@ -135,21 +183,27 @@ export function rendre(etat, lundi) {
       h('h1', { classe: 'page-titre' }, 'Importer les menus')),
     h('a', { href: `#/import/${ajouterJours(lundi, 7)}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')));
 
-  racine.appendChild(blocPhoto(lundi));
-
   const dejaSaisie = dates.some((date) => [1, 2].some((menu) => jourOuVide(etat, date).menus[menu].intitule.trim() !== ''));
   const zoneLecture = h('div', { classe: 'imp-lecture-jours' });
   const majLecture = () => zoneLecture.replaceChildren(...dates.map((date) => ligneLectureJour(etat, champs, date, ouverts)));
   const repartirEtLire = () => { repartir(champs, lundi); majLecture(); };
-
-  racine.appendChild(h('section', { classe: 'carte' },
-    repliable(h('h2', { classe: 'imp-titre-section', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie || reprise !== null, [
+  // Les lignes de l'IA remplacent le champ de texte puis passent par la même répartition que le bouton ; rien n'est enregistré.
+  const surLecturePhoto = ({ lignes, illisibles }) => {
+    const remplace = champs.get('feuille-texte').value.trim() !== '';
+    champs.get('feuille-texte').value = lignes.join('\n');
+    sectionFeuille.open = true;
+    repartirEtLire();
+    afficherMessage(`L'IA a lu ${pluriel(lignes.length, 'ligne')}. Relisez « Ce que Sanji a lu » avant d'enregistrer.${remplace ? ' Le texte collé précédemment a été remplacé.' : ''}${illisibles > 0 ? ` ${pluriel(illisibles, 'ligne illisible', 'lignes illisibles')} : complétez à la main.` : ''}`);
+  };
+  racine.appendChild(blocPhoto(lundi, surLecturePhoto));
+  const sectionFeuille = repliable(h('h2', { classe: 'imp-titre-section', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie || reprise !== null, [
       h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
       h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),
       champSaisi(champs, 'textarea', { id: 'feuille-texte', rows: 6, placeholder: 'texte copié depuis la photo de la feuille', value: '' }),
       h('div', { classe: 'actions' }, bouton('Répartir dans la semaine', repartirEtLire)),
       champSaisi(champs, 'div', { id: 'feuille-retour', classe: 'saisie-retour', 'aria-live': 'polite' }),
-    ])));
+    ]);
+  racine.appendChild(h('section', { classe: 'carte' }, sectionFeuille));
 
   racine.appendChild(h('h2', { classe: 'imp-titre-section imp-titre-hors' }, 'Ou taper jour par jour'));
   for (const date of dates) racine.appendChild(blocJour(champs, etat, date, { repliable: true }));

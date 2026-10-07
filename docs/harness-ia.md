@@ -146,3 +146,12 @@ Décision du 2026-10-07 « Ouverture réseau pour la lecture hybride des menus �
 - **La réponse** : l'outil `proposer_categorie` (`ui/fournisseur-web.js` : `demanderPrecision`) rend une catégorie et une remarque ; `lirePropositionCategorie` n'accepte qu'une catégorie connue (jamais `a_preciser`) ; une remarque avec un chiffre, trop longue ou parlant d'une personne est écartée. Rien n'est appliqué sans « Accepter » ; un légume ou un féculent accepté va au poste (`champsApresProposition`). Fermer le panneau pendant l'attente annule la requête et ignore la réponse ; un composant modifié entre-temps n'est pas écrasé.
 - **Apprentissage** : « Accepter » passe par `modifierComposant`, qui retient par nom et par menu (`etat.memoire`) ; `lirePlat(intitule, menu, { memoire })` lit ensuite ce mot comme appris (statut `lu`, origine `memoire`), l'aperçu de l'import aussi.
 - **Non couvert** : photos, fiches de fonction, réservations (décisions à part).
+
+## Lecture de la photo de la feuille (version 94)
+
+Décision du 2026-10-07 « Lecture de la photo de la feuille de menus par l'IA » : la photo se scanne avec l'app, chaque vendredi pour la semaine suivante.
+- **Où** : bloc « Photo du menu » de l'import (`ui/vue-import.js` : `blocPhoto`, `dialogLecturePhoto`) ; bouton « Lire la photo avec l'IA », visible si l'assistant est prêt et qu'une photo existe. Aperçu de la photo puis « Envoyer » / « Annuler », à chaque fois, jamais automatique.
+- **Ce qui part** : l'image (celle déjà réduite à 1600 px, `photo.js` : `photoEnBase64`) et une phrase fixe, rien d'autre (`ui/fournisseur-web.js` : `construireCorpsPhoto`, outil `rendre_feuille`). Jamais la clé dans le corps, jamais d'état.
+- **Ce que rend l'IA** : des lignes de texte, que `harness/lecture-photo-ia.js` (`lireLignesFeuille`) valide (80 lignes et 160 caractères au plus, caractères de contrôle retirés, `[illisible]` retiré et compté). Elles remplacent le champ « Texte de la feuille » (le message le dit si un texte était déjà collé) puis passent par la répartition existante : `analyserFeuille`, `repartirSurSemaine` (dates corrigées, semaine détectée), `lirePlat`. Rien n'est enregistré sans « Enregistrer la semaine ».
+- **Annulation et erreurs** : fermer le panneau pendant l'attente annule la requête et ignore la réponse ; une erreur reste dans le panneau, ouvert, pour réessayer.
+- **Hors périmètre** : annotations manuscrites (ignorées par consigne), fiches de fonction, réservations, allergies.

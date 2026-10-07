@@ -40,6 +40,18 @@ export async function urlPhoto(date) {
   return url;
 }
 
+const MORCEAU_BASE64 = 0x8000;
+
+/** La photo d'une date encodée pour l'API : { media_type, base64 }, ou null s'il n'y en a pas. Sans FileReader. */
+export async function photoEnBase64(date) {
+  const blob = await lirePhoto(date);
+  if (!blob) return null;
+  const octets = new Uint8Array(await blob.arrayBuffer());
+  let binaire = '';
+  for (let i = 0; i < octets.length; i += MORCEAU_BASE64) binaire += String.fromCharCode(...octets.subarray(i, i + MORCEAU_BASE64));
+  return { media_type: 'image/jpeg', base64: btoa(binaire) };
+}
+
 function oublier(date) {
   const url = urls.get(date);
   if (url) URL.revokeObjectURL(url);

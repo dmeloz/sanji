@@ -1,14 +1,16 @@
 // Mesure de la lecture des feuilles sur le corpus réel (corpus/, local, hors Git). Lecture seule.
 // Usage : node outils/mesurer-corpus.mjs  (ne fait rien si corpus/menus-marche/ est absent).
 // Entrée simulée : titre imprimé (omis s'il est masqué) + jour + plats + prix, sans annotations manuscrites.
-// Les semaines de TEST ne servent qu'à mesurer, jamais à régler le lecteur.
+// Les semaines de TEST ne servent qu'à mesurer, jamais à régler le lecteur : mesurer une nouvelle semaine AVANT d'ajouter des
+// mots à partir d'elle, puis la passer en apprentissage. IMG_0351 et IMG_0355 ont servi à régler le vocabulaire le 2026-10-07 :
+// elles sont en apprentissage ; le test se remplit avec les scans du vendredi.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { analyserFeuille } from '../app/js/domaine/feuille.js';
 import { lirePlat } from '../app/js/domaine/analyse-menu.js';
 
 const dossier = fileURLToPath(new URL('../corpus/menus-marche/', import.meta.url));
-const TEST = new Set(['IMG_0351', 'IMG_0355']);
+const TEST = new Set([]);
 if (!existsSync(dossier)) { console.log('Pas de corpus : rien à mesurer.'); process.exit(0); }
 
 const pages = readdirSync(dossier).filter((f) => f.endsWith('.json')).sort()

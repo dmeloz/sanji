@@ -1489,3 +1489,4 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .vue-historique .nom { font-weight: 600; }
 .hist-semaine > summary .petit { font-weight: 400; }
 .hist-jour .nom { font-weight: 500; }
+.photo-apercu { max-height: 38vh; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto 12px; }

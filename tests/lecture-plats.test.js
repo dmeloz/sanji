@@ -319,3 +319,11 @@ test('mémoire : un mot appris par la propriétaire n\'est plus « à préciser 
   const vide = { 'chayote verte|2': { nom: 'chayote verte', categorie: 'a_preciser', attribue: true } };
   assert.equal(lirePlat(intitule, 2, { memoire: vide }).elements.find((e) => e.nom === 'chayote verte').categorie, 'a_preciser');
 });
+
+test('vocabulaire : rouille (sauce à confirmer) et gratins (féculent) lus ; les modes de préparation restent à préciser', () => {
+  const lu = (texte, menu) => lirePlat(texte, menu).elements.map((e) => `${e.nom}/${e.categorie}`);
+  assert.ok(lu('Choucroute de poisson, pomme nature, rouille safranée', 2).some((e) => e.endsWith('/sauce')));
+  assert.ok(lu('Bavette de bœuf, gratin Lyonnais, tomates provençales', 2).includes('gratin Lyonnais/feculent'));
+  assert.ok(lu('Pavé de truite, bonne femme, riz', 2).some((e) => e === 'bonne femme/a_preciser'));
+  assert.ok(lu('Farfalle, façon niçoise', 1).some((e) => e.endsWith('/a_preciser')));
+});

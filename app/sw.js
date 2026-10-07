@@ -2,7 +2,7 @@
 // Règle du projet : tout nouveau fichier de app/ s'ajoute à FICHIERS ET la VERSION s'incrémente
 // (js/version.js doit porter la même valeur). Un test vérifie la liste.
 
-const VERSION = '93';
+const VERSION = '94';
 const NOM_CACHE = `sanji-v${VERSION}`;
 const PAGE_ACCUEIL = 'index.html';
 
@@ -49,6 +49,7 @@ const FICHIERS = [
   'js/harness/contrats.js',
   'js/harness/fournisseur.js',
   'js/harness/horloge.js',
+  'js/harness/lecture-photo-ia.js',
   'js/harness/orchestrateur.js',
   'js/harness/outils.js',
   'js/harness/parcours-planning.js',
