@@ -136,7 +136,7 @@ test('contenus attendus : tableau, détail, produits, réglages', () => {
   const det = vues.detail.rendre(magasin.etat(), S.lundi).textContent;
   assert.match(det, /L'application répartit seule ce qui revient au poste ; corrigez seulement une exception\./);
   assert.doesNotMatch(det, /Rappel : le menu 1/);
-  assert.match(det, /reprendre ce chiffre|Saisir la prévision|Modifier la prévision/);
+  assert.match(det, /Saisir les couverts|Modifier les couverts/);
   assert.match(det, /allergènes à confirmer/);
   assert.match(det, /Noter une adaptation décidée/);
   assert.match(det, /tâches :/);
@@ -516,7 +516,7 @@ test('tableau : ce qui est au poste est écrit au feutre, le reste en gris ; l\'
   assert.doesNotMatch(texte, /5 points à confirmer/);
 });
 
-test('tableau : le « ? » ouvre la prévision sur place, sans « quantité à régler » dans la liste du jour', async () => {
+test('tableau : le « ? » ouvre la feuille « Couverts midi » sur place, sans « quantité à régler » dans la liste du jour', async () => {
   nettoyerPanneaux();
   const e = etatSemaineSaisie();
   definirStandard(e, 'riz', 'plat_principal', { valeur: 70, unite: 'g', etat: 'sec' }, h());
@@ -528,17 +528,20 @@ test('tableau : le « ? » ouvre la prévision sur place, sans « quantité à r
   assert.match(ouvrir(avant).attributs['aria-label'], /saisir la prévision/);
   await ouvrir(avant).click();
   const d = panneauOuvert();
-  remplir(d, 'Portions du menu 1, hors groupes', '10');
+  assert.equal(d.querySelector('h2').textContent, 'Couverts midi', 'la même feuille que sur Aujourd\'hui');
+  await boutons(d).find((b) => b.textContent === '40').click();
   assert.deepEqual(await soumettre(d), []);
-  assert.equal(jourOuVide(magasin.etat(), S.lundi).previsions[1].portions, 10);
-  // Le lendemain, la prévision se réduit au même endroit et le chiffre affiché suit.
+  // 40 couverts : la répartition calculée (1/3 – 2/3 sans historique) est écrite dans les deux prévisions.
+  assert.deepEqual([1, 2].map((m) => jourOuVide(magasin.etat(), S.lundi).previsions[m].portions), [13, 27]);
+  // Le lendemain, la feuille se rouvre au même endroit et le chiffre affiché suit.
   const apres = tableau(S.lundi, magasin.etat());
-  assert.match(ouvrir(apres).attributs['aria-label'], /10 portions, modifier la prévision/);
+  assert.match(ouvrir(apres).attributs['aria-label'], /13 portions.*modifier les couverts/);
   await ouvrir(apres).click();
   const d2 = panneauOuvert();
-  remplir(d2, 'Portions du menu 1, hors groupes', '6');
+  await boutons(d2).find((b) => b.textContent === '60').click();
   assert.deepEqual(await soumettre(d2), []);
-  assert.match(ouvrir(tableau(S.lundi, magasin.etat())).attributs['aria-label'], /6 portions/);
+  assert.deepEqual([1, 2].map((m) => jourOuVide(magasin.etat(), S.lundi).previsions[m].portions), [20, 40]);
+  assert.match(ouvrir(tableau(S.lundi, magasin.etat())).attributs['aria-label'], /20 portions/);
 });
 
 test('tableau : un standard maison fait disparaître la portion à régler ; la quantité se lit sur Jour', () => {

@@ -473,7 +473,7 @@ const LIBELLE_ACTION = {
   definirMenu: 'Intitulé de menu saisi', validerTranscription: 'Transcription validée',
   genererComposants: 'Composants proposés', ajouterComposant: 'Composant ajouté', modifierComposant: 'Composant modifié',
   validerComposant: 'Composant validé', supprimerComposant: 'Composant supprimé', validerComposantsMenu: 'Composants du menu validés',
-  definirPrevision: 'Prévision modifiée', creerFiche: 'Fiche de fonction créée', modifierFiche: 'Fiche de fonction modifiée',
+  definirPrevision: 'Prévision modifiée', definirCouvertsMidi: 'Couverts midi enregistrés', creerFiche: 'Fiche de fonction créée', modifierFiche: 'Fiche de fonction modifiée',
   annulerFiche: 'Fiche de fonction annulée', confirmerRepartition: 'Répartition confirmée', ajouterAdaptation: 'Adaptation notée',
   definirCreneau: 'État de créneau modifié', definirSemaineType: 'Semaine type modifiée', confirmerSemaineType: 'Semaine type confirmée',
   definirCapacite: 'Capacité modifiée', planifier: 'Tâche planifiée', reporter: 'Tâche reportée', demarrer: 'Tâche démarrée',

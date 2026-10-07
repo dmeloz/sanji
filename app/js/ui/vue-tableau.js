@@ -9,7 +9,7 @@ import { h, svg } from './dom.js';
 import { lien } from './elements.js';
 import { ouvrirProposition } from './feuille-validation.js';
 import { problemeHorsLigne } from './horsligne.js';
-import { dialogPrevision } from './vue-detail.js';
+import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 
 export function titre() { return 'Tableau'; }
 
@@ -45,14 +45,14 @@ function morceaux(menu) {
   return noeuds;
 }
 
-/** Le chiffre des couverts est le seul bouton : il ouvre la prévision, à saisir ou à réviser quand on veut. */
+/** Le chiffre des couverts est le seul bouton : il ouvre la feuille « Couverts midi » du jour, à saisir ou à réviser quand on veut. */
 function couvertsDuMenu(jour, menu) {
-  const ouvrir = () => dialogPrevision(jour.date, menu.menu);
+  const ouvrir = () => ouvrirCouvertsMidi(jour.date);
   if (menu.couverts !== null) {
     return h('button', {
       type: 'button', onClick: ouvrir,
       classe: `tb-couverts feutre${menu.provisoires ? ' tb-provisoire' : ''}`,
-      'aria-label': `${libelleJour(jour.date)}, menu ${menu.menu} : ${pluriel(menu.couverts, 'portion', 'portions')}${menu.provisoires ? ', dont des groupes provisoires' : ''}, modifier la prévision`,
+      'aria-label': `${libelleJour(jour.date)}, menu ${menu.menu} : ${pluriel(menu.couverts, 'portion', 'portions')}${menu.provisoires ? ', dont des groupes provisoires' : ''}, modifier les couverts`,
     }, String(menu.couverts));
   }
   if (menu.previsionASaisir) {

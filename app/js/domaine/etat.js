@@ -101,7 +101,18 @@ export function jourVide(date) {
     previsions: { 1: { portions: null, h: null }, 2: { portions: null, h: null } },
     creneaux: { avant_midi: null, apres_midi: null, avant_soir: null },
     ventes: { 1: null, 2: null, h: null },
+    // Total de couverts du midi saisi par le chef : { total, repartition: null | {1,2} (décidée par lui), h } ; null = non saisi.
+    couverts: null,
   };
+}
+
+/** Un `couverts` importé est-il exploitable ? (entier ≥ 0, répartition de même somme, horodatage texte). */
+function couvertsValide(c) {
+  if (!estObjet(c) || !Number.isInteger(c.total) || c.total < 0 || typeof c.h !== 'string') return false;
+  if (c.repartition === null) return true;
+  if (!estObjet(c.repartition)) return false;
+  const [a, b] = [c.repartition[1], c.repartition[2]];
+  return Number.isInteger(a) && a >= 0 && Number.isInteger(b) && b >= 0 && a + b === c.total;
 }
 
 export function ficheVide(id) {
@@ -301,6 +312,13 @@ export function importer(texte, aujourdhui = null) {
       if (CLES_INTERDITES.has(id)) continue;
       etat[nom][id] = fusionner(fabrique(id), source[nom][id]);
     }
+  }
+  // Couverts du midi : jamais une valeur non validée (absent ou invalide = non saisi), copiée sans clé superflue.
+  for (const j of Object.values(etat.jours)) {
+    const c = j.couverts;
+    j.couverts = couvertsValide(c)
+      ? { total: c.total, repartition: c.repartition === null ? null : { 1: c.repartition[1], 2: c.repartition[2] }, h: c.h }
+      : null;
   }
   // Propositions d'apprentissage écartées (`apprentissage:famille|rôle`) : { statut:'ecarte', h, vus:[ids] }. Une date illisible
   // ou au-delà de demain (la date d'aujourd'hui vient de l'appelant, un jour de tolérance pour le fuseau), un statut autre

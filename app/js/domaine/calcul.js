@@ -61,7 +61,8 @@ export function portionsMenu(etat, date, menu) {
   const prev = etat.jours?.[date]?.previsions?.[menu]?.portions;
   if (Number.isFinite(prev)) {
     res.prevision = prev;
-    details.push({ source: 'prevision', portions: prev, certitude: 'estimee' });
+    // Un total de couverts saisi par le chef (couverts-midi.js) est provisoire ; une prévision menu par menu reste estimée.
+    details.push({ source: 'prevision', portions: prev, certitude: etat.jours[date].couverts ? 'provisoire' : 'estimee' });
   } else {
     res.previsionManquante = true;
   }

@@ -489,6 +489,7 @@ export function definirPrevision(etat, date, menu, portions, h) {
   const j = assurerJour(etat, date);
   const avant = j.previsions[menu].portions;
   j.previsions[menu] = { portions, h };
+  j.couverts = null; // une prévision menu par menu n'est plus le total saisi
   return terminer(etat, h, 'definirPrevision', `${date} menu ${menu} : ${avant ?? '—'} -> ${portions ?? '—'}`, j.previsions[menu]);
 }
 

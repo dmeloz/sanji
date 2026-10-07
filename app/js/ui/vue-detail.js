@@ -1,13 +1,14 @@
 // Détail d'un jour : menus, prévisions, fiches, allergies, créneaux, après service, points à confirmer.
 
 import {
-  ajouterComposant, definirCreneau, definirMenu, definirPrevision, modifierComposant, saisirVentes, supprimerComposant, validerComposant,
+  ajouterComposant, definirCreneau, definirMenu, modifierComposant, saisirVentes, supprimerComposant, validerComposant,
 } from '../domaine/actions.js';
 import { ajouterJours, aMenuDuJour, creneauxDuJour, estOuvert, libelleJour, lundiDe } from '../domaine/dates.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { alertesAllergenes } from '../domaine/allergenes.js';
 import { chargeCreneau } from '../domaine/planification.js';
-import { moyenneVentes, pointsAConfirmer, repereVentes } from '../domaine/points.js';
+import { couvertsMidiDuJour } from '../domaine/couverts-midi.js';
+import { pointsAConfirmer } from '../domaine/points.js';
 import { CATEGORIE, ETAT_CRENEAU, libelle } from '../domaine/statuts.js';
 import { agir, agirStrict, etat as etatCourant, redessiner } from '../magasin.js';
 import { champs } from './champs.js';
@@ -16,6 +17,7 @@ import { bouton, ligneVide, lien, navigationPeriode, pastille, repliable } from 
 import {
   confirmerAnnulation, dialogAdaptation, dialogFiche, dialogHistorique, dialogRepartition, repartitionIncoherente, resumeChoix,
 } from './fiches.js';
+import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { formaterHeure, pluriel } from './format.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
@@ -174,46 +176,19 @@ function sectionMenus(etat, date, replie = false) {
     blocMenu(etat, date, 2, replie)]);
 }
 
-// ------------------------------------------------------------------ prévisions
+// ------------------------------------------------------------------ couverts midi
 
-export function dialogPrevision(date, menu) {
-  const e = etatCourant();
-  const p = jourOuVide(e, date).previsions[menu];
-  const reperes = repereVentes(e, date, menu);
-  const f = champs([{ cle: 'portions', type: 'entier', libelle: `Portions du menu ${menu}, hors groupes`, valeur: p.portions,
-    aide: 'Prévision modifiable à tout moment. Vide : efface la prévision.' }]);
-  const zoneRepere = h('div', { classe: 'repere' },
-    h('h3', { classe: 'bloc-titre' }, 'Repère des ventes'),
-    reperes.length === 0
-      ? h('p', { classe: 'vide' }, 'Aucune vente saisie pour ce jour de la semaine : pas de repère.')
-      : h('ul', { classe: 'liste-simple' }, reperes.map((r) => h('li', { classe: 'ligne-repere' },
-        h('span', null, `${libelleJour(r.date)} : ${pluriel(r.ventes, 'portion vendue', 'portions vendues')}`),
-        bouton('reprendre ce chiffre', () => f.fixer('portions', r.ventes), 'court')))),
-    moyenneVentes(reperes) !== null
-      ? h('p', null, `Moyenne de ces ${reperes.length} jours : ${moyenneVentes(reperes)} portions (repère seulement).`) : null,
-    h('p', { classe: 'aide' }, 'Un repère n\'est pas une prévision : reprendre le chiffre remplit seulement le champ, rien n\'est enregistré avant « Enregistrer ».'));
-  panneau({
-    titre: `Prévision hors groupes : menu ${menu}`,
-    corps: [...f.noeuds, zoneRepere],
-    surEnregistrer: () => { agirStrict((x, t) => definirPrevision(x, date, menu, f.valeur('portions'), t)); },
-  });
-}
-
+/** Décision du 2026-10-07 : plus de saisie menu par menu ; un total, la répartition calculée, la même feuille que sur Aujourd'hui. */
 function sectionPrevisions(etat, date) {
   if (!aMenuDuJour(date)) return null;
-  const jour = jourOuVide(etat, date);
-  const contientUneDonnee = [1, 2].some((menu) => Number.isFinite(jour.previsions[menu].portions));
-  return repliable(h('h2', { classe: 'section-titre' }, 'Prévisions hors groupes'), contientUneDonnee, [
-    h('p', { classe: 'aide' }, 'Les groupes (fiches de fonction) s\'ajoutent à ces chiffres ; les deux menus restent séparés.'),
-    [1, 2].map((menu) => {
-      const p = jour.previsions[menu];
-      const saisie = Number.isFinite(p.portions);
-      return h('div', { classe: 'sous-carte' },
-        h('h3', null, `Menu ${menu} `, pastille(saisie ? 'estimée' : 'non saisie', saisie ? 'gris' : 'ambre')),
-        h('p', null, saisie ? pluriel(p.portions, 'portion') : 'prévision à saisir'),
-        p.h ? h('p', { classe: 'meta' }, `dernière modification : ${formaterHeure(p.h)}`) : null,
-        h('div', { classe: 'actions' }, bouton(saisie ? 'Modifier la prévision' : 'Saisir la prévision', () => dialogPrevision(date, menu), 'court')));
-    }),
+  const c = couvertsMidiDuJour(etat, date);
+  const saisie = c.total !== null;
+  return repliable(h('h2', { classe: 'section-titre' }, 'Couverts midi'), saisie, [
+    h('p', { classe: 'aide' }, 'Les groupes (fiches de fonction) s\'ajoutent à ce total ; les deux menus restent séparés.'),
+    h('p', null, saisie
+      ? [pluriel(c.total, 'couvert'), ` · menu 1 : ${c.m1} · menu 2 : ${c.m2} `, pastille(c.manuel ? 'décidé par vous' : 'calculé', 'gris'), ' ', pastille('provisoire', 'gris')]
+      : 'couverts à saisir'),
+    h('div', { classe: 'actions' }, bouton(saisie ? 'Modifier les couverts' : 'Saisir les couverts', () => ouvrirCouvertsMidi(date), 'court')),
   ], { classe: 'carte', id: 'previsions' });
 }
 

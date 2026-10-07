@@ -100,11 +100,12 @@ test('couverts : le domaine garde la certitude écrite de chaque menu et des fic
   assert.deepEqual(m2.certitudes, [{ certitude: 'estimee', portions: 12 }, { certitude: 'provisoire', portions: 2 }]);
   assert.equal(d.fiches.total, 14);
   assert.deepEqual(d.fiches.certitudes, [{ certitude: 'provisoire', couverts: 6 }, { certitude: 'confirmee', couverts: 8 }]);
-  assert.deepEqual(d.couvertsMidi, { total: 36, m1: 22, m2: 14 });
+  // Les fiches de fonction ne comptent plus dans « Couverts midi » : les prévisions seules (10 + 12).
+  assert.deepEqual(d.couvertsMidi, { total: 22, m1: 10, m2: 12, manuel: false, certitude: 'estimee', aSaisirVentes: false, ventes: null });
   const p = page(S.mercredi, e);
   const caseCouverts = classes(p, 'tdb-case').find((c) => /Couverts midi/.test(c.textContent));
-  assert.match(caseCouverts.textContent, /36/);
-  assert.match(caseCouverts.textContent, /M1 22 · M2 14/);
+  assert.match(caseCouverts.textContent, /22/);
+  assert.match(caseCouverts.textContent, /M1 10 · M2 12/);
   assert.ok(classes(caseCouverts, 'tdb-chiffre')[0], 'chiffre en police des quantités');
   // La certitude de la fiche reste écrite sur la carte « Fiche de fonction ».
   assert.match(classes(p, 'au-fiche')[0].textContent, /répartition|menu fixe/);
@@ -116,7 +117,7 @@ test('couverts : sans prévision, aucun « 0 » inventé et aucune alerte', () =
   const d = aujourdhuiDe(e, S.mercredi);
   assert.equal(d.menus[0].couverts, null);
   assert.equal(d.menus[0].previsionASaisir, true);
-  assert.deepEqual(d.couvertsMidi, { total: null, m1: null, m2: null });
+  assert.deepEqual(d.couvertsMidi, { total: null, m1: null, m2: null, manuel: false, certitude: null, aSaisirVentes: false, ventes: null });
   const p = page(S.mercredi, e);
   const caseCouverts = classes(p, 'tdb-case').find((c) => /Couverts midi/.test(c.textContent));
   assert.equal(classes(caseCouverts, 'tdb-chiffre')[0].textContent, '—');

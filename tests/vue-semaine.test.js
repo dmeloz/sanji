@@ -195,7 +195,7 @@ test('rien ne disparaît : tout le détail du jour est dans des replis, fermés 
   assert.equal(detail.balise, 'details');
   assert.equal(detail.open, false);
   const t = texte(detail);
-  for (const attendu of ['Menus du jour', 'Prévisions hors groupes', 'Fiches de fonction', 'Allergies du jour', 'Créneaux du jour',
+  for (const attendu of ['Menus du jour', 'Couverts midi', 'Fiches de fonction', 'Allergies du jour', 'Créneaux du jour',
     'Après service', 'Points à confirmer', 'Modifier l\'intitulé', 'Ajouter un composant', 'Nouvelle fiche']) {
     assert.ok(t.includes(attendu), attendu);
   }

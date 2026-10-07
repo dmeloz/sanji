@@ -2,7 +2,7 @@
 // Règle du projet : tout nouveau fichier de app/ s'ajoute à FICHIERS ET la VERSION s'incrémente
 // (js/version.js doit porter la même valeur). Un test vérifie la liste.
 
-const VERSION = '73';
+const VERSION = '74';
 const NOM_CACHE = `sanji-v${VERSION}`;
 const PAGE_ACCUEIL = 'index.html';
 
@@ -16,6 +16,7 @@ const FICHIERS = [
   'js/domaine/actions-apprentissage.js',
   'js/domaine/actions-ajustements.js',
   'js/domaine/actions-validation.js',
+  'js/domaine/actions-couverts.js',
   'js/domaine/actions.js',
   'js/domaine/ajustements.js',
   'js/domaine/allergenes.js',
@@ -23,6 +24,7 @@ const FICHIERS = [
   'js/domaine/analyse-menu.js',
   'js/domaine/base.js',
   'js/domaine/calcul.js',
+  'js/domaine/couverts-midi.js',
   'js/domaine/dates.js',
   'js/domaine/decisions.js',
   'js/domaine/etat.js',
@@ -60,6 +62,7 @@ const FICHIERS = [
   'js/ui/dom.js',
   'js/ui/ecran-allume.js',
   'js/ui/elements.js',
+  'js/ui/feuille-couverts.js',
   'js/ui/feuille-decisions.js',
   'js/ui/feuille-validation.js',
   'js/ui/fiches.js',

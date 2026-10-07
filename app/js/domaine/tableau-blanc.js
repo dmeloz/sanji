@@ -4,6 +4,7 @@
 import { proposerComposants } from './analyse-menu.js';
 import { propositionsApprentissage } from './apprentissage.js';
 import { calculerComposant, formaterQuantite, portionsMenu } from './calcul.js';
+import { couvertsMidiDuJour, ventesASaisir } from './couverts-midi.js';
 import { decisionsDe } from './decisions.js';
 import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, libelleJour, lundiDe } from './dates.js';
 import { jourOuVide, normaliser } from './etat.js';
@@ -674,10 +675,11 @@ function avancementDuJour(feuille) {
   return { faites: lignes.filter((l) => l.fait).length, total: lignes.length };
 }
 
-/** Couverts du midi du jour : total et répartition M1 / M2 d'après les prévisions déjà saisies (null tant qu'aucun menu n'a de chiffre). */
-function couvertsMidiDe(menus) {
-  const [m1, m2] = [1, 2].map((n) => menus.find((m) => m.menu === n)?.couverts ?? null);
-  return { total: m1 === null && m2 === null ? null : (m1 ?? 0) + (m2 ?? 0), m1, m2 };
+/** Couverts du midi (prévisions seules, hors fiches), ventes à saisir dès 14 h et ventes saisies si les deux menus le sont. */
+function couvertsMidiAvecVentes(etat, date, heure) {
+  const v = jourOuVide(etat, date).ventes;
+  const saisies = Number.isFinite(v[1]) && Number.isFinite(v[2]);
+  return { ...couvertsMidiDuJour(etat, date), aSaisirVentes: ventesASaisir(etat, date, heure), ventes: saisies ? { m1: v[1], m2: v[2] } : null };
 }
 
 /**
@@ -686,7 +688,7 @@ function couvertsMidiDe(menus) {
  * priorité, prochaine fiche de fonction, et ce que l'ancien tableau montrait encore (production, commande à relire,
  * rappel de sauvegarde). Pure : ni DOM ni heure courante.
  */
-export function aujourdhuiDe(etat, aujourd) {
+export function aujourdhuiDe(etat, aujourd, heure = null) {
   const lundi = lundiDe(aujourd);
   const ouvert = estOuvert(aujourd);
   const feuille = ouvert ? feuilleDuJour(etat, aujourd) : null;
@@ -698,7 +700,7 @@ export function aujourdhuiDe(etat, aujourd) {
     menus: aMenuDuJour(aujourd) ? [1, 2].map((m) => couvertsDuMenu(etat, aujourd, m)) : [],
     fiches: fichesDuJour(etat, aujourd),
     menusSurTrois: menusSurTrois(etat, aujourd),
-    couvertsMidi: couvertsMidiDe(aMenuDuJour(aujourd) ? [1, 2].map((m) => couvertsDuMenu(etat, aujourd, m)) : []),
+    couvertsMidi: couvertsMidiAvecVentes(etat, aujourd, heure),
     aAvancer: aAvancerDe(feuille),
     maintenant: maintenantDe(etat, feuille),
     avancement: feuille ? feuille.avancement : { faites: 0, total: 0 },

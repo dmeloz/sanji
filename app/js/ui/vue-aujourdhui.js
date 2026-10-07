@@ -13,6 +13,7 @@ import { aujourdhuiDe } from '../domaine/tableau-blanc.js';
 import { aujourdhui, maintenant } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { lien, pastille } from './elements.js';
+import { ouvrirCouvertsMidi, ouvrirVentesMidi } from './feuille-couverts.js';
 import { ouvrirDecisions } from './feuille-decisions.js';
 import { ouvrirProposition } from './feuille-validation.js';
 import { problemeHorsLigne } from './horsligne.js';
@@ -80,14 +81,22 @@ function caseProduction(d, aujourd) {
     total > 0 ? h('span', { classe: 'prod-jauge', 'aria-hidden': 'true' }, h('span', { style: `width: ${Math.round((faites / total) * 100)}%` })) : null);
 }
 
-/** Couverts du midi (prévisions saisies) : la touche mène aux prévisions du jour ; la feuille de saisie vient avec l'étape suivante. */
+/**
+ * Couverts du midi (prévisions saisies) : la touche ouvre la feuille « Couverts midi » ; dès 14 h, tant que les ventes ne sont pas
+ * saisies, la case dit « Ventes à saisir » et ouvre la feuille « Ventes du midi ».
+ */
 function caseCouverts(d, aujourd) {
-  const { total, m1, m2 } = d.couvertsMidi;
-  const repartition = total === null ? 'à saisir' : `M1 ${m1 ?? '—'} · M2 ${m2 ?? '—'}`;
-  return h('a', { href: `#/semaine/${aujourd}`, classe: 'tdb-case', 'aria-label': `Couverts midi aujourd'hui : ${total === null ? 'à saisir' : total}. Modifier` },
-    h('span', { classe: 'au-sous' }, 'Couverts midi'),
-    h('span', { classe: 'tdb-chiffre' }, total === null ? '—' : String(total)),
-    h('span', { classe: 'au-sous' }, repartition));
+  const { total, m1, m2, aSaisirVentes, ventes } = d.couvertsMidi;
+  let suite = total === null ? 'à saisir' : `M1 ${m1 ?? '—'} · M2 ${m2 ?? '—'}`;
+  if (ventes) suite = `servis M1 ${ventes.m1} · M2 ${ventes.m2}`;
+  const surClic = () => (aSaisirVentes ? ouvrirVentesMidi(aujourd) : ouvrirCouvertsMidi(aujourd));
+  return h('button', { type: 'button', classe: 'tdb-case tdb-case-bouton', onClick: surClic,
+    'aria-label': `Couverts midi aujourd'hui : ${total === null ? 'à saisir' : total}${aSaisirVentes ? '. Ventes à saisir' : ''}. Modifier` },
+  h('span', { classe: 'au-sous tdb-case-tete' }, 'Couverts midi', icone(['M4 20h4L19 9l-4-4L4 16z'], 'au-icone tdb-crayon')),
+  h('span', { classe: 'tdb-chiffre' }, total === null ? '—' : String(total)),
+  aSaisirVentes
+    ? h('span', { classe: 'tdb-ventes-a-saisir' }, icone(['M12 3l10 18H2z', 'M12 10v5M12 18v.5'], 'au-icone'), 'Ventes à saisir')
+    : h('span', { classe: 'au-sous' }, suite));
 }
 
 function sectionChiffres(d, aujourd) {
@@ -229,7 +238,7 @@ function carteProchaine(d, aujourd) {
 
 export function rendre(etat) {
   const aujourd = aujourdhui();
-  const donnees = aujourdhuiDe(etat, aujourd);
+  const donnees = aujourdhuiDe(etat, aujourd, maintenant().slice(11, 16));
   const racine = h('div', { classe: 'vue vue-aujourdhui' });
   const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), sectionAAvancer(donnees, aujourd),
     carteFiche(donnees, aujourd, etat), sectionAConfirmer(donnees, decisionsDe(etat, aujourd)), sectionRappels(donnees), carteProchaine(donnees, aujourd)];

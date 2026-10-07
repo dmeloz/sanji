@@ -1351,3 +1351,44 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
   .prochaine .au-btn-clair { background: var(--sur-encre); color: var(--encre); border-color: var(--sur-encre); }
 }
 @media (min-width: 981px) { .prochaine { left: 50%; right: auto; width: min(var(--largeur-max), 100% - 2 * var(--marge-ecran)); transform: translateX(-50%); margin: 0; } }
+
+/* ===== Feuilles « Couverts midi » et « Ventes du midi » (refonte 2) : − / +, choix rapides, répartition, détail replié. ===== */
+.tdb-case-bouton { border: 0; font: inherit; text-align: left; cursor: pointer; width: 100%; }
+.tdb-case-tete { display: flex; align-items: center; justify-content: space-between; }
+.tdb-crayon { width: 14px; height: 14px; }
+.tdb-ventes-a-saisir { display: inline-flex; align-items: center; gap: 4px; font-size: var(--t-legende); font-weight: 650; color: var(--exception); }
+.cv-zone { display: flex; flex-direction: column; gap: 14px; }
+.cv-surtitre { margin: 0; }
+.cv-total { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: var(--r-carte-petite); background: var(--carte); border: 1px solid var(--bordure); }
+.cv-total-ligne { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.cv-total-chiffre { display: flex; flex-direction: column; align-items: center; }
+.cv-grand { font-family: var(--police-qte); font-weight: 600; font-size: var(--t-qte-grande); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.cv-pas { width: 48px; height: 48px; min-height: 48px; padding: 0; border-radius: 24px; font-size: 22px; flex: none; }
+.cv-menu .cv-pas { width: 44px; height: 44px; min-height: 44px; }
+.cv-pas:disabled { opacity: 0.45; cursor: default; }
+.cv-puces { display: flex; flex-wrap: wrap; gap: 6px; }
+.cv-puce { min-height: var(--cible); padding: 0 14px; font-family: var(--police-qte); }
+.cv-puce[aria-pressed="true"] { background: var(--encre); color: var(--sur-encre); border-color: var(--encre); }
+.cv-repartition { display: flex; flex-direction: column; }
+.cv-repartition-tete { display: flex; align-items: baseline; justify-content: space-between; }
+.cv-retour { min-height: var(--cible); font-size: var(--t-legende); font-weight: 600; }
+.cv-menu { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 56px; border-bottom: 1px solid var(--bordure); }
+.cv-menu:last-child { border-bottom: 0; }
+.cv-menu-texte { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.cv-menu-pas { display: flex; align-items: center; gap: 8px; }
+.cv-menu-pas-fin { margin-right: 52px; }
+.cv-moyen { min-width: 36px; text-align: center; font-family: var(--police-qte); font-weight: 600; font-size: 20px; font-variant-numeric: tabular-nums; }
+.cv-servi { display: flex; align-items: center; justify-content: space-between; }
+.cv-detail-bouton { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: var(--cible); padding: 0; background: none; border: 0; font: inherit; color: var(--texte); cursor: pointer; text-align: left; }
+.cv-etiquettes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cv-etiquette { padding: 2px 8px; border: 1px solid var(--bordure-forte); border-radius: var(--r-etiquette); font-size: var(--t-legende); font-weight: 600; }
+.cv-etiquette-chef { background: var(--encre); color: var(--sur-encre); border-color: var(--encre); }
+.cv-chevron { font-size: 18px; transition: transform 120ms ease; }
+.cv-chevron-ouvert { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .cv-chevron { transition: none; } }
+.cv-detail-corps { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: var(--r-carte-petite); background: var(--carte); border: 1px solid var(--bordure); }
+.cv-formules { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.cv-formule { display: flex; flex-direction: column; gap: 1px; }
+.cv-calcul { font-size: var(--t-corps); }
+.cv-fiche { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 56px; padding: 6px 0; border-top: 1px solid var(--bordure); color: var(--texte); text-decoration: none; }
+.cv-fiche-texte { display: flex; flex-direction: column; gap: 1px; }
