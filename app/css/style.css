@@ -1497,3 +1497,5 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .retour-essai-lien { margin: 8px 16px 0; }
 
 .btn[hidden] { display: none; }
+
+.diagnostic-indicateur { font-size: var(--t-corps); margin: 0 0 8px; padding: 8px 12px; border: 1px solid var(--exception); border-radius: 8px; }

@@ -17,8 +17,9 @@ import { pluriel } from './format.js';
 import { problemeHorsLigne } from './horsligne.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
+import { garderPhotoPourDiagnostic, noter } from './journal-diagnostic.js';
 import { noterRetour } from './retours-essai.js';
-import { importerPhoto, photoEnBase64, retirerPhoto, urlPhoto } from './photo.js';
+import { importerPhoto, photoBlob, photoEnBase64, retirerPhoto, urlPhoto } from './photo.js';
 import { JOURS_A_MENU, blocJour, champSaisi, enregistrer, repartir, reprendreTexte } from './vue-menus.js';
 
 export function titre() { return 'Import des menus'; }
@@ -84,7 +85,7 @@ function ligneLectureJour(etat, champs, date, ouverts) {
   return details;
 }
 
-const TEXTE_ENVOI_PHOTO = 'La photo va être envoyée à l\'IA pour transcrire le texte imprimé. Les notes écrites à la main sont ignorées. Rien d\'autre ne part.';
+const TEXTE_ENVOI_PHOTO = 'La photo va être envoyée à l\'IA pour transcrire le texte imprimé. Les notes écrites à la main sont ignorées. Rien d\'autre ne part. Le texte rendu par l\'IA est gardé 14 jours dans le journal de diagnostic de cet appareil, et la photo reste en mémoire jusqu\'à la fermeture de l\'application.';
 const AIDE_PHOTO_IA = 'La photo peut être lue par l\'IA, après un aperçu et à chaque fois que vous le demandez : seules les lignes imprimées reviennent, vous les relisez avant d\'enregistrer. Réduite à 1600 px, gardée sur l\'appareil, non exportée.';
 const AIDE_PHOTO_SANS_IA = 'Sanji ne lit pas la photo : elle reste à côté pour que vous recopiiez les intitulés ou copiiez son texte. Réduite à 1600 px, gardée sur l\'appareil, non exportée.';
 
@@ -103,6 +104,7 @@ async function dialogLecturePhoto(lundi, url, surLecture) {
       }
       const image = await photoEnBase64(lundi);
       if (!image) throw new Error('La photo n\'est plus sur cet appareil : rien n\'est envoyé.');
+      garderPhotoPourDiagnostic('feuille', await photoBlob(lundi)); // en mémoire seulement, pour le fichier de diagnostic
       envoi.addEventListener('close', () => attente.abort());
       let lecture;
       try {
@@ -198,7 +200,10 @@ export function rendre(etat, lundi) {
   let retourNote = false; // un double clic ne note qu'un retour
   const enregistrerEtNoter = () => {
     const final = intitulesDeLaPage();
-    if (enregistrer(champs, etat, lundi) && lignesIA && !retourNote) { retourNote = true; noterRetour({ type: 'menu', lu: lignesIA, final }); }
+    if (!enregistrer(champs, etat, lundi)) return;
+    const jours = Object.values(final).filter((j) => j.menu1 !== '' || j.menu2 !== '').length;
+    noter('import_enregistre', { jours, aApresIA: lignesIA !== null });
+    if (lignesIA && !retourNote) { retourNote = true; noterRetour({ type: 'menu', lu: lignesIA, final }); }
   };
   const signaler = () => panneau({
     titre: 'Signaler un problème de lecture',

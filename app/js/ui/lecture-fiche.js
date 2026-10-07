@@ -5,13 +5,14 @@ import { lireChampsFiche } from '../harness/lecture-fiche-ia.js';
 import { assistantPret, fournisseurDepuisReglages } from './assistant-reglages.js';
 import { h } from './dom.js';
 import { dialogFiche } from './fiches.js';
+import { garderPhotoPourDiagnostic } from './journal-diagnostic.js';
 import { noterRetour } from './retours-essai.js';
 import { panneau } from './panneau.js';
 import { blobEnBase64, reduireImage } from './photo.js';
 
-const AVERTISSEMENT = 'Cette fiche peut contenir des noms et des allergies ; elle part à l\'IA. Le choix du menu et la répartition ne sont jamais proposés. Sanji ne garde pas la photo ; supprimez-la aussi de la pellicule de l\'iPhone si elle y a été enregistrée.';
+const AVERTISSEMENT = 'Cette fiche peut contenir des noms et des allergies ; elle part à l\'IA. Le choix du menu et la répartition ne sont jamais proposés. Sanji ne garde pas la photo dans son stockage (elle reste en mémoire jusqu\'à la fermeture de l\'application, pour le diagnostic), et garde 14 jours le texte que l\'IA rend dans son journal de diagnostic ; supprimez la photo de la pellicule de l\'iPhone si elle y a été enregistrée.';
 
-function dialogLectureFiche(date, miniature, image) {
+function dialogLectureFiche(date, miniature, image, blob) {
   const attente = new AbortController();
   const envoi = panneau({
     titre: 'Lire une fiche (essai)',
@@ -25,6 +26,7 @@ function dialogLectureFiche(date, miniature, image) {
         throw new Error('L\'assistant IA n\'est pas activé : rien n\'est envoyé.');
       }
       envoi.addEventListener('close', () => attente.abort());
+      garderPhotoPourDiagnostic('fiche', blob); // en mémoire seulement (jamais stockée), pour le fichier de diagnostic
       let lecture;
       try {
         lecture = lireChampsFiche(await fournisseur.demanderLectureFiche(image, { signal: attente.signal }));
@@ -55,7 +57,7 @@ export function boutonLireFiche(date) {
       ouverture = true;
       try {
         const blob = await reduireImage(fichier);
-        dialogLectureFiche(date, URL.createObjectURL(blob), await blobEnBase64(blob));
+        dialogLectureFiche(date, URL.createObjectURL(blob), await blobEnBase64(blob), blob);
       } catch (erreur) {
         panneau({ titre: 'Lire une fiche (essai)', lectureSeule: true, corps: [h('p', { classe: 'alerte-texte' }, erreur.message)] });
       } finally { ouverture = false; }

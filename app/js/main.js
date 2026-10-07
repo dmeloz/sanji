@@ -4,6 +4,7 @@
 import { h, parId } from './ui/dom.js';
 import { bouton, encadre } from './ui/elements.js';
 import { abonnerHorsLigne, preparerHorsLigne } from './ui/horsligne.js';
+import { installerJournal } from './ui/journal-diagnostic.js';
 import { afficherMessage } from './ui/messages.js';
 import { charger, redessiner, surMessage } from './magasin.js';
 import { demarrerRouteur } from './ui/routeur.js';
@@ -33,6 +34,7 @@ export async function demarrer() {
   demarrerRouteur();
   abonnerHorsLigne(redessiner);
   preparerHorsLigne();
+  installerJournal(); // après le chargement ; ne lève jamais
 }
 
 if (typeof document !== 'undefined') {

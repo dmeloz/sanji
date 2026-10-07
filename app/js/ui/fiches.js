@@ -8,6 +8,7 @@ import { champs } from './champs.js';
 import { h } from './dom.js';
 import { definitions, lien } from './elements.js';
 import { formaterHeure } from './format.js';
+import { noter } from './journal-diagnostic.js';
 import { confirmer, panneau } from './panneau.js';
 import { LIBELLE_MODE, LIBELLE_SERVICE } from './reference.js';
 import { blocBuffet } from './reperes-metier.js';
@@ -113,6 +114,7 @@ export function dialogFiche(fiche, dateParDefaut, prefill = null, { surEnregistr
       };
       if (v.mode === 'choix_libre') champsFiche.repartition = { 1: v.rep1 ?? 0, 2: v.rep2 ?? 0 };
       agirStrict((e, t) => (f ? modifierFiche(e, f.id, champsFiche, t) : creerFiche(e, champsFiche, t)));
+      noter('fiche_enregistree', { viaIA: p !== null });
       if (p) surEnregistre?.(champsFiche);
     },
   });

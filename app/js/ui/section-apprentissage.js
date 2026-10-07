@@ -10,6 +10,7 @@ import { bouton, ligneVide } from './elements.js';
 import { pluriel } from './format.js';
 import { afficherMessage } from './messages.js';
 import { confirmer } from './panneau.js';
+import { indicateurErreurs, sectionDiagnostic } from './section-diagnostic.js';
 import { effacerRetours, lireRetours } from './retours-essai.js';
 
 const carte = (titre, ...contenu) => h('section', { classe: 'carte' }, h('h2', { classe: 'section-titre' }, titre), contenu);
@@ -60,4 +61,4 @@ function sectionRetours() {
     zone);
 }
 
-export const sectionsApprentissage = (etat) => [sectionAppris(etat), sectionRetours()];
+export const sectionsApprentissage = (etat) => [indicateurErreurs(), sectionAppris(etat), sectionRetours(), sectionDiagnostic(etat)];

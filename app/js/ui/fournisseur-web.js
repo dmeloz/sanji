@@ -6,6 +6,7 @@
 
 import { SCHEMA_BROUILLON } from '../harness/validateur.js';
 import { CATEGORIE } from '../domaine/statuts.js';
+import { noter } from './journal-diagnostic.js';
 
 export const URL_API = 'https://api.anthropic.com/v1/messages';
 export const MODELE_PAR_DEFAUT = 'claude-opus-5-5';
@@ -170,26 +171,43 @@ export function creerFournisseurWeb({
   cle, modele = MODELE_PAR_DEFAUT, fetchImpl = globalThis.fetch, maxTokens = 4000, effort = 'low',
 } = {}) {
   async function envoyer(corpsRequete, signal) {
-    const reponse = await fetchImpl(URL_API, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json', 'x-api-key': cle, 'anthropic-version': '2023-06-01',
-        // Obligatoire pour un appel direct depuis un navigateur : la clé reste sur cet appareil, sous la responsabilité de la propriétaire.
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify(corpsRequete),
-      signal,
-    });
-    let corps;
+    // Journal de diagnostic : seulement l'outil, l'issue, le statut et la durée ; jamais le corps, la réponse ni la clé.
+    const debut = Date.now();
+    const outil = corpsRequete?.tools?.[0]?.name ?? 'inconnu';
+    let statut = 'reseau';
+    let ok = false;
+    let contenu = '';
     try {
-      corps = await reponse.json();
-    } catch {
-      throw new Error(`Réponse illisible de l'API (HTTP ${reponse.status}).`);
+      const reponse = await fetchImpl(URL_API, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json', 'x-api-key': cle, 'anthropic-version': '2023-06-01',
+          // Obligatoire pour un appel direct depuis un navigateur : la clé reste sur cet appareil, sous la responsabilité de la propriétaire.
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify(corpsRequete),
+        signal,
+      });
+      statut = reponse.status;
+      let corps;
+      try {
+        corps = await reponse.json();
+      } catch {
+        throw new Error(`Réponse illisible de l'API (HTTP ${reponse.status}).`);
+      }
+      if (!reponse.ok) throw new Error(`API Anthropic : HTTP ${reponse.status} ${corps?.error?.type ?? ''} ${corps?.error?.message ?? ''}`.trim());
+      fournisseur.dernierUsage = corps.usage ?? null;
+      if (corps.stop_reason === 'refusal') throw new Error('Le modèle a refusé la demande.');
+      ok = true;
+      // Ce que l'IA a RENDU (jamais la requête, l'image ni la clé), pour comprendre une lecture fausse ; borné et nettoyé par `noter`.
+      try { contenu = JSON.stringify((corps.content ?? []).filter((b) => b.type === 'tool_use').map((b) => b.input)); } catch { contenu = ''; }
+      return corps;
+    } catch (e) {
+      if (e?.name === 'AbortError') statut = 'annule'; // fermeture voulue du panneau : pas une panne réseau
+      throw e;
+    } finally {
+      noter('ia', { outil, ok, statut, ms: Date.now() - debut, contenu });
     }
-    if (!reponse.ok) throw new Error(`API Anthropic : HTTP ${reponse.status} ${corps?.error?.type ?? ''} ${corps?.error?.message ?? ''}`.trim());
-    fournisseur.dernierUsage = corps.usage ?? null;
-    if (corps.stop_reason === 'refusal') throw new Error('Le modèle a refusé la demande.');
-    return corps;
   }
   const fournisseur = {
     nom: `anthropic:${modele}`,

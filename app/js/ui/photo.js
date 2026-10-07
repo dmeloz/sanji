@@ -62,6 +62,11 @@ function oublier(date) {
   urls.delete(date);
 }
 
+/** La photo stockée d'une date (blob), ou null : sert à joindre la photo envoyée à l'IA au diagnostic, en mémoire seulement. */
+export async function photoBlob(date) {
+  return (await lirePhoto(date)) ?? null;
+}
+
 /** Réduit puis enregistre. Renvoie true si la photo est conservée sur l'appareil, false si elle reste en mémoire. */
 export async function importerPhoto(date, fichier) {
   const blob = await reduireImage(fichier);
