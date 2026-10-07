@@ -58,9 +58,6 @@
   --gris-fond: var(--carte-2);
 
   /* Barre du haut et focus */
-  --barre-fond: var(--carte);
-  --barre-texte: var(--texte);
-  --barre-trait: var(--bordure);
   --focus: var(--action);
 
   /* Polices */
@@ -147,39 +144,7 @@ a { color: var(--bleu-texte); }
 
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
-/* ------------------------------------------------------------ barre et onglets */
-
-.barre {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 16px) 10px calc(env(safe-area-inset-left) + 16px);
-  background: var(--barre-fond);
-  border-bottom: 1px solid var(--barre-trait);
-  color: var(--barre-texte);
-}
-.barre-app { font-family: var(--police-titre); font-weight: 700; font-size: var(--t0); letter-spacing: -0.01em; }
-.barre-titre { font-family: var(--police-titre); font-size: var(--t0); font-weight: 500; color: var(--texte-doux); }
-.barre-reglages {
-  margin-left: auto;
-  align-self: center;
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--cible);
-  min-width: var(--cible);
-  padding: 0 14px;
-  border: 1px solid var(--bordure);
-  border-radius: var(--r-bouton);
-  background: var(--carte);
-  color: var(--texte);
-  font-size: var(--t-corps);
-  font-weight: 600;
-  text-decoration: none;
-}
-.barre-reglages[hidden] { display: none; }
+/* ------------------------------------------------------------ onglets (plus de barre du haut : chaque page porte son titre) */
 
 .onglets {
   position: fixed;
@@ -219,7 +184,7 @@ a { color: var(--bleu-texte); }
 .contenu {
   max-width: var(--largeur-max);
   margin: 0 auto;
-  padding: 14px calc(env(safe-area-inset-right) + 14px) calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 28px) calc(env(safe-area-inset-left) + 14px);
+  padding: calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 14px) calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 28px) calc(env(safe-area-inset-left) + 14px);
   outline: none;
 }
 
@@ -1307,7 +1272,6 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prod-pied { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: 12px; }
 
 /* ===== Aujourd'hui, tableau de bord (refonte 2, décision du 2026-10-07) : menus sur 3 jours, cases, À avancer, À confirmer, Prochaine fixe. ===== */
-.vue-aujourdhui { padding-bottom: 190px; } /* la carte « Prochaine » est fixe : la page garde de la place sous le dernier bloc */
 .tdb-section { display: flex; flex-direction: column; gap: 4px; }
 .tdb-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .tdb-jours { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -1336,8 +1300,8 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .tdb-confirmer .au-sous { color: var(--exception); }
 .tdb-tout-voir { background: none; border: 0; cursor: pointer; color: var(--exception); }
 .tdb-rappels { display: flex; flex-direction: column; }
-/* Prochaine : carte fixe au-dessus des onglets, près du pouce. */
-.prochaine { position: fixed; left: 0; right: 0; bottom: var(--haut-onglets); z-index: 15; display: flex; flex-direction: column; gap: 8px; margin: 0 var(--marge-ecran); padding: 12px 14px; border-radius: var(--r-carte-petite); background: var(--encre); color: var(--sur-encre); box-shadow: 0 -1px 0 var(--bordure); }
+/* Prochaine : une carte de la page, qui défile avec elle (jamais fixe). */
+.prochaine { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: var(--r-carte-petite); background: var(--encre); color: var(--sur-encre); }
 .prochaine-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: var(--t-legende); }
 .prochaine-etiquette { font-size: var(--t-legende); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; }
 .prochaine-ligne { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
@@ -1350,7 +1314,6 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 @media (prefers-color-scheme: dark) {
   .prochaine .au-btn-clair { background: var(--sur-encre); color: var(--encre); border-color: var(--sur-encre); }
 }
-@media (min-width: 981px) { .prochaine { left: 50%; right: auto; width: min(var(--largeur-max), 100% - 2 * var(--marge-ecran)); transform: translateX(-50%); margin: 0; } }
 
 /* ===== Feuilles « Couverts midi » et « Ventes du midi » (refonte 2) : − / +, choix rapides, répartition, détail replié. ===== */
 .tdb-case-bouton { border: 0; font: inherit; text-align: left; cursor: pointer; width: 100%; }
@@ -1449,3 +1412,25 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 
 /* E1 Réglages : note de fin de page (apparence, écran allumé), à la place du groupe « Affichage ». */
 .reglages-note { margin: 12px 16px 0; font-size: var(--t-legende); color: var(--texte-doux); }
+
+/* Aujourd'hui : l'en-tête porte le bouton Réglages (plus de barre du haut). */
+.au-tete-ligne { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.au-reglages { display: inline-flex; align-items: center; min-height: var(--cible); padding: 0 14px; border: 1px solid var(--bordure); border-radius: var(--r-bouton); background: var(--carte); color: var(--texte); font-size: var(--t-corps); font-weight: 600; text-decoration: none; }
+.au-reglages:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ===== Menu du jour (Production) et sous-titres de menu (Articles), refonte 2 ===== */
+.mj-bloc { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: var(--cible); padding: 6px 2px; color: var(--texte); text-decoration: none; font-size: 15px; border-bottom: 1px solid var(--bordure); }
+.mj-ligne { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mj-etiquette { font-weight: 600; }
+.mj-nonsaisi { color: var(--texte-doux); }
+.mj-vide { margin: 0; padding: 6px 2px; font-size: 15px; color: var(--texte-doux); }
+.mj-lien-import { display: inline-flex; align-items: center; min-height: var(--cible); font-weight: 600; }
+.art-menu-titre { margin: 12px 0 4px; font-size: 15px; font-weight: 600; }
+
+/* ===== Semaine : un seul bouton « ⋯ », feuille d'actions, lien « Production du jour › » (refonte 2) ===== */
+.sa-actions { min-width: 44px; min-height: 44px; border-radius: 50%; border: 1px solid var(--bordure-forte); background: transparent; color: var(--texte); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+.sa-actions:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.sa-barre { display: flex; justify-content: flex-end; margin: 0 0 8px; }
+.sa-action { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; margin: 0 0 12px; font-size: 1rem; text-decoration: none; }
+.sa-lien-production { display: inline-flex; align-items: center; min-height: 44px; color: var(--action); text-decoration: underline; font-size: 15px; }
+.sa-lien-production:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }

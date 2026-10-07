@@ -12,6 +12,7 @@ import { h } from './dom.js';
 import { problemeHorsLigne } from './horsligne.js';
 import { lien } from './elements.js';
 import { activerGlisser } from './glisser.js';
+import { blocMenuDuJour } from './menu-du-jour.js';
 import { corps } from './vue-jour.js';
 
 export function titre() { return 'Production'; }
@@ -101,6 +102,8 @@ export function rendre(etat, date) {
   racine.appendChild(selecteur(date, aujourd));
   // Les autres jours : la barre de la semaine n'apparaît que hors Aujourd'hui et Demain (sinon Semaine et le glissement suffisent).
   if (date !== aujourd && date !== ajouterJours(aujourd, 1)) racine.appendChild(barreDeJours(date, aujourd));
+  const menu = blocMenuDuJour(etat, date);
+  if (menu) racine.appendChild(menu);
   for (const n of corps(etat, date, feuille)) racine.appendChild(n);
   racine.appendChild(pied(date));
   activerGlisser(racine, {

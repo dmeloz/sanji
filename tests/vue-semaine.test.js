@@ -219,7 +219,8 @@ test('semaine globale : sans date ou /tableau, l\'ancien tableau restylé, avec 
     const n = vue.rendre(magasin.etat(), param, sous);
     assert.equal(n.className, 'vue-semaine-globale');
     assert.match(texte(n), /Menus de la semaine/);
-    assert.match(texte(n), /Importer les menus/);
+    assert.doesNotMatch(texte(n), /Importer les menus|Proposer un planning/, 'les actions sont dans la feuille « ⋯ »');
+    assert.equal(parClasse(n, 'sa-actions')[0].attributs['aria-label'], 'Actions de la semaine');
     assert.ok(liens(n).some((l) => l.startsWith('#/semaine/')), 'les jours mènent au détail');
   }
 });
@@ -250,4 +251,24 @@ test('couverts midi saisis : la certitude est « provisoire » et ne laisse pas 
   actions.definirPrevision(zero, S.lundiSuivant, 2, 0, horo());
   magasin.remplacer(zero);
   assert.match(texte(vue.rendre(magasin.etat(), S.lundiSuivant)), /estimée 0/);
+});
+
+test('bouton « ⋯ » : la feuille propose Importer les menus et Proposer un planning', async () => {
+  magasin.remplacer(semaine());
+  const n = vue.rendre(magasin.etat(), S.lundiSuivant);
+  const boutons = parClasse(n, 'sa-actions');
+  assert.equal(boutons.length, 1);
+  assert.equal(boutons[0].textContent, '⋯');
+  await boutons[0].click();
+  const feuille = dom.document.body.tous((x) => x.className.split(' ').includes('sa-action'));
+  assert.deepEqual(feuille.map((x) => x.textContent), ['Importer les menus', 'Proposer un planning']);
+  assert.equal(feuille[0].attributs.href, `#/import/${S.lundiSuivant}`);
+});
+
+test('Semaine : couverts en lecture seule, lien « Production du jour › »', () => {
+  magasin.remplacer(semaine());
+  const n = vue.rendre(magasin.etat(), S.lundiSuivant);
+  assert.doesNotMatch(texte(n), /Saisir les couverts|Modifier les couverts|Voir la feuille du jour/);
+  assert.ok(liens(n).includes(`#/production/${S.lundiSuivant}`));
+  assert.match(texte(n), /Production du jour ›/);
 });

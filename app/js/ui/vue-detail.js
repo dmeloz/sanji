@@ -10,14 +10,13 @@ import { chargeCreneau } from '../domaine/planification.js';
 import { couvertsMidiDuJour } from '../domaine/couverts-midi.js';
 import { pointsAConfirmer } from '../domaine/points.js';
 import { CATEGORIE, ETAT_CRENEAU, libelle } from '../domaine/statuts.js';
-import { agir, agirStrict, etat as etatCourant, redessiner } from '../magasin.js';
+import { agir, agirStrict, aujourdhui, etat as etatCourant, redessiner } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
 import {
   confirmerAnnulation, dialogAdaptation, dialogFiche, dialogHistorique, dialogRepartition, repartitionIncoherente, resumeChoix,
 } from './fiches.js';
-import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { formaterHeure, pluriel } from './format.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
@@ -188,7 +187,7 @@ function sectionPrevisions(etat, date) {
     h('p', null, saisie
       ? [pluriel(c.total, 'couvert'), ` · menu 1 : ${c.m1} · menu 2 : ${c.m2} `, pastille(c.manuel ? 'décidé par vous' : 'calculé', 'gris'), ' ', pastille('provisoire', 'gris')]
       : 'couverts à saisir'),
-    h('div', { classe: 'actions' }, bouton(saisie ? 'Modifier les couverts' : 'Saisir les couverts', () => ouvrirCouvertsMidi(date), 'court')),
+    h('p', { classe: 'aide' }, date === aujourdhui() ? 'Les couverts du jour se saisissent dans Aujourd\'hui.' : 'Les couverts se règlent dans Aujourd\'hui, le jour même.'),
   ], { classe: 'carte', id: 'previsions' });
 }
 
@@ -357,7 +356,7 @@ export function rendre(etat, date) {
     { href: `#/semaine/${ajouterJours(date, -1)}`, texte: '‹ Jour précédent' },
     { href: `#/semaine/${lundiDe(date)}/tableau`, texte: 'Semaine' },
     { href: `#/semaine/${ajouterJours(date, 1)}`, texte: 'Jour suivant ›' }));
-  racine.appendChild(h('p', null, lien(`#/production/${date}`, 'Voir la feuille du jour')));
+  racine.appendChild(h('p', null, lien(`#/production/${date}`, 'Production du jour ›', 'sa-lien-production')));
   if (!estOuvert(date)) {
     racine.appendChild(h('p', { classe: 'ferme' }, 'fermé'));
     racine.appendChild(h('p', { classe: 'aide' }, 'Le dimanche est non travaillé, sans tâche ; il reste compté dans le temps de conservation.'));

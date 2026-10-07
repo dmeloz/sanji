@@ -1,7 +1,7 @@
 // Aujourd'hui (onglet 1, accueil), tableau de bord de la refonte 2 (décision du 2026-10-07). La vue ne calcule rien : tout vient
 // de `aujourdhuiDe(...)` (domaine/tableau-blanc.js). De haut en bas : en-tête (jour, date, heure), menus sur 3 jours, cases
 // Production et Couverts midi, « À avancer » (règle des 2 jours, 3 lignes), fiche de fonction (aujourd'hui ou demain),
-// « À confirmer » (3 lignes), rappels discrets ; la carte « Prochaine » reste fixe en bas, au-dessus des onglets.
+// « À confirmer » (3 lignes), rappels discrets ; la carte « Prochaine » est une carte de la page (sous les chiffres), jamais fixe.
 // Retirés de l'accueil : créneaux du jour, case ambre « À confirmer » dans les chiffres, raccourci Articles, À consommer en
 // priorité (DLC masquées). Interface commune des vues : `titre(param, sous)` et `rendre(etat, param, sous)`.
 
@@ -39,7 +39,9 @@ const CHEVRON = ['M9 6l6 6-6 6'];
 function entete(donnees) {
   const probleme = problemeHorsLigne();
   return h('header', { classe: 'au-tete' },
-    h('p', { classe: 'au-date' }, `${majuscule(libelleJour(donnees.date))} · ${maintenant().slice(11, 16)}`),
+    h('div', { classe: 'au-tete-ligne' },
+      h('p', { classe: 'au-date' }, `${majuscule(libelleJour(donnees.date))} · ${maintenant().slice(11, 16)}`),
+      h('a', { href: '#/reglages', classe: 'au-reglages' }, 'Réglages')),
     h('h1', { classe: 'au-titre' }, "Aujourd'hui"),
     probleme ? h('p', { classe: 'au-hors-ligne', role: 'status' }, h('span', { classe: 'au-point', 'aria-hidden': 'true' }), h('span', null, probleme)) : null);
 }
@@ -240,8 +242,8 @@ export function rendre(etat) {
   const aujourd = aujourdhui();
   const donnees = aujourdhuiDe(etat, aujourd, maintenant().slice(11, 16));
   const racine = h('div', { classe: 'vue vue-aujourdhui' });
-  const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), sectionAAvancer(donnees, aujourd),
-    carteFiche(donnees, aujourd, etat), sectionAConfirmer(donnees, decisionsDe(etat, aujourd)), sectionRappels(donnees), carteProchaine(donnees, aujourd)];
+  const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), carteProchaine(donnees, aujourd),
+    sectionAAvancer(donnees, aujourd), carteFiche(donnees, aujourd, etat), sectionAConfirmer(donnees, decisionsDe(etat, aujourd)), sectionRappels(donnees)];
   for (const m of morceaux) if (m) racine.appendChild(m);
   return racine;
 }

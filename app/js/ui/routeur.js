@@ -104,14 +104,10 @@ export function rendre() {
   }
   racine.replaceChildren(noeud);
   const titrePage = VUES[vue].titre(param, sous);
-  const titreVue = parId('barre-titre');
-  if (titreVue) titreVue.textContent = titrePage;
   document.title = `${titrePage} — Sanji`;
   // Vraie nouvelle page (pas un simple redessin) : le focus passe au contenu, pour le clavier et VoiceOver.
   if (cleCourante !== null && cle !== cleCourante) racine.focus?.({ preventScroll: true });
   majOnglets(vue);
-  const reglages = parId('barre-reglages');
-  if (reglages) reglages.hidden = vue !== 'aujourdhui';
   maintenirAllume(vue === 'production' || vue === 'poste').catch(() => {});
   dessinerBandeaux();
   window.scrollTo(0, defilement);

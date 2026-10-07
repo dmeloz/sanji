@@ -8,6 +8,7 @@ import { cocherArticle } from '../domaine/actions-articles.js';
 import { articlesDuPoste } from '../domaine/articles.js';
 import { estOuvert, libelleJour } from '../domaine/dates.js';
 import { agir, aujourdhui, redessiner } from '../magasin.js';
+import { jourOuVide } from '../domaine/etat.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, lien } from './elements.js';
 import { qteNoeuds, quantite } from './format.js';
@@ -25,7 +26,6 @@ let vueChoisie = 'semaine';
 export function oublierVue() { vueChoisie = 'semaine'; }
 
 const titreJour = (j) => `${majuscule(libelleJour(j.date))}${j.estAujourdhui ? " · aujourd'hui" : ''}`;
-const legende = (a) => `menu ${a.menu}${a.aCompleter ? ' · à compléter' : ''}`;
 
 /** La liste en texte simple, pour la partager : un jour par bloc, une ligne par article, les cases cochées marquées. */
 export function texteDeLaListe(jours) {
@@ -59,9 +59,22 @@ function ligneArticle(a) {
       type: 'button', role: 'checkbox', 'aria-checked': a.coche ? 'true' : 'false', classe: `case-fait${a.coche ? ' case-fait-ok' : ''}`,
       onClick: () => agir((x, t) => cocherArticle(x, a.cle, !a.coche, t)),
     }, h('span', { classe: 'case-fait-boite', 'aria-hidden': 'true' }, a.coche ? '✓' : null), h('span', { classe: 'sr' }, nomCase)),
-    h('span', { classe: 'art-texte' }, h('span', { classe: 'art-nom' }, a.nom), h('span', { classe: 'au-sous' }, legende(a))),
+    h('span', { classe: 'art-texte' }, h('span', { classe: 'art-nom' }, a.nom), a.aCompleter ? h('span', { classe: 'au-sous' }, 'à compléter') : null),
     q ? h('span', { classe: 'au-qte art-qte' }, qteNoeuds(q))
       : h('span', { classe: 'au-neutre' }, '—', h('span', { classe: 'sr' }, ' quantité à compléter')));
+}
+
+/** Les articles d'un jour regroupés par menu (déjà triés par menu), sous « Menu N · intitulé du jour ». */
+function groupesParMenu(etat, jour) {
+  const { menus } = jourOuVide(etat, jour.date);
+  return [1, 2].map((n) => {
+    const articles = jour.articles.filter((a) => a.menu === n);
+    if (articles.length === 0) return null;
+    const intitule = String(menus?.[n]?.intitule ?? '').trim();
+    return h('div', { classe: 'art-menu' },
+      h('h3', { classe: 'art-menu-titre' }, intitule ? `Menu ${n} · ${intitule}` : `Menu ${n}`),
+      h('ul', { classe: 'art-liste' }, articles.map(ligneArticle)));
+  });
 }
 
 function selecteur(vue) {
@@ -90,7 +103,7 @@ export function rendre(etat) {
   for (const j of visibles) {
     racine.appendChild(h('section', { classe: 'art-jour', 'aria-label': titreJour(j) },
       h('h2', { classe: 'au-etiquette' }, titreJour(j)),
-      h('ul', { classe: 'art-liste' }, j.articles.map(ligneArticle))));
+      groupesParMenu(etat, j)));
   }
   racine.appendChild(h('p', { classe: 'au-sous' }, 'Quantités brutes calculées depuis les menus. Une quantité inconnue reste « à compléter », sans alerte.'));
   if (visibles.length > 0) {

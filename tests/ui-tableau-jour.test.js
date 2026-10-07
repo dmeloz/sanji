@@ -89,7 +89,7 @@ test('Tableau : menus = aujourd\'hui et 2 jours suivants ; ligne entière vers l
   const plats = classes(zone, 'bord-plat');
   assert.ok(plats.length > 0);
   for (const a of plats) assert.match(a.attributs.href, /^#\/fiche\//);
-  assert.ok(boutons(zone).length >= 6, 'le cercle de prévision reste un bouton');
+  assert.ok(classes(zone, 'tb-couverts').length >= 6, 'les chiffres de prévision restent affichés');
 });
 
 test('Tableau : le cercle de prévision et chaque ligne cliquable mesurent au moins 44 px (feuille de style)', () => {

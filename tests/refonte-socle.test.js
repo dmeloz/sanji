@@ -35,7 +35,7 @@ test('barre d\'onglets : quatre onglets fixes, dans l\'ordre, sans Réglages', (
   assert.deepEqual([...nav.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ['#/aujourdhui', '#/production', '#/semaine', '#/articles']);
   assert.deepEqual([...nav.matchAll(/data-onglet="([^"]+)"/g)].map((m) => m[1]), ['aujourdhui', 'production', 'semaine', 'articles']);
   assert.doesNotMatch(nav, /Réglages/);
-  assert.match(html, /id="barre-reglages"[^>]*href="#\/reglages"/, 'le bouton Réglages de l\'en-tête');
+  assert.doesNotMatch(html, /id="barre"|barre-titre|barre-reglages/, 'plus de barre du haut : chaque page porte son titre');
 });
 
 test('vues-relais : chacune exporte titre et rendre', () => {

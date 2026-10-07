@@ -57,17 +57,28 @@ test('semaine : un bloc par jour, les articles par menu, la quantité brute à d
   const mardi = classes(jours[1], 'art-ligne').map((l) => classes(l, 'art-nom')[0].textContent);
   assert.deepEqual(mardi, ['ARTICLE_SANS_PREVISION_TEST', 'ARTICLE_MARDI_TEST'], 'menu 1 puis menu 2');
   const premiere = classes(jours[0], 'art-ligne')[0];
-  assert.match(premiere.textContent, /menu 1/);
+  assert.doesNotMatch(premiere.textContent, /menu 1/, 'le menu est dit par le sous-titre, plus par la ligne');
   assert.ok(classes(premiere, 'art-qte')[0].className.includes('au-qte'));
   assert.match(classes(premiere, 'art-qte')[0].textContent, /\d/);
 });
 
-test('quantité inconnue : « menu 1 · à compléter » et « — », sans alerte', () => {
+test('quantité inconnue : « à compléter » et « — », sans alerte', () => {
   const p = page(S.lundi, semaine());
   const ligne = classes(p, 'art-ligne').find((l) => /ARTICLE_SANS_PREVISION_TEST/.test(l.textContent));
-  assert.match(ligne.textContent, /menu 1 · à compléter/);
+  assert.match(ligne.textContent, /à compléter/);
+  assert.doesNotMatch(ligne.textContent, /menu 1/);
   assert.match(ligne.textContent, /—/);
   assert.equal(classes(p, 'encadre-alerte').length + classes(p, 'encadre-erreur').length, 0);
+});
+
+test('articles groupés par menu sous « Menu N · intitulé du jour » ; sans intitulé, « Menu N » seul', () => {
+  vue.oublierVue();
+  const e = semaine();
+  e.jours[S.mardi].menus[2].intitule = 'INTITULE_M2_TEST';
+  const mardi = classes(page(S.lundi, e), 'art-jour')[1];
+  assert.deepEqual(classes(mardi, 'art-menu-titre').map((t) => t.textContent), ['Menu 1', 'Menu 2 · INTITULE_M2_TEST']);
+  const noms = classes(mardi, 'art-menu').map((g) => classes(g, 'art-nom').map((n) => n.textContent));
+  assert.deepEqual(noms, [['ARTICLE_SANS_PREVISION_TEST'], ['ARTICLE_MARDI_TEST']]);
 });
 
 test('cases : un mot pour l\'état (Cocher / Décocher), la coche reste après redessin, et se retire en la retouchant', async () => {

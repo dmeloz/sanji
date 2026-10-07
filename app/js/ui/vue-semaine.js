@@ -13,8 +13,9 @@ import { pointsAConfirmer } from '../domaine/points.js';
 import { tableauBlanc } from '../domaine/tableau-blanc.js';
 import { LIBELLES, libelle } from '../domaine/statuts.js';
 import { aujourdhui } from '../magasin.js';
-import { boutonProposerPlanning } from './assistant-planning.js';
+import { ouvrirAssistantPlanning } from './assistant-planning.js';
 import { h } from './dom.js';
+import { panneau } from './panneau.js';
 import { bouton, lien, pastille, repliable } from './elements.js';
 import { ouvrirFiche } from './fiches.js';
 import { problemeHorsLigne } from './horsligne.js';
@@ -61,6 +62,20 @@ function estJourOff(etat, date) {
 
 // ------------------------------------------------------------------ en-tête et puces
 
+/** Le seul bouton d'action de Semaine : une feuille avec « Importer les menus » et « Proposer un planning ». */
+function boutonActions(lundi, date) {
+  return h('button', {
+    type: 'button', classe: 'sa-actions', 'aria-label': 'Actions de la semaine',
+    onClick: () => panneau({
+      titre: 'Semaine', lectureSeule: true,
+      corps: ({ fermer }) => [
+        h('a', { href: `#/import/${lundi}`, classe: 'btn sa-action', onClick: () => fermer() }, 'Importer les menus'),
+        h('button', { type: 'button', classe: 'btn sa-action', onClick: () => { fermer(); ouvrirAssistantPlanning({ date }); } }, 'Proposer un planning'),
+      ],
+    }),
+  }, '⋯');
+}
+
 function entete(etat, date, aujourd) {
   const lundi = lundiDe(date);
   const numero = tableauBlanc(etat, aujourd, lundi).bord.entete.semaine;
@@ -68,7 +83,7 @@ function entete(etat, date, aujourd) {
     h('div', { classe: 'sem-tete-texte' },
       h('p', { classe: 'sem-legende' }, `Semaine ${numero} · ouvert lun → sam${problemeHorsLigne() ? ` · ${problemeHorsLigne()}` : ''}`),
       h('h1', { classe: 'sem-titre' }, 'Semaine')),
-    lien(`#/import/${lundi}`, 'Importer', 'sem-importer'));
+    boutonActions(lundi, date));
 }
 
 function puces(etat, date, aujourd) {
@@ -260,7 +275,7 @@ function sectionAProduire(etat, date) {
     h('h2', { classe: 'sem-section', id: 'sem-titre-produire' }, 'À produire ce jour'),
     lignes.length === 0 ? h('p', { classe: 'sem-neutre' }, 'Aucune production décidée ce jour-là.')
       : h('ul', { classe: 'sem-liste' }, lignes.map((l) => ligneAProduire(etat, date, l))),
-    h('p', null, lien(`#/production/${date}`, 'Voir la feuille du jour (avances possibles, décisions)', 'btn btn-court')));
+    h('p', null, lien(`#/production/${date}`, 'Production du jour ›', 'sa-lien-production')));
 }
 
 // ------------------------------------------------------------------ vue
@@ -286,8 +301,7 @@ function rendreJour(etat, date) {
 function rendreGlobale(etat, lundi) {
   const interieur = vueTableau.rendre(etat, lundi ?? null);
   const racine = h('div', { classe: 'vue-semaine-globale' },
-    h('p', { classe: 'sem-globale-outils' }, lien(`#/import/${lundi ?? lundiDe(aujourdhui())}`, 'Importer les menus', 'btn btn-court'),
-      boutonProposerPlanning(lundi ?? aujourdhui())),
+    h('p', { classe: 'sa-barre' }, boutonActions(lundiDe(lundi ?? aujourdhui()), lundi ?? aujourdhui())),
     interieur);
   return racine;
 }
