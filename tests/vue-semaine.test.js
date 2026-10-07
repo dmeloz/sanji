@@ -235,7 +235,8 @@ test('puces : « ? » à confirmer quand le jour a un point à confirmer, dit en
   const n = vue.rendre(magasin.etat(), S.lundiSuivant);
   assert.match(puceDe(n, 'Lundi').attributs['aria-label'], /^Lundi.*à confirmer/);
   assert.deepEqual(parClasse(puceDe(n, 'Lundi'), 'sem-signe').map(texte), ['?']);
-  assert.match(texte(parClasse(n, 'sem-cle')[0]), /à confirmer : point en attente/);
+  assert.match(texte(parClasse(n, 'sem-cle')[0]), /\? à confirmer/);
+  assert.equal(parClasse(n, 'sem-cle').length, 1, 'une seule ligne de légende');
 });
 
 test('couverts midi saisis : la certitude est « provisoire » et ne laisse pas d\'« estimée 0 » ; une prévision estimée à 0 se dit « estimée 0 »', async () => {
@@ -253,7 +254,7 @@ test('couverts midi saisis : la certitude est « provisoire » et ne laisse pas 
   assert.match(texte(vue.rendre(magasin.etat(), S.lundiSuivant)), /estimée 0/);
 });
 
-test('bouton « ⋯ » : la feuille propose Importer les menus et Proposer un planning', async () => {
+test('bouton « ⋯ » : la feuille propose Importer les menus, Proposer un planning et Vue de la semaine ; les flèches changent de semaine', async () => {
   magasin.remplacer(semaine());
   const n = vue.rendre(magasin.etat(), S.lundiSuivant);
   const boutons = parClasse(n, 'sa-actions');
@@ -261,14 +262,25 @@ test('bouton « ⋯ » : la feuille propose Importer les menus et Proposer un pl
   assert.equal(boutons[0].textContent, '⋯');
   await boutons[0].click();
   const feuille = dom.document.body.tous((x) => x.className.split(' ').includes('sa-action'));
-  assert.deepEqual(feuille.map((x) => x.textContent), ['Importer les menus', 'Proposer un planning']);
+  assert.deepEqual(feuille.map((x) => x.textContent), ['Importer les menus', 'Proposer un planning', 'Vue de la semaine']);
   assert.equal(feuille[0].attributs.href, `#/import/${S.lundiSuivant}`);
+  assert.equal(feuille[2].attributs.href, `#/semaine/${S.lundiSuivant}/tableau`);
+  const fleches = parClasse(n, 'sa-fleche');
+  assert.deepEqual(fleches.map((a) => a.attributs['aria-label']), ['Semaine précédente', 'Semaine suivante']);
+  assert.equal(parClasse(n, 'sem-nav').length, 0, 'plus de pile de trois boutons en haut');
 });
 
-test('Semaine : couverts en lecture seule, lien « Production du jour › »', () => {
+test('Semaine : la ligne « Couverts midi » ouvre la feuille de saisie ; lien « Production du jour › »', async () => {
   magasin.remplacer(semaine());
   const n = vue.rendre(magasin.etat(), S.lundiSuivant);
-  assert.doesNotMatch(texte(n), /Saisir les couverts|Modifier les couverts|Voir la feuille du jour/);
+  assert.match(texte(n), /Couverts midi/);
+  const bouton = n.tous((x) => x.balise === 'button' && /les couverts midi du/.test(x.attributs['aria-label'] ?? ''))[0];
+  assert.ok(bouton, 'bouton Saisir / Modifier dans la carte Services');
+  await bouton.click();
+  const feuille = dom.corps.tous((x) => x.balise === 'dialog' && x.open).at(-1);
+  assert.equal(feuille.querySelector('h2').textContent, 'Couverts midi');
+  feuille.close();
+  assert.doesNotMatch(texte(n), /Voir la feuille du jour/);
   assert.ok(liens(n).includes(`#/production/${S.lundiSuivant}`));
   assert.match(texte(n), /Production du jour ›/);
 });

@@ -181,9 +181,10 @@ test('Semaine : plus d\'aide permanente sur la carte, légende explicite, liens 
   assert.match(carte, /Carte/);
   assert.doesNotMatch(carte, /aucune quantité calculée/);
   assert.match(n.tous((x) => x.attributs.id === 'detail-jour')[0].textContent, /aucune quantité n'en est calculée/, 'dite une fois, dans le repli du détail');
+  // Légende compacte : une ligne, seulement les signes présents dans la semaine.
   const cle = classes(n, 'sem-cle')[0].textContent;
-  assert.match(cle, /hors règle : avance non autorisée/);
-  assert.match(cle, /jour off : aucun créneau de travail/);
+  assert.match(cle, /\? à confirmer/);
+  assert.doesNotMatch(cle, /hors règle|jour off/, 'un signe absent de la semaine n\'est pas expliqué');
   assert.match(blocLot, /\.bord-plat \{[^}]*min-height: var\(--cible\)/);
   assert.match(blocLot, /\.interrupteur-entree \{[^}]*height: 44px/);
 });

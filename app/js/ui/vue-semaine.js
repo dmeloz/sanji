@@ -16,6 +16,8 @@ import { aujourdhui } from '../magasin.js';
 import { ouvrirAssistantPlanning } from './assistant-planning.js';
 import { h } from './dom.js';
 import { panneau } from './panneau.js';
+import { couvertsMidiDuJour } from '../domaine/couverts-midi.js';
+import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { bouton, lien, pastille, repliable } from './elements.js';
 import { ouvrirFiche } from './fiches.js';
 import { problemeHorsLigne } from './horsligne.js';
@@ -71,6 +73,7 @@ function boutonActions(lundi, date) {
       corps: ({ fermer }) => [
         h('a', { href: `#/import/${lundi}`, classe: 'btn sa-action', onClick: () => fermer() }, 'Importer les menus'),
         h('button', { type: 'button', classe: 'btn sa-action', onClick: () => { fermer(); ouvrirAssistantPlanning({ date }); } }, 'Proposer un planning'),
+        h('a', { href: `#/semaine/${lundi}/tableau`, classe: 'btn sa-action', onClick: () => fermer() }, 'Vue de la semaine'),
       ],
     }),
   }, '⋯');
@@ -83,7 +86,10 @@ function entete(etat, date, aujourd) {
     h('div', { classe: 'sem-tete-texte' },
       h('p', { classe: 'sem-legende' }, `Semaine ${numero} · ouvert lun → sam${problemeHorsLigne() ? ` · ${problemeHorsLigne()}` : ''}`),
       h('h1', { classe: 'sem-titre' }, 'Semaine')),
-    boutonActions(lundi, date));
+    h('div', { classe: 'sa-groupe' },
+      h('a', { href: `#/semaine/${ajouterJours(date, -7)}`, classe: 'sa-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
+      h('a', { href: `#/semaine/${ajouterJours(date, 7)}`, classe: 'sa-fleche', 'aria-label': 'Semaine suivante' }, '›'),
+      boutonActions(lundi, date)));
 }
 
 function puces(etat, date, aujourd) {
@@ -109,16 +115,22 @@ function puces(etat, date, aujourd) {
     horsRegle || aConfirmer ? h('span', { classe: 'sem-signe', 'aria-hidden': 'true' }, horsRegle ? '!' : '?')
       : h('span', { classe: `sem-point${off ? ' sem-point-off' : ''}`, 'aria-hidden': 'true' }));
   };
+  // Légende : seulement les signes présents dans la semaine (une ligne au plus), au lieu de trois lignes fixes.
+  const presents = { regle: false, confirmer: false, off: false };
+  for (const d of jours) {
+    if (!estOuvert(d)) continue;
+    if (productionsDuJour(etat, d).some((l) => estHorsRegle(etat, l))) presents.regle = true;
+    if (pointsAConfirmer(etat, d).length > 0) presents.confirmer = true;
+    if (estJourOff(etat, d)) presents.off = true;
+  }
+  const cle = [
+    presents.regle ? h('span', null, h('span', { classe: 'sem-signe', 'aria-hidden': 'true' }, '!'), ' hors règle, à trancher') : null,
+    presents.confirmer ? h('span', null, h('span', { classe: 'sem-signe', 'aria-hidden': 'true' }, '?'), ' à confirmer') : null,
+    presents.off ? h('span', null, h('span', { classe: 'sem-point sem-point-off', 'aria-hidden': 'true' }), ' jour off') : null,
+  ].filter(Boolean);
   return h('div', { classe: 'sem-bandeau-jours' },
     h('nav', { classe: 'sem-puces', 'aria-label': 'Jours de la semaine' }, jours.map(puce)),
-    h('p', { classe: 'sem-legende sem-cle' },
-      h('span', null, h('span', { classe: 'sem-signe', 'aria-hidden': 'true' }, '!'), ' hors règle : avance non autorisée, à trancher'),
-      h('span', null, h('span', { classe: 'sem-signe', 'aria-hidden': 'true' }, '?'), ' à confirmer : point en attente'),
-      h('span', null, h('span', { classe: 'sem-point sem-point-off', 'aria-hidden': 'true' }), ' jour off : aucun créneau de travail')),
-    h('nav', { classe: 'sem-nav', 'aria-label': 'Changer de semaine' },
-      lien(`#/semaine/${ajouterJours(date, -7)}`, '‹ Semaine précédente', 'btn btn-court'),
-      lien(`#/semaine/${lundi}/tableau`, 'Menus de la semaine', 'btn btn-court'),
-      lien(`#/semaine/${ajouterJours(date, 7)}`, 'Semaine suivante ›', 'btn btn-court')));
+    cle.length > 0 ? h('p', { classe: 'sem-legende sem-cle' }, cle) : null);
 }
 
 // ------------------------------------------------------------------ bandeau du jour
@@ -202,6 +214,16 @@ function ficheDuJour(etat, f, alertes) {
     bouton('Voir la fiche', () => ouvrirFiche(f.id), 'court', { 'aria-label': `Voir la fiche ${f.numero || ''} de fonction` }));
 }
 
+/** « Couverts midi · 50 · M1 30 · M2 20 » et un bouton qui ouvre la feuille de saisie (la même que sur Aujourd'hui), sans rond ni pastille. */
+function ligneCouverts(etat, date) {
+  const c = couvertsMidiDuJour(etat, date);
+  const saisi = c.total !== null;
+  return h('div', { classe: 'sa-couverts' },
+    h('span', { classe: 'sa-couverts-texte' }, h('span', { classe: 'sem-rang' }, 'Couverts midi'),
+      saisi ? h('span', { classe: 'sa-couverts-nombres' }, h('span', { classe: 'sem-qte' }, String(c.total)), `  ·  M1 ${c.m1 ?? '—'}  ·  M2 ${c.m2 ?? '—'}`) : h('span', { classe: 'sem-neutre' }, 'à saisir')),
+    h('button', { type: 'button', classe: 'btn btn-court', onClick: () => ouvrirCouvertsMidi(date), 'aria-label': `${saisi ? 'Modifier' : 'Saisir'} les couverts midi du ${libelleJour(date)}` }, saisi ? 'Modifier' : 'Saisir'));
+}
+
 function carteServices(etat, date) {
   const fiches = Object.values(etat.fiches ?? {}).filter((f) => f.date === date && f.statut === 'active')
     .sort((a, b) => String(a.service).localeCompare(b.service) || String(a.horaire).localeCompare(String(b.horaire)));
@@ -209,7 +231,7 @@ function carteServices(etat, date) {
   const aMenus = jourSemaine(date) <= 5;
   return h('section', { classe: 'sem-carte', 'aria-labelledby': 'sem-titre-services' },
     h('h2', { classe: 'sem-section', id: 'sem-titre-services' }, `Services · ${libelleJour(date)}`),
-    aMenus ? [blocMenu(etat, date, 1), blocMenu(etat, date, 2)] : h('p', { classe: 'sem-neutre' }, 'Pas de menu du jour ce jour-là.'),
+    aMenus ? [ligneCouverts(etat, date), blocMenu(etat, date, 1), blocMenu(etat, date, 2)] : h('p', { classe: 'sem-neutre' }, 'Pas de menu du jour ce jour-là.'),
     h('div', { classe: 'sem-ligne' }, h('span', { classe: 'sem-rang' }, 'Carte'),
       h('span', { classe: 'sem-intitule' }, 'contexte du service')),
     fiches.length > 0 ? h('div', { classe: 'sem-fiches' }, h('h3', { classe: 'sem-sous-titre' }, 'Fiches de fonction'),
@@ -299,11 +321,8 @@ function rendreJour(etat, date) {
 
 /** Semaine globale : la vue d'ensemble existante (menus, fiches, à confirmer, production), habillée par `.vue-semaine-globale`. */
 function rendreGlobale(etat, lundi) {
-  const interieur = vueTableau.rendre(etat, lundi ?? null);
-  const racine = h('div', { classe: 'vue-semaine-globale' },
-    h('p', { classe: 'sa-barre' }, boutonActions(lundiDe(lundi ?? aujourdhui()), lundi ?? aujourdhui())),
-    interieur);
-  return racine;
+  const interieur = vueTableau.rendre(etat, lundi ?? null, { actions: boutonActions(lundiDe(lundi ?? aujourdhui()), lundi ?? aujourdhui()) });
+  return h('div', { classe: 'vue-semaine-globale' }, interieur);
 }
 
 export function rendre(etat, param, sous) {

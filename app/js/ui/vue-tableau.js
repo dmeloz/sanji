@@ -8,6 +8,7 @@ import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { lien } from './elements.js';
 import { ouvrirProposition } from './feuille-validation.js';
+import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { problemeHorsLigne } from './horsligne.js';
 
 export function titre() { return 'Tableau'; }
@@ -46,16 +47,19 @@ function morceaux(menu) {
 
 /** Les couverts se règlent dans Aujourd'hui : ici le chiffre est en lecture seule ; « ? » renvoie à l'import de la semaine. */
 function couvertsDuMenu(jour, menu) {
+  // Le nombre est du texte (plus de rond) ; il ouvre la feuille « Couverts midi » du jour (la même que sur Aujourd'hui).
+  const ouvrir = () => ouvrirCouvertsMidi(jour.date);
   if (menu.couverts !== null) {
-    return h('span', { classe: `tb-couverts feutre${menu.provisoires ? ' tb-provisoire' : ''}` },
-      String(menu.couverts),
-      h('span', { classe: 'sr' }, ` ${menu.couverts >= 2 ? 'portions' : 'portion'}${menu.provisoires ? ', dont des groupes provisoires' : ''}`));
+    return h('button', {
+      type: 'button', onClick: ouvrir, classe: `tb-couverts feutre${menu.provisoires ? ' tb-provisoire' : ''}`,
+      'aria-label': `${libelleJour(jour.date)}, menu ${menu.menu} : ${pluriel(menu.couverts, 'portion', 'portions')}${menu.provisoires ? ', dont des groupes provisoires' : ''}, modifier les couverts`,
+    }, String(menu.couverts));
   }
   if (menu.previsionASaisir) {
-    return h('a', {
-      href: `#/import/${lundiDe(jour.date)}`, classe: 'tb-couverts tb-couverts-vide feutre',
-      'aria-label': `${libelleJour(jour.date)}, menu ${menu.menu} : prévision à saisir, ouvrir l'import de la semaine`,
-    }, '?');
+    return h('button', {
+      type: 'button', onClick: ouvrir, classe: 'tb-couverts tb-couverts-vide feutre',
+      'aria-label': `${libelleJour(jour.date)}, menu ${menu.menu} : prévision à saisir, saisir les couverts`,
+    }, 'à saisir');
   }
   return null;
 }
@@ -174,7 +178,7 @@ function zone(id, titreTexte, contenu) {
     h('h2', { classe: 'bord-zone-titre', id: `bord-titre-${id}` }, titreTexte), contenu);
 }
 
-function entete(tb) {
+function entete(tb, actions = null) {
   const e = tb.bord.entete;
   return h('header', { classe: 'bord-tete' },
     h('div', { classe: 'bord-semaine-nav' },
@@ -185,16 +189,17 @@ function entete(tb) {
       h('a', { href: `#/semaine/${tb.semaineSuivante}/tableau`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')),
     h('div', { classe: 'bord-aujourdhui-ligne' },
       h('p', { classe: 'bord-date' }, `Aujourd'hui, ${libelleJour(e.date)}`),
-      lien(e.lienJour, 'Production du jour ›', 'sa-lien-production')),
+      h('div', { classe: 'sa-groupe' }, lien(e.lienJour, 'Production du jour ›', 'sa-lien-production'), actions)),
     e.sauvegarde ? h('p', { classe: 'bord-rappel' }, h('a', { href: e.sauvegarde.lien, classe: 'bord-ligne bord-neutre' },
       h('span', { classe: 'bord-ligne-texte' }, e.sauvegarde.texte, h('span', { classe: 'note-detail' }, e.sauvegarde.detail)))) : null);
 }
 
-export function rendre(etat, lundiAffiche) {
+/** `options.actions` : un nœud (le bouton « ⋯ » de Semaine) posé sur la ligne « Aujourd'hui, … », pour ne pas prendre une rangée de plus. */
+export function rendre(etat, lundiAffiche, options = {}) {
   const aujourd = aujourdhui();
   const tb = tableauBlanc(etat, aujourd, lundiAffiche ?? undefined);
   const racine = h('div', { classe: 'vue vue-tableau vue-bord' });
-  racine.appendChild(entete(tb));
+  racine.appendChild(entete(tb, options.actions ?? null));
   racine.appendChild(zoneMenus(tb.bord, tb.lundi));
   racine.appendChild(zoneFiches(tb.bord, aujourd));
   racine.appendChild(zoneAConfirmer(tb.bord));

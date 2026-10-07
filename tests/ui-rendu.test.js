@@ -4,6 +4,7 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import {
   ajouterAdaptation, ajouterComposant, ajouterPreparatoire, creerFiche, definirCapacite, definirCreneau, definirFournisseur, definirMenu, definirRegle,
@@ -137,8 +138,7 @@ test('contenus attendus : tableau, détail, produits, réglages', () => {
   assert.match(det, /L'application répartit seule ce qui revient au poste ; corrigez seulement une exception\./);
   assert.doesNotMatch(det, /Rappel : le menu 1/);
   assert.match(det, /Couverts midi/);
-  assert.doesNotMatch(det, /Saisir les couverts|Modifier les couverts/);
-  assert.match(det, /se (saisissent|règlent) dans Aujourd'hui/);
+  assert.match(det, /Saisir les couverts|Modifier les couverts/);
   assert.match(det, /allergènes à confirmer/);
   assert.match(det, /Noter une adaptation décidée/);
   assert.match(det, /tâches :/);
@@ -433,8 +433,8 @@ const textes = (noeuds) => noeuds.map((n) => n.textContent);
 function verifierTableau(noeud, contexte) {
   const texte = verifierTexte(noeud, contexte);
   assert.equal(ERREUR_DE_CODE.test(texte), false, `${contexte} : message d'erreur de code`);
-  // Aucun bouton : les couverts sont en lecture seule, tout le reste est un lien.
-  assert.equal(noeud.tous((x) => x.balise === 'button').length, 0, `${contexte} : liens seulement`);
+  // Seuls boutons : les nombres de couverts (ils ouvrent la feuille Couverts midi) ; tout le reste est un lien.
+  assert.equal(noeud.tous((x) => x.balise === 'button' && !x.className.split(' ').includes('tb-couverts')).length, 0, `${contexte} : liens seulement`);
   assert.ok(classes(noeud, 'bord-zone').length <= 5, `${contexte} : au plus 5 zones primaires`);
   assert.equal(classes(noeud, 'note').length, 0, `${contexte} : la note multi-sujets n'existe plus`);
   return texte;
@@ -508,28 +508,45 @@ test('tableau : ce qui est au poste est écrit au feutre, le reste en gris ; l\'
   assert.match(texte, /2 portions à régler dans les standards maison/);
   assert.match(texte, /1 élément du menu à préciser/);
   assert.match(texte, /Prévisions à saisir pour 2 jours/);
-  // Sans prévision ni groupe, aucun chiffre : un cercle vide invite à saisir la prévision.
-  assert.deepEqual(textes(classes(noeud, 'tb-couverts')), ['?', '?', '?']);
+  // Sans prévision ni groupe, aucun chiffre : « à saisir » (plus de rond) invite à saisir les couverts.
+  assert.deepEqual(textes(classes(noeud, 'tb-couverts')), ['à saisir', 'à saisir', 'à saisir']);
   assert.equal(classes(noeud, 'tb-couverts-vide').length, 3);
-  assert.ok(classes(noeud, 'tb-couverts-vide').every((a) => a.balise === 'a' && a.attributs.href === `#/import/${S.lundi}`), '« ? » est un lien vers l\'import');
+  assert.ok(classes(noeud, 'tb-couverts-vide').every((b) => b.balise === 'button'), '« à saisir » ouvre la feuille Couverts midi');
   // Une quantité manquante n'est jamais une décision : ni « à confirmer », ni « à décider » ; elle reste dite, calmement.
   const confirmer = classes(noeud, 'bord-confirmer')[0].textContent;
   assert.doesNotMatch(confirmer, /portion|prévision|quantité|préciser/);
   assert.doesNotMatch(texte, /5 points à confirmer/);
 });
 
-test('tableau : les couverts sont en lecture seule, le « ? » mène à l\'import, sans « quantité à régler » dans la liste du jour', () => {
+test('tableau : le nombre de couverts (sans rond) ouvre la feuille « Couverts midi » sur place, sans « quantité à régler » dans la liste du jour', async () => {
+  nettoyerPanneaux();
   const e = etatSemaineSaisie();
   definirStandard(e, 'riz', 'plat_principal', { valeur: 70, unite: 'g', etat: 'sec' }, h());
   magasin.remplacer(e);
   const avant = tableau(S.lundi, magasin.etat());
   assert.doesNotMatch(verifierTableau(avant, 'tableau avant prévision'), /quantité à régler/);
-  assert.equal(boutons(avant).length, 0, 'aucune ouverture de la feuille Couverts midi');
-  assert.ok(classes(avant, 'tb-couverts-vide').every((a) => a.balise === 'a' && /^#\/import\//.test(a.attributs.href)));
-  prevision(e, S.lundi, 1, 13);
-  const apres = tableau(S.lundi, e);
-  assert.ok(classes(apres, 'tb-couverts').some((x) => x.balise === 'span' && /^13/.test(x.textContent)), 'le chiffre reste affiché, non cliquable');
-  assert.equal(boutons(apres).length, 0);
+  const ouvrir = (noeud) => boutons(noeud).find((b) => /menu 1 : (prévision à saisir|\d+ portions?)/.test(b.attributs['aria-label'] ?? '')
+    && /lundi 5 octobre/.test(b.attributs['aria-label']));
+  assert.match(ouvrir(avant).attributs['aria-label'], /prévision à saisir, saisir les couverts/);
+  await ouvrir(avant).click();
+  const d = panneauOuvert();
+  assert.equal(d.querySelector('h2').textContent, 'Couverts midi', 'la même feuille que sur Aujourd\'hui');
+  await boutons(d).find((b) => b.textContent === '40').click();
+  assert.deepEqual(await soumettre(d), []);
+  // 40 couverts : la répartition calculée (1/3 – 2/3 sans historique) est écrite dans les deux prévisions.
+  assert.deepEqual([1, 2].map((m) => jourOuVide(magasin.etat(), S.lundi).previsions[m].portions), [13, 27]);
+  const apres = tableau(S.lundi, magasin.etat());
+  assert.match(ouvrir(apres).attributs['aria-label'], /13 portions.*modifier les couverts/);
+  await ouvrir(apres).click();
+  const d2 = panneauOuvert();
+  await boutons(d2).find((b) => b.textContent === '60').click();
+  assert.deepEqual(await soumettre(d2), []);
+  assert.deepEqual([1, 2].map((m) => jourOuVide(magasin.etat(), S.lundi).previsions[m].portions), [20, 40]);
+  assert.match(ouvrir(tableau(S.lundi, magasin.etat())).attributs['aria-label'], /20 portions/);
+  // Plus de rond bleu autour du nombre.
+  const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
+  const regle = css.match(/\.tb-couverts \{([^}]*)\}/)[1];
+  assert.doesNotMatch(regle, /border-radius:\s*50%|border:\s*1\.5px/);
 });
 
 test('tableau : un standard maison fait disparaître la portion à régler ; la quantité se lit sur Jour', () => {
@@ -542,7 +559,7 @@ test('tableau : un standard maison fait disparaître la portion à régler ; la 
   const noeud = tableau(S.lundi, e);
   const texte = verifierTableau(noeud, 'tableau avec standards');
   assert.doesNotMatch(texte, /portions? à régler/);
-  assert.deepEqual(textes(classes(noeud, 'tb-couverts')).map((t) => t.replace(/ portions?.*$/, '')), ['10', '20', '?']);
+  assert.deepEqual(textes(classes(noeud, 'tb-couverts')).map((t) => t.replace(/ portions?.*$/, '')), ['10', '20', 'à saisir']);
   // 10 portions × 70 g secs = 700 g : la portion est déjà en poids sec, le gain de cuisson n'est pas appliqué.
   // Le détail des quantités n'est plus sur le Tableau : il est sur la feuille du jour.
   const feuille = aDate(S.lundi, () => vues.jour.rendre(magasin.etat(), S.lundi)).textContent;

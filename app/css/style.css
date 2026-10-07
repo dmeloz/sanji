@@ -491,24 +491,29 @@ dialog.panneau::backdrop { background: rgba(8, 12, 16, 0.5); }
 .bord-plat { display: inline-block; padding: 10px 0; }
 .tb-virgule { color: var(--texte-doux); }
 .tb-discret { margin: 0; font-size: var(--t-1); color: var(--texte-doux); }
-/* Le cercle de prévision : au moins 44 × 44 px. */
+/* Couverts du tableau : un nombre en texte (plus de rond), souligné pour dire qu'on peut le toucher ; au moins 44 × 44 px. Prévision
+   « provisoire » : souligné en pointillés (jamais la couleur seule) ; prévision à saisir : « à saisir » en gris. */
 .tb-couverts {
   min-width: var(--cible);
   min-height: var(--cible);
-  padding: 0 8px;
+  padding: 0 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid var(--bleu);
-  border-radius: 50%;
-  color: var(--bleu-texte);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--texte);
   font-size: 1.1rem;
   font-variant-numeric: tabular-nums;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
 }
-.tb-provisoire { border-style: dashed; }
-button.tb-couverts { background: transparent; cursor: pointer; font-family: inherit; }
-/* Prévision à saisir : un cercle vide en pointillés, discret, là où le nombre de couverts s'écrira. */
-.tb-couverts-vide { border-color: var(--bordure-forte); border-style: dashed; color: var(--texte-doux); }
+.tb-provisoire { text-decoration-style: dotted; }
+button.tb-couverts { cursor: pointer; font-family: inherit; }
+button.tb-couverts:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.tb-couverts-vide { color: var(--texte-doux); font-size: var(--t-1); text-decoration-style: dotted; }
 .bord-reste { margin-top: 6px; }
 .tb-allergie { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: var(--rouge-texte); }
 
@@ -1434,3 +1439,13 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .sa-action { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; margin: 0 0 12px; font-size: 1rem; text-decoration: none; }
 .sa-lien-production { display: inline-flex; align-items: center; min-height: 44px; color: var(--action); text-decoration: underline; font-size: 15px; }
 .sa-lien-production:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* Semaine, carte Services : la ligne « Couverts midi » et son bouton (refonte 2). */
+.sa-couverts { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--cible); padding: 4px 0 8px; border-bottom: 1px solid var(--bordure); }
+.sa-couverts-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sa-couverts-nombres { font-size: var(--t-corps); white-space: pre-wrap; }
+
+/* Semaine : en-tête compact, flèches de semaine et « ⋯ » sur la rangée du titre (refonte 2). */
+.sa-groupe { display: flex; align-items: center; gap: 6px; flex: none; }
+.sa-fleche { display: inline-flex; align-items: center; justify-content: center; min-width: var(--cible); min-height: var(--cible); border: 1px solid var(--bordure-forte); border-radius: 50%; color: var(--texte); font-size: 1.5rem; line-height: 1; text-decoration: none; }
+.sa-fleche:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
