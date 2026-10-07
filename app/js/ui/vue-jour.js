@@ -11,7 +11,7 @@ import { estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js
 import { aideRefroidissement, evaluationProduction } from '../domaine/planification.js';
 import { libelle } from '../domaine/statuts.js';
 import { h } from './dom.js';
-import { bouton, imprimer, encadre, ligneVide, lien, repliable } from './elements.js';
+import { bouton, etatVide, imprimer, encadre, ligneVide, lien, repliable } from './elements.js';
 import { formaterHeure, phraseConservation, qteNoeuds, quantite } from './format.js';
 import {
   actionsTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, defaireEnUnToucher, noeudEvaluation, pastilleCreneau, texteCharge,
@@ -297,7 +297,13 @@ export function corps(etat, date, feuille) {
 
   const lignesDeTravail = toutes.length;
   if (lignesDeTravail === 0) {
-    noeuds.push(ligneVide(lecture.pretsPlusTard.length > 0 || feuille.avancement.total > 0 ? 'Tout est fait.' : 'Aucune tâche décidée pour ce jour.'));
+    if (lecture.pretsPlusTard.length > 0 || feuille.avancement.total > 0) noeuds.push(ligneVide('Tout est fait.'));
+    else if (estOuvert(date)) {
+      noeuds.push(etatVide({
+        titre: "Rien à produire aujourd'hui", texte: 'Pas de menu ce jour-là, ou tout a déjà été avancé.',
+        actions: [{ libelle: 'Voir la semaine', href: `#/semaine/${lundiDe(date)}` }, { libelle: 'Importer les menus', href: `#/import/${lundiDe(date)}` }],
+      }));
+    }
   }
   for (const b of [
     bloc('Menu 1', lecture.service1, etat, date, 'service'),

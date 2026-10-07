@@ -377,7 +377,13 @@ dialog.panneau[open] { animation: ouverture-panneau 160ms ease-out; }
 }
 /* Voile derrière le panneau : il assombrit la page, aucun texte ne repose dessus. */
 dialog.panneau::backdrop { background: rgba(8, 12, 16, 0.5); }
-.panneau form { padding: 16px 16px 0; }
+/* Poignée de la feuille montante : petite barre centrée, au-dessus du titre. */
+.panneau-poignee { display: block; width: 40px; height: 5px; margin: 0 auto 10px; border-radius: 3px; background: var(--bordure-forte); }
+.panneau form { padding: 8px 16px 0; }
+/* Sur mobile, toute feuille se colle en bas de l'écran : angles hauts arrondis, pas de bas arrondi. */
+@media (max-width: 600px) {
+  dialog.panneau { width: 100%; max-width: none; margin: auto 0 0; border-radius: var(--rayon) var(--rayon) 0 0; border-bottom: 0; }
+}
 .panneau-titre { font-size: var(--t1); margin-bottom: 12px; }
 .panneau-corps > * + * { margin-top: 12px; }
 .panneau-erreur { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--rouge-fond); border: 1px solid var(--rouge); color: var(--rouge-texte); font-weight: 700; }
@@ -1504,3 +1510,13 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .vue-semaine-globale .bord-aujourdhui { border-radius: var(--r-carte-petite); }
 .imp-section-plate { background: transparent; border-radius: 0; padding: 12px 0; border-top: 1px solid var(--bordure); }
 .imp-section-plate > * + * { margin-top: 10px; }
+
+/* ===== États vides (refonte 2, G1 à G5) : titre, phrase, boutons, filets fins en haut et en bas ===== */
+.etat-vide { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 20px 0; border-top: 1px solid var(--bordure); border-bottom: 1px solid var(--bordure); margin-top: 12px; }
+.etat-vide-icone { width: 24px; height: 24px; color: var(--texte-doux); }
+.etat-vide-titre { margin: 0; font-size: var(--t1); font-weight: 700; }
+.etat-vide-texte { margin: 0; color: var(--texte-doux); }
+.etat-vide-actions { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.etat-vide-actions .btn { flex: 1 1 auto; justify-content: center; }
+.fiche-sans-recette { margin-top: 12px; }
+.fiche-sans-recette .fiche-ligne { min-height: var(--cible); border-bottom: 1px solid var(--bordure); }

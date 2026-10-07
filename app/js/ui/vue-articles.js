@@ -10,7 +10,7 @@ import { estOuvert, libelleJour } from '../domaine/dates.js';
 import { agir, aujourdhui, redessiner } from '../magasin.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { h } from './dom.js';
-import { bouton, ligneVide, lien } from './elements.js';
+import { bouton, etatVide, ligneVide, lien } from './elements.js';
 import { qteNoeuds, quantite } from './format.js';
 import { afficherMessage } from './messages.js';
 
@@ -95,10 +95,12 @@ export function rendre(etat) {
       h('h1', { classe: 'au-titre' }, 'Articles')),
     selecteur(vueChoisie));
   if (visibles.length === 0) {
-    racine.appendChild(ligneVide(jours.length === 0
-      ? 'Aucun article pour le poste : les menus de la semaine ne sont pas saisis, ou rien n\'est attribué au poste.'
-      : estOuvert(aujourd) ? "Rien pour le poste aujourd'hui." : "Fermé aujourd'hui : rien pour le poste."));
-    if (jours.length === 0) racine.appendChild(h('p', null, lien(`#/import/${lundi}`, 'Saisir les menus de la semaine', 'btn btn-court')));
+    racine.appendChild(jours.length === 0
+      ? etatVide({
+        titre: 'Aucun article pour l\'instant', texte: 'La liste se remplit dès que les menus de la semaine sont importés.',
+        actions: [{ libelle: 'Importer les menus', href: `#/import/${lundi}`, principal: true }],
+      })
+      : ligneVide(estOuvert(aujourd) ? "Rien pour le poste aujourd'hui." : "Fermé aujourd'hui : rien pour le poste."));
   }
   for (const j of visibles) {
     racine.appendChild(h('section', { classe: 'art-jour', 'aria-label': titreJour(j) },

@@ -58,10 +58,12 @@ export function panneau(options) {
       }
     },
   },
+  h('span', { classe: 'panneau-poignee', 'aria-hidden': 'true' }),
   h('h2', { id: 'panneau-titre', classe: 'panneau-titre' }, titre),
   h('div', { classe: 'panneau-corps' }, contenu),
   zoneErreur,
   h('div', { classe: 'panneau-actions' }, boutons));
+  // Poignée de la feuille montante (premier enfant du formulaire) : repère visuel seulement ; fermer reste « Annuler », Échap ou le fond.
   dialogue.appendChild(formulaire);
   dialogue.addEventListener('close', () => dialogue.remove());
   (parId('panneaux') ?? document.body).appendChild(dialogue);

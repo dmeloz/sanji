@@ -34,6 +34,21 @@ export function ligneVide(texte) {
   return h('p', { classe: 'vide' }, texte);
 }
 
+/**
+ * État vide (refonte 2) : un titre, une phrase, des boutons-liens. `etiquette` : mot d'état au-dessus du titre ;
+ * `icone` : tracé d'icône de ligne (attribut `d` d'un chemin 24 px). `actions` : [{ libelle, href, principal }].
+ */
+export function etatVide({ titre, texte, actions = [], etiquette = null, icone = null }) {
+  return h('div', { classe: 'etat-vide' },
+    icone ? svg('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round',
+      'stroke-linejoin': 'round', 'aria-hidden': 'true', focusable: 'false', classe: 'etat-vide-icone' }, [svg('path', { d: icone })]) : null,
+    etiquette ? h('span', { classe: 'etq' }, etiquette) : null,
+    h('p', { classe: 'etat-vide-titre' }, titre),
+    h('p', { classe: 'etat-vide-texte' }, texte),
+    actions.length > 0 ? h('div', { classe: 'etat-vide-actions' },
+      actions.map((a) => lien(a.href, a.libelle, a.principal ? 'btn btn-principal' : 'btn'))) : null);
+}
+
 export function titreSection(texte, id) {
   return h('h2', { classe: 'section-titre', id }, texte);
 }

@@ -253,7 +253,7 @@ test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide
   }
   assert.match(texte, /revue de mi-semaine/);
   assert.doesNotMatch(vues.jour.rendre(magasin.etat(), S.lundi).textContent, /revue de mi-semaine/);
-  assert.match(vues.jour.rendre(magasin.etat(), S.jeudi).textContent, /Aucune tâche décidée pour ce jour/);
+  assert.match(vues.jour.rendre(magasin.etat(), S.jeudi).textContent, /Rien à produire aujourd'hui/);
   // Le samedi : tâche avancée pour lundi visible sur le samedi et, comme « attendu », sur le lundi.
   assert.match(vues.jour.rendre(magasin.etat(), S.samediPrecedent).textContent, /Pour lun\. 5/);
   assert.match(vues.jour.rendre(magasin.etat(), S.lundi).textContent, /prévu samedi 3 octobre/);

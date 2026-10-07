@@ -190,7 +190,7 @@ export function rendre(etat, lundi) {
   const dejaSaisie = dates.some((date) => [1, 2].some((menu) => jourOuVide(etat, date).menus[menu].intitule.trim() !== ''));
   const zoneLecture = h('div', { classe: 'imp-lecture-jours' });
   const majLecture = () => zoneLecture.replaceChildren(...dates.map((date) => ligneLectureJour(etat, champs, date, ouverts)));
-  const repartirEtLire = () => { repartir(champs, lundi); majLecture(); };
+  const repartirEtLire = () => { repartir(champs, lundi, { enregistrerLeLu: () => enregistrerEtNoter() }); majLecture(); };
   // Les lignes de l'IA remplacent le champ de texte puis passent par la même répartition que le bouton ; rien n'est enregistré.
   let lignesIA = null; // lignes lues par l'IA sur cette page : sert au retour d'essai (local, rien n'est envoyé)
   const intitulesDeLaPage = () => Object.fromEntries(dates.map((date) => [date, {
