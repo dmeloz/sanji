@@ -82,6 +82,15 @@ function detailPortions(p) {
 /** « ven. 2 » : jour abrégé et numéro. */
 const courtJour = (date) => `${libelleJour(date).slice(0, 3)}. ${Number(date.slice(8))}`;
 
+/** « Brut à prévoir » : toujours là. Connu seulement quand le parage est appliqué ; sinon dit « inconnu », sans alerte. */
+function ligneBrut(calc) {
+  const connu = calc.statut === 'CALCULE' && calc.etapes.some((e) => e.etape === 'parage' && e.appliquee);
+  return h('section', { classe: 'fiche-brut', 'aria-label': 'Brut à prévoir' },
+    h('span', { classe: 'fiche-brut-nom' }, 'Brut à prévoir'),
+    connu ? h('span', { classe: 'fiche-qte' }, quantiteNoeuds(calc.brut, calc.uniteTravail))
+      : h('span', { classe: 'fiche-brut-inconnu' }, h('span', { classe: 'fiche-qte fiche-brut-tiret' }, '—'), ' inconnu · forme achetée à préciser'));
+}
+
 function sectionProvenance(c, calc) {
   return h('section', { classe: 'carte fiche-bloc' },
     h('h2', { classe: 'fiche-titre-bloc' }, 'Calcul et provenance'),
@@ -160,6 +169,7 @@ export function rendre(etat, id) {
         // Montrer l'exception : « attribué au poste » est la normale et ne s'écrit pas.
         c.attribue ? null : pastille('non attribué', 'ambre'))),
     sectionQuantite(etat, c, calc),
+    ligneBrut(calc),
     sectionProvenance(c, calc),
     sectionIngredients(etat, c, calc),
     sectionEtapes(etapes, c),

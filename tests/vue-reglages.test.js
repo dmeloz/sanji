@@ -24,7 +24,7 @@ test('racine : retour « Aujourd\'hui », titre, sections, les six rubriques dan
   assert.equal(retour.attributs.href, '#/aujourdhui');
   assert.match(retour.textContent, /Aujourd'hui/);
   assert.deepEqual(r.tous((x) => x.balise === 'h2').map((x) => x.textContent),
-    ['Règles de production', 'Repères', 'Poste et commandes', 'Affichage', 'Assistant', 'Données']);
+    ['Production', 'Poste', 'Assistant', 'Données']);
   assert.deepEqual(hrefs(r).filter((l) => l.startsWith('#/reglages/')), vue.CLES_RUBRIQUES.map((c) => `#/reglages/${c}`));
   assert.ok(hrefs(r).includes('#/import'));
   assert.match(r.textContent, /Import des menus/);

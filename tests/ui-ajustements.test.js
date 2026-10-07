@@ -39,7 +39,7 @@ const alertes = (d) => d.tous((x) => x.attributs.role === 'alert' && !x.hidden).
 test('route : #/reglages/standards-base est une sous-page de Réglages, listée à la racine', () => {
   assert.ok(reglages.CLES_RUBRIQUES.includes('standards-base'));
   assert.deepEqual(routeur.analyserHash('#/reglages/standards-base', '2026-10-05'), { vue: 'reglages', param: 'standards-base' });
-  assert.equal(reglages.titre('standards-base'), 'Valeurs de base (manuels)');
+  assert.equal(reglages.titre('standards-base'), 'Standards de base');
   magasin.remplacer(etatVide());
   const racine = reglages.rendre(magasin.etat(), null);
   assert.ok(racine.tous((x) => x.balise === 'a').some((a) => a.attributs.href === '#/reglages/standards-base'));

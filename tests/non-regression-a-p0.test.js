@@ -210,7 +210,7 @@ test('persistance : un « fait », une correction de réel et une annulation sur
 
 // ---------------------------------------------------------------- inventaire des Réglages
 
-const RUBRIQUES_REGLAGES = ['standards', 'standards-base', 'reperes', 'organisation', 'produits', 'assistant-ia', 'donnees'];
+const RUBRIQUES_REGLAGES = ['standards-base', 'standards', 'reperes', 'organisation', 'produits', 'assistant-ia', 'donnees'];
 
 test('inventaire : les dix blocs de Réglages existent TOUS, répartis sur les sous-pages (jamais en perdre un)', () => {
   magasin.remplacer(etatVide());

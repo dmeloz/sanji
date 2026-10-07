@@ -208,3 +208,15 @@ test('fiche : composant introuvable', () => {
 });
 
 test('fiche : le titre de l\'onglet', () => assert.equal(vue.titre(), 'Fiche technique'));
+
+test('fiche : « Brut à prévoir » toujours visible ; sans parage connu, « inconnu · forme achetée à préciser », sans alerte', () => {
+  const { e, c } = scenario();
+  const calc = calculerComposant(e, c);
+  const racine = vue.rendre(e, c);
+  const ligne = racine.tous((x) => x.className.split(' ').includes('fiche-brut'))[0];
+  assert.ok(ligne, 'la ligne est là');
+  assert.match(ligne.textContent, /Brut à prévoir/);
+  if (calc.etapes.some((x) => x.etape === 'parage' && x.appliquee)) assert.match(ligne.textContent, /\d/);
+  else assert.match(ligne.textContent, /inconnu · forme achetée à préciser/);
+  assert.equal(ligne.tous((x) => x.attributs?.role === 'alert').length, 0, 'aucune alerte');
+});

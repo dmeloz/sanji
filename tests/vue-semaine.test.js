@@ -228,3 +228,26 @@ test('le routeur envoie les anciennes adresses vers cet écran', () => {
   assert.deepEqual(routeur.analyserHash(`#/detail/${S.lundiSuivant}`, S.samedi), { vue: 'semaine', param: S.lundiSuivant });
   assert.equal(routeur.analyserHash(`#/semaine/${S.lundiSuivant}/tableau`, S.samedi).sous, 'tableau');
 });
+
+test('puces : « ? » à confirmer quand le jour a un point à confirmer, dit en toutes lettres pour les lecteurs d\'écran', () => {
+  magasin.remplacer(semaine()); // menu 2 saisi sans prévision : un point à confirmer le lundi
+  const n = vue.rendre(magasin.etat(), S.lundiSuivant);
+  assert.match(puceDe(n, 'Lundi').attributs['aria-label'], /^Lundi.*à confirmer/);
+  assert.deepEqual(parClasse(puceDe(n, 'Lundi'), 'sem-signe').map(texte), ['?']);
+  assert.match(texte(parClasse(n, 'sem-cle')[0]), /à confirmer : point en attente/);
+});
+
+test('couverts midi saisis : la certitude est « provisoire » et ne laisse pas d\'« estimée 0 » ; une prévision estimée à 0 se dit « estimée 0 »', async () => {
+  const { definirCouvertsMidi } = await import('../app/js/domaine/actions-couverts.js');
+  const e = semaine();
+  definirCouvertsMidi(e, S.lundiSuivant, { total: 60 }, horo());
+  magasin.remplacer(e);
+  const t = texte(vue.rendre(magasin.etat(), S.lundiSuivant));
+  assert.match(t, /provisoire 20/);
+  assert.match(t, /provisoire 40/);
+  assert.doesNotMatch(t, /estimée 0/);
+  const zero = semaine();
+  actions.definirPrevision(zero, S.lundiSuivant, 2, 0, horo());
+  magasin.remplacer(zero);
+  assert.match(texte(vue.rendre(magasin.etat(), S.lundiSuivant)), /estimée 0/);
+});

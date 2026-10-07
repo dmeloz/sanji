@@ -49,8 +49,8 @@ test('« Revenir au standard » garde le repli ouvert et dit « Valeur de base r
 });
 
 test('libellés : routes inchangées, titres explicites', () => {
-  assert.equal(reglages.titre('standards'), 'Standards maison (portions)');
-  assert.equal(reglages.titre('standards-base'), 'Valeurs de base (manuels)');
+  assert.equal(reglages.titre('standards'), 'Standards maison');
+  assert.equal(reglages.titre('standards-base'), 'Standards de base');
   assert.ok(reglages.CLES_RUBRIQUES.includes('standards') && reglages.CLES_RUBRIQUES.includes('standards-base'));
 });
 

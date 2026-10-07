@@ -1436,3 +1436,16 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .art-pouce .btn { flex: 1; min-height: var(--haut-bouton); }
 @media (min-width: 981px) { .art-pouce { left: 50%; right: auto; width: min(var(--largeur-max), 100% - 2 * var(--marge-ecran)); transform: translateX(-50%); margin: 0; } }
 .art-segments .stock-segment-actif { background: var(--carte); border-color: var(--encre); color: var(--texte); font-weight: 700; }
+
+/* ===== Étape 8 : retouches des autres écrans (refonte 2). Noms nouveaux uniquement. ===== */
+/* A4 Fiche : ligne « Brut à prévoir » toujours visible, sans alerte. */
+.fiche-brut { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 12px 4px; min-height: var(--cible); border-bottom: 1px solid var(--bordure); font-size: var(--t-corps); }
+.fiche-brut-nom { font-weight: 600; }
+.fiche-brut-inconnu { color: var(--texte-doux); text-align: right; font-size: var(--t-legende); }
+.fiche-brut-tiret { color: var(--texte-doux); }
+
+/* C1 Semaine : signes « ! » (à trancher) et « ? » (à confirmer) sous le jour, à la place du point coloré. */
+.sem-signe { display: inline-block; min-width: 8px; font-size: var(--t-legende); font-weight: 700; line-height: 1; font-family: var(--police-qte); }
+
+/* E1 Réglages : note de fin de page (apparence, écran allumé), à la place du groupe « Affichage ». */
+.reglages-note { margin: 12px 16px 0; font-size: var(--t-legende); color: var(--texte-doux); }

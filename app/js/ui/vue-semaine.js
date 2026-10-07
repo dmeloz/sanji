@@ -83,18 +83,22 @@ function puces(etat, date, aujourd) {
     }
     const horsRegle = productionsDuJour(etat, d).some((l) => estHorsRegle(etat, l));
     const off = estJourOff(etat, d);
-    const marques = [horsRegle ? 'hors règle' : null, off ? 'jour off' : null].filter(Boolean);
+    const aConfirmer = pointsAConfirmer(etat, d).length > 0;
+    const marques = [horsRegle ? 'hors règle, à trancher' : null, aConfirmer ? 'à confirmer' : null, off ? 'jour off' : null].filter(Boolean);
     return h('a', {
       href: `#/semaine/${d}`, classe: `sem-puce${d === date ? ' sem-puce-actif' : ''}${d === aujourd ? ' sem-puce-aujourdhui' : ''}`,
       'aria-label': `${majuscule(libelleJour(d))}${d === aujourd ? ", aujourd'hui" : ''}${marques.length ? `, ${marques.join(', ')}` : ''}`,
       'aria-current': d === date ? 'date' : null,
     }, h('span', { classe: 'sem-puce-nom' }, nom),
-    h('span', { classe: `sem-point${horsRegle ? ' sem-point-regle' : off ? ' sem-point-off' : ''}`, 'aria-hidden': 'true' }));
+    // Signe du jour : « ! » à trancher (hors règle), sinon « ? » à confirmer, sinon le point « jour off ». Le jour est aussi dit en toutes lettres (aria-label).
+    horsRegle || aConfirmer ? h('span', { classe: 'sem-signe', 'aria-hidden': 'true' }, horsRegle ? '!' : '?')
+      : h('span', { classe: `sem-point${off ? ' sem-point-off' : ''}`, 'aria-hidden': 'true' }));
   };
   return h('div', { classe: 'sem-bandeau-jours' },
     h('nav', { classe: 'sem-puces', 'aria-label': 'Jours de la semaine' }, jours.map(puce)),
     h('p', { classe: 'sem-legende sem-cle' },
-      h('span', null, h('span', { classe: 'sem-point sem-point-regle', 'aria-hidden': 'true' }), ' hors règle : avance non autorisée'),
+      h('span', null, h('span', { classe: 'sem-signe', 'aria-hidden': 'true' }, '!'), ' hors règle : avance non autorisée, à trancher'),
+      h('span', null, h('span', { classe: 'sem-signe', 'aria-hidden': 'true' }, '?'), ' à confirmer : point en attente'),
       h('span', null, h('span', { classe: 'sem-point sem-point-off', 'aria-hidden': 'true' }), ' jour off : aucun créneau de travail')),
     h('nav', { classe: 'sem-nav', 'aria-label': 'Changer de semaine' },
       lien(`#/semaine/${ajouterJours(date, -7)}`, '‹ Semaine précédente', 'btn btn-court'),
@@ -134,7 +138,9 @@ function certitudeDuMenu(etat, date, menu) {
   const parties = [];
   for (const [cle, mot] of [['estimee', 'estimée'], ['provisoire', 'provisoire'], ['confirmee', 'confirmée']]) {
     const n = p.details.filter((d) => d.certitude === cle).reduce((s, d) => s + d.portions, 0);
-    if (n > 0 || (cle === 'estimee' && !p.previsionManquante)) parties.push({ cle, mot: LIBELLES.CERTITUDE[cle] ?? mot, n });
+    // Une prévision estimée à 0 se dit « estimée 0 » ; une prévision « provisoire » (total saisi dans Couverts midi) ne laisse pas d'« estimée 0 ».
+    const prevision0Estimee = cle === 'estimee' && p.details.some((d) => d.source === 'prevision' && d.certitude === 'estimee');
+    if (n > 0 || prevision0Estimee) parties.push({ cle, mot: LIBELLES.CERTITUDE[cle] ?? mot, n });
   }
   return { total: Math.round(p.total), manquante: Boolean(p.previsionManquante) && p.total === 0, parties };
 }
