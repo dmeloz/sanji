@@ -144,14 +144,12 @@ test('défilement vers une ancre : doux par défaut, immédiat si le mouvement r
   }
 });
 
-test('variantes claire et sombre : aucune paire texte / fond sous 4,5:1', () => {
-  const debutSombre = css.indexOf('@media (prefers-color-scheme: dark)');
-  const clair = jetons(css.slice(css.indexOf(':root {'), debutSombre));
-  const sombre = { ...clair, ...jetons(css.slice(debutSombre, css.indexOf('*, *::before', debutSombre))) };
+test('variante claire (le mode sombre est désactivé depuis la v100) : aucune paire texte / fond sous 4,5:1', () => {
+  const clair = jetons(css.slice(css.indexOf(':root {'), css.indexOf('*, *::before')));
   const paires = [['texte', 'fond'], ['texte', 'carte'], ['texte-doux', 'carte'], ['texte-doux', 'fond'], ['texte-moyen', 'carte'],
     ['texte-moyen', 'carte-2'], ['texte-doux', 'carte-2'], ['sur-encre', 'encre'], ['exception', 'exception-fond'],
     ['action-fonce', 'action-fond'], ['rouge-texte', 'rouge-fond'], ['sur-action', 'action'], ['action', 'carte'], ['action-fonce', 'carte'], ['texte', 'carte-2'], ['action', 'carte-2']];
-  for (const [nom, jeu] of [['clair', clair], ['sombre', sombre]]) {
+  for (const [nom, jeu] of [['clair', clair]]) {
     for (const [t, f] of paires) assert.ok(contraste(jeu[t], jeu[f]) >= 4.5, `${nom} : ${t} sur ${f} = ${contraste(jeu[t], jeu[f]).toFixed(2)}`);
   }
 });

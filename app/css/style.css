@@ -8,6 +8,7 @@
 @font-face { font-family: "Sanji Mono"; src: url("../polices/IBMPlexMono-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
 
 :root {
+  color-scheme: light;
   /* Surfaces et texte (clair) */
   --fond: #F4EAD5;
   --carte: #FFF9EC;
@@ -93,33 +94,6 @@
   --marge-ecran: 20px;
   --largeur-max: 980px;
   --haut-onglets: 84px; /* zone d'accueil iPhone incluse */
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fond: #0E1622;
-    --carte: #172233;
-    --carte-2: #1F2C40;
-    --encre: #F4EAD5;
-    --sur-encre: #0E1622;
-    --texte: #F4EAD5;
-    --texte-doux: #A9B3C2;
-    --texte-moyen: #CBD3DE;
-    --bordure: #26344A;
-    --bordure-forte: #4A5D78;
-    --bordure-champ: #7D8DA5;
-    --action: #6FA8F0;
-    --action-fonce: #A3C8F7;
-    --action-fond: #17304F;
-    --sur-action: #0E1622;
-    --exception: #F0B94A;
-    --exception-fond: #2C2312;
-    --exception-bord: #4D3B17;
-    --exception-point: #F0B94A;
-    --rouge: #FF7369;
-    --rouge-fond: #3D1A1A;
-    --rouge-texte: #FF9F97;
-  }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -820,7 +794,6 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 
 /* Maintenant : carte d'encre */
 .au-maintenant { --jauge-trait: #6FA8F0; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: var(--r-carte); background: var(--encre); color: var(--sur-encre); }
-@media (prefers-color-scheme: dark) { .au-maintenant { --jauge-trait: #1D5AA6; } }
 .au-maintenant-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .au-maintenant .au-etiquette, .au-jauge-texte { color: var(--sur-encre); opacity: 0.85; }
 .au-jauge-texte { font-size: var(--t-legende); }
@@ -1179,23 +1152,6 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .au-lien-prochaine:focus-visible { outline: 3px solid currentColor; outline-offset: 2px; }
 .au-fiche-pastille { display: block; margin-top: 4px; }
 /* Sombre : la carte « Maintenant » et la carte quantité de la fiche sont des surfaces foncées surélevées (pas de grands blocs clairs), texte clair, accent basilic. */
-@media (prefers-color-scheme: dark) {
-  .au-maintenant { background: var(--carte-2); color: var(--texte); border: 1px solid var(--bordure-forte); --jauge-trait: var(--action); }
-  .au-maintenant .au-etiquette, .au-jauge-texte { color: var(--texte-moyen); opacity: 1; }
-  .au-maintenant-neutre, .au-maintenant-vide, .au-maintenant-dest { opacity: 1; color: var(--texte-moyen); }
-  .au-jauge::-webkit-progress-bar { background: var(--bordure-forte); opacity: 1; }
-  .au-btn-clair { background: var(--action); color: var(--sur-action); border-color: var(--action); }
-  .au-btn-contour { color: var(--texte); border-color: var(--texte-doux); }
-  .au-btn:focus-visible { outline-color: var(--focus); }
-  .fiche-quantite { background: var(--carte-2); color: var(--texte); border: 1px solid var(--bordure-forte); }
-  .fiche-legende { color: var(--texte-moyen); }
-  .fiche-repartition { border-top-color: var(--bordure-forte); }
-  .fiche-jauge { background: var(--bordure); }
-  .fiche-jauge > span { background: var(--action); }
-  /* Cases à cocher : contour net sur fond sombre. */
-  .case input { outline: 1px solid var(--contour-case); outline-offset: 1px; border-radius: 3px; }
-  .case-fait-boite { border-color: var(--contour-case); }
-}
 /* ===== Lot Stock et Import (audit v56) : montrer l'exception, pas la normalité. Jetons du socle seulement. ===== */
 /* Achats : une phrase d'en-tête, une légende discrète, changement de semaine par flèches. */
 .achats-regle { margin: 0; font-size: var(--t-corps); font-weight: 600; color: var(--texte-moyen); }
@@ -1314,10 +1270,6 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prochaine-vide { background: var(--carte); color: var(--texte); border: 1px solid var(--bordure); }
 .prochaine .au-btn-action { flex: 1; background: var(--action); color: var(--sur-action); border: 1px solid var(--action); }
 .prochaine .au-btn:focus-visible { outline: 3px solid var(--sur-encre); outline-offset: 2px; }
-@media (prefers-color-scheme: dark) {
-  .prochaine .au-btn-clair { background: var(--sur-encre); color: var(--encre); border-color: var(--sur-encre); }
-}
-
 /* ===== Feuilles « Couverts midi » et « Ventes du midi » (refonte 2) : − / +, choix rapides, répartition, détail replié. ===== */
 .tdb-case-bouton { border: 0; font: inherit; text-align: left; cursor: pointer; width: 100%; }
 .tdb-case-tete { display: flex; align-items: center; justify-content: space-between; }
