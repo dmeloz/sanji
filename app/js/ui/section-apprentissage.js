@@ -49,7 +49,7 @@ function sectionRetours() {
   const zone = h('div', { 'aria-live': 'polite' });
   const peutPartager = typeof globalThis.navigator?.share === 'function';
   return carte('Retours d\'essai',
-    h('p', { classe: 'aide' }, 'Rien n\'est envoyé : vous copiez le rapport et vous me le transmettez vous-même. Les retours de fiche peuvent contenir des noms, des allergies et des remarques : relisez le rapport avant de le coller. Les retours sont effacés après 14 jours.'),
+    h('p', { classe: 'aide' }, 'Ces retours sont déjà inclus dans le fichier de diagnostic : un seul partage suffit. Rien n\'est envoyé automatiquement ; ils sont effacés après 14 jours.'),
     h('p', null, pluriel(retours.length, 'retour noté', 'retours notés')),
     h('div', { classe: 'actions' },
       bouton('Copier le rapport', () => copier(rapport(), zone), 'court', { disabled: retours.length === 0 }),

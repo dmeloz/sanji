@@ -1,9 +1,10 @@
 // Journal de diagnostic : stockage local à l'appareil, HORS de l'état et de la sauvegarde. Rien n'est envoyé.
 // Note des types d'événements, des itinéraires, des libellés de boutons, des durées, des codes, des messages techniques
 // bornés et, depuis l'accord de la propriétaire du 2026-10-07, ce que l'IA a RENDU (texte borné) ; les photos envoyées à
-// l'IA ne restent qu'EN MÉMOIRE (3 au plus, jusqu'à la fermeture). Jamais la clé, jamais une saisie, jamais une requête.
+// l'IA sont gardées sur l'appareil (5 au plus, 14 jours). Jamais la clé, jamais une saisie, jamais une requête.
 
 import { MAX_CONTENU, MAX_LIBELLE, MAX_TEXTE, nettoyer } from '../domaine/rapport-diagnostic.js';
+import { enregistrerPhoto, lirePhoto, supprimerPhoto } from '../stockage.js';
 import { VERSION_APP } from '../version.js';
 
 export { nettoyer };
@@ -77,26 +78,63 @@ export function effacerJournal() {
   memoire = [];
   charge = true; // le journal est vide : rien à relire dans le stockage
   repli = false;
-  photos.length = 0;
+  effacerPhotosDiagnostic().catch(() => {});
   try { stockage()?.removeItem(CLE); } catch { /* rien à retirer */ }
 }
 
-// Photos envoyées à l'IA, gardées EN MÉMOIRE seulement (jamais dans le stockage), pour être jointes au diagnostic.
-const MAX_PHOTOS = 3;
+// Photos envoyées à l'IA, gardées sur l'appareil (magasin de photos existant, clés « diag| … », registre en localStorage) :
+// les 5 dernières, 14 jours, jointes au fichier de diagnostic. Effacées avec « Effacer le journal ».
+const CLE_PHOTOS = 'sanji-photos-diagnostic';
+const MAX_PHOTOS = 5;
 const TAILLE_PHOTO_MAX = 800 * 1024;
-const photos = [];
+let registreMemoire = [];
 
-/** `type` : 'feuille' | 'fiche'. Les 3 dernières photos sont gardées ; une photo de plus de 800 Ko est ignorée. Ne lève jamais. */
-export function garderPhotoPourDiagnostic(type, blob) {
+const photoRecente = (e) => e && typeof e.cle === 'string' && Date.parse(e.h) >= Date.now() - DUREE_MAX_MS;
+
+function lireRegistre() {
+  try {
+    const liste = JSON.parse(stockage()?.getItem(CLE_PHOTOS) ?? 'null');
+    return Array.isArray(liste) ? liste.filter(photoRecente) : registreMemoire.filter(photoRecente);
+  } catch { return registreMemoire.filter(photoRecente); }
+}
+
+function ecrireRegistre(liste) {
+  registreMemoire = liste;
+  try { stockage()?.setItem(CLE_PHOTOS, JSON.stringify(liste)); } catch { /* le registre reste en mémoire */ }
+}
+
+/** `type` : 'feuille' | 'fiche'. Garde la photo, les 5 dernières, 14 jours ; une photo de plus de 800 Ko est ignorée. Ne lève jamais. */
+export async function garderPhotoPourDiagnostic(type, blob) {
   try {
     if (!blob || typeof blob.size !== 'number' || blob.size === 0 || blob.size > TAILLE_PHOTO_MAX) return;
-    photos.push({ type: type === 'fiche' ? 'fiche' : 'feuille', h: new Date().toISOString(), blob });
-    while (photos.length > MAX_PHOTOS) photos.shift();
+    const h = new Date().toISOString();
+    const entree = { cle: `diag|${h}|${type === 'fiche' ? 'fiche' : 'feuille'}`, type: type === 'fiche' ? 'fiche' : 'feuille', h };
+    await enregistrerPhoto(entree.cle, blob);
+    const toutes = [...lireRegistre(), entree];
+    const gardees = toutes.slice(-MAX_PHOTOS);
+    for (const e of toutes) if (!gardees.includes(e)) await supprimerPhoto(e.cle);
+    ecrireRegistre(gardees);
   } catch { /* le diagnostic ne doit jamais gêner l'application */ }
 }
 
-/** Copie de la liste (la plus ancienne d'abord). */
-export function photosGardees() { return [...photos]; }
+/** Les photos gardées, la plus ancienne d'abord : [{ type, h, blob }]. */
+export async function photosGardees() {
+  const sortie = [];
+  for (const e of lireRegistre()) {
+    try {
+      const blob = await lirePhoto(e.cle);
+      if (blob) sortie.push({ type: e.type, h: e.h, blob });
+    } catch { /* photo illisible : ignorée */ }
+  }
+  return sortie;
+}
+
+async function effacerPhotosDiagnostic() {
+  const entrees = lireRegistre();
+  registreMemoire = [];
+  try { stockage()?.removeItem(CLE_PHOTOS); } catch { /* rien à retirer */ }
+  for (const e of entrees) await supprimerPhoto(e.cle);
+}
 
 const sansChemin = (texte) => String(texte ?? '').replace(/https?:\/\/[^\s)]*\//g, '');
 

@@ -85,7 +85,7 @@ function ligneLectureJour(etat, champs, date, ouverts) {
   return details;
 }
 
-const TEXTE_ENVOI_PHOTO = 'La photo va être envoyée à l\'IA pour transcrire le texte imprimé. Les notes écrites à la main sont ignorées. Rien d\'autre ne part. Le texte rendu par l\'IA est gardé 14 jours dans le journal de diagnostic de cet appareil, et la photo reste en mémoire jusqu\'à la fermeture de l\'application.';
+const TEXTE_ENVOI_PHOTO = 'La photo va être envoyée à l\'IA pour transcrire le texte imprimé. Les notes écrites à la main sont ignorées. Rien d\'autre ne part. Le texte rendu par l\'IA est gardé 14 jours sur cet appareil pour le diagnostic.';
 const AIDE_PHOTO_IA = 'La photo peut être lue par l\'IA, après un aperçu et à chaque fois que vous le demandez : seules les lignes imprimées reviennent, vous les relisez avant d\'enregistrer. Réduite à 1600 px, gardée sur l\'appareil, non exportée.';
 const AIDE_PHOTO_SANS_IA = 'Sanji ne lit pas la photo : elle reste à côté pour que vous recopiiez les intitulés ou copiiez son texte. Réduite à 1600 px, gardée sur l\'appareil, non exportée.';
 

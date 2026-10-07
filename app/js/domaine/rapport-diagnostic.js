@@ -12,8 +12,8 @@ const MAX_AGENT = 120;
 const MOTIF_CLE = /sk-ant-[A-Za-z0-9_-]*/g;
 export const MAX_CONTENU = 2000;
 // Règle assouplie par la propriétaire le 2026-10-07 : le contenu lu par l'IA et des photos peuvent figurer, jamais la clé.
-const PHRASE_CONFIDENTIALITE = 'Ce fichier ne contient jamais votre clé. Il peut contenir le texte lu par l\'IA et des photos de feuilles ou de fiches '
-  + '(donc des noms et des allergies) : relisez avant de le transmettre. Rien n\'est envoyé automatiquement.';
+const PHRASE_CONFIDENTIALITE = 'Ce fichier ne contient jamais votre clé. Il contient le texte lu par l\'IA, les retours d\'essai et des photos de feuilles ou de fiches '
+  + '(noms et allergies possibles). Rien n\'est envoyé automatiquement.';
 
 /** Texte borné, motifs de clé masqués. Une valeur qui n'est ni texte, ni nombre fini, ni booléen est refusée (undefined). */
 export function nettoyer(valeur, max = MAX_TEXTE) {
@@ -75,7 +75,7 @@ function contenusIA(recents) {
 
 /** `evenements` dans l'ordre chronologique (le plus ancien d'abord). `aujourdhui` : date ISO fournie par l'appelant. */
 export function texteDiagnostic({ environnement = {}, resume = {}, evenements = [], aujourdhui = '', photosJointes = 0, photosEnMemoire = 0,
-  motifPhotos = 'partage de fichiers multiples indisponible' }) {
+  motifPhotos = 'partage de fichiers multiples indisponible', retoursTexte = '' }) {
   const liste = evenements.filter((e) => e && typeof e === 'object');
   const recents = [...liste].reverse();
   const actions = (resume.dernieresActions ?? []).map((a) => `  ${heureCourte(a.h)} · ${a.action}`);
@@ -90,8 +90,8 @@ export function texteDiagnostic({ environnement = {}, resume = {}, evenements = 
     `En ligne : ${environnement.enLigne === false ? 'non' : 'oui'}`,
     `Agent utilisateur : ${nettoyer(String(environnement.agent ?? '?'), MAX_AGENT)}`,
     `Stockage persistant : ${environnement.persistant === true ? 'oui' : environnement.persistant === false ? 'non' : 'inconnu'}`,
-    `Photos jointes : ${Number(photosJointes) || 0} (gardées en mémoire jusqu'à la fermeture de l'application)`
-      + (photosEnMemoire > photosJointes ? ` ; ${photosEnMemoire - photosJointes} photo(s) en mémoire non jointes (${nettoyer(String(motifPhotos), 120)})` : ''),
+    `Photos jointes : ${Number(photosJointes) || 0} (les 5 dernières, gardées 14 jours sur l'appareil)`
+      + (photosEnMemoire > photosJointes ? ` ; ${photosEnMemoire - photosJointes} photo(s) gardées non jointes (${nettoyer(String(motifPhotos), 120)})` : ''),
     '',
     'ÉTAT (nombres seulement)',
     `Semaines avec menus : ${resume.semainesAvecMenus ?? 0}`,
@@ -112,6 +112,7 @@ export function texteDiagnostic({ environnement = {}, resume = {}, evenements = 
     'CONTENU LU PAR L\'IA (du plus récent au plus ancien)',
     ...contenusIA(recents),
     '',
+    ...(retoursTexte ? ['RETOURS D\'ESSAI (ce que l\'IA a lu, ce que vous avez enregistré)', retoursTexte, ''] : []),
     `ÉVÉNEMENTS (du plus récent au plus ancien, ${Math.min(liste.length, MAX_EVENEMENTS_RAPPORT)} sur ${liste.length})`,
     ...recents.slice(0, MAX_EVENEMENTS_RAPPORT).map(ligne),
     '',

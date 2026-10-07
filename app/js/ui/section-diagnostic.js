@@ -1,17 +1,19 @@
 // Réglages > Apprentissage et essais : journal de diagnostic local. Rien n'est envoyé : la propriétaire partage ou copie le fichier.
 
 import { resumeEtat, texteDiagnostic } from '../domaine/rapport-diagnostic.js';
+import { texteRapport } from '../domaine/retour-essai.js';
 import { redessiner, statutStockage } from '../magasin.js';
 import { VERSION_APP } from '../version.js';
 import { h } from './dom.js';
 import { bouton } from './elements.js';
 import { pluriel } from './format.js';
 import { effacerJournal, lireEvenements, photosGardees } from './journal-diagnostic.js';
+import { lireRetours } from './retours-essai.js';
 import { afficherMessage } from './messages.js';
 import { confirmer } from './panneau.js';
 
-const AIDE = 'Rien n\'est envoyé : vous partagez ou copiez le fichier vous-même. Il ne contient jamais votre clé. Il peut contenir le texte lu par l\'IA et '
-  + 'des photos de feuilles ou de fiches (donc des noms et des allergies) : relisez avant de le transmettre. Journal effacé après 14 jours ; photos gardées en mémoire jusqu\'à la fermeture de l\'application.';
+const AIDE = 'Un seul geste : « Partager le fichier » envoie tout (journal, texte lu par l\'IA, retours d\'essai, photos). Rien n\'est envoyé automatiquement. '
+  + 'Le journal et les photos (les 5 dernières) sont gardés 14 jours sur l\'appareil.';
 
 const nombreErreurs = () => lireEvenements().filter((e) => e.type === 'erreur').length;
 
@@ -30,9 +32,12 @@ function environnement() {
 
 const maintenant = () => new Date().toISOString();
 
-function texte(etat, photosJointes = 0, motifPhotos = undefined) {
-  return texteDiagnostic({ environnement: environnement(), resume: resumeEtat(etat), evenements: lireEvenements(), aujourdhui: maintenant(),
-    photosJointes, photosEnMemoire: photosGardees().length, motifPhotos });
+function texte(etat, photosJointes = 0, motifPhotos = undefined, photosGardeesN = 0) {
+  const retours = lireRetours();
+  const date = maintenant();
+  return texteDiagnostic({ environnement: environnement(), resume: resumeEtat(etat), evenements: lireEvenements(), aujourdhui: date,
+    photosJointes, photosEnMemoire: photosGardeesN, motifPhotos,
+    retoursTexte: retours.length > 0 ? texteRapport(retours, { version: VERSION_APP, date }) : '' });
 }
 
 const nomFichier = () => `sanji-diagnostic-${maintenant().slice(0, 10)}.txt`;
@@ -43,23 +48,25 @@ function telecharger(contenu) {
   setTimeout(() => URL.revokeObjectURL(adresse), 10000);
 }
 
-/** Partage le texte et, si l'appareil accepte plusieurs fichiers, les photos gardées en mémoire ; sinon le texte seul, qui le dit. */
+/** Partage le texte et, si l'appareil accepte plusieurs fichiers, les photos gardées ; sinon le texte seul, qui le dit. */
 async function partager(etat) {
   const nav = globalThis.navigator;
-  const photos = photosGardees().map((p, i) => new File([p.blob], `photo-${p.type}-${i + 1}.jpg`, { type: 'image/jpeg' }));
+  const gardees = await photosGardees();
+  const photos = gardees.map((p, i) => new File([p.blob], `photo-${p.type}-${i + 1}.jpg`, { type: 'image/jpeg' }));
   const peut = (fichiers) => typeof nav?.share === 'function' && nav.canShare?.({ files: fichiers });
   try {
     if (photos.length > 0) {
-      const avecPhotos = new File([texte(etat, photos.length)], nomFichier(), { type: 'text/plain' });
+      const avecPhotos = new File([texte(etat, photos.length, undefined, gardees.length)], nomFichier(), { type: 'text/plain' });
       if (peut([avecPhotos, ...photos])) { await nav.share({ files: [avecPhotos, ...photos], title: 'Diagnostic Sanji' }); return; }
     }
-    const seul = texte(etat, 0);
+    const seul = texte(etat, 0, undefined, gardees.length);
     if (peut([new File([seul], nomFichier(), { type: 'text/plain' })])) await nav.share({ files: [new File([seul], nomFichier(), { type: 'text/plain' })], title: 'Diagnostic Sanji' });
     else telecharger(seul);
   } catch { /* partage annulé */ }
 }
 
-async function copier(contenu, zone) {
+async function copier(etat, zone) {
+  const contenu = texte(etat, 0, 'copie de texte : utilisez « Partager le fichier » pour les joindre', (await photosGardees()).length);
   try {
     await globalThis.navigator.clipboard.writeText(contenu);
     afficherMessage('Diagnostic copié. Collez-le dans la conversation.', 'ok');
@@ -79,7 +86,7 @@ export function sectionDiagnostic(etat) {
     h('p', null, `${pluriel(evenements.length, 'événement noté', 'événements notés')} · ${pluriel(nombreErreurs(), 'erreur', 'erreurs')}`),
     h('div', { classe: 'actions' },
       bouton('Partager le fichier', () => partager(etat), 'court'),
-      bouton('Copier le diagnostic', () => copier(texte(etat, 0, 'copie de texte : utilisez « Partager le fichier » pour les joindre'), zone), 'court'),
+      bouton('Copier le diagnostic', () => copier(etat, zone), 'court'),
       bouton('Effacer le journal', () => confirmer({
         titre: 'Effacer le journal de diagnostic ?', texte: 'Le journal gardé sur cet appareil sera supprimé. Vos menus ne changent pas.', libelleOk: 'Effacer', danger: true,
         action: () => { effacerJournal(); redessiner(); },

@@ -43,7 +43,8 @@ test('texteDiagnostic : phrase, synthèse, erreurs, aucune clé ni objet', () =>
   ];
   const t = texteDiagnostic({ environnement: { version: '9', agent: 'x'.repeat(300) }, resume: resumeEtat(etatVide()), evenements, aujourdhui: '2026-10-07' });
   assert.match(t, /^Diagnostic Sanji/);
-  assert.match(t, /Ce fichier ne contient jamais votre clé\. Il peut contenir le texte lu par l'IA et des photos/);
+  assert.match(t, /Ce fichier ne contient jamais votre clé\. Il contient le texte lu par l'IA, les retours d'essai et des photos/);
+  assert.equal(t.includes('relisez'), false, 'aucune consigne à la propriétaire');
   assert.match(t, /Erreurs : 1/);
   assert.match(t, /Appels IA réussis : 1 \(statuts : 200\)/);
   assert.match(t, /Appels IA échoués : 1 \(statuts : 401\)/);
@@ -69,9 +70,15 @@ test('texteDiagnostic : le contenu lu par l\'IA est gardé (clé masquée), les 
   assert.match(t, /CONTENU LU PAR L'IA/);
   assert.match(t, /LU_PAR_IA_TEST/);
   assert.equal(t.includes('sk-ant'), false, 'la clé est masquée même dans le contenu');
-  assert.match(t, /Photos jointes : 2 \(gardées en mémoire jusqu'à la fermeture de l'application\) ; 1 photo\(s\) en mémoire non jointes \(partage de fichiers multiples indisponible\)/);
-  assert.match(texteDiagnostic({ evenements, photosEnMemoire: 1, motifPhotos: 'copie de texte' }), /1 photo\(s\) en mémoire non jointes \(copie de texte\)/);
+  assert.match(t, /Photos jointes : 2 \(les 5 dernières, gardées 14 jours sur l'appareil\) ; 1 photo\(s\) gardées non jointes \(partage de fichiers multiples indisponible\)/);
+  assert.match(texteDiagnostic({ evenements, photosEnMemoire: 1, motifPhotos: 'copie de texte' }), /1 photo\(s\) gardées non jointes \(copie de texte\)/);
   assert.match(texteDiagnostic({ evenements: [] }), /CONTENU LU PAR L'IA[^\n]*\naucun/);
   // Le contenu n'est pas répété (ni tronqué à 200 caractères) dans les lignes d'événements.
   assert.equal(t.split('LU_PAR_IA_TEST').length - 1, 1);
+});
+
+test('texteDiagnostic : les retours d\'essai sont inclus dans le même fichier', () => {
+  const t = texteDiagnostic({ evenements: [], retoursTexte: 'Rapport d\'essai Sanji\nRetours : 1' });
+  assert.match(t, /RETOURS D'ESSAI[^\n]*\nRapport d'essai Sanji\nRetours : 1/);
+  assert.equal(texteDiagnostic({ evenements: [] }).includes('RETOURS D\'ESSAI'), false);
 });

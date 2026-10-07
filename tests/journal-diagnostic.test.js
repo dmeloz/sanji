@@ -107,19 +107,25 @@ test('envoyer : note ia avec le contenu rendu, sans requête, image ni clé (suc
   for (const interdit of ['sk-ant', 'SECRET']) assert.equal(brut.includes(interdit), false);
 });
 
-test('photos de diagnostic : gardées en mémoire seulement, 3 au plus, trop grosses ignorées, jamais dans le stockage', () => {
+test('photos de diagnostic : gardées durablement, 5 au plus, trop grosses ignorées, jamais dans le journal, effacées avec lui', async () => {
   globalThis.localStorage = faux();
   J.effacerJournal();
-  const blob = (taille) => ({ size: taille });
-  for (let i = 0; i < 5; i += 1) J.garderPhotoPourDiagnostic(i % 2 ? 'fiche' : 'feuille', blob(1000 + i));
-  J.garderPhotoPourDiagnostic('feuille', blob(900 * 1024));
-  J.garderPhotoPourDiagnostic('feuille', null);
-  assert.deepEqual(J.photosGardees().map((p) => p.blob.size), [1002, 1003, 1004]);
-  assert.deepEqual(J.photosGardees().map((p) => p.type), ['feuille', 'fiche', 'feuille']);
+  const blob = (taille) => new Blob(['x'.repeat(taille)], { type: 'image/jpeg' });
+  for (let i = 0; i < 7; i += 1) {
+    await J.garderPhotoPourDiagnostic(i % 2 ? 'fiche' : 'feuille', blob(1000 + i));
+    await new Promise((r) => { setTimeout(r, 2).ref?.(); }); // des heures distinctes, donc des clés distinctes
+  }
+  await J.garderPhotoPourDiagnostic('feuille', blob(900 * 1024));
+  await J.garderPhotoPourDiagnostic('feuille', null);
+  const gardees = await J.photosGardees();
+  assert.deepEqual(gardees.map((p) => p.blob.size), [1002, 1003, 1004, 1005, 1006]);
+  assert.deepEqual(gardees.map((p) => p.type), ['feuille', 'fiche', 'feuille', 'fiche', 'feuille']);
   J.noter('ia', { outil: 'rendre_feuille', ok: true });
-  assert.equal(JSON.stringify(J.lireEvenements()).includes('size'), false, 'aucune photo dans le journal stocké');
+  assert.equal(JSON.stringify(J.lireEvenements()).includes('image/jpeg'), false, 'aucune photo dans le journal');
+  assert.ok(JSON.parse(globalThis.localStorage.getItem('sanji-photos-diagnostic')).length === 5, 'le registre des photos est gardé');
   J.effacerJournal();
-  assert.equal(J.photosGardees().length, 0);
+  await new Promise((r) => { setTimeout(r, 20).ref?.(); });
+  assert.equal((await J.photosGardees()).length, 0);
 });
 
 const texteDe = (n) => n.tous(() => true).map((e) => e.texte ?? '').join('') + n.textContent;
@@ -150,8 +156,9 @@ test('section : boutons, repli sans clipboard, effacement avec confirmation, ind
 test('partage : le texte part avec les photos si l\'appareil accepte plusieurs fichiers, sinon le texte seul le dit', async () => {
   globalThis.localStorage = faux();
   J.effacerJournal();
-  J.garderPhotoPourDiagnostic('feuille', new Blob(['x'.repeat(2000)], { type: 'image/jpeg' }));
-  J.garderPhotoPourDiagnostic('fiche', new Blob(['y'.repeat(2000)], { type: 'image/jpeg' }));
+  await J.garderPhotoPourDiagnostic('feuille', new Blob(['x'.repeat(2000)], { type: 'image/jpeg' }));
+  await new Promise((r) => { setTimeout(r, 2).ref?.(); });
+  await J.garderPhotoPourDiagnostic('fiche', new Blob(['y'.repeat(2000)], { type: 'image/jpeg' }));
   const partages = [];
   const regler = (accepteMultiples) => Object.defineProperty(globalThis, 'navigator', { configurable: true, value: {
     canShare: ({ files }) => accepteMultiples || files.length === 1,
@@ -165,7 +172,7 @@ test('partage : le texte part avec les photos si l\'appareil accepte plusieurs f
   regler(false);
   await parTexte(s, 'Partager le fichier').click();
   assert.equal(partages[1].length, 1);
-  assert.match(await partages[1][0].text(), /Photos jointes : 0[^\n]*2 photo\(s\) en mémoire non jointes/);
+  assert.match(await partages[1][0].text(), /Photos jointes : 0[^\n]*2 photo\(s\) gardées non jointes/);
   J.effacerJournal();
 });
 

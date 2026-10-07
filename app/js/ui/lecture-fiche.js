@@ -10,7 +10,7 @@ import { noterRetour } from './retours-essai.js';
 import { panneau } from './panneau.js';
 import { blobEnBase64, reduireImage } from './photo.js';
 
-const AVERTISSEMENT = 'Cette fiche peut contenir des noms et des allergies ; elle part à l\'IA. Le choix du menu et la répartition ne sont jamais proposés. Sanji ne garde pas la photo dans son stockage (elle reste en mémoire jusqu\'à la fermeture de l\'application, pour le diagnostic), et garde 14 jours le texte que l\'IA rend dans son journal de diagnostic ; supprimez la photo de la pellicule de l\'iPhone si elle y a été enregistrée.';
+const AVERTISSEMENT = 'Cette fiche peut contenir des noms et des allergies ; elle part à l\'IA. Le choix du menu et la répartition ne sont jamais proposés. La photo et le texte rendu par l\'IA sont gardés 14 jours sur l\'appareil pour le diagnostic.';
 
 function dialogLectureFiche(date, miniature, image, blob) {
   const attente = new AbortController();
