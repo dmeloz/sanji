@@ -10,7 +10,7 @@ import { decisionsDe, texteDecisions } from '../domaine/decisions.js';
 import { abonner, agir, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { dialogRepartition } from './fiches.js';
-import { ouvrirProposition, ouvrirValidation, texteFourchette } from './feuille-validation.js';
+import { ouvrirProposition, ouvrirValidations, texteFourchette } from './feuille-validation.js';
 import { qteNoeuds, quantite } from './format.js';
 import { panneau } from './panneau.js';
 import { dialogCorriger, dialogDecider, dialogPlanifier } from './taches.js';
@@ -31,7 +31,8 @@ function icone(chemins, classe = 'dec-icone', taille = 16) {
 }
 
 /** Une carte : étiquette (mot écrit + icône), titre, détail, un ou deux gestes. `fermer` ferme la feuille avant un changement de page. */
-function carte(c, fermer) {
+/** `valeurs` : toutes les valeurs à valider de la feuille, pour le parcours « une par une » (la valeur touchée d'abord). */
+function carte(c, fermer, valeurs = []) {
   // `bouton()` préfixe chaque classe par « btn- » : la classe de mise en page `dec-btn` est donc posée ici, sans préfixe.
   const geste = (classe) => (texte, surClic, extra) => h('button', { type: 'button', classe, onClick: surClic, ...extra }, texte);
   const principal = geste('btn btn-decision dec-btn');
@@ -125,7 +126,7 @@ function carte(c, fermer) {
       etiquette = 'Valeur à valider';
       titre = `${v.libelle} ${ROLE_EN_CLAIR[v.role] ?? ''}`.trim();
       detail = ['Estimation à valider : ', h('span', { classe: 'dec-qte' }, texteFourchette(v.proposition)), '.'];
-      actions = [principal('Valider', () => ouvrirValidation(v), { 'aria-label': `Valider la valeur : ${titre}` })];
+      actions = [principal('Valider', () => { fermer(); ouvrirValidations([v, ...valeurs.filter((x) => x !== v)]); }, { 'aria-label': `Valider la valeur : ${titre}` })];
     }
   }
   return h('article', { classe: 'dec-carte', dataset: { genre: c.genre } },
@@ -152,7 +153,8 @@ export function contenuDecisions(etat, aujourd, fermer = () => {}) {
       h('p', { classe: 'dec-vide-titre' }, 'Tout est réglé'),
       h('p', { classe: 'dec-sous' }, 'Sanji continue avec vos décisions.')), boutonOk(fermer)];
   }
-  return [entete, h('div', { classe: 'dec-cartes' }, cartes.map((c) => carte(c, fermer))), boutonOk(fermer)];
+  const valeurs = cartes.filter((c) => c.genre === 'valeur').map((c) => c.valeur);
+  return [entete, h('div', { classe: 'dec-cartes' }, cartes.map((c) => carte(c, fermer, valeurs))), boutonOk(fermer)];
 }
 
 /** Ouvre la feuille « À décider » (appelée par le bandeau de l'écran Aujourd'hui). Une seule feuille à la fois. */
