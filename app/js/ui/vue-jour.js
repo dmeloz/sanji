@@ -1,16 +1,17 @@
-// Jour (feuille quotidienne) : une seule liste de mise en place, dans l'ordre de lecture du poste.
-// Menu 1, menu 2, autres tâches, puis « Après service » (avances pour les jours suivants). Une ligne cochable par
-// tâche, la quantité et l'état du poids en point focal. Aucun filtre ne cache de tâche ; une tâche faite aujourd'hui
-// reste à sa place (cochée, barrée, grisée) ; seules les préparations faites un jour précédent pour plus tard sont repliées.
-// Montrer l'exception, pas la normalité : une ligne ne répète ni le menu que dit déjà le titre du groupe, ni une provenance
-// ordinaire ; les décisions se disent une fois (le bandeau de Production, qui ouvre la feuille « À décider »).
+// Jour (feuille quotidienne) : une seule liste à plat de mise en place, dans l'ordre de lecture du poste (refonte 2, style épuré).
+// Menu 1, menu 2, autres tâches, puis les avances pour les jours suivants (une ligne « N avances à planifier »). Une ligne par
+// tâche : case, nom, quantité. Aucun filtre ne cache de tâche ; une tâche faite reste dans son menu, grisée (sans barré) et
+// rangée en bas ; seules les préparations faites un jour précédent pour plus tard sont repliées.
+// Montrer l'exception, pas la normalité : la sous-ligne ne dit que « à préciser », « déjà avancé », les avances hors règle et
+// les avertissements de conservation ; le créneau, les portions et la provenance se lisent dans la fiche. Les décisions se
+// disent une fois (l'étiquette « N à décider » de Production, qui ouvre la feuille « À décider »).
 
 import { calculerComposant } from '../domaine/calcul.js';
 import { estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js';
 import { aideRefroidissement, evaluationProduction } from '../domaine/planification.js';
 import { libelle } from '../domaine/statuts.js';
 import { h } from './dom.js';
-import { bouton, imprimer, encadre, ligneVide, lien, pastille, repliable } from './elements.js';
+import { bouton, imprimer, encadre, ligneVide, lien, repliable } from './elements.js';
 import { formaterHeure, phraseConservation, qteNoeuds, quantite } from './format.js';
 import {
   actionsTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, defaireEnUnToucher, noeudEvaluation, pastilleCreneau, texteCharge,
@@ -19,7 +20,6 @@ import {
 export const titre = () => 'Production';
 
 const COCHABLES = new Set(['a_planifier', 'a_faire', 'en_cours', 'ecart']);
-const VARIANTE_ETAT = { a_preciser: 'gris', a_planifier: 'ambre', en_cours: 'vert', ecart: 'rouge' };
 const POIDS = { fini: 'quantité finie' };
 
 /** « mar. 6 » : jour abrégé et numéro. */
@@ -44,11 +44,11 @@ export function rappelMenus(date, feuille) {
 
 // ------------------------------------------------------------------ une ligne de mise en place
 
-/** Case à cocher : « Fait » en un toucher, annulable (le message propose d'annuler pendant deux minutes). */
+/** Case à cocher : « Fait » en un toucher, sans bandeau ; toucher la case cochée remet la tâche à faire. */
 function caseFait(l) {
   return h('button', {
     type: 'button', role: 'checkbox', 'aria-checked': 'false', classe: 'case-fait',
-    onClick: () => faireEnUnToucher(l.productionId),
+    onClick: () => faireEnUnToucher(l.productionId, { sansBandeau: true }),
   }, h('span', { classe: 'case-fait-boite', 'aria-hidden': 'true' }), h('span', { classe: 'sr' }, `Marquer fait : ${l.genre === 'principale' ? l.nom : (l.libelle || l.nom)}`));
 }
 
@@ -66,30 +66,38 @@ function texteQuantite(etat, l) {
   return l.cible !== null ? quantite(l.cible, l.unite) : null;
 }
 
+/** État du poids dit à la suite de l'unité (« g cru net ») ; jamais caché. */
 function poidsDe(l) {
   if (!l.etatPoids) return null;
-  return POIDS[l.etatPoids] ?? `poids ${libelle('ETAT_POIDS', l.etatPoids)}`;
+  return POIDS[l.etatPoids] ?? libelle('ETAT_POIDS', l.etatPoids);
 }
 
-function badgesEtMeta(l, ev, { groupe }) {
-  const meta = [];
-  const badges = [];
-  if (l.genre === 'preparatoire') meta.push('action préparatoire');
-  if (groupe === 'autres' && l.menu) meta.push(`menu ${l.menu}`);
-  if (l.creneau) meta.push(libelle('CRENEAU', l.creneau));
-  if (l.source === 'attendue' && l.jourDecide) meta.push(`prévu ${libelleJour(l.jourDecide)}`);
-  if (l.avanceJours > 0) {
-    meta.unshift(`Pour ${courtJour(l.dateService)}`);
-    badges.push(pastille(`Avance J+${l.avanceJours}`, 'gris'));
+/**
+ * Sous-ligne d'une tâche : seulement ce qui sort de l'ordinaire. « à préciser » et les états à trancher en or paille, « déjà avancé »,
+ * « Pour mar. 6 » (avance) et les causes d'une avance hors règle. Le texte dit toujours l'état : jamais la couleur seule.
+ * @returns {{texte: string, ton: 'ambre'|'doux'}[]}
+ */
+function notesDeLigne(l, ev, date) {
+  const notes = [];
+  if (l.avanceJours > 0) notes.push({ texte: `Pour ${courtJour(l.dateService)}`, ton: 'doux' });
+  if (l.fait && l.hFait) {
+    const avantAujourdhui = l.hFait.slice(0, 10) < date;
+    // Une étape faite avant ce jour : « déjà avancé sam. 3 » (le jour où elle a été faite).
+    if (l.etapeCle && avantAujourdhui) notes.push({ texte: `déjà avancé ${courtJour(l.hFait.slice(0, 10))}`, ton: 'doux' });
+    else if (avantAujourdhui && l.dateService === date) notes.push({ texte: 'déjà avancé', ton: 'doux' });
   }
-  if (!l.fait && ev && ev.jours > 0 && !ev.autorisee) {
-    badges.push(pastille('hors règle', 'ambre'));
+  if (l.fait) return notes;
+  if (l.etat === 'a_preciser') notes.push({ texte: 'à préciser', ton: 'ambre' });
+  if (l.source === 'attendue' && l.jourDecide) notes.push({ texte: `prévu ${libelleJour(l.jourDecide)}`, ton: 'doux' });
+  if (ev && ev.jours > 0 && !ev.autorisee) {
     // La cause est dite sur la ligne : une avance d'un jour peut être hors règle (maximum de l'étape dépassé).
-    meta.push(ev.alertes.some((a) => /plus de deux jours/.test(a)) ? 'plus de deux jours d\'avance' : 'au-delà du maximum de l\'étape');
+    notes.push({ texte: `hors règle · ${ev.alertes.some((a) => /plus de deux jours/.test(a)) ? 'plus de deux jours d\'avance' : 'au-delà du maximum de l\'étape'}`, ton: 'ambre' });
   }
-  // Une proposition est « à planifier » par nature : le titre du groupe le dit, la ligne n'a que « Pour mar. 6 ».
-  if (l.source !== 'suggestion' && l.etat !== 'a_faire' && l.etat !== 'a_preciser' && l.etat !== 'fait') badges.push(pastille(libelle('ETAT_TACHE', l.etat), VARIANTE_ETAT[l.etat] ?? 'gris'));
-  return { meta, badges };
+  // Une proposition est « à planifier » par nature : le titre du groupe le dit.
+  if (l.source !== 'suggestion' && ['a_planifier', 'en_cours', 'ecart'].includes(l.etat)) {
+    notes.push({ texte: libelle('ETAT_TACHE', l.etat), ton: l.etat === 'en_cours' ? 'doux' : 'ambre' });
+  }
+  return notes;
 }
 
 /**
@@ -138,88 +146,52 @@ export function provenanceAMontrer(provenance) {
   return provenance === libelle('PROVENANCE', 'STANDARD_BASE') || provenance === libelle('PROVENANCE', 'INCONNU') ? provenance : null;
 }
 
-/** Étiquette de la ligne : « Recette » (préparation maison). Un produit brut n'a pas d'étiquette : l'absence de chevron le dit. */
-const ETIQUETTE = { preparation_maison: 'Recette' };
-
 let compteurActions = 0;
 
 /**
- * Ligne de mise en place (maquette Production) : case, nom, étiquette Recette, destination (hors groupes Menu 1 et Menu 2,
- * dont le titre la dit déjà), créneau, provenance de la quantité si elle sort de l'ordinaire, quantité à droite ; chevron vers
- * la fiche pour une recette. Les autres gestes s'ouvrent depuis la ligne : toucher du nom ou bouton « ⋯ » (Actions : <plat>).
- * Une proposition montre « Planifier » directement. Les avertissements d'avance et de conservation restent dits.
+ * Ligne de mise en place (maquette Production, refonte 2) : case, nom (lien vers la fiche), quantité en chiffres de quantité avec
+ * l'unité et l'état du poids ; une sous-ligne seulement pour l'exception (voir `notesDeLigne`). Les autres gestes s'ouvrent depuis
+ * « ⋯ » (Actions : <plat>), qui porte aussi l'évaluation de l'avance. Une proposition montre « Planifier » directement.
+ * Les avertissements de conservation restent dits. Le créneau, les portions et la provenance se lisent dans la fiche.
  */
 function ligneTache(etat, ligneBrute, date, options) {
   const l = { ...ligneBrute, avanceJours: ligneBrute.avanceJours ?? Math.max(0, joursEntre(date, ligneBrute.dateService)) };
   const p = etat.productions[l.productionId];
   const fait = p?.etat === 'fait';
   const q = texteQuantite(etat, l);
-  const composant = etat.composants?.[l.composantId] ?? null;
-  const etiquette = ETIQUETTE[composant?.type] ?? null;
-  const brut = composant?.type === 'produit_simple';
   const nom = l.genre === 'principale' ? l.nom : (l.libelle || l.nom);
   // L'évaluation de l'avance (limite d'utilisation, règle) reste lisible, derrière « ⋯ ».
   const ev = l.evaluation ?? evaluationProduction(etat, l.productionId);
-  const { meta, badges } = badgesEtMeta({ ...l, fait }, ev, options);
-  // Destination et créneau sont placés par la ligne elle-même : on retire les doublons de la liste de méta.
-  const creneau = l.creneau ? libelle('CRENEAU', l.creneau) : null;
-  const autres = meta.filter((m) => m !== creneau && !/^menu \d$/.test(m));
-  if (fait) badges.unshift(pastille('fait', 'gris'));
-  if (fait && l.hFait) {
-    const avantAujourdhui = l.hFait.slice(0, 10) < date;
-    // Une étape faite avant ce jour : « déjà avancé sam. 3 » (le jour où elle a été faite).
-    const dejaAvance = l.etapeCle && avantAujourdhui ? `, déjà avancé ${courtJour(l.hFait.slice(0, 10))}`
-      : (avantAujourdhui && l.dateService === date ? ', déjà avancé' : '');
-    autres.push(`fait le ${formaterHeure(l.hFait)}${dejaAvance}`);
-  }
+  const notes = notesDeLigne({ ...l, fait }, ev, date);
   const poids = poidsDe(l);
-  // Le titre « Menu 1 » ou « Menu 2 » dit déjà la destination : on ne la répète que dans les autres groupes.
-  const destination = !brut && l.menu && options.groupe !== 'service' ? `menu ${l.menu}` : null;
-  const provenance = !brut && q && l.genre !== 'preparatoire' ? provenanceAMontrer(provenanceQuantite(etat, l.composantId)) : null;
   const { directes, autres: autresActions } = actionsDeLigne(etat, l, date);
   const actions = autresActions.filter(Boolean);
-  // Un produit brut n'a pas de chevron : sa fiche s'ouvre depuis la ligne (« ⋯ »).
-  if (brut) actions.push(lien(`#/fiche/${encodeURIComponent(l.composantId)}`, 'Ouvrir la fiche', 'btn btn-court'));
   const evaluation = ev && ev.jours > 0 ? noeudEvaluation(ev) : null;
   const surLaLigne = directes.filter(Boolean);
-  // Les gestes s'ouvrent depuis la ligne : le nom et « ⋯ » basculent le même panneau.
   let panneau = null;
   let plus = null;
-  let boutonNom = null;
   if (actions.length > 0 || evaluation) {
     compteurActions += 1;
     const idActions = `prod-actions-${compteurActions}`;
     panneau = h('div', { classe: 'prod-actions', id: idActions, hidden: true }, evaluation, h('div', { classe: 'actions' }, actions));
-    const basculer = () => {
-      panneau.hidden = !panneau.hidden;
-      for (const b of [plus, boutonNom]) b.setAttribute('aria-expanded', String(!panneau.hidden));
-    };
-    plus = h('button', { type: 'button', classe: 'prod-plus', 'aria-label': `Actions : ${nom}`, 'aria-expanded': 'false', 'aria-controls': idActions, onClick: basculer }, '⋯');
-    boutonNom = h('button', { type: 'button', classe: 'prod-nom tache-nom mep-nom', 'aria-expanded': 'false', 'aria-controls': idActions, onClick: basculer }, nom);
+    plus = h('button', {
+      type: 'button', classe: 'prod-plus', 'aria-label': `Actions : ${nom}`, 'aria-expanded': 'false', 'aria-controls': idActions,
+      onClick: () => { panneau.hidden = !panneau.hidden; plus.setAttribute('aria-expanded', String(!panneau.hidden)); },
+    }, '⋯');
   }
   return h('li', { classe: `mep-ligne prod-ligne mep-${fait ? 'fait' : l.etat}` },
     h('div', { classe: 'prod-principal' },
       fait ? caseFaite(l) : COCHABLES.has(l.etat) ? caseFait(l) : h('span', { classe: 'case-fait case-fait-vide' }),
       h('div', { classe: 'mep-corps' },
-        h('div', { classe: 'prod-nom-ligne' }, boutonNom ?? h('span', { classe: 'tache-nom mep-nom' }, nom)),
-        etiquette || destination || creneau
-          ? h('p', { classe: 'mep-meta prod-etiquettes' },
-            etiquette ? h('span', { classe: 'prod-etiquette prod-etiquette-recette' }, etiquette) : null,
-            [destination, creneau].filter(Boolean).join(' · '))
-          : null,
-        provenance ? h('p', { classe: 'mep-meta prod-provenance' }, `provenance : ${provenance}`) : null,
-        badges.length > 0 || autres.length > 0 ? h('p', { classe: 'mep-meta' }, badges, autres.join(' · ')) : null,
+        h('div', { classe: 'prod-nom-ligne' }, lien(`#/fiche/${encodeURIComponent(l.composantId)}`, nom, 'prod-nom tache-nom mep-nom')),
+        notes.length > 0 ? h('p', { classe: 'mep-meta prod-notes' }, notes.map((n, i) => h('span', { classe: `prod-note prod-note-${n.ton}` }, i > 0 ? ` · ${n.texte}` : n.texte))) : null,
         avertissementConservation(ev),
         surLaLigne.length > 0 ? h('div', { classe: 'actions prod-directes' }, surLaLigne) : null),
       h('div', { classe: 'mep-quantite' },
-        q ? h('strong', { classe: 'mep-qte' }, qteNoeuds(q)) : (l.genre === 'preparatoire' ? null : h('span', { classe: 'mep-neutre' }, 'quantité à compléter')),
+        q ? h('strong', { classe: 'mep-qte' }, qteNoeuds(q)) : (l.genre === 'preparatoire' ? null : h('span', { classe: 'mep-neutre' }, '—', h('span', { classe: 'sr' }, ' quantité à compléter'))),
         q && poids ? h('span', { classe: 'mep-poids' }, poids) : null),
       // « ⋯ » a sa propre colonne (la même à chaque ligne) ; sans actions, son emplacement reste vide.
-      plus ?? h('span', { classe: 'prod-plus-vide', 'aria-hidden': 'true' }),
-      brut ? h('span', { classe: 'prod-chevron-vide', 'aria-hidden': 'true' })
-        : h('a', {
-          href: `#/fiche/${encodeURIComponent(l.composantId)}`, classe: 'prod-chevron', 'aria-label': `Ouvrir la fiche : ${nom}`,
-        }, h('span', { 'aria-hidden': 'true' }, '›'))),
+      plus ?? h('span', { classe: 'prod-plus-vide', 'aria-hidden': 'true' })),
     panneau);
 }
 
@@ -229,18 +201,38 @@ const estHorsRegle = (l) => !l.fait && Boolean(l.evaluation) && l.evaluation.jou
 /** La phrase de refroidissement en une ligne courte : sans le détail des températures ni la source (elles restent dans la fiche). */
 const aideCourte = () => aideRefroidissement()?.replace(/\s*\([^)]*\)/g, '') ?? null;
 
+/** Les tâches faites restent dans leur menu, grisées, rangées en bas (ordre de lecture conservé dans chaque moitié). */
+const faitesEnBas = (lignes) => [...lignes.filter((l) => !l.fait), ...lignes.filter((l) => l.fait)];
+
+function liste(lignes, etat, date, groupe) {
+  return h('ul', { classe: 'mep-liste' }, lignes.map((l) => ligneTache(etat, l, date, { groupe })));
+}
+
 function bloc(titreTexte, lignes, etat, date, groupe) {
   if (lignes.length === 0) return null;
-  const liste = (ls) => h('ul', { classe: 'mep-liste' }, ls.map((l) => ligneTache(etat, l, date, { groupe })));
+  const rangees = faitesEnBas(lignes);
   // Page courte : au-delà de 8 lignes de travail, la suite se replie sous « Voir les N autres » (un compte et un toucher).
-  const visibles = lignes.slice(0, LIGNES_VISIBLES);
-  const suite = lignes.slice(LIGNES_VISIBLES);
-  const aideApres = groupe === 'apres' ? aideCourte() : null;
+  const visibles = rangees.slice(0, LIGNES_VISIBLES);
+  const suite = rangees.slice(LIGNES_VISIBLES);
   return h('section', { classe: 'jour-bloc' },
-    h('h2', { classe: 'section-titre' }, titreTexte),
-    aideApres ? h('p', { classe: 'aide mep-aide-froid' }, aideApres) : null,
-    visibles.length > 0 ? liste(visibles) : null,
-    suite.length > 0 ? repliable(`Voir les ${suite.length} autres`, false, liste(suite), { classe: 'jour-hors-regle' }) : null);
+    h('h2', { classe: 'section-titre prod-groupe-titre' }, titreTexte),
+    visibles.length > 0 ? liste(visibles, etat, date, groupe) : null,
+    suite.length > 0 ? repliable(`Voir les ${suite.length} autres`, false, liste(suite, etat, date, groupe), { classe: 'jour-hors-regle' }) : null);
+}
+
+/**
+ * Avances pour les jours suivants : une seule ligne repliée, « N avances à planifier » (les propositions, dites une fois dans le
+ * titre) ; la liste, avec « Planifier » sur chaque proposition et la phrase de refroidissement, s'ouvre au toucher.
+ */
+function blocAvances(lignes, etat, date) {
+  if (lignes.length === 0) return null;
+  const propositions = lignes.filter((l) => l.source === 'suggestion').length;
+  const resume = propositions > 0 ? pluriel(propositions, 'avance à planifier', 'avances à planifier') : 'Avances pour les jours suivants';
+  const aide = aideCourte();
+  return repliable(resume, false, [
+    aide ? h('p', { classe: 'aide mep-aide-froid' }, aide) : null,
+    liste(faitesEnBas(lignes), etat, date, 'apres'),
+  ], { classe: 'prod-avances' });
 }
 
 /**
@@ -303,8 +295,6 @@ function chargeDesCreneaux(feuille) {
 export function corps(etat, date, feuille) {
   const { lecture } = feuille;
   const noeuds = [];
-  const rappel = rappelMenus(date, feuille);
-  if (rappel) noeuds.push(rappel);
   if (!estOuvert(date)) {
     noeuds.push(h('p', { classe: 'ferme' }, 'fermé'));
     noeuds.push(h('p', { classe: 'aide' }, 'Le dimanche est non travaillé : aucune tâche. Il reste compté dans le temps de conservation.'));
@@ -323,14 +313,11 @@ export function corps(etat, date, feuille) {
   if (lignesDeTravail === 0) {
     noeuds.push(ligneVide(lecture.pretsPlusTard.length > 0 || feuille.avancement.total > 0 ? 'Tout est fait.' : 'Aucune tâche décidée pour ce jour.'));
   }
-  // Après service : les propositions (« à planifier ») sont dites une fois, dans le titre du groupe.
-  const propositions = enRegle.filter((l) => l.source === 'suggestion').length;
-  const titreApres = `Après service · avances pour les jours suivants${propositions > 0 ? ` · ${propositions} à planifier` : ''}`;
   for (const b of [
-    bloc('Menu 1 · pour le service du jour', lecture.service1, etat, date, 'service'),
-    bloc('Menu 2 · pour le service du jour', lecture.service2, etat, date, 'service'),
+    bloc('Menu 1', lecture.service1, etat, date, 'service'),
+    bloc('Menu 2', lecture.service2, etat, date, 'service'),
     bloc('Autres tâches', lecture.autres, etat, date, 'autres'),
-    bloc(titreApres, enRegle, etat, date, 'apres'),
+    blocAvances(enRegle, etat, date),
   ]) if (b) noeuds.push(b);
   if (lecture.pretsPlusTard.length > 0) {
     noeuds.push(repliable(`Déjà prêt (${lecture.pretsPlusTard.length})`, false,

@@ -164,13 +164,18 @@ function uniteDe(etat, p) {
  * « Fait » en un toucher : la cible devient le réel, un message propose d'annuler (deux minutes) ou de corriger.
  * Sans cible connue, on garde le panneau : il faut saisir la quantité réellement faite.
  */
-export function faireEnUnToucher(productionId) {
+/**
+ * Marque une tâche faite. `sansBandeau` : pas de message « Fait · Annuler » (Production, décision du 2026-10-07 : retoucher la
+ * case remet la tâche à faire ; « Corriger » reste dans les actions de la ligne).
+ */
+export function faireEnUnToucher(productionId, { sansBandeau = false } = {}) {
   const e = etatCourant();
   const p = e.productions[productionId];
   if (p.genre !== 'preparatoire' && cibleProduction(e, productionId) === null) { dialogFait(productionId); return; }
   const r = agir((x, t) => marquerFait(x, productionId, undefined, t));
   if (!r.ok) return;
   try { globalThis.navigator?.vibrate?.(20); } catch { /* sans effet sur iOS */ }
+  if (sansBandeau) return;
   const apres = etatCourant().productions[productionId];
   const detail = p.genre === 'preparatoire' ? '' : ` : ${quantite(apres.quantiteReelle, apres.unite)}`;
   afficherMessage(`Fait${detail} (${p.libelle})`, 'ok', [

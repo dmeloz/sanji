@@ -67,43 +67,40 @@ test('sélecteur Aujourd\'hui / Demain : deux liens vers les jours, le jour affi
   assert.ok(classes(plusLoin, 'jour-barre').length === 1, 'la barre de jours reste pour aller plus loin');
 });
 
-test('en-tête : « date · x / n faites », aucun état hors ligne quand tout est normal (pas de synchronisation)', () => {
+test('en-tête : jour, « Production », « x/n » et jauge, aucun état hors ligne quand tout est normal (pas de synchronisation)', () => {
   const { e, brut } = lundi();
   const texte = classes(page(e), 'prod-tete')[0].textContent;
-  assert.match(texte, /Lundi 5 octobre \(aujourd'hui\) · 0 \/ 2 faites/);
+  assert.match(texte, /Lundi 5 octobre \(aujourd'hui\)Production0\/2/);
   assert.doesNotMatch(texte, /hors ligne/, 'la normalité ne s\'affiche pas (vérification en cours ou prêt)');
   assert.doesNotMatch(texte, /synchronis|en attente/i);
   marquerFait(e, principaleDe(e, brut), undefined, h(1));
-  assert.match(classes(page(e), 'prod-tete')[0].textContent, /1 \/ 2 faites/);
+  assert.match(classes(page(e), 'prod-tete')[0].textContent, /Production1\/2/);
+  assert.equal(classes(page(e), 'prod-jauge')[0].attributs['aria-valuenow'], '1');
 });
 
-test('ligne Recette : étiquette, créneau (le menu est dit par le titre du groupe), provenance seulement si hors ordinaire, quantité, chevron vers la fiche', () => {
+test('ligne Recette : case, nom (lien vers la fiche), quantité ; ni étiquette, ni créneau, ni provenance, ni chevron (ils se lisent dans la fiche)', () => {
   const { e, recette } = lundi();
   const noeud = page(e);
   const ligne = ligneDe(noeud, 'RECETTE_TEST');
-  const etiquette = classes(ligne, 'prod-etiquette')[0];
-  assert.equal(etiquette.textContent, 'Recette');
-  assert.match(classes(ligne, 'prod-etiquettes')[0].textContent, /Recette.*après le service de midi/);
-  assert.doesNotMatch(classes(ligne, 'prod-etiquettes')[0].textContent, /menu/, 'le titre « Menu 2 » le dit déjà');
-  assert.ok(classes(noeud, 'jour-bloc').some((b) => b.querySelector('h2').textContent.startsWith('Menu 2') && b.tous((x) => x === ligne).length));
-  for (const p of classes(ligne, 'prod-provenance')) assert.match(p.textContent, /provenance : (standard de base|inconnu)/, 'seulement l\'exception');
+  assert.equal(classes(ligne, 'prod-etiquette').length, 0);
+  assert.equal(classes(ligne, 'prod-etiquettes').length, 0);
+  assert.doesNotMatch(ligne.textContent, /Recette|après le service|provenance/);
+  assert.ok(classes(noeud, 'jour-bloc').some((b) => b.querySelector('h2').textContent === 'Menu 2' && b.tous((x) => x === ligne).length));
   assert.equal(classes(ligne, 'mep-qte').length, 1);
-  const chevron = classes(ligne, 'prod-chevron')[0];
-  assert.equal(chevron.attributs.href, `#/fiche/${encodeURIComponent(recette)}`);
-  assert.match(chevron.attributs['aria-label'], /Ouvrir la fiche : RECETTE_TEST/);
+  assert.equal(classes(ligne, 'prod-chevron').length, 0);
+  assert.equal(classes(ligne, 'prod-nom')[0].attributs.href, `#/fiche/${encodeURIComponent(recette)}`);
 });
 
-test('ligne Brut : seulement nom, créneau et quantité ; ni pastille « Brut », ni destination, provenance ou chevron', () => {
+test('ligne Brut : seulement nom et quantité ; ni pastille « Brut », ni créneau, destination, provenance ou chevron', () => {
   const { e, brut } = lundi();
   const ligne = ligneDe(page(e), 'BRUT_TEST');
-  assert.equal(classes(ligne, 'prod-etiquette').length, 0, 'l\'absence de chevron suffit à dire « produit brut »');
-  const ligneEtiquettes = classes(ligne, 'prod-etiquettes')[0].textContent;
-  assert.match(ligneEtiquettes, /avant le service de midi/);
-  assert.doesNotMatch(ligneEtiquettes, /menu/);
+  assert.equal(classes(ligne, 'prod-etiquette').length, 0);
+  assert.equal(classes(ligne, 'prod-etiquettes').length, 0);
+  assert.doesNotMatch(ligne.textContent, /avant le service|menu/i);
   assert.equal(classes(ligne, 'prod-provenance').length, 0);
   assert.equal(classes(ligne, 'prod-chevron').length, 0);
   assert.equal(classes(ligne, 'mep-qte').length, 1);
-  // La fiche du produit reste accessible, derrière « ⋯ » (Actions : <plat>).
+  // La fiche du produit s'ouvre depuis le nom.
   const hrefs = ligne.tous((x) => x.balise === 'a').map((a) => a.attributs.href);
   assert.deepEqual(hrefs, [`#/fiche/${encodeURIComponent(brut)}`]);
 });
@@ -119,7 +116,7 @@ test('une quantité absente n\'est ni une alerte ni une décision : « quantité
   assert.equal(classes(noeud, 'jour-decisions').length, 0);
 });
 
-test('gestes conservés : case « Fait », Corriger le réel, impression, case cochée barrée à sa place', () => {
+test('gestes conservés : case « Fait », Corriger le réel, impression, case cochée grisée à sa place', () => {
   const { e, brut } = lundi();
   marquerFait(e, principaleDe(e, brut), undefined, h(1));
   const noeud = page(e);
@@ -141,9 +138,11 @@ test('vocabulaire : aucun terme écarté par la propriétaire sur l\'écran', ()
 test('accessibilité : cibles de 44 px, légendes de 13 px, quantités en police dédiée, mouvement réduit déjà respecté', () => {
   const debut = css.indexOf('Production (refonte 1, onglet 2)');
   const fin = css.indexOf('/* =====', debut);
-  const bloc = css.slice(debut, fin > debut ? fin : undefined); // le seul bloc Production, pas ceux des écrans suivants
-  assert.match(bloc, /\.prod-segment \{[^}]*min-height: var\(--cible\)/);
-  assert.match(bloc, /\.prod-chevron \{[^}]*min-width: var\(--cible\)[^}]*min-height: var\(--cible\)/);
+  const bloc = css.slice(debut, fin > debut ? fin : undefined); // le bloc Production d'origine, pas ceux des écrans suivants
+  const bloc2 = css.slice(css.indexOf('Production, refonte 2')); // les règles épurées de la refonte 2 (dernier bloc)
+  assert.match(bloc2, /\.prod-segment \{[^}]*min-height: var\(--cible\)/);
+  assert.match(bloc2, /\.prod-adecider \{[^}]*min-height: var\(--cible\)/);
+  assert.match(css, /\.prod-plus \{[^}]*min-width: var\(--cible\)[^}]*min-height: var\(--cible\)/);
   assert.match(bloc, /\.prod-ligne \.mep-qte \{ font-family: var\(--police-qte\)/);
   assert.match(css, /--cible: 44px/);
   assert.match(css, /--t-legende: 13px/);

@@ -56,27 +56,28 @@ function lundi({ type = 'produit_simple' } = {}) {
 
 // ------------------------------------------------------------------ 1. bruit sur chaque ligne
 
-test('ligne : « menu 1 » n\'est pas répété sous une ligne du groupe Menu 1 ; il reste dans « Après service »', () => {
+test('ligne : « menu 1 » n\'est pas répété sous une ligne du groupe Menu 1, ni la destination après le service (elle se lit dans la fiche)', () => {
   const { e } = lundi({ type: 'preparation_maison' });
   const noeud = production(e);
   const dansMenu1 = blocDe(noeud, 'Menu 1');
   for (const l of classes(dansMenu1, 'mep-ligne')) assert.doesNotMatch(texteVisible(l), /menu 1/i, 'le titre du groupe le dit déjà');
   const apres = ligneDe(noeud, 'ELEMENT_MARDI_TEST');
-  assert.match(texteVisible(apres), /menu 1/, 'la destination reste dite après le service');
+  assert.doesNotMatch(texteVisible(apres), /menu 1/i, 'la destination n\'est plus dite sur la ligne');
+  assert.match(texteVisible(apres), /Pour mar\. 6/, 'l\'avance dit pour quel jour');
 });
 
-test('ligne : pas de pastille « Brut » (l\'absence de chevron suffit) ; « Recette » reste', () => {
+test('ligne : plus d\'étiquette « Brut » ni « Recette », plus de chevron : le nom est le lien vers la fiche', () => {
   const brut = production(lundi().e);
   assert.doesNotMatch(texteVisible(brut), /Brut/);
-  assert.equal(classes(brut, 'prod-etiquette-brut').length, 0);
   const recette = production(lundi({ type: 'preparation_maison' }).e);
-  assert.ok(classes(recette, 'prod-etiquette-recette').length >= 1);
-  assert.match(texteVisible(ligneDe(recette, 'ELEMENT_M1_TEST')), /Recette/);
-  assert.ok(classes(ligneDe(brut, 'ELEMENT_M1_TEST'), 'prod-chevron').length === 0, 'un produit brut n\'a pas de chevron');
+  assert.equal(classes(recette, 'prod-etiquette').length, 0, 'l\'étiquette Recette n\'est plus sur la ligne');
+  assert.doesNotMatch(texteVisible(ligneDe(recette, 'ELEMENT_M1_TEST')), /Recette/);
+  for (const noeud of [brut, recette]) assert.equal(classes(noeud, 'prod-chevron').length, 0, 'plus de chevron');
 });
 
-test('ligne : plus de « Actions ▸ » sous chaque ligne ; un bouton « ⋯ » de nom « Actions : <plat> » ouvre les actions', async () => {
-  const noeud = production(lundi().e);
+test('ligne : plus de « Actions ▸ » sous chaque ligne ; un bouton « ⋯ » de nom « Actions : <plat> » ouvre les actions ; le nom ouvre la fiche', async () => {
+  const { e, m1 } = lundi();
+  const noeud = production(e);
   assert.equal(noeud.tous((x) => x.balise === 'details' && x.querySelector('summary')?.textContent === 'Actions').length, 0);
   const ligne = ligneDe(noeud, 'ELEMENT_M1_TEST');
   const plus = boutons(ligne).find((b) => b.attributs['aria-label'] === 'Actions : ELEMENT_M1_TEST');
@@ -91,11 +92,10 @@ test('ligne : plus de « Actions ▸ » sous chaque ligne ; un bouton « ⋯ » 
   assert.equal(plus.attributs['aria-expanded'], 'true');
   await plus.click();
   assert.equal(panneau.hidden, true);
-  // Toucher le nom ouvre la même chose.
-  const nom = boutons(ligne).find((b) => b.className.includes('prod-nom'));
-  assert.ok(nom, 'le nom est touchable');
-  await nom.click();
-  assert.equal(panneau.hidden, false);
+  // Le nom est un lien vers la fiche (maquette refonte 2) : il n'ouvre plus les actions.
+  const nom = classes(ligne, 'prod-nom')[0];
+  assert.equal(nom.balise, 'a');
+  assert.equal(nom.attributs.href, `#/fiche/${encodeURIComponent(m1)}`);
 });
 
 test('ligne : « ⋯ » occupe sa propre colonne, la même à chaque ligne (aligné quelle que soit la longueur du nom)', () => {
@@ -107,12 +107,12 @@ test('ligne : « ⋯ » occupe sa propre colonne, la même à chaque ligne (alig
   assert.ok(lignes.length >= 3);
   for (const l of lignes) {
     const enfants = classes(l, 'prod-principal')[0].enfants.filter((x) => x.balise);
-    assert.equal(enfants.length, 5, 'case, corps, quantité, « ⋯ » (ou son emplacement vide), chevron');
+    assert.equal(enfants.length, 4, 'case, corps, quantité, « ⋯ » (ou son emplacement vide)');
     assert.match(enfants[3].className, /prod-plus/, 'la 4e colonne est celle de « ⋯ »');
     assert.equal(classes(enfants[1], 'prod-plus').length, 0, '« ⋯ » ne suit plus le nom dans la colonne du corps');
   }
   const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
-  assert.match(css, /\.prod-principal \{[^}]*grid-template-columns: var\(--cible\) minmax\(0, 1fr\) auto var\(--cible\) var\(--cible\)/);
+  assert.match(css, /\.prod-principal \{[^}]*grid-template-columns: var\(--cible\) minmax\(0, 1fr\) auto var\(--cible\);/);
 });
 
 test('ligne : une proposition à planifier montre « Planifier » directement, et seulement « Pour mer. 7 » en mention', () => {
@@ -126,16 +126,16 @@ test('ligne : une proposition à planifier montre « Planifier » directement, e
   assert.doesNotMatch(meta, /à planifier/, 'la mention est dans le titre du groupe');
 });
 
-test('groupe Après service : le titre dit « à planifier » quand il y a des propositions, sinon rien', () => {
+test('avances : une seule ligne repliée « N avances à planifier » quand il y a des propositions, sinon « Avances pour les jours suivants »', () => {
   const avec = production(lundi().e);
-  const titre = blocDe(avec, 'Après service').querySelector('h2').textContent;
-  assert.match(titre, /^Après service · avances pour les jours suivants/);
-  assert.match(titre, /1 à planifier/);
+  const repli = classes(avec, 'prod-avances')[0];
+  assert.equal(repli.open, false, 'repliée au départ');
+  assert.equal(repli.querySelector('summary').textContent, '1 avance à planifier');
   const { e, mardi } = lundi();
   e.productions[principaleDe(e, mardi)];
   const mercredi = Object.values(e.composants).find((c) => c.nom === 'ELEMENT_MERCREDI_TEST').id;
   planifier(e, principaleDe(e, mercredi), S.lundi, 'apres_midi', h());
-  assert.equal(blocDe(production(e), 'Après service').querySelector('h2').textContent, 'Après service · avances pour les jours suivants');
+  assert.equal(classes(production(e), 'prod-avances')[0].querySelector('summary').textContent, 'Avances pour les jours suivants');
 });
 
 test('ligne : la provenance ne se dit que pour « standard de base » ou « inconnu »', () => {
@@ -147,7 +147,7 @@ test('ligne : la provenance ne se dit que pour « standard de base » ou « inco
   assert.equal(vueJour.provenanceAMontrer(null), null);
 });
 
-test('ligne : une préparation au standard de base dit « provenance : standard de base », un grammage validé ne dit rien', () => {
+test('ligne : la provenance ne se dit plus sur la ligne (elle reste dans la fiche), même au standard de base', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'riz', h());
   definirPrevision(e, S.lundi, 1, 10, h());
@@ -163,7 +163,7 @@ test('ligne : une préparation au standard de base dit « provenance : standard 
   const grammageBase = { valeur: 50, unite: 'ml', statut: 'STANDARD_BASE', source: 'TEST_ONLY' };
   const prepBase = composantValide(b, S.lundi, 1, { ...J.PREPARATION_TEST, grammage: grammageBase }, { nom: 'PREP_BASE_TEST' });
   assert.equal(vueJour.provenanceQuantite(b, prepBase), 'standard de base');
-  assert.match(texteVisible(ligneDe(production(b), 'PREP_BASE_TEST')), /provenance : standard de base/);
+  assert.doesNotMatch(texteVisible(ligneDe(production(b), 'PREP_BASE_TEST')), /provenance/, 'dite dans la fiche, plus sur la ligne');
 });
 
 test('page : la phrase de refroidissement tient en une ligne courte ; plus de « Rien d\'obligatoire » ni d\'écran allumé sur la page', () => {
@@ -190,14 +190,14 @@ test('page : « Rien d\'obligatoire… » est replié dans « Pas encore chiffr�
 
 // ------------------------------------------------------------------ 2. décision affichée une fois
 
-test('décision : seul le bandeau « N décisions à prendre » reste sur Production ; il ouvre la feuille', async () => {
+test('décision : seule l\'étiquette « N à décider » reste sur Production ; elle ouvre la feuille', async () => {
   const noeud = production(lundi().e);
   assert.equal(classes(noeud, 'jour-decisions').length, 0, 'plus de bloc « À confirmer » en haut');
   assert.equal(classes(noeud, 'jour-centre').length, 0, 'plus de repli « À confirmer » en bas');
   assert.doesNotMatch(noeud.textContent, /À confirmer \(\d+\)|Voir À confirmer/);
-  const bandeau = classes(noeud, 'prod-decisions')[0];
+  const bandeau = classes(noeud, 'prod-adecider')[0];
   assert.ok(bandeau);
-  assert.match(bandeau.textContent, /^\d+ décisions? à prendre/);
+  assert.match(bandeau.textContent, /^⚠ \d+ à décider$/);
   await bandeau.click();
   assert.equal(panneauxOuverts(dom.corps).length >= 1, true, 'la feuille « À décider » s\'ouvre');
   for (const d of panneauxOuverts(dom.corps)) d.close();
@@ -224,7 +224,7 @@ test('« N avances hors règle » remonte juste sous le bandeau (replié, avec l
   const enfants = noeud.enfants.filter((x) => x.balise);
   const iBarre = enfants.findIndex((x) => x.className.includes('jour-barre'));
   const iRepli = enfants.findIndex((x) => x.balise === 'details' && /hors règle/.test(x.querySelector('summary').textContent));
-  const iBloc = enfants.findIndex((x) => x.className.includes('jour-bloc'));
+  const iBloc = enfants.findIndex((x) => x.className.includes('jour-bloc') || x.className.includes('prod-avances'));
   assert.ok(iRepli > iBarre, 'après la navigation entre jours');
   assert.ok(iRepli < iBloc, 'avant tous les groupes de travail');
   assert.equal(enfants[iRepli].open, false);
@@ -245,14 +245,16 @@ test('« Déjà prêt pour plus tard N » devient « Déjà prêt (N) »', () =>
   assert.doesNotMatch(noeud.textContent, /Déjà prêt pour plus tard/);
 });
 
-test('en-tête : « x / n faites » est visible dès qu\'il y a des tâches, même sans tâche décidée', () => {
+test('en-tête : « x/n » est visible dès qu\'il y a des tâches, même sans tâche décidée', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'riz, carottes', h());
   const noeud = production(e);
   assert.ok(classes(noeud, 'mep-ligne').length >= 2);
-  assert.match(classes(noeud, 'prod-date')[0].textContent, /\b0 \/ \d+ faites/);
+  assert.match(classes(noeud, 'prod-compte')[0].textContent, /^0\/\d+$/);
+  assert.equal(classes(noeud, 'prod-jauge').length, 1, 'la fine jauge suit');
   const vide = production(etatVide(), S.jeudi);
-  assert.doesNotMatch(classes(vide, 'prod-date')[0].textContent, /faites/, 'rien à compter : rien dit');
+  assert.equal(classes(vide, 'prod-compte').length, 0, 'rien à compter : rien dit');
+  assert.equal(classes(vide, 'prod-jauge').length, 0);
 });
 
 // ------------------------------------------------------------------ 5. fiche

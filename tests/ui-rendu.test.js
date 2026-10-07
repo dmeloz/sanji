@@ -170,7 +170,8 @@ test('jour : « Fait » marque fait en un toucher avec la cible ; sans quantité
   assert.equal(panneauxOuverts(dom.corps).length, 0, 'aucun panneau');
   // La jauge du jour suit.
   const apres = vues.jour.rendre(magasin.etat(), S.mardi);
-  assert.match(apres.textContent, /2 \/ 2 faites|1 \/ 2 faites/, 'la jauge compte les productions décidées ce jour');
+  const compte = apres.tous((x) => x.className.split(' ').includes('prod-compte'))[0];
+  assert.match(compte.textContent, /^[12]\/2$/, 'la jauge compte les productions décidées ce jour');
 });
 
 test('jour : deux services du même produit proposent un lot, sans rien planifier ni fusionner', () => {
@@ -215,38 +216,38 @@ test('composant : « Composer un mélange » crée une recette en parts, non val
   nettoyerPanneaux();
 });
 
-test('jour : l\'en-tête dit « x / n faites » et s\'efface sans production décidée', () => {
+test('jour : l\'en-tête dit « x/n » et s\'efface sans production décidée', () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const p = principaleDe(e, composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST));
   planifier(e, p, S.mardi, 'apres_midi', h());
   magasin.remplacer(e);
-  assert.match(vues.jour.rendre(magasin.etat(), S.mardi).textContent, /0 \/ 1 faites/);
-  assert.doesNotMatch(vues.jour.rendre(magasin.etat(), S.lundi).textContent, /\d+ \/ \d+ faites/);
+  const comptes = (noeud) => noeud.tous((x) => x.className.split(' ').includes('prod-compte'));
+  assert.equal(comptes(vues.jour.rendre(magasin.etat(), S.mardi))[0].textContent, '0/1');
+  assert.equal(comptes(vues.jour.rendre(magasin.etat(), S.lundi)).length, 0);
 });
 
 test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide = une ligne discrète', () => {
   const { e } = etatRiche();
   magasin.remplacer(e);
   const texte = vues.jour.rendre(magasin.etat(), S.mardi).textContent;
-  // Ordre de lecture A-P1 : menu 1, menu 2, autres tâches, après service, puis le repli « déjà prêt pour plus tard » ; les décisions
-  // sont résumées avant la liste et détaillées dans le centre « À confirmer » en fin de page.
+  // Ordre de lecture : menu 1, menu 2, autres tâches, la ligne des avances, puis le repli « déjà prêt » ; l'étiquette « N à décider »
+  // précède la liste (les décisions sont détaillées dans la feuille « À décider »).
   const lundi = vues.jour.rendre(magasin.etat(), S.lundi).textContent;
-  const ordre = ['Menu 1 · pour le service du jour', 'Menu 2 · pour le service du jour', 'Autres tâches',
-    'Après service · avances pour les jours suivants', 'Déjà prêt pour plus tard'];
+  const ordre = [/Menu 1/, /Menu 2/, /Autres tâches/, /avances? à planifier|Avances pour les jours suivants/, /Déjà prêt/];
   // Une rubrique vide n'est plus affichée (page moins chargée) : seules les rubriques présentes gardent leur ordre.
-  const presentes = ordre.filter((r) => lundi.includes(r));
+  const presentes = ordre.filter((r) => r.test(lundi));
   assert.ok(presentes.length >= 3, `plusieurs rubriques présentes dans cet état riche : ${lundi.slice(0, 900)}`);
   let position = -1;
   for (const r of presentes) {
-    const p = lundi.indexOf(r);
-    assert.ok(p > position, `rubrique « ${r} » dans le mauvais ordre`);
+    const p = lundi.search(r);
+    assert.ok(p > position, `rubrique ${r} dans le mauvais ordre`);
     position = p;
   }
-  assert.ok(lundi.indexOf('À confirmer') < lundi.indexOf(presentes[0]), 'le résumé des décisions précède la liste');
+  assert.ok(lundi.indexOf('à décider') < lundi.search(presentes[0]), 'l\'étiquette des décisions précède la liste');
   const vide = vues.jour.rendre(magasin.etat(), S.jeudi).textContent;
-  for (const r of ['Déjà prêt pour plus tard', 'À confirmer', 'Après service']) {
-    assert.doesNotMatch(vide, new RegExp(r), `la rubrique vide « ${r} » n'est pas affichée`);
+  for (const r of [/Déjà prêt/, /À confirmer/, /avances? à planifier|Avances pour les jours suivants/]) {
+    assert.doesNotMatch(vide, r, `la rubrique vide ${r} n'est pas affichée`);
   }
   assert.match(texte, /revue de mi-semaine/);
   assert.doesNotMatch(vues.jour.rendre(magasin.etat(), S.lundi).textContent, /revue de mi-semaine/);

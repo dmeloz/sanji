@@ -170,54 +170,55 @@ function lundiTravail() {
   return { e, m1, m2 };
 }
 
-test('Jour : barre de jours horizontale, en-tête minimal (date, couverts, jauge), rappel des deux menus', () => {
+test('Jour : barre de jours horizontale (hors Aujourd\'hui et Demain), en-tête minimal (jour, x/n, jauge), lien vers les prévisions', () => {
   const { e } = lundiTravail();
-  definirMenu(e, S.lundi, 1, 'riz et carottes', h());
-  definirMenu(e, S.lundi, 2, 'poulet, riz', h());
-  creerFiche(e, { numero: 'FICHE_TEST_1', date: S.lundi, service: 'midi', horaire: '12:00', couverts: 24, mode: 'menu_fixe', menuFixe: 1 }, h());
-  const noeud = jour(S.lundi, e);
-  const puces = classes(noeud, 'jour-puce').filter((a) => !a.className.includes('fleche'));
+  // Un jour qui n'est ni Aujourd'hui ni Demain : la barre de la semaine permet d'aller plus loin.
+  const plusLoin = jour(S.lundi, e, S.jeudi);
+  const puces = classes(plusLoin, 'jour-puce').filter((a) => !a.className.includes('fleche'));
   assert.deepEqual(puces.map((a) => a.attributs.href), [S.lundi, S.mardi, S.mercredi, S.jeudi, S.vendredi, S.samedi].map((d) => `#/production/${d}`));
-  assert.equal(classes(noeud, 'jour-puce-actif').length, 1);
+  assert.equal(classes(plusLoin, 'jour-puce-actif').length, 1);
+  const noeud = jour(S.lundi, e);
+  assert.equal(classes(noeud, 'jour-barre').length, 0, 'Aujourd\'hui : Aujourd\'hui / Demain suffisent, la barre est masquée');
   assert.match(classes(noeud, 'jour-tete')[0].textContent, /Lundi 5 octobre/);
-  assert.match(classes(noeud, 'jour-tete')[0].textContent, /\d+ couverts/);
-  assert.match(classes(noeud, 'jour-tete')[0].textContent, /\d \/ \d faites/);
-  const menus = classes(noeud, 'jour-menu');
-  assert.equal(menus.length, 3, 'deux menus et un banquet');
-  for (const a of menus) assert.equal(a.attributs.href, `#/semaine/${S.lundi}`);
+  assert.match(classes(noeud, 'jour-tete')[0].textContent, /Production\d\/\d/);
+  assert.equal(classes(noeud, 'prod-jauge').length, 1);
+  assert.equal(classes(noeud, 'jour-menu').length, 0, 'les menus se lisent sur Aujourd\'hui');
+  assert.ok(hrefs(classes(noeud, 'prod-pied')[0]).includes(`#/semaine/${S.lundi}`), 'Prévisions →');
 });
 
 test('Jour : ordre de lecture menu 1, menu 2, autres, après service ; une ligne cochable par tâche, pas de grosses cartes', () => {
   const { e } = lundiTravail();
   const noeud = jour(S.lundi, e);
   const titres = classes(noeud, 'jour-bloc').map((b) => b.querySelector('h2').textContent);
-  // L'avance J+2 n'est que proposée : le titre du groupe le dit une fois (« 1 à planifier »), pas chaque ligne.
-  assert.deepEqual(titres, ['Menu 1 · pour le service du jour', 'Menu 2 · pour le service du jour', 'Après service · avances pour les jours suivants · 1 à planifier']);
+  // L'avance J+2 n'est que proposée : la ligne repliée des avances le dit une fois (« 1 avance à planifier »), pas chaque ligne.
+  assert.deepEqual(titres, ['Menu 1', 'Menu 2']);
+  assert.equal(classes(noeud, 'prod-avances')[0].querySelector('summary').textContent, '1 avance à planifier');
   assert.equal(classes(noeud, 'tache').length, 0, 'aucune grosse carte dans la liste');
   const lignes = classes(noeud, 'mep-ligne');
   const cases = classes(noeud, 'case-fait').filter((c) => c.balise === 'button' && c.attributs['aria-checked'] === 'false');
   assert.equal(cases.length, 4, 'une case à cocher par tâche à faire : M1, M2, avance J+1, avance J+2');
   for (const c of cases) assert.equal(c.attributs.role, 'checkbox');
   assert.ok(lignes.length >= 5);
-  // La quantité et l'état du poids sont le point focal de chaque ligne.
+  // La quantité et l'état du poids (à la suite de l'unité) sont le point focal de chaque ligne.
   const premiere = classes(noeud, 'mep-ligne')[0];
   assert.match(classes(premiere, 'mep-qte')[0].textContent, /\d/);
-  assert.match(classes(premiere, 'mep-poids')[0].textContent, /poids|quantité finie/);
+  assert.ok(classes(premiere, 'mep-poids')[0].textContent.length > 0, 'l\'état du poids est dit');
   // Aucune commande qui filtre : pas de liste déroulante ni de bouton de filtre.
   assert.equal(noeud.tous((x) => x.balise === 'select').length, 0);
   assert.equal(boutons(noeud).some((b) => /filtre|seulement|aujourd'hui \//i.test(b.textContent)), false);
 });
 
-test('Jour : les avances sont dans la même liste, avec « Pour mar. 6 » et le badge « Avance J+1 » ou « J+2 »', () => {
+test('Jour : les avances sont dans la ligne repliée « N avances à planifier », avec « Pour mar. 6 » (plus de badge « Avance J+n »)', () => {
   const { e } = lundiTravail();
-  const apres = classes(jour(S.lundi, e), 'jour-bloc')[2];
+  const apres = classes(jour(S.lundi, e), 'prod-avances')[0];
   const textes = classes(apres, 'mep-ligne').map((l) => l.textContent);
   assert.equal(textes.length, 2);
-  assert.ok(textes.some((t) => /Pour mar\. 6/.test(t) && /Avance J\+1/.test(t) && /ELEMENT_MARDI_TEST/.test(t)));
-  assert.ok(textes.some((t) => /Pour mer\. 7/.test(t) && /Avance J\+2/.test(t) && /ELEMENT_MERCREDI_TEST/.test(t)), 'même une avance seulement possible est visible');
+  assert.ok(textes.some((t) => /Pour mar\. 6/.test(t) && /ELEMENT_MARDI_TEST/.test(t)));
+  assert.ok(textes.some((t) => /Pour mer\. 7/.test(t) && /ELEMENT_MERCREDI_TEST/.test(t)), 'même une avance seulement possible est visible');
+  assert.ok(textes.every((t) => !/Avance J\+/.test(t)));
 });
 
-test('Jour : une tâche faite aujourd\'hui reste dans sa section, barrée et grisée, sans repli « Terminé »', () => {
+test('Jour : une tâche faite aujourd\'hui reste dans sa section, grisée, sans repli « Terminé »', () => {
   const { e } = lundiTravail();
   const noeud = jour(S.lundi, e);
   assert.equal(classes(noeud, 'jour-faites').length, 0, 'plus de repli « Terminé »');
@@ -227,17 +228,17 @@ test('Jour : une tâche faite aujourd\'hui reste dans sa section, barrée et gri
   assert.ok(classes(classes(noeud, 'jour-bloc')[1], 'mep-fait').includes(ligneFaite), 'dans le menu 2, à sa place');
 });
 
-test('Jour : une tâche faite = case cochée, nom accessible « Marquer non fait », mention « fait », quantité réelle, même ordre', () => {
+test('Jour : une tâche faite = case cochée (✓), nom accessible « Marquer non fait », quantité réelle, rangée en bas de son menu', () => {
   const { e } = lundiTravail();
   const bloc2 = classes(jour(S.lundi, e), 'jour-bloc')[1];
   const nomsLus = classes(bloc2, 'mep-ligne').map((l) => classes(l, 'mep-nom')[0].textContent);
-  assert.deepEqual(nomsLus, [...nomsLus].sort(), 'ordre de lecture du poste (ici alphabétique), la tâche faite n\'en sort pas');
+  assert.deepEqual(nomsLus, ['ELEMENT_M2_TEST', 'ELEMENT_FAIT_TEST'], 'la tâche faite passe après celles à faire (sinon ordre alphabétique du poste)');
   const ligneFaite = classes(bloc2, 'mep-fait')[0];
   const caseFaite = classes(ligneFaite, 'case-fait')[0];
   assert.equal(caseFaite.balise, 'button');
   assert.equal(caseFaite.attributs['aria-checked'], 'true');
   assert.match(caseFaite.textContent, /Marquer non fait : ELEMENT_FAIT_TEST/);
-  assert.ok(classes(ligneFaite, 'mep-meta').some((m) => /fait/.test(m.textContent)), 'l\'état est dit en texte');
+  assert.match(classes(ligneFaite, 'case-fait-boite')[0].textContent, /✓/, 'l\'état est porté par la coche, pas par la couleur seule');
   assert.equal(classes(ligneFaite, 'mep-qte').length, 1, 'quantité réelle affichée');
   assert.equal(classes(bloc2, 'case-fait').filter((c) => c.attributs['aria-checked'] === 'true').length, 1);
 });
@@ -263,24 +264,24 @@ test('Jour : toucher la case d\'une tâche faite la décoche ; passé les 2 minu
   } finally { quitter(); }
 });
 
-test('style : la ligne faite est barrée et grisée, la cible tactile reste de 44 px', () => {
-  assert.match(css, /\.mep-ligne\.mep-fait \.mep-nom[^{]*\{[^}]*text-decoration:\s*line-through/);
-  assert.match(css, /\.mep-ligne\.mep-fait\s*\{[^}]*background/);
+test('style : la ligne faite est grisée sans barré, la cible tactile reste de 44 px', () => {
+  assert.doesNotMatch(css, /\.mep-ligne\.mep-fait \.mep-nom[^{]*\{[^}]*text-decoration:\s*line-through/);
+  assert.match(css, /\.mep-ligne\.mep-fait \.mep-nom \{ color: var\(--texte-doux\); \}/);
   assert.match(css, /--cible:\s*44px/);
   assert.match(css, /\.case-fait\s*\{[^}]*min-width:\s*var\(--cible\)[^}]*min-height:\s*var\(--cible\)/);
 });
 
-test('Jour : « Fait » en un toucher, annulable', async () => {
+test('Jour : « Fait » en un toucher, sans bandeau « Annuler » (retoucher la case annule)', async () => {
   const { e } = lundiTravail();
   const noeud = jour(S.lundi, e);
   const case1 = classes(classes(noeud, 'jour-bloc')[0], 'case-fait')[0];
   await case1.click();
   const attendu = Object.values(magasin.etat().productions).filter((p) => p.etat === 'fait').length;
   assert.equal(attendu, 2, 'un seul toucher marque fait');
-  assert.ok(dom.corps.tous((x) => x.balise === 'button' && x.textContent === 'Annuler').length > 0, 'le message propose d\'annuler');
+  assert.equal(dom.corps.tous((x) => x.balise === 'button' && x.textContent === 'Annuler').length, 0, 'plus de bandeau « Fait · Annuler » sur Production');
 });
 
-test('Jour : une décision se dit une fois : le bandeau « N décision à prendre » ; plus de résumé ni de centre « À confirmer » dans la page', async () => {
+test('Jour : une décision se dit une fois : l\'étiquette « N à décider » ; plus de résumé ni de centre « À confirmer » dans la page', async () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_ECART_TEST' });
@@ -290,9 +291,9 @@ test('Jour : une décision se dit une fois : le bandeau « N décision à prendr
   const noeud = jour(S.mardi, e);
   assert.equal(classes(noeud, 'jour-decisions').length, 0, 'plus de résumé en haut');
   assert.equal(classes(noeud, 'jour-centre').length, 0, 'plus de centre « À confirmer » en bas');
-  const bandeau = classes(noeud, 'prod-decisions')[0];
-  assert.ok(bandeau, 'le bandeau reste');
-  assert.match(bandeau.textContent, /\d+ décisions? à prendre/);
+  const bandeau = classes(noeud, 'prod-adecider')[0];
+  assert.ok(bandeau, 'l\'étiquette reste');
+  assert.match(bandeau.textContent, /\d+ à décider/);
   await aDate(S.mardi, () => bandeau.click());
   assert.match(dom.corps.textContent, /ELEMENT_ECART_TEST/, 'le détail est dans la feuille « À décider »');
   for (const d of dom.corps.tous((x) => x.balise === 'dialog' && x.open)) d.close();
@@ -328,7 +329,7 @@ test('Jour : une action préparatoire est une autre tâche ; avec un standard, l
   planifier(e, prep.id, S.lundi, 'avant_midi', h());
   const noeud = jour(S.lundi, e);
   assert.match(classes(noeud, 'jour-bloc')[0].textContent.replace(/[\u202f\u00a0]/g, ' '), /700 g/);
-  assert.match(classes(noeud, 'jour-bloc')[0].textContent, /poids sec/);
+  assert.match(classes(noeud, 'jour-bloc')[0].textContent, /sec/, 'l\'état du poids suit l\'unité');
   assert.ok(classes(noeud, 'jour-bloc').some((b) => b.querySelector('h2').textContent === 'Autres tâches'));
 });
 
