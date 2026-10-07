@@ -322,7 +322,7 @@ function rendreJour(etat, date) {
   if (!estOuvert(date)) return racine;
   const vide = productionsDuJour(etat, date).length === 0 ? vueDetail.etatVideSansMenu(etat, date) : null;
   if (vide) racine.appendChild(vide);
-  else racine.appendChild(carteServices(etat, date));
+  racine.appendChild(carteServices(etat, date));
   racine.appendChild(sectionAProduire(etat, date));
   racine.appendChild(repliable(h('h2', { classe: 'sem-section' }, 'Tout le détail du jour'), false,
     [h('p', { classe: 'aide' }, 'Intitulés, composants, prévisions, fiches de fonction, allergies, créneaux, après service, points à confirmer. La carte n\'est qu\'un contexte : aucune quantité n\'en est calculée.'),

@@ -51,7 +51,7 @@ test('etatVide : titre, phrase, boutons avec leur href, principal en bleu', () =
 test('G1 : production sans tâche, deux boutons vers la semaine et l\'import', () => {
   magasin.remplacer(etatVide());
   const p = vues.jour.rendre(magasin.etat(), S.jeudi);
-  assert.match(p.textContent, /Rien à produire aujourd'hui/);
+  assert.match(p.textContent, /Rien à produire ce jour/);
   assert.match(p.textContent, /Pas de menu ce jour-là, ou tout a déjà été avancé\./);
   const attendus = [['Voir la semaine', `#/semaine/${S.lundi}`], ['Importer les menus', `#/import/${S.lundi}`]];
   for (const l of attendus) assert.ok(liens(p).some(([t, href]) => t === l[0] && href === l[1]), l[0]);
@@ -66,7 +66,7 @@ test('G1 : absent quand des tâches existent (« Tout est fait. » ou liste)', (
   assert.doesNotMatch(p.textContent, /Rien à produire/);
 });
 
-test('G2 : jour sans menu, étiquette, titre, bouton d\'import ; la ligne du samedi seulement le week-end', () => {
+test('G2 : jour sans menu, étiquette, titre, bouton d\'import ; jamais le samedi (aucun menu à importer)', () => {
   magasin.remplacer(etatVide());
   const mer = vues.detail.rendre(magasin.etat(), S.mercredi);
   assert.match(mer.textContent, /menu à importer/);
@@ -74,7 +74,7 @@ test('G2 : jour sans menu, étiquette, titre, bouton d\'import ; la ligne du sam
   assert.match(mer.textContent, /Sans menu, Sanji ne calcule rien pour mercredi : aucune quantité n'est inventée\./);
   assert.ok(liens(mer).some(([t, href]) => t === 'Importer les menus de la semaine' && href === `#/import/${S.lundi}`));
   assert.doesNotMatch(mer.textContent, /le samedi n'est jamais présumé/);
-  assert.match(vues.detail.rendre(magasin.etat(), S.samedi).textContent, /Le dimanche est fermé ; le samedi n'est jamais présumé\./);
+  assert.doesNotMatch(vues.detail.rendre(magasin.etat(), S.samedi).textContent, /Pas encore de menu pour ce jour/);
 });
 
 test('G2 : absent quand le jour a un menu', () => {

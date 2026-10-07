@@ -351,16 +351,15 @@ export function sectionsDuJour(etat, date, { replie = false } = {}) {
     .filter(Boolean);
 }
 
-/** G2 : le jour n'a aucun menu. null si au moins un menu est saisi. */
+/** G2 : un jour de semaine n'a aucun menu. null si au moins un menu est saisi, ou le samedi (jamais de menu, rien à importer). */
 export function etatVideSansMenu(etat, date) {
+  if (jourSemaine(date) > 5) return null;
   if ([1, 2].some((menu) => jourOuVide(etat, date).menus[menu].intitule.trim() !== '')) return null;
-  return h('div', null,
-    etatVide({
+  return etatVide({
       etiquette: 'menu à importer', titre: 'Pas encore de menu pour ce jour',
       texte: `Sans menu, Sanji ne calcule rien pour ${libelleJour(date).split(' ')[0]} : aucune quantité n'est inventée.`,
       actions: [{ libelle: 'Importer les menus de la semaine', href: `#/import/${lundiDe(date)}`, principal: true }],
-    }),
-    jourSemaine(date) >= 6 ? h('p', { classe: 'aide' }, 'Le dimanche est fermé ; le samedi n\'est jamais présumé.') : null);
+    });
 }
 
 export function rendre(etat, date) {
