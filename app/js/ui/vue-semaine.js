@@ -20,6 +20,7 @@ import { couvertsMidiDuJour } from '../domaine/couverts-midi.js';
 import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { bouton, lien, pastille, repliable } from './elements.js';
 import { ouvrirFiche } from './fiches.js';
+import { boutonLireFiche } from './lecture-fiche.js';
 import { problemeHorsLigne } from './horsligne.js';
 import { qteNoeuds, quantite } from './format.js';
 import {
@@ -240,6 +241,8 @@ function carteServices(etat, date) {
     aMenus ? [ligneCouverts(etat, date), blocMenu(etat, date, 1), blocMenu(etat, date, 2)] : h('p', { classe: 'sem-neutre' }, 'Pas de menu du jour ce jour-là.'),
     h('div', { classe: 'sem-ligne' }, h('span', { classe: 'sem-rang' }, 'Carte'),
       h('span', { classe: 'sem-intitule' }, 'contexte du service')),
+    // Essai du 2026-10-07 : la lecture d'une fiche se trouve ici, sans ouvrir le détail du jour.
+    boutonLireFiche(date) ? h('div', { classe: 'actions' }, boutonLireFiche(date)) : null,
     fiches.length > 0 ? h('div', { classe: 'sem-fiches' }, h('h3', { classe: 'sem-sous-titre' }, 'Fiches de fonction'),
       h('ul', { classe: 'sem-liste' }, fiches.map((f) => ficheDuJour(etat, f, alertes)))) : null);
 }

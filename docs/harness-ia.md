@@ -155,3 +155,12 @@ Décision du 2026-10-07 « Lecture de la photo de la feuille de menus par l'IA �
 - **Ce que rend l'IA** : des lignes de texte, que `harness/lecture-photo-ia.js` (`lireLignesFeuille`) valide (80 lignes et 160 caractères au plus, caractères de contrôle retirés, `[illisible]` retiré et compté). Elles remplacent le champ « Texte de la feuille » (le message le dit si un texte était déjà collé) puis passent par la répartition existante : `analyserFeuille`, `repartirSurSemaine` (dates corrigées, semaine détectée), `lirePlat`. Rien n'est enregistré sans « Enregistrer la semaine ».
 - **Annulation et erreurs** : fermer le panneau pendant l'attente annule la requête et ignore la réponse ; une erreur reste dans le panneau, ouvert, pour réessayer.
 - **Hors périmètre** : annotations manuscrites (ignorées par consigne), fiches de fonction, réservations, allergies.
+
+## Fiches de fonction en mode essai et retours d'essai (version 96)
+
+Décision du 2026-10-07 « Lecture des fiches de fonction par l'IA, en mode essai ».
+- **Où** : bouton « Lire une fiche avec l'IA (essai) » dans la zone Services du jour (`ui/vue-semaine.js`, `ui/lecture-fiche.js`), visible si l'assistant est prêt. Photo réduite en mémoire (`photo.js` : `reduireImage`, `blobEnBase64`), jamais stockée.
+- **Ce qui part** : l'image et une phrase fixe (`fournisseur-web.js` : `construireCorpsFiche`, outil `rendre_fiche`), après aperçu et avertissement explicite (noms et allergies). Jamais la clé, jamais d'état.
+- **Ce que rend l'IA** : propositions validées par `harness/lecture-fiche-ia.js` (7 champs ; `menuFixe`, `mode`, `repartition` ignorés ; date, service, couverts validés) qui préremplissent `dialogFiche(null, date, prefill, { doutes, surEnregistre })`. Rien n'est enregistré avant « Enregistrer ». Les allergies sont toujours signalées « à confirmer » (ou « rien n'a été lu »), jamais interprétées.
+- **Retours d'essai** : `ui/retours-essai.js` (localStorage `sanji-retours-essai`, 30 entrées, 14 jours, hors état et sauvegarde) ; lecture de la feuille (menu) et de la fiche y notent « lu par l'IA » et « enregistré » ; Réglages > Apprentissage et essais copie un rapport texte (`domaine/retour-essai.js`) que la propriétaire transmet elle-même, avec un avertissement sur les noms et allergies.
+- **À reconfirmer** après l'essai du 2026-10-08.

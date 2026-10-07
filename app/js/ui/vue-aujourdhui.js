@@ -207,6 +207,7 @@ function carteFiche(d, aujourd, etat) {
 /** Ce que l'ancien tableau disait encore et qui garde une action : menus de la semaine à saisir, portions à régler, sauvegarde. */
 function sectionRappels(d) {
   const lignes = [];
+  if (d.rappelVendredi) lignes.push(lien(`#/import/${d.rappelVendredi.lundi}`, 'Menus de la semaine prochaine · à importer', 'au-ligne au-ligne-lien'));
   if (d.semaineSansMenu) lignes.push(lien(`#/import/${d.lundi}`, 'Saisir les menus de la semaine', 'au-ligne au-ligne-lien'));
   for (const l of d.production.chiffrage) lignes.push(lien(l.lien, l.detail ? `${l.texte} : ${l.detail}` : l.texte, 'au-ligne au-ligne-lien'));
   if (d.sauvegarde) lignes.push(lien(d.sauvegarde.lien, `${d.sauvegarde.texte} : ${d.sauvegarde.detail}`, 'au-ligne au-ligne-lien'));

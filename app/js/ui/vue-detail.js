@@ -17,6 +17,7 @@ import { bouton, ligneVide, lien, navigationPeriode, pastille, repliable } from 
 import {
   confirmerAnnulation, dialogAdaptation, dialogFiche, dialogHistorique, dialogRepartition, repartitionIncoherente, resumeChoix,
 } from './fiches.js';
+import { boutonLireFiche } from './lecture-fiche.js';
 import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { formaterHeure, pluriel } from './format.js';
 import { afficherMessage } from './messages.js';
@@ -220,7 +221,7 @@ function sectionFiches(etat, date) {
     .sort((a, b) => a.service.localeCompare(b.service) || a.horaire.localeCompare(b.horaire));
   return repliable(h('h2', { classe: 'section-titre' }, 'Fiches de fonction'), fiches.length > 0, [
     fiches.length === 0 ? ligneVide('Aucune fiche de fonction ce jour-là.') : fiches.map(carteFiche),
-    h('div', { classe: 'actions' }, bouton('Nouvelle fiche', () => dialogFiche(null, date), 'principal')),
+    h('div', { classe: 'actions' }, bouton('Nouvelle fiche', () => dialogFiche(null, date), 'principal'), boutonLireFiche(date)),
   ], { classe: 'carte', id: 'fiches' });
 }
 

@@ -2,7 +2,7 @@
 // Règle du projet : tout nouveau fichier de app/ s'ajoute à FICHIERS ET la VERSION s'incrémente
 // (js/version.js doit porter la même valeur). Un test vérifie la liste.
 
-const VERSION = '95';
+const VERSION = '96';
 const NOM_CACHE = `sanji-v${VERSION}`;
 const PAGE_ACCUEIL = 'index.html';
 
@@ -28,6 +28,8 @@ const FICHIERS = [
   'js/domaine/calcul.js',
   'js/domaine/couverts-midi.js',
   'js/domaine/dates.js',
+  'js/domaine/rapport-apprentissage.js',
+  'js/domaine/retour-essai.js',
   'js/domaine/historique.js',
   'js/domaine/decisions.js',
   'js/domaine/etat.js',
@@ -49,6 +51,7 @@ const FICHIERS = [
   'js/harness/contrats.js',
   'js/harness/fournisseur.js',
   'js/harness/horloge.js',
+  'js/harness/lecture-fiche-ia.js',
   'js/harness/lecture-photo-ia.js',
   'js/harness/orchestrateur.js',
   'js/harness/outils.js',
@@ -71,6 +74,7 @@ const FICHIERS = [
   'js/ui/feuille-decisions.js',
   'js/ui/feuille-validation.js',
   'js/ui/fiches.js',
+  'js/ui/lecture-fiche.js',
   'js/ui/format.js',
   'js/ui/fournisseur-web.js',
   'js/ui/glisser.js',
@@ -89,6 +93,8 @@ const FICHIERS = [
   'js/ui/vue-fiche.js',
   'js/ui/vue-historique.js',
   'js/ui/vue-import.js',
+  'js/ui/retours-essai.js',
+  'js/ui/section-apprentissage.js',
   'js/ui/vue-jour.js',
   'js/ui/vue-menus.js',
   'js/ui/vue-poste.js',

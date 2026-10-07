@@ -190,13 +190,14 @@ export function enregistrer(champs, etat, lundi) {
     saisie = lireSaisie(champs, etat, lundi);
   } catch (erreur) {
     afficherMessage(erreur.message, 'erreur');
-    return;
+    return false;
   }
   const resultat = agir((copie, heure) => saisirMenusSemaine(copie, lundi, saisie, heure));
   if (resultat.ok) {
     afficherMessage('Semaine enregistrée.', 'info');
     location.hash = `#/semaine/${lundi}/tableau`;
   }
+  return Boolean(resultat.ok);
 }
 
 export function rendre(etat, lundi) {

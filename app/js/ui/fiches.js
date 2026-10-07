@@ -64,22 +64,26 @@ export function ouvrirFiche(ficheId) {
 
 const OPTIONS_MODE = Object.entries(LIBELLE_MODE);
 
-/** Création (fiche = null) ou modification d'une fiche. */
-export function dialogFiche(fiche, dateParDefaut) {
+/**
+ * Création (fiche = null) ou modification d'une fiche. `prefill` (champs proposés par l'IA, essai) ne sert qu'à préremplir
+ * une création ; `surEnregistre(champsEnregistres)` est appelé après l'enregistrement d'une fiche préremplie.
+ */
+export function dialogFiche(fiche, dateParDefaut, prefill = null, { surEnregistre, doutes = 0 } = {}) {
   const f = fiche;
+  const p = f ? null : prefill;
   const form = champs([
-    { cle: 'numero', type: 'texte', libelle: 'Identifiant de la fiche', valeur: f?.numero ?? '', placeholder: 'numéro ou référence' },
-    { cle: 'date', type: 'date', libelle: 'Date', valeur: f?.date ?? dateParDefaut },
-    { cle: 'service', type: 'choix', libelle: 'Service', valeur: f?.service ?? 'midi', options: [['midi', 'Midi'], ['soir', 'Soir']] },
-    { cle: 'horaire', type: 'texte', libelle: 'Horaire', valeur: f?.horaire ?? '', placeholder: 'heure d\'arrivée' },
-    { cle: 'couverts', type: 'entier', libelle: 'Couverts (personnes)', valeur: f?.couverts ?? null },
+    { cle: 'numero', type: 'texte', libelle: 'Identifiant de la fiche', valeur: f?.numero ?? p?.numero ?? '', placeholder: 'numéro ou référence' },
+    { cle: 'date', type: 'date', libelle: 'Date', valeur: f?.date ?? p?.date ?? dateParDefaut },
+    { cle: 'service', type: 'choix', libelle: 'Service', valeur: f?.service ?? p?.service ?? 'midi', options: [['midi', 'Midi'], ['soir', 'Soir']] },
+    { cle: 'horaire', type: 'texte', libelle: 'Horaire', valeur: f?.horaire ?? p?.horaire ?? '', placeholder: 'heure d\'arrivée' },
+    { cle: 'couverts', type: 'entier', libelle: 'Couverts (personnes)', valeur: f?.couverts ?? p?.couverts ?? null },
     { cle: 'mode', type: 'choix', libelle: 'Mode', valeur: f?.mode ?? 'menu_fixe', options: OPTIONS_MODE.map(([v, l]) => [v, l[0].toUpperCase() + l.slice(1)]) },
     { cle: 'menuFixe', type: 'choix', libelle: 'Menu fixé', valeur: f?.menuFixe ?? null,
       options: [[null, 'choisir…'], [1, 'Menu 1'], [2, 'Menu 2']] },
     { cle: 'rep1', type: 'entier', libelle: 'Répartition : portions du menu 1', valeur: f?.repartition?.[1] ?? 0 },
     { cle: 'rep2', type: 'entier', libelle: 'Répartition : portions du menu 2', valeur: f?.repartition?.[2] ?? 0 },
-    { cle: 'allergies', type: 'zone', libelle: 'Allergies', valeur: f?.allergies ?? '', placeholder: 'allergies signalées pour le groupe' },
-    { cle: 'remarques', type: 'zone', libelle: 'Remarques', valeur: f?.remarques ?? '', placeholder: 'remarques' },
+    { cle: 'allergies', type: 'zone', libelle: 'Allergies', valeur: f?.allergies ?? p?.allergies ?? '', placeholder: 'allergies signalées pour le groupe' },
+    { cle: 'remarques', type: 'zone', libelle: 'Remarques', valeur: f?.remarques ?? p?.remarques ?? '', placeholder: 'remarques' },
   ]);
   const afficher = () => {
     const mode = form.valeur('mode');
@@ -93,6 +97,10 @@ export function dialogFiche(fiche, dateParDefaut) {
     titre: f ? `Modifier la fiche ${f.numero || ''}`.trim() : 'Nouvelle fiche de fonction',
     corps: [
       f ? h('p', { classe: 'aide' }, 'Chaque modification crée une nouvelle version et remplace l\'ancien besoin, sans double comptage.') : null,
+      p ? h('p', { classe: 'aide' }, 'Lu par l\'IA (essai) : relisez chaque champ contre la fiche papier avant d\'enregistrer.') : null,
+      // Une fiche lue par l'IA : les allergies sont toujours à relire contre la fiche papier, qu'elles aient été lues ou non.
+      p ? h('p', { classe: 'aide' }, p.allergies ? 'Allergies : texte à confirmer, jamais interprété.' : 'Allergies : rien n\'a été lu, vérifiez la fiche papier.') : null,
+      p && doutes > 0 ? h('p', { classe: 'aide' }, `${doutes} passage${doutes > 1 ? 's' : ''} illisible${doutes > 1 ? 's' : ''} ou refusé${doutes > 1 ? 's' : ''} : complétez à la main.`) : null,
       ...form.noeuds,
     ],
     surEnregistrer: () => {
@@ -105,6 +113,7 @@ export function dialogFiche(fiche, dateParDefaut) {
       };
       if (v.mode === 'choix_libre') champsFiche.repartition = { 1: v.rep1 ?? 0, 2: v.rep2 ?? 0 };
       agirStrict((e, t) => (f ? modifierFiche(e, f.id, champsFiche, t) : creerFiche(e, champsFiche, t)));
+      if (p) surEnregistre?.(champsFiche);
     },
   });
 }

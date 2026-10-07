@@ -27,6 +27,7 @@ import { libelleHorsLigne, problemeHorsLigne, situationHorsLigne } from './horsl
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { ALLERGENES, libelleAllergene } from './reference.js';
+import { resumeApprentissage, sectionsApprentissage } from './section-apprentissage.js';
 import { pageReperesMetier } from './reperes-metier.js';
 import { pastilleCreneau } from './taches.js';
 
@@ -775,6 +776,9 @@ const RUBRIQUES = [
   { cle: 'assistant-ia', titre: 'Assistant IA',
     resume: () => { const r = lireReglagesIA(); return assistantPret(r) ? `activé · ${r.modele}` : 'désactivé : Sanji calcule seul'; },
     blocs: () => [sectionAssistant()] },
+  { cle: 'apprentissage', titre: 'Apprentissage et essais',
+    resume: resumeApprentissage,
+    blocs: (e) => sectionsApprentissage(e) },
   { cle: 'donnees', titre: 'Données et hors ligne',
     resume: (e) => (e.reglages.dernierExport ? `dernier export : ${formaterHeure(e.reglages.dernierExport)}` : 'aucun export noté sur cet appareil'),
     blocs: (e) => [sectionSauvegarde(), sectionEtat(), sectionJournal(e)] },
@@ -831,6 +835,7 @@ export function rendre(etat, param = null) {
         ligneLien('#/import', 'Import des menus', 'saisie de la semaine')),
       groupe('Assistant', ligneRubrique('assistant-ia', etat, assistantPret(lireReglagesIA()) ? pastille('activé', 'vert') : null)),
       groupe('Données',
+        ligneRubrique('apprentissage', etat),
         ligneRubrique('donnees', etat),
         ligneInfo('Version', `Sanji ${VERSION_APP}`)),
       h('p', { classe: 'reglages-note' }, 'Apparence : suit le réglage du téléphone (clair / sombre). Écran allumé : en Production et en mode poste.'),

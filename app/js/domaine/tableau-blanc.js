@@ -713,5 +713,7 @@ export function aujourdhuiDe(etat, aujourd, heure = null) {
     production: productionDuBord(etat, aujourd, lundi),
     sauvegarde: rappelSauvegarde(etat, aujourd),
     semaineSansMenu: semaineSansMenu(etat, lundi),
+    // Décision du 2026-10-07 : le vendredi (et le week-end, jusqu'à l'import), la semaine suivante sans menu est rappelée.
+    rappelVendredi: jourSemaine(aujourd) >= 5 && semaineSansMenu(etat, ajouterJours(lundi, 7)) ? { lundi: ajouterJours(lundi, 7) } : null,
   };
 }

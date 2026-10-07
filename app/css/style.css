@@ -1490,3 +1490,10 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .hist-semaine > summary .petit { font-weight: 400; }
 .hist-jour .nom { font-weight: 500; }
 .photo-apercu { max-height: 38vh; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto 12px; }
+
+/* Retours d'essai (Réglages > Apprentissage et essais, Import) : à coller dans app/css/style.css. */
+.retour-essai-sous-titre { font-size: var(--t-ligne); margin: 16px 0 4px; }
+.retour-essai-texte { width: 100%; font-size: var(--t-corps); font-family: var(--police-qte); margin-top: 8px; }
+.retour-essai-lien { margin: 8px 16px 0; }
+
+.btn[hidden] { display: none; }

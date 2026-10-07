@@ -17,6 +17,7 @@ import { pluriel } from './format.js';
 import { problemeHorsLigne } from './horsligne.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
+import { noterRetour } from './retours-essai.js';
 import { importerPhoto, photoEnBase64, retirerPhoto, urlPhoto } from './photo.js';
 import { JOURS_A_MENU, blocJour, champSaisi, enregistrer, repartir, reprendreTexte } from './vue-menus.js';
 
@@ -189,7 +190,30 @@ export function rendre(etat, lundi) {
   const majLecture = () => zoneLecture.replaceChildren(...dates.map((date) => ligneLectureJour(etat, champs, date, ouverts)));
   const repartirEtLire = () => { repartir(champs, lundi); majLecture(); };
   // Les lignes de l'IA remplacent le champ de texte puis passent par la même répartition que le bouton ; rien n'est enregistré.
+  let lignesIA = null; // lignes lues par l'IA sur cette page : sert au retour d'essai (local, rien n'est envoyé)
+  const intitulesDeLaPage = () => Object.fromEntries(dates.map((date) => [date, {
+    menu1: String(champs.get(`menu-${date}-1`).value ?? '').replace(/\s+/g, ' ').trim(),
+    menu2: String(champs.get(`menu-${date}-2`).value ?? '').replace(/\s+/g, ' ').trim(),
+  }]));
+  let retourNote = false; // un double clic ne note qu'un retour
+  const enregistrerEtNoter = () => {
+    const final = intitulesDeLaPage();
+    if (enregistrer(champs, etat, lundi) && lignesIA && !retourNote) { retourNote = true; noterRetour({ type: 'menu', lu: lignesIA, final }); }
+  };
+  const signaler = () => panneau({
+    titre: 'Signaler un problème de lecture',
+    corps: [h('p', { classe: 'aide' }, 'Rien n\'est envoyé : la remarque est gardée sur cet appareil, avec ce que l\'IA a lu et ce qui est dans les champs.'),
+      h('label', { pour: 'remarque-lecture', classe: 'saisie-libelle' }, 'Qu\'est-ce qui ne va pas ?'),
+      champSaisi(champs, 'textarea', { id: 'remarque-lecture', rows: 4, value: '' })],
+    surEnregistrer: () => {
+      noterRetour({ type: 'menu', lu: lignesIA, final: intitulesDeLaPage(), remarque: String(champs.get('remarque-lecture').value ?? '').trim() });
+      afficherMessage('Retour noté sur cet appareil (Réglages > Apprentissage et essais).', 'ok');
+    },
+  });
+  const lienSignaler = bouton('Signaler un problème de lecture', signaler, 'court', { hidden: true });
   const surLecturePhoto = ({ lignes, illisibles }) => {
+    lignesIA = [...lignes];
+    lienSignaler.hidden = false;
     const remplace = champs.get('feuille-texte').value.trim() !== '';
     champs.get('feuille-texte').value = lignes.join('\n');
     sectionFeuille.open = true;
@@ -197,6 +221,7 @@ export function rendre(etat, lundi) {
     afficherMessage(`L'IA a lu ${pluriel(lignes.length, 'ligne')}. Relisez « Ce que Sanji a lu » avant d'enregistrer.${remplace ? ' Le texte collé précédemment a été remplacé.' : ''}${illisibles > 0 ? ` ${pluriel(illisibles, 'ligne illisible', 'lignes illisibles')} : complétez à la main.` : ''}`);
   };
   racine.appendChild(blocPhoto(lundi, surLecturePhoto));
+  racine.appendChild(h('p', { classe: 'aide retour-essai-lien' }, lienSignaler));
   const sectionFeuille = repliable(h('h2', { classe: 'imp-titre-section', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie || reprise !== null, [
       h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
       h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),
@@ -219,7 +244,7 @@ export function rendre(etat, lundi) {
 
   racine.appendChild(h('div', { classe: 'barre-enregistrer' },
     lien(`#/semaine/${lundi}/tableau`, 'Annuler', 'btn'),
-    bouton('Enregistrer la semaine', () => enregistrer(champs, etat, lundi), 'principal')));
+    bouton('Enregistrer la semaine', enregistrerEtNoter, 'principal')));
   if (reprise !== null) {
     champs.get('feuille-texte').value = reprise.texte;
     repartir(champs, lundi, { deplaceeDepuis: reprise.depuis });
