@@ -114,7 +114,7 @@ test('vue Jour : les pâtes du menu 1 ne sont pas dans « Après service » le l
   assert.doesNotMatch(texte, /Tagliatelles/);
 });
 
-test('vue Jour : au-delà de 8 lignes, la suite d\'un bloc se replie sous « Voir les N autres », rien n\'est caché', () => {
+test('vue Jour : toutes les lignes d\'un bloc sont visibles (aucun « Voir les N autres », aucun repli)', () => {
   const e = etatVide();
   definirPrevision(e, S.lundi, 2, 10, h());
   for (let i = 1; i <= 11; i += 1) {
@@ -123,8 +123,7 @@ test('vue Jour : au-delà de 8 lignes, la suite d\'un bloc se replie sous « Voi
   }
   magasin.remplacer(e);
   const noeud = vueJour.rendre(magasin.etat(), S.lundi);
-  const repli = noeud.tous((x) => x.balise === 'details').find((d) => /Voir les 3 autres/.test(d.querySelector('summary').textContent));
-  assert.ok(repli, '11 lignes : 8 visibles et « Voir les 3 autres »');
-  assert.equal(repli.open, false);
+  assert.equal(noeud.tous((x) => x.balise === 'details').length, 0, 'aucune liste à dérouler');
+  assert.doesNotMatch(noeud.textContent, /Voir les \d+ autres/);
   for (let i = 1; i <= 11; i += 1) assert.match(noeud.textContent, new RegExp(`ELEMENT_${String(i).padStart(2, '0')}_TEST`));
 });

@@ -1,23 +1,21 @@
-// Réglages > Apprentissage et essais : ce que Sanji a appris (lecture seule) et les retours d'essai (locaux, rien n'est envoyé).
+// Réglages > Apprentissage et essais : ce que Sanji a appris (lecture seule) et l'accès à « Notes et diagnostic ».
 
 import { libelleJour } from '../domaine/dates.js';
 import { rapportApprentissage } from '../domaine/rapport-apprentissage.js';
-import { texteRapport } from '../domaine/retour-essai.js';
-import { redessiner } from '../magasin.js';
-import { VERSION_APP } from '../version.js';
 import { h } from './dom.js';
 import { bouton, ligneVide } from './elements.js';
 import { pluriel } from './format.js';
-import { afficherMessage } from './messages.js';
-import { confirmer } from './panneau.js';
-import { indicateurErreurs, sectionDiagnostic } from './section-diagnostic.js';
-import { effacerRetours, lireRetours } from './retours-essai.js';
+import { ouvrirCentreDev } from './centre-dev.js';
+import { lireEvenements } from './journal-diagnostic.js';
+import { lireNotes } from './notes-dev.js';
+import { indicateurErreurs } from './section-diagnostic.js';
+import { interrupteurPastille } from './section-notes-dev.js';
 
 const carte = (titre, ...contenu) => h('section', { classe: 'carte' }, h('h2', { classe: 'section-titre' }, titre), contenu);
 
 export const resumeApprentissage = (etat) => {
   const n = rapportApprentissage(etat).motsRetenus;
-  return `${pluriel(n, 'mot retenu', 'mots retenus')} · ${pluriel(lireRetours().length, 'retour d\'essai', 'retours d\'essai')}`;
+  return `${pluriel(n, 'mot retenu', 'mots retenus')} · ${pluriel(lireNotes().length, 'note', 'notes')}`;
 };
 
 function sectionAppris(etat) {
@@ -31,34 +29,13 @@ function sectionAppris(etat) {
       : h('ul', { classe: 'liste-simple' }, r.semaines.map((s) => h('li', null, `Semaine du ${libelleJour(s.lundi)} : ${s.aPreciser} à préciser sur ${s.composants}`))));
 }
 
-/** Copie le rapport ; sans presse-papiers, l'affiche dans une zone de texte à sélectionner. */
-async function copier(texte, zone) {
-  try {
-    await globalThis.navigator.clipboard.writeText(texte);
-    afficherMessage('Rapport copié. Collez-le dans la conversation.', 'ok');
-  } catch {
-    const champ = h('textarea', { classe: 'retour-essai-texte', rows: 10, readonly: true, 'aria-label': 'Rapport à copier' });
-    champ.value = texte;
-    zone.replaceChildren(h('p', { classe: 'aide' }, 'Copie automatique indisponible : sélectionnez tout le texte ci-dessous, puis copiez-le.'), champ);
-  }
+function sectionCentre() {
+  const ouvertes = lireNotes().filter((n) => n.etat !== 'reglee').length;
+  return carte('Notes et diagnostic',
+    h('p', { classe: 'aide' }, 'Notes, retours d\'essai et journal partent ensemble, d\'un seul geste, depuis une même feuille. Rien n\'est envoyé automatiquement.'),
+    interrupteurPastille(),
+    h('p', null, `${pluriel(ouvertes, 'note ouverte', 'notes ouvertes')} · ${pluriel(lireEvenements().length, 'événement noté', 'événements notés')}`),
+    h('div', { classe: 'actions' }, bouton('Ouvrir notes et diagnostic', () => ouvrirCentreDev(), 'court')));
 }
 
-function sectionRetours() {
-  const retours = lireRetours();
-  const rapport = () => texteRapport(lireRetours(), { version: VERSION_APP, date: new Date().toISOString() });
-  const zone = h('div', { 'aria-live': 'polite' });
-  const peutPartager = typeof globalThis.navigator?.share === 'function';
-  return carte('Retours d\'essai',
-    h('p', { classe: 'aide' }, 'Ces retours sont déjà inclus dans le fichier de diagnostic : un seul partage suffit. Rien n\'est envoyé automatiquement ; ils sont effacés après 14 jours.'),
-    h('p', null, pluriel(retours.length, 'retour noté', 'retours notés')),
-    h('div', { classe: 'actions' },
-      bouton('Copier le rapport', () => copier(rapport(), zone), 'court', { disabled: retours.length === 0 }),
-      peutPartager ? bouton('Partager', async () => { try { await globalThis.navigator.share({ title: 'Rapport d\'essai Sanji', text: rapport() }); } catch { /* annulé */ } }, 'court', { disabled: retours.length === 0 }) : null,
-      bouton('Effacer les retours', () => confirmer({
-        titre: 'Effacer les retours d\'essai ?', texte: 'Les retours gardés sur cet appareil seront supprimés. Vos menus ne changent pas.', libelleOk: 'Effacer', danger: true,
-        action: () => { effacerRetours(); redessiner(); },
-      }), 'court', { disabled: retours.length === 0 })),
-    zone);
-}
-
-export const sectionsApprentissage = (etat) => [indicateurErreurs(), sectionAppris(etat), sectionRetours(), sectionDiagnostic(etat)];
+export const sectionsApprentissage = (etat) => [indicateurErreurs(), sectionAppris(etat), sectionCentre()];

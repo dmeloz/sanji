@@ -82,3 +82,55 @@ test('texteDiagnostic : les retours d\'essai sont inclus dans le même fichier',
   assert.match(t, /RETOURS D'ESSAI[^\n]*\nRapport d'essai Sanji\nRetours : 1/);
   assert.equal(texteDiagnostic({ evenements: [] }).includes('RETOURS D\'ESSAI'), false);
 });
+
+// ---- « Depuis le dernier envoi » (v110)
+import { clePhoto, notesPourEnvoi, nouveautes } from '../app/js/domaine/rapport-diagnostic.js';
+
+const REPERE = { h: h(10), notesEnvoyees: ['n1'], photosEnvoyees: ['diag|P1|feuille'] };
+
+test('texteDiagnostic avec repère : seulement le nouveau, en-tête chiffré, état en chiffres sans la liste des actions', () => {
+  const evenements = [
+    { h: h(5), type: 'ia', outil: 'rendre_feuille', ok: true, statut: 200, contenu: 'VIEUX_CONTENU_IA' },
+    { h: h(20), type: 'ia', outil: 'rendre_feuille', ok: true, statut: 200, contenu: 'NOUVEAU_CONTENU_IA' },
+    { h: h(21), type: 'clic', libelle: 'Nouveau clic' },
+  ];
+  const resume = { ...resumeEtat(etatVide()), dernieresActions: [{ h: h(1), action: 'ACTION_VUE' }] };
+  const t = texteDiagnostic({ evenements, resume, repere: REPERE, notesNouvelles: 2 });
+  assert.match(t, /Depuis le dernier envoi \(2026-10-01 08:10:00\) : 2 événements, 2 notes nouvelles/);
+  assert.match(t, /Données à lire|Ce fichier ne contient jamais votre clé/);
+  assert.equal(t.includes('VIEUX_CONTENU_IA'), false);
+  assert.match(t, /NOUVEAU_CONTENU_IA/);
+  assert.equal(t.includes('ACTION_VUE'), false);
+  assert.equal(texteDiagnostic({ evenements, resume }).includes('ACTION_VUE'), true, 'sans repère : comme avant');
+  assert.equal(texteDiagnostic({ evenements }).includes('Depuis le dernier envoi'), false);
+});
+
+test('texteDiagnostic avec repère : 60 lignes au plus, navigations consécutives identiques regroupées « ×N »', () => {
+  const nav = Array.from({ length: 5 }, (_, i) => ({ h: h(20 + i), type: 'navigation', route: '#/semaine' }));
+  const autres = Array.from({ length: 100 }, (_, i) => ({ h: h(30 + i), type: 'clic', libelle: `b${i}` }));
+  const t = texteDiagnostic({ evenements: [...nav, ...autres], repere: REPERE });
+  assert.match(t, /lignes pour 105 événements/);
+  assert.equal(t.split('\n').filter((l) => l.includes(' · clic · ')).length, 60);
+  const regroupe = texteDiagnostic({ evenements: nav, repere: REPERE });
+  assert.match(regroupe, /route=#\/semaine ×5/);
+  assert.equal(regroupe.split('\n').filter((l) => l.includes('navigation')).length, 1);
+});
+
+test('nouveautes et notesPourEnvoi : notes déjà transmises sur une ligne tronquée à 60, nouvelles en détail, photos et retours filtrés', () => {
+  const notes = [
+    { id: 'n1', type: 'bug', categorie: 'bug_gene', texte: `ANCIENNE ${'x'.repeat(100)}`, ecran: 'A', etat: 'ouverte', h: h(1) },
+    { id: 'n0', type: 'bug', categorie: 'bug_gene', texte: 'REGLEE_ANCIENNE', ecran: 'A', etat: 'reglee', h: h(1) },
+    { id: 'n2', type: 'idee', categorie: 'idee_remarque', texte: 'NOUVELLE_NOTE', ecran: 'B', etat: 'ouverte', h: h(15) },
+  ];
+  const photos = [{ h: 'P1', type: 'feuille' }, { h: 'P2', type: 'fiche' }];
+  const retours = [{ h: h(1), type: 'menu' }, { h: h(30), type: 'menu' }];
+  const nv = nouveautes({ notes, photos, retours }, { ...REPERE, notesEnvoyees: ['n1', 'n0'] });
+  assert.deepEqual(nv.notes.map((n) => n.id), ['n2']);
+  assert.deepEqual(nv.photos.map(clePhoto), ['diag|P2|fiche']);
+  assert.equal(nv.retours.length, 1);
+  const texte = notesPourEnvoi(nv, { version: '110', date: 'd' });
+  assert.match(texte, /NOUVELLE_NOTE/);
+  assert.match(texte, /1 notes déjà transmises, toujours ouvertes :\n {2}- ANCIENNE x+…$/);
+  assert.equal(texte.includes('REGLEE_ANCIENNE'), false);
+  assert.equal(nouveautes({ notes, photos, retours }, null).notes.length, 3, 'premier envoi : tout');
+});

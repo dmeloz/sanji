@@ -49,12 +49,21 @@ test('feuille : annotations manuscrites et restes de lecture écartés', () => {
   assert.deepEqual(r.ignorees, ['30', '+ note au stylo', '8h', '40', '30 + note']);
 });
 
-test('feuille : nombre de lignes incohérent = avertissement, rien de réparti', () => {
-  const r = analyserFeuille('lundi 5 octobre\nriz et carottes\nmardi 6 octobre\npâtes\npoisson, riz');
-  assert.equal(r.avertissements.length, 1);
-  assert.match(r.avertissements[0], /2 jour\(s\) reconnu\(s\) mais 3 ligne\(s\)/);
-  assert.ok(r.jours.every((j) => j.menu1 === '' && j.menu2 === ''));
-  assert.deepEqual(r.lignes, ['riz et carottes', 'pâtes', 'poisson, riz']);
+test('feuille : un jour à 1 plat est signalé seul, les autres jours sont répartis', () => {
+  const r = analyserFeuille('lundi 5 octobre\nriz et carottes\nmardi 6 octobre\npâtes\npoisson, riz\nmercredi 7 octobre\nsoupe\ntarte');
+  assert.deepEqual(r.avertissements, ['Lundi 5 octobre : 1 ligne de menu au lieu de 2, à placer à la main.']);
+  assert.deepEqual(r.jours.map((j) => [j.menu1, j.menu2]), [['', ''], ['pâtes', 'poisson, riz'], ['soupe', 'tarte']]);
+  assert.deepEqual(r.aVerifier, [{ jourSemaine: 1, libelle: 'Lundi 5 octobre', plats: ['riz et carottes'] }]);
+  assert.deepEqual(r.lignes, ['riz et carottes', 'pâtes', 'poisson, riz', 'soupe', 'tarte']);
+});
+
+test('feuille : un jour à 3 plats est signalé avec ses lignes, sans bloquer les autres', () => {
+  const r = analyserFeuille('lundi 5 octobre\na b c\nd e f\ng h i\nmardi 6 octobre\npâtes\npoisson, riz');
+  assert.deepEqual(r.avertissements, ['Lundi 5 octobre : 3 lignes de menu au lieu de 2, à placer à la main.']);
+  assert.deepEqual(r.aVerifier[0].plats, ['a b c', 'd e f', 'g h i']);
+  assert.deepEqual(r.jours.map((j) => j.menu1), ['', 'pâtes']);
+  const sem = repartirSurSemaine(r, '2026-10-05');
+  assert.deepEqual(Object.keys(sem.saisie), ['2026-10-06']);
 });
 
 test('feuille : aucun jour, jour répété, texte vide', () => {
@@ -188,4 +197,40 @@ test('semaine : un texte d\'une autre semaine garde ses avertissements et rend l
   assert.equal(r.semaine.lundi, '2026-03-09');
   assert.deepEqual(r.corrections, []);
   assert.ok(r.avertissements.length > 0);
+});
+
+test('sous-titre entre parenthèses (« (À midi uniquement) ») : écarté, jamais compté comme un plat ; la semaine se répartit', () => {
+  // Arrange : texte rendu par l'IA pour une vraie photo (menu du marché, 2 plats par jour, prix attachés)
+  const texte = ['Menu du marché', '(À midi uniquement)', 'Lundi 12 octobre', 'Fusilli à la N\'Duja 21.-', 'Emincé de bœuf à la moutarde, pommes grenailles 24.-',
+    'Mardi 13 octobre', 'Casarecce au fromage de chèvre et noix 19.-', 'Dos de lieu noir aux crevettes, boulghour 22.-'].join('\n');
+  // Act
+  const analyse = analyserFeuille(texte);
+  const { saisie, avertissements } = repartirSurSemaine(analyse, '2026-10-12');
+  // Assert
+  assert.ok(analyse.ignorees.includes('(À midi uniquement)'));
+  assert.deepEqual(avertissements, []);
+  assert.equal(saisie['2026-10-12'].menu1, 'Fusilli à la N\'Duja');
+  assert.equal(saisie['2026-10-13'].menu2, 'Dos de lieu noir aux crevettes, boulghour');
+});
+
+test('une ligne entre parenthèses longue (un vrai plat) n\'est pas écartée', () => {
+  const analyse = analyserFeuille(['Lundi 12 octobre', '(riz pilaf aux petits légumes de saison, beurre noisette et herbes fraîches)', 'poulet rôti'].join('\n'));
+  assert.equal(analyse.ignorees.length, 0);
+});
+
+test('feuille réelle de la photo : en-tête, sous-titre, 5 jours, prix « 21.- » : 10 plats répartis, aucun avertissement', () => {
+  // Arrange
+  const texte = ['Menu du marché', '(À midi uniquement)']
+    .concat(['Lundi 12 octobre', 'Mardi 13 octobre', 'Mercredi 14 octobre', 'Jeudi 15 octobre', 'Vendredi 16 octobre']
+      .flatMap((jour, i) => [jour, `entrée ${i} et riz 21.-`, `poulet ${i}, pommes 21.-`])).join('\n');
+  // Act
+  const analyse = analyserFeuille(texte);
+  const { saisie, avertissements } = repartirSurSemaine(analyse, '2026-10-12');
+  // Assert
+  assert.deepEqual(analyse.avertissements, []);
+  assert.deepEqual(avertissements, []);
+  assert.equal(analyse.jours.length, 5);
+  assert.equal(analyse.lignes.length, 10);
+  assert.deepEqual(analyse.ignorees, ['Menu du marché', '(À midi uniquement)']);
+  assert.deepEqual(saisie['2026-10-16'], { menu1: 'entrée 4 et riz', menu2: 'poulet 4, pommes' });
 });

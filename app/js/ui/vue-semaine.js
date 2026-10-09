@@ -7,7 +7,7 @@
 import { ajouterJours, creneauxDuJour, estDateValide, estOuvert, jourSemaine, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { alertesAllergenes } from '../domaine/allergenes.js';
-import { portionsMenu } from '../domaine/calcul.js';
+import { calculerComposant, portionsMenu } from '../domaine/calcul.js';
 import { etatCreneau, evaluationProduction } from '../domaine/planification.js';
 import { pointsAConfirmer } from '../domaine/points.js';
 import { tableauBlanc } from '../domaine/tableau-blanc.js';
@@ -22,6 +22,7 @@ import { bouton, lien, pastille, repliable } from './elements.js';
 import { ouvrirFiche } from './fiches.js';
 import { boutonLireFiche } from './lecture-fiche.js';
 import { problemeHorsLigne } from './horsligne.js';
+import { demanderReinitialisation, peutReinitialiser } from './reinitialiser-semaine.js';
 import { qteNoeuds, quantite } from './format.js';
 import {
   actionsTache, defaireEnUnToucher, dialogCorriger, dialogPlanifier, faireEnUnToucher, ligneProduction, noeudEvaluation,
@@ -81,6 +82,7 @@ function boutonActionsFeuille(lundi, date) {
         h('a', { href: `#/import/${lundi}`, classe: 'btn sa-action', onClick: () => fermer() }, 'Importer les menus'),
         h('button', { type: 'button', classe: 'btn sa-action', onClick: () => { fermer(); ouvrirAssistantPlanning({ date }); } }, 'Proposer un planning'),
         h('a', { href: `#/semaine/${lundi}/tableau`, classe: 'btn sa-action', onClick: () => fermer() }, 'Vue de la semaine'),
+        peutReinitialiser(lundi) ? h('button', { type: 'button', classe: 'btn sa-action', onClick: () => { fermer(); demanderReinitialisation(lundi); } }, 'Réinitialiser la semaine') : null,
       ],
     }),
   }, '⋯');
@@ -183,9 +185,9 @@ function ligneComposants(etat, date, menu) {
   const composants = Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
   if (composants.length === 0) return null;
   const aposte = composants.filter((c) => c.attribue).length;
-  // Montrer l'exception : tout est au poste = replié (le résumé suffit) ; dès qu'un élément manque, déplié, et chaque
-  // élément hors poste le dit en toutes lettres. Les interrupteurs restent (modifier l'attribution d'un geste).
-  return h('details', { classe: 'repliable sem-poste', open: aposte < composants.length },
+  // Carte réduite (décision du 2026-10-09) : l'attribution reste repliée, le résumé dit combien d'éléments sont au poste.
+  // Les interrupteurs restent dedans (modifier l'attribution d'un geste).
+  return h('details', { classe: 'repliable sem-poste' },
     h('summary', null, `Attribution au poste : ${aposte} sur ${composants.length}`),
     h('ul', { classe: 'sem-composants' }, composants.map((c) => h('li', { classe: 'sem-composant' },
       lien(`#/fiche/${encodeURIComponent(c.id)}`, c.nom, 'tache-nom'),
@@ -198,7 +200,7 @@ function blocMenu(etat, date, menu) {
   return h('div', { classe: 'sem-menu' },
     h('div', { classe: 'sem-ligne' },
       h('span', { classe: 'sem-rang' }, `Menu ${menu}`),
-      intitule === '' ? h('span', { classe: 'sem-neutre' }, 'menu non saisi') : h('span', { classe: 'sem-intitule' }, intitule)),
+      intitule === '' ? h('span', { classe: 'sem-neutre' }, 'menu non saisi') : h('span', { classe: 'sem-intitule sem-intitule-court', title: intitule }, intitule)),
     certitude ? h('p', { classe: 'sem-couverts' },
       certitude.manquante ? h('span', { classe: 'sem-neutre' }, 'prévision à saisir')
         : [h('span', { classe: 'sem-qte' }, String(certitude.total)), ` ${certitude.total >= 2 ? 'couverts' : 'couvert'}`],
@@ -268,6 +270,14 @@ function noeudQuantite(etat, l) {
   return h('span', { classe: 'sem-neutre sem-qte-absente' }, 'quantité à compléter');
 }
 
+/** État court d'une ligne : fait, à confirmer (quantité absente ou valeur INCONNU) ou calculé. Une action préparatoire n'a pas de quantité. */
+function pastilleEtat(etat, l, fait) {
+  if (fait) return pastille('fait', 'gris');
+  if (l.genre === 'preparatoire') return null;
+  const aConfirmer = l.cible === null || calculerComposant(etat, l.composantId).aValider;
+  return aConfirmer ? pastille('à confirmer', 'ambre') : pastille('calculé', 'gris');
+}
+
 function ligneAProduire(etat, date, l) {
   const p = etat.productions[l.productionId];
   const fait = p?.etat === 'fait';
@@ -293,7 +303,7 @@ function ligneAProduire(etat, date, l) {
     h('div', { classe: 'sem-prod-ligne' },
       h('div', { classe: 'sem-prod-corps' },
         lien(`#/fiche/${encodeURIComponent(l.composantId)}`, nom, 'tache-nom'),
-        h('p', { classe: 'sem-prod-sous' }, fait ? pastille('fait', 'gris') : null, ' ',
+        h('p', { classe: 'sem-prod-sous' }, pastilleEtat(etat, l, fait), ' ',
           horsRegle ? h('strong', { classe: 'sem-hors-regle' }, 'hors règle · ') : null, sousTitre)),
       noeudQuantite(etat, l)),
     h('div', { classe: 'sem-prod-actions' }, principal),
@@ -322,8 +332,9 @@ function rendreJour(etat, date) {
   if (!estOuvert(date)) return racine;
   const vide = productionsDuJour(etat, date).length === 0 ? vueDetail.etatVideSansMenu(etat, date) : null;
   if (vide) racine.appendChild(vide);
-  racine.appendChild(carteServices(etat, date));
+  // « À produire » d'abord (décision du 2026-10-09), puis les services réduits, puis tout le détail replié.
   racine.appendChild(sectionAProduire(etat, date));
+  racine.appendChild(carteServices(etat, date));
   racine.appendChild(repliable(h('h2', { classe: 'sem-section' }, 'Tout le détail du jour'), false,
     [h('p', { classe: 'aide' }, 'Intitulés, composants, prévisions, fiches de fonction, allergies, créneaux, après service, points à confirmer. La carte n\'est qu\'un contexte : aucune quantité n\'en est calculée.'),
       ...vueDetail.sectionsDuJour(etat, date, { replie: true })], { classe: 'sem-detail', id: 'detail-jour' }));

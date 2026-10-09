@@ -79,7 +79,7 @@ function jourDuBord(jour) {
     h('a', { href: `#/semaine/${jour.date}`, classe: 'bord-jour-lien feutre',
       'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''} : ouvrir le détail du jour` },
     `${etiquetteJour(jour.date)}${couverts} `,
-    jour.estAujourdhui ? h('span', { classe: 'bord-badge' }, "aujourd'hui") : null),
+    jour.estAujourdhui ? h('span', { classe: 'bord-badge' }, h('span', { 'aria-hidden': 'true' }, '● '), "aujourd'hui") : null),
     saisis.length === 0 ? h('p', { classe: 'tb-discret' }, 'Menus non saisis') : saisis.map((m) => ligneMenu(jour, m)));
 }
 

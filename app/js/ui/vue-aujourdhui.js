@@ -9,6 +9,7 @@ import { libelleJour, lundiDe } from '../domaine/dates.js';
 import { libelle } from '../domaine/statuts.js';
 import { alertesAllergenes } from '../domaine/allergenes.js';
 import { decisionsDe } from '../domaine/decisions.js';
+import { preparationSemaine } from '../domaine/preparation.js';
 import { aujourdhuiDe } from '../domaine/tableau-blanc.js';
 import { aujourdhui, maintenant } from '../magasin.js';
 import { h, svg } from './dom.js';
@@ -205,8 +206,9 @@ function carteFiche(d, aujourd, etat) {
 // ------------------------------------------------------------------ rappels
 
 /** Ce que l'ancien tableau disait encore et qui garde une action : menus de la semaine à saisir, portions à régler, sauvegarde. */
-function sectionRappels(d) {
+function sectionRappels(d, aFaire) {
   const lignes = [];
+  if (aFaire > 0) lignes.push(lien(`#/preparer/${d.lundi}`, `Préparer la semaine · ${aFaire} à faire`, 'au-ligne au-ligne-lien'));
   if (d.rappelVendredi) lignes.push(lien(`#/import/${d.rappelVendredi.lundi}`, 'Menus de la semaine prochaine · à importer', 'au-ligne au-ligne-lien'));
   if (d.semaineSansMenu) lignes.push(lien(`#/import/${d.lundi}`, 'Saisir les menus de la semaine', 'au-ligne au-ligne-lien'));
   for (const l of d.production.chiffrage) lignes.push(lien(l.lien, l.detail ? `${l.texte} : ${l.detail}` : l.texte, 'au-ligne au-ligne-lien'));
@@ -247,7 +249,7 @@ export function rendre(etat) {
   const donnees = aujourdhuiDe(etat, aujourd, maintenant().slice(11, 16));
   const racine = h('div', { classe: 'vue vue-aujourdhui' });
   const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), carteProchaine(donnees, aujourd),
-    sectionAAvancer(donnees, aujourd), carteFiche(donnees, aujourd, etat), sectionAConfirmer(donnees, decisionsDe(etat, aujourd)), sectionRappels(donnees)];
+    sectionAAvancer(donnees, aujourd), carteFiche(donnees, aujourd, etat), sectionAConfirmer(donnees, decisionsDe(etat, aujourd)), sectionRappels(donnees, preparationSemaine(etat, donnees.lundi, aujourd).aFaire)];
   for (const m of morceaux) if (m) racine.appendChild(m);
   return racine;
 }

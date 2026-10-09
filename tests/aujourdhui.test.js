@@ -399,7 +399,7 @@ test('hors règle : une vraie avance hors règle (plus de 2 jours sans règle) r
   assert.equal(conso?.horsRegle, true, 'à consommer : même définition');
 });
 
-test('bandeau : même nombre que la feuille « À décider » (sauce implicite seule, plusieurs répartitions provisoires), et accès depuis Production', async () => {
+test('bandeau : même nombre que la feuille « À décider » (sauce implicite seule, plusieurs répartitions provisoires) ; Production n\'a plus de puce', async () => {
   const production = await import('../app/js/ui/vue-production.js');
   const sauce = calme(etatVide());
   definirMenu(sauce, S.mercredi, 1, 'Penne aux courgettes', h());
@@ -411,14 +411,10 @@ test('bandeau : même nombre que la feuille « À décider » (sauce implicite s
     const carte = classes(page(S.mercredi, e), 'tdb-confirmer')[0];
     assert.ok(carte, `${nom} : carte « À confirmer » présente`);
     assert.match(carte.textContent, new RegExp(`À confirmer · ${attendu}`), nom);
+    // Production épurée (2026-10-09) : plus de puce « N à décider » ; les décisions se disent sur Aujourd'hui.
     const prod = aDate(S.mercredi, () => { magasin.remplacer(structuredClone(e)); return production.rendre(magasin.etat(), S.mercredi); });
-    const acces = classes(prod, 'prod-adecider')[0];
-    assert.ok(acces, `${nom} : second accès dans Production`);
-    assert.match(acces.textContent, new RegExp(`${attendu} à décider`));
-    assert.equal(acces.balise, 'button');
+    assert.equal(classes(prod, 'prod-adecider').length, 0, `${nom} : plus de puce « à décider » dans Production`);
   }
-  const calmeProd = aDate(S.mercredi, () => { magasin.remplacer(calme(etatVide())); return production.rendre(magasin.etat(), S.mercredi); });
-  assert.equal(classes(calmeProd, 'prod-adecider').length, 0, 'rien à décider : pas d\'accès');
 });
 
 test('samedi : pas de menu du jour, donc pas de case « Couverts midi » ; la case Production occupe la largeur', () => {
@@ -429,4 +425,16 @@ test('samedi : pas de menu du jour, donc pas de case « Couverts midi » ; la ca
   // Un jour de semaine garde les deux cases.
   const semaine = page(S.mercredi, mercredi());
   assert.equal(classes(semaine, 'tdb-case').length, 2);
+});
+
+test('Rappels : « Préparer la semaine · N à faire » mène à l\'écran quand des couverts ou des valeurs manquent, absent quand tout est fait', () => {
+  const e = calme(etatVide());
+  definirMenu(e, S.mercredi, 2, 'riz, carottes', h());
+  const n = page(S.mercredi, e);
+  const ligne = n.tous((x) => x.balise === 'a' && /^Préparer la semaine · \d+ à faire$/.test(x.textContent))[0];
+  assert.ok(ligne, 'ligne dans les rappels');
+  assert.equal(ligne.attributs.href, `#/preparer/${S.lundi}`);
+  const fait = calme(etatVide());
+  const vide = page(S.mercredi, fait);
+  assert.equal(vide.tous((x) => /Préparer la semaine/.test(x.textContent)).length, 0, 'rien à préparer : aucune ligne');
 });

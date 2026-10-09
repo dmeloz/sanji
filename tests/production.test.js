@@ -51,31 +51,29 @@ test('Production : le routeur la sert à #/production, titre « Production »', 
   assert.equal(vue.titre(), 'Production');
 });
 
-test('sélecteur Aujourd\'hui / Demain : deux liens vers les jours, le jour affiché porte aria-current', () => {
+test('en-tête : « Production » et la date en une ligne, aucun sélecteur Aujourd\'hui / Demain, flèches ‹ › vers le jour précédent et suivant', () => {
   const { e } = lundi();
   const noeud = page(e, S.lundi);
-  const seg = classes(noeud, 'prod-segment');
-  assert.deepEqual(seg.map((a) => a.textContent), ['Aujourd\'hui', 'Demain']);
-  assert.deepEqual(seg.map((a) => a.attributs.href), [`#/production/${S.lundi}`, `#/production/${S.mardi}`]);
-  assert.equal(seg[0].attributs['aria-current'], 'date');
-  assert.equal(seg[1].attributs['aria-current'], undefined);
-  const demain = page(e, S.mardi);
-  assert.equal(classes(demain, 'prod-segment')[1].attributs['aria-current'], 'date');
-  assert.equal(classes(demain, 'prod-segment')[0].attributs['aria-current'], undefined);
-  const plusLoin = page(e, S.jeudi);
-  assert.equal(classes(plusLoin, 'prod-segment').filter((a) => a.attributs['aria-current']).length, 0, 'ni l\'un ni l\'autre');
-  assert.ok(classes(plusLoin, 'jour-barre').length === 1, 'la barre de jours reste pour aller plus loin');
+  const tete = classes(noeud, 'prod-tete')[0];
+  assert.match(tete.textContent, /^Production\s*Lundi 5 octobre/);
+  assert.equal(classes(noeud, 'prod-segment').length, 0, 'plus de sélecteur Aujourd\'hui / Demain');
+  assert.equal(classes(noeud, 'prod-selecteur').length, 0);
+  assert.equal(classes(noeud, 'jour-barre').length, 0, 'plus de barre de jours');
+  assert.equal(classes(noeud, 'prod-adecider').length, 0, 'plus de puce « à décider »');
+  const hrefs = classes(tete, 'prod-fleche').map((a) => [a.textContent, a.attributs.href]);
+  assert.deepEqual(hrefs, [['‹', '#/production/2026-10-03'], ['›', `#/production/${S.mardi}`]]);
+  const dimanche = classes(page(e, S.samediPrecedent), 'prod-fleche').map((a) => a.attributs.href);
+  assert.equal(dimanche[1], `#/production/${S.lundi}`, 'le jour suivant le samedi est le lundi (dimanche sauté)');
 });
 
-test('en-tête : jour, « Production », « x/n » et jauge, aucun état hors ligne quand tout est normal (pas de synchronisation)', () => {
+test('en-tête : aucun état hors ligne quand tout est normal, aucun « x/n » ni jauge', () => {
   const { e, brut } = lundi();
   const texte = classes(page(e), 'prod-tete')[0].textContent;
-  assert.match(texte, /Lundi 5 octobre \(aujourd'hui\)Production0\/2/);
   assert.doesNotMatch(texte, /hors ligne/, 'la normalité ne s\'affiche pas (vérification en cours ou prêt)');
   assert.doesNotMatch(texte, /synchronis|en attente/i);
   marquerFait(e, principaleDe(e, brut), undefined, h(1));
-  assert.match(classes(page(e), 'prod-tete')[0].textContent, /Production1\/2/);
-  assert.equal(classes(page(e), 'prod-jauge')[0].attributs['aria-valuenow'], '1');
+  assert.doesNotMatch(classes(page(e), 'prod-tete')[0].textContent, /\d\/\d/);
+  assert.equal(classes(page(e), 'prod-jauge').length, 0);
 });
 
 test('ligne Recette : case, nom (lien vers la fiche), quantité ; ni étiquette, ni créneau, ni provenance, ni chevron (ils se lisent dans la fiche)', () => {
@@ -85,7 +83,7 @@ test('ligne Recette : case, nom (lien vers la fiche), quantité ; ni étiquette,
   assert.equal(classes(ligne, 'prod-etiquette').length, 0);
   assert.equal(classes(ligne, 'prod-etiquettes').length, 0);
   assert.doesNotMatch(ligne.textContent, /Recette|après le service|provenance/);
-  assert.ok(classes(noeud, 'jour-bloc').some((b) => b.querySelector('h2').textContent === 'Menu 2' && b.tous((x) => x === ligne).length));
+  assert.ok(classes(noeud, 'jour-bloc').some((b) => b.querySelector('h2').textContent === 'M2' && b.tous((x) => x === ligne).length));
   assert.equal(classes(ligne, 'mep-qte').length, 1);
   assert.equal(classes(ligne, 'prod-chevron').length, 0);
   assert.equal(classes(ligne, 'prod-nom')[0].attributs.href, `#/fiche/${encodeURIComponent(recette)}`);
@@ -105,13 +103,13 @@ test('ligne Brut : seulement nom et quantité ; ni pastille « Brut », ni crén
   assert.deepEqual(hrefs, [`#/fiche/${encodeURIComponent(brut)}`]);
 });
 
-test('une quantité absente n\'est ni une alerte ni une décision : « quantité à compléter », sans provenance', () => {
+test('une quantité absente n\'est ni une alerte ni une décision : étiquette « à préciser », sans provenance', () => {
   const e = etatVide();
   const c = composantValide(e, S.lundi, 2, J.PREPARATION_TEST, { nom: 'SANS_PREVISION_TEST' });
   planifier(e, principaleDe(e, c), S.lundi, 'avant_midi', h());
   const noeud = page(e);
   const ligne = ligneDe(noeud, 'SANS_PREVISION_TEST');
-  assert.match(ligne.textContent, /quantité à compléter/);
+  assert.match(ligne.textContent, /à préciser/, 'l\'étiquette dit pourquoi, sans « — » seul');
   assert.equal(classes(ligne, 'prod-provenance').length, 0);
   assert.equal(classes(noeud, 'jour-decisions').length, 0);
 });
@@ -140,8 +138,10 @@ test('accessibilité : cibles de 44 px, légendes de 13 px, quantités en police
   const fin = css.indexOf('/* =====', debut);
   const bloc = css.slice(debut, fin > debut ? fin : undefined); // le bloc Production d'origine, pas ceux des écrans suivants
   const bloc2 = css.slice(css.indexOf('Production, refonte 2')); // les règles épurées de la refonte 2 (dernier bloc)
-  assert.match(bloc2, /\.prod-segment \{[^}]*min-height: var\(--cible\)/);
-  assert.match(bloc2, /\.prod-adecider \{[^}]*min-height: var\(--cible\)/);
+  const mini = css.slice(css.indexOf('Production minimaliste')); // retours d'essai du 2026-10-09 : flèches, « à saisir », résumés
+  assert.match(mini, /\.prod-fleche \{[^}]*width: var\(--cible\); height: var\(--cible\)/);
+  assert.match(mini, /\.prod-asaisir \{[^}]*min-height: var\(--cible\)/);
+  assert.match(mini, /\.prod-resume \{[^}]*min-height: 48px/);
   assert.match(css, /\.prod-plus \{[^}]*min-width: var\(--cible\)[^}]*min-height: var\(--cible\)/);
   assert.match(bloc, /\.prod-ligne \.mep-qte \{ font-family: var\(--police-qte\)/);
   assert.match(css, /--cible: 44px/);

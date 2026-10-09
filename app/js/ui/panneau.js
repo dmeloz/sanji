@@ -2,6 +2,7 @@
 // Une erreur levée par `surEnregistrer` s'affiche dans le panneau, qui reste ouvert ; l'état n'est pas touché.
 
 import { h, parId } from './dom.js';
+import { activerFermetureParGlisse } from './glisser.js';
 
 /**
  * @param {object} options
@@ -38,6 +39,9 @@ export function panneau(options) {
     h('button', { type: 'button', classe: annulerEnLien && !lectureSeule ? 'btn btn-lien' : 'btn', onClick: () => dialogue.close() }, lectureSeule ? 'Fermer' : libelleAnnuler),
     boutonOk,
   ];
+  const poignee = h('span', { classe: 'panneau-poignee', 'aria-hidden': 'true' });
+  const enTete = h('h2', { id: 'panneau-titre', classe: 'panneau-titre' }, titre);
+  activerFermetureParGlisse(dialogue, [poignee, enTete]);
   let enCours = false;
   const formulaire = h('form', {
     novalidate: true,
@@ -58,12 +62,12 @@ export function panneau(options) {
       }
     },
   },
-  h('span', { classe: 'panneau-poignee', 'aria-hidden': 'true' }),
-  h('h2', { id: 'panneau-titre', classe: 'panneau-titre' }, titre),
+  poignee,
+  enTete,
   h('div', { classe: 'panneau-corps' }, contenu),
   zoneErreur,
   h('div', { classe: 'panneau-actions' }, boutons));
-  // Poignée de la feuille montante (premier enfant du formulaire) : repère visuel seulement ; fermer reste « Annuler », Échap ou le fond.
+  // Poignée de la feuille montante (premier enfant du formulaire) : tirer la poignée ou le titre vers le bas ferme la feuille (comme « Annuler »).
   dialogue.appendChild(formulaire);
   dialogue.addEventListener('close', () => dialogue.remove());
   (parId('panneaux') ?? document.body).appendChild(dialogue);

@@ -158,11 +158,11 @@ a { color: var(--bleu-texte); }
 .contenu {
   max-width: var(--largeur-max);
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 14px) calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 28px) calc(env(safe-area-inset-left) + 14px);
+  padding: calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 14px) calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 84px) calc(env(safe-area-inset-left) + 14px);
   outline: none;
 }
 
-.bandeaux { max-width: var(--largeur-max); margin: 0 auto; padding: 0 calc(env(safe-area-inset-right) + 14px) 0 calc(env(safe-area-inset-left) + 14px); }
+.bandeaux { position: sticky; top: 0; z-index: 20; max-width: var(--largeur-max); margin: 0 auto; padding: 0 calc(env(safe-area-inset-right) + 14px) 0 calc(env(safe-area-inset-left) + 14px); }
 .bandeaux .encadre { margin-top: 12px; }
 .bandeau-version { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--action-fond); border-color: var(--action); color: var(--action-fonce); }
 
@@ -353,13 +353,15 @@ dialog.panneau[open] { animation: ouverture-panneau 160ms ease-out; }
 /* Voile derrière le panneau : il assombrit la page, aucun texte ne repose dessus. */
 dialog.panneau::backdrop { background: rgba(8, 12, 16, 0.5); }
 /* Poignée de la feuille montante : petite barre centrée, au-dessus du titre. */
-.panneau-poignee { display: block; width: 40px; height: 5px; margin: 0 auto 10px; border-radius: 3px; background: var(--bordure-forte); }
+.panneau-poignee { position: relative; display: block; width: 40px; height: 5px; margin: 0 auto 10px; border-radius: 3px; background: var(--bordure-forte); touch-action: none; }
+/* Zone de prise élargie autour de la barre : le doigt tire la feuille vers le bas (ui/glisser.js). */
+.panneau-poignee::after { content: ''; position: absolute; inset: -16px -80px -8px; }
 .panneau form { padding: 8px 16px 0; }
 /* Sur mobile, toute feuille se colle en bas de l'écran : angles hauts arrondis, pas de bas arrondi. */
 @media (max-width: 600px) {
   dialog.panneau { width: 100%; max-width: none; margin: auto 0 0; border-radius: var(--rayon) var(--rayon) 0 0; border-bottom: 0; }
 }
-.panneau-titre { font-size: var(--t1); margin-bottom: 12px; }
+.panneau-titre { font-size: var(--t1); margin-bottom: 12px; touch-action: none; }
 .panneau-corps > * + * { margin-top: 12px; }
 .panneau-erreur { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--rouge-fond); border: 1px solid var(--rouge); color: var(--rouge-texte); font-weight: 700; }
 .panneau-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin: 16px -16px 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); position: sticky; bottom: 0; background: var(--carte); border-top: 1px solid var(--bordure); }
@@ -645,7 +647,7 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 @media print {
   :root { color-scheme: light; }
   body { background: #fff; color: #000; }
-  .barre, .onglets, .bandeaux, .messages, #panneaux, .pas-imprime, .actions, button, nav { display: none !important; }
+  .barre, .onglets, .bouton-dev, .bandeaux, .messages, #panneaux, .pas-imprime, .actions, button, nav { display: none !important; }
   .contenu { padding: 0; max-width: none; }
   .carte, .tache, .rubrique { box-shadow: none; border: 1px solid #888; break-inside: avoid; background: #fff; }
   a { color: inherit; text-decoration: none; }
@@ -762,6 +764,35 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .mep-ligne.mep-fait .mep-nom { color: var(--texte-doux); }
 .mep-ligne.mep-fait .mep-qte { color: var(--texte-doux); }
 .mep-ligne.mep-fait .mep-meta { color: var(--texte-doux); }
+
+/* ------------------------------------------------------------ notes de test : pastille « Dev » et feuille de saisie */
+.bouton-dev {
+  position: fixed;
+  right: calc(env(safe-area-inset-right) + 12px);
+  bottom: calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 8px);
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: var(--cible);
+  min-height: var(--cible);
+  padding: 0 14px;
+  border: 2px solid var(--action);
+  border-radius: 999px;
+  background: var(--carte);
+  color: var(--action);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.bouton-dev[hidden] { display: none; }
+/* Les pages à barre « Enregistrer » en bas : la pastille se pose au-dessus de la barre, jamais sur son bouton. */
+body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 84px); }
+.note-dev-legende { font-weight: 700; margin-bottom: 4px; }
+.note-dev-groupe + .note-dev-groupe { margin-top: 12px; }
+.note-dev { padding: 10px 0; border-top: 1px solid var(--bordure); }
+.note-dev:first-child { border-top: 0; }
+.note-dev-texte { overflow-wrap: anywhere; white-space: pre-wrap; }
 
 /* ------------------------------------------------------------ Écran Aujourd'hui (refonte 1, maquette Main) */
 /* Quantités en var(--police-qte) ; un état se dit toujours par un mot écrit, la couleur ne fait que l'appuyer. */
@@ -919,15 +950,16 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .sem-banniere-off { background: var(--carte); border: 1px dashed var(--bordure-forte); }
 .sem-banniere-confirmer { background: var(--exception-fond); border: 1px solid var(--exception-bord); color: var(--exception); font-weight: 600; }
 .sem-banniere-texte { flex: 1; min-width: 0; }
-.sem-carte, .sem-aproduire { background: var(--carte); border-radius: var(--r-carte); padding: 12px 16px; display: grid; gap: 8px; }
+.sem-carte, .sem-aproduire { background: var(--carte); border-radius: var(--r-carte); padding: 12px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .sem-aproduire { background: transparent; padding: 0; }
 .sem-section { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); margin: 0 4px; }
 .sem-carte > .sem-section { margin: 0; }
 .sem-sous-titre { font-size: var(--t-corps); }
-.sem-menu { display: grid; gap: 4px; }
+.sem-menu { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; min-width: 0; }
 .sem-ligne { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: var(--t-corps); }
 .sem-rang { color: var(--texte-doux); flex: none; }
 .sem-intitule { text-align: right; min-width: 0; overflow-wrap: anywhere; }
+.sem-intitule-court { flex: 1 1 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
 .sem-neutre { color: var(--texte-doux); font-style: italic; }
 .sem-qte, .sem-qte-ligne { font-family: var(--police-qte); font-weight: 600; font-size: var(--t-qte); white-space: nowrap; }
 .sem-qte-absente { font-family: var(--police); font-size: var(--t-legende); white-space: normal; text-align: right; }
@@ -937,7 +969,7 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .sem-composant { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--cible); border-top: 1px solid var(--bordure); }
 .sem-fiches { display: grid; gap: 6px; padding-top: 8px; border-top: 1px solid var(--bordure); }
 .sem-liste { display: grid; gap: 8px; }
-.sem-fiche { display: grid; gap: 4px; }
+.sem-fiche { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; min-width: 0; }
 .sem-fiche-titre { font-weight: 600; }
 .sem-allergies { font-size: var(--t-corps); }
 .sem-prod { display: grid; gap: 6px; padding: 8px 8px 8px 14px; background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--r-carte-petite); }
@@ -1050,6 +1082,8 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .imp-titre-section { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); margin: 0; }
 .imp-titre-hors { margin-top: 20px; }
 .imp-photo > summary, .imp-lecture-jours .imp-jour > summary { min-height: var(--cible); display: flex; align-items: center; cursor: pointer; }
+.imp-scanner { margin: 12px 0; }
+.btn-scanner { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 56px; cursor: pointer; }
 .imp-lecture { display: grid; gap: 10px; }
 .imp-lecture-jours { display: flex; flex-direction: column; }
 .imp-jour { border-top: 1px solid var(--bordure); }
@@ -1206,13 +1240,6 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prod-compte { font-family: var(--police-qte); font-weight: 600; font-size: var(--t-section); color: var(--texte-doux); font-variant-numeric: tabular-nums; }
 .prod-jauge { height: 6px; margin-top: 8px; border-radius: 999px; background: var(--carte-2); overflow: hidden; }
 .prod-jauge > span { display: block; height: 100%; border-radius: 999px; background: var(--action); }
-.prod-adecider { display: inline-flex; align-items: center; gap: 4px; min-height: var(--cible); margin: 0 0 6px; padding: 4px 12px; border: 1px solid var(--exception-bord); border-radius: 999px; background: var(--exception-fond); color: var(--exception); font: inherit; font-size: var(--t-corps); font-weight: 650; cursor: pointer; }
-.prod-adecider:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-/* Onglets texte Aujourd'hui / Demain : l'actif est en graisse et souligné d'un filet (jamais la couleur seule). */
-.prod-selecteur { display: flex; gap: 24px; margin: 0 0 4px; border-bottom: 1px solid var(--bordure); }
-.prod-segment { display: flex; align-items: center; min-height: var(--cible); margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--texte-doux); font-size: var(--t0); font-weight: 500; text-decoration: none; }
-.prod-segment-actif { color: var(--texte); font-weight: 650; border-bottom-color: var(--texte); }
-.prod-segment:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .prod-groupe-titre { margin: 14px 0 2px; font-size: var(--t-legende); font-weight: 600; color: var(--texte-doux); letter-spacing: 0; }
 .vue-production .mep-liste { border-top: 0; }
 .prod-principal { display: grid; grid-template-columns: var(--cible) minmax(0, 1fr) auto var(--cible); align-items: center; gap: 4px; min-height: 56px; padding: 2px 0; }
@@ -1227,8 +1254,6 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prod-note-doux { color: var(--texte-doux); font-weight: 500; }
 /* Tâche faite : grisée, jamais barrée. */
 .mep-ligne.mep-fait .mep-qte, .mep-ligne.mep-fait .mep-poids { color: var(--texte-doux); }
-.prod-avances { margin-top: 8px; }
-.prod-avances > summary { display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: var(--texte-doux); cursor: pointer; }
 .prod-pied { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: 12px; }
 
 /* ===== Aujourd'hui, tableau de bord (refonte 2, décision du 2026-10-07) : menus sur 3 jours, cases, À avancer, À confirmer, Prochaine fixe. ===== */
@@ -1392,7 +1417,7 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .sa-lien-production:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 /* Semaine, carte Services : la ligne « Couverts midi » et son bouton (refonte 2). */
-.sa-couverts { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--cible); padding: 4px 0 8px; border-bottom: 1px solid var(--bordure); }
+.sa-couverts { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--cible); padding: 4px 0 8px; border-bottom: 1px solid var(--bordure); }
 .sa-couverts-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .sa-couverts-nombres { font-size: var(--t-corps); white-space: pre-wrap; }
 
@@ -1457,9 +1482,8 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .vue-semaine-globale .bord-zone { background: transparent; border-radius: 0; padding: 12px 0; }
 .vue-semaine-globale .bord-jours { border-top: 1px solid var(--bordure); border-bottom: 1px solid var(--bordure); }
 .vue-semaine-globale .bord-jour:last-child { border-bottom: 0; }
-.bord-aujourdhui { background: var(--encre); color: var(--sur-encre); border-radius: var(--r-carte-petite); }
-.bord-aujourdhui a, .bord-aujourdhui .bord-jour-lien, .bord-aujourdhui .tb-discret, .bord-aujourdhui .tb-rang { color: var(--sur-encre); }
-.bord-aujourdhui .bord-badge { color: var(--sur-encre); border-color: var(--sur-encre); }
+.bord-aujourdhui { background: transparent; border-radius: 0; border-left: 4px solid var(--encre); padding-left: 8px; }
+.bord-aujourdhui .bord-jour-lien { font-weight: 700; }
 .vue-semaine-globale .bord-aujourdhui { border-radius: var(--r-carte-petite); }
 .imp-section-plate { background: transparent; border-radius: 0; padding: 12px 0; border-top: 1px solid var(--bordure); }
 .imp-section-plate > * + * { margin-top: 10px; }
@@ -1473,3 +1497,52 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .etat-vide-actions .btn { flex: 1 1 auto; justify-content: center; }
 .fiche-sans-recette { margin-top: 12px; }
 .fiche-sans-recette .fiche-ligne { min-height: var(--cible); border-bottom: 1px solid var(--bordure); }
+
+/* Préparer la semaine (v108) : une page, une main ; valeurs à toucher de 44 px au moins. */
+.prep-section, .prep-fin { display: grid; gap: 10px; margin-block: 16px; }
+.prep-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.prep-jour, .prep-ligne { display: grid; gap: 8px; border-bottom: 1px solid var(--bordure); padding-bottom: 12px; }
+.prep-jour-tete, .prep-ligne { grid-template-columns: 1fr auto; align-items: center; gap: 12px; }
+.prep-jour-tete { display: flex; justify-content: space-between; align-items: baseline; }
+.prep-nombre { font-family: var(--police-qte); font-weight: 600; font-size: var(--t-qte); }
+.prep-valeurs { display: flex; flex-wrap: wrap; gap: 6px; }
+.prep-valeur { min-height: var(--cible); min-width: var(--cible); padding: 0 14px; font-family: var(--police-qte); }
+.prep-valeur[aria-pressed="true"] { background: var(--encre); color: var(--sur-encre); border-color: var(--encre); }
+.prep-ligne-texte { display: grid; gap: 2px; min-width: 0; }
+.prep-ligne-valeur { font-size: var(--t-legende); color: var(--texte-doux); }
+.prep-saisie { display: flex; gap: 6px; align-items: center; }
+.prep-champ { width: 6rem; min-height: var(--cible); font-family: var(--police-qte); font-size: var(--t-corps); }
+.prep-tout, .prep-fiche { min-height: var(--cible); width: 100%; text-align: center; justify-content: center; }
+.prep-bilan { margin: 0; font-size: var(--t-corps); }
+.envoi-statut { min-height: 1.5em; }
+.sa-couverts .btn { flex: none; }
+.prep-jour, .prep-ligne, .prep-ligne-texte, .prep-saisie { min-width: 0; }
+.prep-saisie .btn { flex: none; }
+.prep-champ { min-width: 0; flex: 0 1 6rem; }
+.prep-retenus { margin: 0; padding-left: 18px; font-size: var(--t-corps); }
+.envoi-statut, .actions { min-width: 0; }
+
+/* ===== Production minimaliste (retours d'essai du 2026-10-09) : en-tête sur une ligne, lignes « verbe + produit … quantité », résumés en feuille. ===== */
+.vue-production .prod-titre-ligne { align-items: center; gap: 8px; min-width: 0; }
+.vue-production .prod-titre-ligne .page-titre { flex: none; margin: 0; }
+.vue-production .prod-date { flex: 1 1 0; min-width: 0; font-size: var(--t-corps); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prod-fleches { display: flex; flex: none; margin-left: auto; }
+.prod-fleche { display: inline-flex; align-items: center; justify-content: center; width: var(--cible); height: var(--cible); font-size: 1.6rem; line-height: 1; color: var(--texte-doux); text-decoration: none; }
+.prod-fleche:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.vue-production .mj-bloc { min-width: 0; color: var(--texte-doux); }
+.vue-production .prod-groupe-titre { margin: 16px 0 0; font-size: var(--t-corps); font-weight: 700; color: var(--texte); }
+.vue-production .case-fait-boite { border-radius: 3px; }
+.vue-production .prod-nom-ligne { flex-wrap: nowrap; }
+.prod-verbe { flex: none; white-space: nowrap; font-weight: 500; color: var(--texte-doux); }
+.vue-production .prod-nom { display: block; flex: 0 1 auto; line-height: var(--cible); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
+.prod-asaisir { display: inline-flex; align-items: center; min-height: var(--cible); padding: 0 4px; background: transparent; border: 0; font: inherit; cursor: pointer; }
+.prod-asaisir:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.prod-saisie { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; margin: 0 0 8px var(--cible); }
+.prod-saisie[hidden] { display: none; }
+.prod-saisie .btn { flex: none; }
+.prod-saisie-unite { font-size: var(--t-corps); color: var(--texte-doux); }
+.prod-resumes { margin-top: 16px; border-top: 1px solid var(--bordure); }
+.prod-resume { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; min-height: 48px; padding: 0; background: transparent; border: 0; border-bottom: 1px solid var(--bordure); font: inherit; font-size: var(--t-corps); color: var(--texte-doux); text-align: left; cursor: pointer; }
+.prod-resume-texte { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prod-resume-fleche { flex: none; font-size: 1.4rem; }
+.prod-resume:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }

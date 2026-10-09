@@ -2,7 +2,7 @@
 // Règle du projet : tout nouveau fichier de app/ s'ajoute à FICHIERS ET la VERSION s'incrémente
 // (js/version.js doit porter la même valeur). Un test vérifie la liste.
 
-const VERSION = '101';
+const VERSION = '110';
 const NOM_CACHE = `sanji-v${VERSION}`;
 const PAGE_ACCUEIL = 'index.html';
 
@@ -18,6 +18,8 @@ const FICHIERS = [
   'js/domaine/actions-validation.js',
   'js/domaine/actions-articles.js',
   'js/domaine/actions-couverts.js',
+  'js/domaine/actions-preparation.js',
+  'js/domaine/actions-semaine.js',
   'js/domaine/actions.js',
   'js/domaine/ajustements.js',
   'js/domaine/allergenes.js',
@@ -27,11 +29,14 @@ const FICHIERS = [
   'js/domaine/articles.js',
   'js/domaine/calcul.js',
   'js/domaine/couverts-midi.js',
+  'js/domaine/preparation.js',
   'js/domaine/dates.js',
+  'js/domaine/notes-dev.js',
   'js/domaine/rapport-apprentissage.js',
   'js/domaine/rapport-diagnostic.js',
   'js/domaine/retour-essai.js',
   'js/domaine/historique.js',
+  'js/domaine/mise-en-place.js',
   'js/domaine/decisions.js',
   'js/domaine/etat.js',
   'js/domaine/feuille.js',
@@ -68,6 +73,8 @@ const FICHIERS = [
   'js/ui/assistant-planning.js',
   'js/ui/assistant-reglages.js',
   'js/ui/champs.js',
+  'js/ui/dernier-envoi.js',
+  'js/ui/reinitialiser-semaine.js',
   'js/ui/dom.js',
   'js/ui/ecran-allume.js',
   'js/ui/elements.js',
@@ -95,8 +102,12 @@ const FICHIERS = [
   'js/ui/vue-fiche.js',
   'js/ui/vue-historique.js',
   'js/ui/vue-import.js',
+  'js/ui/vue-preparer.js',
   'js/ui/retours-essai.js',
   'js/ui/journal-diagnostic.js',
+  'js/ui/centre-dev.js',
+  'js/ui/notes-dev.js',
+  'js/ui/section-notes-dev.js',
   'js/ui/section-apprentissage.js',
   'js/ui/section-diagnostic.js',
   'js/ui/vue-jour.js',

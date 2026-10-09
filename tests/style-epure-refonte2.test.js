@@ -55,12 +55,13 @@ test('Réglages : la liste des rubriques est une liste à plat, sans carte autou
   assert.match(css, /\.liste-rubriques-reglages \{[^}]*background: transparent/);
 });
 
-test('Semaine : la liste des jours est à plat et le jour en cours est en encre, pas en bleu clair', () => {
+test('Semaine : la liste des jours est à plat et le jour en cours est sur le même fond que les autres (filet encre à gauche), sans bloc noir', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'riz et carottes', horloge());
   const noeud = tableau.rendre(e, S.lundi);
   assert.ok(classes(noeud, 'bord-jours').every((ul) => ul.className.split(' ').includes('liste')));
-  assert.match(bloc, /\.bord-aujourdhui \{[^}]*background: var\(--encre\)/);
+  assert.match(bloc, /\.bord-aujourdhui \{[^}]*background: transparent[^}]*border-left: 4px solid var\(--encre\)/);
+  assert.doesNotMatch(bloc, /\.bord-aujourdhui \{[^}]*background: var\(--encre\)/, 'plus de bloc noir');
   assert.match(bloc, /\.vue-semaine-globale \.bord-zone \{[^}]*background: transparent/);
 });
 

@@ -7,7 +7,7 @@
 
 import { definirCouvertsMidi } from '../domaine/actions-couverts.js';
 import { saisirVentes } from '../domaine/actions.js';
-import { apercuCouverts, couvertsMidiDuJour, repartitionCalculee } from '../domaine/couverts-midi.js';
+import { COUVERTS_RAPIDES, apercuCouverts, couvertsMidiDuJour, repartitionCalculee } from '../domaine/couverts-midi.js';
 import { libelleJour } from '../domaine/dates.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { agirStrict, aujourdhui, etat as etatCourant } from '../magasin.js';
@@ -15,9 +15,6 @@ import { h } from './dom.js';
 import { qteNoeuds, quantite } from './format.js';
 import { afficherMessage } from './messages.js';
 import { panneau } from './panneau.js';
-
-/** Choix rapides de la maquette (validés par la propriétaire) : 40, 50, 60, 70, 80 couverts. */
-const CHOIX_RAPIDES = [40, 50, 60, 70, 80];
 
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 const pluriel = (n, un, plusieurs) => `${n} ${n >= 2 ? plusieurs : un}`;
@@ -111,7 +108,7 @@ export function ouvrirCouvertsMidi(date) {
         h('span', { classe: 'cv-total-chiffre' }, h('span', { classe: 'cv-grand' }, etat.total === null ? '—' : String(etat.total)), h('span', { classe: 'au-sous' }, 'couverts au total')),
         pas('+', 'Un couvert de plus', () => regler(total + 1))),
       h('div', { classe: 'cv-puces', role: 'group', 'aria-label': 'Choix rapides' },
-        CHOIX_RAPIDES.map((n) => h('button', { type: 'button', classe: 'btn cv-puce', 'aria-pressed': etat.total === n ? 'true' : 'false', onClick: () => regler(n) }, String(n)))));
+        COUVERTS_RAPIDES.map((n) => h('button', { type: 'button', classe: 'btn cv-puce', 'aria-pressed': etat.total === n ? 'true' : 'false', onClick: () => regler(n) }, String(n)))));
     const blocRepartition = h('div', { classe: 'cv-repartition' },
       h('div', { classe: 'cv-repartition-tete' },
         h('h3', { classe: 'au-etiquette' }, 'Répartition'),

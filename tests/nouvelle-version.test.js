@@ -74,3 +74,29 @@ test('ligne de vérification : un bouton « Vérifier les mises à jour » et un
   for (let i = 0; i < 5; i += 1) await Promise.resolve();
   assert.match(ligne.textContent, /à jour/);
 });
+
+test('vérification manuelle : une mise à jour trouvée relance l\'app d\'elle-même dès que le nouveau worker prend la main, sans bandeau', async () => {
+  // Arrange
+  const conteneur = fauxConteneur({});
+  let rechargee = 0;
+  const ligne = mod.ligneVerifierMiseAJour(async () => 'en_cours', { conteneur, recharger: () => { rechargee += 1; }, delaiMs: 60000 });
+  const [bouton] = ligne.tous((x) => x.balise === 'button');
+  // Act
+  bouton.click();
+  for (let i = 0; i < 5; i += 1) await Promise.resolve();
+  assert.equal(rechargee, 0, 'pas avant que le nouveau worker soit actif');
+  conteneur.declencher();
+  // Assert
+  assert.equal(rechargee, 1);
+  assert.match(ligne.textContent, /relanc/);
+});
+
+test('vérification manuelle : « à jour » ne relance rien', async () => {
+  const conteneur = fauxConteneur({});
+  let rechargee = 0;
+  const ligne = mod.ligneVerifierMiseAJour(async () => 'a_jour', { conteneur, recharger: () => { rechargee += 1; } });
+  ligne.tous((x) => x.balise === 'button')[0].click();
+  for (let i = 0; i < 5; i += 1) await Promise.resolve();
+  conteneur.declencher();
+  assert.equal(rechargee, 0);
+});

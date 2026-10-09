@@ -11,10 +11,11 @@ import { tableauBlanc } from '../domaine/tableau-blanc.js';
 import { lireLignesFeuille } from '../harness/lecture-photo-ia.js';
 import { aujourdhui } from '../magasin.js';
 import { assistantPret, fournisseurDepuisReglages } from './assistant-reglages.js';
-import { h } from './dom.js';
+import { h, svg } from './dom.js';
 import { bouton, lien, repliable } from './elements.js';
 import { pluriel } from './format.js';
 import { problemeHorsLigne } from './horsligne.js';
+import { demanderReinitialisation, peutReinitialiser } from './reinitialiser-semaine.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { garderPhotoPourDiagnostic, noter } from './journal-diagnostic.js';
@@ -120,6 +121,40 @@ async function dialogLecturePhoto(lundi, url, surLecture) {
   });
 }
 
+let apercuOuvert = false; // un seul aperçu à la fois, quel que soit le bouton qui l'ouvre
+
+const ICONE_APPAREIL = 'M4 8h3l2-3h6l2 3h3v11H4zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z';
+
+/** « Scanner la feuille » : photo puis aperçu (l'envoi reste un clic sur « Envoyer »). Sans assistant prêt, une ligne pour l'activer. */
+function blocScanner(lundi, surLecture) {
+  if (!assistantPret()) {
+    return h('p', { classe: 'aide imp-scanner' }, 'Pour scanner la feuille, activez l\'assistant IA dans ', lien('#/reglages/assistant-ia', 'Réglages'), '.');
+  }
+  const entree = h('input', {
+    type: 'file', accept: 'image/*', id: 'scanner-feuille', classe: 'cache',
+    onChange: async (evenement) => {
+      const fichier = evenement.target.files?.[0];
+      evenement.target.value = '';
+      if (!fichier || apercuOuvert) return;
+      apercuOuvert = true;
+      try {
+        const conservee = await importerPhoto(lundi, fichier);
+        if (!conservee) afficherMessage('Photo gardée en mémoire seulement : elle sera perdue à la fermeture.', 'alerte');
+        const url = await urlPhoto(lundi);
+        if (url) dialogLecturePhoto(lundi, url, surLecture);
+      } catch (erreur) {
+        afficherMessage(erreur.message, 'erreur');
+      } finally { apercuOuvert = false; }
+    },
+  });
+  return h('div', { classe: 'imp-scanner' },
+    h('label', { classe: 'btn btn-principal btn-scanner' },
+      svg('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+        'aria-hidden': 'true', focusable: 'false', width: 24, height: 24 }, [svg('path', { d: ICONE_APPAREIL })]),
+      'Scanner la feuille', entree),
+    h('p', { classe: 'aide' }, 'Prenez la feuille en photo : un aperçu s\'ouvre, rien ne part sans « Envoyer ». Vous relisez ensuite avant d\'enregistrer.'));
+}
+
 /** Photo du menu papier : gardée sur l'appareil, non exportée. `surLecture` reçoit les lignes que l'IA a transcrites. */
 function blocPhoto(lundi, surLecture) {
   const zone = h('div', { classe: 'photo-zone' }, h('p', { classe: 'vide' }, 'Aucune photo.'));
@@ -127,15 +162,14 @@ function blocPhoto(lundi, surLecture) {
     titre: 'Retirer la photo ?', texte: 'La photo sera supprimée de cet appareil.', libelleOk: 'Retirer', danger: true,
     action: async () => { await retirerPhoto(lundi); montrer(null); },
   }), 'court', { hidden: true });
-  let ouverture = false;
   const lirePhotoIA = assistantPret()
     ? bouton('Lire la photo avec l\'IA', async () => {
-      if (ouverture) return; // un seul aperçu à la fois : le deuxième clic pendant la lecture de la photo est ignoré
-      ouverture = true;
+      if (apercuOuvert) return; // un seul aperçu à la fois : le deuxième clic pendant la lecture de la photo est ignoré
+      apercuOuvert = true;
       try {
         const url = await urlPhoto(lundi);
         if (url) dialogLecturePhoto(lundi, url, surLecture);
-      } finally { ouverture = false; }
+      } finally { apercuOuvert = false; }
     }, 'court', { hidden: true })
     : null;
   function montrer(url) {
@@ -200,7 +234,7 @@ export function rendre(etat, lundi) {
   let retourNote = false; // un double clic ne note qu'un retour
   const enregistrerEtNoter = () => {
     const final = intitulesDeLaPage();
-    if (!enregistrer(champs, etat, lundi)) return;
+    if (!enregistrer(champs, etat, lundi, `#/preparer/${lundi}`)) return;
     const jours = Object.values(final).filter((j) => j.menu1 !== '' || j.menu2 !== '').length;
     noter('import_enregistre', { jours, aApresIA: lignesIA !== null });
     if (lignesIA && !retourNote) { retourNote = true; noterRetour({ type: 'menu', lu: lignesIA, final }); }
@@ -225,6 +259,7 @@ export function rendre(etat, lundi) {
     repartirEtLire();
     afficherMessage(`L'IA a lu ${pluriel(lignes.length, 'ligne')}. Relisez « Ce que Sanji a lu » avant d'enregistrer.${remplace ? ' Le texte collé précédemment a été remplacé.' : ''}${illisibles > 0 ? ` ${pluriel(illisibles, 'ligne illisible', 'lignes illisibles')} : complétez à la main.` : ''}`);
   };
+  racine.appendChild(blocScanner(lundi, surLecturePhoto));
   racine.appendChild(blocPhoto(lundi, surLecturePhoto));
   racine.appendChild(h('p', { classe: 'aide retour-essai-lien' }, lienSignaler));
   const sectionFeuille = repliable(h('h2', { classe: 'imp-titre-section', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie || reprise !== null, [
@@ -246,6 +281,12 @@ export function rendre(etat, lundi) {
     h('p', { classe: 'aide' }, 'Lecture des intitulés ci-dessus. Corrigez l\'intitulé dans son champ si la lecture est fausse : elle se met à jour.'),
     zoneLecture));
   majLecture();
+
+  // Semaine à venir déjà remplie : repartir de zéro pour la re-scanner.
+  const semaineRemplie = dates.some((d) => [1, 2].some((m) => String(etat.jours?.[d]?.menus?.[m]?.intitule ?? '').trim() !== ''));
+  if (semaineRemplie && peutReinitialiser(lundi)) {
+    racine.appendChild(h('div', { classe: 'actions' }, bouton('Réinitialiser la semaine', () => demanderReinitialisation(lundi), 'court')));
+  }
 
   racine.appendChild(h('div', { classe: 'barre-enregistrer' },
     lien(`#/semaine/${lundi}/tableau`, 'Annuler', 'btn'),

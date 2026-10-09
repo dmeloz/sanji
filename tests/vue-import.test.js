@@ -103,7 +103,7 @@ test('« Enregistrer la semaine » : un menu suffit, les composants se créent s
   const e = magasin.etat();
   assert.equal(e.jours[S.lundi].menus[2].intitule, 'courgettes, quinoa');
   assert.ok(Object.keys(e.composants).length >= 2, 'composants créés seuls');
-  assert.equal(location.hash, `#/semaine/${S.lundi}/tableau`);
+  assert.equal(location.hash, `#/preparer/${S.lundi}`, 'après l\'enregistrement : l\'écran « Préparer la semaine »');
 });
 
 test('la page ancienne vue-menus reste disponible et partage les champs', async () => {
@@ -197,4 +197,33 @@ test('texte d\'une autre semaine : ouvert à sa place, sans rien enregistrer', a
   assert.equal(Object.keys(magasin.etat().composants).length, 0);
   // Un deuxième affichage ne reprend plus le texte.
   assert.equal(champ(vue.rendre(magasin.etat(), '2026-10-12'), 'feuille-texte').value, '');
+});
+
+test('texte collé sans aucun jour reconnu : le journal garde un résumé et le texte (borné), pour comprendre pourquoi', async () => {
+  // Arrange
+  const { lireEvenements, effacerJournal } = await import('../app/js/ui/journal-diagnostic.js');
+  effacerJournal();
+  magasin.remplacer(etatVide());
+  const noeud = vue.rendre(magasin.etat(), S.lundi);
+  champ(noeud, 'feuille-texte').value = 'texte sans aucun jour ni plat reconnaissable';
+  // Act
+  await bouton(noeud, 'Répartir dans la semaine').click();
+  // Assert
+  const evenement = lireEvenements().find((e) => e.type === 'import_texte');
+  assert.ok(evenement, 'événement noté');
+  assert.equal(evenement.jours, 0);
+  assert.match(evenement.contenu, /texte sans aucun jour/);
+});
+
+test('texte collé qui donne des jours : rien de plus dans le journal', async () => {
+  // Arrange
+  const { lireEvenements, effacerJournal } = await import('../app/js/ui/journal-diagnostic.js');
+  effacerJournal();
+  magasin.remplacer(etatVide());
+  const noeud = vue.rendre(magasin.etat(), S.lundi);
+  champ(noeud, 'feuille-texte').value = 'Lundi 05 octobre\nriz et carottes\npoulet, riz, carottes';
+  // Act
+  await bouton(noeud, 'Répartir dans la semaine').click();
+  // Assert
+  assert.equal(lireEvenements().filter((e) => e.type === 'import_texte').length, 0);
 });

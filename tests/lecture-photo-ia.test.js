@@ -59,6 +59,7 @@ test('demanderLecturePhoto : valide ; clé en en-tête seulement ; refus, HTTP 4
 
 // ------------------------------------------------------------------ photo et UI
 
+let imageReelle; let creerReel;
 let dom; let magasin; let vue; let reglages; let photo; let stockage; let fetchReel;
 const OCTETS = new Uint8Array([1, 2, 3, 250, 255, 0, 65]);
 const LUNDI_SANS_PHOTO = '2026-11-02';
@@ -71,9 +72,15 @@ before(async () => {
   photo = await import('../app/js/ui/photo.js');
   stockage = await import('../app/js/stockage.js');
   fetchReel = globalThis.fetch;
+  // Le faux DOM n'a ni image ni canvas : la réduction du scan est simulée, le reste (enregistrement, aperçu, base64) est réel.
+  imageReelle = globalThis.Image;
+  creerReel = globalThis.document.createElement;
+  globalThis.Image = class { set src(v) { this.naturalWidth = 10; this.naturalHeight = 10; queueMicrotask(() => this.onload()); } };
+  globalThis.document.createElement = (balise) => (balise === 'canvas'
+    ? { getContext: () => ({ drawImage() {} }), toBlob: (cb) => cb(new Blob([OCTETS], { type: 'image/jpeg' })) } : creerReel.call(globalThis.document, balise));
   await stockage.enregistrerPhoto(S.lundi, new Blob([OCTETS], { type: 'image/jpeg' }));
 });
-after(() => { dom.restaurer(); globalThis.fetch = fetchReel; reglages.effacerReglagesIA(); });
+after(() => { globalThis.Image = imageReelle; globalThis.document.createElement = creerReel; dom.restaurer(); globalThis.fetch = fetchReel; reglages.effacerReglagesIA(); });
 
 const champ = (n, id) => n.tous((x) => x.attributs.id === id)[0];
 const bouton = (n, texte) => boutons(n).find((b) => b.textContent === texte);
@@ -180,4 +187,94 @@ test('UI : un texte déjà collé remplacé par la lecture de la photo est dit',
 test('lireLignesFeuille : un « [illisible] » au milieu d\'une ligne est retiré du texte et compté', () => {
   const r = lireLignesFeuille({ lignes: ['[illisible]ortecce à la bolognaise 19.-', 'Penne au pesto [illisible] 19.-'] });
   assert.deepEqual(r, { lignes: ['ortecce à la bolognaise 19.-', 'Penne au pesto 19.-'], illisibles: 2 });
+});
+
+test('un modèle qui refuse tool_choice forcé (HTTP 400) : le même appel est retenté une fois en « auto », sans changer le reste', async () => {
+  // Arrange
+  const corps = [];
+  const fetchImpl = async (_url, init) => {
+    const envoye = JSON.parse(init.body);
+    corps.push(envoye);
+    if (envoye.tool_choice.type === 'tool') {
+      return reponseHttp(400, { error: { type: 'invalid_request_error', message: 'tool_choice: type "tool" and "any" are not supported for this model.' } });
+    }
+    return reponseHttp(200, outil({ lignes: ['Lundi 05 octobre'] }));
+  };
+  const fournisseur = creerFournisseurWeb({ cle: FAUSSE_CLE, fetchImpl });
+  // Act
+  const rendu = await fournisseur.demanderLecturePhoto({ media_type: 'image/jpeg', base64: 'AAAA' });
+  // Assert
+  assert.equal(corps.length, 2);
+  assert.deepEqual(corps[1].tool_choice, { type: 'auto' });
+  assert.deepEqual({ ...corps[1], tool_choice: corps[0].tool_choice }, corps[0]);
+  assert.deepEqual(rendu.lignes, ['Lundi 05 octobre']);
+});
+
+test('une autre erreur 400 n\'est pas retentée', async () => {
+  // Arrange
+  let appels = 0;
+  const fetchImpl = async () => { appels += 1; return reponseHttp(400, { error: { type: 'invalid_request_error', message: 'image trop grande' } }); };
+  const fournisseur = creerFournisseurWeb({ cle: FAUSSE_CLE, fetchImpl });
+  // Act / Assert
+  await assert.rejects(() => fournisseur.demanderLecturePhoto({ media_type: 'image/jpeg', base64: 'AAAA' }), /image trop grande/);
+  assert.equal(appels, 1);
+});
+
+test('lireLignesFeuille : nouveau format, aplati par jour, en-tête ignoré, illisibles additionnés', () => {
+  // Arrange
+  const reponse = { entete: ['Menu du marché', '(À midi uniquement)'], illisibles: 1, jours: [
+    { jour: 'Lundi 12 octobre', plats: ['riz 21.-', ' poulet [illisible] 21.-'], illisibles: 2 },
+    { jour: 'Mardi 13 octobre', plats: ['pâtes', 'poisson'] }] };
+  // Act
+  const lu = lireLignesFeuille(reponse);
+  // Assert
+  assert.deepEqual(lu.lignes, ['Lundi 12 octobre', 'riz 21.-', 'poulet 21.-', 'Mardi 13 octobre', 'pâtes', 'poisson']);
+  assert.equal(lu.illisibles, 4);
+});
+
+test('lireLignesFeuille : nouveau format, bornes et refus', () => {
+  const jour = (n) => ({ jour: 'Lundi', plats: Array(n).fill('a') });
+  assert.equal(lireLignesFeuille({ jours: [jour(79)] }).lignes.length, 80);
+  for (const mauvais of [{ jours: [jour(80)] }, { jours: 'x' }, { jours: [{ jour: 1, plats: [] }] }, { jours: [{ jour: 'L', plats: [2] }] },
+    { jours: [{ jour: 'L', plats: ['a'], illisibles: -1 }] }, { jours: [jour(1)], entete: 'x' }, { jours: [] }]) {
+    assert.equal(lireLignesFeuille(mauvais), null, JSON.stringify(mauvais));
+  }
+  assert.deepEqual(lireLignesFeuille({ lignes: ['a'] }), { lignes: ['a'], illisibles: 0 }, 'ancien format toujours lu');
+});
+
+test('construireCorpsPhoto : schéma par jour, image + phrase fixe seulement', () => {
+  const corps = construireCorpsPhoto({ media_type: 'image/jpeg', base64: 'QUJD' }, { modele: 'm' });
+  const schema = corps.tools[0].input_schema;
+  assert.deepEqual(Object.keys(schema.properties), ['entete', 'jours', 'illisibles']);
+  assert.deepEqual(schema.properties.jours.items.required, ['jour', 'plats']);
+  assert.deepEqual(Object.keys(corps).sort(), ['max_tokens', 'messages', 'model', 'system', 'tool_choice', 'tools']);
+  assert.deepEqual(corps.messages[0].content.map((b) => b.type), ['image', 'text']);
+  assert.equal(corps.messages[0].content[1].text, 'Transcris le texte imprimé de cette feuille de menus, plats rangés par jour.');
+});
+
+const entreeScan = (n) => n.tous((x) => x.attributs.id === 'scanner-feuille')[0];
+const REPONSE_JOURS = outil({ entete: ['Menu du marché'], jours: [{ jour: 'Lundi 2 novembre', plats: ['riz et carottes 21.-', 'poulet, riz 21.-'] }] });
+
+test('UI : « Scanner la feuille » avec assistant prêt ; sinon la ligne d\'activation et son lien', async () => {
+  const prete = await page();
+  assert.match(prete.noeud.textContent, /Scanner la feuille/);
+  assert.ok(entreeScan(prete.noeud));
+  const sans = await page({ cle: false });
+  assert.equal(entreeScan(sans.noeud), undefined);
+  assert.match(sans.noeud.textContent, /Pour scanner la feuille, activez l'assistant IA dans Réglages\./);
+  assert.ok(sans.noeud.tous((x) => x.balise === 'a' && x.attributs.href === '#/reglages/assistant-ia').length === 1);
+});
+
+test('UI : scanner ouvre l\'aperçu, rien ne part sans « Envoyer », puis les jours sont remplis', async () => {
+  const { noeud, appels } = await page({ lundi: LUNDI_SANS_PHOTO, reponse: REPONSE_JOURS });
+  await entreeScan(noeud).declencher('change', { target: { files: [new Blob([OCTETS], { type: 'image/jpeg' })], value: 'x' } });
+  const [dialogue] = panneauxOuverts(dom.corps);
+  assert.ok(dialogue, `aperçu ouvert : ${dom.corps.textContent.slice(-300)}`);
+  assert.ok(bouton(dialogue, 'Envoyer'));
+  assert.equal(appels.length, 0, 'aucun envoi avant le clic');
+  await dialogue.enfants[0].declencher('submit');
+  assert.equal(appels.length, 1);
+  assert.match(champ(noeud, 'feuille-texte').value, /^Lundi 2 novembre\nriz et carottes/);
+  assert.equal(champ(noeud, 'menu-2026-11-02-1').value, 'riz et carottes');
+  assert.equal(Object.keys(magasin.etat().composants).length, 0);
 });
