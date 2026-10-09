@@ -189,3 +189,22 @@ test('semaine : un texte d\'une autre semaine garde ses avertissements et rend l
   assert.deepEqual(r.corrections, []);
   assert.ok(r.avertissements.length > 0);
 });
+
+test('sous-titre entre parenthèses (« (À midi uniquement) ») : écarté, jamais compté comme un plat ; la semaine se répartit', () => {
+  // Arrange : texte rendu par l'IA pour une vraie photo (menu du marché, 2 plats par jour, prix attachés)
+  const texte = ['Menu du marché', '(À midi uniquement)', 'Lundi 12 octobre', 'Fusilli à la N\'Duja 21.-', 'Emincé de bœuf à la moutarde, pommes grenailles 24.-',
+    'Mardi 13 octobre', 'Casarecce au fromage de chèvre et noix 19.-', 'Dos de lieu noir aux crevettes, boulghour 22.-'].join('\n');
+  // Act
+  const analyse = analyserFeuille(texte);
+  const { saisie, avertissements } = repartirSurSemaine(analyse, '2026-10-12');
+  // Assert
+  assert.ok(analyse.ignorees.includes('(À midi uniquement)'));
+  assert.deepEqual(avertissements, []);
+  assert.equal(saisie['2026-10-12'].menu1, 'Fusilli à la N\'Duja');
+  assert.equal(saisie['2026-10-13'].menu2, 'Dos de lieu noir aux crevettes, boulghour');
+});
+
+test('une ligne entre parenthèses longue (un vrai plat) n\'est pas écartée', () => {
+  const analyse = analyserFeuille(['Lundi 12 octobre', '(riz pilaf aux petits légumes de saison, beurre noisette et herbes fraîches)', 'poulet rôti'].join('\n'));
+  assert.equal(analyse.ignorees.length, 0);
+});

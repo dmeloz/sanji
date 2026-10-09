@@ -35,6 +35,9 @@ function estEnseigne(ligne) {
 // « (à midi uniquement) », « / A midi uniquement », « [midi uniquement] ».
 const MOTIF_TITRE = /^menus?\s+(?:du|de la|de|des)\s+\S+(?:\s+\S+)?(?:\s*[(/[–-]?\s*(?:[aà]\s+)?(?:midi|soir)\b[^)\]]*[)\]]?)?$/i;
 
+/** Sous-titre de service entre parenthèses (« (À midi uniquement) ») : court, jamais un plat. */
+const MOTIF_SOUS_TITRE = /^[(\[][^)\]]{1,40}[)\]]$/;
+
 /** Une annotation manuscrite ou un reste de lecture : trop court, ou un nombre suivi de peu de chose. */
 function estAnnotation(ligne) {
   const lettres = (ligne.match(/\p{L}/gu) ?? []).length;
@@ -81,6 +84,7 @@ export function analyserFeuille(texte) {
     }
     // Une ligne imprimée ne commence pas par « + », « = » ou une flèche : c'est une annotation.
     if (/^[+=→>]/.test(ligne)) { ignorees.push(ligne); nonComprises.push(ligne); continue; }
+    if (MOTIF_SOUS_TITRE.test(ligne)) { ignorees.push(ligne); continue; } // avant le retrait des marques : la parenthèse en tête en est une
     // Coche, puce ou tiret en tête de ligne : on retire la marque, on garde le texte.
     ligne = ligne.replace(/^[^\p{L}\p{N}]+/u, '').trim();
     if (ligne === '') continue;

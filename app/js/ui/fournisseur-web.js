@@ -176,6 +176,7 @@ export function creerFournisseurWeb({
     const outil = corpsRequete?.tools?.[0]?.name ?? 'inconnu';
     let statut = 'reseau';
     let ok = false;
+    let relance = false; // l'appel est refait tel quel ou presque : seul l'échange refait est noté
     let contenu = '';
     try {
       const reponse = await fetchImpl(URL_API, {
@@ -197,6 +198,7 @@ export function creerFournisseurWeb({
       }
       // Certains modèles refusent un outil imposé (`tool_choice` « tool » ou « any ») : on retente UNE fois en « auto » (la consigne demande déjà l'outil).
       if (reponse.status === 400 && /tool_choice/.test(corps?.error?.message ?? '') && corpsRequete.tool_choice && corpsRequete.tool_choice.type !== 'auto') {
+        relance = true;
         return await envoyer({ ...corpsRequete, tool_choice: { type: 'auto' } }, signal);
       }
       if (!reponse.ok) throw new Error(`API Anthropic : HTTP ${reponse.status} ${corps?.error?.type ?? ''} ${corps?.error?.message ?? ''}`.trim());
@@ -210,7 +212,7 @@ export function creerFournisseurWeb({
       if (e?.name === 'AbortError') statut = 'annule'; // fermeture voulue du panneau : pas une panne réseau
       throw e;
     } finally {
-      noter('ia', { outil, ok, statut, ms: Date.now() - debut, contenu });
+      if (!relance) noter('ia', { outil, ok, statut, ms: Date.now() - debut, contenu });
     }
   }
   const fournisseur = {
