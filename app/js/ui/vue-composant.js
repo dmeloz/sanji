@@ -29,6 +29,7 @@ import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { ALLERGENES, PROVENANCES_SAISIE, libelleAllergene, texteSourceAllergenes } from './reference.js';
 import { blocReperes } from './reperes-metier.js';
+import { blocEnseigner } from './enseigner-mot.js';
 import { carteTache, dialogPreparatoire, ligneProduction } from './taches.js';
 
 export const titre = () => 'Composant';
@@ -396,6 +397,7 @@ function sectionEntete(etat, c, calc) {
       calc.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre') : null, ' ',
       calc.aMesurer ? pastille('à mesurer', 'ambre') : null),
     h('p', { classe: 'meta' }, `Portions : ${pluriel(p.total, 'portion')} (hors groupes ${p.prevision}${p.previsionManquante ? ', non saisie' : ''} ; groupes confirmés ${p.groupesConfirmes} ; groupes provisoires ${p.groupesProvisoires})`),
+    blocEnseigner(c),
     blocGestes(c));
 }
 

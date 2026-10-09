@@ -2,6 +2,7 @@
 // Aucune lecture de l'heure : l'horodatage `h` (ISO) est toujours un argument .
 
 import { controleAjustement } from './ajustements.js';
+import { categorieMotValide, motsValides } from './mots-retenus.js';
 import { ETAT_POIDS } from './statuts.js';
 
 export const APPLICATION = 'sanji-entremetier';
@@ -80,6 +81,8 @@ export function etatInitial() {
     recettes: {},
     fournisseurs: {},
     memoire: {},
+    // Mots retenus (clé = mot normalisé) : { categorie: 'forme_pates'|'sauce'|'produit'|'garniture', h }, valables pour tous les plats.
+    mots: {},
     standards: {},
     // Valeurs changées par la propriétaire sur les standards de base (clé « usage|sujet »).
     ajustements: {},
@@ -315,6 +318,10 @@ export function importer(texte, aujourdhui = null) {
       etat[nom][id] = fusionner(fabrique(id), source[nom][id]);
     }
   }
+  // Suggestion d'un composant (lecture) : seulement un classement autorisé, sinon retirée.
+  for (const c of Object.values(etat.composants)) {
+    if (estObjet(c) && aCle(c, 'suggestion') && !categorieMotValide(c.suggestion)) delete c.suggestion;
+  }
   // Couverts du midi : jamais une valeur non validée (absent ou invalide = non saisi), copiée sans clé superflue.
   for (const j of Object.values(etat.jours)) {
     const c = j.couverts;
@@ -348,6 +355,11 @@ export function importer(texte, aujourdhui = null) {
       if (CLES_INTERDITES.has(cle) || cle.length > 300 || !cle.includes('|')) continue;
       if (typeof h === 'string' && !Number.isNaN(Date.parse(h))) etat.articlesCoches[cle] = h;
     }
+  }
+  // Mots retenus : une entrée dont le classement n'est pas autorisé ou dont le mot est vide, trop long ou non normalisé est écartée.
+  if (source.mots !== undefined) {
+    if (!estObjet(source.mots)) throw new Error('Export corrompu : « mots » est invalide.');
+    etat.mots = motsValides(source.mots);
   }
   if (source.ajustements !== undefined) {
     // { « usage|sujet »: {valeur, unite, le, avant:{valeur, origine}} } : écartée si sans valeur finie ou sans unité, si

@@ -14,7 +14,9 @@ import { pluriel, precisionQuantite, qteNoeuds, quantiteNoeuds } from './format.
 import { libelleAllergene } from './reference.js';
 import { blocReperes } from './reperes-metier.js';
 import { defaireEnUnToucher, dialogCorriger, faireEnUnToucher } from './taches.js';
-import { boutonPrecisionIA, dialogModifier, sectionsReglages } from './vue-composant.js';
+import { CATEGORIES_MOT } from '../domaine/mots-retenus.js';
+import { blocEnseigner, suggestionDe } from './enseigner-mot.js';
+import { boutonPrecisionIA, dialogChoisirSauce, dialogModifier, sectionsReglages } from './vue-composant.js';
 
 export const titre = () => 'Fiche technique';
 
@@ -161,6 +163,12 @@ function blocFait(etat, c) {
   return bouton('Fait', () => faireEnUnToucher(p.id));
 }
 
+/** Étiquette de l'élément : un élément seulement proposé par la lecture dit « proposée · à confirmer » (attention), pas son type. */
+function etiquetteElement(c) {
+  if (suggestionDe(c)) return pastille(`${CATEGORIES_MOT[suggestionDe(c)].toLowerCase()} proposée · à confirmer`, 'ambre');
+  return pastille(etiquetteType(c), c.type === 'produit_simple' ? 'gris' : 'vert');
+}
+
 export function rendre(etat, id) {
   const c = etat.composants[id];
   const racine = h('div', { classe: 'vue vue-fiche' });
@@ -179,10 +187,11 @@ export function rendre(etat, id) {
   const sections = [
     h('a', { href: `#/production/${c.date}`, classe: 'fiche-retour' }, icone('M15 6l-6 6 6 6'), 'Production'),
     h('header', { classe: 'fiche-entete' }, h('h1', { classe: 'page-titre' }, c.nom),
-      h('div', { classe: 'fiche-etiquettes' }, pastille(etiquetteType(c), c.type === 'produit_simple' ? 'gris' : 'vert'),
+      h('div', { classe: 'fiche-etiquettes' }, etiquetteElement(c),
         // Montrer l'exception : « attribué au poste » est la normale et ne s'écrit pas.
         c.attribue ? null : pastille('non attribué', 'ambre'))),
     // Un élément à préciser : le geste « Demander à l'IA » se voit tout de suite, sans ouvrir « Plus de réglages ».
+    blocEnseigner(c, () => dialogChoisirSauce(c)),
     boutonPrecisionIA(c) ? h('div', { classe: 'fiche-actions' }, boutonPrecisionIA(c)) : null,
     sectionQuantite(etat, c, calc),
     ligneBrut(calc),

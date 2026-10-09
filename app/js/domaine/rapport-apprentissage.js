@@ -1,6 +1,7 @@
 // « Ce que Sanji a appris » : lecture seule de la mémoire des noms et des semaines à préciser. Ne modifie jamais l'état.
 
 import { lundiDe } from './dates.js';
+import { categorieMotValide } from './mots-retenus.js';
 
 const MAX_MOTS = 30;
 const MAX_SEMAINES = 8;
@@ -12,9 +13,14 @@ function motDeCle(cle, entree) {
 }
 
 export function rapportApprentissage(etat) {
+  // Mots retenus pour tous les plats (`etat.mots`, `pourTous`), puis noms retenus pour un menu (`etat.memoire`).
+  const pourTous = Object.entries(etat?.mots ?? {})
+    .filter(([, entree]) => categorieMotValide(entree?.categorie))
+    .map(([mot, entree]) => ({ nom: mot, menu: null, categorie: entree.categorie, pourTous: true }));
   const retenus = Object.entries(etat?.memoire ?? {})
     .filter(([, entree]) => entree && typeof entree === 'object' && entree.categorie && entree.categorie !== A_PRECISER)
     .map(([cle, entree]) => motDeCle(cle, entree))
+    .concat(pourTous)
     .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
   const parSemaine = new Map();
   for (const c of Object.values(etat?.composants ?? {})) {

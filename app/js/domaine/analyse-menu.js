@@ -3,6 +3,7 @@
 // ils ne portent aucun chiffre. Rien n'est inventé : un mot inconnu reste « à préciser », une sauce implicite reste « à confirmer ».
 
 import { cleMemoire, lireMemoire, normaliser } from './etat.js';
+import { expressionsApprises } from './mots-retenus.js';
 import { FAMILLES, MOTS_SANS_FAMILLE, lireNom } from './savoir.js';
 import {
   ALIAS, CHAMPIGNONS, EPICES, FORMES_PATES, HERBES, MODES, MOTS_DE_LIAISON, PRODUITS, SAUCES,
@@ -117,11 +118,15 @@ const EXPRESSIONS = (() => {
   return liste.sort((a, b) => b.mots.length - a.mots.length);
 })();
 
+// Mots retenus par la propriétaire pour la lecture en cours : ils passent AVANT tout le vocabulaire.
+// ponytail: variable de module posée le temps d'un lirePlat (synchrone) ; passer un paramètre si la lecture devient asynchrone.
+let apprises = [];
+
 /** Expressions trouvées dans des jetons (la plus longue d'abord, de gauche à droite, sans chevauchement). */
 function expressionsDe(jetons) {
   const trouvees = [];
   for (let i = 0; i < jetons.length;) {
-    const e = jetons[i].sep ? null : EXPRESSIONS.find((x) => x.mots.every((w, k) => jetons[i + k] && !jetons[i + k].sep && motEgal(jetons[i + k].n, w)));
+    const e = jetons[i].sep ? null : [...apprises, ...EXPRESSIONS].find((x) => x.mots.every((w, k) => jetons[i + k] && !jetons[i + k].sep && motEgal(jetons[i + k].n, w)));
     if (e) { trouvees.push({ debut: i, fin: i + e.mots.length, e }); i += e.mots.length; } else i += 1;
   }
   return trouvees;
@@ -164,7 +169,14 @@ function figees(jetons) {
 }
 const bloque = (zones, i) => zones.some((z) => i >= z.debut && i < z.fin);
 
-const CONNECTEURS = [['a', 'la'], ['a', 'l'], ['au'], ['aux'], ['avec'], ['alla'], ['alle'], ['al'], ['ai'], ['agli'], ['all']];
+// Prépositions de cuisine qui introduisent un complément. « de », « di », « sur » et « et » n'en font pas partie : ils nomment
+// souvent le plat lui-même (« gnocchi di patate », « risotto de la mer ») et ne coupent que si les deux côtés sont connus.
+const CONNECTEURS = [['a', 'la'], ['a', 'l'], ['au'], ['aux'], ['avec'], ['alla'], ['alle'], ['allo'], ['al'], ['ai'], ['agli'], ['all'], ['con']];
+// Prépositions ITALIENNES : seules à couper un complément INCONNU (« gnocchi alla sorrentina »). Les françaises (à la, à l', au,
+// aux, avec) nomment des plats entiers (« riz au lait », « pâtes à l'ancienne ») : elles ne coupent que devant un mot connu ou retenu.
+const PREPOSITIONS_ITALIENNES = new Set(['alla', 'alle', 'allo', 'al', 'all', 'ai', 'agli', 'con']);
+/** Longueur maximale (en mots) d'un complément inconnu proposé « à confirmer » : au-delà, le texte reste entier. */
+const MAX_COMPLEMENT_INCONNU = 2;
 function longueurConnecteur(jetons, i) {
   const c = CONNECTEURS.find((seq) => seq.every((w, k) => jetons[i + k]?.n === w));
   return c ? c.length : 0;
@@ -215,6 +227,13 @@ function couperProteine(jetons) {
   return [jetons];
 }
 
+/** Le texte entier n'est fait que de formes de pâtes (« ferretto », une forme retenue) : un qualificatif de forme. */
+function qualifieLaForme(jetons) {
+  const trouvees = expressionsDe(jetons);
+  return trouvees.length > 0 && trouvees.every((t) => t.e.kind === 'pate') && trouvees.reduce((n, t) => n + t.fin - t.debut, 0) === jetons.length;
+}
+/** Commence par un féculent reconnu (pâtes, risotto, gnocchi, riz, polenta, pommes de terre…). */
+const estFeculent = (jetons) => { const t = expressionsDe(jetons)[0]; return Boolean(t) && t.debut === 0 && t.e.categorie === 'feculent'; };
 const kindDe = (jetons) => decisive(jetons)?.kind ?? null;
 const estBase = (jetons) => ['pate', 'risotto'].includes(kindDe(jetons));
 const sansLiaisonDebut = (jetons) => {
@@ -257,10 +276,22 @@ function decouper(jetonsBruts, menu) {
     const x = jetons.slice(0, i);
     const y = jetons.slice(i + k);
     if (!aExpression(x) || !aExpression(y)) continue;
+    if (estBase(x) && qualifieLaForme(y)) continue; // « fusilli al ferretto » : la forme qualifiée reste dans le nom du féculent
     const morceaux = couperListe(y);
     // « poulet au riz » : une protéine suivie d'un seul ingrédient est un plat nommé, il reste entier.
     if (categorieDe(x) === 'proteine' && morceaux.length === 1) return [{ jetons }];
     return [...decouper(x, menu), ...morceaux.flatMap((m) => juxtaposes(m, menu))];
+  }
+
+  // Féculent suivi d'une préposition ITALIENNE et d'un complément INCONNU (« gnocchi alla sorrentina ») : le complément est
+  // proposé « à confirmer » comme sauce, jamais lu comme un mot muet. Les mots connus ou retenus ont déjà été traités plus haut.
+  for (let i = 1; i < jetons.length - 1; i += 1) {
+    const k = bloque(zones, i) || !PREPOSITIONS_ITALIENNES.has(jetons[i].n) ? 0 : longueurConnecteur(jetons, i);
+    const y = jetons.slice(i + k);
+    if (k === 0 || y.length > MAX_COMPLEMENT_INCONNU || aExpression(y) || rogner(y).length === 0) continue;
+    const x = jetons.slice(0, i);
+    if (!estFeculent(x)) continue;
+    return [...decouper(x, menu), { jetons: rogner(y), suggestion: 'sauce' }];
   }
 
   // « X et Y » sans connecteur : coupé seulement au menu 2 quand un côté est au poste et l'autre non (« poulet et riz »).
@@ -311,11 +342,12 @@ function elementDe(fragment, menu) {
   if (categorie === 'a_preciser' || recetteFigee || fragment.alternatives) statut = 'a_confirmer';
   if (fragment.queueSauce?.recette) statut = 'a_confirmer';
   if (kind === 'sauce' && e?.sauce?.recette) statut = 'a_confirmer';
-  if (kind === 'mode') statut = 'a_confirmer';
+  if (kind === 'mode' || fragment.suggestion) statut = 'a_confirmer';
 
   let role;
   if (categorie === 'sauce') role = 'sauce';
   else if (kind === 'herbe') role = 'herbe';
+  else if (kind === 'garniture') role = 'garniture';
   else if (menu === 1) role = categorie === 'proteine' ? 'composant_recette' : 'plat_principal';
   else role = 'garniture';
 
@@ -329,6 +361,8 @@ function elementDe(fragment, menu) {
   const element = { nom, canonique: canonDe(jetons), categorie, role, propriete, origine: 'intitule', statut };
   if (kind === 'mode') element.composition = [...e.mode.ingredients];
   if (fragment.alternatives) element.alternatives = fragment.alternatives;
+  if (fragment.suggestion) element.suggestion = fragment.suggestion;
+  if (e?.appris) element.origine = 'mot_retenu';
   return { element, base: estBase(jetons) ? kind : null, recette: recetteFigee ? recetteLisible(jetons) : null };
 }
 
@@ -344,10 +378,16 @@ function recetteLisible(jetons) {
  * (8) sauce implicite du menu 1 « à confirmer » (jamais choisie), (9) mot inconnu « à préciser ».
  * @param {string} intitule
  * @param {1|2} menu
- * @param {{memoire?:object, lectures?:object}} [options] `lectures` : lectures corrigées, clé « intitulé normalisé|menu »
+ * @param {{memoire?:object, lectures?:object, mots?:object}} [options] `lectures` : lectures corrigées, clé « intitulé normalisé|menu » ;
+ *   `mots` : mots retenus (état.mots), consultés avant tout le vocabulaire
  * @returns {{original:string, normalise:string, elements:object[], ambiguites:object[]}}
  */
-export function lirePlat(intitule, menu, { lectures, memoire } = {}) {
+export function lirePlat(intitule, menu, { lectures, memoire, mots } = {}) {
+  apprises = expressionsApprises(mots);
+  try { return lireIntitule(intitule, menu, { lectures, memoire }); } finally { apprises = []; }
+}
+
+function lireIntitule(intitule, menu, { lectures, memoire }) {
   const original = String(intitule ?? '');
   const jetons = remplacerAlias(tokeniser(original));
   const normalise = jetons.filter((t) => !t.sep).map((t) => t.n).join(' ');
@@ -374,6 +414,7 @@ export function lirePlat(intitule, menu, { lectures, memoire } = {}) {
     // Ce que la propriétaire a déjà appris à Sanji pour ce nom et ce menu : le mot n'est plus « à préciser ».
     const appris = element.categorie === 'a_preciser' ? lireMemoire(memoire, element.nom, menu) : null;
     if (appris && appris.categorie && appris.categorie !== 'a_preciser') {
+      delete element.suggestion;
       Object.assign(element, { categorie: appris.categorie, statut: 'lu', origine: 'memoire',
         propriete: appris.attribue === true ? 'poste' : 'hors_poste' });
     }
@@ -382,11 +423,11 @@ export function lirePlat(intitule, menu, { lectures, memoire } = {}) {
     if (element.alternatives) ambiguites.push({ type: 'choix', texte: element.nom });
     if (recette) ambiguites.push({ type: 'recette', texte: recette });
     if (element.categorie === 'sauce' && element.statut === 'a_confirmer') ambiguites.push({ type: 'sauce', texte: element.nom });
-    if (element.categorie === 'a_preciser') ambiguites.push({ type: 'mot_inconnu', texte: element.nom });
+    if (element.categorie === 'a_preciser') ambiguites.push(element.suggestion ? { type: 'mot_propose', texte: element.nom, suggestion: element.suggestion } : { type: 'mot_inconnu', texte: element.nom });
     if (element.composition) ambiguites.push({ type: 'preparation', texte: `${element.nom} (peut contenir : ${element.composition.join(', ')})` });
   }
 
-  if (menu === 1 && bases.length > 0 && !elements.some((e) => e.categorie === 'sauce')) {
+  if (menu === 1 && bases.length > 0 && !elements.some((e) => e.categorie === 'sauce' || e.suggestion === 'sauce')) {
     const nom = bases.includes('pate') ? 'sauce à confirmer' : 'base de risotto à confirmer';
     elements.push({ nom, canonique: normaliser(nom), categorie: 'sauce', role: 'sauce', propriete: 'poste', origine: 'implicite',
       statut: 'a_confirmer', candidates: candidatesDeSauce() });
@@ -415,14 +456,16 @@ export function categoriePropose(nom) {
  * @param {1|2} menu
  * @param {object} [memoire] état.memoire
  * @param {object} [lectures] lectures corrigées par le chef (voir lirePlat)
+ * @param {object} [mots] état.mots : mots retenus par la propriétaire (voir mots-retenus.js)
  * @returns {{nom:string, categorie:string, attribue:boolean, type:'a_preciser', depuisMemoire?:true}[]}
  */
-export function proposerComposants(intitule, menu, memoire = {}, lectures = undefined) {
-  return lirePlat(intitule, menu, { memoire, lectures }).elements.map((element) => {
+export function proposerComposants(intitule, menu, memoire = {}, lectures = undefined, mots = undefined) {
+  return lirePlat(intitule, menu, { memoire, lectures, mots }).elements.map((element) => {
     const { nom, categorie } = element;
     const attribue = element.propriete === 'poste';
     const proposition = { nom, categorie, attribue, type: 'a_preciser' };
     if (element.origine === 'implicite') proposition.implicite = true;
+    if (element.suggestion) proposition.suggestion = element.suggestion;
     const memorise = lireMemoire(memoire, nom, menu);
     if (memorise) {
       proposition.categorie = memorise.categorie ?? categorie;

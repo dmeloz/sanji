@@ -1,7 +1,10 @@
 // Réglages > Apprentissage et essais : ce que Sanji a appris (lecture seule) et l'accès à « Notes et diagnostic ».
 
 import { libelleJour } from '../domaine/dates.js';
+import { oublierMot } from '../domaine/actions-mots.js';
+import { CATEGORIES_MOT } from '../domaine/mots-retenus.js';
 import { rapportApprentissage } from '../domaine/rapport-apprentissage.js';
+import { agir } from '../magasin.js';
 import { h } from './dom.js';
 import { bouton, ligneVide } from './elements.js';
 import { pluriel } from './format.js';
@@ -18,12 +21,19 @@ export const resumeApprentissage = (etat) => {
   return `${pluriel(n, 'mot retenu', 'mots retenus')} · ${pluriel(lireNotes().length, 'note', 'notes')}`;
 };
 
+/** Un mot retenu pour tous les plats peut être oublié ; un nom retenu pour un menu se lit seulement. */
+function ligneMot(m) {
+  if (!m.pourTous) return h('li', null, `${m.nom}${m.menu ? ` (menu ${m.menu})` : ''} · ${m.categorie}`);
+  return h('li', { classe: 'ligne-mot' }, h('span', null, `${m.nom} · ${CATEGORIES_MOT[m.categorie].toLowerCase()} · tous les plats`),
+    bouton('Oublier', () => agir((e, t) => oublierMot(e, m.nom, t)), 'court', { 'aria-label': `Oublier le mot : ${m.nom}` }));
+}
+
 function sectionAppris(etat) {
   const r = rapportApprentissage(etat);
   return carte('Ce que Sanji a appris',
     h('p', null, `${pluriel(r.motsRetenus, 'mot retenu', 'mots retenus')}${r.motsRetenus > r.mots.length ? ` (les ${r.mots.length} premiers sont listés)` : ''}.`),
     r.mots.length === 0 ? ligneVide('Aucun mot retenu pour l\'instant.')
-      : h('ul', { classe: 'liste-simple' }, r.mots.map((m) => h('li', null, `${m.nom}${m.menu ? ` (menu ${m.menu})` : ''} · ${m.categorie}`))),
+      : h('ul', { classe: 'liste-simple' }, r.mots.map(ligneMot)),
     h('h3', { classe: 'retour-essai-sous-titre' }, 'À préciser par semaine'),
     r.semaines.length === 0 ? ligneVide('Aucune semaine avec des composants.')
       : h('ul', { classe: 'liste-simple' }, r.semaines.map((s) => h('li', null, `Semaine du ${libelleJour(s.lundi)} : ${s.aPreciser} à préciser sur ${s.composants}`))));

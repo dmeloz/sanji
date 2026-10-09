@@ -1546,3 +1546,12 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .prod-resume-texte { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .prod-resume-fleche { flex: none; font-size: 1.4rem; }
 .prod-resume:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+
+/* ===== Mots retenus (v111) : les quatre choix pour enseigner un mot, et la liste des mots retenus avec « Oublier ». ===== */
+.enseigner { min-width: 0; margin: 8px 0; }
+.enseigner .actions { flex-wrap: wrap; gap: 8px; }
+.enseigner-choix { display: inline-flex; align-items: center; gap: 6px; min-width: 0; min-height: var(--cible); }
+.enseigner-choix svg { flex: none; width: 18px; height: 18px; }
+.ligne-mot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.ligne-mot span { min-width: 0; overflow-wrap: anywhere; }
+.ligne-mot .btn { flex: none; }

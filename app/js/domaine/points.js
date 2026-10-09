@@ -39,7 +39,7 @@ export function pointsAConfirmer(etat, date) {
   const memoire = etat.memoire ?? {};
   const estInconnu = (c) => c.categorie === 'a_preciser' && lireMemoire(memoire, c.nom, c.menu) === null;
   for (const c of composants.filter(estInconnu)) {
-    points.push({ type: 'composant_inconnu', composantId: c.id, texte: `${c.nom} : à classer : au poste ou non ?` });
+    points.push({ type: 'composant_inconnu', composantId: c.id, texte: c.suggestion ? `${c.nom} : à confirmer (${c.suggestion} proposée) : au poste ou non ?` : `${c.nom} : à classer : au poste ou non ?` });
   }
 
   for (const c of composants.filter((x) => x.attribue && x.valide)) {
