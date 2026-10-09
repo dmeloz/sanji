@@ -1,6 +1,7 @@
 // Réglages > Apprentissage et essais : journal de diagnostic local. Rien n'est envoyé : la propriétaire partage ou copie le fichier.
 
 import { resumeEtat, texteDiagnostic } from '../domaine/rapport-diagnostic.js';
+import { texteNotes } from '../domaine/notes-dev.js';
 import { texteRapport } from '../domaine/retour-essai.js';
 import { redessiner, statutStockage } from '../magasin.js';
 import { VERSION_APP } from '../version.js';
@@ -8,11 +9,12 @@ import { h } from './dom.js';
 import { bouton } from './elements.js';
 import { pluriel } from './format.js';
 import { effacerJournal, lireEvenements, photosGardees } from './journal-diagnostic.js';
+import { lireNotes } from './notes-dev.js';
 import { lireRetours } from './retours-essai.js';
 import { afficherMessage } from './messages.js';
 import { confirmer } from './panneau.js';
 
-const AIDE = 'Un seul geste : « Partager le fichier » envoie tout (journal, texte lu par l\'IA, retours d\'essai, photos). Rien n\'est envoyé automatiquement. '
+const AIDE = 'Un seul geste : « Partager le fichier » envoie tout (journal, texte lu par l\'IA, retours d\'essai, notes de test, photos). Rien n\'est envoyé automatiquement. '
   + 'Le journal et les photos (les 5 dernières) sont gardés 14 jours sur l\'appareil.';
 
 const nombreErreurs = () => lireEvenements().filter((e) => e.type === 'erreur').length;
@@ -37,7 +39,8 @@ function texte(etat, photosJointes = 0, motifPhotos = undefined, photosGardeesN 
   const date = maintenant();
   return texteDiagnostic({ environnement: environnement(), resume: resumeEtat(etat), evenements: lireEvenements(), aujourdhui: date,
     photosJointes, photosEnMemoire: photosGardeesN, motifPhotos,
-    retoursTexte: retours.length > 0 ? texteRapport(retours, { version: VERSION_APP, date }) : '' });
+    retoursTexte: retours.length > 0 ? texteRapport(retours, { version: VERSION_APP, date }) : '',
+    notesTexte: texteNotes(lireNotes(), { version: VERSION_APP, date }) });
 }
 
 const nomFichier = () => `sanji-diagnostic-${maintenant().slice(0, 10)}.txt`;

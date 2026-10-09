@@ -158,7 +158,7 @@ a { color: var(--bleu-texte); }
 .contenu {
   max-width: var(--largeur-max);
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 14px) calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 28px) calc(env(safe-area-inset-left) + 14px);
+  padding: calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 14px) calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 84px) calc(env(safe-area-inset-left) + 14px);
   outline: none;
 }
 
@@ -645,7 +645,7 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 @media print {
   :root { color-scheme: light; }
   body { background: #fff; color: #000; }
-  .barre, .onglets, .bandeaux, .messages, #panneaux, .pas-imprime, .actions, button, nav { display: none !important; }
+  .barre, .onglets, .bouton-dev, .bandeaux, .messages, #panneaux, .pas-imprime, .actions, button, nav { display: none !important; }
   .contenu { padding: 0; max-width: none; }
   .carte, .tache, .rubrique { box-shadow: none; border: 1px solid #888; break-inside: avoid; background: #fff; }
   a { color: inherit; text-decoration: none; }
@@ -762,6 +762,33 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .mep-ligne.mep-fait .mep-nom { color: var(--texte-doux); }
 .mep-ligne.mep-fait .mep-qte { color: var(--texte-doux); }
 .mep-ligne.mep-fait .mep-meta { color: var(--texte-doux); }
+
+/* ------------------------------------------------------------ notes de test : pastille « Dev » et feuille de saisie */
+.bouton-dev {
+  position: fixed;
+  right: calc(env(safe-area-inset-right) + 12px);
+  bottom: calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 8px);
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: var(--cible);
+  min-height: var(--cible);
+  padding: 0 14px;
+  border: 2px solid var(--action);
+  border-radius: 999px;
+  background: var(--carte);
+  color: var(--action);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.bouton-dev[hidden] { display: none; }
+.note-dev-legende { font-weight: 700; margin-bottom: 4px; }
+.note-dev-groupe + .note-dev-groupe { margin-top: 12px; }
+.note-dev { padding: 10px 0; border-top: 1px solid var(--bordure); }
+.note-dev:first-child { border-top: 0; }
+.note-dev-texte { overflow-wrap: anywhere; white-space: pre-wrap; }
 
 /* ------------------------------------------------------------ Écran Aujourd'hui (refonte 1, maquette Main) */
 /* Quantités en var(--police-qte) ; un état se dit toujours par un mot écrit, la couleur ne fait que l'appuyer. */

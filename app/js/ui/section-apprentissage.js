@@ -10,6 +10,7 @@ import { bouton, ligneVide } from './elements.js';
 import { pluriel } from './format.js';
 import { afficherMessage } from './messages.js';
 import { confirmer } from './panneau.js';
+import { sectionNotesDev } from './section-notes-dev.js';
 import { indicateurErreurs, sectionDiagnostic } from './section-diagnostic.js';
 import { effacerRetours, lireRetours } from './retours-essai.js';
 
@@ -61,4 +62,4 @@ function sectionRetours() {
     zone);
 }
 
-export const sectionsApprentissage = (etat) => [indicateurErreurs(), sectionAppris(etat), sectionRetours(), sectionDiagnostic(etat)];
+export const sectionsApprentissage = (etat) => [indicateurErreurs(), sectionAppris(etat), sectionNotesDev(), sectionRetours(), sectionDiagnostic(etat)];

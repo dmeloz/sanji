@@ -5,6 +5,7 @@ import { h, parId } from './ui/dom.js';
 import { bouton, encadre } from './ui/elements.js';
 import { abonnerHorsLigne, preparerHorsLigne } from './ui/horsligne.js';
 import { installerJournal } from './ui/journal-diagnostic.js';
+import { installerPastilleDev } from './ui/notes-dev.js';
 import { afficherMessage } from './ui/messages.js';
 import { bandeauNouvelleVersion, surveillerNouvelleVersion } from './ui/nouvelle-version.js';
 import { charger, redessiner, surMessage } from './magasin.js';
@@ -37,6 +38,7 @@ export async function demarrer() {
   surveillerNouvelleVersion(navigator.serviceWorker, () => parId('bandeaux')?.appendChild(bandeauNouvelleVersion(() => location.reload())));
   preparerHorsLigne();
   installerJournal(); // après le chargement ; ne lève jamais
+  installerPastilleDev(); // pastille « Dev » (notes de test) ; ne lève jamais
 }
 
 if (typeof document !== 'undefined') {

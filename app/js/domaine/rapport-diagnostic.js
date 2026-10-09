@@ -75,7 +75,7 @@ function contenusIA(recents) {
 
 /** `evenements` dans l'ordre chronologique (le plus ancien d'abord). `aujourdhui` : date ISO fournie par l'appelant. */
 export function texteDiagnostic({ environnement = {}, resume = {}, evenements = [], aujourdhui = '', photosJointes = 0, photosEnMemoire = 0,
-  motifPhotos = 'partage de fichiers multiples indisponible', retoursTexte = '' }) {
+  motifPhotos = 'partage de fichiers multiples indisponible', retoursTexte = '', notesTexte = '' }) {
   const liste = evenements.filter((e) => e && typeof e === 'object');
   const recents = [...liste].reverse();
   const actions = (resume.dernieresActions ?? []).map((a) => `  ${heureCourte(a.h)} · ${a.action}`);
@@ -113,6 +113,7 @@ export function texteDiagnostic({ environnement = {}, resume = {}, evenements = 
     ...contenusIA(recents),
     '',
     ...(retoursTexte ? ['RETOURS D\'ESSAI (ce que l\'IA a lu, ce que vous avez enregistré)', retoursTexte, ''] : []),
+    ...(notesTexte ? [notesTexte, ''] : []),
     `ÉVÉNEMENTS (du plus récent au plus ancien, ${Math.min(liste.length, MAX_EVENEMENTS_RAPPORT)} sur ${liste.length})`,
     ...recents.slice(0, MAX_EVENEMENTS_RAPPORT).map(ligne),
     '',
