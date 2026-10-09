@@ -652,8 +652,9 @@ test('menus de la semaine : champs préremplis, texte incohérent signalé, pré
   assert.equal(champ(noeud, `menu-${S.lundi}-2`).value, 'poulet, riz, carottes');
   champ(noeud, 'feuille-texte').value = 'lundi 5 octobre\nriz\nmardi 6 octobre\npâtes\npoisson, riz';
   await boutonNomme(noeud, 'Répartir dans la semaine').click();
-  assert.match(champ(noeud, 'feuille-retour').textContent, /il en faut deux par jour/);
-  assert.equal(champ(noeud, `menu-${S.lundi}-2`).value, 'poulet, riz, carottes', 'les champs ne sont pas écrasés');
+  assert.match(champ(noeud, 'feuille-retour').textContent, /Lundi 5 octobre : 1 ligne de menu au lieu de 2/);
+  assert.equal(champ(noeud, `menu-${S.mardi}-1`).value, 'pâtes', 'le jour à deux plats est rempli');
+  assert.equal(champ(noeud, `menu-${S.lundi}-2`).value, 'poulet, riz, carottes', 'le jour douteux n\'est pas écrasé');
   const avant = structuredClone(magasin.etat());
   champ(noeud, `prevision-${S.lundi}-1`).value = 'beaucoup';
   await boutonNomme(noeud, 'Enregistrer la semaine').click();

@@ -9,9 +9,24 @@ const ILLISIBLE_EN_LIGNE = /\[\s*illisible\s*\]/gi;
 
 const nettoyerLigne = (brut) => brut.replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, LIGNE_LONGUEUR_MAX);
 
+/**
+ * Nouveau format { entete, jours:[{jour, plats, illisibles?}], illisibles } : aplati en lignes « jour » puis ses plats
+ * (l'en-tête est ignoré). Ancien format { lignes } : tel quel. Autre chose : null.
+ */
+function aplatir(reponse) {
+  if (!Array.isArray(reponse.jours)) return reponse;
+  const jours = reponse.jours;
+  const valide = jours.every((j) => j && typeof j.jour === 'string' && Array.isArray(j.plats) && j.plats.every((p) => typeof p === 'string')
+    && (j.illisibles === undefined || (Number.isInteger(j.illisibles) && j.illisibles >= 0)));
+  if (!valide || (reponse.entete !== undefined && !Array.isArray(reponse.entete))) return null;
+  const parJour = jours.reduce((somme, j) => somme + (j.illisibles ?? 0), 0);
+  return { lignes: jours.flatMap((j) => [j.jour, ...j.plats]), illisibles: (reponse.illisibles ?? 0) + parJour };
+}
+
 /** @returns {{lignes:string[], illisibles:number}|null} réponse invalide ou trop longue : null */
-export function lireLignesFeuille(reponse) {
-  if (!reponse || typeof reponse !== 'object' || !Array.isArray(reponse.lignes)) return null;
+export function lireLignesFeuille(brute) {
+  const reponse = brute && typeof brute === 'object' ? aplatir(brute) : null;
+  if (!reponse || !Array.isArray(reponse.lignes)) return null;
   if (reponse.lignes.length > LIGNES_MAX || reponse.lignes.some((l) => typeof l !== 'string')) return null;
   const fourni = reponse.illisibles ?? 0;
   if (!Number.isInteger(fourni) || fourni < 0) return null;

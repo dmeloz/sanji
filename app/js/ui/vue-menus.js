@@ -171,6 +171,11 @@ export function repartir(champs, lundi, { deplaceeDepuis = null, enregistrerLeLu
       + 'Rien n\'est enregistré avant « Enregistrer la semaine » : « Annuler » garde la semaine telle qu\'elle était.'));
   }
   for (const texte of avertissements) messages.push(encadre('alerte', texte));
+  // Un jour douteux garde ses lignes visibles (rien n'y est réparti) ; les autres jours sont remplis.
+  for (const jour of analyse.aVerifier) {
+    messages.push(h('p', { classe: 'aide' }, `${jour.libelle} : lignes lues, à placer à la main dans les menus du jour.`),
+      jour.plats.length === 0 ? null : h('ul', { classe: 'liste-simple lignes-ecartees' }, jour.plats.map((ligne) => h('li', null, ligne))));
+  }
   if (analyse.ignorees.length > 0) {
     messages.push(h('p', { classe: 'aide' }, 'Lignes laissées de côté (prix, titre, annotations). Une ligne utile peut être remise dans un menu :'),
       h('ul', { classe: 'liste-simple lignes-ecartees' }, analyse.ignorees.map((ligne) => h('li', null,
@@ -181,7 +186,7 @@ export function repartir(champs, lundi, { deplaceeDepuis = null, enregistrerLeLu
   if (jours.length === 0 && avertissements.length === 0) messages.push(encadre('alerte', 'Aucun menu reconnu dans ce texte.'));
   // Diagnostic local : un texte collé qui ne donne aucun jour garde son contenu (borné) pour comprendre pourquoi ; jamais envoyé seul.
   if (jours.length === 0) noter('import_texte', { jours: 0, ignorees: analyse.ignorees.length, nonComprises: analyse.nonComprises.length, contenu: champs.get('feuille-texte').value });
-  retour.replaceChildren(...messages);
+  retour.replaceChildren(...messages.filter(Boolean));
 }
 
 /** Lit le formulaire et ne transmet que ce qui a changé. */

@@ -784,6 +784,8 @@ details.carte.repliable[open] { padding-bottom: 16px; }
   cursor: pointer;
 }
 .bouton-dev[hidden] { display: none; }
+/* Les pages à barre « Enregistrer » en bas : la pastille se pose au-dessus de la barre, jamais sur son bouton. */
+body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 84px); }
 .note-dev-legende { font-weight: 700; margin-bottom: 4px; }
 .note-dev-groupe + .note-dev-groupe { margin-top: 12px; }
 .note-dev { padding: 10px 0; border-top: 1px solid var(--bordure); }
@@ -1077,6 +1079,8 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .imp-titre-section { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); margin: 0; }
 .imp-titre-hors { margin-top: 20px; }
 .imp-photo > summary, .imp-lecture-jours .imp-jour > summary { min-height: var(--cible); display: flex; align-items: center; cursor: pointer; }
+.imp-scanner { margin: 12px 0; }
+.btn-scanner { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 56px; cursor: pointer; }
 .imp-lecture { display: grid; gap: 10px; }
 .imp-lecture-jours { display: flex; flex-direction: column; }
 .imp-jour { border-top: 1px solid var(--bordure); }
