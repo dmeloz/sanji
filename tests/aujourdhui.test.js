@@ -430,3 +430,15 @@ test('samedi : pas de menu du jour, donc pas de case « Couverts midi » ; la ca
   const semaine = page(S.mercredi, mercredi());
   assert.equal(classes(semaine, 'tdb-case').length, 2);
 });
+
+test('Rappels : « Préparer la semaine · N à faire » mène à l\'écran quand des couverts ou des valeurs manquent, absent quand tout est fait', () => {
+  const e = calme(etatVide());
+  definirMenu(e, S.mercredi, 2, 'riz, carottes', h());
+  const n = page(S.mercredi, e);
+  const ligne = n.tous((x) => x.balise === 'a' && /^Préparer la semaine · \d+ à faire$/.test(x.textContent))[0];
+  assert.ok(ligne, 'ligne dans les rappels');
+  assert.equal(ligne.attributs.href, `#/preparer/${S.lundi}`);
+  const fait = calme(etatVide());
+  const vide = page(S.mercredi, fait);
+  assert.equal(vide.tous((x) => /Préparer la semaine/.test(x.textContent)).length, 0, 'rien à préparer : aucune ligne');
+});

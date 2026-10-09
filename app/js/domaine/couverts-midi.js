@@ -9,6 +9,8 @@ import { moyenneVentes, repereVentes } from './points.js';
 
 /** Sans historique de ventes : un tiers des couverts au menu 1, deux tiers au menu 2 (décision du 2026-10-07). */
 export const PART_MENU_1_SANS_HISTORIQUE = 1 / 3;
+/** Choix rapides de couverts proposés au chef (maquette validée) : 40, 50, 60, 70, 80. */
+export const COUVERTS_RAPIDES = Object.freeze([40, 50, 60, 70, 80]);
 /** Les ventes se saisissent dès 14 h (décision du brief). */
 export const HEURE_VENTES_A_SAISIR = '14:00';
 

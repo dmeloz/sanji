@@ -233,7 +233,7 @@ export function rendre(etat, lundi) {
   let retourNote = false; // un double clic ne note qu'un retour
   const enregistrerEtNoter = () => {
     const final = intitulesDeLaPage();
-    if (!enregistrer(champs, etat, lundi)) return;
+    if (!enregistrer(champs, etat, lundi, `#/preparer/${lundi}`)) return;
     const jours = Object.values(final).filter((j) => j.menu1 !== '' || j.menu2 !== '').length;
     noter('import_enregistre', { jours, aApresIA: lignesIA !== null });
     if (lignesIA && !retourNote) { retourNote = true; noterRetour({ type: 'menu', lu: lignesIA, final }); }

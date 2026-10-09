@@ -284,3 +284,41 @@ test('Semaine : la ligne « Couverts midi » ouvre la feuille de saisie ; lien �
   assert.ok(liens(n).includes(`#/production/${S.lundiSuivant}`));
   assert.match(texte(n), /Production du jour ›/);
 });
+
+// ---------------------------------------------------------------- détail du jour raccourci (décision du 2026-10-09)
+
+test('détail du jour : « À produire ce jour » vient avant la carte Services, puis le détail replié', () => {
+  const { e } = lundiAvecAvance();
+  magasin.remplacer(e);
+  const t = texte(vue.rendre(magasin.etat(), S.lundi));
+  const [produire, services, detail] = ['À produire ce jour', 'Services ·', 'Tout le détail du jour'].map((m) => t.indexOf(m));
+  assert.ok(produire > 0 && services > produire && detail > services, `ordre : ${produire}, ${services}, ${detail}`);
+});
+
+test('détail du jour : chaque ligne porte un état court (calculé, à confirmer, fait), icône et mot', async () => {
+  const { e, m } = lundiAvecAvance();
+  composantValide(e, S.lundi, 2, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_SANS_PREVISION_TEST' });
+  planifier(e, principaleDe(e, Object.values(e.composants).find((c) => c.nom === 'ELEMENT_SANS_PREVISION_TEST').id), S.lundi, 'avant_midi', h());
+  magasin.remplacer(e);
+  let lignes = parClasse(vue.rendre(magasin.etat(), S.lundi), 'sem-prod');
+  const etat = (nom) => parClasse(lignes.find((l) => texte(l).includes(nom)), 'pastille').map(texte).join(' ');
+  assert.equal(etat('ELEMENT_M1_TEST'), 'calculé');
+  assert.equal(etat('ELEMENT_SANS_PREVISION_TEST'), 'à confirmer');
+  assert.equal(parClasse(lignes.find((l) => texte(l).includes('SANS_PREVISION')), 'etq-ambre').length, 1, 'l\'état à confirmer a son icône et son mot');
+  await magasin.agir((x, t) => actions.marquerFait(x, principaleDe(x, m), 100, t));
+  lignes = parClasse(vue.rendre(magasin.etat(), S.lundi), 'sem-prod');
+  assert.equal(etat('ELEMENT_M1_TEST'), 'fait');
+});
+
+test('détail du jour : carte Services réduite, attribution toujours repliée, intitulé sur une ligne', () => {
+  const e = semaine();
+  for (const c of Object.values(e.composants)) c.attribue = true;
+  Object.values(e.composants)[0].attribue = false;
+  magasin.remplacer(e);
+  const n = vue.rendre(magasin.etat(), S.lundiSuivant);
+  const carte = parClasse(n, 'sem-carte')[0];
+  assert.ok(parClasse(carte, 'sem-poste').length >= 1);
+  assert.ok(parClasse(carte, 'sem-poste').every((d) => d.open === false));
+  assert.ok(parClasse(carte, 'sem-intitule-court').length >= 1);
+  assert.match(texte(carte), /Couverts midi/);
+});

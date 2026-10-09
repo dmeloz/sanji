@@ -117,7 +117,7 @@ function semaineAvecComposants() {
 const jourSemaine = (e) => { magasin.remplacer(e); return semaineVue.rendre(magasin.etat(), S.lundiSuivant); };
 const interrupteurs = (n) => n.tous((x) => x.balise === 'input' && x.attributs.role === 'switch');
 
-test('Semaine : « Attribution au poste » repliée quand tout est au poste, dépliée dès qu\'il en manque, avec « hors poste » écrit', () => {
+test('Semaine : « Attribution au poste » toujours repliée (carte Services réduite), « hors poste » écrit dans le repli et dans le résumé', () => {
   const e = semaineAvecComposants();
   for (const c of Object.values(e.composants)) c.attribue = true;
   let n = jourSemaine(e);
@@ -135,11 +135,11 @@ test('Semaine : « Attribution au poste » repliée quand tout est au poste, dé
   poulet.attribue = false;
   n = jourSemaine(e);
   reglesPoste = classes(n, 'sem-poste');
-  const ouvert = reglesPoste.filter((d) => d.open);
-  assert.equal(ouvert.length, 1, 'seul le menu où il en manque est déplié');
-  assert.match(ouvert[0].textContent, /poulet/);
-  assert.match(ouvert[0].textContent, /hors poste/);
-  assert.equal(classes(ouvert[0], 'interrupteur-etat').filter((x) => x.textContent === 'hors poste').length, 1);
+  assert.ok(reglesPoste.every((d) => d.open === false), 'décision du 2026-10-09 : jamais dépliée par défaut, même s\'il en manque');
+  const concerne = reglesPoste.find((d) => /poulet/.test(d.textContent));
+  assert.match(concerne.textContent, /Attribution au poste : (\d+) sur (?!\1\b)\d+/, 'le résumé dit qu\'il en manque');
+  assert.match(concerne.textContent, /hors poste/);
+  assert.equal(classes(concerne, 'interrupteur-etat').filter((x) => x.textContent === 'hors poste').length, 1);
 });
 
 test('Semaine : le nom accessible de l\'interrupteur porte l\'état et le suit', async () => {

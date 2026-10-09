@@ -214,7 +214,8 @@ function lireSaisie(champs, etat, lundi) {
   return saisie;
 }
 
-export function enregistrer(champs, etat, lundi) {
+/** `destination` : adresse où aller après l'enregistrement (par défaut le tableau de la semaine). */
+export function enregistrer(champs, etat, lundi, destination = `#/semaine/${lundi}/tableau`) {
   let saisie;
   try {
     saisie = lireSaisie(champs, etat, lundi);
@@ -225,7 +226,7 @@ export function enregistrer(champs, etat, lundi) {
   const resultat = agir((copie, heure) => saisirMenusSemaine(copie, lundi, saisie, heure));
   if (resultat.ok) {
     afficherMessage('Semaine enregistrée.', 'info');
-    location.hash = `#/semaine/${lundi}/tableau`;
+    location.hash = destination;
   }
   return Boolean(resultat.ok);
 }

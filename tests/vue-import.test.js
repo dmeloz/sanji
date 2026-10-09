@@ -103,7 +103,7 @@ test('« Enregistrer la semaine » : un menu suffit, les composants se créent s
   const e = magasin.etat();
   assert.equal(e.jours[S.lundi].menus[2].intitule, 'courgettes, quinoa');
   assert.ok(Object.keys(e.composants).length >= 2, 'composants créés seuls');
-  assert.equal(location.hash, `#/semaine/${S.lundi}/tableau`);
+  assert.equal(location.hash, `#/preparer/${S.lundi}`, 'après l\'enregistrement : l\'écran « Préparer la semaine »');
 });
 
 test('la page ancienne vue-menus reste disponible et partage les champs', async () => {

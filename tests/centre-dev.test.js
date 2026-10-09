@@ -85,3 +85,43 @@ test('marquer une note réglée rafraîchit la feuille', async () => {
   assert.ok(parTexte(f, 'Rouvrir'), 'la feuille montre le nouvel état');
   assert.equal(parTexte(f, 'Réglée'), undefined);
 });
+
+test('« Copié ✓ » apparaît DANS la feuille (zone d\'état), s\'efface, et un second toucher rapide n\'écrit qu\'une fois', async () => {
+  globalThis.localStorage = faux(); J.effacerJournal();
+  magasin.remplacer(etatVide());
+  const ecritures = [];
+  const original = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { onLine: true, userAgent: 'test', clipboard: { writeText: async (t) => { ecritures.push(t); } } } });
+  try {
+    centre.ouvrirCentreDev();
+    const f = dernier();
+    const zone = f.tous((x) => x.attributs.role === 'status' && x.className.includes('envoi-statut'))[0];
+    assert.ok(zone, 'zone role="status" dans la feuille');
+    assert.equal(zone.textContent, '');
+    assert.match(parTexte(f, 'Partager le fichier').className, /btn-principal/, 'partager = bouton principal');
+    assert.doesNotMatch(parTexte(f, 'Copier le diagnostic').className, /btn-principal/, 'copier = secondaire');
+    await parTexte(f, 'Copier le diagnostic').click();
+    assert.equal(zone.textContent, 'Copié ✓');
+    assert.equal(zone.tous((x) => x.balise === 'svg').length, 1, 'avec une icône');
+    await parTexte(f, 'Copier le diagnostic').click();
+    assert.equal(ecritures.length, 1, 'le second toucher dans la seconde est ignoré');
+  } finally {
+    if (original) Object.defineProperty(globalThis, 'navigator', original); else delete globalThis.navigator;
+  }
+});
+
+test('copie impossible : pas de « Copié ✓ », le texte à copier à la main est proposé', async () => {
+  globalThis.localStorage = faux();
+  magasin.remplacer(etatVide());
+  const original = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { clipboard: { writeText: async () => { throw new Error('refusé'); } } } });
+  try {
+    centre.ouvrirCentreDev();
+    const f = dernier();
+    await parTexte(f, 'Copier le diagnostic').click();
+    assert.doesNotMatch(f.textContent, /Copié ✓/);
+    assert.match(f.textContent, /Copie automatique indisponible/);
+  } finally {
+    if (original) Object.defineProperty(globalThis, 'navigator', original); else delete globalThis.navigator;
+  }
+});

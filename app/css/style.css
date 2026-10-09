@@ -948,15 +948,16 @@ body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + en
 .sem-banniere-off { background: var(--carte); border: 1px dashed var(--bordure-forte); }
 .sem-banniere-confirmer { background: var(--exception-fond); border: 1px solid var(--exception-bord); color: var(--exception); font-weight: 600; }
 .sem-banniere-texte { flex: 1; min-width: 0; }
-.sem-carte, .sem-aproduire { background: var(--carte); border-radius: var(--r-carte); padding: 12px 16px; display: grid; gap: 8px; }
+.sem-carte, .sem-aproduire { background: var(--carte); border-radius: var(--r-carte); padding: 12px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .sem-aproduire { background: transparent; padding: 0; }
 .sem-section { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); margin: 0 4px; }
 .sem-carte > .sem-section { margin: 0; }
 .sem-sous-titre { font-size: var(--t-corps); }
-.sem-menu { display: grid; gap: 4px; }
+.sem-menu { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; min-width: 0; }
 .sem-ligne { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: var(--t-corps); }
 .sem-rang { color: var(--texte-doux); flex: none; }
 .sem-intitule { text-align: right; min-width: 0; overflow-wrap: anywhere; }
+.sem-intitule-court { flex: 1 1 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
 .sem-neutre { color: var(--texte-doux); font-style: italic; }
 .sem-qte, .sem-qte-ligne { font-family: var(--police-qte); font-weight: 600; font-size: var(--t-qte); white-space: nowrap; }
 .sem-qte-absente { font-family: var(--police); font-size: var(--t-legende); white-space: normal; text-align: right; }
@@ -966,7 +967,7 @@ body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + en
 .sem-composant { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--cible); border-top: 1px solid var(--bordure); }
 .sem-fiches { display: grid; gap: 6px; padding-top: 8px; border-top: 1px solid var(--bordure); }
 .sem-liste { display: grid; gap: 8px; }
-.sem-fiche { display: grid; gap: 4px; }
+.sem-fiche { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; min-width: 0; }
 .sem-fiche-titre { font-weight: 600; }
 .sem-allergies { font-size: var(--t-corps); }
 .sem-prod { display: grid; gap: 6px; padding: 8px 8px 8px 14px; background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--r-carte-petite); }
@@ -1423,7 +1424,7 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .sa-lien-production:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 /* Semaine, carte Services : la ligne « Couverts midi » et son bouton (refonte 2). */
-.sa-couverts { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--cible); padding: 4px 0 8px; border-bottom: 1px solid var(--bordure); }
+.sa-couverts { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--cible); padding: 4px 0 8px; border-bottom: 1px solid var(--bordure); }
 .sa-couverts-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .sa-couverts-nombres { font-size: var(--t-corps); white-space: pre-wrap; }
 
@@ -1504,3 +1505,27 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .etat-vide-actions .btn { flex: 1 1 auto; justify-content: center; }
 .fiche-sans-recette { margin-top: 12px; }
 .fiche-sans-recette .fiche-ligne { min-height: var(--cible); border-bottom: 1px solid var(--bordure); }
+
+/* Préparer la semaine (v108) : une page, une main ; valeurs à toucher de 44 px au moins. */
+.prep-section, .prep-fin { display: grid; gap: 10px; margin-block: 16px; }
+.prep-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.prep-jour, .prep-ligne { display: grid; gap: 8px; border-bottom: 1px solid var(--bordure); padding-bottom: 12px; }
+.prep-jour-tete, .prep-ligne { grid-template-columns: 1fr auto; align-items: center; gap: 12px; }
+.prep-jour-tete { display: flex; justify-content: space-between; align-items: baseline; }
+.prep-nombre { font-family: var(--police-qte); font-weight: 600; font-size: var(--t-qte); }
+.prep-valeurs { display: flex; flex-wrap: wrap; gap: 6px; }
+.prep-valeur { min-height: var(--cible); min-width: var(--cible); padding: 0 14px; font-family: var(--police-qte); }
+.prep-valeur[aria-pressed="true"] { background: var(--encre); color: var(--sur-encre); border-color: var(--encre); }
+.prep-ligne-texte { display: grid; gap: 2px; min-width: 0; }
+.prep-ligne-valeur { font-size: var(--t-legende); color: var(--texte-doux); }
+.prep-saisie { display: flex; gap: 6px; align-items: center; }
+.prep-champ { width: 6rem; min-height: var(--cible); font-family: var(--police-qte); font-size: var(--t-corps); }
+.prep-tout, .prep-fiche { min-height: var(--cible); width: 100%; text-align: center; justify-content: center; }
+.prep-bilan { margin: 0; font-size: var(--t-corps); }
+.envoi-statut { min-height: 1.5em; }
+.sa-couverts .btn { flex: none; }
+.prep-jour, .prep-ligne, .prep-ligne-texte, .prep-saisie { min-width: 0; }
+.prep-saisie .btn { flex: none; }
+.prep-champ { min-width: 0; flex: 0 1 6rem; }
+.prep-retenus { margin: 0; padding-left: 18px; font-size: var(--t-corps); }
+.envoi-statut, .actions { min-width: 0; }
