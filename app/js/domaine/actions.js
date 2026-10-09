@@ -203,6 +203,7 @@ function creerComposant(etat, date, menu, champs) {
     attribue: champs.attribue ?? true, type: champs.type ?? 'a_preciser', valide: champs.valide ?? false };
   // Sauce issue de la lecture implicite (« à confirmer ») : on garde le NOM D'ORIGINE (« sauce à confirmer » ou « base de risotto à confirmer »)
   // pour ne conserver une sauce confirmée que si le plat reste de même nature. `true` = ancien marqueur, origine inconnue.
+  if (champs.suggestion) c.suggestion = champs.suggestion; // lecture : complément inconnu proposé « à confirmer » (sauce)
   if (champs.implicite) c.implicite = typeof champs.implicite === 'string' ? champs.implicite : normaliser(champs.nom ?? '') || true;
   etat.composants[id] = c;
   return c;
@@ -217,7 +218,7 @@ function creerComposant(etat, date, menu, champs) {
 /** `retires` (facultatif) reçoit { nom, taches } pour chaque composant retiré : le journal doit dire ce qui disparaît. */
 function fusionnerComposants(etat, date, menu, retires = []) {
   const m = etat.jours[date].menus[menu];
-  const propositions = proposerComposants(m.intitule, menu, etat.memoire);
+  const propositions = proposerComposants(m.intitule, menu, etat.memoire, undefined, etat.mots);
   const voulus = new Set(propositions.map((p) => normaliser(p.nom)));
   const duMenu = () => Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
   // Une sauce issue de la lecture implicite et déjà confirmée (renommée) reste tant que l'intitulé n'écrit pas de sauce :

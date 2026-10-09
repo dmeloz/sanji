@@ -109,7 +109,7 @@ export const MODES = geler([
 
 /** Mots de liaison : on ne coupe jamais à l'intérieur d'une expression, et on les retire au bord d'un élément. */
 export const MOTS_DE_LIAISON = geler(['de', 'du', 'des', 'd', 'au', 'aux', 'a', 'la', 'le', 'les', 'l', 'en', 'et', 'e', 'sur',
-  'sous', 'avec', 'alla', 'al', 'ai', 'alle', 'agli', 'all', 'dei', 'di', '&']);
+  'sous', 'avec', 'alla', 'al', 'ai', 'alle', 'allo', 'con', 'agli', 'all', 'dei', 'di', '&']);
 
 const sans = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 

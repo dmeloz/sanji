@@ -34,6 +34,7 @@ const MOTS_AMBIGUITE = {
   sauce: 'sauce à confirmer',
   sauce_implicite: 'sauce implicite à confirmer',
   mot_inconnu: 'mot à préciser',
+  mot_propose: 'sauce proposée, à confirmer',
   preparation: 'préparation à confirmer',
 };
 
@@ -49,7 +50,7 @@ function etiquetteElement(element) {
 /** La lecture d'un intitulé : null si le champ est vide. */
 function lire(etat, texte, menu) {
   const intitule = String(texte ?? '').replace(/\s+/g, ' ').trim();
-  return intitule === '' ? null : lirePlat(intitule, menu, { lectures: etat.lectures, memoire: etat.memoire });
+  return intitule === '' ? null : lirePlat(intitule, menu, { lectures: etat.lectures, memoire: etat.memoire, mots: etat.mots });
 }
 
 function blocLectureMenu(menu, lecture) {

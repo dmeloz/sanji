@@ -83,7 +83,7 @@ function morceauxDuMenu(etat, date, menu, intitule) {
   for (const c of Object.values(etat.composants ?? {})) {
     if (c.date === date && c.menu === menu) parNom.set(normaliser(c.nom), c);
   }
-  return proposerComposants(intitule, menu, {}).map((p) => {
+  return proposerComposants(intitule, menu, {}, undefined, etat.mots).map((p) => {
     const composant = parNom.get(normaliser(p.nom)) ?? null;
     return { texte: p.nom, auPoste: Boolean(composant?.attribue), composantId: composant?.id ?? null, implicite: Boolean(p.implicite) };
   });
