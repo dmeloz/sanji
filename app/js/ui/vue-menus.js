@@ -11,6 +11,7 @@ import { champs as construireChamps } from './champs.js';
 import { h } from './dom.js';
 import { bouton, encadre, lien, pastille, repliable } from './elements.js';
 import { parseEntier, pluriel } from './format.js';
+import { noter } from './journal-diagnostic.js';
 import { afficherMessage } from './messages.js';
 import { panneau } from './panneau.js';
 
@@ -178,6 +179,8 @@ export function repartir(champs, lundi, { deplaceeDepuis = null, enregistrerLeLu
   }
   if (analyse.nonComprises.length > 0) messages.push(zoneLue(champs, lundi, saisie, analyse.nonComprises, enregistrerLeLu));
   if (jours.length === 0 && avertissements.length === 0) messages.push(encadre('alerte', 'Aucun menu reconnu dans ce texte.'));
+  // Diagnostic local : un texte collé qui ne donne aucun jour garde son contenu (borné) pour comprendre pourquoi ; jamais envoyé seul.
+  if (jours.length === 0) noter('import_texte', { jours: 0, ignorees: analyse.ignorees.length, nonComprises: analyse.nonComprises.length, contenu: champs.get('feuille-texte').value });
   retour.replaceChildren(...messages);
 }
 

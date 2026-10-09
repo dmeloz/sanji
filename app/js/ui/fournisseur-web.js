@@ -195,6 +195,10 @@ export function creerFournisseurWeb({
       } catch {
         throw new Error(`Réponse illisible de l'API (HTTP ${reponse.status}).`);
       }
+      // Certains modèles refusent un outil imposé (`tool_choice` « tool » ou « any ») : on retente UNE fois en « auto » (la consigne demande déjà l'outil).
+      if (reponse.status === 400 && /tool_choice/.test(corps?.error?.message ?? '') && corpsRequete.tool_choice && corpsRequete.tool_choice.type !== 'auto') {
+        return await envoyer({ ...corpsRequete, tool_choice: { type: 'auto' } }, signal);
+      }
       if (!reponse.ok) throw new Error(`API Anthropic : HTTP ${reponse.status} ${corps?.error?.type ?? ''} ${corps?.error?.message ?? ''}`.trim());
       fournisseur.dernierUsage = corps.usage ?? null;
       if (corps.stop_reason === 'refusal') throw new Error('Le modèle a refusé la demande.');

@@ -198,3 +198,32 @@ test('texte d\'une autre semaine : ouvert à sa place, sans rien enregistrer', a
   // Un deuxième affichage ne reprend plus le texte.
   assert.equal(champ(vue.rendre(magasin.etat(), '2026-10-12'), 'feuille-texte').value, '');
 });
+
+test('texte collé sans aucun jour reconnu : le journal garde un résumé et le texte (borné), pour comprendre pourquoi', async () => {
+  // Arrange
+  const { lireEvenements, effacerJournal } = await import('../app/js/ui/journal-diagnostic.js');
+  effacerJournal();
+  magasin.remplacer(etatVide());
+  const noeud = vue.rendre(magasin.etat(), S.lundi);
+  champ(noeud, 'feuille-texte').value = 'texte sans aucun jour ni plat reconnaissable';
+  // Act
+  await bouton(noeud, 'Répartir dans la semaine').click();
+  // Assert
+  const evenement = lireEvenements().find((e) => e.type === 'import_texte');
+  assert.ok(evenement, 'événement noté');
+  assert.equal(evenement.jours, 0);
+  assert.match(evenement.contenu, /texte sans aucun jour/);
+});
+
+test('texte collé qui donne des jours : rien de plus dans le journal', async () => {
+  // Arrange
+  const { lireEvenements, effacerJournal } = await import('../app/js/ui/journal-diagnostic.js');
+  effacerJournal();
+  magasin.remplacer(etatVide());
+  const noeud = vue.rendre(magasin.etat(), S.lundi);
+  champ(noeud, 'feuille-texte').value = 'Lundi 05 octobre\nriz et carottes\npoulet, riz, carottes';
+  // Act
+  await bouton(noeud, 'Répartir dans la semaine').click();
+  // Assert
+  assert.equal(lireEvenements().filter((e) => e.type === 'import_texte').length, 0);
+});

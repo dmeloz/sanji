@@ -181,3 +181,34 @@ test('lireLignesFeuille : un « [illisible] » au milieu d\'une ligne est retir�
   const r = lireLignesFeuille({ lignes: ['[illisible]ortecce à la bolognaise 19.-', 'Penne au pesto [illisible] 19.-'] });
   assert.deepEqual(r, { lignes: ['ortecce à la bolognaise 19.-', 'Penne au pesto 19.-'], illisibles: 2 });
 });
+
+test('un modèle qui refuse tool_choice forcé (HTTP 400) : le même appel est retenté une fois en « auto », sans changer le reste', async () => {
+  // Arrange
+  const corps = [];
+  const fetchImpl = async (_url, init) => {
+    const envoye = JSON.parse(init.body);
+    corps.push(envoye);
+    if (envoye.tool_choice.type === 'tool') {
+      return reponseHttp(400, { error: { type: 'invalid_request_error', message: 'tool_choice: type "tool" and "any" are not supported for this model.' } });
+    }
+    return reponseHttp(200, outil({ lignes: ['Lundi 05 octobre'] }));
+  };
+  const fournisseur = creerFournisseurWeb({ cle: FAUSSE_CLE, fetchImpl });
+  // Act
+  const rendu = await fournisseur.demanderLecturePhoto({ media_type: 'image/jpeg', base64: 'AAAA' });
+  // Assert
+  assert.equal(corps.length, 2);
+  assert.deepEqual(corps[1].tool_choice, { type: 'auto' });
+  assert.deepEqual({ ...corps[1], tool_choice: corps[0].tool_choice }, corps[0]);
+  assert.deepEqual(rendu.lignes, ['Lundi 05 octobre']);
+});
+
+test('une autre erreur 400 n\'est pas retentée', async () => {
+  // Arrange
+  let appels = 0;
+  const fetchImpl = async () => { appels += 1; return reponseHttp(400, { error: { type: 'invalid_request_error', message: 'image trop grande' } }); };
+  const fournisseur = creerFournisseurWeb({ cle: FAUSSE_CLE, fetchImpl });
+  // Act / Assert
+  await assert.rejects(() => fournisseur.demanderLecturePhoto({ media_type: 'image/jpeg', base64: 'AAAA' }), /image trop grande/);
+  assert.equal(appels, 1);
+});
