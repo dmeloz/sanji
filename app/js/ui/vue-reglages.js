@@ -488,7 +488,7 @@ const LIBELLE_ACTION = {
   saisirVentes: 'Ventes saisies', saisirApresService: 'Après service saisi',
   definirStandard: 'Standard maison réglé', supprimerStandard: 'Standard maison effacé',
   annulerFait: 'Marquage « fait » annulé', composerMelange: 'Mélange composé', noterExport: 'Sauvegarde exportée', definirMargeSecurite: 'Marge de sécurité réglée',
-  saisirMenusSemaine: 'Menus de la semaine enregistrés',
+  saisirMenusSemaine: 'Menus de la semaine enregistrés', reinitialiserSemaine: 'Semaine réinitialisée',
   validerStandard: 'Portion validée comme standard maison', corrigerStandard: 'Standard maison corrigé',
   reporterValidation: 'Validation reportée à plus tard',
   ajusterStandard: 'Valeur de base changée', revenirAuStandard: 'Valeur de base rétablie',

@@ -202,3 +202,22 @@ test('la page branche le glissement : un geste vers la gauche ouvre le jour suiv
   await noeud.declencher('touchend', { changedTouches: [{ clientX: 290, clientY: 400 }] });
   assert.equal(globalThis.location.hash, '', 'geste vertical : rien');
 });
+
+test('jourApresGeste : un geste de plus de 700 ms n\'est pas un feuilletage', () => {
+  assert.equal(jourApresGeste(S.lundi, -120, 10, undefined, 400), S.mardi);
+  assert.equal(jourApresGeste(S.lundi, -120, 10, undefined, 701), null);
+});
+
+test('la page ignore un glissement qui commence sur un champ, une zone de texte, une liste ou un bouton (saisie en cours)', async () => {
+  const noeud = page(lundiFusilli());
+  globalThis.location.hash = '';
+  for (const balise of ['input', 'textarea', 'select', 'button']) {
+    const cible = { closest: (sel) => (sel.split(', ').includes(balise) ? {} : null) };
+    noeud.declencher('touchstart', { target: cible, touches: [{ clientX: 300, clientY: 100 }] });
+    await noeud.declencher('touchend', { changedTouches: [{ clientX: 180, clientY: 110 }] });
+    assert.equal(globalThis.location.hash, '', balise);
+  }
+  noeud.declencher('touchstart', { target: { closest: () => null }, touches: [{ clientX: 300, clientY: 100 }] });
+  await noeud.declencher('touchend', { changedTouches: [{ clientX: 180, clientY: 110 }] });
+  assert.equal(globalThis.location.hash, `#/production/${S.mardi}`, 'ailleurs : le geste fonctionne');
+});

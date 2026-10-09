@@ -46,7 +46,7 @@ export function rendre(etat, date) {
   racine.appendChild(pied(date));
   // Glissement : la règle (seuil, vertical ignoré, dimanche sauté) est `jourApresGeste` ; ici on la branche sur le doigt.
   activerGlisser(racine, {
-    decider: ({ dx, dy }) => { const cible = jourApresGeste(date, dx, dy); return cible === null ? null : (cible > date ? 'suivant' : 'precedent'); },
+    decider: ({ dx, dy, dt }) => { const cible = jourApresGeste(date, dx, dy, undefined, dt); return cible === null ? null : (cible > date ? 'suivant' : 'precedent'); },
     suivant: () => { location.hash = `#/production/${jourOuvertVoisin(date, 1)}`; },
     precedent: () => { location.hash = `#/production/${jourOuvertVoisin(date, -1)}`; },
   });

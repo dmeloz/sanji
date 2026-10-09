@@ -261,7 +261,8 @@ test('bouton « ⋯ » : la feuille propose Importer les menus, Proposer un plan
   assert.equal(boutons.length, 1);
   assert.equal(boutons[0].textContent, '⋯');
   await boutons[0].click();
-  const feuille = dom.document.body.tous((x) => x.className.split(' ').includes('sa-action'));
+  // « Réinitialiser la semaine » ne s'ajoute que pour une semaine à venir (horloge réelle) : voir tests/reinitialiser-semaine-ui.test.js.
+  const feuille = dom.document.body.tous((x) => x.className.split(' ').includes('sa-action') && x.textContent !== 'Réinitialiser la semaine');
   assert.deepEqual(feuille.map((x) => x.textContent), ['Importer les menus', 'Proposer un planning', 'Vue de la semaine']);
   assert.equal(feuille[0].attributs.href, `#/import/${S.lundiSuivant}`);
   assert.equal(feuille[2].attributs.href, `#/semaine/${S.lundiSuivant}/tableau`);

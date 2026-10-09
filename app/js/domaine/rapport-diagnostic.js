@@ -2,12 +2,15 @@
 // nommer un plat), messages techniques bornés et, depuis l'accord du 2026-10-07, le texte rendu par l'IA : jamais la clé.
 
 import { lundiDe } from './dates.js';
+import { texteNotes } from './notes-dev.js';
 
 export const MAX_TEXTE = 200;
 export const MAX_LIBELLE = 40;
 const MAX_EVENEMENTS_RAPPORT = 150;
 const MAX_ERREURS_RAPPORT = 30;
 const MAX_ACTIONS = 20;
+const MAX_EVENEMENTS_DEPUIS_ENVOI = 60;
+const MAX_NOTE_TRANSMISE = 60;
 const MAX_AGENT = 120;
 const MOTIF_CLE = /sk-ant-[A-Za-z0-9_-]*/g;
 export const MAX_CONTENU = 2000;
@@ -73,15 +76,56 @@ function contenusIA(recents) {
   return lignes.length ? lignes : ['aucun'];
 }
 
+const apresRepere = (repere, h) => !repere?.h || String(h ?? '') > repere.h;
+
+/** Les navigations consécutives vers la même route ne font qu'une ligne « ×N » (du plus récent au plus ancien). */
+function regrouperNavigations(recents) {
+  const sortie = [];
+  let precedent = null;
+  for (const e of recents) {
+    const cle = e.type === 'navigation' ? `nav|${e.route}` : null;
+    if (cle && cle === precedent) { sortie[sortie.length - 1].n += 1; continue; }
+    sortie.push({ e, n: 1 });
+    precedent = cle;
+  }
+  return sortie.map(({ e, n }) => (n > 1 ? `${ligne(e)} ×${n}` : ligne(e)));
+}
+
+export const clePhoto = (p) => `diag|${p.h}|${p.type}`;
+
+/** Ce qui n'a pas encore été envoyé, selon le repère (null = premier envoi : tout). Les notes déjà transmises mais ouvertes sont à part. */
+export function nouveautes({ evenements = [], notes = [], retours = [], photos = [] }, repere) {
+  const vues = new Set(repere?.notesEnvoyees ?? []);
+  const photosVues = new Set(repere?.photosEnvoyees ?? []);
+  return {
+    evenements: evenements.filter((e) => e && apresRepere(repere, e.h)),
+    retours: retours.filter((r) => r && apresRepere(repere, r.h)),
+    photos: photos.filter((p) => !photosVues.has(clePhoto(p))),
+    notes: notes.filter((n) => !vues.has(n.id)),
+    notesDejaTransmises: notes.filter((n) => vues.has(n.id) && n.etat !== 'reglee'),
+  };
+}
+
+/** Bloc des notes à envoyer : les nouvelles en détail, les autres sur une ligne d'en-tête puis leurs textes tronqués. */
+export function notesPourEnvoi({ notes, notesDejaTransmises }, meta) {
+  const deja = notesDejaTransmises.length === 0 ? [] : [
+    `${notesDejaTransmises.length} notes déjà transmises, toujours ouvertes :`,
+    ...notesDejaTransmises.map((n) => `  - ${nettoyer(String(n.texte ?? ''), MAX_NOTE_TRANSMISE)}`),
+  ];
+  return [texteNotes(notes, meta), ...deja].filter(Boolean).join('\n');
+}
+
 /** `evenements` dans l'ordre chronologique (le plus ancien d'abord). `aujourdhui` : date ISO fournie par l'appelant. */
 export function texteDiagnostic({ environnement = {}, resume = {}, evenements = [], aujourdhui = '', photosJointes = 0, photosEnMemoire = 0,
-  motifPhotos = 'partage de fichiers multiples indisponible', retoursTexte = '', notesTexte = '' }) {
-  const liste = evenements.filter((e) => e && typeof e === 'object');
+  motifPhotos = 'partage de fichiers multiples indisponible', retoursTexte = '', notesTexte = '', repere = null, notesNouvelles = 0 }) {
+  const liste = evenements.filter((e) => e && typeof e === 'object' && apresRepere(repere, e.h));
   const recents = [...liste].reverse();
   const actions = (resume.dernieresActions ?? []).map((a) => `  ${heureCourte(a.h)} · ${a.action}`);
+  const lignesEvenements = regrouperNavigations(recents).slice(0, repere?.h ? MAX_EVENEMENTS_DEPUIS_ENVOI : MAX_EVENEMENTS_RAPPORT);
   return [
     'Diagnostic Sanji',
     PHRASE_CONFIDENTIALITE,
+    ...(repere?.h ? [`Depuis le dernier envoi (${heureCourte(repere.h)}) : ${liste.length} événements, ${notesNouvelles} notes nouvelles`] : []),
     '',
     'ENVIRONNEMENT',
     `Version : ${nettoyer(String(environnement.version ?? '?'), 30)}`,
@@ -99,8 +143,7 @@ export function texteDiagnostic({ environnement = {}, resume = {}, evenements = 
     `Composants : ${resume.composants ?? 0} (à préciser : ${resume.composantsAPreciser ?? 0})`,
     `Fiches actives : ${resume.fichesActives ?? 0}`,
     `Mots retenus : ${resume.motsRetenus ?? 0}`,
-    'Dernières actions :',
-    ...(actions.length ? actions : ['  aucune']),
+    ...(repere?.h ? [] : ['Dernières actions :', ...(actions.length ? actions : ['  aucune'])]),
     '',
     'SYNTHÈSE',
     ...synthese(liste),
@@ -114,8 +157,8 @@ export function texteDiagnostic({ environnement = {}, resume = {}, evenements = 
     '',
     ...(retoursTexte ? ['RETOURS D\'ESSAI (ce que l\'IA a lu, ce que vous avez enregistré)', retoursTexte, ''] : []),
     ...(notesTexte ? [notesTexte, ''] : []),
-    `ÉVÉNEMENTS (du plus récent au plus ancien, ${Math.min(liste.length, MAX_EVENEMENTS_RAPPORT)} sur ${liste.length})`,
-    ...recents.slice(0, MAX_EVENEMENTS_RAPPORT).map(ligne),
+    `ÉVÉNEMENTS (du plus récent au plus ancien, ${lignesEvenements.length} lignes pour ${liste.length} événements)`,
+    ...lignesEvenements,
     '',
   ].join('\n');
 }

@@ -22,6 +22,7 @@ import { bouton, lien, pastille, repliable } from './elements.js';
 import { ouvrirFiche } from './fiches.js';
 import { boutonLireFiche } from './lecture-fiche.js';
 import { problemeHorsLigne } from './horsligne.js';
+import { demanderReinitialisation, peutReinitialiser } from './reinitialiser-semaine.js';
 import { qteNoeuds, quantite } from './format.js';
 import {
   actionsTache, defaireEnUnToucher, dialogCorriger, dialogPlanifier, faireEnUnToucher, ligneProduction, noeudEvaluation,
@@ -81,6 +82,7 @@ function boutonActionsFeuille(lundi, date) {
         h('a', { href: `#/import/${lundi}`, classe: 'btn sa-action', onClick: () => fermer() }, 'Importer les menus'),
         h('button', { type: 'button', classe: 'btn sa-action', onClick: () => { fermer(); ouvrirAssistantPlanning({ date }); } }, 'Proposer un planning'),
         h('a', { href: `#/semaine/${lundi}/tableau`, classe: 'btn sa-action', onClick: () => fermer() }, 'Vue de la semaine'),
+        peutReinitialiser(lundi) ? h('button', { type: 'button', classe: 'btn sa-action', onClick: () => { fermer(); demanderReinitialisation(lundi); } }, 'Réinitialiser la semaine') : null,
       ],
     }),
   }, '⋯');

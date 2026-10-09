@@ -14,7 +14,7 @@ function geler(valeur) {
 /** Variantes de nom : [écriture rencontrée, écriture retenue]. Appliquées d'abord, le texte original est conservé. */
 export const ALIAS = geler([
   ['cepe', 'bolet'], ['funghi', 'champignon'], ['fungi', 'champignon'], ['porcini', 'bolet'],
-  ['pdt', 'pomme de terre'], ['patate', 'pomme de terre'], ['grenaille', 'pomme grenaille'],
+  ['al ferretto', 'ferretto'], ['pdt', 'pomme de terre'], ['patate', 'pomme de terre'], ['grenaille', 'pomme grenaille'],
   ['knopfli', 'spatzli'], ['spaetzli', 'spatzli'], ['spaetzle', 'spatzli'],
   ['parmigiano', 'parmesan'], ['zafferano', 'safran'], ['gamberoni', 'gambas'], ['gamberi', 'gambas'],
   ['capesante', 'noix de saint-jacques'], ['nero di seppia', 'encre de seiche'],
@@ -32,7 +32,7 @@ export const FORMES_PATES = geler([
   'casarecce', 'tagliolini', 'tagliolino', 'tagliarini', 'fettuccine', 'fettucine', 'paccheri', 'gemelli', 'garganelli',
   'cavatelli', 'strozzapreti', 'trenette', 'mafalde', 'reginette', 'scialatielli', 'pici', 'bigoli', 'ditalini', 'fregola',
   'orzo', 'risoni', 'ziti', 'calamarata', 'mezzelune', 'agnolotti', 'cappelletti', 'tortelloni', 'maltagliati', 'sedanini',
-  'cresta di gallo', 'radiatori', 'gnocchetti', 'malloreddus', 'chitarra', 'spaghettini', 'spaghettoni', 'rigatoncini',
+  'ferretto', 'cresta di gallo', 'radiatori', 'gnocchetti', 'malloreddus', 'chitarra', 'spaghettini', 'spaghettoni', 'rigatoncini',
 ]);
 
 /** Herbes aromatiques : elles vont à la botte ou à la pièce, jamais à la portion. */
@@ -52,7 +52,7 @@ export const CHAMPIGNONS = geler([
 /** Produits qui manquent au lexique de savoir.js : poissons, crustacés, charcuteries, fromages, divers. */
 export const PRODUITS = geler({
   proteine: ['bar', 'loup', 'homard', 'langouste', 'scampi', 'crabe', 'noix de saint-jacques', 'saint-jacques', 'fruits de mer',
-    'encre de seiche', 'nduja', 'chorizo', 'pancetta', 'speck', 'lardon', 'saumon fume', 'truite fumee', 'anchois', 'thon',
+    'encre de seiche', 'chorizo', 'pancetta', 'speck', 'lardon', 'saumon fume', 'truite fumee', 'anchois', 'thon',
     'poisson', 'mozzarella', 'brochette', 'salami', 'chili con carne'],
   fromage: ['gorgonzola', 'parmesan', 'ricotta', 'ricotta salee', 'fromage', 'pecorino', 'chevre', 'feta', 'emmental',
     'gruyere', 'mascarpone', 'burrata', 'beurre'],
@@ -76,6 +76,7 @@ export const SAUCES = geler([
   { cle: 'creme_fumet', nom: 'crème et fond de poisson', alias: [], ingredients: ['creme', 'fond de poisson'], allergenes: ['lait', 'poisson'], recette: false },
   { cle: 'champignons', nom: 'sauce aux champignons', alias: [], ingredients: ['champignon', 'morille', 'creme'], allergenes: ['lait'], recette: false },
   { cle: 'gorgonzola', nom: 'sauce gorgonzola', alias: [], ingredients: ['gorgonzola', 'creme'], allergenes: ['lait'], recette: false },
+  { cle: 'nduja', nom: 'sauce à la nduja', alias: ['nduja'], ingredients: ['nduja', 'tomate'], allergenes: [], recette: false },
   { cle: 'carbonara', nom: 'carbonara', alias: ['carbonara'], ingredients: [], allergenes: ['oeuf', 'lait'], recette: true },
   { cle: 'amatriciana', nom: 'amatriciana', alias: ['amatriciana'], ingredients: [], allergenes: [], recette: true },
   { cle: 'bolognaise', nom: 'sauce bolognaise', alias: ['bolognaise'], ingredients: [], allergenes: ['celeri'], recette: true },

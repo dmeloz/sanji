@@ -9,7 +9,7 @@ import { effacerRetours, lireRetours } from './retours-essai.js';
 import { boutonsEnvoi } from './section-diagnostic.js';
 import { sectionNotesDev } from './section-notes-dev.js';
 
-const AIDE = 'Un seul geste : tout part dans le même fichier (journal, texte lu par l\'IA, retours d\'essai, notes, photos). Rien n\'est envoyé automatiquement.';
+const AIDE = 'Un seul geste : ce qui est nouveau depuis le dernier envoi part dans le même fichier (journal, texte lu par l\'IA, retours d\'essai, notes, photos). Rien n\'est envoyé automatiquement.';
 
 function contenu(rafraichir) {
   const effacer = () => confirmer({

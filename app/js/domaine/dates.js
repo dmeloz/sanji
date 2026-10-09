@@ -55,12 +55,14 @@ export function jourOuvertVoisin(date, sens) {
 
 const SEUIL_GESTE_PX = 60;
 const RAPPORT_GESTE_HORIZONTAL = 1.5;
+const DUREE_MAX_GESTE_MS = 700; // un geste plus lent n'est pas un feuilletage
 
 /**
  * Jour à ouvrir après un geste horizontal : glisser vers la gauche (dx < 0) = jour ouvert suivant, vers la droite = précédent.
- * Un geste trop court ou plutôt vertical (défilement) ne change rien : null.
+ * Un geste trop court, trop lent (plus de 700 ms) ou plutôt vertical (défilement) ne change rien : null.
  */
-export function jourApresGeste(date, dx, dy, seuil = SEUIL_GESTE_PX) {
+export function jourApresGeste(date, dx, dy, seuil = SEUIL_GESTE_PX, dt = 0) {
+  if (dt > DUREE_MAX_GESTE_MS) return null;
   if (Math.abs(dx) < seuil || Math.abs(dx) < RAPPORT_GESTE_HORIZONTAL * Math.abs(dy)) return null;
   return jourOuvertVoisin(date, dx < 0 ? 1 : -1);
 }

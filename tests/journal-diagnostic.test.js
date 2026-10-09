@@ -131,7 +131,7 @@ test('photos de diagnostic : gardées durablement, 5 au plus, trop grosses ignor
 const texteDe = (n) => n.tous(() => true).map((e) => e.texte ?? '').join('') + n.textContent;
 const parTexte = (n, t) => boutons(n).find((b) => b.textContent === t);
 
-test('section : boutons, repli sans clipboard, effacement avec confirmation, indicateur', async () => {
+test('section : bouton unique d\'envoi, effacement avec confirmation, indicateur', async () => {
   globalThis.localStorage = faux();
   J.effacerJournal();
   assert.equal(section.indicateurErreurs(), null);
@@ -139,11 +139,10 @@ test('section : boutons, repli sans clipboard, effacement avec confirmation, ind
   assert.match(section.indicateurErreurs().textContent, /1 erreur à me transmettre/);
   const s = section.sectionDiagnostic(etatVide());
   assert.match(texteDe(s), /Rien n'est envoyé/);
-  for (const t of ['Partager le fichier', 'Copier le diagnostic', 'Effacer le journal']) assert.ok(parTexte(s, t), t);
+  for (const t of ['Partager le fichier', 'Effacer le journal']) assert.ok(parTexte(s, t), t);
+  assert.equal(parTexte(s, 'Copier le diagnostic'), undefined);
+  assert.equal(s.tous((e) => e.balise === 'textarea').length, 0, 'plus de repli textarea');
   Object.defineProperty(globalThis, 'navigator', { value: {}, configurable: true });
-  await parTexte(s, 'Copier le diagnostic').click();
-  const champ = s.tous((e) => e.balise === 'textarea')[0];
-  assert.match(champ.value, /^Diagnostic Sanji/);
   await parTexte(s, 'Effacer le journal').click();
   const d = panneauxOuverts(dom.corps)[0];
   assert.equal(J.lireEvenements().length, 1);
@@ -170,6 +169,7 @@ test('partage : le texte part avec les photos si l\'appareil accepte plusieurs f
   assert.deepEqual(partages[0].map((f) => f.name.replace(/\d{4}-\d{2}-\d{2}/, 'DATE')), ['sanji-diagnostic-DATE.txt', 'photo-feuille-1.jpg', 'photo-fiche-2.jpg']);
   assert.match(await partages[0][0].text(), /Photos jointes : 2/);
   regler(false);
+  (await import('../app/js/ui/dernier-envoi.js')).effacerRepere(); // le second envoi ne redonne les photos que sans repère
   await parTexte(s, 'Partager le fichier').click();
   assert.equal(partages[1].length, 1);
   assert.match(await partages[1][0].text(), /Photos jointes : 0[^\n]*2 photo\(s\) gardées non jointes/);

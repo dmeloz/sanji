@@ -15,6 +15,7 @@ import { h, svg } from './dom.js';
 import { bouton, lien, repliable } from './elements.js';
 import { pluriel } from './format.js';
 import { problemeHorsLigne } from './horsligne.js';
+import { demanderReinitialisation, peutReinitialiser } from './reinitialiser-semaine.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { garderPhotoPourDiagnostic, noter } from './journal-diagnostic.js';
@@ -280,6 +281,12 @@ export function rendre(etat, lundi) {
     h('p', { classe: 'aide' }, 'Lecture des intitulés ci-dessus. Corrigez l\'intitulé dans son champ si la lecture est fausse : elle se met à jour.'),
     zoneLecture));
   majLecture();
+
+  // Semaine à venir déjà remplie : repartir de zéro pour la re-scanner.
+  const semaineRemplie = dates.some((d) => [1, 2].some((m) => String(etat.jours?.[d]?.menus?.[m]?.intitule ?? '').trim() !== ''));
+  if (semaineRemplie && peutReinitialiser(lundi)) {
+    racine.appendChild(h('div', { classe: 'actions' }, bouton('Réinitialiser la semaine', () => demanderReinitialisation(lundi), 'court')));
+  }
 
   racine.appendChild(h('div', { classe: 'barre-enregistrer' },
     lien(`#/semaine/${lundi}/tableau`, 'Annuler', 'btn'),

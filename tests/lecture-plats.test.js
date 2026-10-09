@@ -343,3 +343,27 @@ test('modes de préparation : reconnus comme garniture à confirmer, avec ce qu\
   assert.equal(tomates.categorie, 'legume');
   assert.equal(tomates.propriete, 'poste');
 });
+
+// ---------------------------------------------------------------- ferretto et nduja (propriétaire, 2026-10-09)
+
+test('« ferretto » est une forme de pâtes ; « à la nduja » est une sauce, pas un produit à part ; aucun mot « à préciser »', () => {
+  assert.ok(FORMES_PATES.includes('ferretto'));
+  for (const intitule of ['Fusilli al ferretto à la N\'Duja', 'Fusilli ferretto à la nduja', 'Penne à la nduja']) {
+    const { elements, ambiguites } = lirePlat(intitule, 1, {});
+    assert.deepEqual(elements.map((e) => e.categorie), ['feculent', 'sauce'], intitule);
+    assert.equal(elements.some((e) => e.categorie === 'proteine' || e.categorie === 'a_preciser'), false, intitule);
+    assert.equal(elements.every((e) => e.propriete === 'poste'), true, intitule);
+    assert.deepEqual(ambiguites, [], intitule);
+  }
+  const lecture = lirePlat('Fusilli al ferretto à la N\'Duja', 1, {});
+  assert.equal(lecture.elements[0].nom, 'Fusilli al ferretto', 'le nom écrit est gardé');
+  assert.equal(lecture.elements[1].canonique, 'nduja');
+  assert.equal(lecture.elements.some((e) => e.origine === 'implicite'), false, 'la sauce écrite remplace la sauce « à confirmer »');
+});
+
+test('sans sauce écrite, le menu 1 propose toujours « sauce à confirmer » (jamais choisie) : le ferretto n\'y change rien', () => {
+  const { elements } = lirePlat('Fusilli al ferretto', 1, {});
+  assert.deepEqual(elements.map((e) => e.categorie), ['feculent', 'sauce']);
+  assert.equal(elements[1].origine, 'implicite');
+  assert.equal(elements[1].statut, 'a_confirmer');
+});
