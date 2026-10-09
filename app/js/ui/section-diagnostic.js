@@ -80,19 +80,26 @@ async function copier(etat, zone) {
   }
 }
 
+/** Les deux boutons d'envoi (partager, copier) et la zone de repli de la copie. */
+export function boutonsEnvoi(etat) {
+  const zone = h('div', { 'aria-live': 'polite' });
+  return h('div', null,
+    h('div', { classe: 'actions' },
+      bouton('Partager le fichier', () => partager(etat), 'court'),
+      bouton('Copier le diagnostic', () => copier(etat, zone), 'court')),
+    zone);
+}
+
 export function sectionDiagnostic(etat) {
   const evenements = lireEvenements();
-  const zone = h('div', { 'aria-live': 'polite' });
   return h('section', { classe: 'carte' },
     h('h2', { classe: 'section-titre' }, 'Journal de diagnostic'),
     h('p', { classe: 'aide' }, AIDE),
     h('p', null, `${pluriel(evenements.length, 'événement noté', 'événements notés')} · ${pluriel(nombreErreurs(), 'erreur', 'erreurs')}`),
+    boutonsEnvoi(etat),
     h('div', { classe: 'actions' },
-      bouton('Partager le fichier', () => partager(etat), 'court'),
-      bouton('Copier le diagnostic', () => copier(etat, zone), 'court'),
       bouton('Effacer le journal', () => confirmer({
         titre: 'Effacer le journal de diagnostic ?', texte: 'Le journal gardé sur cet appareil sera supprimé. Vos menus ne changent pas.', libelleOk: 'Effacer', danger: true,
         action: () => { effacerJournal(); redessiner(); },
-      }), 'court', { disabled: evenements.length === 0 })),
-    zone);
+      }), 'court', { disabled: evenements.length === 0 })));
 }

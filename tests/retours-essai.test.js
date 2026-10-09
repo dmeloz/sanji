@@ -47,7 +47,7 @@ test('stockage : l\'état n\'est pas touché', () => {
   assert.equal(JSON.stringify(magasin.etat()), avant);
 });
 
-test('Réglages : rubrique présente, boutons, effacement avec confirmation', async () => {
+test('Réglages : rubrique présente, accès au centre ; le centre efface les retours après confirmation', async () => {
   globalThis.localStorage = faux();
   essai.effacerRetours();
   essai.noterRetour({ type: 'menu', lu: ['a'], final: {} });
@@ -56,24 +56,15 @@ test('Réglages : rubrique présente, boutons, effacement avec confirmation', as
   const page = reglages.rendre(magasin.etat(), 'apprentissage');
   assert.ok(page.textContent.includes('Rien n\'est envoyé'));
   assert.ok(page.textContent.includes('Ce que Sanji a appris'));
-  assert.ok(texteBouton(page, 'Copier le rapport'));
-  assert.equal(texteBouton(page, 'Partager'), undefined, 'pas de navigator.share');
-  await texteBouton(page, 'Effacer les retours').click();
+  assert.ok(texteBouton(page, 'Ouvrir notes et diagnostic'));
+  const { ouvrirCentreDev } = await import('../app/js/ui/centre-dev.js');
+  const J = await import('../app/js/ui/journal-diagnostic.js');
+  J.noter('erreur', { message: 'x' });
+  ouvrirCentreDev();
+  await texteBouton(panneauxOuverts(dom.corps).at(-1), 'Effacer le journal').click();
   assert.equal(essai.lireRetours().length, 1, 'rien n\'est effacé avant la confirmation');
-  const ouvert = panneauxOuverts(dom.corps)[0];
-  await texteBouton(ouvert, 'Effacer').declencher('click').catch(() => {});
-  await ouvert.querySelector('form').declencher('submit');
+  await panneauxOuverts(dom.corps).at(-1).querySelector('form').declencher('submit');
   assert.equal(essai.lireRetours().length, 0);
-});
-
-test('Réglages : copie sans presse-papiers → zone de texte', async () => {
-  globalThis.localStorage = faux();
-  essai.effacerRetours();
-  essai.noterRetour({ type: 'menu', lu: ['a'], final: {} });
-  const page = reglages.rendre(magasin.etat(), 'apprentissage');
-  await texteBouton(page, 'Copier le rapport').click();
-  const zone = page.tous((x) => x.balise === 'textarea')[0];
-  assert.ok(zone.value.includes('Rapport d\'essai Sanji'));
 });
 
 test('Import : lien de signalement caché avant lecture IA ; retour noté sans réseau', async () => {
@@ -85,7 +76,7 @@ test('Import : lien de signalement caché avant lecture IA ; retour noté sans r
   assert.equal(signaler.hidden, true);
   signaler.hidden = false;
   await signaler.click();
-  const ouvert = panneauxOuverts(dom.corps)[0];
+  const ouvert = panneauxOuverts(dom.corps).at(-1);
   ouvert.tous((x) => x.attributs.id === 'remarque-lecture')[0].value = 'accent perdu';
   await ouvert.querySelector('form').declencher('submit');
   const [retour] = essai.lireRetours();

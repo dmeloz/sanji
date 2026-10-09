@@ -1,4 +1,4 @@
-// Réglages > Apprentissage et essais : « Notes de test » (liste, réglée / rouvrir, supprimer, réglage de la pastille).
+// Réglages > Apprentissage et essais : « Notes de test » (liste, réglée / rouvrir, supprimer) et réglage de la pastille.
 
 import { CATEGORIES, TYPES } from '../domaine/notes-dev.js';
 import { redessiner } from '../magasin.js';
@@ -12,7 +12,7 @@ const AIDE = 'Vos notes restent sur cet appareil ; elles ne partent qu\'avec le 
 
 const jour = (hIso) => String(hIso ?? '').slice(0, 16).replace('T', ' ');
 
-function interrupteurPastille() {
+export function interrupteurPastille() {
   const active = pastilleActive();
   const mot = h('span', { classe: 'interrupteur-etat' }, active ? 'activée' : 'désactivée');
   const entree = h('input', { type: 'checkbox', role: 'switch', id: 'reglage-pastille-dev', classe: 'interrupteur-entree', checked: active,
@@ -20,27 +20,27 @@ function interrupteurPastille() {
   return h('label', { classe: 'interrupteur', pour: 'reglage-pastille-dev' }, entree, h('span', null, 'Pastille « Dev » sur chaque écran'), mot);
 }
 
-function ligneNote(n) {
+function ligneNote(n, surChangement) {
   const reglee = n.etat === 'reglee';
   return h('li', { classe: 'note-dev' },
     h('p', { classe: 'note-dev-texte' }, n.texte),
     h('p', { classe: 'aide' }, `${TYPES[n.type] ?? '?'} · ${reglee ? 'réglée' : 'ouverte'} · ${n.ecran || '?'} · ${jour(n.h)}`),
     h('div', { classe: 'actions' },
-      bouton(reglee ? 'Rouvrir' : 'Réglée', () => { basculerNote(n.id); redessiner(); }, 'court'),
+      bouton(reglee ? 'Rouvrir' : 'Réglée', () => { basculerNote(n.id); surChangement(); }, 'court'),
       bouton('Supprimer', () => confirmer({ titre: 'Supprimer cette note ?', texte: 'La note sera supprimée de cet appareil.', libelleOk: 'Supprimer', danger: true,
-        action: () => { supprimerNote(n.id); redessiner(); } }), 'court')));
+        action: () => { supprimerNote(n.id); surChangement(); } }), 'court')));
 }
 
-export function sectionNotesDev() {
+/** `surChangement` : appelé après une note réglée ou supprimée (la page ou la feuille se redessine). */
+export function sectionNotesDev(surChangement = redessiner) {
   const notes = lireNotes();
   return h('section', { classe: 'carte' },
     h('h2', { classe: 'section-titre' }, 'Notes de test'),
     h('p', { classe: 'aide' }, AIDE),
-    interrupteurPastille(),
     h('p', null, pluriel(notes.length, 'note', 'notes')),
     notes.length === 0 ? ligneVide('Aucune note pour l\'instant. Touchez « Dev » sur n\'importe quel écran pour en écrire une.')
       : CATEGORIES.map((c) => {
         const ici = notes.filter((n) => n.categorie === c.cle);
-        return ici.length === 0 ? null : h('div', null, h('h3', { classe: 'retour-essai-sous-titre' }, c.libelle), h('ul', { classe: 'liste-simple' }, ici.map(ligneNote)));
+        return ici.length === 0 ? null : h('div', null, h('h3', { classe: 'retour-essai-sous-titre' }, c.libelle), h('ul', { classe: 'liste-simple' }, ici.map((n) => ligneNote(n, surChangement))));
       }));
 }

@@ -6,6 +6,7 @@ import { VERSION_APP } from '../version.js';
 import { h, parId, svg } from './dom.js';
 import { lireEvenements } from './journal-diagnostic.js';
 import { afficherMessage } from './messages.js';
+import { ouvrirCentreDev } from './centre-dev.js';
 import { panneau } from './panneau.js';
 
 const CLE = 'sanji-notes-dev';
@@ -103,6 +104,7 @@ export function ouvrirFeuilleNote(contexte = { ecran: ecranCourant(), gestes: de
   const zone = h('textarea', { id: 'note-dev-texte', rows: 5, maxlength: MAX_NOTE, autocomplete: 'off', placeholder: 'Écrivez ou dictez votre remarque' });
   return panneau({
     titre: 'Noter une remarque',
+    extras: [{ libelle: 'Notes et fichier à partager', action: ({ fermer }) => { fermer(); ouvrirCentreDev(); } }],
     corps: [
       h('p', { classe: 'aide' }, `Écran : ${contexte.ecran}. Rien n'est envoyé : la note reste sur cet appareil.`),
       ...CATEGORIES.map((c) => groupeType(c, controles, 'note-dev-type')),
