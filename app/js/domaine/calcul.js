@@ -151,9 +151,10 @@ export function calculerComposant(etat, composantId) {
       res.formule = 'Quantité inconnue : prévision hors groupes à saisir.';
       return res;
     }
-    // Un légume sans famille peut avoir une portion par le standard de sa catégorie : quantité servie seulement,
-    // la perte de parage reste inconnue (aucune étape n'est connue pour lui).
-    const gg = c.categorie === 'legume' ? grammageEffectif(etat, c) : null;
+    // Un légume sans famille peut avoir une portion par le standard de sa catégorie ; tout plat générique peut en avoir une
+    // tapée par la propriétaire (plat ou référence du nom) : quantité servie seulement, la perte de parage reste inconnue
+    // (aucune étape n'est connue pour lui). Sans famille, aucun standard ne s'applique hors légumes : rien n'est inventé.
+    const gg = grammageEffectif(etat, c);
     if (gg) {
       const servie = portions.total * gg.valeur;
       dependances.push({ parametre: 'grammage', valeur: gg.valeur, statut: gg.statut, unite: gg.unite, etat: gg.etat, origine: gg.origine });

@@ -59,7 +59,7 @@ function lundi({ type = 'produit_simple' } = {}) {
 test('ligne : « menu 1 » n\'est pas répété sous une ligne du groupe Menu 1, ni la destination après le service (elle se lit dans la fiche)', () => {
   const { e } = lundi({ type: 'preparation_maison' });
   const noeud = production(e);
-  const dansMenu1 = blocDe(noeud, 'Menu 1');
+  const dansMenu1 = blocDe(noeud, 'M1');
   for (const l of classes(dansMenu1, 'mep-ligne')) assert.doesNotMatch(texteVisible(l), /menu 1/i, 'le titre du groupe le dit déjà');
   const apres = ligneDe(noeud, 'ELEMENT_MARDI_TEST');
   assert.doesNotMatch(texteVisible(apres), /menu 1/i, 'la destination n\'est plus dite sur la ligne');
@@ -126,16 +126,13 @@ test('ligne : une proposition à planifier montre « Planifier » directement, e
   assert.doesNotMatch(meta, /à planifier/, 'la mention est dans le titre du groupe');
 });
 
-test('avances : une seule ligne repliée « N avances à planifier » quand il y a des propositions, sinon « Avances pour les jours suivants »', () => {
-  const avec = production(lundi().e);
-  const repli = classes(avec, 'prod-avances')[0];
-  assert.equal(repli.open, false, 'repliée au départ');
-  assert.equal(repli.querySelector('summary').textContent, '1 avance à planifier');
-  const { e, mardi } = lundi();
-  e.productions[principaleDe(e, mardi)];
-  const mercredi = Object.values(e.composants).find((c) => c.nom === 'ELEMENT_MERCREDI_TEST').id;
-  planifier(e, principaleDe(e, mercredi), S.lundi, 'apres_midi', h());
-  assert.equal(classes(production(e), 'prod-avances')[0].querySelector('summary').textContent, 'Avances pour les jours suivants');
+test('avances : « Après service » est une section toujours visible (aucun repli), chaque avance dit « Pour mar. 6 »', () => {
+  const noeud = production(lundi().e);
+  assert.equal(noeud.tous((x) => x.balise === 'details').length, 0, 'aucune liste à dérouler');
+  const apres = blocDe(noeud, 'Après service');
+  assert.ok(apres, 'section « Après service » visible');
+  assert.match(apres.textContent, /Pour mar\. 6/);
+  assert.equal(classes(noeud, 'prod-avances').length, 0);
 });
 
 test('ligne : la provenance ne se dit que pour « standard de base » ou « inconnu »', () => {
@@ -177,30 +174,30 @@ test('page : la phrase de refroidissement tient en une ligne courte ; plus de «
   assert.doesNotMatch(jourSource, /L'écran reste allumé/);
 });
 
-test('page : « Rien d\'obligatoire… » est replié dans « Pas encore chiffré »', () => {
+test('page : « Pas encore chiffré » est une ligne tappable qui ouvre une feuille en lecture seule (« Rien d\'obligatoire… » y vit)', async () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'riz, carottes', h());
   const noeud = production(e);
-  const repli = noeud.tous((x) => x.balise === 'details').find((d) => /^Pas encore chiffré/.test(d.querySelector('summary').textContent));
-  assert.ok(repli, '« Pas encore chiffré » est un repli');
-  assert.equal(repli.open, false);
-  assert.match(repli.textContent, /Rien d'obligatoire/);
-  assert.match(repli.textContent, /Saisir les prévisions/);
+  assert.equal(noeud.tous((x) => x.balise === 'details').length, 0, 'aucune liste à dérouler');
+  const ligne = classes(noeud, 'prod-resume').find((b) => /^Pas encore chiffré/.test(b.textContent));
+  assert.ok(ligne, '« Pas encore chiffré » est une ligne tappable');
+  assert.doesNotMatch(noeud.textContent, /Rien d'obligatoire/, 'rien n\'est déroulé sur la page');
+  await ligne.click();
+  const ouvert = panneauxOuverts(dom.corps)[0];
+  assert.ok(ouvert, 'la feuille s\'ouvre');
+  assert.match(ouvert.textContent, /Rien d'obligatoire/);
+  assert.match(ouvert.textContent, /Saisir les prévisions/);
+  for (const d of panneauxOuverts(dom.corps)) d.close();
 });
 
 // ------------------------------------------------------------------ 2. décision affichée une fois
 
-test('décision : seule l\'étiquette « N à décider » reste sur Production ; elle ouvre la feuille', async () => {
+test('décision : plus aucune puce « N à décider » sur Production (les décisions se disent sur Aujourd\'hui)', () => {
   const noeud = production(lundi().e);
   assert.equal(classes(noeud, 'jour-decisions').length, 0, 'plus de bloc « À confirmer » en haut');
   assert.equal(classes(noeud, 'jour-centre').length, 0, 'plus de repli « À confirmer » en bas');
-  assert.doesNotMatch(noeud.textContent, /À confirmer \(\d+\)|Voir À confirmer/);
-  const bandeau = classes(noeud, 'prod-adecider')[0];
-  assert.ok(bandeau);
-  assert.match(bandeau.textContent, /^⚠ \d+ à décider$/);
-  await bandeau.click();
-  assert.equal(panneauxOuverts(dom.corps).length >= 1, true, 'la feuille « À décider » s\'ouvre');
-  for (const d of panneauxOuverts(dom.corps)) d.close();
+  assert.doesNotMatch(noeud.textContent, /À confirmer \(\d+\)|Voir À confirmer|à décider/);
+  assert.equal(classes(noeud, 'prod-adecider').length, 0);
 });
 
 // ------------------------------------------------------------------ 3. hors règle, déjà prêt, en-tête
@@ -219,42 +216,40 @@ function horsRegle() {
   return e;
 }
 
-test('« N avances hors règle » remonte juste sous le bandeau (replié, avec le mot), avant les groupes de travail', () => {
+test('hors règle : les avances hors règle sont les premières lignes d\'« Après service », étiquette et cause sur la ligne', () => {
   const noeud = production(horsRegle(), S.samediPrecedent);
-  const enfants = noeud.enfants.filter((x) => x.balise);
-  const iBarre = enfants.findIndex((x) => x.className.includes('jour-barre'));
-  const iRepli = enfants.findIndex((x) => x.balise === 'details' && /hors règle/.test(x.querySelector('summary').textContent));
-  const iBloc = enfants.findIndex((x) => x.className.includes('jour-bloc') || x.className.includes('prod-avances'));
-  assert.ok(iRepli > iBarre, 'après la navigation entre jours');
-  assert.ok(iRepli < iBloc, 'avant tous les groupes de travail');
-  assert.equal(enfants[iRepli].open, false);
-  assert.match(enfants[iRepli].querySelector('summary').textContent, /2 avances hors règle/);
-  assert.match(enfants[iRepli].textContent, /plus de deux jours d'avance/);
+  assert.equal(noeud.tous((x) => x.balise === 'details').length, 0);
+  const apres = blocDe(noeud, 'Après service');
+  const lignes = classes(apres, 'mep-ligne');
+  assert.ok(/hors règle/.test(lignes[0].textContent) && /hors règle/.test(lignes[1].textContent), 'en tête');
+  assert.match(apres.textContent, /plus de deux jours d'avance/);
+  assert.equal(lignes.filter((l) => /hors règle/.test(l.textContent)).length, 2);
 });
 
-test('« Déjà prêt pour plus tard N » devient « Déjà prêt (N) »', () => {
+test('« Déjà prêt pour plus tard » : une ligne tappable avec son compte, la liste s\'ouvre en feuille', async () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_PRET_TEST' });
   planifier(e, principaleDe(e, c), S.samediPrecedent, 'apres_midi', h());
   marquerFait(e, principaleDe(e, c), undefined, h(1));
   const noeud = production(e, S.lundi);
-  const repli = noeud.tous((x) => x.balise === 'details').find((d) => /^Déjà prêt/.test(d.querySelector('summary').textContent));
-  assert.ok(repli, 'le repli existe');
-  assert.equal(repli.querySelector('summary').textContent, 'Déjà prêt (1)');
-  assert.doesNotMatch(noeud.textContent, /Déjà prêt pour plus tard/);
+  assert.equal(noeud.tous((x) => x.balise === 'details').length, 0);
+  const ligne = classes(noeud, 'prod-resume').find((b) => /^Déjà prêt pour plus tard/.test(b.textContent));
+  assert.ok(ligne, 'la ligne existe');
+  assert.match(ligne.textContent, /: 1/);
+  assert.doesNotMatch(noeud.textContent, /ELEMENT_PRET_TEST/, 'le détail n\'est pas déroulé sur la page');
+  await ligne.click();
+  assert.match(panneauxOuverts(dom.corps)[0].textContent, /ELEMENT_PRET_TEST/);
+  for (const d of panneauxOuverts(dom.corps)) d.close();
 });
 
-test('en-tête : « x/n » est visible dès qu\'il y a des tâches, même sans tâche décidée', () => {
+test('en-tête : « Production » et la date, aucun « x/n » ni jauge (le compte s\'est retiré de la page)', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'riz, carottes', h());
   const noeud = production(e);
   assert.ok(classes(noeud, 'mep-ligne').length >= 2);
-  assert.match(classes(noeud, 'prod-compte')[0].textContent, /^0\/\d+$/);
-  assert.equal(classes(noeud, 'prod-jauge').length, 1, 'la fine jauge suit');
-  const vide = production(etatVide(), S.jeudi);
-  assert.equal(classes(vide, 'prod-compte').length, 0, 'rien à compter : rien dit');
-  assert.equal(classes(vide, 'prod-jauge').length, 0);
+  assert.equal(classes(noeud, 'prod-compte').length, 0);
+  assert.equal(classes(noeud, 'prod-jauge').length, 0);
 });
 
 // ------------------------------------------------------------------ 5. fiche
@@ -311,6 +306,7 @@ test('fiche, bug B3 : « 25 portions » n\'est pas écrit deux fois', () => {
   prevision(e, S.lundi, 1, 25);
   const c = composantValide(e, S.lundi, 1, { ...J.PRODUIT_SEC_TEST, type: 'generique' }, { nom: 'GENERIQUE_TEST', type: 'generique' });
   e.composants[c].type = 'generique';
+  e.composants[c].grammage.valeur = null; // sans portion connue : seules les portions se comptent
   const racine = fiche(e, c);
   const grande = classes(racine, 'fiche-qte-grande')[0].textContent;
   assert.doesNotMatch(grande, /portions?\s+portions?/i);
@@ -323,6 +319,7 @@ test('composant (page complète) : « 25 portions » n\'est pas écrit deux fois
   prevision(e, S.lundi, 1, 25);
   const c = composantValide(e, S.lundi, 1, { ...J.PRODUIT_SEC_TEST, type: 'generique' }, { nom: 'GENERIQUE_TEST', type: 'generique' });
   e.composants[c].type = 'generique';
+  e.composants[c].grammage.valeur = null; // sans portion connue : seules les portions se comptent
   magasin.remplacer(e);
   const texte = vueComposant.rendre(magasin.etat(), c).textContent;
   assert.doesNotMatch(texte, /portions?\s+portions?/i);

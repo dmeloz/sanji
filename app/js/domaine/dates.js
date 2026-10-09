@@ -47,6 +47,24 @@ export function estOuvert(date) {
   return jourSemaine(date) !== 7;
 }
 
+/** Jour ouvert suivant (sens 1) ou précédent (sens -1) : le dimanche est sauté. */
+export function jourOuvertVoisin(date, sens) {
+  const voisin = ajouterJours(date, sens);
+  return estOuvert(voisin) ? voisin : ajouterJours(voisin, sens);
+}
+
+const SEUIL_GESTE_PX = 60;
+const RAPPORT_GESTE_HORIZONTAL = 1.5;
+
+/**
+ * Jour à ouvrir après un geste horizontal : glisser vers la gauche (dx < 0) = jour ouvert suivant, vers la droite = précédent.
+ * Un geste trop court ou plutôt vertical (défilement) ne change rien : null.
+ */
+export function jourApresGeste(date, dx, dy, seuil = SEUIL_GESTE_PX) {
+  if (Math.abs(dx) < seuil || Math.abs(dx) < RAPPORT_GESTE_HORIZONTAL * Math.abs(dy)) return null;
+  return jourOuvertVoisin(date, dx < 0 ? 1 : -1);
+}
+
 /** Deux menus du jour existent du lundi au vendredi. */
 export function aMenuDuJour(date) {
   return jourSemaine(date) <= 5;

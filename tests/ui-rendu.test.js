@@ -170,20 +170,23 @@ test('jour : « Fait » marque fait en un toucher avec la cible ; sans quantité
   assert.equal(magasin.etat().productions[p].etat, 'fait', 'un seul toucher');
   assert.equal(magasin.etat().productions[p].quantiteReelle, 500, 'la cible devient le réel');
   assert.equal(panneauxOuverts(dom.corps).length, 0, 'aucun panneau');
-  // La jauge du jour suit.
+  // La ligne faite reste à sa place, cochée.
   const apres = vues.jour.rendre(magasin.etat(), S.mardi);
-  const compte = apres.tous((x) => x.className.split(' ').includes('prod-compte'))[0];
-  assert.match(compte.textContent, /^[12]\/2$/, 'la jauge compte les productions décidées ce jour');
+  assert.equal(apres.tous((x) => x.attributs?.['aria-checked'] === 'true').length, 1, 'une case cochée');
 });
 
-test('jour : deux services du même produit proposent un lot, sans rien planifier ni fusionner', () => {
+test('jour : deux services du même produit proposent un lot (une ligne, détail en feuille), sans rien planifier ni fusionner', async () => {
+  nettoyerPanneaux();
   const e = etatVide();
   const riz = { ...J.PRODUIT_SEC_TEST, nom: 'riz' };
   for (const jour of [S.mardi, S.mercredi]) { prevision(e, jour, 1, 10); composantValide(e, jour, 1, riz); }
   magasin.remplacer(e);
-  const texte = vues.jour.rendre(magasin.etat(), S.lundi).textContent;
-  assert.match(texte, /À faire en une fois/);
-  assert.match(texte, /riz : 1 000 g en une fois, pour mardi 6 octobre et mercredi 7 octobre/);
+  const noeud = vues.jour.rendre(magasin.etat(), S.lundi);
+  assert.match(noeud.textContent, /À faire en une fois/);
+  assert.doesNotMatch(noeud.textContent, /en une fois, pour/, 'le détail n\'est pas déroulé sur la page');
+  await noeud.tous((x) => x.balise === 'button' && /^À faire en une fois/.test(x.textContent))[0].click();
+  assert.match(panneauOuvert().textContent, /riz : 1 kg en une fois, pour mardi 6 octobre et mercredi 7 octobre/);
+  nettoyerPanneaux();
   assert.equal(Object.values(magasin.etat().productions).every((p) => p.jourDecide === null), true, 'rien n\'est planifié seul');
 });
 
@@ -218,15 +221,15 @@ test('composant : « Composer un mélange » crée une recette en parts, non val
   nettoyerPanneaux();
 });
 
-test('jour : l\'en-tête dit « x/n » et s\'efface sans production décidée', () => {
+test('jour : l\'en-tête ne porte plus de « x/n » ; le jour sans tâche n\'a plus de ligne', () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const p = principaleDe(e, composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST));
   planifier(e, p, S.mardi, 'apres_midi', h());
   magasin.remplacer(e);
   const comptes = (noeud) => noeud.tous((x) => x.className.split(' ').includes('prod-compte'));
-  assert.equal(comptes(vues.jour.rendre(magasin.etat(), S.mardi))[0].textContent, '0/1');
-  assert.equal(comptes(vues.jour.rendre(magasin.etat(), S.lundi)).length, 0);
+  assert.equal(comptes(vues.jour.rendre(magasin.etat(), S.mardi)).length, 0);
+  assert.equal(vues.jour.rendre(magasin.etat(), S.lundi).tous((x) => x.className.split(' ').includes('mep-ligne')).length, 0);
 });
 
 test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide = une ligne discrète', () => {
@@ -236,7 +239,7 @@ test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide
   // Ordre de lecture : menu 1, menu 2, autres tâches, la ligne des avances, puis le repli « déjà prêt » ; l'étiquette « N à décider »
   // précède la liste (les décisions sont détaillées dans la feuille « À décider »).
   const lundi = vues.jour.rendre(magasin.etat(), S.lundi).textContent;
-  const ordre = [/Menu 1/, /Menu 2/, /Autres tâches/, /avances? à planifier|Avances pour les jours suivants/, /Déjà prêt/];
+  const ordre = [/M1/, /M2/, /Autres/, /Après service/, /Déjà prêt/];
   // Une rubrique vide n'est plus affichée (page moins chargée) : seules les rubriques présentes gardent leur ordre.
   const presentes = ordre.filter((r) => r.test(lundi));
   assert.ok(presentes.length >= 3, `plusieurs rubriques présentes dans cet état riche : ${lundi.slice(0, 900)}`);
@@ -246,9 +249,9 @@ test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide
     assert.ok(p > position, `rubrique ${r} dans le mauvais ordre`);
     position = p;
   }
-  assert.ok(lundi.indexOf('à décider') < lundi.search(presentes[0]), 'l\'étiquette des décisions précède la liste');
+  assert.ok(!lundi.includes('à décider'), 'plus de puce « à décider » sur Production');
   const vide = vues.jour.rendre(magasin.etat(), S.jeudi).textContent;
-  for (const r of [/Déjà prêt/, /À confirmer/, /avances? à planifier|Avances pour les jours suivants/]) {
+  for (const r of [/Déjà prêt/, /À confirmer/, /Après service/]) {
     assert.doesNotMatch(vide, r, `la rubrique vide ${r} n'est pas affichée`);
   }
   assert.match(texte, /revue de mi-semaine/);
@@ -564,7 +567,7 @@ test('tableau : un standard maison fait disparaître la portion à régler ; la 
   // Le détail des quantités n'est plus sur le Tableau : il est sur la feuille du jour.
   const feuille = aDate(S.lundi, () => vues.jour.rendre(magasin.etat(), S.lundi)).textContent;
   assert.doesNotMatch(texte, /700 g/);
-  assert.match(feuille, /700 g/);
+  assert.match(feuille, /700\sg/);
 });
 
 test('tableau : navigation de semaine et retour à aujourd\'hui', () => {

@@ -1,8 +1,7 @@
-// Feuille Jour : les avances hors règle (plus de deux jours) restent visibles mais repliées en une ligne,
-// pour ne pas allonger la liste de travail. Constaté sur le rendu réel à 390 px : 13 lignes hors règle empilées.
+// Feuille Jour : les avances hors règle (plus de deux jours) restent visibles dans « Après service » (plus aucune liste à
+// dérouler, refonte du 2026-10-09) ; chaque ligne dit sa cause.
 
 import test, { after, before } from 'node:test';
-import { setTimeout as attendre } from 'node:timers/promises';
 import assert from 'node:assert/strict';
 import { installerFauxDom } from './aide-dom.js';
 import { definirMenu, definirPrevision, definirRegle, definirStandard } from '../app/js/domaine/actions.js';
@@ -33,39 +32,32 @@ function semaine() {
   return e;
 }
 
-test('jour : les avances dans la règle sont dans la liste, les avances hors règle sont repliées avec leur compte', () => {
+test('jour : les avances dans la règle et hors règle sont dans une liste « Après service » toujours visible, chaque ligne dit sa cause', () => {
   magasin.remplacer(semaine());
   const noeud = vueJour.rendre(magasin.etat(), S.samediPrecedent);
-  const replies = noeud.tous((x) => x.balise === 'details');
-  const horsRegle = replies.find((d) => /hors règle/.test(d.querySelector('summary').textContent));
-  assert.ok(horsRegle, 'une ligne repliée « hors règle » existe');
-  assert.match(horsRegle.querySelector('summary').textContent, /2 avances hors règle/);
-  assert.equal(horsRegle.open, false, 'repliée par défaut');
-  const texteReplie = horsRegle.textContent;
-  assert.match(texteReplie, /plus de deux jours d'avance/, 'chaque ligne dit sa cause');
-  assert.match(texteReplie, /carottes/);
-  assert.match(texteReplie, /quinoa/);
-  assert.doesNotMatch(texteReplie, /riz/, 'le riz du lundi est dans la règle : il reste dans la liste');
-  const texteTotal = noeud.textContent;
-  for (const nom of ['riz', 'carottes', 'quinoa']) assert.match(texteTotal, new RegExp(nom), `${nom} reste visible quelque part`);
+  assert.equal(noeud.tous((x) => x.balise === 'details').length, 0, 'aucune liste à dérouler');
+  const apres = noeud.tous((x) => x.balise === 'section' && x.querySelector('h2')?.textContent === 'Après service')[0];
+  assert.ok(apres, 'section « Après service » visible');
+  const lignes = apres.tous((x) => x.className.split(' ').includes('mep-ligne'));
+  const texte = (l) => l.textContent;
+  const hors = lignes.filter((l) => /hors règle/.test(texte(l)));
+  assert.equal(hors.length, 2, 'deux avances hors règle, dites sur leur ligne');
+  assert.ok(hors.every((l) => /plus de deux jours d'avance/.test(texte(l))), 'chaque ligne dit sa cause');
+  assert.match(texte(hors[0]) + texte(hors[1]), /carottes/);
+  assert.match(texte(hors[0]) + texte(hors[1]), /quinoa/);
+  assert.ok(lignes.some((l) => /riz/.test(texte(l)) && !/hors règle/.test(texte(l))), 'le riz du lundi est dans la règle');
+  assert.ok(/hors règle/.test(texte(lignes[0])) && /hors règle/.test(texte(lignes[1])), 'les avances hors règle sont en tête');
 });
 
-test('jour : la barre des jours amène le jour affiché à l\'écran (le samedi n\'est pas caché à droite)', async () => {
-  const { Element } = await import('./aide-dom.js');
-  const appels = [];
-  Element.prototype.scrollIntoView = function scrollIntoView(options) { appels.push({ libelle: this.attributs['aria-label'], options }); };
-  try {
-    magasin.remplacer(semaine());
-    vueJour.rendre(magasin.etat(), S.samediPrecedent);
-    await attendre(20); // le faux DOM ne garde pas les minuteries en vie : on attend avec le minuteur de Node
-  } finally { delete Element.prototype.scrollIntoView; }
-  const actifs = appels.filter((a) => /jour affiché/.test(a.libelle));
-  assert.ok(actifs.length >= 1, 'le jour affiché est amené à l\'écran');
-  assert.ok(actifs.every((a) => /samedi 3 octobre/.test(a.libelle)), 'et c\'est bien le jour affiché');
-  assert.equal(actifs.at(-1).options.inline, 'center');
+test('jour : le changement de jour se fait par flèches ‹ › (jour précédent / suivant), le dimanche est sauté', () => {
+  magasin.remplacer(semaine());
+  const noeud = vueJour.rendre(magasin.etat(), S.samediPrecedent);
+  const fleches = noeud.tous((x) => x.balise === 'a' && ['Jour précédent', 'Jour suivant'].includes(x.attributs['aria-label']));
+  assert.equal(fleches.length, 2);
+  assert.equal(fleches.find((a) => a.attributs['aria-label'] === 'Jour suivant').attributs.href, `#/production/${S.lundi}`, 'après le samedi : le lundi');
 });
 
-test('jour : le titre du repli ne prétend pas « plus de deux jours » ; chaque ligne dit sa cause', async () => {
+test('jour : une avance d\'un jour hors règle dit sa cause sur sa ligne', async () => {
   const { planifier } = await import('../app/js/domaine/actions.js');
   const e = etatVide();
   definirMenu(e, S.mardi, 1, 'carottes', h());
@@ -76,9 +68,9 @@ test('jour : le titre du repli ne prétend pas « plus de deux jours » ; chaque
   planifier(e, couper.id, S.lundi, 'avant_midi', h());
   magasin.remplacer(e);
   const noeud = vueJour.rendre(magasin.etat(), S.lundi);
-  const repli = noeud.tous((x) => x.balise === 'details').find((d) => /hors règle/.test(d.querySelector('summary').textContent));
-  assert.ok(repli, 'une avance à J+1 hors règle est repliée');
-  assert.equal(repli.querySelector('summary').textContent, '1 avance hors règle');
-  assert.match(repli.textContent, /au-delà du maximum de l'étape/);
-  assert.doesNotMatch(repli.textContent, /plus de deux jours/);
+  assert.equal(noeud.tous((x) => x.balise === 'details').length, 0);
+  const ligne = noeud.tous((x) => x.className.split(' ').includes('mep-ligne')).find((l) => /hors règle/.test(l.textContent));
+  assert.ok(ligne, 'une avance à J+1 hors règle est sur une ligne visible');
+  assert.match(ligne.textContent, /au-delà du maximum de l'étape/);
+  assert.doesNotMatch(ligne.textContent, /plus de deux jours/);
 });

@@ -12,10 +12,10 @@ export function directionDuGeste({ dx, dy, dt }) {
 }
 
 /**
- * Branche le geste sur un élément. Après un geste reconnu, les clics sont ignorés un instant (un doigt qui glisse
+ * Branche le geste sur un élément (`decider` : règle du geste, `directionDuGeste` par défaut). Après un geste reconnu, les clics sont ignorés un instant (un doigt qui glisse
  * ne doit pas cocher ou ouvrir ce qu'il survole).
  */
-export function activerGlisser(element, { suivant, precedent }) {
+export function activerGlisser(element, { suivant, precedent, decider = directionDuGeste }) {
   let depart = null;
   let bloqueJusqua = 0;
   element.addEventListener('touchstart', (e) => {
@@ -25,7 +25,7 @@ export function activerGlisser(element, { suivant, precedent }) {
   element.addEventListener('touchend', (e) => {
     const t = e.changedTouches?.[0];
     if (!depart || !t) return;
-    const sens = directionDuGeste({ dx: t.clientX - depart.x, dy: t.clientY - depart.y, dt: Date.now() - depart.h });
+    const sens = decider({ dx: t.clientX - depart.x, dy: t.clientY - depart.y, dt: Date.now() - depart.h });
     depart = null;
     if (!sens) return;
     bloqueJusqua = Date.now() + 350;
