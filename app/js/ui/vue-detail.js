@@ -3,7 +3,7 @@
 import {
   ajouterComposant, definirCreneau, definirMenu, modifierComposant, saisirVentes, supprimerComposant, validerComposant,
 } from '../domaine/actions.js';
-import { ajouterJours, aMenuDuJour, creneauxDuJour, estOuvert, libelleJour, lundiDe } from '../domaine/dates.js';
+import { ajouterJours, aMenuDuJour, creneauxDuJour, estOuvert, jourSemaine, libelleJour, lundiDe } from '../domaine/dates.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { alertesAllergenes } from '../domaine/allergenes.js';
 import { chargeCreneau } from '../domaine/planification.js';
@@ -13,7 +13,7 @@ import { CATEGORIE, ETAT_CRENEAU, libelle } from '../domaine/statuts.js';
 import { agir, agirStrict, etat as etatCourant, redessiner } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
-import { bouton, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
+import { bouton, etatVide, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
 import {
   confirmerAnnulation, dialogAdaptation, dialogFiche, dialogHistorique, dialogRepartition, repartitionIncoherente, resumeChoix,
 } from './fiches.js';
@@ -351,6 +351,17 @@ export function sectionsDuJour(etat, date, { replie = false } = {}) {
     .filter(Boolean);
 }
 
+/** G2 : un jour de semaine n'a aucun menu. null si au moins un menu est saisi, ou le samedi (jamais de menu, rien à importer). */
+export function etatVideSansMenu(etat, date) {
+  if (jourSemaine(date) > 5) return null;
+  if ([1, 2].some((menu) => jourOuVide(etat, date).menus[menu].intitule.trim() !== '')) return null;
+  return etatVide({
+      etiquette: 'menu à importer', titre: 'Pas encore de menu pour ce jour',
+      texte: `Sans menu, Sanji ne calcule rien pour ${libelleJour(date).split(' ')[0]} : aucune quantité n'est inventée.`,
+      actions: [{ libelle: 'Importer les menus de la semaine', href: `#/import/${lundiDe(date)}`, principal: true }],
+    });
+}
+
 export function rendre(etat, date) {
   const racine = h('div', { classe: 'vue vue-detail' });
   racine.appendChild(h('h1', { classe: 'page-titre' }, libelleJour(date)));
@@ -364,6 +375,8 @@ export function rendre(etat, date) {
     racine.appendChild(h('p', { classe: 'aide' }, 'Le dimanche est non travaillé, sans tâche ; il reste compté dans le temps de conservation.'));
     return racine;
   }
+  const vide = etatVideSansMenu(etat, date);
+  if (vide) racine.appendChild(vide);
   for (const section of sectionsDuJour(etat, date)) racine.appendChild(section);
   return racine;
 }

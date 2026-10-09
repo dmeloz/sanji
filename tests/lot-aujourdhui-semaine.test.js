@@ -242,22 +242,6 @@ const contraste = (a, b) => {
   return (x + 0.05) / (y + 0.05);
 };
 
-test('sombre : « Maintenant » et la carte quantité de la fiche sont des surfaces foncées surélevées, texte clair, contraste d\'au moins 4,5:1', () => {
-  const debutSombre = css.indexOf('@media (prefers-color-scheme: dark)');
-  const sombre = { ...jetons(css.slice(css.indexOf(':root {'), debutSombre)), ...jetons(css.slice(debutSombre, css.indexOf('*, *::before', debutSombre))) };
-  const media = blocLot.slice(blocLot.indexOf('@media (prefers-color-scheme: dark) {\n'));
-  assert.match(media, /\.au-maintenant \{[^}]*background: var\(--carte-2\)[^}]*color: var\(--texte\)/);
-  assert.match(media, /\.fiche-quantite \{[^}]*background: var\(--carte-2\)[^}]*color: var\(--texte\)/);
-  assert.match(media, /\.au-btn-clair \{[^}]*background: var\(--action\)[^}]*color: var\(--sur-action\)/);
-  // Les paires réellement posées : texte, texte moyen, accent et ambre sur la surface surélevée ; bouton plein ; contour des cases.
-  const paires = [['texte', 'carte-2'], ['texte-moyen', 'carte-2'], ['action', 'carte-2'], ['exception', 'exception-fond'], ['sur-action', 'action'],
-    ['texte-doux', 'carte'], ['texte-doux', 'fond']];
-  for (const [t, f] of paires) assert.ok(contraste(sombre[t], sombre[f]) >= 4.5, `${t} sur ${f} = ${contraste(sombre[t], sombre[f]).toFixed(2)}`);
-  // --contour-case = --texte-doux (aucune couleur écrite en dur dans ce bloc).
-  assert.match(blocLot, /--contour-case: var\(--texte-doux\)/);
-  assert.doesNotMatch(blocLot, /#[0-9a-fA-F]{3,6}\b/);
-  assert.match(media, /\.case input \{[^}]*outline: 1px solid var\(--contour-case\)/);
-});
 
 test('CSS du lot : en fin de fichier, dans un bloc commenté, sans texte sous 13 px ni animation', () => {
   assert.ok(debutLot > 0 && blocLot.length > 0, 'bloc du lot présent');

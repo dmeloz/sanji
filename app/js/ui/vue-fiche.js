@@ -14,7 +14,7 @@ import { pluriel, precisionQuantite, qteNoeuds, quantiteNoeuds } from './format.
 import { libelleAllergene } from './reference.js';
 import { blocReperes } from './reperes-metier.js';
 import { defaireEnUnToucher, dialogCorriger, faireEnUnToucher } from './taches.js';
-import { boutonPrecisionIA, sectionsReglages } from './vue-composant.js';
+import { boutonPrecisionIA, dialogModifier, sectionsReglages } from './vue-composant.js';
 
 export const titre = () => 'Fiche technique';
 
@@ -132,6 +132,15 @@ function sectionEtapes(etapes, c) {
           : (x.jourDecide && x.etat !== 'fait' ? h('span', { classe: 'meta' }, ` · prévu ${courtJour(x.jourDecide)}`) : null)))));
 }
 
+/** G5 : préparation maison sans recette ni étape. La quantité reste juste ; rien n'est inventé. */
+function blocSansRecette(c) {
+  const ligne = (nom, valeur) => h('div', { classe: 'fiche-ligne' }, h('span', null, nom), h('span', { classe: 'discret' }, valeur));
+  return h('section', { classe: 'fiche-sans-recette' },
+    ligne('Recette', 'non saisie'), ligne('Étapes', 'aucune'),
+    h('p', { classe: 'aide' }, 'Les quantités viennent des couverts et des standards ; elles restent justes sans recette. Le mode en poste apparaîtra avec les étapes.'),
+    h('div', { classe: 'fiche-actions' }, bouton('Ajouter la recette', () => dialogModifier(c), 'principal')));
+}
+
 function sectionAllergenes(etat, c) {
   const s = statutAllergenes(etat, c);
   return h('section', { classe: 'carte fiche-bloc' },
@@ -166,6 +175,7 @@ export function rendre(etat, id) {
   // Le mode en poste avance étape par étape : il n'a de sens qu'avec au moins deux étapes.
   const poste = etapes.length >= 2 ? h('a', { href: `#/poste/${encodeURIComponent(id)}`, classe: 'btn btn-principal fiche-poste' }, 'Mode en poste') : null;
   const fait = blocFait(etat, c);
+  const sansRecette = c.type === 'preparation_maison' && !c.recetteId && etapes.length === 0;
   const sections = [
     h('a', { href: `#/production/${c.date}`, classe: 'fiche-retour' }, icone('M15 6l-6 6 6 6'), 'Production'),
     h('header', { classe: 'fiche-entete' }, h('h1', { classe: 'page-titre' }, c.nom),
@@ -178,7 +188,7 @@ export function rendre(etat, id) {
     ligneBrut(calc),
     sectionProvenance(c, calc),
     sectionIngredients(etat, c, calc),
-    sectionEtapes(etapes, c),
+    sansRecette ? blocSansRecette(c) : sectionEtapes(etapes, c),
     sectionAllergenes(etat, c),
     blocReperes(c.famille, etat),
     (poste || fait) ? h('div', { classe: 'fiche-actions' }, poste, fait) : null,

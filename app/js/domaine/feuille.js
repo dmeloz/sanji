@@ -49,12 +49,13 @@ function estAnnotation(ligne) {
  * la première est le menu 1, la seconde le menu 2, que la date soit écrite avant, entre ou après elles.
  * @param {string} texte
  * @returns {{jours:{jourSemaine:number, numero:number, mois:number|null, menu1:string, menu2:string}[],
- *   lignes:string[], ignorees:string[], avertissements:string[]}}
+ *   lignes:string[], ignorees:string[], nonComprises:string[], avertissements:string[]}}
  */
 export function analyserFeuille(texte) {
   const jours = [];
   const lignes = [];
   const ignorees = [];
+  const nonComprises = []; // sous-ensemble de `ignorees` : annotations et restes que rien ne reconnaît (ni prix, ni titre, ni enseigne)
   const avertissements = [];
   let premiere = true;
   for (const brute of String(texte ?? '').split(/\r?\n/)) {
@@ -79,7 +80,7 @@ export function analyserFeuille(texte) {
       if (ligne === '') continue;
     }
     // Une ligne imprimée ne commence pas par « + », « = » ou une flèche : c'est une annotation.
-    if (/^[+=→>]/.test(ligne)) { ignorees.push(ligne); continue; }
+    if (/^[+=→>]/.test(ligne)) { ignorees.push(ligne); nonComprises.push(ligne); continue; }
     // Coche, puce ou tiret en tête de ligne : on retire la marque, on garde le texte.
     ligne = ligne.replace(/^[^\p{L}\p{N}]+/u, '').trim();
     if (ligne === '') continue;
@@ -88,25 +89,26 @@ export function analyserFeuille(texte) {
       continue;
     }
     while (MOTIF_PRIX_FIN.test(ligne)) ligne = ligne.replace(MOTIF_PRIX_FIN, '').trim();
-    if (MOTIF_TITRE.test(ligne) || estAnnotation(ligne)) { ignorees.push(ligne); continue; }
+    if (MOTIF_TITRE.test(ligne)) { ignorees.push(ligne); continue; }
+    if (estAnnotation(ligne)) { ignorees.push(ligne); nonComprises.push(ligne); continue; }
     lignes.push(ligne);
   }
   if (jours.length === 0) {
     avertissements.push('Aucun jour reconnu dans le texte : écrivez les jours sous la forme « lundi 5 octobre ».');
-    return { jours, lignes, ignorees, avertissements };
+    return { jours, lignes, ignorees, nonComprises, avertissements };
   }
   const repetes = jours.map((j) => j.jourSemaine).filter((j, i, tous) => tous.indexOf(j) !== i);
   if (repetes.length > 0) {
     avertissements.push('Un même jour apparaît deux fois dans le texte : les menus ne sont pas répartis.');
-    return { jours, lignes, ignorees, avertissements };
+    return { jours, lignes, ignorees, nonComprises, avertissements };
   }
   if (lignes.length !== jours.length * 2) {
     avertissements.push(`${jours.length} jour(s) reconnu(s) mais ${lignes.length} ligne(s) de menu : il en faut deux par jour. `
       + 'Les menus ne sont pas répartis ; placez les lignes à la main.');
-    return { jours, lignes, ignorees, avertissements };
+    return { jours, lignes, ignorees, nonComprises, avertissements };
   }
   jours.forEach((jour, i) => { jour.menu1 = lignes[2 * i]; jour.menu2 = lignes[2 * i + 1]; });
-  return { jours, lignes, ignorees, avertissements };
+  return { jours, lignes, ignorees, nonComprises, avertissements };
 }
 
 /**

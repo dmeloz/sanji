@@ -1,10 +1,22 @@
 // Petits éléments d'interface réutilisés par les vues.
 
-import { h } from './dom.js';
+import { h, svg } from './dom.js';
 
-/** Pastille de statut. @param {'ambre'|'vert'|'rouge'|'gris'} variante */
+// Étiquette d'état : un état porté par une couleur a toujours une icône ET un mot. Le ton neutre (gris) reste en mot seul.
+const ICONES_ETIQUETTE = {
+  ambre: { classe: 'etq-ambre', formes: [['path', { d: 'M12 3l10 18H2z' }], ['path', { d: 'M12 10v5M12 18v.5' }]] },
+  vert: { classe: 'etq-action', formes: [['path', { d: 'M5 12l5 5 9-10' }]] },
+  rouge: { classe: 'etq-rouge', formes: [['circle', { cx: 12, cy: 12, r: 9 }], ['path', { d: 'M12 7v6M12 16v.5' }]] },
+  ia: { classe: 'etq-ia', formes: [['path', { d: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z' }]] },
+  chef: { classe: 'etq-chef', formes: [['circle', { cx: 12, cy: 8, r: 4 }], ['path', { d: 'M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6' }]] },
+};
+
+/** Pastille de statut, avec icône selon le ton. @param {'ambre'|'vert'|'rouge'|'ia'|'chef'|'gris'} variante */
 export function pastille(texte, variante = 'gris') {
-  return h('span', { classe: `pastille pastille-${variante}` }, texte);
+  const ton = ICONES_ETIQUETTE[variante];
+  const icone = ton && svg('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2.2, 'stroke-linecap': 'round',
+    'stroke-linejoin': 'round', 'aria-hidden': 'true', focusable: 'false' }, ton.formes.map(([balise, attributs]) => svg(balise, attributs)));
+  return h('span', { classe: `etq ${ton ? `${ton.classe} ` : ''}pastille pastille-${variante}` }, icone, texte);
 }
 
 export function lien(href, texte, classe = 'lien') {
@@ -20,6 +32,21 @@ export function bouton(texte, surClic, classe = '', extra = {}) {
 /** Ligne discrète pour une rubrique vide (pas de bloc vide). */
 export function ligneVide(texte) {
   return h('p', { classe: 'vide' }, texte);
+}
+
+/**
+ * État vide (refonte 2) : un titre, une phrase, des boutons-liens. `etiquette` : mot d'état au-dessus du titre ;
+ * `icone` : tracé d'icône de ligne (attribut `d` d'un chemin 24 px). `actions` : [{ libelle, href, principal }].
+ */
+export function etatVide({ titre, texte, actions = [], etiquette = null, icone = null }) {
+  return h('div', { classe: 'etat-vide' },
+    icone ? svg('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round',
+      'stroke-linejoin': 'round', 'aria-hidden': 'true', focusable: 'false', classe: 'etat-vide-icone' }, [svg('path', { d: icone })]) : null,
+    etiquette ? h('span', { classe: 'etq' }, etiquette) : null,
+    h('p', { classe: 'etat-vide-titre' }, titre),
+    h('p', { classe: 'etat-vide-texte' }, texte),
+    actions.length > 0 ? h('div', { classe: 'etat-vide-actions' },
+      actions.map((a) => lien(a.href, a.libelle, a.principal ? 'btn btn-principal' : 'btn'))) : null);
 }
 
 export function titreSection(texte, id) {

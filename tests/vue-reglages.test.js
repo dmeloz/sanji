@@ -34,9 +34,9 @@ test('racine : informations seulement (ni avance −/+, ni planning, taux d\'act
   const r = vue.rendre(etatVide(), null);
   const t = r.textContent;
   assert.match(t, /Avance normale2 jours \(règle\)/);
-  assert.match(t, /suit le réglage du téléphone \(clair \/ sombre\)/);
+  assert.match(t, /Apparence : toujours claire/);
   assert.match(t, /en Production et en mode poste/);
-  assert.equal(boutons(r).length, 0, 'aucun bouton ni interrupteur à la racine');
+  assert.deepEqual(boutons(r).map((b) => b.textContent), ['Vérifier les mises à jour'], 'un seul bouton à la racine : la vérification des mises à jour');
   assert.equal(r.tous((x) => x.balise === 'input' || x.balise === 'select').length, 0);
   assert.doesNotMatch(t, /Mon planning|Taux d'activité|Jours off|Importer le planning/i);
 });

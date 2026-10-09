@@ -8,6 +8,7 @@
 @font-face { font-family: "Sanji Mono"; src: url("../polices/IBMPlexMono-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
 
 :root {
+  color-scheme: light;
   /* Surfaces et texte (clair) */
   --fond: #F4EAD5;
   --carte: #FFF9EC;
@@ -95,33 +96,6 @@
   --haut-onglets: 84px; /* zone d'accueil iPhone incluse */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fond: #0E1622;
-    --carte: #172233;
-    --carte-2: #1F2C40;
-    --encre: #F4EAD5;
-    --sur-encre: #0E1622;
-    --texte: #F4EAD5;
-    --texte-doux: #A9B3C2;
-    --texte-moyen: #CBD3DE;
-    --bordure: #26344A;
-    --bordure-forte: #4A5D78;
-    --bordure-champ: #7D8DA5;
-    --action: #6FA8F0;
-    --action-fonce: #A3C8F7;
-    --action-fond: #17304F;
-    --sur-action: #0E1622;
-    --exception: #F0B94A;
-    --exception-fond: #2C2312;
-    --exception-bord: #4D3B17;
-    --exception-point: #F0B94A;
-    --rouge: #FF7369;
-    --rouge-fond: #3D1A1A;
-    --rouge-texte: #FF9F97;
-  }
-}
-
 *, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; }
@@ -190,6 +164,7 @@ a { color: var(--bleu-texte); }
 
 .bandeaux { max-width: var(--largeur-max); margin: 0 auto; padding: 0 calc(env(safe-area-inset-right) + 14px) 0 calc(env(safe-area-inset-left) + 14px); }
 .bandeaux .encadre { margin-top: 12px; }
+.bandeau-version { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--action-fond); border-color: var(--action); color: var(--action-fonce); }
 
 /* ------------------------------------------------------------ titres et texte */
 
@@ -278,22 +253,14 @@ a.jour-titre::after { content: "›"; margin-left: 8px; color: var(--bleu-texte)
 
 /* ------------------------------------------------------------ pastilles, boutons, encadrés */
 
-.pastille {
-  display: inline-block;
-  padding: 1px 10px;
-  border: 1px solid var(--bordure);
-  border-radius: 999px;
-  font-size: var(--t-1);
-  font-weight: 600;
-  line-height: 1.5;
-  white-space: normal;
-  background: var(--carte-2);
-  color: var(--texte);
-}
-.pastille-ambre { background: var(--ambre-fond); color: var(--ambre-texte); border-color: var(--ambre); }
-.pastille-vert { background: var(--vert-fond); color: var(--vert-texte); border-color: var(--vert-texte); }
-.pastille-rouge { background: var(--rouge-fond); color: var(--rouge-texte); border-color: var(--rouge); }
-.pastille-gris { background: var(--carte-2); color: var(--texte-doux); }
+/* Étiquettes d'état (refonte 2) : icône + mot ; `pastille()` en produit (classes pastille-* conservées pour les tests). */
+.etq { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--r-etiquette); font-size: var(--t-legende); font-weight: 600; line-height: 1.5; background: var(--carte-2); color: var(--texte-moyen); }
+.etq svg { flex: none; width: 14px; height: 14px; }
+.etq-action { background: var(--action-fond); color: var(--action-fonce); }
+.etq-ambre { background: var(--exception-fond); color: var(--exception); }
+.etq-rouge { background: var(--rouge-fond); color: var(--rouge-texte); }
+.etq-ia { background: transparent; border: 1px dashed var(--bordure-forte); color: var(--texte-moyen); }
+.etq-chef { background: var(--encre); color: var(--sur-encre); }
 
 .btn {
   display: inline-flex;
@@ -385,7 +352,13 @@ dialog.panneau[open] { animation: ouverture-panneau 160ms ease-out; }
 }
 /* Voile derrière le panneau : il assombrit la page, aucun texte ne repose dessus. */
 dialog.panneau::backdrop { background: rgba(8, 12, 16, 0.5); }
-.panneau form { padding: 16px 16px 0; }
+/* Poignée de la feuille montante : petite barre centrée, au-dessus du titre. */
+.panneau-poignee { display: block; width: 40px; height: 5px; margin: 0 auto 10px; border-radius: 3px; background: var(--bordure-forte); }
+.panneau form { padding: 8px 16px 0; }
+/* Sur mobile, toute feuille se colle en bas de l'écran : angles hauts arrondis, pas de bas arrondi. */
+@media (max-width: 600px) {
+  dialog.panneau { width: 100%; max-width: none; margin: auto 0 0; border-radius: var(--rayon) var(--rayon) 0 0; border-bottom: 0; }
+}
 .panneau-titre { font-size: var(--t1); margin-bottom: 12px; }
 .panneau-corps > * + * { margin-top: 12px; }
 .panneau-erreur { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--rouge-fond); border: 1px solid var(--rouge); color: var(--rouge-texte); font-weight: 700; }
@@ -822,7 +795,6 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 
 /* Maintenant : carte d'encre */
 .au-maintenant { --jauge-trait: #6FA8F0; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: var(--r-carte); background: var(--encre); color: var(--sur-encre); }
-@media (prefers-color-scheme: dark) { .au-maintenant { --jauge-trait: #1D5AA6; } }
 .au-maintenant-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .au-maintenant .au-etiquette, .au-jauge-texte { color: var(--sur-encre); opacity: 0.85; }
 .au-jauge-texte { font-size: var(--t-legende); }
@@ -1181,23 +1153,6 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .au-lien-prochaine:focus-visible { outline: 3px solid currentColor; outline-offset: 2px; }
 .au-fiche-pastille { display: block; margin-top: 4px; }
 /* Sombre : la carte « Maintenant » et la carte quantité de la fiche sont des surfaces foncées surélevées (pas de grands blocs clairs), texte clair, accent basilic. */
-@media (prefers-color-scheme: dark) {
-  .au-maintenant { background: var(--carte-2); color: var(--texte); border: 1px solid var(--bordure-forte); --jauge-trait: var(--action); }
-  .au-maintenant .au-etiquette, .au-jauge-texte { color: var(--texte-moyen); opacity: 1; }
-  .au-maintenant-neutre, .au-maintenant-vide, .au-maintenant-dest { opacity: 1; color: var(--texte-moyen); }
-  .au-jauge::-webkit-progress-bar { background: var(--bordure-forte); opacity: 1; }
-  .au-btn-clair { background: var(--action); color: var(--sur-action); border-color: var(--action); }
-  .au-btn-contour { color: var(--texte); border-color: var(--texte-doux); }
-  .au-btn:focus-visible { outline-color: var(--focus); }
-  .fiche-quantite { background: var(--carte-2); color: var(--texte); border: 1px solid var(--bordure-forte); }
-  .fiche-legende { color: var(--texte-moyen); }
-  .fiche-repartition { border-top-color: var(--bordure-forte); }
-  .fiche-jauge { background: var(--bordure); }
-  .fiche-jauge > span { background: var(--action); }
-  /* Cases à cocher : contour net sur fond sombre. */
-  .case input { outline: 1px solid var(--contour-case); outline-offset: 1px; border-radius: 3px; }
-  .case-fait-boite { border-color: var(--contour-case); }
-}
 /* ===== Lot Stock et Import (audit v56) : montrer l'exception, pas la normalité. Jetons du socle seulement. ===== */
 /* Achats : une phrase d'en-tête, une légende discrète, changement de semaine par flèches. */
 .achats-regle { margin: 0; font-size: var(--t-corps); font-weight: 600; color: var(--texte-moyen); }
@@ -1316,10 +1271,6 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prochaine-vide { background: var(--carte); color: var(--texte); border: 1px solid var(--bordure); }
 .prochaine .au-btn-action { flex: 1; background: var(--action); color: var(--sur-action); border: 1px solid var(--action); }
 .prochaine .au-btn:focus-visible { outline: 3px solid var(--sur-encre); outline-offset: 2px; }
-@media (prefers-color-scheme: dark) {
-  .prochaine .au-btn-clair { background: var(--sur-encre); color: var(--encre); border-color: var(--sur-encre); }
-}
-
 /* ===== Feuilles « Couverts midi » et « Ventes du midi » (refonte 2) : − / +, choix rapides, répartition, détail replié. ===== */
 .tdb-case-bouton { border: 0; font: inherit; text-align: left; cursor: pointer; width: 100%; }
 .tdb-case-tete { display: flex; align-items: center; justify-content: space-between; }
@@ -1499,3 +1450,26 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .btn[hidden] { display: none; }
 
 .diagnostic-indicateur { font-size: var(--t-corps); margin: 0 0 8px; padding: 8px 12px; border: 1px solid var(--exception); border-radius: 8px; }
+
+/* ===== Style épuré partout (refonte 2, décision du 2026-10-07) : listes à plat, jour en cours en encre, lignes cliquables en texte. ===== */
+.liste { list-style: none; margin: 0; padding: 0; background: transparent; border-radius: 0; border-top: 1px solid var(--bordure); border-bottom: 1px solid var(--bordure); }
+.liste-rubriques-reglages { background: transparent; border: 0; border-top: 1px solid var(--bordure); border-bottom: 1px solid var(--bordure); border-radius: 0; }
+.vue-semaine-globale .bord-zone { background: transparent; border-radius: 0; padding: 12px 0; }
+.vue-semaine-globale .bord-jours { border-top: 1px solid var(--bordure); border-bottom: 1px solid var(--bordure); }
+.vue-semaine-globale .bord-jour:last-child { border-bottom: 0; }
+.bord-aujourdhui { background: var(--encre); color: var(--sur-encre); border-radius: var(--r-carte-petite); }
+.bord-aujourdhui a, .bord-aujourdhui .bord-jour-lien, .bord-aujourdhui .tb-discret, .bord-aujourdhui .tb-rang { color: var(--sur-encre); }
+.bord-aujourdhui .bord-badge { color: var(--sur-encre); border-color: var(--sur-encre); }
+.vue-semaine-globale .bord-aujourdhui { border-radius: var(--r-carte-petite); }
+.imp-section-plate { background: transparent; border-radius: 0; padding: 12px 0; border-top: 1px solid var(--bordure); }
+.imp-section-plate > * + * { margin-top: 10px; }
+
+/* ===== États vides (refonte 2, G1 à G5) : titre, phrase, boutons, filets fins en haut et en bas ===== */
+.etat-vide { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 20px 0; border-top: 1px solid var(--bordure); border-bottom: 1px solid var(--bordure); margin-top: 12px; }
+.etat-vide-icone { width: 24px; height: 24px; color: var(--texte-doux); }
+.etat-vide-titre { margin: 0; font-size: var(--t1); font-weight: 700; }
+.etat-vide-texte { margin: 0; color: var(--texte-doux); }
+.etat-vide-actions { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.etat-vide-actions .btn { flex: 1 1 auto; justify-content: center; }
+.fiche-sans-recette { margin-top: 12px; }
+.fiche-sans-recette .fiche-ligne { min-height: var(--cible); border-bottom: 1px solid var(--bordure); }

@@ -6,6 +6,7 @@ import { bouton, encadre } from './ui/elements.js';
 import { abonnerHorsLigne, preparerHorsLigne } from './ui/horsligne.js';
 import { installerJournal } from './ui/journal-diagnostic.js';
 import { afficherMessage } from './ui/messages.js';
+import { bandeauNouvelleVersion, surveillerNouvelleVersion } from './ui/nouvelle-version.js';
 import { charger, redessiner, surMessage } from './magasin.js';
 import { demarrerRouteur } from './ui/routeur.js';
 
@@ -33,6 +34,7 @@ export async function demarrer() {
   await attendreAuPlus(charger(), DELAI_LECTURE_MS, 'la lecture des données de cet appareil est trop longue');
   demarrerRouteur();
   abonnerHorsLigne(redessiner);
+  surveillerNouvelleVersion(navigator.serviceWorker, () => parId('bandeaux')?.appendChild(bandeauNouvelleVersion(() => location.reload())));
   preparerHorsLigne();
   installerJournal(); // après le chargement ; ne lève jamais
 }

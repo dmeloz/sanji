@@ -9,8 +9,8 @@ import { analyserFeuille, repartirSurSemaine } from '../domaine/feuille.js';
 import { agir } from '../magasin.js';
 import { champs as construireChamps } from './champs.js';
 import { h } from './dom.js';
-import { bouton, encadre, lien, repliable } from './elements.js';
-import { parseEntier } from './format.js';
+import { bouton, encadre, lien, pastille, repliable } from './elements.js';
+import { parseEntier, pluriel } from './format.js';
 import { afficherMessage } from './messages.js';
 import { panneau } from './panneau.js';
 
@@ -111,8 +111,29 @@ export function reprendreTexte() {
   return reprise;
 }
 
+/** G4 : ce que Sanji a lu quand des lignes ne sont pas comprises. Rien n'est deviné, rien de ces lignes n'est enregistré. */
+function zoneLue(champs, lundi, saisie, nonComprises, enregistrerLeLu) {
+  const etatJour = (date) => {
+    const n = [saisie[date]?.menu1, saisie[date]?.menu2].filter(Boolean).length;
+    return n === 2 ? '2 menus · lu' : n === 1 ? '1 à vérifier' : 'non saisi';
+  };
+  return h('section', { classe: 'zone-lue', 'aria-label': 'Ce que Sanji a lu' },
+    h('h3', { classe: 'section-titre' }, 'Ce que Sanji a lu'),
+    h('div', { classe: 'encadre encadre-alerte' },
+      h('p', null, pastille(pluriel(nonComprises.length, 'ligne non comprise', 'lignes non comprises'), 'ambre')),
+      h('ul', { classe: 'liste-simple' }, nonComprises.map((ligne) => h('li', null, `« ${ligne} »`))),
+      h('p', { classe: 'aide' }, 'Rien n\'est deviné : ces lignes ne sont pas enregistrées.')),
+    h('ul', { classe: 'liste-simple' }, JOURS_A_MENU.map((decalage) => {
+      const date = ajouterJours(lundi, decalage);
+      return h('li', null, h('strong', null, majuscule(libelleJour(date).split(' ')[0])), ` : ${etatJour(date)}`);
+    })),
+    h('div', { classe: 'actions' },
+      bouton('Corriger le texte', () => champs.get('feuille-texte').focus?.()),
+      enregistrerLeLu ? bouton('Enregistrer le lu', enregistrerLeLu, 'principal') : null));
+}
+
 /** Remplit les champs à partir du texte collé. N'enregistre rien. `deplaceeDepuis` : le lundi de l'écran où il a été collé. */
-export function repartir(champs, lundi, { deplaceeDepuis = null } = {}) {
+export function repartir(champs, lundi, { deplaceeDepuis = null, enregistrerLeLu = null } = {}) {
   const retour = champs.get('feuille-retour');
   const analyse = analyserFeuille(champs.get('feuille-texte').value);
   const { saisie, avertissements, corrections, semaine } = repartirSurSemaine(analyse, lundi);
@@ -155,6 +176,7 @@ export function repartir(champs, lundi, { deplaceeDepuis = null } = {}) {
         h('span', null, ligne),
         bouton('Ajouter à un menu', () => dialogRestaurer(champs, lundi, ligne), 'court', { 'aria-label': `Ajouter « ${ligne} » à un menu` })))));
   }
+  if (analyse.nonComprises.length > 0) messages.push(zoneLue(champs, lundi, saisie, analyse.nonComprises, enregistrerLeLu));
   if (jours.length === 0 && avertissements.length === 0) messages.push(encadre('alerte', 'Aucun menu reconnu dans ce texte.'));
   retour.replaceChildren(...messages);
 }
@@ -214,12 +236,12 @@ export function rendre(etat, lundi) {
     const jour = jourOuVide(etat, ajouterJours(lundi, decalage));
     return [1, 2].some((menu) => jour.menus[menu].intitule.trim() !== '');
   });
-  racine.appendChild(h('section', { classe: 'carte' },
+  racine.appendChild(h('section', { classe: 'imp-section-plate' },
     repliable(h('h2', { classe: 'section-titre', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie || reprise !== null, [
       h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
       h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),
       champSaisi(champs, 'textarea', { id: 'feuille-texte', rows: 6, placeholder: 'texte copié depuis la photo de la feuille', value: '' }),
-      h('div', { classe: 'actions' }, bouton('Répartir dans la semaine', () => repartir(champs, lundi))),
+      h('div', { classe: 'actions' }, bouton('Répartir dans la semaine', () => repartir(champs, lundi, { enregistrerLeLu: () => enregistrer(champs, etat, lundi) }))),
       champSaisi(champs, 'div', { id: 'feuille-retour', classe: 'saisie-retour', 'aria-live': 'polite' }),
     ])));
 

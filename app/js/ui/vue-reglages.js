@@ -2,6 +2,7 @@
 // mémorisées, semaine type, capacité, règles de préparation, recettes, fournisseurs, marge de commande, sauvegarde,
 // état de l'application et journal : aucun réglage n'a été retiré, seulement réparti.
 
+import { ligneVerifierMiseAJour } from './nouvelle-version.js';
 import {
   confirmerSemaineType, creerRecette, definirCapacite, definirFournisseur, definirMargeSecurite, definirRegle, definirSemaineType,
   definirStandard, modifierRecette, noterExport, supprimerFournisseur, supprimerRegle, supprimerStandard, validerRecette,
@@ -808,7 +809,7 @@ const ligneInfo = (titreTexte, valeur) => h('li', { classe: 'reglage-info' },
 
 const groupe = (titreTexte, ...lignes) => h('section', { classe: 'reglages-groupe' },
   h('h2', { classe: 'reglages-groupe-titre' }, titreTexte),
-  h('ul', { classe: 'liste-rubriques-reglages' }, lignes));
+  h('ul', { classe: 'liste liste-rubriques-reglages' }, lignes));
 
 /** Pastille du pied : neutre pendant la vérification, verte une fois prêt, ambre en cas de problème. */
 function pastilleHorsLigne(hl) {
@@ -838,7 +839,8 @@ export function rendre(etat, param = null) {
         ligneRubrique('apprentissage', etat),
         ligneRubrique('donnees', etat),
         ligneInfo('Version', `Sanji ${VERSION_APP}`)),
-      h('p', { classe: 'reglages-note' }, 'Apparence : suit le réglage du téléphone (clair / sombre). Écran allumé : en Production et en mode poste.'),
+      ligneVerifierMiseAJour(),
+      h('p', { classe: 'reglages-note' }, 'Apparence : toujours claire. Écran allumé : en Production et en mode poste.'),
       h('p', { classe: 'reglages-pied' }, pastilleHorsLigne(hl), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
   }
   return h('div', { classe: 'vue vue-reglages' },

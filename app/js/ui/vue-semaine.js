@@ -320,6 +320,8 @@ function rendreJour(etat, date) {
   const bande = noeudBandeau(bandeau(etat, date));
   if (bande) racine.appendChild(bande);
   if (!estOuvert(date)) return racine;
+  const vide = productionsDuJour(etat, date).length === 0 ? vueDetail.etatVideSansMenu(etat, date) : null;
+  if (vide) racine.appendChild(vide);
   racine.appendChild(carteServices(etat, date));
   racine.appendChild(sectionAProduire(etat, date));
   racine.appendChild(repliable(h('h2', { classe: 'sem-section' }, 'Tout le détail du jour'), false,
