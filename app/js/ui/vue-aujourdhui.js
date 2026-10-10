@@ -204,16 +204,25 @@ function carteFiche(d, aujourd, etat) {
     icone(CHEVRON, 'au-icone au-chevron'));
 }
 
+// ------------------------------------------------------------------ fin de semaine
+
+/** Le rappel de clôture (samedi dès 18:00, dimanche) en carte d'attention, comme « À confirmer » : un seul accès, absent des Rappels. */
+function carteCloture(d) {
+  const r = d.rappelCloture;
+  if (!r) return null;
+  const retenus = r.retenus > 0 ? ` · ${pluriel(r.retenus, 'plat déjà retenu', 'plats déjà retenus')}` : '';
+  return h('section', { classe: 'tdb-confirmer tdb-cloture', 'aria-label': 'Fin de semaine' },
+    h('h2', { classe: 'tdb-confirmer-titre' }, icone(['M12 3l10 18H2z', 'M12 10v5M12 18v.5']), 'Fin de semaine'),
+    h('p', { classe: 'au-sous' }, `Retenir les plats de la semaine · ${r.aRetenir} à retenir${retenus}`),
+    h('button', { type: 'button', classe: 'au-btn au-btn-action', onClick: () => ouvrirCloture(r.lundi) }, 'Retenir les plats'));
+}
+
 // ------------------------------------------------------------------ rappels
 
 /** Ce que l'ancien tableau disait encore et qui garde une action : menus de la semaine à saisir, portions à régler, sauvegarde. */
 function sectionRappels(d, aFaire) {
   const lignes = [];
   if (aFaire > 0) lignes.push(lien(`#/preparer/${d.lundi}`, `Préparer la semaine · ${aFaire} à faire`, 'au-ligne au-ligne-lien'));
-  if (d.rappelCloture) {
-    lignes.push(h('button', { type: 'button', classe: 'au-ligne au-ligne-lien', onClick: () => ouvrirCloture(d.rappelCloture.lundi) },
-      `Retenir les plats de la semaine · ${d.rappelCloture.aRetenir} à retenir`));
-  }
   if (d.rappelVendredi) lignes.push(lien(`#/import/${d.rappelVendredi.lundi}`, 'Menus de la semaine prochaine · à importer', 'au-ligne au-ligne-lien'));
   if (d.semaineSansMenu) lignes.push(lien(`#/import/${d.lundi}`, 'Saisir les menus de la semaine', 'au-ligne au-ligne-lien'));
   for (const l of d.production.chiffrage) lignes.push(lien(l.lien, l.detail ? `${l.texte} : ${l.detail}` : l.texte, 'au-ligne au-ligne-lien'));
@@ -253,7 +262,7 @@ export function rendre(etat) {
   const aujourd = aujourdhui();
   const donnees = aujourdhuiDe(etat, aujourd, maintenant().slice(11, 16));
   const racine = h('div', { classe: 'vue vue-aujourdhui' });
-  const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), carteProchaine(donnees, aujourd),
+  const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), carteProchaine(donnees, aujourd), carteCloture(donnees),
     sectionAAvancer(donnees, aujourd), carteFiche(donnees, aujourd, etat), sectionAConfirmer(donnees, decisionsDe(etat, aujourd)), sectionRappels(donnees, preparationSemaine(etat, donnees.lundi, aujourd).aFaire)];
   for (const m of morceaux) if (m) racine.appendChild(m);
   return racine;

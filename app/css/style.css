@@ -1281,6 +1281,8 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .tdb-confirmer-titre { display: flex; align-items: center; gap: 6px; font-size: var(--t-corps); font-weight: 700; }
 .tdb-confirmer .au-ligne { color: var(--exception); border-bottom-color: var(--exception-bord); }
 .tdb-confirmer .au-sous { color: var(--exception); }
+.tdb-cloture { gap: 8px; }
+.tdb-cloture .au-btn-action { background: var(--action); color: var(--sur-action); border: 1px solid var(--action); }
 .tdb-tout-voir { background: none; border: 0; cursor: pointer; color: var(--exception); }
 .tdb-rappels { display: flex; flex-direction: column; }
 /* Prochaine : une carte de la page, qui défile avec elle (jamais fixe). */
