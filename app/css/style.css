@@ -721,8 +721,6 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .case-fait { display: inline-flex; align-items: center; justify-content: center; min-width: var(--cible); min-height: var(--cible); padding: 0; background: transparent; border: 0; cursor: pointer; font: inherit; color: var(--texte); }
 .case-fait-boite { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 2px solid var(--bordure-forte); border-radius: 6px; background: var(--carte); font-weight: 800; line-height: 1; }
 .case-fait-ok .case-fait-boite { border-color: var(--vert-texte); color: var(--vert-texte); background: var(--vert-fond); }
-.case-fait-vide { cursor: default; }
-.case-fait-vide::before { content: ""; width: 12px; height: 2px; background: var(--bordure-forte); }
 .case-fait:focus-visible { outline: 3px solid var(--focus); outline-offset: -4px; }
 
 .jour-faites, .jour-lots, .jour-charge, .jour-centre { margin-top: 12px; }
@@ -1538,7 +1536,7 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .prod-asaisir { display: inline-flex; align-items: center; min-height: var(--cible); padding: 0 4px; background: transparent; border: 0; font: inherit; cursor: pointer; }
 .prod-asaisir:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
 .prod-saisie { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; margin: 0 0 8px var(--cible); }
-.prod-saisie[hidden] { display: none; }
+.prod-saisie-feuille { margin: 8px 0 0; }
 .prod-saisie .btn { flex: none; }
 .prod-saisie-unite { font-size: var(--t-corps); color: var(--texte-doux); }
 .prod-resumes { margin-top: 16px; border-top: 1px solid var(--bordure); }

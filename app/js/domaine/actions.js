@@ -705,8 +705,9 @@ export function demarrer(etat, productionId, h) {
 /**
  * Marque une production faite. Sans quantité, la cible est proposée comme réel (corrigerReel la remplace).
  * Fige l'instantané des paramètres et des versions utilisés ; il n'est plus jamais réécrit.
+ * `sansQuantite` (liste de Production) : « fait » ne dépend pas de la quantité ; cible inconnue, le réel reste null, rien n'est inventé.
  */
-export function marquerFait(etat, productionId, quantite, h) {
+export function marquerFait(etat, productionId, quantite, h, { sansQuantite = false } = {}) {
   verifierH(h);
   const p = exigerProduction(etat, productionId);
   if (p.etat === 'fait') throw new Error('Déjà fait : utilisez corrigerReel pour changer la quantité réelle.');
@@ -716,7 +717,7 @@ export function marquerFait(etat, productionId, quantite, h) {
   const cible = cibleProduction(etat, productionId);
   const reel = quantite === undefined || quantite === null ? cible : quantite;
   if (reel !== null && (!Number.isFinite(reel) || reel < 0)) throw new Error('Quantité réelle : nombre positif ou nul attendu.');
-  if (reel === null && p.genre !== 'preparatoire') throw new Error('Quantité à saisir : la cible est inconnue (composant à préciser).');
+  if (reel === null && p.genre !== 'preparatoire' && !sansQuantite) throw new Error('Quantité à saisir : la cible est inconnue (composant à préciser).');
   const calc = c ? calculerComposant(etat, c.id) : null;
   const recette = c?.recetteId ? etat.recettes[c.recetteId] ?? null : null;
   // L'instantané garde la portion effective utilisée (plat, référence, standard ou base) avec son état et son origine.

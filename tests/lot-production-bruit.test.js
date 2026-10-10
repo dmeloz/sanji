@@ -174,20 +174,14 @@ test('page : la phrase de refroidissement tient en une ligne courte ; plus de «
   assert.doesNotMatch(jourSource, /L'écran reste allumé/);
 });
 
-test('page : « Pas encore chiffré » est une ligne tappable qui ouvre une feuille en lecture seule (« Rien d\'obligatoire… » y vit)', async () => {
+test('page : plus de ligne-résumé « Pas encore chiffré » ; la ligne non chiffrée est dans sa liste, « à chiffrer »', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'riz, carottes', h());
   const noeud = production(e);
   assert.equal(noeud.tous((x) => x.balise === 'details').length, 0, 'aucune liste à dérouler');
-  const ligne = classes(noeud, 'prod-resume').find((b) => /^Pas encore chiffré/.test(b.textContent));
-  assert.ok(ligne, '« Pas encore chiffré » est une ligne tappable');
-  assert.doesNotMatch(noeud.textContent, /Rien d'obligatoire/, 'rien n\'est déroulé sur la page');
-  await ligne.click();
-  const ouvert = panneauxOuverts(dom.corps)[0];
-  assert.ok(ouvert, 'la feuille s\'ouvre');
-  assert.match(ouvert.textContent, /Rien d'obligatoire/);
-  assert.match(ouvert.textContent, /Saisir les prévisions/);
-  for (const d of panneauxOuverts(dom.corps)) d.close();
+  assert.equal(classes(noeud, 'prod-resume').filter((b) => /Pas encore chiffré/.test(b.textContent)).length, 0);
+  assert.doesNotMatch(noeud.textContent, /Pas encore chiffré|Rien d'obligatoire/);
+  assert.ok(classes(blocDe(noeud, 'M1'), 'prod-asaisir').length >= 1, 'dans la liste du menu 1');
 });
 
 // ------------------------------------------------------------------ 2. décision affichée une fois

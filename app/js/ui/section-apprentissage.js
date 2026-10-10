@@ -10,7 +10,7 @@ import { bouton, ligneVide } from './elements.js';
 import { pluriel } from './format.js';
 import { ouvrirCentreDev } from './centre-dev.js';
 import { lireEvenements } from './journal-diagnostic.js';
-import { lireNotes } from './notes-dev.js';
+import { notesParEtat } from './notes-dev.js';
 import { indicateurErreurs } from './section-diagnostic.js';
 import { interrupteurPastille } from './section-notes-dev.js';
 
@@ -18,7 +18,7 @@ const carte = (titre, ...contenu) => h('section', { classe: 'carte' }, h('h2', {
 
 export const resumeApprentissage = (etat) => {
   const n = rapportApprentissage(etat).motsRetenus;
-  return `${pluriel(n, 'mot retenu', 'mots retenus')} · ${pluriel(lireNotes().length, 'note', 'notes')}`;
+  return `${pluriel(n, 'mot retenu', 'mots retenus')} · ${pluriel(notesParEtat('nouvelle').length, 'note nouvelle', 'notes nouvelles')}`;
 };
 
 /** Un mot retenu pour tous les plats peut être oublié ; un nom retenu pour un menu se lit seulement. */
@@ -40,11 +40,11 @@ function sectionAppris(etat) {
 }
 
 function sectionCentre() {
-  const ouvertes = lireNotes().filter((n) => n.etat !== 'reglee').length;
+  const nouvelles = notesParEtat('nouvelle').length;
   return carte('Notes et diagnostic',
     h('p', { classe: 'aide' }, 'Notes, retours d\'essai et journal partent ensemble, d\'un seul geste, depuis une même feuille. Rien n\'est envoyé automatiquement.'),
     interrupteurPastille(),
-    h('p', null, `${pluriel(ouvertes, 'note ouverte', 'notes ouvertes')} · ${pluriel(lireEvenements().length, 'événement noté', 'événements notés')}`),
+    h('p', null, `${pluriel(nouvelles, 'note nouvelle', 'notes nouvelles')} · ${pluriel(lireEvenements().length, 'événement noté', 'événements notés')}`),
     h('div', { classe: 'actions' }, bouton('Ouvrir notes et diagnostic', () => ouvrirCentreDev(), 'court')));
 }
 

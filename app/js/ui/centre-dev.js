@@ -18,10 +18,12 @@ function contenu(rafraichir) {
     libelleOk: 'Effacer', danger: true,
     action: () => { effacerJournal(); effacerRetours(); rafraichir(); },
   });
+  // Après un envoi, seul le bloc des notes se redessine : « Envoyé ✓ » reste affiché.
+  const notes = h('div', null, sectionNotesDev(rafraichir));
   return [
     h('p', { classe: 'aide' }, AIDE),
-    boutonsEnvoi(etat()),
-    sectionNotesDev(rafraichir),
+    boutonsEnvoi(etat(), () => notes.replaceChildren(sectionNotesDev(rafraichir))),
+    notes,
     h('div', { classe: 'actions' }, bouton('Effacer le journal', effacer, 'court', { disabled: lireEvenements().length + lireRetours().length === 0 })),
   ];
 }

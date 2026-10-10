@@ -2,7 +2,7 @@
 // nommer un plat), messages techniques bornés et, depuis l'accord du 2026-10-07, le texte rendu par l'IA : jamais la clé.
 
 import { lundiDe } from './dates.js';
-import { texteNotes } from './notes-dev.js';
+import { etatNote, texteNotes } from './notes-dev.js';
 
 export const MAX_TEXTE = 200;
 export const MAX_LIBELLE = 40;
@@ -10,7 +10,6 @@ const MAX_EVENEMENTS_RAPPORT = 150;
 const MAX_ERREURS_RAPPORT = 30;
 const MAX_ACTIONS = 20;
 const MAX_EVENEMENTS_DEPUIS_ENVOI = 60;
-const MAX_NOTE_TRANSMISE = 60;
 const MAX_AGENT = 120;
 const MOTIF_CLE = /sk-ant-[A-Za-z0-9_-]*/g;
 export const MAX_CONTENU = 2000;
@@ -93,26 +92,29 @@ function regrouperNavigations(recents) {
 
 export const clePhoto = (p) => `diag|${p.h}|${p.type}`;
 
-/** Ce qui n'a pas encore été envoyé, selon le repère (null = premier envoi : tout). Les notes déjà transmises mais ouvertes sont à part. */
+/** Ce qui n'a pas encore été envoyé, selon le repère (null = premier envoi : tout). Les notes : seules les nouvelles partent ; les transmises et réglées sont comptées. */
 export function nouveautes({ evenements = [], notes = [], retours = [], photos = [] }, repere) {
-  const vues = new Set(repere?.notesEnvoyees ?? []);
+  const envoyees = new Set(repere?.notesEnvoyees ?? []);
   const photosVues = new Set(repere?.photosEnvoyees ?? []);
+  const valides = notes.filter((n) => n && typeof n === 'object');
+  const parEtat = (etat) => valides.filter((n) => etatNote(n, envoyees) === etat);
   return {
     evenements: evenements.filter((e) => e && apresRepere(repere, e.h)),
     retours: retours.filter((r) => r && apresRepere(repere, r.h)),
     photos: photos.filter((p) => !photosVues.has(clePhoto(p))),
-    notes: notes.filter((n) => !vues.has(n.id)),
-    notesDejaTransmises: notes.filter((n) => vues.has(n.id) && n.etat !== 'reglee'),
+    notes: parEtat('nouvelle'),
+    notesTransmises: parEtat('transmise'),
+    notesReglees: parEtat('reglee'),
   };
 }
 
-/** Bloc des notes à envoyer : les nouvelles en détail, les autres sur une ligne d'en-tête puis leurs textes tronqués. */
-export function notesPourEnvoi({ notes, notesDejaTransmises }, meta) {
-  const deja = notesDejaTransmises.length === 0 ? [] : [
-    `${notesDejaTransmises.length} notes déjà transmises, toujours ouvertes :`,
-    ...notesDejaTransmises.map((n) => `  - ${nettoyer(String(n.texte ?? ''), MAX_NOTE_TRANSMISE)}`),
-  ];
-  return [texteNotes(notes, meta), ...deja].filter(Boolean).join('\n');
+/** Bloc des notes à envoyer : les nouvelles en détail, puis les comptes des transmises (non répétées) et des réglées. Jamais le texte d'une note déjà transmise. */
+export function notesPourEnvoi({ notes, notesTransmises = [], notesReglees = [] }, meta) {
+  return [
+    texteNotes(notes, meta),
+    notesTransmises.length > 0 ? `${notesTransmises.length} notes déjà transmises : non répétées.` : '',
+    notesReglees.length > 0 ? `${notesReglees.length} notes réglées.` : '',
+  ].filter(Boolean).join('\n');
 }
 
 /** `evenements` dans l'ordre chronologique (le plus ancien d'abord). `aujourdhui` : date ISO fournie par l'appelant. */

@@ -4,10 +4,11 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { installerFauxDom } from './aide-dom.js';
-import { definirMenu, definirPrevision, definirRegle, definirStandard, planifier } from '../app/js/domaine/actions.js';
+import { installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { definirMenu, definirPrevision, definirRegle, definirStandard, marquerFait, annulerFait, planifier } from '../app/js/domaine/actions.js';
+import { etatTache } from '../app/js/domaine/planification.js';
 import { jourApresGeste, jourOuvertVoisin } from '../app/js/domaine/dates.js';
-import { aSaisirPortion, quantiteEnPoids, verbeDe } from '../app/js/domaine/mise-en-place.js';
+import { aSaisirPortion, quantiteEnPoids, raisonNonChiffree, verbeDe } from '../app/js/domaine/mise-en-place.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, etatVide, h, prevision, principaleDe } from './aide.js';
@@ -94,34 +95,166 @@ test('aSaisirPortion : vrai seulement quand la portion manque (pas d\'herbe, pas
   assert.equal(aSaisirPortion(e, 'inconnu'), false);
 });
 
-test('ligne sans portion : étiquette « à saisir » (icône + mot), un toucher ouvre un champ, « OK » enregistre et la quantité sort en kg', async () => {
+const fermerFeuilles = () => { for (const d of panneauxOuverts(dom.corps)) d.close(); };
+
+test('ligne sans portion : étiquette « à chiffrer » (icône + mot), un toucher ouvre la feuille qui dit la raison, « OK » enregistre et la quantité sort en kg', async () => {
   const { e, c } = platSansPortion();
   const noeud = page(e);
   const ligne = ligneDe(noeud, 'GENERIQUE_TEST');
-  const asaisir = classes(ligne, 'prod-asaisir')[0];
-  assert.ok(asaisir, 'bouton « à saisir »');
-  assert.match(asaisir.textContent, /à saisir/);
-  assert.ok(asaisir.tous((x) => x.balise === 'svg').length >= 1, 'icône avec le mot : jamais la couleur seule');
+  const bouton = classes(ligne, 'prod-asaisir')[0];
+  assert.ok(bouton, 'bouton « à chiffrer »');
+  assert.match(bouton.textContent, /à chiffrer/);
+  assert.ok(bouton.tous((x) => x.balise === 'svg').length >= 1, 'icône avec le mot : jamais la couleur seule');
   assert.equal(classes(ligne, 'mep-qte').length, 0, 'pas de quantité inventée');
-  const formulaire = classes(ligne, 'prod-saisie')[0];
-  assert.equal(formulaire.hidden, true, 'champ caché avant le toucher');
-  await asaisir.click();
-  assert.equal(formulaire.hidden, false, 'un toucher : le champ est là');
-  const champ = formulaire.querySelector('input');
-  champ.value = '80';
+  await bouton.click();
+  const feuille = panneauxOuverts(dom.corps)[0];
+  assert.match(feuille.textContent, /Il manque la portion de GENERIQUE_TEST/, 'la raison est dite');
+  const formulaire = classes(feuille, 'prod-saisie')[0];
+  formulaire.querySelector('input').value = '80';
   await formulaire.declencher('submit');
   assert.equal(magasin.etat().composants[c].grammage.valeur, 80, 'la portion tapée est enregistrée');
+  fermerFeuilles();
   const apres = ligneDe(vue.rendre(magasin.etat(), S.lundi), 'GENERIQUE_TEST');
   assert.equal(texte(classes(apres, 'mep-qte')[0]), '2 kg', '25 × 80 g = 2 000 g');
+  assert.equal(classes(apres, 'prod-asaisir').length, 0, 'plus « à chiffrer »');
 });
 
-test('ligne sans portion : une saisie invalide ne change rien', async () => {
+test('ligne sans portion : chaque saisie invalide dit son message DANS la feuille, qui reste ouverte, sans rien changer ; la valeur valide la ferme', async () => {
   const { e, c } = platSansPortion();
-  const ligne = ligneDe(page(e), 'GENERIQUE_TEST');
-  const formulaire = classes(ligne, 'prod-saisie')[0];
-  formulaire.querySelector('input').value = 'abc';
+  await classes(ligneDe(page(e), 'GENERIQUE_TEST'), 'prod-asaisir')[0].click();
+  const feuille = panneauxOuverts(dom.corps)[0];
+  const formulaire = classes(feuille, 'prod-saisie')[0];
+  const alerte = () => feuille.tous((x) => x.attributs.role === 'alert' && !x.hidden)[0]?.textContent ?? '';
+  const cas = [['', /Tapez une portion en g, par exemple 120/], ['abc', /n'est pas un nombre/], ['1e3', /n'est pas un nombre/],
+    ['0', /supérieure à 0/], ['-5', /supérieure à 0/], ['2001', /ne peut pas dépasser 2000/]];
+  for (const [saisie, attendu] of cas) {
+    formulaire.querySelector('input').value = saisie;
+    await formulaire.declencher('submit');
+    assert.match(alerte(), attendu, `« ${saisie} »`);
+    assert.equal(feuille.open, true, 'la feuille reste ouverte');
+    assert.equal(magasin.etat().composants[c].grammage.valeur, null, 'rien n\'est enregistré');
+  }
+  formulaire.querySelector('input').value = '120';
   await formulaire.declencher('submit');
-  assert.equal(magasin.etat().composants[c].grammage.valeur, null);
+  assert.equal(magasin.etat().composants[c].grammage.valeur, 120);
+  assert.equal(feuille.open, false, 'la valeur valide ferme la feuille');
+  fermerFeuilles();
+});
+
+// ------------------------------------------------------------------ « à chiffrer » : la raison, la feuille, « fait » sans quantité
+
+/** Menu 1 du lundi : un plat à famille connue, standard réglé, mais AUCUNE prévision (couverts manquants). */
+function lundiSansCouverts() {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'riz', h());
+  definirStandard(e, 'riz', 'plat_principal', { valeur: 85, unite: 'g', etat: 'sec' }, h());
+  return e;
+}
+const ligneBrute = (e, nom) => {
+  const c = Object.values(e.composants).find((x) => x.nom === nom);
+  return { composantId: c.id, genre: 'principale', cible: null, unite: 'g' };
+};
+
+test('raisonNonChiffree : couverts manquants, portion manquante, autre cause, ou null quand la ligne est chiffrée', () => {
+  const couverts = lundiSansCouverts();
+  const r = raisonNonChiffree(couverts, ligneBrute(couverts, 'riz'));
+  assert.equal(r.type, 'couverts');
+  assert.equal(r.date, S.lundi);
+  assert.match(r.texte, /couverts du/);
+  const { e, c } = platSansPortion();
+  assert.deepEqual(raisonNonChiffree(e, { composantId: c, genre: 'principale', cible: null, unite: 'g' }).type, 'portion');
+  assert.equal(raisonNonChiffree(e, { composantId: c, genre: 'principale', cible: 2000, unite: 'g' }), null, 'déjà chiffrée');
+  assert.equal(raisonNonChiffree(e, { composantId: c, genre: 'preparatoire', cible: null, unite: null }), null);
+  assert.equal(raisonNonChiffree(e, { composantId: 'inconnu', genre: 'principale', cible: null }), null);
+  const sauce = etatVide();
+  definirMenu(sauce, S.lundi, 1, 'riz', h());
+  const id = Object.values(sauce.composants)[0].id;
+  sauce.composants[id].type = 'a_preciser';
+  assert.equal(raisonNonChiffree(sauce, { composantId: id, genre: 'principale', cible: null }).type, 'autre');
+});
+
+test('couverts manquants : la ligne dit « à chiffrer », la feuille propose 40 à 80, un toucher chiffre la ligne en kg', async () => {
+  const e = lundiSansCouverts();
+  const ligne = ligneDe(page(e), 'riz');
+  const bouton = classes(ligne, 'prod-asaisir')[0];
+  assert.match(bouton.textContent, /à chiffrer/);
+  await bouton.click();
+  const feuille = panneauxOuverts(dom.corps)[0];
+  assert.match(feuille.textContent, /Il manque les couverts du/);
+  const puces = classes(feuille, 'prep-valeur');
+  assert.deepEqual(puces.map((b) => b.textContent), ['40', '50', '60', '70', '80']);
+  await puces.find((b) => b.textContent === '60').click();
+  fermerFeuilles();
+  const apres = ligneDe(vue.rendre(magasin.etat(), S.lundi), 'riz');
+  assert.ok(classes(apres, 'mep-qte').length === 1, 'la ligne se chiffre aussitôt');
+  assert.equal(classes(apres, 'prod-asaisir').length, 0);
+});
+
+test('une prévision existe pour l\'autre menu : pas de puces de couverts (elles l\'écraseraient), un seul bouton « Saisir la prévision »', async () => {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'riz', h());
+  definirMenu(e, S.lundi, 2, 'quinoa', h());
+  definirPrevision(e, S.lundi, 1, 30, h());
+  const r = raisonNonChiffree(e, ligneBrute(e, 'quinoa'));
+  assert.equal(r.type, 'prevision');
+  assert.match(r.texte, /il manque la prévision du menu 2 du/);
+  await classes(ligneDe(page(e), 'quinoa'), 'prod-asaisir')[0].click();
+  const feuille = panneauxOuverts(dom.corps)[0];
+  assert.equal(classes(feuille, 'prep-valeur').length, 0, 'aucune puce de couverts');
+  const liens = feuille.tous((x) => x.balise === 'a');
+  assert.deepEqual(liens.map((x) => x.textContent), ['Saisir la prévision']);
+  assert.match(liens[0].attributs.href, /^#\/import\//);
+  assert.equal(magasin.etat().jours[S.lundi].previsions[1].portions, 30, 'le 30 est intact');
+  fermerFeuilles();
+});
+
+test('cause autre : un seul bouton « Préciser » vers la fiche', async () => {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'riz', h());
+  definirPrevision(e, S.lundi, 1, 10, h());
+  const c = Object.values(e.composants)[0];
+  c.type = 'a_preciser';
+  await classes(ligneDe(page(e), c.nom), 'prod-asaisir')[0].click();
+  const feuille = panneauxOuverts(dom.corps)[0];
+  const liens = feuille.tous((x) => x.balise === 'a');
+  assert.equal(liens.length, 1);
+  assert.equal(liens[0].textContent, 'Préciser');
+  assert.match(liens[0].attributs.href, /^#\/fiche\//);
+  fermerFeuilles();
+});
+
+test('« fait » ne dépend pas de la quantité : une case sur chaque ligne ; cocher sans quantité n\'invente aucun chiffre et se défait', async () => {
+  const e = lundiSansCouverts();
+  const noeud = page(e);
+  const lignes = classes(noeud, 'mep-ligne');
+  assert.ok(lignes.length > 0);
+  for (const l of lignes) assert.equal(classes(l, 'case-fait').length, 1, 'une case de pointage par ligne');
+  assert.equal(classes(noeud, 'case-fait-vide').length, 0, 'plus de tiret à la place de la case');
+  const ligne = ligneDe(noeud, 'riz');
+  const idProd = Object.values(e.productions).find((p) => p.genre === 'principale').id;
+  await classes(ligne, 'case-fait')[0].click();
+  const p = magasin.etat().productions[idProd];
+  assert.equal(p.etat, 'fait');
+  assert.equal(p.quantiteReelle, null, 'aucun chiffre inventé');
+  const faite = ligneDe(vue.rendre(magasin.etat(), S.lundi), 'riz');
+  assert.equal(classes(faite, 'case-fait')[0].attributs['aria-checked'], 'true');
+  assert.equal(classes(faite, 'prod-asaisir').length, 0, 'une ligne faite ne demande plus rien');
+  assert.equal(classes(faite, 'mep-qte').length, 0);
+  // Les couverts arrivent après : le « fait » sans quantité ne devient pas un écart à arbitrer.
+  definirPrevision(magasin.etat(), S.lundi, 1, 20, h(1));
+  assert.equal(etatTache(magasin.etat(), idProd), 'fait');
+  await classes(faite, 'case-fait')[0].click();
+  assert.equal(magasin.etat().productions[idProd].etat === 'fait', false, 'se défait');
+});
+
+test('marquerFait sans quantité : refuse par défaut, accepte avec sansQuantite (réel null), annulerFait le remet', () => {
+  const e = lundiSansCouverts();
+  const id = Object.values(e.productions).find((p) => p.genre === 'principale').id;
+  assert.throws(() => marquerFait(e, id, undefined, h()), /cible est inconnue/);
+  marquerFait(e, id, undefined, h(), { sansQuantite: true });
+  assert.equal(e.productions[id].quantiteReelle, null);
+  annulerFait(e, id, h(1));
+  assert.equal(e.productions[id].etat === 'fait', false);
 });
 
 // ------------------------------------------------------------------ verbe

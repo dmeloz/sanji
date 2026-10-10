@@ -8,7 +8,7 @@ import { texteDiagnostic } from '../app/js/domaine/rapport-diagnostic.js';
 
 const faux = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k), m }; };
 const texteBouton = (n, t) => boutons(n).find((b) => b.textContent === t);
-const note = (o = {}) => ({ id: 'a', type: 'bug', categorie: 'bug_gene', texte: 'Le bouton ne répond pas', ecran: 'Semaine', version: '102', h: '2026-10-09T10:00:00.000Z', etat: 'ouverte', gestes: ['10:00:00 bouton « Semaine »'], ...o });
+const note = (o = {}) => ({ id: 'a', type: 'bug', categorie: 'bug_gene', texte: 'Le bouton ne répond pas', ecran: 'Semaine', version: '102', h: '2026-10-09T10:00:00.000Z', etat: 'nouvelle', gestes: ['10:00:00 bouton « Semaine »'], ...o });
 let dom; let N; let magasin; let reglages; let J;
 
 before(async () => {
@@ -42,8 +42,8 @@ test('gesteTexte : bouton, écran, erreur ; jamais d\'autre champ', () => {
   assert.match(gesteTexte({ type: 'navigation', route: '#/semaine' }), /écran #\/semaine/);
 });
 
-test('texteNotes : en-tête, groupé par catégorie puis écran, ouvertes en détail, réglées en liste', () => {
-  const t = texteNotes([note(), note({ id: 'b', ecran: 'Production', texte: 'Autre bug' }), note({ id: 'c', etat: 'reglee', texte: 'Réglé ici', gestes: ['GESTE_REGLEE'] }),
+test('texteNotes : en-tête, groupé par catégorie puis écran, seules les nouvelles en détail (ni transmise ni réglée)', () => {
+  const t = texteNotes([note(), note({ id: 'b', ecran: 'Production', texte: 'Autre bug' }), note({ id: 'c', etat: 'reglee', texte: 'Réglé ici', gestes: ['GESTE_REGLEE'] }), note({ id: 'e', etat: 'transmise', texte: 'DEJA_TRANSMISE' }),
     note({ id: 'd', type: 'idee', categorie: 'idee_remarque', texte: 'Une idée' })], { version: '102', date: '2026-10-09' });
   const lignes = t.split('\n');
   assert.equal(lignes[0], 'Notes de test');
@@ -52,8 +52,9 @@ test('texteNotes : en-tête, groupé par catégorie puis écran, ouvertes en dé
   const bug = t.slice(t.indexOf('== Bug / Gêne'));
   assert.ok(bug.indexOf('Écran : Semaine') < bug.indexOf('Écran : Production'));
   assert.match(bug, /Derniers gestes : 10:00:00 bouton « Semaine »/);
-  assert.match(bug, /Réglées :\n {2}- \[Bug\] Semaine · Réglé ici/);
-  assert.equal(t.includes('GESTE_REGLEE'), false, 'une réglée n\'est qu\'une ligne');
+  assert.match(t, /Notes nouvelles : 3/);
+  assert.equal(t.includes('GESTE_REGLEE') || t.includes('Réglé ici') || t.includes('DEJA_TRANSMISE'), false, 'ni réglée ni transmise');
+  assert.equal(texteNotes([note({ etat: 'transmise' })]), '');
   assert.equal(texteNotes([]), '');
 });
 
@@ -64,13 +65,13 @@ test('fichier de diagnostic : contient le bloc des notes, pas de bloc sans note'
 });
 
 // ---------- stockage
-test('stockage : ajout, plafond de 100, plus récente en tête, état ouverte', () => {
+test('stockage : ajout, plafond de 100, plus récente en tête, état nouvelle', () => {
   globalThis.localStorage = faux(); N.effacerNotes();
   for (let i = 0; i < 105; i++) N.ajouterNote({ type: 'remarque', texte: `n${i}`, ecran: 'E' });
   const l = N.lireNotes();
   assert.equal(l.length, 100);
   assert.equal(l[0].texte, 'n104');
-  assert.equal(l[0].etat, 'ouverte');
+  assert.equal(l[0].etat, 'nouvelle');
   assert.equal(l[0].categorie, 'idee_remarque');
   assert.throws(() => N.ajouterNote({ type: 'bug', texte: '' }), /Écrivez/);
 });
@@ -89,7 +90,7 @@ test('stockage : écriture refusée → repli mémoire ; l\'état n\'est pas tou
   const avant = JSON.stringify(magasin.etat());
   const n = N.ajouterNote({ type: 'bug', texte: 'x' });
   assert.equal(N.lireNotes().length, 1);
-  N.basculerNote(n.id);
+  N.definirEtatNote(n.id, 'reglee');
   assert.equal(N.lireNotes()[0].etat, 'reglee');
   assert.equal(JSON.stringify(magasin.etat()), avant);
   N.effacerNotes();
@@ -140,7 +141,7 @@ test('feuille : texte vide refusé avec message, rien d\'enregistré', async () 
 });
 
 // ---------- Réglages
-test('Centre : notes (vide, bascule réglée/rouvrir, suppression confirmée), interrupteur dans Réglages, aide', async () => {
+test('Centre : notes (vide, réglée puis rouvrir depuis « Voir », suppression confirmée), interrupteur dans Réglages, aide', async () => {
   globalThis.localStorage = faux(); N.effacerNotes();
   magasin.remplacer(etatVide());
   const reglage = reglages.rendre(magasin.etat(), 'apprentissage');
@@ -148,7 +149,7 @@ test('Centre : notes (vide, bascule réglée/rouvrir, suppression confirmée), i
   const { ouvrirCentreDev } = await import('../app/js/ui/centre-dev.js');
   ouvrirCentreDev();
   let page = panneauxOuverts(dom.corps).at(-1);
-  assert.match(page.textContent, /Aucune note pour l'instant/);
+  assert.match(page.textContent, /Aucune nouvelle note\./);
   assert.match(page.textContent, /Vos notes restent sur cet appareil ; elles ne partent qu'avec le fichier que vous partagez\./);
   N.ajouterNote({ type: 'gene', texte: 'Trop petit', ecran: 'Articles' });
   ouvrirCentreDev();
@@ -157,7 +158,9 @@ test('Centre : notes (vide, bascule réglée/rouvrir, suppression confirmée), i
   assert.match(page.textContent, /Trop petit/);
   await texteBouton(page, 'Réglée').click();
   assert.equal(N.lireNotes()[0].etat, 'reglee');
-  assert.ok(texteBouton(page, 'Rouvrir'));
+  await texteBouton(page, 'Voir').click();
+  await texteBouton(panneauxOuverts(dom.corps).at(-1), 'Rouvrir').click();
+  assert.equal(N.lireNotes()[0].etat, 'nouvelle');
   await texteBouton(page, 'Supprimer').click();
   assert.equal(N.lireNotes().length, 1, 'rien n\'est supprimé avant la confirmation');
   const ouvert = panneauxOuverts(dom.corps).at(-1);
