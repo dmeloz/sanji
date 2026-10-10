@@ -1498,6 +1498,7 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .prod-verbe { flex: none; white-space: nowrap; font-weight: 500; color: var(--texte-doux); }
 .vue-production .prod-nom { display: block; flex: 0 1 auto; line-height: var(--cible); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
 .prod-asaisir { display: inline-flex; align-items: center; min-height: var(--cible); padding: 0 4px; background: transparent; border: 0; font: inherit; cursor: pointer; }
+.art-preciser { display: inline-flex; align-items: center; min-height: var(--cible); }
 .prod-asaisir:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
 .prod-saisie { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; margin: 0 0 8px var(--cible); }
 .prod-saisie-feuille { margin: 8px 0 0; }
