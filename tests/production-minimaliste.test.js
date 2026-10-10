@@ -119,14 +119,25 @@ test('ligne sans portion : étiquette « à chiffrer » (icône + mot), un touch
   assert.equal(classes(apres, 'prod-asaisir').length, 0, 'plus « à chiffrer »');
 });
 
-test('ligne sans portion : une saisie invalide ne change rien', async () => {
+test('ligne sans portion : chaque saisie invalide dit son message DANS la feuille, qui reste ouverte, sans rien changer ; la valeur valide la ferme', async () => {
   const { e, c } = platSansPortion();
-  const ligne = ligneDe(page(e), 'GENERIQUE_TEST');
-  await classes(ligne, 'prod-asaisir')[0].click();
-  const formulaire = classes(panneauxOuverts(dom.corps)[0], 'prod-saisie')[0];
-  formulaire.querySelector('input').value = 'abc';
+  await classes(ligneDe(page(e), 'GENERIQUE_TEST'), 'prod-asaisir')[0].click();
+  const feuille = panneauxOuverts(dom.corps)[0];
+  const formulaire = classes(feuille, 'prod-saisie')[0];
+  const alerte = () => feuille.tous((x) => x.attributs.role === 'alert' && !x.hidden)[0]?.textContent ?? '';
+  const cas = [['', /Tapez une portion en g, par exemple 120/], ['abc', /n'est pas un nombre/], ['1e3', /n'est pas un nombre/],
+    ['0', /supérieure à 0/], ['-5', /supérieure à 0/], ['2001', /ne peut pas dépasser 2000/]];
+  for (const [saisie, attendu] of cas) {
+    formulaire.querySelector('input').value = saisie;
+    await formulaire.declencher('submit');
+    assert.match(alerte(), attendu, `« ${saisie} »`);
+    assert.equal(feuille.open, true, 'la feuille reste ouverte');
+    assert.equal(magasin.etat().composants[c].grammage.valeur, null, 'rien n\'est enregistré');
+  }
+  formulaire.querySelector('input').value = '120';
   await formulaire.declencher('submit');
-  assert.equal(magasin.etat().composants[c].grammage.valeur, null);
+  assert.equal(magasin.etat().composants[c].grammage.valeur, 120);
+  assert.equal(feuille.open, false, 'la valeur valide ferme la feuille');
   fermerFeuilles();
 });
 
@@ -177,6 +188,24 @@ test('couverts manquants : la ligne dit « à chiffrer », la feuille propose 40
   const apres = ligneDe(vue.rendre(magasin.etat(), S.lundi), 'riz');
   assert.ok(classes(apres, 'mep-qte').length === 1, 'la ligne se chiffre aussitôt');
   assert.equal(classes(apres, 'prod-asaisir').length, 0);
+});
+
+test('une prévision existe pour l\'autre menu : pas de puces de couverts (elles l\'écraseraient), un seul bouton « Saisir la prévision »', async () => {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'riz', h());
+  definirMenu(e, S.lundi, 2, 'quinoa', h());
+  definirPrevision(e, S.lundi, 1, 30, h());
+  const r = raisonNonChiffree(e, ligneBrute(e, 'quinoa'));
+  assert.equal(r.type, 'prevision');
+  assert.match(r.texte, /il manque la prévision du menu 2 du/);
+  await classes(ligneDe(page(e), 'quinoa'), 'prod-asaisir')[0].click();
+  const feuille = panneauxOuverts(dom.corps)[0];
+  assert.equal(classes(feuille, 'prep-valeur').length, 0, 'aucune puce de couverts');
+  const liens = feuille.tous((x) => x.balise === 'a');
+  assert.deepEqual(liens.map((x) => x.textContent), ['Saisir la prévision']);
+  assert.match(liens[0].attributs.href, /^#\/import\//);
+  assert.equal(magasin.etat().jours[S.lundi].previsions[1].portions, 30, 'le 30 est intact');
+  fermerFeuilles();
 });
 
 test('cause autre : un seul bouton « Préciser » vers la fiche', async () => {

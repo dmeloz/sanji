@@ -130,22 +130,27 @@ export function provenanceAMontrer(provenance) {
 
 let compteurActions = 0;
 
-/** Portion tapée en un toucher : un champ (g par portion) et « OK » (comme « Préparer la semaine »). */
+/** Borne haute d'une portion tapée (g, ml…) : au-delà, c'est une faute de frappe. */
+const PORTION_MAX = 2000;
+
+/** Portion tapée en un toucher : un champ (g par portion) et « OK ». Toute erreur se dit DANS la feuille (`api.erreur`). */
 function formulairePortion(etat, l, nom, api) {
-  const unite = etat.composants[l.composantId].grammage?.unite ?? 'g';
-  const champ = h('input', { type: 'number', inputmode: 'decimal', min: '0', step: 'any', classe: 'prep-champ', 'aria-label': `${nom} : portion en ${libelle('UNITE', unite)}` });
+  const unite = libelle('UNITE', etat.composants[l.composantId].grammage?.unite ?? 'g');
+  const champ = h('input', { type: 'number', inputmode: 'decimal', min: '0', step: 'any', classe: 'prep-champ', 'aria-label': `${nom} : portion en ${unite}` });
   const valider = (evenement) => {
     evenement?.preventDefault?.();
     let valeur;
-    try { valeur = parseNombre(champ.value, nom); } catch (erreur) { afficherMessage(erreur.message, 'erreur'); return; }
-    if (valeur === null) { afficherMessage(`${nom} : tapez la portion en ${libelle('UNITE', unite)}.`, 'erreur'); return; }
-    const r = agir((e, t) => saisirPortionInconnue(e, l.composantId, valeur, t));
-    if (!r.ok) return;
+    try { valeur = parseNombre(champ.value, nom); } catch { api.erreur("Cette valeur n'est pas un nombre."); return; }
+    if (valeur === null) { api.erreur(`Tapez une portion en ${unite}, par exemple 120.`); return; }
+    if (valeur <= 0) { api.erreur('La portion doit être supérieure à 0.'); return; }
+    if (valeur > PORTION_MAX) { api.erreur(`La portion ne peut pas dépasser ${PORTION_MAX} ${unite}.`); return; }
+    const r = agir((e, t) => saisirPortionInconnue(e, l.composantId, valeur, t), { afficher: false });
+    if (!r.ok) { api.erreur(r.erreur); return; }
     api.fermer();
-    afficherMessage(`${nom} : ${valeur} ${libelle('UNITE', unite)} par portion retenu${r.valeur.portee === 'standard' ? ' pour toutes les semaines' : ' pour ce plat'}.`, 'ok');
+    afficherMessage(`${nom} : ${valeur} ${unite} par portion retenu${r.valeur.portee === 'standard' ? ' pour toutes les semaines' : ' pour ce plat'}.`, 'ok');
   };
   return h('form', { classe: 'prod-saisie prod-saisie-feuille', novalidate: true, onSubmit: valider },
-    champ, h('span', { classe: 'prod-saisie-unite' }, `${libelle('UNITE', unite)} par portion`), bouton('OK', valider, 'court', { type: 'submit', 'aria-label': `Valider la portion de ${nom}` }));
+    champ, h('span', { classe: 'prod-saisie-unite' }, `${unite} par portion`), bouton('OK', valider, 'court', { type: 'submit', 'aria-label': `Valider la portion de ${nom}` }));
 }
 
 /** Les couverts du jour en un toucher (40 à 80, comme « Préparer la semaine ») : la ligne se chiffre aussitôt. */
@@ -153,7 +158,10 @@ function puceCouverts(raison, api) {
   return h('div', { classe: 'prep-valeurs', role: 'group', 'aria-label': `Couverts du ${libelleJour(raison.date)}` },
     COUVERTS_RAPIDES.map((n) => h('button', {
       type: 'button', classe: 'btn prep-valeur', 'aria-label': `${n} couverts le ${libelleJour(raison.date)}`,
-      onClick: () => { if (agir((e, t) => definirCouvertsMidi(e, raison.date, { total: n }, t)).ok) api.fermer(); },
+      onClick: () => {
+        const r = agir((e, t) => definirCouvertsMidi(e, raison.date, { total: n }, t), { afficher: false });
+        if (r.ok) api.fermer(); else api.erreur(r.erreur);
+      },
     }, String(n))));
 }
 
@@ -165,6 +173,7 @@ function feuilleChiffrage(etat, l, nom, raison) {
       h('p', null, raison.texte.charAt(0).toUpperCase() + raison.texte.slice(1)),
       raison.type === 'couverts' ? puceCouverts(raison, api) : null,
       raison.type === 'portion' ? formulairePortion(etat, l, nom, api) : null,
+      raison.type === 'prevision' ? h('a', { href: `#/import/${lundiDe(raison.date)}`, classe: 'btn btn-principal btn-court', onClick: () => api.fermer() }, 'Saisir la prévision') : null,
       raison.type === 'autre' ? h('a', { href: `#/fiche/${encodeURIComponent(l.composantId)}`, classe: 'btn btn-principal btn-court', onClick: () => api.fermer() }, 'Préciser') : null),
   });
 }

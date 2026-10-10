@@ -58,12 +58,13 @@ export function aSaisirPortion(etat, composantId) {
 /**
  * Pourquoi une ligne de la liste n'est pas chiffrée, ou null quand elle l'est (cible en poids, ou ligne faite / préparatoire).
  * - 'couverts' : aucune prévision pour ce jour et ce menu (`date` dit lequel) ;
+ * - 'prevision' : l'autre menu a sa prévision, celui-ci non : se saisit menu par menu (les couverts écraseraient l'autre) ;
  * - 'portion' : seule la portion manque (`aSaisirPortion`) ;
  * - 'autre' : sauce à confirmer, herbe, plat à préciser, composition à définir, famille inconnue : se règle depuis la fiche.
  * La phrase `texte` est dite telle quelle dans la feuille de la ligne.
  * @param {object} etat
  * @param {{composantId:string, genre?:string, cible?:number|null, unite?:string|null, nom?:string, libelle?:string}} ligne
- * @returns {{type:'couverts'|'portion'|'autre', texte:string, date?:string}|null}
+ * @returns {{type:'couverts'|'prevision'|'portion'|'autre', texte:string, date?:string}|null}
  */
 export function raisonNonChiffree(etat, ligne) {
   const c = etat.composants?.[ligne.composantId];
@@ -75,6 +76,11 @@ export function raisonNonChiffree(etat, ligne) {
   if (c.type === 'a_preciser') return { type: 'autre', texte: `${nom} est encore à préciser : la fiche dit ce qu'il faut.` };
   const portions = portionsMenu(etat, c.date, c.menu);
   if (portions.previsionManquante && portions.total === 0) {
+    // Les couverts du midi réécrivent les prévisions des DEUX menus : jamais proposés si l'autre menu a déjà la sienne.
+    const autre = c.menu === 1 ? 2 : 1;
+    if (Number.isFinite(etat.jours?.[c.date]?.previsions?.[autre]?.portions)) {
+      return { type: 'prevision', date: c.date, texte: `il manque la prévision du menu ${c.menu} du ${libelleJour(c.date)}.` };
+    }
     return { type: 'couverts', date: c.date, texte: `il manque les couverts du ${libelleJour(c.date)} (menu ${c.menu}).` };
   }
   if (aSaisirPortion(etat, ligne.composantId)) return { type: 'portion', texte: `il manque la portion de ${nom}.` };
