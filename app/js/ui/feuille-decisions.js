@@ -80,19 +80,19 @@ function carte(c, fermer, valeurs = []) {
       titre = c.nom;
       detail = `Menu du ${libelleJour(c.date)} : rien n'est choisi à votre place.`;
       actions = [principal('Choisir la sauce', () => dialogChoisirSauce(etatCourant().composants[c.composantId]), { 'aria-label': `Choisir la sauce : ${c.nom}` }),
-        versLien(`#/semaine/${c.date}`, 'Voir le jour')];
+        versLien(`#/production/${c.date}`, 'Voir le jour')];
       break;
     case 'repartition':
       etiquette = 'Répartition provisoire';
       titre = `Fiche ${c.numero}`;
       detail = [`${libelleJour(c.date)} : `, h('span', { classe: 'dec-qte' }, String(c.couverts)), ' couverts, répartition entre les menus provisoire.'];
       actions = [principal('Confirmer la répartition', () => dialogRepartition(c.ficheId), { 'aria-label': `Confirmer la répartition : fiche ${c.numero}` }),
-        versLien(`#/semaine/${c.date}`, 'Voir le jour')];
+        versLien(`#/production/${c.date}`, 'Voir le jour')];
       break;
     case 'point': {
       etiquette = ETIQUETTE_POINT[c.type] ?? 'À confirmer';
       titre = c.texte;
-      const href = c.composantId ? `#/fiche/${encodeURIComponent(c.composantId)}` : c.date ? `#/semaine/${c.date}` : '#/reglages';
+      const href = c.composantId ? `#/fiche/${encodeURIComponent(c.composantId)}` : c.date ? `#/production/${c.date}` : '#/reglages';
       if (c.type === 'allergenes' && c.composantId && etatCourant().composants[c.composantId]) {
         // Valider la liste ne règle rien quand la composition manque : l'action proposée est celle qui règle vraiment.
         const composant = () => etatCourant().composants[c.composantId];

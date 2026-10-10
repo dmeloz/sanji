@@ -455,7 +455,7 @@ export function blocGestes(c, { sansIA = false } = {}) {
     c.recetteId ? null : bouton('Composer un mélange', () => dialogMelange(c), 'court'),
     bouton('Supprimer', () => confirmer({
       titre: 'Supprimer ce composant ?', texte: `${c.nom} et ses tâches non faites seront supprimés.`, libelleOk: 'Supprimer', danger: true,
-      action: () => { agirStrict((e, t) => supprimerComposant(e, c.id, t)); location.hash = `#/semaine/${c.date}`; },
+      action: () => { agirStrict((e, t) => supprimerComposant(e, c.id, t)); location.hash = `#/production/${c.date}`; },
     }), 'court danger'));
 }
 
@@ -598,7 +598,7 @@ export function rendre(etat, id) {
     return racine;
   }
   const calc = calculerComposant(etat, id);
-  racine.appendChild(h('p', null, lien(`#/semaine/${c.date}`, '‹ Détail du jour'), ' · ', lien(`#/production/${c.date}`, 'Feuille du jour')));
+  racine.appendChild(h('p', null, lien(`#/production/${c.date}`, '‹ Feuille du jour')));
   for (const s of [sectionEntete(etat, c, calc), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionEtapesPreparation(etat, c), sectionProductions(etat, c),
     sectionIngredients(etat, c, calc), sectionMemoire(etat, c), sectionAllergenes(etat, c), sectionApresService(c, calc), blocReperes(c.famille, etat)]) {
     if (s) racine.appendChild(s);

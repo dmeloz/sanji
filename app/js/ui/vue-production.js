@@ -9,9 +9,9 @@ import { feuilleDuJour } from '../domaine/planification.js';
 import { boutonProposerPlanning } from './assistant-planning.js';
 import { h } from './dom.js';
 import { problemeHorsLigne } from './horsligne.js';
-import { lien } from './elements.js';
 import { activerGlisser } from './glisser.js';
 import { blocMenuDuJour } from './menu-du-jour.js';
+import { ligneServicesDuJour } from './feuille-services.js';
 import { corps } from './vue-jour.js';
 
 export function titre() { return 'Production'; }
@@ -29,11 +29,9 @@ function entete(date) {
     problemeHorsLigne() ? h('span', { classe: 'prod-horsligne' }, h('span', { classe: 'prod-horsligne-point', 'aria-hidden': 'true' }), problemeHorsLigne()) : null);
 }
 
-/** Pied de page : prévisions du jour, assistant (facultatif). */
+/** Pied de page : l'assistant (facultatif). */
 function pied(date) {
-  return h('div', { classe: 'prod-pied pas-imprime' },
-    lien(`#/semaine/${date}`, 'Prévisions →', 'jour-lien'),
-    boutonProposerPlanning(date));
+  return h('div', { classe: 'prod-pied pas-imprime' }, boutonProposerPlanning(date));
 }
 
 export function rendre(etat, date) {
@@ -42,6 +40,8 @@ export function rendre(etat, date) {
   racine.appendChild(entete(date));
   const menu = blocMenuDuJour(etat, date);
   if (menu) racine.appendChild(menu);
+  const services = ligneServicesDuJour(etat, date);
+  if (services) racine.appendChild(services);
   for (const n of corps(etat, date, feuille)) racine.appendChild(n);
   racine.appendChild(pied(date));
   // Glissement : la règle (seuil, vertical ignoré, dimanche sauté) est `jourApresGeste` ; ici on la branche sur le doigt.

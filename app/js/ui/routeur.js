@@ -31,11 +31,11 @@ export const ONGLET_DE_VUE = {
  * Analyse un hash (« #/production/2026-10-05 ») : { vue, param, sous? }. Fonction pure, sans DOM.
  * Adresses : #/aujourdhui (accueil, défaut), #/production[/date], #/semaine[/date[/tableau]], #/articles,
  * #/fiche/<composantId>, #/poste/<composantId>, #/import[/date], #/preparer[/date] (lundi de la semaine), #/reglages[/rubrique], #/historique.
- * Défauts : production = aujourd'hui ; import = lundi de la semaine donnée ou en cours ; articles : aucun paramètre ; semaine sans date = tableau de la semaine (param null), avec date = détail du jour,
+ * Défauts : production = aujourd'hui ; import = lundi de la semaine donnée ou en cours ; articles : aucun paramètre ; semaine sans date = tableau de la semaine (param null), avec date = Production de ce jour (v116),
  * « /tableau » en plus = tableau de cette semaine (ramenée au lundi). Une adresse inconnue, ou fiche/poste sans identifiant, mène à l'accueil.
  * Réglages : une clé de rubrique inconnue donne la racine.
  * Anciennes adresses, redirigées pour les favoris : #/accueil et #/tableau → aujourdhui (#/tableau/<date> → tableau de la semaine),
- * #/jour/<d> → production/<d>, #/stock[/…] et #/produits[/…] → articles (Restes, DLC et Achats sont masqués, décision du 2026-10-07), #/detail/<d> → semaine/<d>,
+ * #/jour/<d> → production/<d>, #/stock[/…] et #/produits[/…] → articles (Restes, DLC et Achats sont masqués, décision du 2026-10-07), #/detail/<d> → production/<d>,
  * #/composant/<id> → fiche/<id>, #/menus/<d> → import/<d>.
  */
 /** Décode un morceau d'adresse ; une adresse mal formée (« %E0 ») vaut « absent » au lieu de faire échouer le routeur. */
@@ -51,9 +51,10 @@ export function analyserHash(hash, aujourd) {
   if (vue === 'production' || vue === 'jour') return { vue: 'production', param: dateValide ? param : aujourd };
   if (vue === 'semaine') {
     if (!dateValide) return { vue: 'semaine', param: null };
-    return morceaux[2] === 'tableau' ? { vue: 'semaine', param: lundiDe(param), sous: 'tableau' } : { vue: 'semaine', param };
+    // v116 : l'ancienne page de jour n'existe plus ; un jour de la Semaine ouvre Production (anciens liens conservés).
+    return morceaux[2] === 'tableau' ? { vue: 'semaine', param: lundiDe(param), sous: 'tableau' } : { vue: 'production', param };
   }
-  if (vue === 'detail') return { vue: 'semaine', param: dateValide ? param : aujourd };
+  if (vue === 'detail') return { vue: 'production', param: dateValide ? param : aujourd };
   if (vue === 'tableau' && dateValide) return { vue: 'semaine', param: lundiDe(param), sous: 'tableau' };
   if (vue === 'import' || vue === 'menus') return { vue: 'import', param: lundiDe(dateValide ? param : aujourd) };
   if (vue === 'preparer') return { vue: 'preparer', param: lundiDe(dateValide ? param : aujourd) };

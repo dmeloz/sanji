@@ -6,7 +6,7 @@ import { LIBELLES } from '../domaine/statuts.js';
 import { agirStrict, etat as etatCourant } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
-import { definitions, lien } from './elements.js';
+import { bouton, definitions } from './elements.js';
 import { formaterHeure } from './format.js';
 import { noter } from './journal-diagnostic.js';
 import { confirmer, panneau } from './panneau.js';
@@ -45,7 +45,7 @@ export function ouvrirFiche(ficheId) {
   panneau({
     titre: `Fiche ${f.numero || ''}`.trim(),
     lectureSeule: true,
-    corps: [
+    corps: ({ fermer }) => [
       definitions([
         ['Service', LIBELLE_SERVICE[f.service] ?? f.service],
         ['Horaire', f.horaire || 'non renseigné'],
@@ -58,7 +58,7 @@ export function ouvrirFiche(ficheId) {
       repartitionIncoherente(f)
         ? h('p', { classe: 'alerte-texte' }, `La répartition (${sommeRepartition(f)}) ne correspond pas aux couverts (${f.couverts}).`) : null,
       buffetDeLaFiche(f),
-      lien(`#/semaine/${f.date}`, 'Ouvrir le jour pour modifier', 'lien'),
+      h('div', { classe: 'actions' }, bouton('Modifier la fiche', () => { fermer(); dialogFiche(f, f.date); }, 'court')),
     ],
   });
 }

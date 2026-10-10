@@ -64,7 +64,7 @@ function ligneFormule(c) {
 /** Les fiches de fonction du jour : lien vers le détail du jour (leur gestion reste dans Semaine). */
 function lignesFiches(etat, date, fermer) {
   const actives = Object.values(etat.fiches ?? {}).filter((f) => f.statut === 'active' && f.date === date);
-  return actives.map((f) => h('a', { href: `#/semaine/${date}`, classe: 'cv-fiche', onClick: fermer },
+  return actives.map((f) => h('a', { href: `#/production/${date}`, classe: 'cv-fiche', onClick: fermer },
     h('span', { classe: 'cv-fiche-texte' }, h('span', { classe: 'nom' }, `Fiche de fonction · ${f.numero || 'sans numéro'}`),
       h('span', { classe: 'au-sous' }, `${pluriel(Number(f.couverts) || 0, 'pers.', 'pers.')}${f.horaire ? ` · ${f.horaire}` : ''}`))));
 }

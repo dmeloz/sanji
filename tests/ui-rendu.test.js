@@ -88,7 +88,7 @@ function etatRiche() {
   return { e, ids: { sec, cru, prep, vague } };
 }
 
-const nettoyerPanneaux = () => { for (const d of dom.corps.tous((x) => x.balise === 'dialog')) d.remove(); };
+const nettoyerPanneaux = () => { for (const d of dom.corps.tous((x) => x.balise === 'dialog')) { d.close(); d.remove(); } };
 
 const TEXTE_INTERDIT = /undefined|\bNaN\b|\bnull\b|\[object/;
 const ERREUR_DE_CODE = /is not defined|is not a function|Cannot read|Cannot set|undefined|is not iterable|null|NaN|\[object/;
@@ -300,7 +300,7 @@ async function parcourir(nomVue, param) {
       }
       if (dialogue.open) dialogue.close();
     }
-    for (const d of corps.tous((x) => x.balise === 'dialog')) d.remove();
+    for (const d of corps.tous((x) => x.balise === 'dialog')) { d.close(); d.remove(); }
   }
   return 500;
 }

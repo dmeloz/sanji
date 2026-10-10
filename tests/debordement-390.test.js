@@ -18,12 +18,6 @@ for (const s of ['.sem-menu', '.sem-fiche', '.sa-couverts-texte', '.sem-intitule
 test('carte Services : colonne unique minmax(0, 1fr), sinon la grille s\'élargit avec son contenu', () => {
   assert.match(regles('.sem-carte'), /grid-template-columns:\s*minmax\(0,\s*1fr\)/);
 });
-test('intitulé de menu : une ligne tronquée par « … »', () => {
-  const r = regles('.sem-intitule-court');
-  assert.match(r, /overflow:\s*hidden/);
-  assert.match(r, /text-overflow:\s*ellipsis/);
-  assert.match(r, /white-space:\s*nowrap/);
-});
 test('boutons « Saisir » et « OK » : jamais rétrécis (flex: none) ; la ligne couverts peut passer à la ligne', () => {
   assert.match(regles('.sa-couverts .btn'), /flex:\s*none/);
   assert.match(regles('.prep-saisie .btn'), /flex:\s*none/);

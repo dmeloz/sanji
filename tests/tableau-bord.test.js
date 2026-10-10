@@ -52,7 +52,7 @@ test('bord : fiches de fonction = horaire, numéro, couverts, mode, allergies, l
   const { fiches } = tableauBlanc(e, S.mardi).bord;
   assert.deepEqual(fiches.map((f) => f.numero), ['FICHE_TEST_1'], 'les fiches passées de la semaine ne sont pas à venir');
   assert.deepEqual([fiches[0].horaire, fiches[0].couverts, fiches[0].mode, fiches[0].aAllergies, fiches[0].lien],
-    ['12:00', 24, 'menu_fixe', true, `#/semaine/${S.mardi}`]);
+    ['12:00', 24, 'menu_fixe', true, `#/production/${S.mardi}`]);
   assert.match(fiches[0].modeTexte, /Menu fixe/);
 });
 

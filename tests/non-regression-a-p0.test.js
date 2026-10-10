@@ -120,7 +120,7 @@ test('liens : les adresses historiques mènent toujours à une page, et une rout
   for (const hash of ['#/accueil', '#/tableau', '#/', '', '#/inconnu']) {
     assert.equal(routeur.analyserHash(hash, S.samedi).vue, 'aujourdhui', hash);
   }
-  const attendu = { '#/jour': 'production', '#/detail': 'semaine', '#/produits': 'articles', '#/stock/dlc/2026-10-05': 'articles', '#/menus': 'import', [`#/composant/${'x'}`]: 'fiche' };
+  const attendu = { '#/jour': 'production', '#/detail': 'production', '#/produits': 'articles', '#/stock/dlc/2026-10-05': 'articles', '#/menus': 'import', [`#/composant/${'x'}`]: 'fiche' };
   for (const [hash, vue] of Object.entries(attendu)) assert.equal(routeur.analyserHash(hash, S.samedi).vue, vue, hash);
 });
 

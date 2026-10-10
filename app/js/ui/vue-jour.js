@@ -314,7 +314,7 @@ export function corps(etat, date, feuille) {
     else {
       noeuds.push(etatVide({
         titre: 'Rien à produire ce jour', texte: 'Pas de menu ce jour-là, ou tout a déjà été avancé.',
-        actions: [{ libelle: 'Voir la semaine', href: `#/semaine/${lundiDe(date)}` }, { libelle: 'Importer les menus', href: `#/import/${lundiDe(date)}` }],
+        actions: [{ libelle: 'Voir la semaine', href: `#/semaine/${lundiDe(date)}/tableau` }, { libelle: 'Importer les menus', href: `#/import/${lundiDe(date)}` }],
       }));
     }
   }
