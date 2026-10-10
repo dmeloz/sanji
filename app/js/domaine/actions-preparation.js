@@ -23,7 +23,7 @@ export function validerToutAvecStandards(etat, lundi, h) {
 
 /**
  * Portion TAPÉE par la propriétaire pour une ligne sans standard (INCONNU) : c'est sa valeur choisie, jamais une valeur proposée.
- * Famille et rôle connus : elle devient son standard maison (reprise toutes les semaines). Sinon : portion de ce plat seulement,
+ * Famille et rôle connus : elle devient son standard maison (reprise toutes les semaines). Sinon : portion retenue pour ce nom, toutes les semaines (fiche retenue, voir fiches-retenues.js),
  * gardée aussi dans la mémoire maison par nom (`memoriser`, à reprendre depuis la fiche du plat ; rien n'est repris seul).
  * @returns {{portee:'standard'|'plat'}}
  */

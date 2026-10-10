@@ -3,6 +3,7 @@
 // ils ne portent aucun chiffre. Rien n'est inventé : un mot inconnu reste « à préciser », une sauce implicite reste « à confirmer ».
 
 import { cleMemoire, lireMemoire, normaliser } from './etat.js';
+import { ficheEnMemoire, nomCorrect } from './fiches-retenues.js';
 import { expressionsApprises } from './mots-retenus.js';
 import { FAMILLES, MOTS_SANS_FAMILLE, lireNom } from './savoir.js';
 import {
@@ -78,6 +79,35 @@ const motEgal = (n, w) => n === w || n === `${w}s` || n === `${w}x` || `${n}s` =
 const ALIAS_JETONS = [...ALIAS].map(([de, vers]) => ({ de: normaliser(de).split(' '), vers: normaliser(vers).split(' ') }))
   .sort((a, b) => b.de.length - a.de.length);
 
+/**
+ * Remplace, AVANT toute autre lecture, chaque orthographe retenue par la propriétaire (`etat.noms`) par le nom correct :
+ * ses mots, sa fiche retenue et sa mémoire s'appliquent alors comme s'il avait été écrit juste. La plus longue variante d'abord.
+ */
+function corrigerOrthographes(jetons) {
+  if (Object.keys(orthographes).length === 0) return jetons;
+  const sortie = [];
+  for (let i = 0; i < jetons.length; i += 1) {
+    let trouve = null;
+    for (let longueur = Math.min(4, jetons.length - i); longueur >= 1 && !trouve && !jetons[i].sep; longueur -= 1) {
+      const groupe = jetons.slice(i, i + longueur);
+      if (groupe.some((t) => t.sep)) continue;
+      const nom = nomCorrect(orthographes, groupe.map((t) => t.n).join(' '));
+      if (nom) trouve = { nom, longueur };
+    }
+    if (!trouve) { sortie.push(jetons[i]); continue; }
+    const correct = tokeniser(trouve.nom).filter((t) => !t.sep);
+    // Les mots qui suivent complètent déjà le nom correct (« riz basmati » → « riz basmati parfumé » devant « parfumé ») : rien à remplacer.
+    if (correct.length > trouve.longueur && correct.every((t, k) => jetons[i + k] && !jetons[i + k].sep && jetons[i + k].n === t.n)) {
+      sortie.push(...jetons.slice(i, i + correct.length));
+      i += correct.length - 1;
+      continue;
+    }
+    sortie.push(...correct);
+    i += trouve.longueur - 1;
+  }
+  return sortie;
+}
+
 /** Remplace les variantes de nom par le nom retenu, en gardant dans `raw` le texte original. */
 function remplacerAlias(jetons) {
   const sortie = [];
@@ -121,6 +151,7 @@ const EXPRESSIONS = (() => {
 // Mots retenus par la propriétaire pour la lecture en cours : ils passent AVANT tout le vocabulaire.
 // ponytail: variable de module posée le temps d'un lirePlat (synchrone) ; passer un paramètre si la lecture devient asynchrone.
 let apprises = [];
+let orthographes = {};
 
 /** Expressions trouvées dans des jetons (la plus longue d'abord, de gauche à droite, sans chevauchement). */
 function expressionsDe(jetons) {
@@ -382,14 +413,18 @@ function recetteLisible(jetons) {
  *   `mots` : mots retenus (état.mots), consultés avant tout le vocabulaire
  * @returns {{original:string, normalise:string, elements:object[], ambiguites:object[]}}
  */
-export function lirePlat(intitule, menu, { lectures, memoire, mots } = {}) {
+export function lirePlat(intitule, menu, { lectures, memoire, mots, noms, fiches } = {}) {
   apprises = expressionsApprises(mots);
-  try { return lireIntitule(intitule, menu, { lectures, memoire }); } finally { apprises = []; }
+  orthographes = noms && typeof noms === 'object' ? noms : {};
+  try { return lireIntitule(intitule, menu, { lectures, memoire, fiches }); } finally { apprises = []; orthographes = {}; }
 }
 
-function lireIntitule(intitule, menu, { lectures, memoire }) {
+/** Mémoire du nom pour ce menu (« nom|menu » d'abord), à défaut ce que la fiche retenue du nom apporte (voir fiches-retenues.js). */
+const memoireOuFiche = (memoire, fiches, nom, menu) => lireMemoire(memoire, nom, menu) ?? ficheEnMemoire(fiches, nom, menu);
+
+function lireIntitule(intitule, menu, { lectures, memoire, fiches }) {
   const original = String(intitule ?? '');
-  const jetons = remplacerAlias(tokeniser(original));
+  const jetons = remplacerAlias(corrigerOrthographes(tokeniser(original)));
   const normalise = jetons.filter((t) => !t.sep).map((t) => t.n).join(' ');
 
   const cle = `${normaliser(original)}|${menu}`;
@@ -412,11 +447,11 @@ function lireIntitule(intitule, menu, { lectures, memoire }) {
   for (const fragment of segments.flatMap((seg) => decouper(seg, menu))) {
     const { element, base, recette } = elementDe(fragment, menu);
     // Ce que la propriétaire a déjà appris à Sanji pour ce nom et ce menu : le mot n'est plus « à préciser ».
-    const appris = element.categorie === 'a_preciser' ? lireMemoire(memoire, element.nom, menu) : null;
+    const appris = element.categorie === 'a_preciser' ? memoireOuFiche(memoire, fiches, element.nom, menu) : null;
     if (appris && appris.categorie && appris.categorie !== 'a_preciser') {
       delete element.suggestion;
       Object.assign(element, { categorie: appris.categorie, statut: 'lu', origine: 'memoire',
-        propriete: appris.attribue === true ? 'poste' : 'hors_poste' });
+        propriete: typeof appris.attribue === 'boolean' ? (appris.attribue ? 'poste' : 'hors_poste') : element.propriete });
     }
     elements.push(element);
     if (base) bases.push(base);
@@ -457,16 +492,17 @@ export function categoriePropose(nom) {
  * @param {object} [memoire] état.memoire
  * @param {object} [lectures] lectures corrigées par le chef (voir lirePlat)
  * @param {object} [mots] état.mots : mots retenus par la propriétaire (voir mots-retenus.js)
+ * @param {{noms?:object, fiches?:object}} [retenu] orthographes retenues (état.noms) et fiches retenues (état.fiches_retenues)
  * @returns {{nom:string, categorie:string, attribue:boolean, type:'a_preciser', depuisMemoire?:true}[]}
  */
-export function proposerComposants(intitule, menu, memoire = {}, lectures = undefined, mots = undefined) {
-  return lirePlat(intitule, menu, { memoire, lectures, mots }).elements.map((element) => {
+export function proposerComposants(intitule, menu, memoire = {}, lectures = undefined, mots = undefined, { noms, fiches } = {}) {
+  return lirePlat(intitule, menu, { memoire, lectures, mots, noms, fiches }).elements.map((element) => {
     const { nom, categorie } = element;
     const attribue = element.propriete === 'poste';
     const proposition = { nom, categorie, attribue, type: 'a_preciser' };
     if (element.origine === 'implicite') proposition.implicite = true;
     if (element.suggestion) proposition.suggestion = element.suggestion;
-    const memorise = lireMemoire(memoire, nom, menu);
+    const memorise = memoireOuFiche(memoire, fiches, nom, menu);
     if (memorise) {
       proposition.categorie = memorise.categorie ?? categorie;
       proposition.attribue = typeof memorise.attribue === 'boolean' ? memorise.attribue : attribue;

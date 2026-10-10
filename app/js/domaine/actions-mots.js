@@ -3,6 +3,7 @@
 import { modifierComposant, terminer } from './actions.js';
 import { cleMemoire, lireMemoire } from './etat.js';
 import { CATEGORIES_MOT, categorieMotValide, champsPourMot, motDe } from './mots-retenus.js';
+import { retenirFiche } from './fiches-retenues.js';
 import { appliquerSavoir } from './savoir.js';
 
 function verifierH(h) {
@@ -12,7 +13,7 @@ function verifierH(h) {
 }
 
 /** Classe un élément encore « à préciser » : champs du classement, savoir de l'application, suggestion retirée. */
-function classer(etat, c, categorie, h) {
+export function classer(etat, c, categorie, h) {
   const cle = cleMemoire(c.nom, c.menu);
   const existait = Object.hasOwn(etat.memoire, cle);
   modifierComposant(etat, c.id, champsPourMot(categorie, c.menu), h);
@@ -48,6 +49,8 @@ export function enseignerMot(etat, composantId, categorie, h) {
   if (!c) throw new Error('Composant introuvable.');
   if (!categorieMotValide(categorie)) throw new Error(`Classement de mot inconnu : « ${categorie} ».`);
   classer(etat, c, categorie, h);
+  // Le geste est une confirmation de la propriétaire : l'élément entier entre dans la fiche retenue de son nom.
+  retenirFiche(etat, c.nom, { categorie: c.categorie, role: c.role ?? undefined, attribue: c.menu === 2 ? c.attribue : undefined }, h);
   return retenirMot(etat, c.nom, categorie, h);
 }
 

@@ -1553,3 +1553,9 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .ligne-mot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
 .ligne-mot span { min-width: 0; overflow-wrap: anywhere; }
 .ligne-mot .btn { flex: none; }
+
+/* v114 : fiche retenue (corriger le nom, sauce reprise) et feuille de clôture de la semaine */
+.corriger-nom { min-width: 0; margin: 8px 0; }
+.corriger-nom input { max-width: 100%; }
+.cloture-plat { min-width: 0; overflow-wrap: anywhere; padding: 8px 0; }
+.cloture-geste { margin-top: 8px; }

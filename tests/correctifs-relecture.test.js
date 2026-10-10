@@ -44,7 +44,7 @@ test('mémoire : une référence maison (grammage) mémorisée en menu 2 est rep
   modifierComposant(e, r2.id, { role: 'garniture' }, h(5));
   modifierComposant(e, r1.id, { role: 'garniture' }, h(5));
   assert.equal(grammageEffectif(e, e.composants[r2.id]).valeur, 111, 'repris par grammageEffectif en menu 2');
-  assert.notEqual(grammageEffectif(e, e.composants[r1.id])?.valeur, 111, 'pas en menu 1');
+  assert.equal(grammageEffectif(e, e.composants[r1.id])?.valeur, 111, 'v114 : la fiche retenue du nom (sans menu, même rôle) vaut aussi en menu 1 ; la mémoire nom|menu reste par menu (reprendreMemoire ci-dessous)');
   assert.ok(reprendreMemoire(e, r2.id, h(6)).champs.includes('grammage'));
   assert.deepEqual(reprendreMemoire(e, r1.id, h(7)), { applique: false, champs: [] });
 });

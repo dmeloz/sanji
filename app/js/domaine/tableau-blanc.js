@@ -9,6 +9,7 @@ import { decisionsDe } from './decisions.js';
 import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, libelleJour, lundiDe } from './dates.js';
 import { jourOuVide, normaliser } from './etat.js';
 import { avancesPossibles, cibleProduction, etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
+import { rappelCloture } from './plats-retenus.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
 import { besoinsProduits, echeanceCommande, suiviProduit } from './produits.js';
 import { cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes } from './savoir.js';
@@ -83,7 +84,7 @@ function morceauxDuMenu(etat, date, menu, intitule) {
   for (const c of Object.values(etat.composants ?? {})) {
     if (c.date === date && c.menu === menu) parNom.set(normaliser(c.nom), c);
   }
-  return proposerComposants(intitule, menu, {}, undefined, etat.mots).map((p) => {
+  return proposerComposants(intitule, menu, {}, undefined, etat.mots, { noms: etat.noms, fiches: etat.fiches_retenues }).map((p) => {
     const composant = parNom.get(normaliser(p.nom)) ?? null;
     return { texte: p.nom, auPoste: Boolean(composant?.attribue), composantId: composant?.id ?? null, implicite: Boolean(p.implicite) };
   });
@@ -714,6 +715,7 @@ export function aujourdhuiDe(etat, aujourd, heure = null) {
     sauvegarde: rappelSauvegarde(etat, aujourd),
     semaineSansMenu: semaineSansMenu(etat, lundi),
     // Décision du 2026-10-07 : le vendredi (et le week-end, jusqu'à l'import), la semaine suivante sans menu est rappelée.
+    rappelCloture: rappelCloture(etat, aujourd, heure),
     rappelVendredi: jourSemaine(aujourd) >= 5 && semaineSansMenu(etat, ajouterJours(lundi, 7)) ? { lundi: ajouterJours(lundi, 7) } : null,
   };
 }
