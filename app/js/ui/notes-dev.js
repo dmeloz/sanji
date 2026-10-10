@@ -1,9 +1,10 @@
 // Notes de test : stockage local à l'appareil (HORS de l'état et de la sauvegarde), pastille « Dev » et feuille de saisie.
 // Rien n'est envoyé : les notes ne partent qu'avec le fichier de diagnostic que la propriétaire partage.
 
-import { CATEGORIES, MAX_GESTES, MAX_NOTE, TYPES, TYPE_PAR_DEFAUT, gesteTexte, validerNote } from '../domaine/notes-dev.js';
+import { CATEGORIES, ETATS, MAX_GESTES, MAX_NOTE, TYPES, TYPE_PAR_DEFAUT, etatNote, gesteTexte, validerNote } from '../domaine/notes-dev.js';
 import { VERSION_APP } from '../version.js';
 import { h, parId, svg } from './dom.js';
+import { lireRepere } from './dernier-envoi.js';
 import { lireEvenements } from './journal-diagnostic.js';
 import { afficherMessage } from './messages.js';
 import { ouvrirCentreDev } from './centre-dev.js';
@@ -26,34 +27,50 @@ const recentes = (liste) => {
   return liste.filter((n) => n && typeof n === 'object' && typeof n.id === 'string' && Date.parse(n.h) >= limite);
 };
 
-/** Les notes de moins de 60 jours, la plus récente en tête. */
+// Une note `ouverte` d'avant la v113 se lit nouvelle ou transmise selon le repère d'envoi : aucune note perdue.
+const normalisees = (liste) => {
+  const envoyees = new Set(lireRepere()?.notesEnvoyees ?? []);
+  return recentes(liste).map((n) => (ETATS.includes(n.etat) ? n : { ...n, etat: etatNote(n, envoyees) }));
+};
+
+/** Les notes de moins de 60 jours, la plus récente en tête, chacune avec un état nouvelle / transmise / reglee. */
 export function lireNotes() {
   const s = stockage();
-  if (!s || repli) return recentes(memoire);
+  if (!s || repli) return normalisees(memoire);
   try {
     const liste = JSON.parse(s.getItem(CLE) ?? '[]');
-    return Array.isArray(liste) ? recentes(liste) : [];
-  } catch { return recentes(memoire); }
+    return Array.isArray(liste) ? normalisees(liste) : [];
+  } catch { return normalisees(memoire); }
 }
+
+/** Les notes d'un état donné (compteurs, groupes de la feuille). */
+export const notesParEtat = (etat) => lireNotes().filter((n) => n.etat === etat);
 
 function ecrire(liste) {
   memoire = liste;
   try { stockage()?.setItem(CLE, JSON.stringify(liste)); } catch { repli = true; }
 }
 
-/** Ajoute une note ouverte en tête (100 au plus). `saisie` : { type, texte, ecran, gestes }. Lève une Error si la saisie est refusée. */
+/** Ajoute une note nouvelle en tête (100 au plus). `saisie` : { type, texte, ecran, gestes }. Lève une Error si la saisie est refusée. */
 export function ajouterNote({ type, texte, ecran = '', gestes = [] }) {
   const v = validerNote({ type, texte });
   if (!v.ok) throw new Error(v.erreur);
   const note = { id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, type: v.type, categorie: v.categorie, texte: v.texte,
-    ecran: String(ecran).slice(0, 80), version: VERSION_APP, h: new Date().toISOString(), etat: 'ouverte', gestes: gestes.slice(-MAX_GESTES) };
+    ecran: String(ecran).slice(0, 80), version: VERSION_APP, h: new Date().toISOString(), etat: 'nouvelle', gestes: gestes.slice(-MAX_GESTES) };
   ecrire([note, ...lireNotes()].slice(0, MAX_NOTES));
   return note;
 }
 
-/** Réglée ↔ ouverte. */
-export function basculerNote(id) {
-  ecrire(lireNotes().map((n) => (n.id === id ? { ...n, etat: n.etat === 'reglee' ? 'ouverte' : 'reglee' } : n)));
+/** Change l'état d'une note (`reglee`, ou `nouvelle` pour la rouvrir : elle repart dans le prochain fichier). */
+export function definirEtatNote(id, etat) {
+  if (!ETATS.includes(etat)) throw new Error(`État de note inconnu : ${etat}`);
+  ecrire(lireNotes().map((n) => (n.id === id ? { ...n, etat } : n)));
+}
+
+/** Après un partage réussi : les notes nouvelles DU LOT envoyé (ids) passent à `transmise` ; celles créées pendant le partage restent nouvelles. */
+export function marquerTransmises(ids) {
+  const lot = new Set(ids);
+  ecrire(lireNotes().map((n) => (lot.has(n.id) && n.etat === 'nouvelle' ? { ...n, etat: 'transmise' } : n)));
 }
 
 export function supprimerNote(id) {

@@ -8,7 +8,7 @@ import { h } from './dom.js';
 import { bouton, pastille } from './elements.js';
 import { pluriel } from './format.js';
 import { effacerJournal, lireEvenements, photosGardees } from './journal-diagnostic.js';
-import { lireNotes } from './notes-dev.js';
+import { lireNotes, marquerTransmises } from './notes-dev.js';
 import { lireRetours } from './retours-essai.js';
 import { lireRepere, marquerEnvoi } from './dernier-envoi.js';
 import { confirmer } from './panneau.js';
@@ -71,7 +71,11 @@ async function partager(etat) {
   const photos = gardees.map((p, i) => new File([p.blob], `photo-${p.type}-${i + 1}.jpg`, { type: 'image/jpeg' }));
   const peut = (fichiers) => typeof nav?.share === 'function' && nav.canShare?.({ files: fichiers });
   // Les notes marquées sont celles du fichier (pas celles créées pendant la feuille de partage).
-  const marquer = (photosJointes) => marquerEnvoi({ h: date, notes: lot.nv.notes.map((n) => n.id), photos: photosJointes.map(clePhoto) });
+  const marquer = (photosJointes) => {
+    const ids = lot.nv.notes.map((n) => n.id);
+    marquerEnvoi({ h: date, notes: ids, photos: photosJointes.map(clePhoto) });
+    marquerTransmises(ids);
+  };
   try {
     if (photos.length > 0) {
       const avecPhotos = new File([texte(etat, lot, date, photos.length, undefined, gardees.length)], nomFichier(), { type: 'text/plain' });
@@ -96,7 +100,7 @@ const prochainEnvoi = () => {
  * Le bouton d'envoi (« Partager le fichier », seul), la ligne « Prochain envoi » et une zone d'état DANS la feuille :
  * le message global est caché derrière une feuille ouverte, donc « Envoyé ✓ » s'affiche ici (effacé après quelques secondes).
  */
-export function boutonsEnvoi(etat) {
+export function boutonsEnvoi(etat, surEnvoi = () => {}) {
   const statut = h('div', { role: 'status', classe: 'envoi-statut' });
   const info = h('p', { classe: 'aide' }, prochainEnvoi());
   let minuteur = null;
@@ -106,6 +110,7 @@ export function boutonsEnvoi(etat) {
     const issue = await partager(etat);
     if (!issue) return;
     info.textContent = prochainEnvoi();
+    surEnvoi(); // les notes envoyées changent de groupe
     statut.replaceChildren(pastille(issue === 'envoye' ? 'Envoyé ✓' : 'Fichier téléchargé', 'vert'));
     minuteur = setTimeout(effacer, DUREE_CONFIRMATION_MS);
   };

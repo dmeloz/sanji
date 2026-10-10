@@ -116,21 +116,30 @@ test('texteDiagnostic avec repère : 60 lignes au plus, navigations consécutive
   assert.equal(regroupe.split('\n').filter((l) => l.includes('navigation')).length, 1);
 });
 
-test('nouveautes et notesPourEnvoi : notes déjà transmises sur une ligne tronquée à 60, nouvelles en détail, photos et retours filtrés', () => {
+test('nouveautes et notesPourEnvoi : nouvelles en détail, transmises jamais répétées (compte seul), réglées comptées, photos et retours filtrés', () => {
   const notes = [
     { id: 'n1', type: 'bug', categorie: 'bug_gene', texte: `ANCIENNE ${'x'.repeat(100)}`, ecran: 'A', etat: 'ouverte', h: h(1) },
     { id: 'n0', type: 'bug', categorie: 'bug_gene', texte: 'REGLEE_ANCIENNE', ecran: 'A', etat: 'reglee', h: h(1) },
-    { id: 'n2', type: 'idee', categorie: 'idee_remarque', texte: 'NOUVELLE_NOTE', ecran: 'B', etat: 'ouverte', h: h(15) },
+    { id: 'n3', type: 'bug', categorie: 'bug_gene', texte: 'TRANSMISE_EXPLICITE', ecran: 'A', etat: 'transmise', h: h(1) },
+    { id: 'n2', type: 'idee', categorie: 'idee_remarque', texte: 'NOUVELLE_NOTE', ecran: 'B', etat: 'nouvelle', h: h(15) },
+    { id: 'n4', type: 'idee', categorie: 'idee_remarque', texte: 'OUVERTE_NON_ENVOYEE', ecran: 'B', etat: 'ouverte', h: h(16) },
   ];
   const photos = [{ h: 'P1', type: 'feuille' }, { h: 'P2', type: 'fiche' }];
   const retours = [{ h: h(1), type: 'menu' }, { h: h(30), type: 'menu' }];
   const nv = nouveautes({ notes, photos, retours }, { ...REPERE, notesEnvoyees: ['n1', 'n0'] });
-  assert.deepEqual(nv.notes.map((n) => n.id), ['n2']);
+  assert.deepEqual(nv.notes.map((n) => n.id), ['n2', 'n4'], 'une `ouverte` hors repère se lit nouvelle ; une rouverte (nouvelle) repart même si son id est au repère');
+  assert.deepEqual(nv.notesTransmises.map((n) => n.id), ['n1', 'n3']);
+  assert.deepEqual(nv.notesReglees.map((n) => n.id), ['n0']);
   assert.deepEqual(nv.photos.map(clePhoto), ['diag|P2|fiche']);
   assert.equal(nv.retours.length, 1);
   const texte = notesPourEnvoi(nv, { version: '110', date: 'd' });
   assert.match(texte, /NOUVELLE_NOTE/);
-  assert.match(texte, /1 notes déjà transmises, toujours ouvertes :\n {2}- ANCIENNE x+…$/);
-  assert.equal(texte.includes('REGLEE_ANCIENNE'), false);
-  assert.equal(nouveautes({ notes, photos, retours }, null).notes.length, 3, 'premier envoi : tout');
+  assert.match(texte, /^2 notes déjà transmises : non répétées\.$/m);
+  assert.match(texte, /^1 notes réglées\.$/m);
+  assert.equal(/ANCIENNE|TRANSMISE_EXPLICITE|REGLEE_ANCIENNE/.test(texte), false, 'aucun texte d\'une note transmise ou réglée');
+  assert.equal(notesPourEnvoi(nouveautes({ notes: [notes[1]] }, null), {}).includes('réglées'), true);
+  assert.equal(notesPourEnvoi(nouveautes({ notes: [] }, null), {}), '', 'rien : pas de ligne « 0 notes réglées »');
+  assert.equal(nouveautes({ notes, photos, retours }, null).notes.length, 3, 'premier envoi : toutes les notes non transmises ni réglées');
+  const rouverte = nouveautes({ notes: [{ ...notes[0], etat: 'nouvelle' }] }, { ...REPERE, notesEnvoyees: ['n1'] });
+  assert.equal(rouverte.notes.length, 1);
 });
