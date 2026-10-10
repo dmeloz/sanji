@@ -15,6 +15,10 @@ import { libelleAllergene } from './reference.js';
 import { blocReperes } from './reperes-metier.js';
 import { defaireEnUnToucher, dialogCorriger, faireEnUnToucher } from './taches.js';
 import { CATEGORIES_MOT } from '../domaine/mots-retenus.js';
+import { estSauceAConfirmer } from '../domaine/etat.js';
+import { confirmerReprise } from '../domaine/actions-fiches.js';
+import { agir } from '../magasin.js';
+import { blocCorrigerNom } from './corriger-nom.js';
 import { blocEnseigner, suggestionDe } from './enseigner-mot.js';
 import { boutonPrecisionIA, dialogChoisirSauce, dialogModifier, sectionsReglages } from './vue-composant.js';
 
@@ -165,8 +169,18 @@ function blocFait(etat, c) {
 
 /** Étiquette de l'élément : un élément seulement proposé par la lecture dit « proposée · à confirmer » (attention), pas son type. */
 function etiquetteElement(c) {
+  if (c.reprise) return pastille('reprise · à reconfirmer', 'ambre');
   if (suggestionDe(c)) return pastille(`${CATEGORIES_MOT[suggestionDe(c)].toLowerCase()} proposée · à confirmer`, 'ambre');
   return pastille(etiquetteType(c), c.type === 'produit_simple' ? 'gris' : 'vert');
+}
+
+/** Sauce reprise d'un plat retenu : un toucher pour la confirmer, ou on la change. Jamais confirmée en silence. */
+function blocReprise(c) {
+  return h('div', { classe: 'enseigner' },
+    h('p', { classe: 'aide' }, `« ${c.nom} » vient du plat retenu la dernière fois. La sauce change souvent : est-ce encore la bonne ?`),
+    h('div', { classe: 'actions' },
+      bouton('OK', () => agir((e, t) => confirmerReprise(e, c.id, t)), 'court principal'),
+      bouton('Changer la sauce', () => dialogChoisirSauce(c), 'court')));
 }
 
 export function rendre(etat, id) {
@@ -192,6 +206,8 @@ export function rendre(etat, id) {
         c.attribue ? null : pastille('non attribué', 'ambre'))),
     // Un élément à préciser : le geste « Demander à l'IA » se voit tout de suite, sans ouvrir « Plus de réglages ».
     blocEnseigner(c, () => dialogChoisirSauce(c)),
+    c.reprise ? blocReprise(c) : null,
+    estSauceAConfirmer(c) ? null : blocCorrigerNom(c),
     boutonPrecisionIA(c) ? h('div', { classe: 'fiche-actions' }, boutonPrecisionIA(c)) : null,
     sectionQuantite(etat, c, calc),
     ligneBrut(calc),

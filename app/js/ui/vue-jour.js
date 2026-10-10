@@ -147,7 +147,7 @@ function formulairePortion(etat, l, nom, api) {
     const r = agir((e, t) => saisirPortionInconnue(e, l.composantId, valeur, t), { afficher: false });
     if (!r.ok) { api.erreur(r.erreur); return; }
     api.fermer();
-    afficherMessage(`${nom} : ${valeur} ${unite} par portion retenu${r.valeur.portee === 'standard' ? ' pour toutes les semaines' : ' pour ce plat'}.`, 'ok');
+    afficherMessage(`${nom} : ${valeur} ${unite} par portion retenu${' pour toutes les semaines'}.`, 'ok');
   };
   return h('form', { classe: 'prod-saisie prod-saisie-feuille', novalidate: true, onSubmit: valider },
     champ, h('span', { classe: 'prod-saisie-unite' }, `${unite} par portion`), bouton('OK', valider, 'court', { type: 'submit', 'aria-label': `Valider la portion de ${nom}` }));

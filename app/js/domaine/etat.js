@@ -2,6 +2,7 @@
 // Aucune lecture de l'heure : l'horodatage `h` (ISO) est toujours un argument .
 
 import { controleAjustement } from './ajustements.js';
+import { fichesValides, nomsValides, platsValides } from './fiches-retenues.js';
 import { categorieMotValide, motsValides } from './mots-retenus.js';
 import { ETAT_POIDS } from './statuts.js';
 
@@ -83,6 +84,12 @@ export function etatInitial() {
     memoire: {},
     // Mots retenus (clé = mot normalisé) : { categorie: 'forme_pates'|'sauce'|'produit'|'garniture', h }, valables pour tous les plats.
     mots: {},
+    // Orthographes retenues (clé = variante normalisée) : { nom: 'nom correct', h }. Voir fiches-retenues.js.
+    noms: {},
+    // Fiches retenues par nom correct normalisé, indépendantes du menu : { categorie?, role?, attribue?, grammage?, h }.
+    fiches_retenues: {},
+    // Plats complets retenus (clé = intitulé normalisé) : { elements: [{ nom, categorie, role?, attribue, grammage? }], h }. Voir plats-retenus.js.
+    plats_retenus: {},
     standards: {},
     // Valeurs changées par la propriétaire sur les standards de base (clé « usage|sujet »).
     ajustements: {},
@@ -360,6 +367,19 @@ export function importer(texte, aujourdhui = null) {
   if (source.mots !== undefined) {
     if (!estObjet(source.mots)) throw new Error('Export corrompu : « mots » est invalide.');
     etat.mots = motsValides(source.mots);
+  }
+  // Orthographes et fiches retenues : entrées invalides écartées, plafond de 500 (voir fiches-retenues.js).
+  if (source.noms !== undefined) {
+    if (!estObjet(source.noms)) throw new Error('Export corrompu : « noms » est invalide.');
+    etat.noms = nomsValides(source.noms);
+  }
+  if (source.fiches_retenues !== undefined) {
+    if (!estObjet(source.fiches_retenues)) throw new Error('Export corrompu : « fiches_retenues » est invalide.');
+    etat.fiches_retenues = fichesValides(source.fiches_retenues);
+  }
+  if (source.plats_retenus !== undefined) {
+    if (!estObjet(source.plats_retenus)) throw new Error('Export corrompu : « plats_retenus » est invalide.');
+    etat.plats_retenus = platsValides(source.plats_retenus);
   }
   if (source.ajustements !== undefined) {
     // { « usage|sujet »: {valeur, unite, le, avant:{valeur, origine}} } : écartée si sans valeur finie ou sans unité, si

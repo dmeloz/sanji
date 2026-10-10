@@ -22,7 +22,7 @@ const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 let bilan = null;
 /** Ce que chaque « OK » sans standard a retenu (la ligne disparaît une fois validée) ; propre à une semaine. */
 let retenus = { lundi: null, textes: [] };
-const TEXTE_PORTEE = { standard: 'retenu pour toutes les semaines', plat: 'pour ce plat seulement' };
+const TEXTE_PORTEE = { standard: 'retenu pour toutes les semaines', plat: 'retenu pour toutes les semaines' };
 
 const phraseBilan = ({ validees, restantInconnu }) => {
   const debut = validees === 0 ? 'Aucune valeur à valider avec les standards' : `${pluriel(validees, 'valeur validée', 'valeurs validées')} avec les standards`;

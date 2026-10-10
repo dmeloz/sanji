@@ -30,20 +30,32 @@ test('la poignée et le titre portent les écouteurs, le corps défilant non', (
   d.close();
 });
 
-test('un long glissement depuis la poignée ferme la feuille (close), un glissement court ne la ferme pas', async () => {
-  const d = panneau({ titre: 'Essai', corps: [] });
-  let fermee = 0;
-  d.addEventListener('close', () => { fermee += 1; });
-  await poignee(d).declencher('touchstart', doigt(100));
-  await poignee(d).declencher('touchmove', doigt(130));
-  await poignee(d).declencher('touchend', doigt(130));
-  assert.equal(d.open, true);
-  assert.equal(fermee, 0);
-  await titre(d).declencher('touchstart', doigt(100));
-  await titre(d).declencher('touchend', doigt(220));
-  assert.equal(d.open, false);
-  assert.equal(fermee, 1);
-  assert.equal(panneauxOuverts(dom.corps).includes(d), false);
+test('un long glissement depuis la poignée ferme la feuille (close), un glissement court et lent ne la ferme pas', async () => {
+  // Horloge maîtrisée : la décision dépend de la durée du geste (vif ou lent), elle ne doit pas dépendre de la vitesse de la machine.
+  const vraie = Date.now;
+  let maintenant = 1_000_000;
+  Date.now = () => maintenant;
+  try {
+    const d = panneau({ titre: 'Essai', corps: [] });
+    let fermee = 0;
+    d.addEventListener('close', () => { fermee += 1; });
+    await poignee(d).declencher('touchstart', doigt(100));
+    await poignee(d).declencher('touchmove', doigt(130));
+    maintenant += 1000; // 30 px en 1 s : court et lent
+    await poignee(d).declencher('touchend', doigt(130));
+    assert.equal(d.open, true);
+    assert.equal(fermee, 0);
+    await titre(d).declencher('touchstart', doigt(100));
+    maintenant += 300; // 120 px en 0,3 s : long
+    await titre(d).declencher('touchend', doigt(220));
+    assert.equal(d.open, false);
+    // L'événement « close » est signalé en différé par le faux DOM (règle du projet) : on l'attend, sans durée fixe.
+    for (let i = 0; i < 50 && fermee === 0; i += 1) await new Promise((r) => setTimeout(r, 10));
+    assert.equal(fermee, 1);
+    assert.equal(panneauxOuverts(dom.corps).includes(d), false);
+  } finally {
+    Date.now = vraie;
+  }
 });
 
 test('un geste annulé (touchcancel) ne ferme pas', async () => {

@@ -138,7 +138,7 @@ test('semaine sans menu : phrase claire, fiche de production quand même accessi
   assert.ok(liens(n).includes(`#/production/${S.lundi}`));
 });
 
-test('« OK » sans standard dit ce qui est retenu : pour toutes les semaines (famille connue) ou pour ce plat seulement', () => {
+test('« OK » sans standard dit ce qui est retenu : pour toutes les semaines, que la famille soit connue (standard maison) ou non (fiche retenue du nom)', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'polenta', h());
   prevision(e, S.lundi, 1, 20, h());
@@ -152,6 +152,6 @@ test('« OK » sans standard dit ce qui est retenu : pour toutes les semaines (f
   }
   const t = page().textContent;
   assert.match(t, /polenta : retenu pour toutes les semaines\./);
-  assert.match(t, /PRODUIT_SEC_TEST : pour ce plat seulement\./);
+  assert.match(t, /PRODUIT_SEC_TEST : retenu pour toutes les semaines\./);
   assert.equal(magasin.etat().standards.polenta.plat_principal.valeur, 150);
 });

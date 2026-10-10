@@ -16,6 +16,7 @@ import { h, svg } from './dom.js';
 import { lien, pastille } from './elements.js';
 import { ouvrirCouvertsMidi, ouvrirVentesMidi } from './feuille-couverts.js';
 import { ouvrirDecisions } from './feuille-decisions.js';
+import { ouvrirCloture } from './feuille-cloture.js';
 import { ouvrirProposition } from './feuille-validation.js';
 import { problemeHorsLigne } from './horsligne.js';
 import { phraseConservation, pluriel, qteNoeuds, quantite } from './format.js';
@@ -209,6 +210,10 @@ function carteFiche(d, aujourd, etat) {
 function sectionRappels(d, aFaire) {
   const lignes = [];
   if (aFaire > 0) lignes.push(lien(`#/preparer/${d.lundi}`, `Préparer la semaine · ${aFaire} à faire`, 'au-ligne au-ligne-lien'));
+  if (d.rappelCloture) {
+    lignes.push(h('button', { type: 'button', classe: 'au-ligne au-ligne-lien', onClick: () => ouvrirCloture(d.rappelCloture.lundi) },
+      `Retenir les plats de la semaine · ${d.rappelCloture.aRetenir} à retenir`));
+  }
   if (d.rappelVendredi) lignes.push(lien(`#/import/${d.rappelVendredi.lundi}`, 'Menus de la semaine prochaine · à importer', 'au-ligne au-ligne-lien'));
   if (d.semaineSansMenu) lignes.push(lien(`#/import/${d.lundi}`, 'Saisir les menus de la semaine', 'au-ligne au-ligne-lien'));
   for (const l of d.production.chiffrage) lignes.push(lien(l.lien, l.detail ? `${l.texte} : ${l.detail}` : l.texte, 'au-ligne au-ligne-lien'));
