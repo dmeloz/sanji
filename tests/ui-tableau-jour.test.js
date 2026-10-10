@@ -79,7 +79,7 @@ test('Tableau : menus = aujourd\'hui et 2 jours suivants ; ligne entière vers l
   const visibles = zone.tous((x) => x.className.split(' ').includes('bord-jour')).filter((li) => !li.parent.parent.className.includes('bord-reste'));
   assert.equal(visibles.length, 3, 'mardi, mercredi, jeudi');
   const entetes = classes(zone, 'bord-jour-lien').map((a) => a.attributs.href);
-  assert.deepEqual(entetes.slice(0, 3), [`#/semaine/${S.mardi}`, `#/semaine/${S.mercredi}`, `#/semaine/${S.jeudi}`]);
+  assert.deepEqual(entetes.slice(0, 3), [`#/production/${S.mardi}`, `#/production/${S.mercredi}`, `#/production/${S.jeudi}`]);
   assert.match(classes(zone, 'bord-jour-lien')[0].textContent, /Mar 6 · 64 couverts/);
   // Le reste de la semaine : une touche, rien n'est perdu.
   const reste = classes(zone, 'bord-reste')[0];
@@ -106,7 +106,7 @@ test('Tableau : fiches de fonction = horaire, numéro, couverts, mode, allergies
   const noeud = tableau(S.mardi, semaine());
   const zone = classes(noeud, 'bord-fiches')[0];
   const ligne = classes(zone, 'bord-fiche')[0];
-  assert.equal(ligne.attributs.href, `#/semaine/${S.mardi}`);
+  assert.equal(ligne.attributs.href, `#/production/${S.mardi}`);
   assert.match(ligne.textContent, /12:00 · fiche FICHE_TEST_1 · 24 couverts/);
   assert.match(ligne.textContent, /Menu fixe/);
   assert.match(ligne.textContent, /allergies/);
@@ -170,7 +170,7 @@ function lundiTravail() {
   return { e, m1, m2 };
 }
 
-test('Jour : en-tête « Production » + date, flèches ‹ ›, plus de barre de jours ni de jauge ; lien vers les prévisions', () => {
+test('Jour : en-tête « Production » + date, flèches ‹ ›, plus de barre de jours ni de jauge ; ligne « Services du jour »', () => {
   const { e } = lundiTravail();
   for (const affiche of [S.lundi, S.jeudi]) {
     const noeud = jour(S.lundi, e, affiche);
@@ -178,7 +178,8 @@ test('Jour : en-tête « Production » + date, flèches ‹ ›, plus de barre d
     assert.equal(classes(noeud, 'prod-jauge').length, 0);
     assert.match(classes(noeud, 'jour-tete')[0].textContent, affiche === S.lundi ? /^Production\s*Lundi 5 octobre/ : /^Production\s*Jeudi 8 octobre/);
     assert.equal(classes(noeud, 'prod-fleche').length, 2);
-    assert.ok(hrefs(classes(noeud, 'prod-pied')[0]).includes(`#/semaine/${affiche}`), 'Prévisions →');
+    assert.equal(classes(noeud, 'prod-services').length, 1, 'Services du jour');
+    assert.ok(!hrefs(classes(noeud, 'prod-pied')[0]).some((x) => x.startsWith('#/semaine/')), 'plus de lien vers la page de jour');
   }
   const menus = classes(jour(S.lundi, e), 'mj-ligne');
   assert.ok(menus.length === 2 || menus.length === 0, 'les menus tiennent en une ligne chacun (M1 · …, M2 · …) quand ils sont saisis');

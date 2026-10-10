@@ -76,8 +76,8 @@ function jourDuBord(jour) {
   const saisis = jour.menus.filter((m) => m.saisi);
   const couverts = jour.couvertsTotal !== null ? ` · ${pluriel(jour.couvertsTotal, 'couvert', 'couverts')}` : '';
   return h('li', { classe: `bord-jour${jour.estAujourdhui ? ' bord-aujourdhui' : ''}` },
-    h('a', { href: `#/semaine/${jour.date}`, classe: 'bord-jour-lien feutre',
-      'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''} : ouvrir le détail du jour` },
+    h('a', { href: `#/production/${jour.date}`, classe: 'bord-jour-lien feutre',
+      'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''} : ouvrir la production du jour` },
     `${etiquetteJour(jour.date)}${couverts} `,
     jour.estAujourdhui ? h('span', { classe: 'bord-badge' }, h('span', { 'aria-hidden': 'true' }, '● '), "aujourd'hui") : null),
     saisis.length === 0 ? h('p', { classe: 'tb-discret' }, 'Menus non saisis') : saisis.map((m) => ligneMenu(jour, m)));
@@ -107,7 +107,7 @@ function ficheDuBord(fiche, aujourd) {
   const entete = [fiche.date !== aujourd ? etiquetteJour(fiche.date) : null, fiche.horaire || null,
     fiche.numero ? `fiche ${fiche.numero}` : null, pluriel(Number(fiche.couverts) || 0, 'couvert', 'couverts')].filter(Boolean).join(' · ');
   return h('li', { classe: 'bord-fiche-ligne' },
-    h('a', { href: fiche.lien, classe: 'bord-fiche', 'aria-label': `Fiche de fonction, ${libelleJour(fiche.date)} : ouvrir le détail du jour` },
+    h('a', { href: fiche.lien, classe: 'bord-fiche', 'aria-label': `Fiche de fonction, ${libelleJour(fiche.date)} : ouvrir la production du jour` },
       h('span', { classe: 'bord-fiche-tete feutre' }, entete),
       h('span', { classe: 'bord-fiche-suite' }, fiche.modeTexte,
         fiche.aAllergies ? [' · ', h('span', { classe: 'tb-allergie' }, caseSymbole('a_decider'), 'allergies')] : null)));

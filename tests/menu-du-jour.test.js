@@ -35,16 +35,16 @@ function avecMenus() {
   return e;
 }
 
-test('Production : le menu du jour suit le jour affiché (Aujourd\'hui puis Demain), avec lien vers la Semaine', () => {
+test('Production : le menu du jour suit le jour affiché (Aujourd\'hui puis Demain), sans lien (la ligne Services du jour le remplace)', () => {
   const e = avecMenus();
   const auj = classes(page(e, S.lundi), 'mj-bloc')[0];
   assert.match(auj.textContent, /M1 · INTITULE_M1_LUNDI_TEST/);
   assert.doesNotMatch(auj.textContent, /MARDI/);
-  assert.equal(auj.attributs.href, `#/semaine/${S.lundi}`);
+  assert.equal(auj.attributs.href, undefined);
   const dem = classes(page(e, S.mardi), 'mj-bloc')[0];
   assert.match(dem.textContent, /M1 · INTITULE_M1_MARDI_TEST/);
   assert.match(dem.textContent, /M2 · INTITULE_M2_MARDI_TEST/);
-  assert.equal(dem.attributs.href, `#/semaine/${S.mardi}`);
+  assert.equal(dem.attributs.href, undefined);
 });
 
 test('Production : un menu non saisi est dit « non saisi »', () => {

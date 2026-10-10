@@ -395,7 +395,7 @@ function fichesDuBord(etat, dates, lundi) {
     .map((f) => ({
       id: f.id, date: f.date, numero: f.numero, service: f.service, horaire: f.horaire, couverts: f.couverts,
       mode: f.mode, modeTexte: MODE_FICHE[f.mode] ?? '', aAllergies: String(f.allergies ?? '').trim() !== '',
-      lien: `#/semaine/${f.date}`, semaine: lundi,
+      lien: `#/production/${f.date}`, semaine: lundi,
     }));
 }
 
@@ -420,18 +420,18 @@ function aConfirmerDuBord(etat, dates, aujourdhui) {
   const compte = (x) => x.reduce((n, y) => n + y.liste.length, 0);
   if (repartitions.length > 0) {
     const n = compte(repartitions);
-    categories.push({ genre: 'repartition', n, lien: `#/semaine/${repartitions[0].date}`,
+    categories.push({ genre: 'repartition', n, lien: `#/production/${repartitions[0].date}`,
       texte: n === 1 ? '1 répartition provisoire à confirmer' : `${n} répartitions provisoires à confirmer` });
   }
   if (autres.length > 0) {
     const n = compte(autres);
-    categories.push({ genre: 'points', n, lien: `#/semaine/${autres[0].date}`,
+    categories.push({ genre: 'points', n, lien: `#/production/${autres[0].date}`,
       texte: n === 1 ? '1 point à confirmer' : `${n} points à confirmer`, detail: autres[0].liste[0].texte });
   }
   for (const point of pointsGlobaux(etat)) categories.push({ genre: 'global', n: 1, lien: '#/reglages', texte: point.texte });
   if (conservations.length > 0) {
     const n = compte(conservations);
-    categories.push({ genre: 'conservation', n, lien: `#/semaine/${conservations[0].date}`,
+    categories.push({ genre: 'conservation', n, lien: `#/production/${conservations[0].date}`,
       texte: n === 1 ? '1 préparation : conservation à confirmer' : `${n} préparations : conservation à confirmer` });
   }
   // Une correction répétée dans le même sens : une ligne par proposition d'apprentissage, après les vraies décisions.
@@ -579,7 +579,7 @@ function prochaineFiche(etat, aujourd) {
   return {
     id: f.id, date: f.date, numero: f.numero, service: f.service, horaire: f.horaire, couverts: Number(f.couverts) || 0,
     mode: f.mode, modeTexte: MODE_FICHE[f.mode] ?? '', certitude: certitudeFiche(f),
-    allergies: String(f.allergies ?? '').trim(), lien: `#/semaine/${f.date}`,
+    allergies: String(f.allergies ?? '').trim(), lien: `#/production/${f.date}`,
   };
 }
 

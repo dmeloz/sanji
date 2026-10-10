@@ -1,4 +1,4 @@
-// Menu du jour (Production, Articles) : les intitulés saisis du jour, deux lignes compactes, lien vers la Semaine.
+// Menu du jour (Production, Articles) : les intitulés saisis du jour, deux lignes compactes, sans lien (la ligne « Services du jour » de Production ouvre la feuille).
 // Lecture seule : rien n'est calculé ici, les intitulés viennent de l'état.
 
 import { aMenuDuJour, estOuvert, lundiDe } from '../domaine/dates.js';
@@ -17,7 +17,7 @@ export function blocMenuDuJour(etat, date) {
     if (!estOuvert(date)) return null;
     return h('p', { classe: 'mj-vide' }, 'Menu non saisi · ', lien(`#/import/${lundiDe(date)}`, 'Importer ›', 'mj-lien-import'));
   }
-  return h('a', { href: `#/semaine/${date}`, classe: 'mj-bloc', 'aria-label': 'Menu du jour, voir la semaine' },
+  return h('div', { classe: 'mj-bloc', role: 'group', 'aria-label': 'Menu du jour' },
     intitules.map((texte, i) => h('span', { classe: 'mj-ligne' },
       h('span', { classe: 'mj-etiquette' }, `M${MENUS[i]} · `),
       texte ? h('span', { classe: 'mj-intitule' }, texte) : h('span', { classe: 'mj-nonsaisi' }, 'non saisi'))));

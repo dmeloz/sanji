@@ -81,7 +81,7 @@ test('analyserHash : routes, défauts et dates invalides', () => {
   assert.deepEqual(analyserHash('#/production/2026-10-10', j), { vue: 'production', param: '2026-10-10' });
   assert.deepEqual(analyserHash('#/production/2026-13-45', j), { vue: 'production', param: j }, 'date invalide : aujourd\'hui');
   assert.deepEqual(analyserHash('#/semaine', j), { vue: 'semaine', param: null }, 'sans date : tableau de la semaine');
-  assert.deepEqual(analyserHash('#/semaine/2026-10-14', j), { vue: 'semaine', param: '2026-10-14' }, 'avec date : détail du jour');
+  assert.deepEqual(analyserHash('#/semaine/2026-10-14', j), { vue: 'production', param: '2026-10-14' }, 'avec date : Production de ce jour (v116)');
   assert.deepEqual(analyserHash('#/semaine/pas-une-date', j), { vue: 'semaine', param: null });
   assert.deepEqual(analyserHash('#/semaine/2026-10-14/tableau', j), { vue: 'semaine', param: '2026-10-12', sous: 'tableau' }, 'ramenée au lundi');
   // Articles (décision du 2026-10-07) : aucun paramètre ; les anciennes adresses #/stock[/…] y mènent (Restes, DLC et Achats sont masqués).
@@ -110,8 +110,8 @@ test('analyserHash : les anciennes adresses sont redirigées sans casse', () => 
   assert.deepEqual(analyserHash('#/tableau/2026-10-14', j), { vue: 'semaine', param: '2026-10-12', sous: 'tableau' });
   assert.deepEqual(analyserHash('#/jour', j), { vue: 'production', param: j });
   assert.deepEqual(analyserHash('#/jour/2026-10-10', j), { vue: 'production', param: '2026-10-10' });
-  assert.deepEqual(analyserHash('#/detail/2026-10-10', j), { vue: 'semaine', param: '2026-10-10' });
-  assert.deepEqual(analyserHash('#/detail/2026-13-45', j), { vue: 'semaine', param: j });
+  assert.deepEqual(analyserHash('#/detail/2026-10-10', j), { vue: 'production', param: '2026-10-10' });
+  assert.deepEqual(analyserHash('#/detail/2026-13-45', j), { vue: 'production', param: j });
   assert.deepEqual(analyserHash('#/produits/2026-10-08', j), { vue: 'articles', param: null });
   assert.deepEqual(analyserHash('#/produits', j), { vue: 'articles', param: null });
   assert.deepEqual(analyserHash('#/composant/comp_1abc', j), { vue: 'fiche', param: 'comp_1abc' });

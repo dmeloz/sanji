@@ -61,7 +61,7 @@ function colonneJour(jour, lundi) {
       h('span', { classe: 'tdb-etiquette' }, 'Importer'));
   }
   const dits = jour.menus.map((m) => `menu ${m.menu} : ${m.intitule || 'non saisi'}`).join(', ');
-  return h('a', { href: `#/semaine/${jour.date}`, classe: `tdb-jour${jour.estAujourdhui ? ' tdb-jour-auj' : ''}`,
+  return h('a', { href: `#/production/${jour.date}`, classe: `tdb-jour${jour.estAujourdhui ? ' tdb-jour-auj' : ''}`,
     'aria-label': `${majuscule(nom)}${jour.estAujourdhui ? ", aujourd'hui" : ''}, ${dits}` },
   h('span', { classe: 'tdb-j' }, `${NOM_COURT(jour.date)}${jour.estAujourdhui ? ' · auj.' : ''}`),
   jour.menus.map((m) => h('span', { classe: 'tdb-m' }, h('b', null, `M${m.menu}`),

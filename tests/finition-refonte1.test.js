@@ -14,14 +14,14 @@ let magasin;
 let format;
 let aujourdhuiVue;
 let production;
-let semaine;
+let services;
 before(async () => {
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   format = await import('../app/js/ui/format.js');
   aujourdhuiVue = await import('../app/js/ui/vue-aujourdhui.js');
   production = await import('../app/js/ui/vue-production.js');
-  semaine = await import('../app/js/ui/vue-semaine.js');
+  services = await import('../app/js/ui/feuille-services.js');
 });
 after(() => dom.restaurer());
 
@@ -63,15 +63,17 @@ test('quantité : un mot (pièces, portions, personnes) ou un texte non numériq
   assert.match(css, /\.qte-mot \{[^}]*font-family: var\(--police\)/);
 });
 
-test('Semaine : « personnes » n\'est pas dans la police de quantité, seul le nombre l\'est', () => {
+test('Services du jour : « personnes » n\'est pas dans la police de quantité, seul le nombre l\'est', () => {
   const e = etatVide();
   definirMenu(e, S.lundiSuivant, 1, 'Tagliatelles', h());
   creerFiche(e, { date: S.lundiSuivant, service: 'midi', numero: 'F7', couverts: 12, horaire: '12:00', mode: 'menu_fixe', menuFixe: 1, allergies: '' }, h());
   magasin.remplacer(e);
-  const page = aDate(S.lundiSuivant, () => semaine.rendre(magasin.etat(), S.lundiSuivant));
+  services.ouvrirServices(S.lundiSuivant);
+  const page = dom.corps.tous((x) => x.balise === 'dialog' && x.open).at(-1);
   assert.ok(classes(page, 'sem-qte').some((x) => x.textContent === '12'), 'le nombre seul en police de quantité');
   assert.match(page.textContent, /12 personnes/);
   assert.ok(!classes(page, 'sem-qte').some((x) => /personne/.test(x.textContent)));
+  page.close();
 });
 
 test('Aujourd\'hui, dimanche : « Fermé aujourd\'hui » une seule fois, avec la prochaine journée ouverte', () => {

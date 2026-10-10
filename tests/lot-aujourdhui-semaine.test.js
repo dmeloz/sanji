@@ -9,12 +9,13 @@ import { creerFiche, definirMenu, definirPrevision } from '../app/js/domaine/act
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h } from './aide.js';
 
-let dom; let magasin; let aujourdhuiVue; let semaineVue; let detailVue; let fiches; let horsligne; let reglages;
+let dom; let magasin; let aujourdhuiVue; let productionVue; let services; let detailVue; let fiches; let horsligne; let reglages;
 before(async () => {
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   aujourdhuiVue = await import('../app/js/ui/vue-aujourdhui.js');
-  semaineVue = await import('../app/js/ui/vue-semaine.js');
+  productionVue = await import('../app/js/ui/vue-production.js');
+  services = await import('../app/js/ui/feuille-services.js');
   detailVue = await import('../app/js/ui/vue-detail.js');
   fiches = await import('../app/js/ui/fiches.js');
   horsligne = await import('../app/js/ui/horsligne.js');
@@ -100,7 +101,7 @@ test('les écrans ne montrent rien quand tout est normal, et le problème en tou
   assert.match(classes(au, 'au-hors-ligne')[0].textContent, /hors ligne pas encore prêt/);
   assert.doesNotMatch(au.textContent, /hors ligne prêt/);
   magasin.remplacer(e);
-  assert.match(aDate(S.mercredi, () => semaineVue.rendre(magasin.etat(), S.mercredi)).textContent, /ouvert lun → sam · hors ligne pas encore prêt/);
+  assert.match(aDate(S.mercredi, () => productionVue.rendre(magasin.etat(), S.mercredi)).textContent, /hors ligne pas encore prêt/);
   const pied = classes(reglages.rendre(e, null), 'reglages-pied')[0];
   assert.match(pied.textContent, /Hors ligne pas encore prêt/);
   assert.doesNotMatch(pied.textContent, /Fonctionne hors ligne/);
@@ -114,40 +115,37 @@ function semaineAvecComposants() {
   definirMenu(e, S.lundiSuivant, 2, 'poulet, courgettes', h());
   return e;
 }
-const jourSemaine = (e) => { magasin.remplacer(e); return semaineVue.rendre(magasin.etat(), S.lundiSuivant); };
+/** v116 : l'attribution se règle dans la feuille « Services du jour » de Production (ancienne carte Services de la page de jour). */
+const feuilleServices = (e, date = S.lundiSuivant) => {
+  magasin.remplacer(e);
+  services.ouvrirServices(date);
+  return dom.corps.tous((x) => x.balise === 'dialog' && x.open).at(-1);
+};
 const interrupteurs = (n) => n.tous((x) => x.balise === 'input' && x.attributs.role === 'switch');
 
-test('Semaine : « Attribution au poste » toujours repliée (carte Services réduite), « hors poste » écrit dans le repli et dans le résumé', () => {
+test('Services du jour : l\'attribution est à plat (aucun repli), « au poste » ou « hors poste » est écrit à côté de chaque interrupteur', () => {
   const e = semaineAvecComposants();
   for (const c of Object.values(e.composants)) c.attribue = true;
-  let n = jourSemaine(e);
-  let reglesPoste = classes(n, 'sem-poste');
-  assert.ok(reglesPoste.length >= 1);
-  assert.ok(reglesPoste.every((d) => d.open === false), 'tout est au poste : replié');
-  assert.match(reglesPoste[0].textContent, /Attribution au poste : (\d+) sur \1/);
-  // Chaque interrupteur écrit son état dans les deux sens (jamais une coche seule).
-  const etiquettes = classes(n, 'interrupteur-etat');
+  let f = feuilleServices(e);
+  assert.equal(f.tous((x) => x.balise === 'details').length, 0);
+  const etiquettes = classes(f, 'interrupteur-etat');
   assert.ok(etiquettes.length >= 1);
-  assert.ok(etiquettes.every((x) => x.textContent === 'au poste'), 'tout est au poste : « au poste » est écrit à côté de chaque interrupteur');
-  assert.doesNotMatch(classes(n, 'sem-carte')[0].textContent, /hors poste/);
+  assert.ok(etiquettes.every((x) => x.textContent === 'au poste'));
+  assert.doesNotMatch(f.textContent, /hors poste/);
+  f.close();
 
-  const poulet = Object.values(e.composants).find((c) => c.nom === 'poulet');
-  poulet.attribue = false;
-  n = jourSemaine(e);
-  reglesPoste = classes(n, 'sem-poste');
-  assert.ok(reglesPoste.every((d) => d.open === false), 'décision du 2026-10-09 : jamais dépliée par défaut, même s\'il en manque');
-  const concerne = reglesPoste.find((d) => /poulet/.test(d.textContent));
-  assert.match(concerne.textContent, /Attribution au poste : (\d+) sur (?!\1\b)\d+/, 'le résumé dit qu\'il en manque');
-  assert.match(concerne.textContent, /hors poste/);
-  assert.equal(classes(concerne, 'interrupteur-etat').filter((x) => x.textContent === 'hors poste').length, 1);
+  Object.values(e.composants).find((c) => c.nom === 'poulet').attribue = false;
+  f = feuilleServices(e);
+  assert.equal(classes(f, 'interrupteur-etat').filter((x) => x.textContent === 'hors poste').length, 1);
+  f.close();
 });
 
-test('Semaine : le nom accessible de l\'interrupteur porte l\'état et le suit', async () => {
+test('Services du jour : le nom accessible de l\'interrupteur porte l\'état et le suit', async () => {
   const e = semaineAvecComposants();
   for (const c of Object.values(e.composants)) c.attribue = true;
   const poulet = Object.values(e.composants).find((c) => c.nom === 'poulet');
-  const n = jourSemaine(e);
-  const sw = interrupteurs(n).find((i) => i.attributs.id === `sem-poste-${poulet.id}`);
+  const f = feuilleServices(e);
+  const sw = interrupteurs(f).find((i) => i.attributs.id === `sem-poste-${poulet.id}`);
   assert.equal(sw.attributs['aria-label'], 'poulet, au poste');
   sw.checked = false;
   await sw.declencher('change');
@@ -158,33 +156,23 @@ test('Semaine : le nom accessible de l\'interrupteur porte l\'état et le suit',
   await sw.declencher('change');
   assert.equal(sw.attributs['aria-label'], 'poulet, au poste');
   assert.equal(etiquette.textContent, 'au poste');
+  f.close();
 });
 
-test('Semaine : l\'attribution n\'est pas répétée dans « Tout le détail du jour » (les interrupteurs sont dans Services)', () => {
+test('Détail du jour (feuille) : garde ses interrupteurs et ses libellés, avec d\'autres identifiants que Services', () => {
   const e = semaineAvecComposants();
   Object.values(e.composants).find((c) => c.nom === 'poulet').attribue = false;
-  const n = jourSemaine(e);
-  const detail = n.tous((x) => x.attributs.id === 'detail-jour')[0];
-  assert.equal(interrupteurs(detail).length, 0);
-  assert.ok(interrupteurs(n).length >= 3, 'ils restent dans Services');
-  assert.ok(detail.tous((x) => x.balise === 'button').some((b) => b.textContent === 'Modifier'), 'Modifier (avec « Attribué au poste ») reste dans le détail');
-  assert.match(detail.textContent, /hors poste/, 'ce qui est hors poste reste dit');
-  // Hors de l'écran Semaine (détail autonome), les interrupteurs et leur libellé restent.
-  const autonome = detailVue.rendre(magasin.etat(), S.lundiSuivant);
-  assert.ok(interrupteurs(autonome).length >= 3);
-  assert.match(autonome.textContent, /au poste/);
+  magasin.remplacer(e);
+  services.ouvrirDetailDuJour(S.lundiSuivant);
+  const detail = dom.corps.tous((x) => x.balise === 'dialog' && x.open).at(-1);
+  assert.ok(interrupteurs(detail).length >= 3);
+  assert.ok(interrupteurs(detail).every((i) => !i.attributs.id.startsWith('sem-poste-')));
+  assert.match(detail.textContent, /hors poste/);
+  assert.match(detail.textContent, /aucune quantité n'en est calculée/);
+  detail.close();
 });
 
-test('Semaine : plus d\'aide permanente sur la carte, légende explicite, liens du tableau à 44 px, interrupteur à 44 px', () => {
-  const n = jourSemaine(semaineAvecComposants());
-  const carte = classes(n, 'sem-carte')[0].textContent;
-  assert.match(carte, /Carte/);
-  assert.doesNotMatch(carte, /aucune quantité calculée/);
-  assert.match(n.tous((x) => x.attributs.id === 'detail-jour')[0].textContent, /aucune quantité n'en est calculée/, 'dite une fois, dans le repli du détail');
-  // Légende compacte : une ligne, seulement les signes présents dans la semaine.
-  const cle = classes(n, 'sem-cle')[0].textContent;
-  assert.match(cle, /\? à confirmer/);
-  assert.doesNotMatch(cle, /hors règle|jour off/, 'un signe absent de la semaine n\'est pas expliqué');
+test('Services du jour : liens du tableau à 44 px, interrupteur à 44 px', () => {
   assert.match(blocLot, /\.bord-plat \{[^}]*min-height: var\(--cible\)/);
   assert.match(blocLot, /\.interrupteur-entree \{[^}]*height: 44px/);
 });

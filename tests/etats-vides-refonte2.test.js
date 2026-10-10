@@ -53,7 +53,7 @@ test('G1 : production sans tâche, deux boutons vers la semaine et l\'import', (
   const p = vues.jour.rendre(magasin.etat(), S.jeudi);
   assert.match(p.textContent, /Rien à produire ce jour/);
   assert.match(p.textContent, /Pas de menu ce jour-là, ou tout a déjà été avancé\./);
-  const attendus = [['Voir la semaine', `#/semaine/${S.lundi}`], ['Importer les menus', `#/import/${S.lundi}`]];
+  const attendus = [['Voir la semaine', `#/semaine/${S.lundi}/tableau`], ['Importer les menus', `#/import/${S.lundi}`]];
   for (const l of attendus) assert.ok(liens(p).some(([t, href]) => t === l[0] && href === l[1]), l[0]);
 });
 
