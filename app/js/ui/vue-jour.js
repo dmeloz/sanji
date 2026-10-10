@@ -166,7 +166,7 @@ function puceCouverts(raison, api) {
 }
 
 /** Feuille de chiffrage d'une ligne : la raison en une phrase, puis seulement ce qui manque (couverts, portion, ou la fiche). */
-function feuilleChiffrage(etat, l, nom, raison) {
+export function feuilleChiffrage(etat, l, nom, raison) {
   panneau({
     titre: nom, lectureSeule: true,
     corps: (api) => h('div', null,

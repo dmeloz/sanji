@@ -315,6 +315,11 @@ export function chargeCreneau(etat, date, creneau) {
   return res;
 }
 
+/** Avance maximale d'une règle (jours) : la sienne si elle est valide, sinon l'avance habituelle de deux jours. */
+export function avanceMaxDe(regle) {
+  return Number.isInteger(regle?.avanceMaxJours) && regle.avanceMaxJours >= 0 ? regle.avanceMaxJours : AVANCE_HABITUELLE;
+}
+
 function candidatsAvance(dateService, avanceMax) {
   const liste = [];
   for (let k = 0; k <= avanceMax; k += 1) {
@@ -338,7 +343,7 @@ export function suggererCreneau(etat, productionId, depuis = null, exclure = nul
   if (!p || p.etat === 'fait') return null;
   const composant = etat.composants?.[p.composantId] ?? null;
   const regle = regleDe(etat, composant, p.etapeCle ?? null);
-  const avanceMax = Number.isInteger(regle?.avanceMaxJours) && regle.avanceMaxJours >= 0 ? regle.avanceMaxJours : AVANCE_HABITUELLE;
+  const avanceMax = avanceMaxDe(regle);
   const points = POINTS_CHARGE[composant?.charge] ?? 0;
   for (const { date, creneau } of candidatsAvance(p.dateService, avanceMax)) {
     if (depuis && date < depuis) continue;
@@ -363,6 +368,42 @@ export function sansAvanceParDefaut(etat, composant, p) {
   if (composant.menu !== 1 || composant.categorie !== 'feculent' || composant.role !== 'plat_principal') return false;
   const avance = regleDe(etat, composant, p.etapeCle ?? null)?.avanceMaxJours;
   return !(Number.isInteger(avance) && avance > 0);
+}
+
+/** Jour de production d'une production non faite : le jour décidé, le jour du service (sans avance) ou la date la plus ancienne sans avertissement. */
+function jourDeUneProduction(etat, p, composant, depuis) {
+  if (p.jourDecide) return { date: p.jourDecide, planifie: true };
+  if (sansAvanceParDefaut(etat, composant, p)) return { date: p.dateService, planifie: false };
+  const regle = regleDe(etat, composant, p.etapeCle ?? null);
+  const repere = repereConservation(composant, etat);
+  let retenue = p.dateService;
+  for (const { date } of candidatsAvance(p.dateService, avanceMaxDe(regle))) {
+    if (date < depuis || date >= retenue) continue;
+    const ev = evaluerAvance(date, p.dateService, regle, repere);
+    if (ev.autorisee && ev.couvre && !ev.repere?.depasse) retenue = date;
+  }
+  return { date: retenue, planifie: false };
+}
+
+/**
+ * Jour où le poste doit avoir les articles d'un composant : le plus ancien de ses jours de production non faits (avances
+ * comprises), borné à `depuis` (premier jour ouvert d'aujourd'hui) et au jour du service. Un jour planifié à la main passe devant ;
+ * pâtes et risotto du menu 1 : le jour du service ; une avance qui se garde moins longtemps (avertissement de conservation) recule.
+ * @returns {{date:string, planifie:boolean}|null} null : composant inconnu, production principale faite ou service passé
+ */
+export function jourDeProduction(etat, composantId, depuis) {
+  const composant = etat.composants?.[composantId];
+  const productions = Object.values(etat.productions ?? {}).filter((p) => p.composantId === composantId);
+  const principale = productions.find((p) => p.genre === 'principale');
+  if (!composant || principale?.etat === 'fait') return null;
+  // Sans production (composant non attribué ou non validé) : le jour du service, jamais une disparition.
+  const dateService = principale?.dateService ?? composant.date;
+  if (dateService < depuis) return null;
+  const jours = productions.filter((p) => p.etat !== 'fait').map((p) => jourDeUneProduction(etat, p, composant, depuis));
+  if (jours.length === 0) return { date: dateService, planifie: false };
+  const premier = jours.reduce((a, b) => (b.date < a.date || (b.date === a.date && b.planifie) ? b : a));
+  const date = [premier.date < depuis ? depuis : premier.date, dateService].sort()[0];
+  return { date, planifie: premier.planifie };
 }
 
 /** Ligne d'affichage d'une production (feuille du jour, avances). */
