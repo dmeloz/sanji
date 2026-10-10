@@ -103,13 +103,13 @@ test('ligne Brut : seulement nom et quantité ; ni pastille « Brut », ni crén
   assert.deepEqual(hrefs, [`#/fiche/${encodeURIComponent(brut)}`]);
 });
 
-test('une quantité absente n\'est ni une alerte ni une décision : étiquette « à préciser », sans provenance', () => {
+test('une quantité absente n\'est ni une alerte ni une décision : étiquette « à chiffrer », sans provenance', () => {
   const e = etatVide();
   const c = composantValide(e, S.lundi, 2, J.PREPARATION_TEST, { nom: 'SANS_PREVISION_TEST' });
   planifier(e, principaleDe(e, c), S.lundi, 'avant_midi', h());
   const noeud = page(e);
   const ligne = ligneDe(noeud, 'SANS_PREVISION_TEST');
-  assert.match(ligne.textContent, /à préciser/, 'l\'étiquette dit pourquoi, sans « — » seul');
+  assert.match(ligne.textContent, /à chiffrer/, 'l\'étiquette dit pourquoi, sans « — » seul');
   assert.equal(classes(ligne, 'prod-provenance').length, 0);
   assert.equal(classes(noeud, 'jour-decisions').length, 0);
 });

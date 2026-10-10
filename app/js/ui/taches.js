@@ -168,11 +168,11 @@ function uniteDe(etat, p) {
  * Marque une tâche faite. `sansBandeau` : pas de message « Fait · Annuler » (Production, décision du 2026-10-07 : retoucher la
  * case remet la tâche à faire ; « Corriger » reste dans les actions de la ligne).
  */
-export function faireEnUnToucher(productionId, { sansBandeau = false } = {}) {
+export function faireEnUnToucher(productionId, { sansBandeau = false, sansQuantite = false } = {}) {
   const e = etatCourant();
   const p = e.productions[productionId];
-  if (p.genre !== 'preparatoire' && cibleProduction(e, productionId) === null) { dialogFait(productionId); return; }
-  const r = agir((x, t) => marquerFait(x, productionId, undefined, t));
+  if (!sansQuantite && p.genre !== 'preparatoire' && cibleProduction(e, productionId) === null) { dialogFait(productionId); return; }
+  const r = agir((x, t) => marquerFait(x, productionId, undefined, t, { sansQuantite }));
   if (!r.ok) return;
   try { globalThis.navigator?.vibrate?.(20); } catch { /* sans effet sur iOS */ }
   if (sansBandeau) return;

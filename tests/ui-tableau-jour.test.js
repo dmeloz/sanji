@@ -297,8 +297,8 @@ test('Jour : une tâche du jour sans quantité reste dans la liste, dite sans al
   definirMenu(e, S.lundi, 1, 'riz, carottes', h());
   const noeud = jour(S.lundi, e);
   assert.equal(classes(noeud, 'mep-ligne').length >= 2, true, 'aucune tâche ne disparaît faute de donnée');
-  assert.match(noeud.textContent, /à préciser/);
-  assert.match(noeud.textContent, /Pas encore chiffré/);
+  assert.match(noeud.textContent, /à chiffrer/);
+  assert.doesNotMatch(noeud.textContent, /Pas encore chiffré/);
   assert.equal(classes(noeud, 'encadre-alerte').length + classes(noeud, 'encadre-erreur').length, 0);
   assert.equal(classes(noeud, 'pastille-rouge').length, 0, 'jamais en rouge');
   // Lots : une ligne tappable ; le détail et le lien vers la fiche s'ouvrent en feuille.

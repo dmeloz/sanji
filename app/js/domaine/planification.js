@@ -275,7 +275,8 @@ export function etatTache(etat, productionId) {
     const cible = cibleProduction(etat, productionId);
     const decide = p.decisionEcart && p.decisionEcart.cible === cible;
     if (p.etat === 'fait') {
-      const ecart = ecartProduction(etat, p.composantId);
+      // Un « fait » sans quantité (cible inconnue au moment du pointage) n'a pas de réel à comparer : jamais un écart.
+      const ecart = Number.isFinite(p.quantiteReelle) ? ecartProduction(etat, p.composantId) : null;
       if (ecart !== null && ecart !== 0 && !decide) return 'ecart';
     } else if (p.etat === 'en_cours' && p.cibleAuDemarrage !== cible && !decide) {
       return 'ecart';

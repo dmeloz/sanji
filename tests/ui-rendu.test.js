@@ -153,7 +153,7 @@ test('contenus attendus : tableau, détail, produits, réglages', () => {
   assert.match(reg, /hors ligne/i);
 });
 
-test('jour : « Fait » marque fait en un toucher avec la cible ; sans quantité connue, aucun « Fait »', async () => {
+test('jour : « Fait » marque fait en un toucher avec la cible ; sans quantité connue, « Fait » aussi, sans rien inventer', async () => {
   nettoyerPanneaux();
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
@@ -165,7 +165,7 @@ test('jour : « Fait » marque fait en un toucher avec la cible ; sans quantité
   magasin.remplacer(e);
   const noeud = vues.jour.rendre(magasin.etat(), S.mardi);
   const faits = boutons(noeud).filter((b) => /^Marquer fait : /.test(b.textContent));
-  assert.equal(faits.length, 1, 'l\'élément sans quantité n\'a pas de « Fait » : rien n\'est inventé');
+  assert.equal(faits.length, 2, 'l\'élément sans quantité a aussi sa case : « fait » ne dépend pas de la quantité');
   await faits[0].click();
   assert.equal(magasin.etat().productions[p].etat, 'fait', 'un seul toucher');
   assert.equal(magasin.etat().productions[p].quantiteReelle, 500, 'la cible devient le réel');

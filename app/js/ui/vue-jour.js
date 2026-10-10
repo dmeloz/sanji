@@ -7,8 +7,10 @@
 
 import { calculerComposant } from '../domaine/calcul.js';
 import { estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js';
+import { definirCouvertsMidi } from '../domaine/actions-couverts.js';
 import { saisirPortionInconnue } from '../domaine/actions-preparation.js';
-import { aSaisirPortion, quantiteEnPoids, verbeDe } from '../domaine/mise-en-place.js';
+import { COUVERTS_RAPIDES } from '../domaine/couverts-midi.js';
+import { quantiteEnPoids, raisonNonChiffree, verbeDe } from '../domaine/mise-en-place.js';
 import { aideRefroidissement, evaluationProduction } from '../domaine/planification.js';
 import { libelle } from '../domaine/statuts.js';
 import { h } from './dom.js';
@@ -23,8 +25,6 @@ import {
 
 export const titre = () => 'Production';
 
-const COCHABLES = new Set(['a_planifier', 'a_faire', 'en_cours', 'ecart']);
-
 /** « mar. 6 » : jour abrégé et numéro. */
 const courtJour = (date) => `${libelleJour(date).slice(0, 3)}. ${Number(date.slice(8))}`;
 const pluriel = (n, un, plusieurs) => `${n} ${n >= 2 ? plusieurs : un}`;
@@ -37,7 +37,7 @@ const pluriel = (n, un, plusieurs) => `${n} ${n >= 2 ? plusieurs : un}`;
 function caseFait(l) {
   return h('button', {
     type: 'button', role: 'checkbox', 'aria-checked': 'false', classe: 'case-fait',
-    onClick: () => faireEnUnToucher(l.productionId, { sansBandeau: true }),
+    onClick: () => faireEnUnToucher(l.productionId, { sansBandeau: true, sansQuantite: true }),
   }, h('span', { classe: 'case-fait-boite', 'aria-hidden': 'true' }), h('span', { classe: 'sr' }, `Marquer fait : ${l.genre === 'principale' ? l.nom : (l.libelle || l.nom)}`));
 }
 
@@ -130,10 +130,9 @@ export function provenanceAMontrer(provenance) {
 
 let compteurActions = 0;
 
-/** Portion tapée en un toucher : « à saisir » ouvre un champ (g par portion) et « OK » l'enregistre (comme « Préparer la semaine »). */
-function panneauSaisie(etat, l, nom) {
-  const c = etat.composants[l.composantId];
-  const unite = c.grammage?.unite ?? 'g';
+/** Portion tapée en un toucher : un champ (g par portion) et « OK » (comme « Préparer la semaine »). */
+function formulairePortion(etat, l, nom, api) {
+  const unite = etat.composants[l.composantId].grammage?.unite ?? 'g';
   const champ = h('input', { type: 'number', inputmode: 'decimal', min: '0', step: 'any', classe: 'prep-champ', 'aria-label': `${nom} : portion en ${libelle('UNITE', unite)}` });
   const valider = (evenement) => {
     evenement?.preventDefault?.();
@@ -141,10 +140,33 @@ function panneauSaisie(etat, l, nom) {
     try { valeur = parseNombre(champ.value, nom); } catch (erreur) { afficherMessage(erreur.message, 'erreur'); return; }
     if (valeur === null) { afficherMessage(`${nom} : tapez la portion en ${libelle('UNITE', unite)}.`, 'erreur'); return; }
     const r = agir((e, t) => saisirPortionInconnue(e, l.composantId, valeur, t));
-    if (r.ok) afficherMessage(`${nom} : ${valeur} ${libelle('UNITE', unite)} par portion retenu${r.valeur.portee === 'standard' ? ' pour toutes les semaines' : ' pour ce plat'}.`, 'ok');
+    if (!r.ok) return;
+    api.fermer();
+    afficherMessage(`${nom} : ${valeur} ${libelle('UNITE', unite)} par portion retenu${r.valeur.portee === 'standard' ? ' pour toutes les semaines' : ' pour ce plat'}.`, 'ok');
   };
-  return { champ, noeud: h('form', { classe: 'prod-saisie', novalidate: true, onSubmit: valider, hidden: true },
-    champ, h('span', { classe: 'prod-saisie-unite' }, `${libelle('UNITE', unite)} par portion`), bouton('OK', valider, 'court', { type: 'submit', 'aria-label': `Valider la portion de ${nom}` })) };
+  return h('form', { classe: 'prod-saisie prod-saisie-feuille', novalidate: true, onSubmit: valider },
+    champ, h('span', { classe: 'prod-saisie-unite' }, `${libelle('UNITE', unite)} par portion`), bouton('OK', valider, 'court', { type: 'submit', 'aria-label': `Valider la portion de ${nom}` }));
+}
+
+/** Les couverts du jour en un toucher (40 à 80, comme « Préparer la semaine ») : la ligne se chiffre aussitôt. */
+function puceCouverts(raison, api) {
+  return h('div', { classe: 'prep-valeurs', role: 'group', 'aria-label': `Couverts du ${libelleJour(raison.date)}` },
+    COUVERTS_RAPIDES.map((n) => h('button', {
+      type: 'button', classe: 'btn prep-valeur', 'aria-label': `${n} couverts le ${libelleJour(raison.date)}`,
+      onClick: () => { if (agir((e, t) => definirCouvertsMidi(e, raison.date, { total: n }, t)).ok) api.fermer(); },
+    }, String(n))));
+}
+
+/** Feuille de chiffrage d'une ligne : la raison en une phrase, puis seulement ce qui manque (couverts, portion, ou la fiche). */
+function feuilleChiffrage(etat, l, nom, raison) {
+  panneau({
+    titre: nom, lectureSeule: true,
+    corps: (api) => h('div', null,
+      h('p', null, raison.texte.charAt(0).toUpperCase() + raison.texte.slice(1)),
+      raison.type === 'couverts' ? puceCouverts(raison, api) : null,
+      raison.type === 'portion' ? formulairePortion(etat, l, nom, api) : null,
+      raison.type === 'autre' ? h('a', { href: `#/fiche/${encodeURIComponent(l.composantId)}`, classe: 'btn btn-principal btn-court', onClick: () => api.fermer() }, 'Préciser') : null),
+  });
 }
 
 /**
@@ -178,20 +200,19 @@ function ligneTache(etat, ligneBrute, date, options) {
       onClick: () => { panneau.hidden = !panneau.hidden; plus.setAttribute('aria-expanded', String(!panneau.hidden)); },
     }, '⋯');
   }
-  // Quantité : en g ou kg ; inconnue, l'étiquette dit pourquoi (portion à saisir, ou autre manque).
-  let saisie = null;
+  // Quantité : en g ou kg ; inconnue, la ligne dit « à chiffrer » et un toucher ouvre sa feuille (la raison, puis ce qui manque).
+  const raison = !q && !fait ? raisonNonChiffree(etat, l) : null;
   let quantiteNoeud = null;
   if (q) quantiteNoeud = h('strong', { classe: 'mep-qte' }, qteNoeuds(q));
-  else if (l.genre !== 'preparatoire' && !fait && aSaisirPortion(etat, l.composantId)) {
-    saisie = panneauSaisie(etat, l, nom);
+  else if (raison) {
     quantiteNoeud = h('button', {
-      type: 'button', classe: 'prod-asaisir', 'aria-label': `${nom} : portion à saisir`,
-      onClick: () => { saisie.noeud.hidden = !saisie.noeud.hidden; if (!saisie.noeud.hidden) saisie.champ.focus?.(); },
-    }, pastille('à saisir', 'ambre'));
-  } else if (l.genre !== 'preparatoire') quantiteNoeud = h('span', { classe: 'prod-apreciser' }, pastille('à préciser', 'ambre'));
+      type: 'button', classe: 'prod-asaisir', 'aria-label': `${nom} : à chiffrer`,
+      onClick: () => feuilleChiffrage(etat, l, nom, raison),
+    }, pastille('à chiffrer', 'ambre'));
+  }
   return h('li', { classe: `mep-ligne prod-ligne mep-${fait ? 'fait' : l.etat}` },
     h('div', { classe: 'prod-principal' },
-      fait ? caseFaite(l) : COCHABLES.has(l.etat) ? caseFait(l) : h('span', { classe: 'case-fait case-fait-vide' }),
+      fait ? caseFaite(l) : caseFait(l),
       h('div', { classe: 'mep-corps' },
         h('div', { classe: 'prod-nom-ligne' },
           verbe ? h('span', { classe: 'prod-verbe' }, `${verbe}\u00a0`) : null,
@@ -202,7 +223,6 @@ function ligneTache(etat, ligneBrute, date, options) {
       h('div', { classe: 'mep-quantite' }, quantiteNoeud),
       // « ⋯ » a sa propre colonne (la même à chaque ligne) ; sans actions, son emplacement reste vide.
       plus ?? h('span', { classe: 'prod-plus-vide', 'aria-hidden': 'true' })),
-    saisie?.noeud ?? null,
     panneau);
 }
 
@@ -232,22 +252,6 @@ function resume(texte, titreFeuille, corps) {
 }
 
 // ------------------------------------------------------------------ rubriques secondaires : une ligne, une feuille
-
-/** Une quantité inconnue n'est pas une décision : information neutre, une ligne tappable qui ouvre sa feuille. */
-function rubriqueQuantites(feuille) {
-  const manquants = feuille.quantitesManquantes;
-  if (manquants.length === 0) return null;
-  const noms = [...new Set(manquants.map((q) => q.nom))];
-  const apercu = `${noms.slice(0, 6).join(', ')}${noms.length > 6 ? `, et ${noms.length - 6} autres` : ''}`;
-  const premier = manquants.map((q) => q.dateService).sort()[0];
-  const phrase = `${noms.length === 1 ? '1 élément n\'a' : `${noms.length} éléments n'ont`} pas encore de quantité : ${apercu}.`;
-  return resume(`Pas encore chiffré : ${noms.length}`, 'Pas encore chiffré', () => h('div', null,
-    h('p', null, phrase),
-    h('p', { classe: 'aide' }, 'Rien d\'obligatoire : saisissez les prévisions et les portions quand vous voulez, ou modifiez-les le lendemain. Tout se recalcule.'),
-    h('div', { classe: 'actions' },
-      lien(`#/import/${lundiDe(premier)}`, 'Saisir les prévisions', 'btn btn-court'),
-      lien('#/reglages', 'Régler les standards maison', 'btn btn-court'))));
-}
 
 /** Suggestion seulement : une ligne ; la préparation et ses quantités se lisent dans la feuille. */
 function rubriqueLots(feuille) {
@@ -313,7 +317,7 @@ export function corps(etat, date, feuille) {
     bloc('Autres', lecture.autres, etat, date),
     bloc('Après service', apres, etat, date, aideCourte()),
   ]) if (b) noeuds.push(b);
-  const resumes = [rubriquePretes(lecture.pretsPlusTard), rubriqueQuantites(feuille), rubriqueLots(feuille), chargeDesCreneaux(feuille)].filter(Boolean);
+  const resumes = [rubriquePretes(lecture.pretsPlusTard), rubriqueLots(feuille), chargeDesCreneaux(feuille)].filter(Boolean);
   if (resumes.length > 0) noeuds.push(h('div', { classe: 'prod-resumes' }, resumes));
   noeuds.push(h('div', { classe: 'barre-jour pas-imprime' }, bouton('Imprimer la feuille du jour', imprimer, 'court')));
   return noeuds;
