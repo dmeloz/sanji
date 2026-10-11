@@ -8,6 +8,7 @@ import { libelleJour, lundiDe } from '../domaine/dates.js';
 import { libelle } from '../domaine/statuts.js';
 import { alertesAllergenes } from '../domaine/allergenes.js';
 import { decisionsDe } from '../domaine/decisions.js';
+import { raisonNonChiffree } from '../domaine/mise-en-place.js';
 import { preparationSemaine } from '../domaine/preparation.js';
 import { aujourdhuiDe } from '../domaine/tableau-blanc.js';
 import { aujourdhui, maintenant } from '../magasin.js';
@@ -20,6 +21,7 @@ import { ouvrirProposition } from './feuille-validation.js';
 import { problemeHorsLigne } from './horsligne.js';
 import { pluriel, qteNoeuds, quantite } from './format.js';
 import { faireEnUnToucher } from './taches.js';
+import { feuilleChiffrage } from './vue-jour.js';
 
 export function titre() { return "Aujourd'hui"; }
 
@@ -118,7 +120,7 @@ function sectionAAvancer(d, aujourd) {
     h('div', { classe: 'tdb-tete' }, h('h2', { classe: 'au-etiquette' }, 'À avancer'), lien(`#/production/${aujourd}`, 'Production ›', 'au-lien-court')),
     lignes.map((l) => h('a', { href: `#/fiche/${encodeURIComponent(l.composantId)}`, classe: 'tdb-avance' },
       h('span', { classe: 'tdb-avance-nom' }, h('span', { classe: 'nom' }, l.nom), h('span', { classe: 'au-sous' }, `pour ${libelleJour(l.dateService).split(' ')[0]}`)),
-      l.quantite !== null ? h('span', { classe: 'au-qte' }, qteNoeuds(quantite(l.quantite, l.unite))) : h('span', { classe: 'au-neutre' }, '—'))));
+      l.quantite !== null && l.unite !== 'portion' ? h('span', { classe: 'au-qte' }, qteNoeuds(quantite(l.quantite, l.unite))) : h('span', { classe: 'au-neutre' }, l.unite === 'portion' ? 'à chiffrer' : '—'))));
 }
 
 // ------------------------------------------------------------------ à confirmer
@@ -201,7 +203,15 @@ function sectionRappels(d, aFaire) {
 
 // ------------------------------------------------------------------ Prochaine (fixe en bas)
 
-function carteProchaine(d, aujourd) {
+/** Quantité inconnue : étiquette « à chiffrer » qui ouvre la même feuille que Production (raison, puis ce qui manque). */
+function boutonAChiffrer(etat, m) {
+  const raison = raisonNonChiffree(etat, m);
+  if (!raison) return h('p', { classe: 'prochaine-neutre' }, 'à chiffrer');
+  return h('button', { type: 'button', classe: 'prod-asaisir prochaine-neutre', 'aria-label': `${m.nom} : à chiffrer`,
+    onClick: () => feuilleChiffrage(etat, m, m.nom, raison) }, pastille('à chiffrer', 'ambre'));
+}
+
+function carteProchaine(d, aujourd, etat) {
   const m = d.maintenant;
   if (!m) {
     return h('section', { classe: 'prochaine prochaine-vide', 'aria-label': 'Prochaine tâche' },
@@ -210,7 +220,7 @@ function carteProchaine(d, aujourd) {
           h('a', { href: `#/production/${d.prochainOuvert}`, classe: 'au-lien-prochaine' }, libelleJour(d.prochainOuvert).split(' ').slice(0, 2).join(' '))] : null]
         : d.avancement.total > 0 ? "Tout est fait pour aujourd'hui." : "Aucune tâche décidée pour aujourd'hui."));
   }
-  const q = m.genre !== 'preparatoire' && m.cible !== null ? quantite(m.cible, m.unite) : null;
+  const q = m.genre !== 'preparatoire' && m.cible !== null && m.unite !== 'portion' ? quantite(m.cible, m.unite) : null;
   const quand = m.dateService === aujourd ? (m.creneau ? libelle('CRENEAU', m.creneau) : null) : `pour ${libelleJour(m.dateService).split(' ')[0]}`;
   return h('section', { classe: 'prochaine', 'aria-label': 'Prochaine tâche' },
     h('div', { classe: 'prochaine-tete' },
@@ -218,7 +228,7 @@ function carteProchaine(d, aujourd) {
       h('span', { classe: 'prochaine-menu' }, [m.menu ? `menu ${m.menu}` : null, m.horsRegle ? h('strong', { classe: 'au-hors-regle' }, ' · hors règle') : null])),
     h('div', { classe: 'prochaine-ligne' },
       h('p', { classe: 'prochaine-nom' }, m.nom),
-      q ? h('p', { classe: 'au-qte prochaine-qte' }, qteNoeuds(q)) : (m.genre === 'preparatoire' ? null : h('p', { classe: 'prochaine-neutre' }, 'quantité à compléter'))),
+      q ? h('p', { classe: 'au-qte prochaine-qte' }, qteNoeuds(q)) : (m.genre === 'preparatoire' ? null : boutonAChiffrer(etat, m))),
     h('div', { classe: 'au-maintenant-actions' },
       h('a', { href: `#/fiche/${encodeURIComponent(m.composantId)}`, classe: 'au-btn au-btn-clair' }, 'Ouvrir la fiche'),
       h('button', { type: 'button', classe: 'au-btn au-btn-action', onClick: () => faireEnUnToucher(m.productionId), 'aria-label': `Fait : ${m.nom}` }, 'Fait')));
@@ -230,7 +240,7 @@ export function rendre(etat) {
   const aujourd = aujourdhui();
   const donnees = aujourdhuiDe(etat, aujourd, maintenant().slice(11, 16));
   const racine = h('div', { classe: 'vue vue-aujourdhui' });
-  const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), carteProchaine(donnees, aujourd), carteCloture(donnees),
+  const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), carteProchaine(donnees, aujourd, etat), carteCloture(donnees),
     sectionAAvancer(donnees, aujourd), carteFiche(donnees, aujourd, etat), sectionAConfirmer(donnees, decisionsDe(etat, aujourd)), sectionRappels(donnees, preparationSemaine(etat, donnees.lundi, aujourd).aFaire)];
   for (const m of morceaux) if (m) racine.appendChild(m);
   return racine;

@@ -43,7 +43,7 @@ export function principaleDuComposant(etat, composantId) {
 export function repartition(c, calc) {
   const p = calc.portions;
   return p.details.map((d) => {
-    const part = calc.statut === 'CALCULE' && p.total > 0 && Number.isFinite(calc.quantiteTravail) ? calc.quantiteTravail * (d.portions / p.total) : null;
+    const part = calc.statut === 'CALCULE' && calc.uniteTravail !== 'portion' && p.total > 0 && Number.isFinite(calc.quantiteTravail) ? calc.quantiteTravail * (d.portions / p.total) : null;
     return {
       libelle: d.source === 'prevision' ? `Menu ${c.menu}` : `Fiche ${d.numero || ''}`.trim(),
       certitude: libelle('CERTITUDE', d.certitude), portions: d.portions, part, ratio: p.total > 0 ? d.portions / p.total : 0,
@@ -63,14 +63,14 @@ function sectionQuantite(etat, c, calc) {
   const avecBarre = lignes.length >= 2;
   return h('section', { classe: 'fiche-quantite' },
     h('p', { classe: 'fiche-legende' }, `${jourMeme ? 'À produire aujourd\'hui' : 'À produire'} · pour ${libelleJour(c.date)}`),
-    calc.statut === 'CALCULE'
+    calc.statut === 'CALCULE' && calc.uniteTravail !== 'portion' // jamais « N portions » comme quantité à produire
       ? h('p', { classe: 'fiche-qte-grande' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail), h('small', null, ` ${precisionQuantite(calc)}`))
-      : h('p', { classe: 'fiche-qte-grande fiche-qte-inconnue' }, 'quantité inconnue', h('small', null, ` ${calc.libelleQuantite}`)),
+      : h('p', { classe: 'fiche-qte-grande fiche-qte-inconnue' }, 'à chiffrer'),
     lignes.length === 0 ? h('p', { classe: 'fiche-legende' }, 'Aucune répartition : aucune portion saisie pour ce menu.')
       : h('ul', { classe: 'fiche-repartition' }, lignes.map((l) => h('li', null,
         h('span', { classe: 'fiche-rep-nom' }, l.libelle, h('small', null, ` ${l.certitude}`)),
         avecBarre && l.part !== null ? h('span', { classe: 'fiche-jauge', 'aria-hidden': 'true' }, h('span', { style: `width:${Math.round(l.ratio * 100)}%` })) : null,
-        h('span', { classe: 'fiche-qte' }, l.part !== null ? quantiteNoeuds(l.part, calc.uniteTravail) : qteNoeuds(`${l.portions} portions`))))),
+        h('span', { classe: 'fiche-qte' }, l.part !== null ? quantiteNoeuds(l.part, calc.uniteTravail) : qteNoeuds(l.portions > 0 ? `à chiffrer · ${pluriel(l.portions, 'couvert')}` : 'à chiffrer'))))),
     h('p', { classe: 'fiche-legende' }, `Calcul : ${calc.formule}`));
 }
 

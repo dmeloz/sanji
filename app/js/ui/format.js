@@ -1,6 +1,7 @@
 // Fonctions pures de format et de lecture de saisie (testables sous Node, sans DOM).
 
 import { formaterQuantite } from '../domaine/calcul.js';
+import { quantiteEnPoids } from '../domaine/mise-en-place.js';
 import { h } from './dom.js';
 
 const ESPACES = /[\s  ]/g;
@@ -57,6 +58,7 @@ export const pluriel = (n, singulier, plur = `${singulier}s`) => `${n} ${n >= 2 
 /** Quantité affichable ; sans unité connue, le nombre seul ; sans valeur, « — ». */
 export function quantite(valeur, unite) {
   if (valeur === null || valeur === undefined || !Number.isFinite(valeur)) return '—';
+  if (unite === 'g') return quantiteEnPoids(valeur, unite);
   return unite ? formaterQuantite(valeur, unite) : String(valeur);
 }
 

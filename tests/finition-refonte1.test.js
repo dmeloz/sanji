@@ -42,12 +42,13 @@ const enveloppe = (noeuds) => {
 const texte = (noeud) => noeud.textContent.replace(/[  ]/g, ' ');
 
 test('quantité : quatre chiffres sans groupement, cinq chiffres avec séparateur étroit, unité de poids collée, valeur inchangée', () => {
-  const q4 = enveloppe(format.quantiteNoeuds(5399, 'g'));
+  assert.equal(texte(enveloppe(format.quantiteNoeuds(5399, 'g'))), '5,4 kg', 'en g/kg : plus de grand nombre de grammes');
+  const q4 = enveloppe(format.qteNoeuds('5399 g'));
   assert.equal(classes(q4, 'sep-milliers').length, 0);
   assert.equal(texte(q4), '5399 g');
   assert.equal(classes(q4, 'sep-unite').length, 1, 'unité séparée par une espace rendue étroite');
   assert.equal(classes(q4, 'qte-unite')[0].textContent, 'g');
-  const q5 = enveloppe(format.quantiteNoeuds(85000, 'g'));
+  const q5 = enveloppe(format.qteNoeuds('85 000 g'));
   assert.equal(classes(q5, 'sep-milliers').length, 1);
   assert.equal(texte(q5), '85 000 g');
   assert.equal(classes(enveloppe(format.qteNoeuds('1 234 567 g')), 'sep-milliers').length, 2);

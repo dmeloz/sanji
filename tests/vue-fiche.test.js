@@ -228,5 +228,30 @@ test('fiche : la carte du haut et la ligne « Brut à prévoir » ne se contredi
   const racine = vue.rendre(e, c);
   const ligne = racine.tous((x) => x.className.split(' ').includes('fiche-brut'))[0];
   assert.doesNotMatch(ligne.textContent, /inconnu/);
-  assert.match(ligne.textContent.replace(/[  \s]/g, ''), new RegExp(String(Math.round(calc.brut))), 'la même quantité que la carte du haut');
+  assert.match(ligne.textContent.replace(/[  \s]/g, ''), new RegExp(String(Math.round(calc.brut / 100) / 10).replace('.', ',') + 'kg'), 'la même quantité que la carte du haut');
+});
+
+test('fiche : la quantité à produire et sa répartition sont en g/kg, jamais « N portions »', () => {
+  const { e, c } = scenario();
+  const racine = vue.rendre(e, c);
+  const rep = racine.tous((x) => x.className.split(' ').includes('fiche-repartition'))[0];
+  assert.ok(rep, 'répartition');
+  assert.doesNotMatch(rep.textContent, /portions/);
+  assert.match(rep.textContent.replace(/[  \s]/g, ''), /\d+(,\d)?(kg|g)/);
+  const grande = racine.tous((x) => x.className.split(' ').includes('fiche-qte-grande'))[0];
+  assert.match(grande.textContent, /(kg|g)/);
+});
+
+test('fiche : sans quantité, la grande quantité dit « à chiffrer » seul et la répartition « à chiffrer · N couverts »', () => {
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 40);
+  const c = composantValide(e, S.lundi, 1, J.COMPOSANT_VAGUE_TEST);
+  magasin.remplacer(e);
+  const calc = calculerComposant(magasin.etat(), c);
+  assert.ok(calc.statut !== 'CALCULE' || calc.uniteTravail === 'portion');
+  const racine = vue.rendre(magasin.etat(), c);
+  const grande = racine.tous((x) => x.className.split(' ').includes('fiche-qte-grande'))[0];
+  assert.equal(grande.textContent.trim(), 'à chiffrer');
+  const rep = racine.tous((x) => x.className.split(' ').includes('fiche-repartition'))[0];
+  assert.match(rep.textContent, /à chiffrer · 40 couverts/);
 });

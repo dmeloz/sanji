@@ -160,6 +160,31 @@ test('Prochaine : première tâche non faite, quantité, créneau, Ouvrir la fic
   assert.equal(magasin.etat().productions[d.maintenant.productionId].etat, 'a_faire');
 });
 
+test('Prochaine : quantité inconnue = « à chiffrer » qui ouvre la feuille de chiffrage, jamais « quantité à compléter »', () => {
+  const e = mercredi();
+  for (const nom of ['Tagliatelles', 'riz']) planifier(e, prodDe(e, nom), S.mercredi, 'avant_midi', h());
+  e.jours[S.mercredi].previsions = { 1: { portions: null }, 2: { portions: null } };
+  const p = page(S.mercredi, e);
+  const carte = classes(p, 'prochaine')[0];
+  assert.doesNotMatch(carte.textContent, /à compléter/);
+  const bouton = classes(carte, 'prod-asaisir')[0];
+  assert.ok(bouton, 'bouton « à chiffrer »');
+  assert.match(bouton.textContent, /à chiffrer/);
+});
+
+test('Prochaine : une quantité en « portions » n\'est jamais écrite : « à chiffrer » s\'applique', () => {
+  const e = mercredi();
+  const id = prodDe(e, 'Tagliatelles');
+  planifier(e, id, S.mercredi, 'avant_midi', h());
+  e.productions[id].unite = 'portion';
+  const d = aujourdhuiDe(e, S.mercredi, '10:00');
+  assert.equal(d.maintenant.unite, 'portion');
+  assert.ok(Number.isFinite(d.maintenant.cible), 'cible finie');
+  const carte = classes(page(S.mercredi, e), 'prochaine')[0];
+  assert.doesNotMatch(carte.textContent, /portions?\b/);
+  assert.match(carte.textContent, /à chiffrer/);
+});
+
 test('Prochaine : une fois tout fait, la carte le dit et ne propose plus rien', () => {
   const e = mercredi();
   const principales = Object.values(e.productions).filter((x) => x.genre === 'principale' && x.dateService === S.mercredi);

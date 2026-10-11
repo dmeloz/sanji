@@ -74,3 +74,19 @@ test('CSS ajouté : aucune couleur hexadécimale, aucune police sous 15 px, aucu
     assert.doesNotMatch(b, /prefers-color-scheme/);
   }
 });
+
+test('plus de bloc noir isolé : jour en cours, Prochaine et quantité de la fiche sont sur le fond carte, marqués par un filet épais', () => {
+  for (const classe of ['tdb-jour-auj', 'prochaine', 'fiche-quantite']) {
+    const m = new RegExp(`\\.${classe} \\{([^}]*)\\}`).exec(css);
+    assert.ok(m, classe);
+    assert.doesNotMatch(m[1], /background: var\(--encre\)/, `${classe} : plus de fond encre`);
+    assert.match(m[1], /background: var\(--carte\)/);
+    assert.match(m[1], /border-left: 6px solid var\(--encre\)/, 'marque non portée par la couleur seule');
+  }
+});
+
+test('impression : le bouton « à chiffrer » reste visible sur papier', () => {
+  const impression = css.slice(css.indexOf('@media print'));
+  assert.match(impression, /\.prod-asaisir \{ display: inline-block !important; \}/);
+  assert.doesNotMatch(css, /liste Produits/);
+});
