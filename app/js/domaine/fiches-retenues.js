@@ -1,8 +1,9 @@
 // Fiches retenues et orthographes retenues (v114). Aucun chiffre venu de l'application : tout vient de la propriétaire.
 //  - `etat.noms` : { [nom normalisé de la variante]: { nom: 'nom correct', h } } ; lirePlat remplace la variante par le nom correct.
-//  - `etat.fiches_retenues` : { [nom correct normalisé]: { categorie?, role?, attribue?, grammage?: {valeur, unite, etat}, h } },
-//    indépendante du menu ; reprise à la création d'un élément du même nom. `attribue` ne s'écrit et ne se lit qu'en menu 2
-//    (le menu 1 est entièrement au poste, sauf exception retenue par nom et par menu dans `etat.memoire`).
+//  - `etat.fiches_retenues` : { [nom correct normalisé]: { nom?, famille?, categorie?, role?, attribue?, grammage?: {valeur, unite, etat}, h } },
+//    la fiche d'un ÉLÉMENT AU POSTE (v118 : jamais d'un plat entier ni d'un élément hors poste, dont la décision reste dans
+//    `etat.memoire`), indépendante du menu ; reprise à la création d'un élément du même nom. `nom` = nom d'affichage ;
+//    `famille` = clé de famille du lexique. `attribue` (vrai) ne s'écrit et ne se lit qu'en menu 2.
 
 import { normaliser } from './etat.js';
 import { CATEGORIE, ETAT_POIDS, ROLE, UNITE } from './statuts.js';
@@ -37,6 +38,12 @@ export function evincerLePlusAncien(objet, max) {
   delete objet[ancienne];
 }
 
+/** Nom d'affichage nettoyé : sans caractère de contrôle, espaces réduits, 60 caractères au plus ; '' si inutilisable. */
+export function nomNettoye(brut) {
+  const nom = typeof brut === 'string' ? brut.replace(/[\u0000-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim() : '';
+  return nom.length > NOM_MAX ? '' : nom;
+}
+
 /** Fiche retenue nettoyée (champs connus et valides seulement), ou null si elle ne retient rien. */
 function ficheValide(f) {
   if (!estObjet(f)) return null;
@@ -47,6 +54,9 @@ function ficheValide(f) {
   const g = grammageValide(f.grammage);
   if (g && s.role) s.grammage = g; // une portion n'a de sens que pour un rôle
   if (Object.keys(s).length === 0) return null;
+  const nom = nomNettoye(f.nom);
+  if (nom !== '') s.nom = nom;
+  if (typeof f.famille === 'string' && f.famille.length <= 40 && /^[a-z]+(_[a-z]+)*$/.test(f.famille)) s.famille = f.famille;
   return { ...s, h: horodatage(f.h) };
 }
 
@@ -106,7 +116,16 @@ export function retenirFiche(etat, nom, champs, h) {
   const cle = cleDeNom(nom);
   if (cle === '') return;
   if (!estObjet(etat.fiches_retenues)) etat.fiches_retenues = {};
-  const ajout = ficheValide({ ...champs, h });
+  // Un élément hors poste n'a pas de fiche (v118) : sa décision vit dans `etat.memoire` (écrite avant, par memoriserAttribution).
+  // La fiche, partagée entre menus, garde sa portion et son rôle : seule l'attribution en part ; sans fiche, rien n'est écrit.
+  if (champs?.attribue === false) {
+    if (Object.hasOwn(etat.fiches_retenues, cle)) {
+      delete etat.fiches_retenues[cle].attribue;
+      etat.fiches_retenues[cle].h = h;
+    }
+    return;
+  }
+  const ajout = ficheValide({ nom, ...champs, h });
   if (!ajout) return; // rien de valide : rien n'est écrit ni évincé
   const existe = Object.hasOwn(etat.fiches_retenues, cle);
   if (!existe) evincerLePlusAncien(etat.fiches_retenues, FICHES_MAX);
@@ -139,39 +158,32 @@ export function reprendreSurAVenir(etat, nom, jour) {
   return Object.values(etat.composants).filter((c) => c.date >= jour && cleDeNom(c.nom) === cle).filter((c) => reprendreFiche(etat, c)).length;
 }
 
-// ---------------------------------------------------------------- plats retenus (import ; le reste est dans plats-retenus.js)
-
-export const PLATS_MAX = 300;
-const CLE_PLAT_MAX = 200;
-const ELEMENTS_MAX = 20;
-
-function elementPlatValide(e) {
-  if (!estObjet(e) || typeof e.nom !== 'string' || e.nom.trim() === '' || e.nom.length > NOM_MAX) return null;
-  if (!Object.hasOwn(CATEGORIE, e.categorie) || e.categorie === 'a_preciser' || typeof e.attribue !== 'boolean') return null;
-  const sortie = { nom: e.nom.trim(), categorie: e.categorie, attribue: e.attribue };
-  if (typeof e.role === 'string' && Object.hasOwn(ROLE, e.role)) sortie.role = e.role;
-  return sortie; // la portion n'est jamais figée dans un plat : elle vient de la fiche retenue du nom (un ancien `grammage` est ignoré)
+/**
+ * Ce qu'un élément réglé apporte à sa fiche (nom d'affichage compris) : catégorie, rôle, famille, et l'attribution en menu 2 seulement.
+ * @returns {{nom:string, categorie:string, role?:string, attribue?:boolean, famille?:string}}
+ */
+export function champsDeComposant(c) {
+  return { nom: c.nom, categorie: c.categorie, role: c.role ?? undefined, attribue: c.menu === 2 ? c.attribue : undefined, famille: c.famille ?? undefined };
 }
 
-export const INTITULE_MAX = 200;
-/** Intitulé d'origine d'un plat : texte sans caractère de contrôle, espaces réduits, 200 caractères au plus ; '' si inutilisable. */
-export function intituleNettoye(brut) {
-  return typeof brut === 'string' ? brut.replace(/[\u0000-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim().slice(0, INTITULE_MAX) : '';
-}
-
-/** Plats importés : clé non vide et sans clé dangereuse, 1 à 20 éléments valides (sinon le plat est écarté), 300 au plus. */
-export function platsValides(brut) {
+/**
+ * Migration (v118) : les éléments d'un ancien `plats_retenus` qui ont une catégorie valide deviennent des fiches d'éléments.
+ * Une fiche déjà là n'est jamais écrasée ; l'attribution ne vient que d'un plat du menu 2. Renvoie les seules fiches NOUVELLES.
+ */
+export function fichesDepuisPlats(brut, existantes) {
   const sortie = {};
   if (!estObjet(brut)) return sortie;
-  for (const [cle, p] of Object.entries(brut)) {
-    if (Object.keys(sortie).length >= PLATS_MAX) break;
-    if (cle === '' || cle.length > CLE_PLAT_MAX || CLES_INTERDITES.has(cle) || !estObjet(p) || !Array.isArray(p.elements)) continue;
-    if (p.elements.length === 0 || p.elements.length > ELEMENTS_MAX) continue;
-    const elements = p.elements.map(elementPlatValide);
-    if (elements.some((e) => e === null)) continue;
-    const intitule = intituleNettoye(p.intitule);
-    sortie[cle] = { elements, ...(intitule ? { intitule } : {}), menu: p.menu === 1 || p.menu === 2 ? p.menu : null, h: typeof p.h === 'string' && !Number.isNaN(Date.parse(p.h)) ? p.h : null };
+  const place = () => FICHES_MAX - Object.keys(existantes).length - Object.keys(sortie).length;
+  for (const plat of Object.values(brut)) {
+    if (!estObjet(plat) || !Array.isArray(plat.elements)) continue;
+    for (const e of plat.elements.slice(0, 20)) {
+      if (place() <= 0) return sortie;
+      if (!estObjet(e) || typeof e.nom !== 'string' || !dans(CATEGORIE, e.categorie) || e.categorie === 'a_preciser') continue;
+      const cle = cleDeNom(e.nom);
+      if (cle === '' || Object.hasOwn(existantes, cle) || Object.hasOwn(sortie, cle)) continue;
+      const fiche = ficheValide({ nom: e.nom, categorie: e.categorie, role: e.role, attribue: plat.menu === 2 ? e.attribue : undefined, h: plat.h });
+      if (fiche) sortie[cle] = fiche;
+    }
   }
   return sortie;
 }
-

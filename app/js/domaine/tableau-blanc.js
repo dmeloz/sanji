@@ -9,7 +9,7 @@ import { decisionsDe } from './decisions.js';
 import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, libelleJour, lundiDe } from './dates.js';
 import { jourOuVide, normaliser } from './etat.js';
 import { avancesPossibles, cibleProduction, etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
-import { rappelCloture } from './plats-retenus.js';
+import { rappelCloture } from './cloture.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
 import { besoinsProduits, echeanceCommande, suiviProduit } from './produits.js';
 import { cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes } from './savoir.js';

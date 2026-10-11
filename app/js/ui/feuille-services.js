@@ -149,7 +149,7 @@ function bandeauPoints(etat, date, fermer) {
  * supprimé…) : abonnement au magasin à l'ouverture, désabonnement à la fermeture. Défilement et focus (par identifiant) sont gardés.
  * `construire(etat, api)` rend le contenu ; `apres` (facultatif) s'exécute une fois à l'ouverture, contenu en place.
  */
-function feuilleVivante({ titre, construire, apres }) {
+export function feuilleVivante({ titre, construire, apres }) {
   const zone = h('div', null);
   let api = null;
   const dessiner = () => {

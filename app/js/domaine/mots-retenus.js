@@ -56,6 +56,17 @@ export function champsPourMot(categorie, menu) {
   }
 }
 
+/**
+ * Un des quatre choix qui décrit un élément ou une fiche ({categorie, role}), ou null s'il n'est pas classé.
+ * Sens inverse de `champsPourMot` : sauce → sauce ; féculent → forme de pâtes ; légume ou rôle garniture → garniture ; le reste → produit.
+ */
+export function choixMotDe(x) {
+  if (!x || typeof x !== 'object' || !x.categorie || x.categorie === 'a_preciser') return null;
+  if (x.categorie === 'sauce') return 'sauce';
+  if (x.categorie === 'feculent') return 'forme_pates';
+  return x.categorie === 'legume' || x.role === 'garniture' ? 'garniture' : 'produit';
+}
+
 /** Entrées valides d'un objet de mots importé (clé canonique, classement autorisé), copiées sans autre champ. */
 export function motsValides(brut) {
   const sortie = {};

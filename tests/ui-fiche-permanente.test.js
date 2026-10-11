@@ -1,11 +1,12 @@
-// Fiche permanente sous faux DOM : « Corriger le nom », sauce reprise « à reconfirmer » avec « OK », feuille de clôture.
+// Fiche d'un élément sous faux DOM (v118) : « Corriger le nom », « Voir sa fiche retenue », feuille de clôture par élément, Réglages.
 // Ce n'est pas un test dans un navigateur.
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { definirMenu, modifierComposant } from '../app/js/domaine/actions.js';
+import { definirMenu } from '../app/js/domaine/actions.js';
 import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { etatInitial } from '../app/js/domaine/etat.js';
+import { retenirFiche } from '../app/js/domaine/fiches-retenues.js';
 import { h } from './aide.js';
 
 let dom;
@@ -24,58 +25,75 @@ before(async () => {
 after(() => dom.restaurer());
 
 const parTexte = (noeud, texte) => boutons(noeud).find((b) => b.textContent === texte);
+const fermerFeuilles = () => dom.corps.tous((x) => x.balise === 'dialog').forEach((d) => d.remove());
+const parNom = (e, nom) => Object.values(e.composants).find((c) => c.nom === nom);
 
-function etatAvecReprise() {
+test('fiche : « Corriger le nom » et « Enregistrer » sont là ; plus de « sauce reprise »', () => {
   const e = etatInitial();
-  definirMenu(e, '2026-10-12', 1, 'Fusilli al ferretto', h());
-  modifierComposant(e, Object.values(e.composants).find((c) => c.nom === 'sauce à confirmer').id, { nom: 'tomate' }, h(1));
-  definirMenu(e, '2026-11-02', 1, 'Fusilli al ferretto', h(2));
-  return e;
-}
-
-test('fiche : « Corriger le nom » et « Enregistrer » sont là ; une sauce reprise dit « reprise · à reconfirmer » avec « OK »', () => {
-  const e = etatAvecReprise();
+  definirMenu(e, '2026-10-12', 1, 'Spaghetti carbonara', h());
   magasin.remplacer(e);
-  const sauce = Object.values(magasin.etat().composants).find((c) => c.reprise);
-  const page = vueFiche.rendre(magasin.etat(), sauce.id);
+  const page = vueFiche.rendre(magasin.etat(), parNom(magasin.etat(), 'carbonara').id);
   assert.match(page.textContent, /Corriger le nom/);
-  assert.match(page.textContent, /reprise · à reconfirmer/);
   assert.ok(parTexte(page, 'Enregistrer'));
-  parTexte(page, 'OK').click();
-  assert.equal(Object.values(magasin.etat().composants).find((c) => c.id === sauce.id).reprise, undefined);
-  assert.doesNotMatch(vueFiche.rendre(magasin.etat(), sauce.id).textContent, /reprise · à reconfirmer/);
-});
-
-test('feuille de clôture : « Retenir tel quel » pour un plat nommé, rien pour une sauce à nommer', () => {
-  const e = etatInitial();
-  definirMenu(e, '2026-10-12', 1, 'Gnocchi alla sorrentina', h());
-  definirMenu(e, '2026-10-13', 1, 'Fusilli al ferretto', h());
-  magasin.remplacer(e);
-  cloture.ouvrirCloture('2026-10-12');
-  const feuille = panneauxOuverts(dom.corps)[0];
-  assert.match(feuille.textContent, /0 plat déjà retenu|0 plats déjà retenus/);
-  assert.equal(boutons(feuille).filter((b) => b.textContent === 'Retenir tel quel').length, 1, 'un seul plat est retenable');
-  assert.match(feuille.textContent, /Rien n'est inventé/);
-  assert.ok(!boutons(feuille).some((b) => /tout retenir/i.test(b.textContent)));
-  parTexte(feuille, 'Retenir tel quel').click();
-  assert.equal(Object.keys(magasin.etat().plats_retenus).length, 1);
-});
-
-test('Réglages : fiches et plats retenus sont listés avec « Oublier »', () => {
-  const e = etatAvecReprise();
-  e.fiches_retenues.zorbi = { categorie: 'autre', role: 'garniture', grammage: { valeur: 80, unite: 'g', etat: 'cuit' }, h: h() };
-  magasin.remplacer(e);
-  const sections = apprentissage.sectionsApprentissage(magasin.etat());
-  const texte = sections.map((s) => s?.textContent ?? '').join(' ');
-  assert.match(texte, /zorbi · garniture · 80 g cuit/);
-  assert.match(texte, /Plats retenus/);
-  assert.ok(sections.some((s) => s && boutons(s).some((b) => b.textContent === 'Oublier')));
+  assert.doesNotMatch(page.textContent, /reprise|reconfirmer/);
 });
 
 test('fiche : une sauce « à confirmer » sans nom n\'offre pas « Corriger le nom »', () => {
   const e = etatInitial();
   definirMenu(e, '2026-10-12', 1, 'Fusilli al ferretto', h());
   magasin.remplacer(e);
-  const sauce = Object.values(magasin.etat().composants).find((c) => c.nom === 'sauce à confirmer');
-  assert.doesNotMatch(vueFiche.rendre(magasin.etat(), sauce.id).textContent, /Corriger le nom/);
+  assert.doesNotMatch(vueFiche.rendre(magasin.etat(), parNom(magasin.etat(), 'sauce à confirmer').id).textContent, /Corriger le nom/);
+});
+
+test('fiche : « Voir sa fiche retenue » n\'apparaît que si l\'élément est retenu, et ouvre la petite fiche', () => {
+  const e = etatInitial();
+  definirMenu(e, '2026-10-12', 1, 'Spaghetti carbonara', h());
+  magasin.remplacer(e);
+  const id = parNom(magasin.etat(), 'carbonara').id;
+  assert.equal(parTexte(vueFiche.rendre(magasin.etat(), id), 'Voir sa fiche retenue'), undefined);
+  retenirFiche(e, 'carbonara', { categorie: 'sauce', role: 'sauce' }, h(1));
+  magasin.remplacer(e);
+  parTexte(vueFiche.rendre(magasin.etat(), id), 'Voir sa fiche retenue').click();
+  const feuille = panneauxOuverts(dom.corps)[0];
+  assert.match(feuille.textContent, /carbonara/);
+  assert.match(feuille.textContent, /Corriger le nom/);
+  fermerFeuilles();
+});
+
+test('feuille de clôture : un élément à la fois ou tous les nommés ; la sauce sans nom est listée à part avec « Préciser »', () => {
+  const e = etatInitial();
+  definirMenu(e, '2026-10-12', 1, 'Gnocchi alla sorrentina', h());
+  definirMenu(e, '2026-10-13', 1, 'Fusilli al ferretto', h());
+  magasin.remplacer(e);
+  cloture.ouvrirCloture('2026-10-12');
+  const feuille = panneauxOuverts(dom.corps)[0];
+  assert.match(feuille.textContent, /Retenir les éléments de la semaine/);
+  assert.match(feuille.textContent, /0 élément déjà retenu/);
+  assert.ok(parTexte(feuille, 'Retenir les 3 éléments nommés'));
+  assert.equal(boutons(feuille).filter((b) => b.textContent === 'Retenir tel quel').length, 3, 'Gnocchi, sorrentina, Fusilli');
+  assert.match(feuille.textContent, /sauce à confirmer · sauce à nommer/);
+  assert.ok(feuille.tous((x) => x.balise === 'a' && x.textContent === 'Préciser').length === 1);
+  assert.ok(feuille.tous((x) => x.balise === 'a' && x.attributs.href === '#/fiches').length === 1, 'lien « Toutes les fiches »');
+  parTexte(feuille, 'Retenir tel quel').click();
+  assert.equal(Object.keys(magasin.etat().fiches_retenues).length, 1);
+  parTexte(panneauxOuverts(dom.corps)[0], 'Retenir les 2 éléments nommés').click();
+  assert.deepEqual(Object.keys(magasin.etat().fiches_retenues).sort(), ['fusilli al ferretto', 'gnocchi', 'sorrentina']);
+  assert.equal(magasin.etat().plats_retenus, undefined);
+  assert.match(panneauxOuverts(dom.corps)[0].textContent, /Tous les éléments nommés de la semaine sont retenus/);
+  assert.ok(!boutons(panneauxOuverts(dom.corps)[0]).some((b) => /Retenir les .* nommés/.test(b.textContent)));
+  assert.ok(parNom(magasin.etat(), 'sauce à confirmer'), 'rien n\'est inventé');
+  fermerFeuilles();
+});
+
+test('Réglages > Apprentissage : plus de liste de fiches ni de plats, un lien vers les fiches des éléments', () => {
+  const e = etatInitial();
+  retenirFiche(e, 'Zorbi', { categorie: 'autre', role: 'garniture' }, h());
+  magasin.remplacer(e);
+  const sections = apprentissage.sectionsApprentissage(magasin.etat());
+  const texte = sections.map((s) => s?.textContent ?? '').join(' ');
+  assert.doesNotMatch(texte, /Plats retenus|Fiches retenues par nom/);
+  assert.match(texte, /1 fiche d'élément retenue/);
+  const lien = sections.flatMap((s) => (s ? s.tous((x) => x.balise === 'a' && x.attributs.href === '#/fiches') : []));
+  assert.equal(lien.length, 1);
+  assert.match(lien[0].textContent, /Voir les fiches des éléments/);
 });

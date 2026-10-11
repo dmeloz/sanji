@@ -1,13 +1,12 @@
 // Réglages > Apprentissage et essais : ce que Sanji a appris (lecture seule) et l'accès à « Notes et diagnostic ».
 
 import { libelleJour } from '../domaine/dates.js';
-import { oublierFiche, oublierPlat } from '../domaine/actions-fiches.js';
 import { oublierMot } from '../domaine/actions-mots.js';
 import { CATEGORIES_MOT } from '../domaine/mots-retenus.js';
 import { rapportApprentissage } from '../domaine/rapport-apprentissage.js';
 import { agir } from '../magasin.js';
 import { h } from './dom.js';
-import { bouton, ligneVide } from './elements.js';
+import { bouton, ligneVide, lien } from './elements.js';
 import { pluriel } from './format.js';
 import { ouvrirCentreDev } from './centre-dev.js';
 import { lireEvenements } from './journal-diagnostic.js';
@@ -29,22 +28,13 @@ function ligneMot(m) {
     bouton('Oublier', () => agir((e, t) => oublierMot(e, m.nom, t)), 'court', { 'aria-label': `Oublier le mot : ${m.nom}` }));
 }
 
-/** Une fiche ou un plat retenu : une ligne (nom et ce qui est retenu) et « Oublier » ; les éléments déjà créés ne changent pas. */
-const ligneRetenue = (entree, oublier, qui) => h('li', { classe: 'ligne-mot' }, h('span', null, entree.resume),
-  bouton('Oublier', () => agir((e, t) => oublier(e, entree.cle, t)), 'court', { 'aria-label': `Oublier ${qui} : ${entree.cle}` }));
-
 function sectionAppris(etat) {
   const r = rapportApprentissage(etat);
   return carte('Ce que Sanji a appris',
     h('p', null, `${pluriel(r.motsRetenus, 'mot retenu', 'mots retenus')}${r.motsRetenus > r.mots.length ? ` (les ${r.mots.length} premiers sont listés)` : ''}.`),
     r.mots.length === 0 ? ligneVide('Aucun mot retenu pour l\'instant.')
       : h('ul', { classe: 'liste-simple' }, r.mots.map(ligneMot)),
-    h('h3', { classe: 'retour-essai-sous-titre' }, 'Fiches retenues par nom'),
-    r.fiches.length === 0 ? ligneVide('Aucune fiche retenue pour l\'instant.')
-      : h('ul', { classe: 'liste-simple' }, r.fiches.map((f) => ligneRetenue(f, oublierFiche, 'la fiche'))),
-    h('h3', { classe: 'retour-essai-sous-titre' }, 'Plats retenus'),
-    r.plats.length === 0 ? ligneVide('Aucun plat retenu pour l\'instant.')
-      : h('ul', { classe: 'liste-simple' }, r.plats.map((p) => ligneRetenue(p, oublierPlat, 'le plat'))),
+    h('p', null, `${pluriel(r.fichesRetenues, 'fiche d\'élément retenue', 'fiches d\'éléments retenues')}. `, lien('#/fiches', 'Voir les fiches des éléments')),
     h('h3', { classe: 'retour-essai-sous-titre' }, 'À préciser par semaine'),
     r.semaines.length === 0 ? ligneVide('Aucune semaine avec des composants.')
       : h('ul', { classe: 'liste-simple' }, r.semaines.map((s) => h('li', null, `Semaine du ${libelleJour(s.lundi)} : ${s.aPreciser} à préciser sur ${s.composants}`))));
