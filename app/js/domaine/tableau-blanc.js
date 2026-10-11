@@ -6,9 +6,9 @@ import { propositionsApprentissage } from './apprentissage.js';
 import { portionsMenu } from './calcul.js';
 import { couvertsMidiDuJour, ventesASaisir } from './couverts-midi.js';
 import { decisionsDe } from './decisions.js';
-import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, lundiDe } from './dates.js';
+import { ajouterJours, aMenuDuJour, creneauxDuJour, estOuvert, jourSemaine, joursEntre, lundiDe } from './dates.js';
 import { jourOuVide, normaliser } from './etat.js';
-import { etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
+import { etatCreneau, etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
 import { rappelCloture } from './cloture.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
 import { cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes } from './savoir.js';
@@ -38,6 +38,21 @@ function morceauxDuMenu(etat, date, menu, intitule) {
   });
 }
 
+/** Une production décidée ce jour, pas faite, dont l'avance n'est pas autorisée par la règle : « hors règle ». */
+function aUneProductionHorsRegle(etat, date) {
+  return Object.values(etat.productions ?? {}).some((p) => {
+    if (p.jourDecide !== date || !etat.composants?.[p.composantId] || p.etat === 'fait') return false;
+    const ev = evaluationProduction(etat, p.id);
+    return Boolean(ev && ev.jours > 0 && ev.exception && !ev.autorisee);
+  });
+}
+
+/** « Jour off » : tous les créneaux du jour sont indisponibles (semaine type ou ce jour). Rien d'autre n'est présumé. */
+function estJourOff(etat, date) {
+  const creneaux = creneauxDuJour(date);
+  return estOuvert(date) && creneaux.length > 0 && creneaux.every((c) => etatCreneau(etat, date, c) === 'indisponible');
+}
+
 function jourDuTableau(etat, date, aujourdhui) {
   const jour = jourOuVide(etat, date);
   const aMenu = aMenuDuJour(date);
@@ -57,6 +72,10 @@ function jourDuTableau(etat, date, aujourdhui) {
   }) : [];
   return {
     date, estAujourdhui: date === aujourdhui, aMenu,
+    // Signes du jour (ancienne page de jour) : jamais sur un jour fermé.
+    horsRegle: estOuvert(date) && aUneProductionHorsRegle(etat, date),
+    aConfirmer: estOuvert(date) && pointsAConfirmer(etat, date).length > 0,
+    jourOff: estJourOff(etat, date),
     menus, nbFiches: Object.values(etat.fiches ?? {}).filter((f) => f.statut === 'active' && f.date === date).length,
     // Couverts du jour : somme des menus chiffrés ; null quand aucun menu n'a de chiffre (jamais un « 0 » inventé).
     couvertsTotal: menus.some((m) => m.couverts !== null) ? menus.reduce((n, m) => n + (m.couverts ?? 0), 0) : null,

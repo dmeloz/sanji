@@ -1,17 +1,9 @@
-// Besoins en produits et suivi de la commande. Trois quantités restent séparées :
-// besoin brut calculé, quantité vérifiée disponible, quantité proposée à commander.
-// `quantiteAcheter` n'est jamais remplie automatiquement. Une ligne notée sans quantité tapée est commandable pour la
-// quantité calculée (besoin majoré de la marge de sécurité, moins le disponible vérifié) quand elle ne repose sur aucune
-// valeur inconnue ; elle est marquée « standard de base » si un standard de base y contribue (décision du 2026-10-04).
+// Besoins en produits de la semaine (lus par Articles). Une ligne est marquée « standard de base » si un standard de
+// base y contribue (décision du 2026-10-04). Le suivi de commande a disparu (v121).
 
-import { ajouterJours, datesDeLaSemaine } from './dates.js';
+import { datesDeLaSemaine } from './dates.js';
 import { calculerComposant } from './calcul.js';
-import { normaliser, suiviProduitVide } from './etat.js';
-
-/** Clé de suivi dans `etat.produits` : lundi|cle|unite. */
-export function cleSuivi(lundi, cle, unite) {
-  return `${lundi}|${cle}|${unite}`;
-}
+import { normaliser } from './etat.js';
 
 /**
  * Besoins de la semaine (services du lundi au samedi), agrégés par produit normalisé et unité, à partir des
@@ -58,32 +50,4 @@ export function besoinsProduits(etat, lundi) {
   }
   const lignes = [...parCle.values()].sort((a, b) => a.nom.localeCompare(b.nom));
   return { lignes, nonChiffrables };
-}
-
-/**
- * Suivi d'une ligne de besoin. `a_reverifier` si un contrôle a été fait et que le besoin a changé depuis
- * (comparaison arrondie à l'unité). `proposeeACommander` n'existe qu'après une vérification chiffrée ;
- * `quantiteAcheter` n'est jamais remplie automatiquement.
- * `quantiteCalculee` : besoin majoré de la marge, moins le disponible vérifié s'il l'est ; null si la ligne dépend d'une
- * valeur inconnue. (Les gestes de commande et la ligne « notée » n'existent plus ; un ancien suivi qui les porte reste lisible.)
- */
-export function suiviProduit(etat, lundi, ligne) {
-  const suivi = { ...suiviProduitVide(), ...(etat.produits?.[cleSuivi(lundi, ligne.cle, ligne.unite)] ?? {}) };
-  const besoinChange = !Number.isFinite(suivi.besoinAuControle)
-    || Math.round(suivi.besoinAuControle) !== Math.round(ligne.besoinBrut);
-  const statutAffiche = suivi.statut !== 'a_verifier' && besoinChange ? 'a_reverifier' : suivi.statut;
-  // La marge de sécurité ne majore que la quantité proposée, après vérification : ni le besoin ni l'achat.
-  const margePourcent = Number.isInteger(etat.reglages?.margeSecurite) ? etat.reglages.margeSecurite : null;
-  const besoinMajore = Math.round(ligne.besoinBrut * (1 + (margePourcent ?? 0) / 100));
-  const proposeeACommander = Number.isFinite(suivi.quantiteVerifiee)
-    ? Math.max(0, besoinMajore - Math.round(suivi.quantiteVerifiee)) : null;
-  const quantiteCalculee = ligne.aValider ? null : proposeeACommander ?? besoinMajore;
-  return {
-    historique: suivi.historique,
-    besoinMajore, quantiteCalculee, standardBase: Boolean(ligne.standardBase),
-    statutAffiche, statut: suivi.statut, besoinBrut: ligne.besoinBrut, besoinAuControle: suivi.besoinAuControle,
-    quantiteVerifiee: suivi.quantiteVerifiee, proposeeACommander, margePourcent, estimationAValider: ligne.aValider,
-    quantiteAcheter: suivi.quantiteAcheter, conditionnement: suivi.conditionnement,
-    fournisseurId: suivi.fournisseurId, commandeLe: suivi.commandeLe,
-  };
 }

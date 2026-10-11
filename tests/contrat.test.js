@@ -30,7 +30,7 @@ test('exports du contrat', () => {
   contient(base, ['chercherBase']);
   contient(planification, ['etatCreneau', 'cibleProduction', 'etatTache', 'ecartProduction', 'evaluerAvance', 'regleDe',
     'suggererCreneau', 'avancesPossibles', 'chargeCreneau', 'feuilleDuJour']);
-  contient(produits, ['besoinsProduits', 'suiviProduit']);
+  contient(produits, ['besoinsProduits']);
   contient(allergenes, ['alertesAllergenes']);
   contient(tableauBlanc, ['tableauBlanc']);
   contient(feuille, ['analyserFeuille', 'repartirSurSemaine']);

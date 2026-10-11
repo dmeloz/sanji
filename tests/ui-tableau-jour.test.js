@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom } from './aide-dom.js';
 import {
-  ajouterPreparatoire, creerFiche, definirMenu, definirStandard, marquerFait, planifier,
+  ajouterPreparatoire, creerFiche, definirCreneau, definirMenu, definirStandard, marquerFait, planifier,
 } from '../app/js/domaine/actions.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
@@ -384,4 +384,28 @@ test('Tableau : sur une autre semaine, Production dit de quelle semaine elle par
   assert.doesNotMatch(zoneAutre.textContent, /Aujourd'hui/);
   const zoneCourante = classes(tableau(S.mardi, e), 'bord-production')[0];
   assert.doesNotMatch(zoneCourante.textContent, /Semaine du/);
+});
+
+test('tableau : un petit signe par jour (hors règle, à confirmer, jour off), icône et mot, rien quand il n\'y a rien à signaler', () => {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'riz', h());
+  prevision(e, S.jeudi, 1, 20);
+  const id = composantValide(e, S.jeudi, 1, J.PRODUIT_SEC_TEST);
+  planifier(e, principaleDe(e, id), S.lundi, 'avant_midi', h());
+  for (const c of ['avant_midi', 'apres_midi', 'avant_soir']) definirCreneau(e, S.mercredi, c, 'indisponible', h());
+  const racine = tableau(S.lundi, e);
+  const signes = classes(racine, 'bord-signe').map((x) => x.textContent);
+  assert.ok(signes.some((t) => /hors règle/.test(t)), 'lundi : hors règle');
+  assert.ok(signes.some((t) => /à confirmer/.test(t)), 'lundi : à confirmer');
+  assert.ok(signes.some((t) => /Jour off selon la semaine type/.test(t)), 'mercredi : jour off');
+  const mardi = classes(racine, 'bord-jour').find((x) => x.textContent.startsWith('Mar'));
+  assert.equal(classes(mardi, 'bord-signe').length, 0, 'mardi, sans rien à signaler, n\'a aucun signe');
+  assert.ok(classes(racine, 'bord-signe').every((x) => classes(x, 'bord-signe-icone').length === 1), 'une icône avec chaque mot');
+  assert.ok(hrefs(racine).includes(`#/production/${S.lundi}`), 'le jour ouvre toujours Production');
+  assert.equal(classes(tableau(S.lundi, etatVide()), 'bord-signe').length, 0, 'rien à signaler : aucun signe');
+});
+
+test('tableau : la légende du signe est lisible (13 px au moins)', () => {
+  const regle = css.match(/\.bord-signe\s*\{[^}]*\}/)?.[0] ?? '';
+  assert.match(regle, /font-size:\s*var\(--t-1\)/);
 });

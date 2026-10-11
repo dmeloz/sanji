@@ -1,4 +1,4 @@
-// Marge de sécurité sur la seule quantité proposée à commander, rappel de sauvegarde, moyenne des ventes.
+// Marge de sécurité (réglage), rappel de sauvegarde, moyenne des ventes.
 // Reprises de Kōzō validées le 2026-10-03. Jeux TEST_ONLY.
 
 import test from 'node:test';
@@ -6,18 +6,9 @@ import assert from 'node:assert/strict';
 import { definirMargeSecurite, noterExport, saisirVentes } from '../app/js/domaine/actions.js';
 import { exporter, importer } from '../app/js/domaine/etat.js';
 import { moyenneVentes, repereVentes } from '../app/js/domaine/points.js';
-import { besoinsProduits, suiviProduit } from '../app/js/domaine/produits.js';
 import { tableauBlanc } from '../app/js/domaine/tableau-blanc.js';
-import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { composantValide, etatVide, h, poserControleProduit, prevision } from './aide.js';
-
-function etatAvecBesoin() {
-  const e = etatVide();
-  prevision(e, S.lundi, 1, 10);
-  composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST);
-  return e;
-}
+import { etatVide, h, prevision } from './aide.js';
 
 test('marge de sécurité : validée entre 0 et 50, vide par défaut, conservée par un export', () => {
   const e = etatVide();
@@ -31,23 +22,6 @@ test('marge de sécurité : validée entre 0 et 50, vide par défaut, conservée
   assert.equal(importer(JSON.parse(JSON.stringify(exporter(e)))).reglages.margeSecurite, 10);
   definirMargeSecurite(e, null, h());
   assert.equal(e.reglages.margeSecurite, null);
-});
-
-test('marge de sécurité : majore la seule quantité proposée à commander, jamais le besoin ni la quantité à acheter', () => {
-  const e = etatAvecBesoin();
-  const ligne = besoinsProduits(e, S.lundi).lignes[0];
-  assert.equal(ligne.besoinBrut, 500);
-  poserControleProduit(e, S.lundi, ligne.cle, ligne.unite, 'a_commander', 100);
-  assert.equal(suiviProduit(e, S.lundi, ligne).proposeeACommander, 400, 'sans marge');
-  definirMargeSecurite(e, 10, h());
-  const avec = suiviProduit(e, S.lundi, ligne);
-  assert.equal(avec.proposeeACommander, 450, '500 + 10 % - 100');
-  assert.equal(avec.margePourcent, 10);
-  assert.equal(avec.besoinBrut, 500, 'le besoin brut n\'est pas majoré');
-  assert.equal(avec.quantiteAcheter, null, 'la quantité à acheter n\'est jamais remplie seule');
-  assert.equal(besoinsProduits(e, S.lundi).lignes[0].besoinBrut, 500);
-  const sansVerif = suiviProduit(etatAvecBesoin(), S.lundi, ligne);
-  assert.equal(sansVerif.proposeeACommander, null, 'rien n\'est proposé avant une vérification chiffrée');
 });
 
 test('sauvegarde : le rappel n\'apparaît qu\'après une semaine sans export, et disparaît à l\'export', () => {

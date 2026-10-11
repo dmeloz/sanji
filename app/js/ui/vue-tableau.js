@@ -70,15 +70,28 @@ function ligneMenu(jour, menu) {
     couvertsDuMenu(jour, menu));
 }
 
+/** Signes du jour : une petite étiquette icône + mot par chose à signaler (jamais la couleur seule) ; rien sinon. */
+function signesDuJour(jour) {
+  const signes = [
+    jour.horsRegle ? ['!', 'hors règle'] : null,
+    jour.aConfirmer ? ['?', 'à confirmer'] : null,
+    jour.jourOff ? ['○', 'Jour off selon la semaine type'] : null,
+  ].filter(Boolean);
+  return signes.map(([icone, mot]) => h('span', { classe: 'bord-signe' }, h('span', { classe: 'bord-signe-icone', 'aria-hidden': 'true' }, icone), mot));
+}
+
 /** Un jour : la ligne entière mène au détail du jour (l'en-tête est étiré sur la ligne), un plat à sa fiche. */
 function jourDuBord(jour) {
   const saisis = jour.menus.filter((m) => m.saisi);
   const couverts = jour.couvertsTotal !== null ? ` · ${pluriel(jour.couvertsTotal, 'couvert', 'couverts')}` : '';
+  const signes = signesDuJour(jour);
+  const dits = [jour.horsRegle ? 'hors règle' : null, jour.aConfirmer ? 'à confirmer' : null, jour.jourOff ? 'jour off selon la semaine type' : null].filter(Boolean);
   return h('li', { classe: `bord-jour${jour.estAujourdhui ? ' bord-aujourdhui' : ''}` },
     h('a', { href: `#/production/${jour.date}`, classe: 'bord-jour-lien feutre',
-      'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''} : ouvrir la production du jour` },
+      'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''}${dits.length ? `, ${dits.join(', ')}` : ''} : ouvrir la production du jour` },
     `${etiquetteJour(jour.date)}${couverts} `,
-    jour.estAujourdhui ? h('span', { classe: 'bord-badge' }, h('span', { 'aria-hidden': 'true' }, '● '), "aujourd'hui") : null),
+    jour.estAujourdhui ? h('span', { classe: 'bord-badge' }, h('span', { 'aria-hidden': 'true' }, '● '), "aujourd'hui") : null,
+    signes),
     saisis.length === 0 ? h('p', { classe: 'tb-discret' }, 'Menus non saisis') : saisis.map((m) => ligneMenu(jour, m)));
 }
 

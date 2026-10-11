@@ -18,7 +18,7 @@ import { LIBELLE_ESTIMATION_A_VALIDER } from '../app/js/domaine/statuts.js';
 import { JEU_REPERES as R, JEU_STANDARDS as ST } from './jeux/TEST_ONLY-savoir.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { composantValide, etatVide, h, menuValide, poserControleProduit, prevision, principaleDe, recetteValidee } from './aide.js';
+import { composantValide, etatVide, h, menuValide, prevision, principaleDe, recetteValidee } from './aide.js';
 import { etatReglette } from './aide-tableau.js';
 import { detailDuJour } from './aide-detail.js';
 
@@ -83,7 +83,6 @@ function etatRiche() {
   definirCreneau(e, S.samediPrecedent, 'avant_soir', 'charge', h());
   definirCapacite(e, 3, h());
   memoriser(e, cru, h());
-  poserControleProduit(e, S.lundi, 'produit_sec_test', 'g', 'a_commander', 100);
   return { e, ids: { sec, cru, prep, vague } };
 }
 
