@@ -5,6 +5,7 @@ import {
   ajouterComposant, assurerProductions, creerRecette, definirMenu, definirPrevision, modifierComposant, validerComposant,
   validerRecette, validerTranscription,
 } from '../app/js/domaine/actions.js';
+import { enseignerMot } from '../app/js/domaine/actions-mots.js';
 import { etatInitial } from '../app/js/domaine/etat.js';
 
 /** Horodatage de test déterministe, n minutes après un point fixe. */
@@ -54,3 +55,9 @@ export function principaleDe(etat, composantId) {
 }
 
 export const copie = (x) => structuredClone(x);
+
+/** Comme `enseignerMot`, puis l'élément est gardé au poste (en menu 2, une garniture ou une sauce enseignée passe hors poste, et un élément hors poste n'a pas de fiche). */
+export function enseignerAuPoste(etat, composantId, categorie, hh) {
+  enseignerMot(etat, composantId, categorie, hh);
+  modifierComposant(etat, composantId, { attribue: true }, hh);
+}

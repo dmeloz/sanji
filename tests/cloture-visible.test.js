@@ -1,11 +1,11 @@
-// Carte « Fin de semaine » (v115) : le rappel de clôture est une carte visible sous « Prochaine » le samedi dès 18:00 et le dimanche.
+// Carte « Fin de semaine » (v115, par élément depuis la v118) : le rappel de clôture est une carte visible sous « Prochaine » le samedi dès 18:00 et le dimanche.
 // Faux DOM : ni mise en page ni tactile réels (à vérifier à l'écran à 390 px).
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { boutons, installerFauxDom } from './aide-dom.js';
 import { definirMenu } from '../app/js/domaine/actions.js';
-import { retenirTelQuel } from '../app/js/domaine/actions-fiches.js';
+import { retenirElementsDeLaSemaine } from '../app/js/domaine/actions-fiches.js';
 import { etatVide, h } from './aide.js';
 
 const LUNDI = '2026-10-12';
@@ -35,13 +35,13 @@ const AVEC_PLAT = () => {
   return e;
 };
 
-test('la carte « Fin de semaine » est présente le samedi à 18:00 et le dimanche avec un plat non retenu', () => {
+test('la carte « Fin de semaine » est présente le samedi à 18:00 et le dimanche avec un élément non retenu', () => {
   for (const [jour, heure] of [['2026-10-17', '18:00'], ['2026-10-18', '09:00']]) {
     const carte = carteDe(page(jour, heure, AVEC_PLAT()));
     assert.ok(carte, `${jour} ${heure}`);
     assert.match(carte.textContent, /Fin de semaine/);
-    assert.match(carte.textContent, /Retenir les plats de la semaine · 1 à retenir/);
-    assert.ok(boutons(carte).some((b) => b.textContent === 'Retenir les plats'));
+    assert.match(carte.textContent, /Retenir les éléments de la semaine · 2 à retenir/);
+    assert.ok(boutons(carte).some((b) => b.textContent === 'Retenir les éléments'));
   }
 });
 
@@ -49,25 +49,25 @@ test('la carte est absente le samedi à 17:59, en semaine et quand tout est rete
   assert.equal(carteDe(page('2026-10-17', '17:59', AVEC_PLAT())), undefined);
   assert.equal(carteDe(page('2026-10-14', '20:00', AVEC_PLAT())), undefined);
   const e = AVEC_PLAT();
-  retenirTelQuel(e, LUNDI, 1, h(1));
+  retenirElementsDeLaSemaine(e, LUNDI, h(1));
   assert.equal(carteDe(page('2026-10-18', '09:00', e)), undefined);
 });
 
-test('la carte précède les Rappels et la ligne « Retenir les plats » n\'y figure plus', () => {
+test('la carte précède les Rappels et la ligne « Retenir les éléments » n\'y figure plus', () => {
   const p = page('2026-10-18', '09:00', AVEC_PLAT());
   const ordre = p.tous(() => true);
   const r = rappels(p);
   if (r) {
     assert.ok(ordre.indexOf(carteDe(p)) < ordre.indexOf(r));
-    assert.ok(!boutons(r).some((b) => /Retenir les plats/.test(b.textContent)));
+    assert.ok(!boutons(r).some((b) => /Retenir les éléments/.test(b.textContent)));
   }
-  assert.equal(boutons(p).filter((b) => /Retenir les plats/.test(b.textContent)).length, 1, 'un seul accès');
+  assert.equal(boutons(p).filter((b) => /Retenir les éléments/.test(b.textContent)).length, 1, 'un seul accès');
 });
 
-test('le bouton « Retenir les plats » ouvre la feuille de clôture', () => {
+test('le bouton « Retenir les éléments » ouvre la feuille de clôture', () => {
   const p = page('2026-10-18', '09:00', AVEC_PLAT());
-  aLHeure('2026-10-18', '09:00', () => boutons(carteDe(p)).find((b) => b.textContent === 'Retenir les plats').click());
+  aLHeure('2026-10-18', '09:00', () => boutons(carteDe(p)).find((b) => b.textContent === 'Retenir les éléments').click());
   const feuilles = dom.corps.tous((x) => x.balise === 'dialog' && x.open);
-  assert.ok(feuilles.some((f) => /Retenir les plats de la semaine/.test(f.textContent)));
+  assert.ok(feuilles.some((f) => /Retenir les éléments de la semaine/.test(f.textContent)));
   dom.corps.tous((x) => x.balise === 'dialog').forEach((dl) => dl.remove());
 });

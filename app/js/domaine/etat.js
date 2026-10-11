@@ -2,7 +2,7 @@
 // Aucune lecture de l'heure : l'horodatage `h` (ISO) est toujours un argument .
 
 import { controleAjustement } from './ajustements.js';
-import { fichesValides, nomsValides, platsValides } from './fiches-retenues.js';
+import { fichesDepuisPlats, fichesValides, nomsValides } from './fiches-retenues.js';
 import { categorieMotValide, motsValides } from './mots-retenus.js';
 import { ETAT_POIDS } from './statuts.js';
 
@@ -86,10 +86,8 @@ export function etatInitial() {
     mots: {},
     // Orthographes retenues (clé = variante normalisée) : { nom: 'nom correct', h }. Voir fiches-retenues.js.
     noms: {},
-    // Fiches retenues par nom correct normalisé, indépendantes du menu : { categorie?, role?, attribue?, grammage?, h }.
+    // Fiches d'ÉLÉMENTS retenues par nom correct normalisé, indépendantes du menu : { nom?, famille?, categorie?, role?, attribue?, grammage?, h }.
     fiches_retenues: {},
-    // Plats complets retenus (clé = intitulé normalisé) : { elements: [{ nom, categorie, role?, attribue, grammage? }], h }. Voir plats-retenus.js.
-    plats_retenus: {},
     standards: {},
     // Valeurs changées par la propriétaire sur les standards de base (clé « usage|sujet »).
     ajustements: {},
@@ -377,9 +375,16 @@ export function importer(texte, aujourdhui = null) {
     if (!estObjet(source.fiches_retenues)) throw new Error('Export corrompu : « fiches_retenues » est invalide.');
     etat.fiches_retenues = fichesValides(source.fiches_retenues);
   }
-  if (source.plats_retenus !== undefined) {
-    if (!estObjet(source.plats_retenus)) throw new Error('Export corrompu : « plats_retenus » est invalide.');
-    etat.plats_retenus = platsValides(source.plats_retenus);
+  // Migration v118 : un ancien `plats_retenus` n'est plus gardé ; ses éléments classés deviennent des fiches d'éléments (sans écraser).
+  Object.assign(etat.fiches_retenues, fichesDepuisPlats(source.plats_retenus, etat.fiches_retenues));
+  // Migration v118 : un élément hors poste n'a pas de fiche ; sa décision reste dans la mémoire d'attribution (`nom|menu`).
+  for (const [cle, f] of Object.entries(etat.fiches_retenues)) {
+    if (f.attribue !== false) continue;
+    const nom = f.nom ?? cle;
+    const cleM = cleMemoire(nom, 2);
+    if (!aCle(etat.memoire, cleM)) etat.memoire[cleM] = { ...memoireVide(), nom, attribue: false, categorie: f.categorie ?? 'a_preciser' };
+    delete f.attribue; // la fiche garde sa portion et son rôle ; elle ne disparaît que si plus rien n'y est retenu
+    if (!f.categorie && !f.role && !f.grammage) delete etat.fiches_retenues[cle];
   }
   if (source.ajustements !== undefined) {
     // { « usage|sujet »: {valeur, unite, le, avant:{valeur, origine}} } : écartée si sans valeur finie ou sans unité, si

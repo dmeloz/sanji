@@ -11,8 +11,7 @@ import {
 } from './etat.js';
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
-import { compositionDepuisPlat, platRetenuPour, poserDepuisPlat, retenirPlatSiValide } from './plats-retenus.js';
-import { ficheEnMemoire, nomCorrect, reprendreFiche, reprendreSurAVenir, retenirFiche } from './fiches-retenues.js';
+import { champsDeComposant, ficheEnMemoire, nomCorrect, reprendreFiche, reprendreSurAVenir, retenirFiche } from './fiches-retenues.js';
 import { chargeCreneau, cibleProduction, ecartProduction, etatTache, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
 import { besoinsProduits, cleSuivi, suiviProduit } from './produits.js';
 import { GROUPES, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
@@ -220,10 +219,7 @@ function creerComposant(etat, date, menu, champs) {
 /** `retires` (facultatif) reçoit { nom, taches } pour chaque composant retiré : le journal doit dire ce qui disparaît. */
 function fusionnerComposants(etat, date, menu, retires = []) {
   const m = etat.jours[date].menus[menu];
-  let propositions = proposerComposants(m.intitule, menu, etat.memoire, undefined, etat.mots, { noms: etat.noms, fiches: etat.fiches_retenues });
-  // Un menu neuf dont l'intitulé est celui d'un plat retenu : tout le plat est recréé (la sauce reprise reste « à reconfirmer »).
-  const plat = Object.values(etat.composants).some((c) => c.date === date && c.menu === menu) ? null : platRetenuPour(etat, date, menu);
-  if (plat) propositions = compositionDepuisPlat(propositions, plat, menu);
+  const propositions = proposerComposants(m.intitule, menu, etat.memoire, undefined, etat.mots, { noms: etat.noms, fiches: etat.fiches_retenues });
   const voulus = new Set(propositions.map((p) => normaliser(p.nom)));
   const duMenu = () => Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
   // Une sauce issue de la lecture implicite et déjà confirmée (renommée) reste tant que l'intitulé n'écrit pas de sauce :
@@ -253,10 +249,8 @@ function fusionnerComposants(etat, date, menu, retires = []) {
     if (p.implicite && gardeeConfirmee) continue;
     presents.add(cle);
     const c = creerComposant(etat, date, menu, { ...p, valide: true });
-    poserDepuisPlat(c, p);
-    const roleExplicite = Boolean(c.role); // venu d'un plat retenu : la propriétaire l'avait réglé
     appliquerSavoir(etat, c);
-    reprendreFiche(etat, c, !roleExplicite); // rôle et portion retenus pour ce nom
+    reprendreFiche(etat, c, true); // rôle et portion retenus pour ce nom (le rôle n'a été posé que par défaut)
     ids.push(c.id);
   }
   const saisi = m.intitule.trim() !== '';
@@ -418,7 +412,7 @@ function memoriserAttribution(etat, c) {
  * Seul un changement d'attribution (au poste ou non) ou de catégorie est mémorisé, par nom, et réappliqué à la saisie
  * suivante. Une correction de portion, de type ou d'étape reste sur ce plat : ni standard, ni base, ni autre plat.
  */
-export function modifierComposant(etat, composantId, champs, h, { interne = false } = {}) {
+export function modifierComposant(etat, composantId, champs, h) {
   verifierH(h);
   const c = exigerComposant(etat, composantId);
   const inconnus = Object.keys(champs ?? {}).filter((k) => !CHAMPS_COMPOSANT.includes(k));
@@ -453,17 +447,14 @@ export function modifierComposant(etat, composantId, champs, h, { interne = fals
   }
   const attributionChangee = ('attribue' in maj && maj.attribue !== c.attribue)
     || ('categorie' in maj && maj.categorie !== c.categorie);
+  const sauceChoisie = 'nom' in maj && estSauceAConfirmer(c); // la propriétaire nomme la sauce implicite : c'est une confirmation
   Object.assign(c, maj);
   // Un composant renommé (sauce choisie…) : ses productions portent le nom courant, jamais l'ancien.
   for (const p of Object.values(etat.productions)) {
     if (p.composantId === c.id && (p.genre === 'principale' || p.genre === 'complement')) p.libelle = libelleCourant(etat, p);
   }
   if (attributionChangee) memoriserAttribution(etat, c);
-  if ((attributionChangee || 'role' in maj) && !estSauceAConfirmer(c)) retenirReglage(etat, c, h);
-  // `interne` (correction d'orthographe) : jamais une confirmation, ni de la sauce reprise ni du plat.
-  if (interne) return terminer(etat, h, 'modifierComposant', `${c.nom} : ${Object.keys(maj).join(', ')}`, c);
-  if ('nom' in maj) delete c.reprise; // une sauce reprise puis changée est choisie, plus à reconfirmer
-  if (retenirPlatSiValide(etat, c.date, c.menu, h)) ajouterJournal(etat, h, 'retenirPlat', `${c.date} menu ${c.menu}`);
+  if ((attributionChangee || 'role' in maj || sauceChoisie) && !estSauceAConfirmer(c)) retenirReglage(etat, c, h);
   return terminer(etat, h, 'modifierComposant', `${c.nom} : ${Object.keys(maj).join(', ')}`, c);
 }
 
@@ -858,7 +849,7 @@ export function enregistrerPesee(etat, composantId, etape, avant, apres, h) {
 
 /** Fiche retenue du nom : ce que la propriétaire vient de régler (catégorie, rôle, attribution en menu 2), sans la portion. */
 function retenirReglage(etat, c, h) {
-  retenirFiche(etat, c.nom, { categorie: c.categorie, role: c.role ?? undefined, attribue: c.menu === 2 ? c.attribue : undefined }, h);
+  retenirFiche(etat, c.nom, champsDeComposant(c), h);
 }
 
 // ---------------------------------------------------------------- mémoire maison
@@ -877,7 +868,7 @@ export function memoriser(etat, composantId, h) {
   etat.memoire[cle] = m;
   // La fiche retenue du nom (indépendante du menu) garde aussi la portion : reprise aux semaines suivantes, menus 1 et 2.
   const g = c.role && c.grammage.valeur > 0 && ['RESTAURANT_VALIDE', 'SAISI_SERVICE'].includes(c.grammage.statut) ? { valeur: c.grammage.valeur, unite: c.grammage.unite, etat: c.grammage.etat } : undefined;
-  retenirFiche(etat, c.nom, { categorie: c.categorie, role: c.role ?? undefined, attribue: c.menu === 2 ? c.attribue : undefined, grammage: g }, h);
+  retenirFiche(etat, c.nom, { ...champsDeComposant(c), grammage: g }, h);
   if (g) reprendreSurAVenir(etat, c.nom, h.slice(0, 10));
   return terminer(etat, h, 'memoriser', c.nom, m);
 }

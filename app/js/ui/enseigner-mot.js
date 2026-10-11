@@ -2,8 +2,9 @@
 // l'élément, retient son mot pour tous les plats et reclasse ceux des semaines à venir (domaine/actions-mots.js).
 
 import { estSauceAConfirmer } from '../domaine/etat.js';
+import { classerEtRetenir, retenirElement } from '../domaine/actions-fiches.js';
 import { enseignerMot } from '../domaine/actions-mots.js';
-import { CATEGORIES_MOT, categorieMotValide } from '../domaine/mots-retenus.js';
+import { CATEGORIES_MOT, categorieMotValide, choixMotDe } from '../domaine/mots-retenus.js';
 import { agirStrict } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { bouton } from './elements.js';
@@ -20,9 +21,12 @@ const ICONES = {
 /** Suggestion valide de l'élément, ou null. */
 export const suggestionDe = (c) => (categorieMotValide(c?.suggestion) ? c.suggestion : null);
 
+/** Icône d'un des quatre choix (la page « Fiches des éléments » la réutilise). */
+export const iconeChoix = (cle) => svg('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round',
+  'stroke-linejoin': 'round', 'aria-hidden': 'true', focusable: 'false' }, svg('path', { d: ICONES[cle] }));
+
 function choix(c, cle) {
-  const icone = svg('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round',
-    'stroke-linejoin': 'round', 'aria-hidden': 'true', focusable: 'false' }, svg('path', { d: ICONES[cle] }));
+  const icone = iconeChoix(cle);
   const propose = suggestionDe(c) === cle;
   return h('button', { type: 'button', classe: `btn btn-court enseigner-choix${propose ? ' btn-principal' : ''}`,
     'aria-label': `${CATEGORIES_MOT[cle]} : retenir « ${c.nom} » pour tous les plats`,
@@ -47,4 +51,30 @@ export function blocEnseigner(c, surSauce = null) {
     h('p', { classe: 'aide' }, suggestion ? `« ${c.nom} » : ${CATEGORIES_MOT[suggestion].toLowerCase()} proposée, à confirmer. Qu'est-ce que c'est ?`
       : `« ${c.nom} » : qu'est-ce que c'est ? Sanji le retiendra pour tous les plats.`),
     h('div', { classe: 'actions' }, Object.keys(CATEGORIES_MOT).map((cle) => choix(c, cle))));
+}
+
+/**
+ * Bloc « Fiche de l'élément » de la fiche technique d'un élément AU POSTE déjà classé : les quatre choix (l'actuel écrit « actuel » et
+ * pressé), et « Retenir la fiche » tant qu'aucune fiche n'existe. Rien hors poste, rien tant que l'élément est « à préciser »
+ * ou proposé (c'est `blocEnseigner` qui parle alors : un seul bloc).
+ * @param {object} c élément ; @param {object|null} fiche sa fiche retenue ; @param {Function} ouvrirFiche ouvre la petite fiche
+ */
+export function blocFicheElement(c, fiche, ouvrirFiche) {
+  if (c.attribue !== true || estSauceAConfirmer(c) || c.categorie === 'a_preciser' || suggestionDe(c)) return null;
+  const actuel = choixMotDe(fiche ?? c);
+  const choisir = (cle) => {
+    const r = agirStrict((e, t) => classerEtRetenir(e, c.id, cle, t));
+    if (r) afficherMessage(`Retenu : ${c.nom} = ${CATEGORIES_MOT[cle].toLowerCase()}, fiche des éléments.`, 'ok');
+  };
+  const retenir = () => {
+    agirStrict((e, t) => retenirElement(e, c.id, t));
+    afficherMessage(`Retenu : ${c.nom} = ${CATEGORIES_MOT[actuel].toLowerCase()}, fiche des éléments.`, 'ok');
+  };
+  return h('section', { classe: 'enseigner', 'aria-label': 'Fiche de l\'élément' },
+    h('p', { classe: 'aide' }, fiche ? `« ${c.nom} » a sa fiche. Catégorie :` : `« ${c.nom} » n'a pas encore de fiche. Catégorie :`),
+    h('div', { classe: 'actions' }, Object.keys(CATEGORIES_MOT).map((cle) => h('button', {
+      type: 'button', classe: `btn btn-court enseigner-choix${cle === actuel ? ' btn-principal' : ''}`, 'aria-pressed': cle === actuel ? 'true' : 'false', onClick: () => choisir(cle),
+    }, iconeChoix(cle), cle === actuel ? `${CATEGORIES_MOT[cle]} · actuel` : CATEGORIES_MOT[cle]))),
+    h('div', { classe: 'actions' }, fiche ? bouton('Voir sa fiche retenue', ouvrirFiche, 'court')
+      : (actuel ? bouton('Retenir la fiche', retenir, 'principal') : null)));
 }

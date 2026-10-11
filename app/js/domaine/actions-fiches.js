@@ -1,11 +1,14 @@
-// Actions sur les orthographes et fiches retenues (voir fiches-retenues.js). Chaque action journalise en clair.
+// Actions sur les orthographes et fiches d'éléments retenues (voir fiches-retenues.js). Chaque action journalise en clair.
 
-import { modifierComposant, terminer } from './actions.js';
+import { definirStandard, modifierComposant, terminer } from './actions.js';
 import { classer } from './actions-mots.js';
-import { ajouterJournal, cleMemoire, estSauceAConfirmer, normaliser } from './etat.js';
-import { FICHES_MAX, NOM_MAX, cleDeNom, evincerLePlusAncien, retenirFiche } from './fiches-retenues.js';
-import { categorieMotValide } from './mots-retenus.js';
-import { clePlat, platRetenuPour, resteAConfirmer, retenirPlatSiValide } from './plats-retenus.js';
+import { elementsDeLaSemaine, lectureDeCloture } from './cloture.js';
+import { cleMemoire, estSauceAConfirmer, normaliser } from './etat.js';
+import { nomDeFiche } from './fiches-elements.js';
+import { FICHES_MAX, NOM_MAX, champsDeComposant, cleDeNom, evincerLePlusAncien, grammageValide, reprendreSurAVenir, retenirFiche } from './fiches-retenues.js';
+import { categorieMotValide, champsPourMot } from './mots-retenus.js';
+import { ROLES_STANDARD, familleDe } from './savoir.js';
+import { ETAT_POIDS } from './statuts.js';
 
 function verifierH(h) {
   if (typeof h !== 'string' || Number.isNaN(Date.parse(h))) {
@@ -23,16 +26,24 @@ function deplacerMemoire(etat, ancien, nouveau) {
   }
 }
 
-/** Les plats retenus gardent la bonne orthographe : leurs éléments et leurs clés d'intitulé suivent le nouveau nom. */
-function renommerDansLesPlats(etat, ancienne, nouvelle, nom) {
-  const motif = new RegExp(`(^| )${ancienne.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}( |$)`);
-  for (const [cle, p] of Object.entries(etat.plats_retenus)) {
-    for (const e of p.elements) if (normaliser(e.nom) === ancienne) e.nom = nom;
-    const cleNeuve = cle.replace(motif, `$1${nouvelle}$2`);
-    if (cleNeuve === cle) continue;
-    if (!Object.hasOwn(etat.plats_retenus, cleNeuve)) etat.plats_retenus[cleNeuve] = p;
-    delete etat.plats_retenus[cle];
-  }
+/** Un nom correct qui contient déjà l'ancien (« riz basmati » → « riz basmati parfumé ») ne devient pas un alias : il redoublerait un mot. */
+const aliasUtile = (cleAncienne, cle) => cleAncienne !== cle && !` ${cle} `.includes(` ${cleAncienne} `);
+
+/** Retient l'ancienne orthographe : `lirePlat` la corrigera aux imports suivants. */
+function retenirAlias(etat, cleAncienne, nom, h) {
+  if (!Object.hasOwn(etat.noms, cleAncienne)) evincerLePlusAncien(etat.noms, FICHES_MAX);
+  etat.noms[cleAncienne] = { nom, h };
+}
+
+/** Le nom change vraiment : orthographes, mémoires et fiche de l'ancien nom passent au nouveau (la fiche en garde le nom d'affichage). */
+function deplacerNom(etat, ancien, cleAncienne, nom, cle, h) {
+  for (const [v, e] of Object.entries(etat.noms)) if (normaliser(e.nom) === cleAncienne) etat.noms[v] = { nom, h }; // l'ancien « nom correct » est renommé
+  delete etat.noms[cle]; // le nouveau nom est correct : il n'est plus une variante
+  deplacerMemoire(etat, ancien, nom);
+  if (!Object.hasOwn(etat.fiches_retenues, cleAncienne)) return;
+  // La fiche cible garde ses champs ; celle de l'ancien nom ne les complète que s'ils manquent.
+  etat.fiches_retenues[cle] = { ...etat.fiches_retenues[cleAncienne], nom, ...(etat.fiches_retenues[cle] ?? {}) };
+  delete etat.fiches_retenues[cleAncienne];
 }
 
 /**
@@ -55,28 +66,14 @@ export function corrigerNom(etat, composantId, nouveauNom, h) {
   const cleAncienne = normaliser(ancien);
   const change = cleAncienne !== cle; // seule la casse ou les accents changent : rien à déplacer ni à retenir
   if (change && cleDeNom(ancien) === '') throw new Error('L\'ancienne orthographe ne peut pas être retenue.');
-  // Un nom correct qui contient déjà l'ancien (« riz basmati » → « riz basmati parfumé ») ne devient pas un alias : il redoublerait un mot.
-  const alias = change && !` ${cle} `.includes(` ${cleAncienne} `);
+  const alias = change && aliasUtile(cleAncienne, cle);
   const jour = h.slice(0, 10);
   const cibles = Object.values(etat.composants).filter((x) => x.id === c.id || (x.date >= jour && normaliser(x.nom) === cleAncienne));
-  // L'orthographe est retenue AVANT les renommages : les plats retenus en chemin se rangent déjà sous le nom correct.
-  if (alias) {
-    if (!Object.hasOwn(etat.noms, cleAncienne)) evincerLePlusAncien(etat.noms, FICHES_MAX);
-    etat.noms[cleAncienne] = { nom, h };
-  }
-  // Interne : une correction d'orthographe ne confirme jamais une sauce reprise et ne retient aucun plat.
-  for (const x of cibles) modifierComposant(etat, x.id, { nom }, h, { interne: true });
-  if (change) {
-    for (const [v, e] of Object.entries(etat.noms)) if (normaliser(e.nom) === cleAncienne) etat.noms[v] = { nom, h }; // l'ancien « nom correct » est renommé
-    delete etat.noms[cle]; // le nouveau nom est correct : il n'est plus une variante
-    deplacerMemoire(etat, ancien, nom);
-    if (Object.hasOwn(etat.fiches_retenues, cleAncienne)) {
-      if (!Object.hasOwn(etat.fiches_retenues, cle)) etat.fiches_retenues[cle] = etat.fiches_retenues[cleAncienne];
-      delete etat.fiches_retenues[cleAncienne];
-    }
-    renommerDansLesPlats(etat, cleAncienne, cle, nom);
-  }
-  retenirFiche(etat, nom, { categorie: c.categorie, role: c.role ?? undefined, attribue: c.menu === 2 ? c.attribue : undefined }, h);
+  if (alias) retenirAlias(etat, cleAncienne, nom, h);
+  // Une correction d'orthographe ne change que le nom : ni catégorie, ni attribution.
+  for (const x of cibles) modifierComposant(etat, x.id, { nom }, h);
+  if (change) deplacerNom(etat, ancien, cleAncienne, nom, cle, h);
+  retenirFiche(etat, nom, champsDeComposant(c), h);
   terminer(etat, h, 'corrigerNom', `${ancien} → ${nom} (${cibles.length} élément(s) à venir ou en cours)`, null);
   return { ancien, nom, corriges: cibles.length, retenue: alias };
 }
@@ -90,43 +87,129 @@ export function oublierFiche(etat, cle, h) {
   return terminer(etat, h, 'oublierFiche', cle, true);
 }
 
-/** Reconfirme une sauce reprise d'un plat retenu (« OK ») : elle n'est plus « à reconfirmer » ; le plat est retenu s'il est validé. */
-export function confirmerReprise(etat, composantId, h) {
+// ---------------------------------------------------------------- retenir des éléments (clôture de la semaine)
+
+/** Retient l'élément : si la lecture n'a fait que le proposer, sa proposition est prise telle quelle (jamais inventée). */
+function retenirUn(etat, c, h) {
+  const l = lectureDeCloture(c);
+  if (l.bloque) throw new Error(`« ${c.nom} » ne peut pas être retenu : ${l.raison}.`);
+  if (l.propose) classer(etat, c, l.choix, h);
+  retenirFiche(etat, c.nom, champsDeComposant(etat.composants[c.id]), h);
+}
+
+/** Clôture : « Retenir tel quel » pour un élément. Une sauce sans nom ou un mot sans proposition sont refusés, sans rien changer. */
+export function retenirElement(etat, composantId, h) {
   verifierH(h);
   const c = etat.composants[composantId];
-  if (!c?.reprise) throw new Error('Cet élément n\'est pas une reprise à reconfirmer.');
-  delete c.reprise;
-  if (retenirPlatSiValide(etat, c.date, c.menu, h)) ajouterJournal(etat, h, 'retenirPlat', `${c.date} menu ${c.menu}`);
-  return terminer(etat, h, 'confirmerReprise', c.nom, true);
+  if (!c) throw new Error('Composant introuvable.');
+  retenirUn(etat, c, h);
+  return terminer(etat, h, 'retenirElement', c.nom, true);
 }
 
 /**
- * Clôture de la semaine : « Retenir tel quel ». Confirme les éléments qui ont déjà un nom concret (une proposition de la lecture
- * est prise telle quelle, une sauce reprise est reconfirmée) et retient le plat. Une sauce sans nom ou un mot sans proposition
- * ne sont jamais inventés : le plat reste non retenu et l'erreur dit pourquoi.
+ * Depuis la fiche technique d'un élément AU POSTE : classe l'élément dans un des quatre choix et retient sa fiche. L'élément reste au
+ * poste (contrairement à `enseignerMot`, qui suit la règle du menu 2) ; aucun mot n'est retenu pour tous les plats.
  */
-export function retenirTelQuel(etat, date, menu, h) {
+export function classerEtRetenir(etat, composantId, choix, h) {
   verifierH(h);
-  const comps = Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
-  if (comps.length === 0) throw new Error('Aucun élément pour ce plat.');
-  const bloquants = comps.map(resteAConfirmer).filter((r) => r?.bloquant).map((r) => r.texte);
-  if (bloquants.length > 0) throw new Error(`Ce plat ne peut pas être retenu tel quel : ${bloquants.join(' ; ')}.`);
-  for (const c of comps) {
-    delete c.reprise;
-    if (c.categorie === 'a_preciser' && categorieMotValide(c.suggestion)) classer(etat, c, c.suggestion, h);
-  }
-  if (!retenirPlatSiValide(etat, date, menu, h) && !platRetenuPour(etat, date, menu)) {
-    throw new Error(clePlat(etat, etat.jours?.[date]?.menus?.[menu]?.intitule) === ''
-      ? 'Ce plat ne peut pas être retenu : son intitulé est vide, trop long ou inutilisable comme clé.'
-      : 'Ce plat ne peut pas être retenu : il reste un élément à confirmer.');
-  }
-  return terminer(etat, h, 'retenirTelQuel', `${date} menu ${menu}`, true);
+  const c = etat.composants[composantId];
+  if (!c) throw new Error('Composant introuvable.');
+  if (c.attribue !== true) throw new Error('Seul un élément au poste a une fiche.');
+  if (!categorieMotValide(choix)) throw new Error(`Classement inconnu : « ${choix} ».`);
+  const champs = { ...champsPourMot(choix, c.menu), attribue: true };
+  if (choix === 'produit' && ['garniture', 'sauce'].includes(c.role)) champs.role = 'autre'; // sinon la fiche se relirait « garniture »
+  modifierComposant(etat, composantId, champs, h);
+  retenirFiche(etat, c.nom, champsDeComposant(etat.composants[composantId]), h);
+  return terminer(etat, h, 'classerEtRetenir', `${c.nom} = ${choix}`, true);
 }
 
-/** Oublie un plat retenu : les éléments déjà créés et les fiches par nom ne changent pas. */
-export function oublierPlat(etat, cle, h) {
+/** Clôture : retient les éléments nommés de la semaine du `lundi` (un par nom) ; jamais une sauce sans nom ni un mot à préciser. */
+export function retenirElementsDeLaSemaine(etat, lundi, h) {
   verifierH(h);
-  if (!Object.hasOwn(etat.plats_retenus, cle)) throw new Error('Ce plat n\'est pas retenu.');
-  delete etat.plats_retenus[cle];
-  return terminer(etat, h, 'oublierPlat', cle, true);
+  const faits = new Set();
+  for (const plat of elementsDeLaSemaine(etat, lundi).plats) {
+    for (const e of plat.elements) {
+      const cle = normaliser(e.nom);
+      if (e.retenu || e.bloque || faits.has(cle)) continue;
+      faits.add(cle);
+      retenirUn(etat, etat.composants[e.id], h);
+    }
+  }
+  if (faits.size > 0) terminer(etat, h, 'retenirElements', `semaine du ${lundi} : ${faits.size} élément(s)`, true);
+  return { retenus: faits.size };
 }
+
+// ---------------------------------------------------------------- la petite fiche (page « Fiches des éléments »)
+
+function exigerFiche(etat, cle) {
+  if (!Object.hasOwn(etat.fiches_retenues, cle)) throw new Error('Cette fiche n\'est pas retenue.');
+  return etat.fiches_retenues[cle];
+}
+
+/**
+ * Corrige le nom d'une fiche. Si des éléments du jour de `h` ou après portent ce nom, c'est `corrigerNom` (ils changent aussi) ;
+ * sinon seule la fiche change. Dans les deux cas l'ancienne orthographe est retenue.
+ * @returns {{ancien:string, nom:string, corriges:number, retenue:boolean}}
+ */
+export function renommerFiche(etat, cle, nouveauNom, h) {
+  verifierH(h);
+  const fiche = exigerFiche(etat, cle);
+  const avenir = Object.values(etat.composants).filter((c) => c.date >= h.slice(0, 10) && normaliser(c.nom) === cle)
+    .sort((a, b) => (a.date < b.date ? -1 : 1));
+  if (avenir.length > 0) return corrigerNom(etat, avenir[0].id, nouveauNom, h);
+  const nom = typeof nouveauNom === 'string' ? nouveauNom.trim().replace(/\s+/g, ' ') : '';
+  const cleNeuve = cleDeNom(nom);
+  if (nom === '') throw new Error('Le nom ne peut pas être vide.');
+  if (nom.length > NOM_MAX) throw new Error(`Le nom est trop long (${NOM_MAX} caractères au plus).`);
+  if (cleNeuve === '') throw new Error('Ce nom ne peut pas être retenu.');
+  const ancien = nomDeFiche(cle, fiche);
+  const alias = cleNeuve !== cle && aliasUtile(cle, cleNeuve);
+  if (alias) retenirAlias(etat, cle, nom, h);
+  if (cleNeuve !== cle) deplacerNom(etat, ancien, cle, nom, cleNeuve, h);
+  else fiche.nom = nom;
+  terminer(etat, h, 'renommerFiche', `${ancien} → ${nom}`, null);
+  return { ancien, nom, corriges: 0, retenue: alias };
+}
+
+/** Change la catégorie d'une fiche (un des quatre choix d'`enseigner-mot.js`). Les éléments déjà créés ne changent pas. */
+export function reclasserFiche(etat, cle, choix, h) {
+  verifierH(h);
+  const fiche = exigerFiche(etat, cle);
+  if (!categorieMotValide(choix)) throw new Error(`Classement inconnu : « ${choix} ».`);
+  const { categorie, role } = champsPourMot(choix, 1);
+  fiche.categorie = categorie;
+  if (role) fiche.role = role;
+  else if (fiche.role === 'sauce' || (choix === 'produit' && fiche.role === 'garniture')) delete fiche.role; // sinon la fiche se relirait « garniture »
+  if (!fiche.role || fiche.role === 'sauce') delete fiche.grammage; // une portion n'a de sens que pour un plat principal ou une garniture
+  fiche.h = h;
+  return terminer(etat, h, 'reclasserFiche', `${nomDeFiche(cle, fiche)} = ${choix}`, true);
+}
+
+/**
+ * Portion tapée sur la fiche : toujours écrite dans la fiche (reprise aux éléments du même nom à venir). Famille et rôle connus,
+ * sans portion ni standard maison jusque-là : elle devient aussi le standard de la famille. Sans fonction (plat principal ou garniture) : refusée.
+ */
+export function definirPortionFiche(etat, cle, valeur, etatPoids, h) {
+  verifierH(h);
+  const fiche = exigerFiche(etat, cle);
+  if (!ROLES_STANDARD.includes(fiche.role)) {
+    throw new Error('Cette fiche n\'a pas de fonction (plat principal ou garniture) : réglez la portion sur l\'élément, dans Production.');
+  }
+  if (!Object.hasOwn(ETAT_POIDS, etatPoids)) throw new Error('État du poids inconnu : sec, cru net ou cuit.');
+  const g = grammageValide({ valeur, unite: 'g', etat: etatPoids });
+  if (!g) throw new Error('La portion doit être un nombre strictement positif.');
+  const famille = fiche.famille ?? familleDe(nomDeFiche(cle, fiche))?.cle;
+  // La portion tapée est toujours celle de la fiche. Le standard maison de la famille n'est posé que s'il n'y en avait ni dans
+  // la fiche ni dans les réglages : jamais écrasé par ce geste.
+  const standard = famille && !fiche.grammage && !etat.standards?.[famille]?.[fiche.role];
+  fiche.grammage = g;
+  fiche.h = h;
+  if (standard) {
+    definirStandard(etat, famille, fiche.role, g, h);
+    return { portee: 'standard' };
+  }
+  reprendreSurAVenir(etat, nomDeFiche(cle, fiche), h.slice(0, 10));
+  terminer(etat, h, 'definirPortionFiche', `${nomDeFiche(cle, fiche)} : ${g.valeur} g (${g.etat})`, true);
+  return { portee: 'fiche' };
+}
+

@@ -1524,3 +1524,22 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .corriger-nom input { max-width: 100%; }
 .cloture-plat { min-width: 0; overflow-wrap: anywhere; padding: 8px 0; }
 .cloture-geste { margin-top: 8px; }
+
+/* v118 : page « Fiches des éléments », petite fiche en feuille, clôture par élément. Jetons du socle seulement. */
+.vue-fiches-elements { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.fe-recherche { width: 100%; max-width: 100%; min-width: 0; min-height: var(--cible); box-sizing: border-box; }
+.fe-zone { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.fe-rubrique { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.fe-liste { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--rayon); overflow: hidden; }
+.fe-liste li + li { border-top: 1px solid var(--bordure); }
+.fe-ligne { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-width: 0; min-height: var(--cible); padding: 10px 16px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.fe-ligne-nom { min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+.fe-ligne-resume { flex: none; color: var(--texte-doux); font-size: var(--t-1); }
+.fe-ligne .pastille { flex: none; }
+.fe-ligne:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.fiche-element, .fe-bloc, .cloture { min-width: 0; overflow-wrap: anywhere; }
+.fiche-element { display: flex; flex-direction: column; gap: 12px; }
+.fe-nom { margin: 0; font-size: 20px; font-weight: 700; }
+.fe-sous-titre { margin: 8px 0 4px; font-size: var(--t0); font-weight: 700; }
+.cloture-element { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; padding: 6px 0; }
+.cloture-element-nom { flex: 1 1 140px; min-width: 0; overflow-wrap: anywhere; font-weight: 600; }

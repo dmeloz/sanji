@@ -210,11 +210,11 @@ function carteFiche(d, aujourd, etat) {
 function carteCloture(d) {
   const r = d.rappelCloture;
   if (!r) return null;
-  const retenus = r.retenus > 0 ? ` · ${pluriel(r.retenus, 'plat déjà retenu', 'plats déjà retenus')}` : '';
+  const retenus = r.retenus > 0 ? ` · ${pluriel(r.retenus, 'élément déjà retenu', 'éléments déjà retenus')}` : '';
   return h('section', { classe: 'tdb-confirmer tdb-cloture', 'aria-label': 'Fin de semaine' },
     h('h2', { classe: 'tdb-confirmer-titre' }, icone(['M12 3l10 18H2z', 'M12 10v5M12 18v.5']), 'Fin de semaine'),
-    h('p', { classe: 'au-sous' }, `Retenir les plats de la semaine · ${r.aRetenir} à retenir${retenus}`),
-    h('button', { type: 'button', classe: 'au-btn au-btn-action', onClick: () => ouvrirCloture(r.lundi) }, 'Retenir les plats'));
+    h('p', { classe: 'au-sous' }, `Retenir les éléments de la semaine · ${r.aRetenir} à retenir${retenus}`),
+    h('button', { type: 'button', classe: 'au-btn au-btn-action', onClick: () => ouvrirCloture(r.lundi) }, 'Retenir les éléments'));
 }
 
 // ------------------------------------------------------------------ rappels

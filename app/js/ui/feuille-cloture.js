@@ -1,45 +1,60 @@
-// Feuille « Retenir les plats de la semaine » (samedi soir et dimanche) : les plats de la semaine pas encore retenus, avec ce qui
-// reste à confirmer. « Retenir tel quel » confirme les éléments déjà nommés et retient le plat ; une sauce sans nom n'est jamais
-// inventée (le plat reste à confirmer, et la feuille le dit). Pas de bouton « tout retenir ». Aucune logique métier ici.
+// Feuille « Retenir les éléments de la semaine » (samedi soir et dimanche) : les éléments au poste de la semaine qui n'ont pas
+// encore de fiche retenue, groupés par plat pour le contexte. « Retenir tel quel » retient un élément ; « Retenir les N éléments
+// nommés » retient tous ceux dont la catégorie est connue. Une sauce sans nom ou un mot « à préciser » n'est jamais retenu : la
+// feuille le liste à part avec « Préciser ». Pas d'inventaire de plats. Aucune logique métier ici.
 
-import { retenirTelQuel } from '../domaine/actions-fiches.js';
-import { ajouterJours, libelleJour } from '../domaine/dates.js';
-import { platsDeLaSemaine } from '../domaine/plats-retenus.js';
-import { agir, etat as etatCourant } from '../magasin.js';
+import { retenirElement, retenirElementsDeLaSemaine } from '../domaine/actions-fiches.js';
+import { elementsDeLaSemaine } from '../domaine/cloture.js';
+import { libelleJour } from '../domaine/dates.js';
+import { CATEGORIES_MOT } from '../domaine/mots-retenus.js';
+import { agir } from '../magasin.js';
 import { h } from './dom.js';
-import { afficherMessage } from './messages.js';
+import { bouton, lien, pastille } from './elements.js';
+import { feuilleVivante } from './feuille-services.js';
 import { pluriel } from './format.js';
-import { panneau } from './panneau.js';
+import { afficherMessage } from './messages.js';
 
-function lignePlat(p) {
-  const zone = h('div', { classe: 'cloture-geste' });
+const titrePlat = (p) => `${p.intitule || 'Menu'} · ${libelleJour(p.date)} · menu ${p.menu}`;
+
+function ligneElement(e) {
   const retenir = () => {
-    const r = agir((e, t) => retenirTelQuel(e, p.date, p.menu, t));
-    if (!r.ok) return;
-    zone.replaceChildren(h('span', { classe: 'discret' }, 'Retenu'));
-    afficherMessage(`Plat retenu : ${p.intitule}.`, 'ok');
+    const r = agir((etat, t) => retenirElement(etat, e.id, t));
+    if (r.ok) afficherMessage(`Élément retenu : ${e.nom}.`, 'ok');
   };
-  if (p.bloque) {
-    zone.appendChild(h('p', { classe: 'aide' }, 'Pas retenu : ce plat garde un élément sans nom (sauce à nommer ou mot à préciser). Rien n\'est inventé : précisez-le sur la fiche.'));
-  } else {
-    zone.appendChild(h('button', { type: 'button', classe: 'btn btn-court', onClick: retenir, 'aria-label': `Retenir tel quel : ${p.intitule}` }, 'Retenir tel quel'));
-  }
-  return h('li', { classe: 'cloture-plat' },
-    h('strong', null, p.intitule), h('span', { classe: 'meta' }, ` · ${libelleJour(p.date)} · menu ${p.menu}`),
-    p.reste.length > 0 ? h('ul', { classe: 'liste-simple' }, p.reste.map((r) => h('li', null, r))) : h('p', { classe: 'aide' }, 'Rien à confirmer.'),
-    zone);
+  return h('li', { classe: 'cloture-element' },
+    h('span', { classe: 'cloture-element-nom' }, e.nom),
+    pastille(e.propose ? `${CATEGORIES_MOT[e.choix].toLowerCase()} proposée` : CATEGORIES_MOT[e.choix].toLowerCase(), e.propose ? 'ambre' : 'gris'),
+    bouton('Retenir tel quel', retenir, 'court', { 'aria-label': `Retenir tel quel : ${e.nom}` }));
+}
+
+function blocPlat(p) {
+  const prets = p.elements.filter((e) => !e.retenu && !e.bloque);
+  return prets.length === 0 ? null : h('div', { classe: 'cloture-plat' }, h('h3', { classe: 'fe-sous-titre' }, titrePlat(p)), h('ul', { classe: 'liste-simple' }, prets.map(ligneElement)));
+}
+
+function blocAPreciser(plats) {
+  const lignes = plats.flatMap((p) => p.elements.filter((e) => !e.retenu && e.bloque).map((e) => h('li', { classe: 'cloture-element' },
+    h('span', { classe: 'cloture-element-nom' }, `${e.nom} · ${e.raison}`),
+    lien(`#/fiche/${encodeURIComponent(e.id)}`, 'Préciser', 'btn btn-court'))));
+  return lignes.length === 0 ? null : h('div', { classe: 'cloture-plat' }, h('h3', { classe: 'fe-sous-titre' }, 'À préciser d\'abord'),
+    h('p', { classe: 'aide' }, 'Rien n\'est inventé : une sauce sans nom ou un mot à préciser ne se retient pas tel quel.'), h('ul', { classe: 'liste-simple' }, lignes));
 }
 
 export function ouvrirCloture(lundi) {
-  const plats = platsDeLaSemaine(etatCourant(), [0, 1, 2, 3, 4, 5].map((i) => ajouterJours(lundi, i)));
-  const aRetenir = plats.filter((p) => !p.retenu);
-  const retenus = plats.length - aRetenir.length;
-  panneau({
-    titre: 'Retenir les plats de la semaine',
-    lectureSeule: true,
-    corps: [
-      h('p', null, `${pluriel(retenus, 'plat déjà retenu', 'plats déjà retenus')} cette semaine.`),
-      aRetenir.length === 0 ? h('p', { classe: 'aide' }, 'Tous les plats de la semaine sont retenus.') : h('ul', { classe: 'liste-simple' }, aRetenir.map(lignePlat)),
-    ],
+  return feuilleVivante({
+    titre: 'Retenir les éléments de la semaine',
+    construire: (etat) => {
+      const s = elementsDeLaSemaine(etat, lundi);
+      const retenirTous = () => {
+        const r = agir((e, t) => retenirElementsDeLaSemaine(e, lundi, t));
+        if (r.ok) afficherMessage(`${pluriel(r.valeur.retenus, 'élément retenu', 'éléments retenus')}.`, 'ok');
+      };
+      return h('div', { classe: 'cloture' },
+        h('p', null, `${pluriel(s.retenus, 'élément déjà retenu', 'éléments déjà retenus')} cette semaine.`),
+        s.aRetenir === 0 ? h('p', { classe: 'aide' }, 'Tous les éléments nommés de la semaine sont retenus.')
+          : h('div', { classe: 'actions' }, bouton(`Retenir les ${pluriel(s.aRetenir, 'élément nommé', 'éléments nommés')}`, retenirTous, 'principal')),
+        s.plats.map(blocPlat), blocAPreciser(s.plats),
+        h('p', null, lien('#/fiches', 'Toutes les fiches')));
+    },
   });
 }

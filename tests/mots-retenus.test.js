@@ -261,7 +261,8 @@ test('fiche : un clic retient le mot, efface la suggestion et reclasse les semai
   assert.equal(duJour(magasin.etat(), PASSE, 1).categorie, 'a_preciser');
   const apres = fiche.rendre(magasin.etat(), c.id);
   assert.doesNotMatch(apres.textContent, /proposée · à confirmer/);
-  assert.equal(boutons(apres).filter((b) => /enseigner-choix/.test(b.className)).length, 0);
+  assert.doesNotMatch(apres.textContent, /qu'est-ce que c'est/, 'plus de bloc d\'enseignement');
+  assert.equal(boutons(apres).filter((b) => /enseigner-choix/.test(b.className)).length, 4, 'v118 : seul le bloc « Fiche de l\'élément » reste (4 choix)');
 });
 
 test('fiche : un élément déjà précisé n\'a pas le bloc', () => {
@@ -269,7 +270,9 @@ test('fiche : un élément déjà précisé n\'a pas le bloc', () => {
   magasin.remplacer(etat);
   const gnocchi = Object.values(magasin.etat().composants).find((x) => x.nom === 'Gnocchi');
   assert.equal(enseigner.blocEnseigner(gnocchi), null);
-  assert.equal(boutons(fiche.rendre(magasin.etat(), gnocchi.id)).filter((b) => /enseigner-choix/.test(b.className)).length, 0);
+  const page = fiche.rendre(magasin.etat(), gnocchi.id);
+  assert.doesNotMatch(page.textContent, /qu'est-ce que c'est/);
+  assert.equal(boutons(page).filter((b) => /enseigner-choix/.test(b.className)).length, 4, 'v118 : le bloc « Fiche de l\'élément » (4 choix) remplace l\'absence de bloc');
 });
 
 test('import : une suggestion qui n\'est pas un classement autorisé est supprimée', () => {

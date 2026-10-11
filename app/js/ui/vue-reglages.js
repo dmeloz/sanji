@@ -833,6 +833,7 @@ export function rendre(etat, param = null) {
       groupe('Poste',
         ligneRubrique('organisation', etat, etat.reglages.semaineTypeConfirmee ? null : pastille('à confirmer', 'ambre')),
         ligneRubrique('produits', etat),
+        ligneLien('#/fiches', 'Fiches des éléments', `· ${Object.keys(etat.fiches_retenues ?? {}).length}`),
         ligneLien('#/import', 'Import des menus', 'saisie de la semaine')),
       groupe('Assistant', ligneRubrique('assistant-ia', etat, assistantPret(lireReglagesIA()) ? pastille('activé', 'vert') : null)),
       groupe('Données',

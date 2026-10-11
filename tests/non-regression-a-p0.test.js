@@ -251,8 +251,8 @@ test('routeur : #/reglages est la racine, #/reglages/<rubrique> une sous-page, u
   }
 });
 
-test('inventaire : les quatre onglets et les dix vues du routeur sont déclarés, les vues d\'origine existent encore', () => {
-  assert.deepEqual(Object.keys(routeur.VUES).sort(), ['articles', 'aujourdhui', 'fiche', 'historique', 'import', 'poste', 'preparer', 'production', 'reglages', 'semaine']);
+test('inventaire : les quatre onglets et les onze vues du routeur sont déclarés, les vues d\'origine existent encore', () => {
+  assert.deepEqual(Object.keys(routeur.VUES).sort(), ['articles', 'aujourdhui', 'fiche', 'fiches', 'historique', 'import', 'poste', 'preparer', 'production', 'reglages', 'semaine']);
   assert.deepEqual(Object.keys(vues).sort(), [...Object.keys(routeur.VUES), 'composant', 'detail', 'jour', 'menus', 'produits', 'stock', 'tableau'].sort());
   assert.deepEqual([...new Set(Object.values(routeur.ONGLET_DE_VUE))].sort(), ['articles', 'aujourdhui', 'production', 'semaine']);
 });
