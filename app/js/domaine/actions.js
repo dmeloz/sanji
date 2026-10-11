@@ -7,16 +7,15 @@ import {
 } from './dates.js';
 import {
   ajouterJournal, assurerJour, composantVide, estSauceAConfirmer, ficheVide, fournisseurVide, memoireVide, normaliser, nouvelId,
-  productionVide, recetteVide, regleVide, suiviProduitVide,
+  productionVide, recetteVide, regleVide,
 } from './etat.js';
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
 import { champsDeComposant, ficheEnMemoire, nomCorrect, reprendreFiche, reprendreSurAVenir, retenirFiche } from './fiches-retenues.js';
 import { chargeCreneau, cibleProduction, ecartProduction, etatTache, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
-import { besoinsProduits, cleSuivi, suiviProduit } from './produits.js';
 import { GROUPES, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
-  CATEGORIE, CHARGE, ETAPE, ETAT_CRENEAU, ETAT_POIDS, PROVENANCE, ROLE, TYPE_COMPOSANT, UNITE, VERIF,
+  CATEGORIE, CHARGE, ETAPE, ETAT_CRENEAU, ETAT_POIDS, PROVENANCE, ROLE, TYPE_COMPOSANT, UNITE,
 } from './statuts.js';
 
 const valeursDe = (enumeration) => Object.values(enumeration);
@@ -1050,73 +1049,6 @@ export function supprimerFournisseur(etat, fournisseurId, h) {
   for (const s of Object.values(etat.produits)) if (s.fournisseurId === fournisseurId) s.fournisseurId = null;
   for (const r of Object.values(etat.recettes)) for (const i of r.ingredients) if (i.fournisseurId === fournisseurId) i.fournisseurId = null;
   return terminer(etat, h, 'supprimerFournisseur', f.nom, true);
-}
-
-// ---------------------------------------------------------------- produits et commande
-
-function suiviDe(etat, lundi, cle, unite) {
-  verifierLundi(lundi);
-  const k = cleSuivi(lundi, cleSure(cle), unite);
-  if (!Object.hasOwn(etat.produits, k)) etat.produits[k] = suiviProduitVide();
-  return etat.produits[k];
-}
-
-/**
- * Contrôle d'un produit : statut ('a_verifier', 'suffisant', 'a_commander'), quantité vérifiée disponible, et le
- * besoin du moment est mémorisé (besoinAuControle). « suffisant » exige une quantité vérifiée au moins égale au besoin.
- * Si le besoin change ensuite, le statut affiché devient « à revérifier ».
- */
-export function controlerProduit(etat, lundi, cle, unite, statut, quantiteVerifiee, h) {
-  verifierH(h);
-  verifierLundi(lundi);
-  verifierDans(statut, VERIF, 'Statut de contrôle');
-  if (statut === 'a_verifier') {
-    return terminer(etat, h, 'controlerProduit', `${cle} : ${statut}`,
-      Object.assign(suiviDe(etat, lundi, cle, unite), { statut, quantiteVerifiee: null, besoinAuControle: null }));
-  }
-  const ligne = besoinsProduits(etat, lundi).lignes.find((l) => l.cle === cle && l.unite === unite);
-  if (!ligne) throw new Error(`Ce produit n'a pas de besoin cette semaine : ${cle} (${unite}).`);
-  if (!Number.isFinite(quantiteVerifiee) || quantiteVerifiee < 0) {
-    throw new Error('Une quantité vérifiée (nombre positif ou nul) est nécessaire : une impression de disponibilité ne suffit pas.');
-  }
-  if (statut === 'suffisant' && Math.round(quantiteVerifiee) < Math.round(ligne.besoinBrut)) {
-    throw new Error('« Suffisant » est impossible : la quantité vérifiée est inférieure au besoin.');
-  }
-  const suivi = Object.assign(suiviDe(etat, lundi, cle, unite), { statut, quantiteVerifiee, besoinAuControle: ligne.besoinBrut });
-  return terminer(etat, h, 'controlerProduit', `${cle} : ${statut}`, suivi);
-}
-
-/** Saisie manuelle de l'achat : champs quantiteAcheter, conditionnement, fournisseurId. Jamais calculée. */
-export function definirAchat(etat, lundi, cle, unite, champs, h) {
-  verifierH(h);
-  const suivi = suiviDe(etat, lundi, cle, unite);
-  if ('quantiteAcheter' in champs) suivi.quantiteAcheter = verifierQuantiteOuNul(champs.quantiteAcheter, 'Quantité à acheter');
-  if ('conditionnement' in champs) suivi.conditionnement = String(champs.conditionnement ?? '');
-  if ('fournisseurId' in champs) {
-    if (champs.fournisseurId !== null) exiger(etat.fournisseurs, champs.fournisseurId, 'Fournisseur');
-    suivi.fournisseurId = champs.fournisseurId;
-  }
-  return terminer(etat, h, 'definirAchat', cle, suivi);
-}
-
-/**
- * Marque une ligne commandée. Une quantité à acheter doit avoir été saisie, sauf pour une ligne NOTÉE sans valeur inconnue :
- * elle se commande pour la quantité notée (calculée au moment de la note, standard de base compris). `quantiteAcheter` n'est
- * jamais remplie par le calcul.
- */
-export function marquerCommande(etat, lundi, cle, unite, h) {
-  verifierH(h);
-  const suivi = suiviDe(etat, lundi, cle, unite);
-  if (suivi.etatLigne === 'retire') throw new Error('Cette ligne est retirée de la liste : remettez-la avant de la marquer commandée.');
-  let detail = cle;
-  if (!Number.isFinite(suivi.quantiteAcheter)) {
-    const ligne = besoinsProduits(etat, lundi).lignes.find((l) => l.cle === cle && l.unite === unite);
-    const commandable = ligne ? suiviProduit(etat, lundi, ligne).quantiteCommandable : null;
-    if (suivi.etatLigne !== 'note' || !Number.isFinite(commandable)) throw new Error("Saisissez d'abord la quantité réellement achetée.");
-    detail = `${cle} : ${commandable} ${unite} notés${ligne.standardBase ? ' (standard de base)' : ''}`;
-  }
-  suivi.commandeLe = h;
-  return terminer(etat, h, 'marquerCommande', detail, suivi);
 }
 
 // ---------------------------------------------------------------- après service

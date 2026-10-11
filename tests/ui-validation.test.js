@@ -1,14 +1,12 @@
-// Feuille de validation et liste « à commander » sous faux DOM : ouverture depuis le plat et depuis Réglages,
+// Feuille de validation sous faux DOM : ouverture depuis le plat et depuis Réglages,
 // un geste principal, deux secondaires, Annuler en lien, états en texte. Ce n'est pas un test dans un navigateur (mise en page, tactile, IndexedDB).
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { definirMenu } from '../app/js/domaine/actions.js';
-import { noterAchat } from '../app/js/domaine/actions-achats.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
-import { composantValide, etatVide, h, prevision } from './aide.js';
+import { etatVide, h, prevision } from './aide.js';
 
 let dom;
 let magasin;
@@ -19,7 +17,6 @@ before(async () => {
   magasin = await import('../app/js/magasin.js');
   vues = {
     fiche: await import('../app/js/ui/vue-fiche.js'),
-    produits: await import('../app/js/ui/vue-produits.js'),
     reglages: await import('../app/js/ui/vue-reglages.js'),
   };
 });
@@ -197,116 +194,4 @@ test('feuille depuis Réglages : « Seulement cette fois » et « Plus tard » f
   d = ouvert();
   await parTexte(d, 'Plus tard').click();
   assert.equal(magasin.etat().validations['riz|garniture'].statut, 'plus_tard');
-});
-
-// ---------------------------------------------------------------- liste « à commander »
-
-function mondeProduits() {
-  const e = etatVide();
-  definirMenu(e, S.lundi, 2, 'riz', h());
-  prevision(e, S.lundi, 2, 40);
-  magasin.remplacer(e);
-}
-
-/** Texte d'état de la ligne compacte (visible sans déplier). */
-const etatsCompacts = (n) => n.tous((x) => x.className.includes('produit-etat-texte')).map((x) => x.textContent).join('|');
-
-test('produits : l\'état de chaque ligne est écrit en texte, avec « Noter à commander » et « Retirer »', () => {
-  nettoyer();
-  mondeProduits();
-  const page = vues.produits.rendre(magasin.etat(), S.lundi);
-  assert.equal(etatsCompacts(page), '', 'état attendu (suggéré) non écrit sur la ligne : seule l exception s écrit');
-  assert.ok(page.tous((x) => x.balise === 'details' && x.className.includes('produit-compact')).length > 0, 'une ligne dépliable par produit');
-  const resume = page.tous((x) => x.balise === 'summary' && x.className.includes('produit-resume'))[0];
-  assert.match(resume.textContent, /standard de base/, 'pastille courte dans la ligne repliée (adapté le 2026-10-04)');
-  assert.doesNotMatch(resume.textContent, /Noter à commander|Fournisseur/, 'les détails et gestes sont dans le dépliant');
-  assert.ok(parTexte(page, 'Noter à commander'));
-  assert.ok(parTexte(page, 'Retirer'));
-  assert.ok(parTexte(page, 'Contrôler') && parTexte(page, 'Achat'), 'le reste est gardé');
-  assert.match(page.textContent, /Marquer commandé/, 'inactif tant qu\'aucune quantité n\'est saisie');
-  assert.doesNotMatch(page.textContent, /Retirées|à relire/);
-});
-
-// Adapté le 2026-10-04 (décision « Standards de base ») : le refus sans quantité tapée vaut pour une valeur inconnue ;
-// une ligne sur standards de base se note sans quantité, pour la quantité calculée marquée « standard de base ».
-test('produits : noter une valeur inconnue sans quantité est refusé, avec une quantité tapée c\'est noté', async () => {
-  nettoyer();
-  const e = etatVide();
-  prevision(e, S.lundi, 1, 40);
-  composantValide(e, S.lundi, 1, { ...J.PRODUIT_CRU_TEST, nom: 'PRODUIT_INCONNU_TEST' },
-    { etapes: [{ etape: 'parage', coefficient: 0.8, statut: 'INCONNU', source: 'TEST_ONLY' }] });
-  magasin.remplacer(e);
-  parTexte(vues.produits.rendre(magasin.etat(), S.lundi), 'Noter à commander').click();
-  const d = ouvert();
-  await d.enfants[0].declencher('submit');
-  assert.match(alertes(d).join(' '), /inconnue/);
-  assert.equal(magasin.etat().produits[`${S.lundi}|produit_inconnu_test|g`], undefined);
-  controleDe(d, 'Quantité à commander (g)').value = '2400';
-  await d.enfants[0].declencher('submit');
-  const suivi = magasin.etat().produits[`${S.lundi}|produit_inconnu_test|g`];
-  assert.equal(suivi.etatLigne, 'note');
-  assert.equal(suivi.quantiteAcheter, 2400);
-  assert.match(etatsCompacts(vues.produits.rendre(magasin.etat(), S.lundi)), /^Noté à commander$/);
-});
-
-test('produits : une ligne sur standards de base se note sans quantité tapée, quantité calculée marquée « standard de base »', async () => {
-  nettoyer();
-  mondeProduits();
-  parTexte(vues.produits.rendre(magasin.etat(), S.lundi), 'Noter à commander').click();
-  const d = ouvert();
-  assert.match(d.textContent, /calculée sur les standards de base \(2 400 g\)/);
-  await d.enfants[0].declencher('submit');
-  assert.deepEqual(alertes(d), []);
-  const suivi = magasin.etat().produits[`${S.lundi}|riz|g`];
-  assert.deepEqual([suivi.etatLigne, suivi.quantiteAcheter], ['note', null], 'noter est la confirmation ; rien n\'est écrit dans la quantité achetée');
-  const page = vues.produits.rendre(magasin.etat(), S.lundi);
-  assert.match(etatsCompacts(page), /^Noté à commander$/);
-  assert.match(page.textContent, /À acheter2 400 g \(calculée, standard de base\)/);
-});
-
-test('produits : « Marquer commandé » est inactif tant que la ligne n\'est pas notée, actif après (quantité notée, rien dans « à acheter » tapé)', async () => {
-  nettoyer();
-  mondeProduits();
-  assert.equal(parTexte(vues.produits.rendre(magasin.etat(), S.lundi), 'Marquer commandé'), undefined, 'inactif (les boutons désactivés ne sont pas listés)');
-  magasin.agir((e, t) => noterAchat(e, S.lundi, 'riz', 'g', {}, t));
-  const bouton = parTexte(vues.produits.rendre(magasin.etat(), S.lundi), 'Marquer commandé');
-  assert.ok(bouton, 'actif : la ligne est notée sur standard de base');
-  bouton.click();
-  const suivi = magasin.etat().produits[`${S.lundi}|riz|g`];
-  assert.ok(suivi.commandeLe);
-  assert.equal(suivi.quantiteAcheter, null, 'jamais rempli par le calcul');
-});
-
-test('produits : « à relire » dit que la quantité calculée a changé depuis la note', () => {
-  nettoyer();
-  mondeProduits();
-  magasin.agir((e, t) => noterAchat(e, S.lundi, 'riz', 'g', {}, t));
-  magasin.agir((e) => { e.reglages.margeSecurite = 30; });
-  const page = vues.produits.rendre(magasin.etat(), S.lundi);
-  assert.match(etatsCompacts(page), /^Noté à commander · à relire$/);
-  assert.match(page.textContent, /À relire : la quantité calculée est maintenant .* vous aviez noté 2 400 g/);
-});
-
-test('produits : retirer range la ligne dans « Retirées », « Remettre » la rend ; « à relire » si le besoin change', () => {
-  nettoyer();
-  mondeProduits();
-  magasin.agir((e, t) => noterAchat(e, S.lundi, 'riz', 'g', { quantite: 2400 }, t));
-  parTexte(vues.produits.rendre(magasin.etat(), S.lundi), 'Retirer').click();
-  let page = vues.produits.rendre(magasin.etat(), S.lundi);
-  const bloc = page.tous((x) => x.balise === 'details' && x.className.includes('lignes-retirees'))[0];
-  assert.ok(bloc, 'bloc replié « Retirées »');
-  assert.equal(bloc.open, false);
-  assert.match(bloc.querySelector('summary').textContent, /Retirées \(1\)/);
-  assert.match(etatsCompacts(bloc), /^Retiré$/);
-  assert.ok(parTexte(bloc, 'Remettre'), 'une ligne retirée montre « Remettre »');
-  assert.ok(!parTexte(bloc, 'Marquer commandé'), 'une ligne retirée n\'a pas le geste « Marquer commandé »');
-  parTexte(bloc, 'Remettre').click();
-  page = vues.produits.rendre(magasin.etat(), S.lundi);
-  assert.equal(page.tous((x) => x.balise === 'details' && x.className.includes('lignes-retirees')).length, 0);
-  assert.match(etatsCompacts(page), /^Noté à commander$/);
-  assert.doesNotMatch(page.textContent, /à relire/);
-  magasin.agir((e, t) => prevision(e, S.lundi, 2, 80));
-  const relire = vues.produits.rendre(magasin.etat(), S.lundi);
-  assert.match(etatsCompacts(relire), /^Noté à commander · à relire$/);
-  assert.equal(magasin.etat().produits[`${S.lundi}|riz|g`].quantiteAcheter, 2400, 'la quantité notée n\'a pas bougé');
 });

@@ -5,8 +5,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  ajouterAdaptation, ajouterPreparatoire, annulerFiche, confirmerRepartition, controlerProduit, creerFiche, definirCapacite,
-  definirCreneau, definirFournisseur, definirRegle, definirStandard, deciderEcart, marquerCommande, marquerFait,
+  ajouterAdaptation, ajouterPreparatoire, annulerFiche, confirmerRepartition, creerFiche, definirCapacite,
+  definirCreneau, definirFournisseur, definirRegle, definirStandard, deciderEcart, marquerFait,
   memoriser, modifierComposant, modifierFiche, planifier, reprendreMemoire, saisirMenusSemaine,
 } from '../app/js/domaine/actions.js';
 import * as allergenes from '../app/js/domaine/allergenes.js';
@@ -17,14 +17,14 @@ import {
   chargeCreneau, ecartProduction, etatTache, evaluerAvance, feuilleDuJour, suggererCreneau,
 } from '../app/js/domaine/planification.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
-import { besoinsProduits, echeanceCommande, suiviProduit } from '../app/js/domaine/produits.js';
+import { besoinsProduits, suiviProduit } from '../app/js/domaine/produits.js';
 import { BASE_METIER } from '../app/js/donnees/base-metier.js';
 import { grammageEffectif } from '../app/js/domaine/savoir.js';
 import { libelle } from '../app/js/domaine/statuts.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_MENUS as M, JEU_STANDARDS as ST } from './jeux/TEST_ONLY-savoir.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { composantValide, copie, etatVide, h, menuValide, prevision, principaleDe, recetteValidee } from './aide.js';
+import { composantValide, copie, etatVide, h, menuValide, poserControleProduit, prevision, principaleDe, recetteValidee } from './aide.js';
 
 const tachesDe = (feuille) => feuille.aFaire.flatMap((g) => g.taches);
 
@@ -262,8 +262,8 @@ test('9. Si un besoin change après vérification des produits, seuls les contr�
   composantValide(etat, S.mardi, 1, J.PRODUIT_CRU_TEST); // 10 × 200 ÷ 0,9 ÷ 0,8 ÷ 0,5 = 5556 g
   const cleSec = 'produit_sec_test';
   const cleCru = 'produit_cru_test';
-  controlerProduit(etat, S.lundi, cleSec, 'g', 'suffisant', 2500, h());
-  controlerProduit(etat, S.lundi, cleCru, 'g', 'a_commander', 1000, h());
+  poserControleProduit(etat, S.lundi, cleSec, 'g', 'suffisant', 2500);
+  poserControleProduit(etat, S.lundi, cleCru, 'g', 'a_commander', 1000);
 
   const ligne = (cle) => besoinsProduits(etat, S.lundi).lignes.find((l) => l.cle === cle);
   assert.equal(suiviProduit(etat, S.lundi, ligne(cleSec)).statutAffiche, 'suffisant');
@@ -289,13 +289,6 @@ test('10. Un délai de commande dépassé ou inconnu est signalé ; la charge d\
   composantValide(etat, S.lundi, 1, J.PRODUIT_SEC_TEST);
   const ligne = besoinsProduits(etat, S.lundi).lignes[0];
   assert.equal(ligne.premiereUtilisation, S.lundi);
-  assert.equal(echeanceCommande(ligne, null, S.veille).statut, 'a_renseigner');
-  const inconnu = definirFournisseur(etat, { nom: 'FOURNISSEUR_TEST' }, h());
-  assert.equal(echeanceCommande(ligne, etat.fournisseurs[inconnu], S.veille).statut, 'a_renseigner');
-  const f = etat.fournisseurs[definirFournisseur(etat, { nom: 'FOURNISSEUR_DELAI_TEST', delaiJours: 3 }, h())];
-  assert.deepEqual(echeanceCommande(ligne, f, '2026-10-01'), { statut: 'ok', dateLimite: '2026-10-02' });
-  assert.equal(echeanceCommande(ligne, f, '2026-10-02').statut, 'aujourdhui');
-  assert.equal(echeanceCommande(ligne, f, '2026-10-03').statut, 'depassee');
 
   // La charge est exprimée en points d'échelle courte/moyenne/longue, jamais en minutes.
   const prep = composantValide(etat, S.lundi, 1, J.PREPARATION_TEST); // charge longue
@@ -545,10 +538,8 @@ test('17. Un paramètre repris des standards de base est visible, étiqueté « 
   assert.ok(Math.abs(ligneCarottes.besoinBrut - 6000 / 0.815) < 1e-6);
   const suivi = suiviProduit(etat, S.lundi, ligneCarottes);
   assert.equal(suivi.estimationAValider, false);
-  assert.deepEqual([suivi.quantiteAcheter, suivi.proposeeACommander, suivi.commandeLe, suivi.quantiteCommandable], [null, null, null, null],
-    'rien n\'est commandé tant que la ligne n\'est pas notée');
-  assert.throws(() => marquerCommande(etat, S.lundi, 'carottes', 'g', h()), /quantité réellement achetée/);
-  controlerProduit(etat, S.lundi, 'carottes', 'g', 'a_commander', 100, h());
+  assert.deepEqual([suivi.quantiteAcheter, suivi.proposeeACommander, suivi.commandeLe], [null, null, null]);
+  poserControleProduit(etat, S.lundi, 'carottes', 'g', 'a_commander', 100);
   const apres = suiviProduit(etat, S.lundi, ligneCarottes);
   assert.equal(apres.quantiteAcheter, null, 'même après un contrôle : la quantité achetée n\'est jamais remplie par le calcul');
 

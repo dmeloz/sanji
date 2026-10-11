@@ -30,7 +30,7 @@ test('exports du contrat', () => {
   contient(base, ['chercherBase']);
   contient(planification, ['etatCreneau', 'cibleProduction', 'etatTache', 'ecartProduction', 'evaluerAvance', 'regleDe',
     'suggererCreneau', 'avancesPossibles', 'chargeCreneau', 'feuilleDuJour']);
-  contient(produits, ['besoinsProduits', 'suiviProduit', 'echeanceCommande']);
+  contient(produits, ['besoinsProduits', 'suiviProduit']);
   contient(allergenes, ['alertesAllergenes']);
   contient(tableauBlanc, ['tableauBlanc']);
   contient(feuille, ['analyserFeuille', 'repartirSurSemaine']);
@@ -40,8 +40,8 @@ test('exports du contrat', () => {
     'annulerFiche', 'confirmerRepartition', 'ajouterAdaptation', 'definirCreneau', 'definirSemaineType', 'confirmerSemaineType',
     'definirCapacite', 'planifier', 'demarrer', 'marquerFait', 'corrigerReel', 'reporter', 'deciderEcart', 'ajouterPreparatoire',
     'supprimerProduction', 'enregistrerPesee', 'memoriser', 'reprendreMemoire', 'definirRegle', 'supprimerRegle', 'creerRecette',
-    'modifierRecette', 'validerRecette', 'definirFournisseur', 'supprimerFournisseur', 'controlerProduit', 'definirAchat',
-    'marquerCommande', 'saisirVentes', 'saisirApresService', 'assurerProductions', 'definirStandard', 'supprimerStandard',
+    'modifierRecette', 'validerRecette', 'definirFournisseur', 'supprimerFournisseur',
+    'saisirVentes', 'saisirApresService', 'assurerProductions', 'definirStandard', 'supprimerStandard',
     'saisirMenusSemaine']);
 });
 

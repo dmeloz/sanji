@@ -11,7 +11,6 @@ import { jourOuVide, normaliser } from './etat.js';
 import { etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
 import { rappelCloture } from './cloture.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
-import { besoinsProduits, echeanceCommande, suiviProduit } from './produits.js';
 import { cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes } from './savoir.js';
 
 /**
@@ -263,31 +262,12 @@ function aConfirmerDuBord(etat, dates, aujourdhui) {
   return { total: categories.length, lignes, reste: categories.length - lignes.length };
 }
 
-/** Commande à relire : besoin changé depuis le contrôle, ou échéance du jour ou dépassée. Rien sans donnée de commande. */
-function commandeARelire(etat, lundi, aujourdhui) {
-  const { lignes } = besoinsProduits(etat, lundi);
-  let arevoir = 0;
-  let echeance = 0;
-  for (const ligne of lignes) {
-    const suivi = suiviProduit(etat, lundi, ligne);
-    if (suivi.statutAffiche === 'a_reverifier') arevoir += 1;
-    const fournisseur = suivi.fournisseurId ? etat.fournisseurs?.[suivi.fournisseurId] ?? null : null;
-    const ech = echeanceCommande(ligne, fournisseur, aujourdhui);
-    if (!suivi.commandeLe && (ech.statut === 'aujourdhui' || ech.statut === 'depassee')) echeance += 1;
-  }
-  const morceaux = [];
-  if (arevoir > 0) morceaux.push(arevoir === 1 ? '1 produit à revérifier' : `${arevoir} produits à revérifier`);
-  if (echeance > 0) morceaux.push(echeance === 1 ? '1 échéance de commande atteinte' : `${echeance} échéances de commande atteintes`);
-  return morceaux.length > 0 ? { texte: `Commande à relire : ${morceaux.join(', ')}`, lien: `#/stock/achats/${lundi}` } : null;
-}
-
 /**
- * Production et commandes en résumé. Semaine courante : le jour désigné. Autre semaine affichée : l'avancement de CETTE
+ * Production en résumé. Semaine courante : le jour désigné. Autre semaine affichée : l'avancement de CETTE
  * semaine (`autreSemaine`), jamais celui d'aujourd'hui ; les avances possibles ne parlent que d'aujourd'hui et sont tues.
  */
 function productionDuBord(etat, aujourdhui, lundi) {
   const autreSemaine = lundi !== lundiDe(aujourdhui);
-  const commande = commandeARelire(etat, lundi, aujourdhui);
   // Ce qui n'est pas encore chiffré : information neutre, jamais une alerte ni une décision.
   const chiffrage = besoinsDe(etat, lundi).lignes;
   if (autreSemaine) {
@@ -297,14 +277,14 @@ function productionDuBord(etat, aujourdhui, lundi) {
       const a = estOuvert(date) ? feuilleDuJour(etat, date).avancement : null;
       if (a) { avancement.faites += a.faites; avancement.total += a.total; }
     }
-    return { autreSemaine, lundi, date: lundi, lien: `#/production/${lundi}`, avancement, avances: 0, commande, chiffrage };
+    return { autreSemaine, lundi, date: lundi, lien: `#/production/${lundi}`, avancement, avances: 0, chiffrage };
   }
   const feuille = estOuvert(aujourdhui) ? feuilleDuJour(etat, aujourdhui) : null;
   const avances = feuille ? feuille.aAvancer.filter((a) => Number.isFinite(a.cible) && a.evaluation.autorisee).length : 0;
   return {
     autreSemaine, lundi, date: aujourdhui, lien: `#/production/${aujourdhui}`,
     avancement: feuille ? feuille.avancement : { faites: 0, total: 0 },
-    avances, commande, chiffrage,
+    avances, chiffrage,
   };
 }
 
@@ -350,7 +330,6 @@ export function tableauBlanc(etat, aujourdhui, lundiAffiche) {
 // ------------------------------------------------------------------ l'écran Aujourd'hui (refonte 1)
 
 const ORDRE_CERTITUDES = Object.freeze(['estimee', 'provisoire', 'confirmee']);
-const A_CONSOMMER_MAX = 3;
 
 /** Certitude d'une fiche de fonction : menu fixe = confirmée ; choix libre selon sa répartition ; hors menu : aucune (jamais inventée). */
 function certitudeFiche(f) {
@@ -418,32 +397,6 @@ function maintenantDe(etat, feuille) {
   };
 }
 
-/**
- * Productions faites pour un service à venir (jour même compris, si faites avant), avec l'avertissement de conservation
- * existant (`evaluationProduction` : `evaluerAvance` + `repereConservation`). Les avertissements d'abord, puis le service le plus proche.
- * Une quantité absente n'est jamais un avertissement.
- */
-function aConsommerDe(etat, aujourd) {
-  const lignes = [];
-  for (const p of Object.values(etat.productions ?? {})) {
-    if (p.etat !== 'fait' || p.genre === 'preparatoire' || p.dateService < aujourd) continue;
-    const composant = etat.composants?.[p.composantId];
-    const ev = composant ? evaluationProduction(etat, p.id, { reelle: true }) : null;
-    if (!ev || !(ev.jours > 0)) continue;
-    lignes.push({
-      productionId: p.id, composantId: composant.id, nom: p.genre === 'complement' ? `Complément : ${composant.nom}` : composant.nom,
-      dateService: p.dateService, dateFait: p.hFait ? String(p.hFait).slice(0, 10) : null, avanceJours: ev.jours,
-      quantite: Number.isFinite(p.quantiteReelle) ? p.quantiteReelle : null, unite: p.unite ?? null,
-      horsRegle: ev.exception && !ev.autorisee,
-      limiteDepassee: ev.conservation === 'depassee',
-      conservation: ev.repere?.depasse ? { texte: ev.repere.texte, provenance: ev.repere.provenance } : null,
-    });
-  }
-  const alerte = (x) => (x.horsRegle || x.limiteDepassee || x.conservation ? 0 : 1);
-  lignes.sort((a, b) => alerte(a) - alerte(b) || a.dateService.localeCompare(b.dateService) || a.nom.localeCompare(b.nom));
-  return { total: lignes.length, lignes: lignes.slice(0, A_CONSOMMER_MAX) };
-}
-
 /** Première date ouverte après `date` (le dimanche est fermé : le lundi suivant). */
 function prochainJourOuvert(date) {
   let d = ajouterJours(date, 1);
@@ -504,8 +457,7 @@ function couvertsMidiAvecVentes(etat, date, heure) {
 
 /**
  * Données de l'écran Aujourd'hui : couverts des menus 1 et 2 et des fiches avec leur certitude, prochaine tâche
- * (« Maintenant »), décisions en attente (points « À confirmer » existants, sans quantité manquante), à consommer en
- * priorité, prochaine fiche de fonction, et ce que l'ancien tableau montrait encore (production, commande à relire,
+ * (« Maintenant »), décisions en attente (points « À confirmer » existants, sans quantité manquante), prochaine fiche de fonction, et ce que l'ancien tableau montrait encore (production,
  * rappel de sauvegarde). Pure : ni DOM ni heure courante.
  */
 export function aujourdhuiDe(etat, aujourd, heure = null) {
@@ -527,7 +479,6 @@ export function aujourdhuiDe(etat, aujourd, heure = null) {
     avancement: feuille ? feuille.avancement : { faites: 0, total: 0 },
     avancementJour: avancementDuJour(feuille),
     decisions: aConfirmerDuBord(etat, datesSemaine, aujourd),
-    aConsommer: aConsommerDe(etat, aujourd),
     // Fiche de fonction du tableau de bord : seulement si elle tombe aujourd'hui ou demain.
     ficheProche: ficheProche && ficheProche.date <= ajouterJours(aujourd, 1) ? ficheProche : null,
     production: productionDuBord(etat, aujourd, lundi),

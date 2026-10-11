@@ -21,7 +21,7 @@ const tous = modules(JS).sort();
 test('app/js/ contient les modules attendus de l\'interface', () => {
   const noms = tous.map((f) => relative(JS, f).split(sep).join('/'));
   for (const attendu of ['main.js', 'stockage.js', 'magasin.js', 'ui/routeur.js', 'ui/vue-tableau.js', 'ui/vue-menus.js', 'ui/vue-detail.js',
-    'ui/vue-jour.js', 'domaine/tableau-blanc.js', 'domaine/feuille.js', 'ui/vue-composant.js', 'ui/vue-produits.js', 'ui/vue-reglages.js']) {
+    'ui/vue-jour.js', 'domaine/tableau-blanc.js', 'domaine/feuille.js', 'ui/vue-composant.js', 'ui/vue-reglages.js']) {
     assert.ok(noms.includes(attendu), attendu);
   }
 });

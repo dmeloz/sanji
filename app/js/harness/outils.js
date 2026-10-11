@@ -116,9 +116,9 @@ const DEFINITIONS = [
     niveau: NIVEAUX.CALCUL, provenance: PROVENANCES.CALCUL_DETERMINISTE, entrees: objet({ productionId: ID }),
     sorties: '{date, creneau, evaluation}|null',
     preconditions: ['la production existe'], erreurs: [CODES.REFERENCE_INCONNUE], effets: 'aucun',
-    executer: ({ productionId }, { etat, aujourdhui, exclure = null }) => {
+    executer: ({ productionId }, { etat, aujourdhui }) => {
       exigerProduction(etat, productionId);
-      const s = suggererCreneau(etat, productionId, aujourdhui, exclure);
+      const s = suggererCreneau(etat, productionId, aujourdhui);
       return s ? { date: s.date, creneau: s.creneau, evaluation: resumerEvaluation(s.evaluation) } : null;
     },
   },
@@ -140,7 +140,7 @@ const DEFINITIONS = [
     verifier: ({ dateDebut, dateFin }) => {
       if (dateDebut > dateFin) throw new ErreurHarness(CODES.PRECONDITION, 'dateDebut doit précéder dateFin.');
     },
-    executer: ({ dateDebut, dateFin }, { etat, aujourdhui, h, exclure = null }) => proposerPlanning(etat, { h, aujourdhui, dateDebut, dateFin, exclure }),
+    executer: ({ dateDebut, dateFin }, { etat, aujourdhui, h }) => proposerPlanning(etat, { h, aujourdhui, dateDebut, dateFin }),
   },
   {
     nom: 'planifier_production', objectif: 'Décide le jour et le créneau d\'une production (commande).',
@@ -169,7 +169,7 @@ export function descriptionsPourModele() {
  * Exécute un outil de lecture, de calcul ou de proposition. Les commandes ne passent jamais ici : voir `commandes.js`.
  * @param {string} nom
  * @param {unknown} entrees
- * @param {{etat:object, aujourdhui:string, h:string, exclure?:Function|null}} contexte `exclure(date, creneau)` : créneau terminé (horloge)
+ * @param {{etat:object, aujourdhui:string, h:string}} contexte
  * @param {{origine?:string}} [options]
  * @returns {{outil:string, provenance:string, resultat:any}} résultat copié : le modèle ne reçoit aucune référence à l'état
  */

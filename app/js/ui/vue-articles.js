@@ -2,8 +2,7 @@
 // Décision du 2026-10-07 « Onglet Articles sans gestion de stock » : ni restes, ni DLC, ni achats, pas de stock théorique.
 // Une section par JOUR DE PRODUCTION (avances comprises) : « Samedi 10 octobre · pour lundi 12 ». Choix Semaine / Aujourd'hui
 // (gardé le temps de la session) et bouton « Partager la liste ». Aucune logique métier ici : la liste vient de
-// `articlesDuPoste` (domaine/articles.js). Les anciennes vues vue-stock.js et vue-produits.js restent
-// dans le code, masquées : aucune route ne les ouvre.
+// `articlesDuPoste` (domaine/articles.js). Les anciennes vues Stock et Produits ont été supprimées (v120).
 
 import { cocherArticle } from '../domaine/actions-articles.js';
 import { articlesDuPoste } from '../domaine/articles.js';

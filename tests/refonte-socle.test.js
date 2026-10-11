@@ -22,7 +22,6 @@ before(async () => {
     fiche: await import('../app/js/ui/vue-fiche.js'),
     semaine: await import('../app/js/ui/vue-semaine.js'),
     articles: await import('../app/js/ui/vue-articles.js'),
-    stock: await import('../app/js/ui/vue-stock.js'), // vue masquée (décision du 2026-10-07) : gardée dans le code, plus de route
     import: await import('../app/js/ui/vue-import.js'),
     poste: await import('../app/js/ui/vue-poste.js'),
   };
@@ -43,14 +42,6 @@ test('vues-relais : chacune exporte titre et rendre', () => {
     assert.equal(typeof vue.titre, 'function', nom);
     assert.equal(typeof vue.rendre, 'function', nom);
   }
-});
-
-// Adapté pour l'écran Stock (refonte 1) : les trois sous-vues sont réelles ; le détail est dans tests/vue-stock.test.js.
-test('vue Stock : « restes », « dlc » et « achats » s\'affichent ; « achats » garde « Aucun stock théorique »', () => {
-  magasin.remplacer(etatVide());
-  for (const sous of ['restes', 'dlc']) assert.doesNotMatch(relais.stock.rendre(magasin.etat(), '2026-10-05', sous).textContent, /À venir/);
-  assert.match(relais.stock.rendre(magasin.etat(), '2026-10-05', 'achats').textContent, /Aucun stock théorique/);
-  assert.match(relais.stock.titre('2026-10-05', 'dlc'), /DLC/);
 });
 
 // Adapté pour l'écran Mode en poste (refonte 1) : sans étapes, il ramène à la fiche ; le détail est dans tests/vue-poste.test.js.

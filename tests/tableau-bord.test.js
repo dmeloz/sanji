@@ -4,7 +4,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { controlerProduit, creerFiche, definirMenu, marquerFait, planifier } from '../app/js/domaine/actions.js';
+import { creerFiche, definirMenu, marquerFait, planifier } from '../app/js/domaine/actions.js';
 import { tableauBlanc } from '../app/js/domaine/tableau-blanc.js';
 import { decisionsDe } from '../app/js/domaine/decisions.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
@@ -115,18 +115,6 @@ test('bord : production = jauge « x/y fait » vers Jour ; une avance possible e
   assert.deepEqual(production.avancement, { faites: 1, total: 1 });
   const sansTache = tableauBlanc(etatVide(), S.mardi).bord.production;
   assert.deepEqual(sansTache.avancement, { faites: 0, total: 0 });
-});
-
-test('bord : une commande à revérifier mène à Produits', () => {
-  const e = etatVide();
-  prevision(e, S.lundi, 1, 10);
-  composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST);
-  assert.equal(tableauBlanc(e, S.lundi).bord.production.commande, null, 'rien à relire sans contrôle');
-  controlerProduit(e, S.lundi, 'produit_sec_test', 'g', 'a_commander', 100, h());
-  prevision(e, S.lundi, 1, 50);
-  const commande = tableauBlanc(e, S.lundi).bord.production.commande;
-  assert.ok(commande, 'le besoin a changé depuis le contrôle');
-  assert.equal(commande.lien, `#/stock/achats/${S.lundi}`);
 });
 
 test('bord : chaque ancienne ligne de la note a une destination (chiffrage, sauvegarde, semaine type)', () => {
