@@ -12,6 +12,7 @@ import { lireLignesFeuille } from '../harness/lecture-photo-ia.js';
 import { aujourdhui } from '../magasin.js';
 import { assistantPret, fournisseurDepuisReglages } from './assistant-reglages.js';
 import { h, svg } from './dom.js';
+import { activerFeuilletage } from './glisser.js';
 import { bouton, lien, repliable } from './elements.js';
 import { pluriel } from './format.js';
 import { problemeHorsLigne } from './horsligne.js';
@@ -288,6 +289,15 @@ export function rendre(etat, lundi) {
   if (semaineRemplie && peutReinitialiser(lundi)) {
     racine.appendChild(h('div', { classe: 'actions' }, bouton('Réinitialiser la semaine', () => demanderReinitialisation(lundi), 'court')));
   }
+
+  // Glisser change de semaine, sauf si une saisie n'est pas enregistrée : la changer la ferait perdre.
+  const saisieNonEnregistree = () => champs.get('feuille-texte').value.trim() !== ''
+    || dates.some((date) => [1, 2].some((menu) => String(champs.get(`menu-${date}-${menu}`).value ?? '').trim() !== String(jourOuVide(etat, date).menus[menu].intitule ?? '').trim()));
+  const versSemaine = (decalage) => {
+    if (saisieNonEnregistree()) { afficherMessage('Enregistrez ou annulez d\'abord.'); return; }
+    location.hash = `#/import/${ajouterJours(lundi, decalage)}`;
+  };
+  activerFeuilletage(racine, { suivant: () => versSemaine(7), precedent: () => versSemaine(-7) });
 
   racine.appendChild(h('div', { classe: 'barre-enregistrer' },
     lien(`#/semaine/${lundi}/tableau`, 'Annuler', 'btn'),

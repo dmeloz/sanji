@@ -3,10 +3,11 @@
 // `#/semaine/<date>` mène à Production de ce jour (routeur), et ce que l'ancienne page de jour offrait (couverts, menus, attribution,
 // fiches, allergies, points à confirmer, détail) est dans la feuille « Services du jour » (feuille-services.js).
 
-import { lundiDe } from '../domaine/dates.js';
+import { ajouterJours, lundiDe } from '../domaine/dates.js';
 import { aujourdhui } from '../magasin.js';
 import { ouvrirAssistantPlanning } from './assistant-planning.js';
 import { h } from './dom.js';
+import { activerFeuilletage } from './glisser.js';
 import { panneau } from './panneau.js';
 import { demanderReinitialisation, peutReinitialiser } from './reinitialiser-semaine.js';
 import * as vueTableau from './vue-tableau.js';
@@ -39,5 +40,9 @@ function boutonActionsFeuille(lundi, date) {
 export function rendre(etat, param) {
   const date = param ?? aujourdhui();
   const interieur = vueTableau.rendre(etat, param ?? null, { actions: boutonActions(lundiDe(date), date) });
-  return h('div', { classe: 'vue-semaine-globale' }, interieur);
+  const racine = h('div', { classe: 'vue-semaine-globale' }, interieur);
+  // Glisser change de semaine, comme les flèches ‹ › de l'en-tête : à partir de la semaine AFFICHÉE (sans paramètre, le week-end, c'est la suivante).
+  const vers = (decalage) => { location.hash = `#/semaine/${ajouterJours(interieur.getAttribute('data-lundi') ?? lundiDe(date), decalage)}/tableau`; };
+  activerFeuilletage(racine, { suivant: () => vers(7), precedent: () => vers(-7) });
+  return racine;
 }

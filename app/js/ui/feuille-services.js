@@ -7,7 +7,7 @@
 import { alertesAllergenes } from '../domaine/allergenes.js';
 import { portionsMenu } from '../domaine/calcul.js';
 import { couvertsMidiDuJour } from '../domaine/couverts-midi.js';
-import { estOuvert, jourSemaine, libelleJour } from '../domaine/dates.js';
+import { estOuvert, jourOuvertVoisin, jourSemaine, libelleJour } from '../domaine/dates.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { pointsAConfirmer } from '../domaine/points.js';
 import { LIBELLES } from '../domaine/statuts.js';
@@ -15,6 +15,7 @@ import { abonner, etat as etatCourant } from '../magasin.js';
 import { h } from './dom.js';
 import { bouton, lien, pastille } from './elements.js';
 import { dialogFiche, ouvrirFiche } from './fiches.js';
+import { activerFeuilletage } from './glisser.js';
 import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { boutonLireFiche } from './lecture-fiche.js';
 import { panneau } from './panneau.js';
@@ -147,7 +148,7 @@ function bandeauPoints(etat, date, fermer) {
 /**
  * Feuille de lecture qui se redessine d'elle-même à chaque changement d'état tant qu'elle est ouverte (nouvelle fiche, composant
  * supprimé…) : abonnement au magasin à l'ouverture, désabonnement à la fermeture. Défilement et focus (par identifiant) sont gardés.
- * `construire(etat, api)` rend le contenu ; `apres` (facultatif) s'exécute une fois à l'ouverture, contenu en place.
+ * `construire(etat, api)` rend le contenu ; `apres(dialogue, redessiner, enHaut)` (facultatif) s'exécute une fois à l'ouverture, contenu en place ; `enHaut()` remet le défilement en haut.
  */
 export function feuilleVivante({ titre, construire, apres }) {
   const zone = h('div', null);
@@ -162,18 +163,24 @@ export function feuilleVivante({ titre, construire, apres }) {
   const dialogue = panneau({ titre, lectureSeule: true, corps: (a) => { api = a; dessiner(); return zone; } });
   const desabonner = abonner(dessiner);
   dialogue.addEventListener('close', desabonner);
-  apres?.(dialogue);
+  apres?.(dialogue, dessiner, () => { if (zone.parentNode) zone.parentNode.scrollTop = 0; });
   return dialogue;
 }
 
 /** Feuille « Détail du jour » : intitulés, composants, prévisions, fiches, allergies, créneaux, après service, points (tout à plat). */
-export function ouvrirDetailDuJour(date, { ancre = null } = {}) {
+export function ouvrirDetailDuJour(dateDepart, { ancre = null } = {}) {
+  let date = dateDepart;
   return feuilleVivante({
     titre: 'Détail du jour',
     construire: (etat) => h('div', { classe: 'vue-detail' },
       h('p', { classe: 'aide' }, `${majuscule(libelleJour(date))}. La carte n'est qu'un contexte : aucune quantité n'en est calculée.`),
       ...vueDetail.sectionsDuJour(etat, date)),
-    apres: () => { if (ancre) document.getElementById(ancre)?.scrollIntoView?.({ block: 'start' }); },
+    // Glisser change de jour (le dimanche est sauté) et redessine la feuille, comme sur Production.
+    apres: (dialogue, redessiner, enHaut) => {
+      const vers = (sens) => { date = jourOuvertVoisin(date, sens); redessiner(); enHaut(); };
+      activerFeuilletage(dialogue, { suivant: () => vers(1), precedent: () => vers(-1) });
+      if (ancre) document.getElementById(ancre)?.scrollIntoView?.({ block: 'start' });
+    },
   });
 }
 
