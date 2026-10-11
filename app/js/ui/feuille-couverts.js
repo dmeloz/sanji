@@ -58,7 +58,7 @@ function ligneFormule(c) {
     h('span', { classe: 'au-sous' }, `menu ${c.menu} · ${c.nom}`),
     h('span', { classe: 'cv-calcul' }, portion && resultat
       ? [h('span', { classe: 'au-qte' }, String(c.couverts)), ' × ', h('span', { classe: 'au-qte' }, portion), ' = ', h('span', { classe: 'au-qte' }, qteNoeuds(resultat))]
-      : [h('span', { classe: 'au-qte' }, String(c.couverts)), ' portions · quantité à compléter']));
+      : [h('span', { classe: 'au-qte' }, String(c.couverts)), ' couverts · à chiffrer']));
 }
 
 /** Les fiches de fonction du jour : lien vers le détail du jour (leur gestion reste dans Semaine). */

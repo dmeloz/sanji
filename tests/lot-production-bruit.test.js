@@ -291,7 +291,7 @@ test('fiche, bug B3 : « 25 portions » n\'est pas écrit deux fois', () => {
   const grande = classes(racine, 'fiche-qte-grande')[0].textContent;
   assert.doesNotMatch(grande, /portions?\s+portions?/i);
   assert.doesNotMatch(racine.textContent, /\d\s+portions?\s+portions?/);
-  assert.match(grande, /composition à définir/, 'le reste de la précision est gardé');
+  assert.equal(grande.trim(), 'à chiffrer', 'sans quantité, « à chiffrer » seul (pas de suffixe)');
 });
 
 test('composant (page complète) : « 25 portions » n\'est pas écrit deux fois non plus', () => {

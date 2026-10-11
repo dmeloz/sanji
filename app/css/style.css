@@ -597,8 +597,9 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .liste-lots li:first-child { border-top: 0; }
 .lignes-ecartees li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--bordure); }
 
-/* ------------------------------------------------------------ impression (feuille du jour, liste Produits) */
+/* ------------------------------------------------------------ impression (feuille du jour, liste Articles) */
 @media print {
+  .prod-asaisir { display: inline-block !important; } /* une quantité inconnue sort lisible sur papier : « à chiffrer » */
   :root { color-scheme: light; }
   body { background: #fff; color: #000; }
   .onglets, .bouton-dev, .bandeaux, .messages, #panneaux, .pas-imprime, .actions, button, nav { display: none !important; }
@@ -713,8 +714,8 @@ body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + en
 
 .au-maintenant-actions { display: flex; gap: 8px; }
 .au-btn { display: flex; align-items: center; justify-content: center; min-height: var(--haut-bouton); border-radius: var(--r-bouton); font: inherit; font-size: var(--t-ligne); font-weight: 600; text-decoration: none; cursor: pointer; }
-.au-btn-clair { flex: 2; background: var(--sur-encre); color: var(--encre); border: 1px solid var(--sur-encre); }
-.au-btn:focus-visible { outline: 3px solid var(--sur-encre); outline-offset: 2px; }
+.au-btn-clair { flex: 2; background: var(--carte); color: var(--encre); border: 1.5px solid var(--encre); }
+.au-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 /* Cartes et lignes */
 .au-lien-court { display: inline-flex; align-items: center; min-height: var(--cible); padding: 0 4px; font-size: var(--t-corps); font-weight: 600; color: var(--action); }
@@ -748,17 +749,17 @@ body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + en
 .fiche-retour { display: inline-flex; align-items: center; gap: 2px; min-height: var(--cible); margin-left: -6px; color: var(--action-fonce); font-size: var(--t0); text-decoration: none; justify-self: start; }
 .fiche-entete { display: grid; gap: 6px; }
 .fiche-etiquettes { display: flex; flex-wrap: wrap; gap: 6px; }
-.fiche-quantite { display: grid; gap: 10px; padding: 16px; border-radius: var(--r-carte); background: var(--encre); color: var(--sur-encre); }
-.fiche-legende { font-size: var(--t-legende); color: var(--sur-encre); overflow-wrap: anywhere; }
+.fiche-quantite { display: grid; gap: 10px; padding: 16px; border-radius: var(--r-carte); background: var(--carte); color: var(--texte); border: 1px solid var(--bordure); border-left: 6px solid var(--encre); }
+.fiche-legende { font-size: var(--t-legende); color: var(--texte-moyen); overflow-wrap: anywhere; }
 .fiche-qte-grande { font-family: var(--police-qte); font-size: var(--t-qte-grande); font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .fiche-qte-grande small { font-family: var(--police); font-size: var(--t-legende); font-weight: 400; }
 .fiche-qte-inconnue { font-size: var(--t-section); }
-.fiche-repartition { display: grid; gap: 6px; padding-top: 8px; border-top: 1px solid var(--sur-encre); }
+.fiche-repartition { display: grid; gap: 6px; padding-top: 8px; border-top: 1px solid var(--bordure-forte); }
 .fiche-repartition li { display: flex; align-items: center; gap: 10px; min-height: 28px; font-size: var(--t-corps); }
 .fiche-rep-nom { flex: none; min-width: 90px; }
 .fiche-rep-nom small { font-size: var(--t-legende); }
 .fiche-jauge { flex: 1; height: 6px; border-radius: 3px; background: var(--bordure-forte); overflow: hidden; }
-.fiche-jauge > span { display: block; height: 6px; background: var(--sur-encre); }
+.fiche-jauge > span { display: block; height: 6px; background: var(--encre); }
 .fiche-qte { font-family: var(--police-qte); font-size: var(--t-qte); font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; }
 .fiche-bloc { display: grid; gap: 8px; }
 .fiche-titre-bloc { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); }
@@ -1017,7 +1018,7 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .tdb-jours { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .tdb-jour { display: flex; flex-direction: column; gap: 6px; min-height: 150px; padding: 10px 10px 12px; border-radius: var(--r-carte-petite); background: var(--carte); color: var(--texte); text-decoration: none; }
 .tdb-jour:focus-visible, .tdb-case:focus-visible, .tdb-avance:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.tdb-jour-auj { background: var(--encre); color: var(--sur-encre); }
+.tdb-jour-auj { background: var(--carte); color: var(--texte); border-left: 6px solid var(--encre); }
 .tdb-j { font-size: var(--t-legende); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
 .tdb-m { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .tdb-m b { font-size: var(--t-legende); font-weight: 700; opacity: 0.75; }
@@ -1043,7 +1044,7 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .tdb-tout-voir { background: none; border: 0; cursor: pointer; color: var(--exception); }
 .tdb-rappels { display: flex; flex-direction: column; }
 /* Prochaine : une carte de la page, qui défile avec elle (jamais fixe). */
-.prochaine { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: var(--r-carte-petite); background: var(--encre); color: var(--sur-encre); }
+.prochaine { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: var(--r-carte-petite); background: var(--carte); color: var(--texte); border: 1px solid var(--bordure); border-left: 6px solid var(--encre); }
 .prochaine-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: var(--t-legende); }
 .prochaine-etiquette { font-size: var(--t-legende); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; }
 .prochaine-ligne { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
@@ -1052,7 +1053,7 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .prochaine-neutre, .prochaine-vide-texte { font-size: var(--t-corps); opacity: 0.9; }
 .prochaine-vide { background: var(--carte); color: var(--texte); border: 1px solid var(--bordure); }
 .prochaine .au-btn-action { flex: 1; background: var(--action); color: var(--sur-action); border: 1px solid var(--action); }
-.prochaine .au-btn:focus-visible { outline: 3px solid var(--sur-encre); outline-offset: 2px; }
+.prochaine .au-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 /* ===== Feuilles « Couverts midi » et « Ventes du midi » (refonte 2) : − / +, choix rapides, répartition, détail replié. ===== */
 .tdb-case-bouton { border: 0; font: inherit; text-align: left; cursor: pointer; width: 100%; }
 .tdb-case-tete { display: flex; align-items: center; justify-content: space-between; }
