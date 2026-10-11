@@ -261,8 +261,6 @@ a { color: var(--bleu-texte); }
 .btn-danger { background: var(--carte); border-color: var(--rouge); color: var(--rouge-texte); }
 .btn-court { padding: 6px 14px; font-size: var(--t-1); min-height: var(--cible); }
 .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
-.nav-periode { display: flex; flex-wrap: wrap; gap: 8px; }
-.nav-periode .btn { flex: 1 1 auto; }
 
 .encadre { border-radius: 10px; padding: 12px 14px; border: 1px solid var(--bordure); background: var(--carte-2); }
 .encadre-alerte { background: var(--ambre-fond); border-color: var(--ambre); color: var(--ambre-texte); }
@@ -642,17 +640,6 @@ details.carte.repliable[open] { padding-bottom: 16px; }
 .case-fait:focus-visible { outline: 3px solid var(--focus); outline-offset: -4px; }
 
 /* Produits : liste compacte, une ligne par produit ; le détail se déplie. */
-.produits-liste { border-top: 1px solid var(--bordure); }
-.produit-compact { border-bottom: 1px solid var(--bordure); }
-.produit-resume { display: block; min-height: var(--cible); padding: 8px 0; cursor: pointer; list-style: none; }
-.produit-resume::-webkit-details-marker { display: none; }
-.produit-ligne { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.produit-nom { font-size: var(--t0); overflow-wrap: anywhere; }
-.produit-chiffre { font-size: var(--t2); line-height: 1.1; }
-.produit-etat { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: var(--t-1); color: var(--texte-doux); }
-.produit-compact[open] > .produit-resume { border-bottom: 1px dashed var(--bordure); }
-.produit-compact > :not(summary) { margin-top: 8px; }
-.produit-compact > .actions { padding-bottom: 12px; }
 
 /* Tableau : élément implicite (sauce ou base « à confirmer »), distinct de ce que le chef a écrit. */
 .tb-implicite { font-size: var(--t-1); font-style: italic; color: var(--texte-doux); text-decoration: none; }
@@ -728,8 +715,6 @@ body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + en
 .au-btn:focus-visible { outline: 3px solid var(--sur-encre); outline-offset: 2px; }
 
 /* Cartes et lignes */
-.au-carte { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 6px; border-radius: var(--r-carte); background: var(--carte); }
-.au-carte-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .au-lien-court { display: inline-flex; align-items: center; min-height: var(--cible); padding: 0 4px; font-size: var(--t-corps); font-weight: 600; color: var(--action); }
 .au-lignes { display: flex; flex-direction: column; }
 .au-ligne { display: flex; align-items: center; gap: 10px; width: 100%; min-height: var(--cible); padding: 6px 0; border: 0; border-bottom: 1px solid var(--bordure); background: none; color: var(--texte); font: inherit; font-size: var(--t-corps); text-align: left; text-decoration: none; }
@@ -738,14 +723,6 @@ body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + en
 .au-ligne-lien { color: var(--action); font-weight: 600; }
 .au-confirmer-mot { flex: none; padding: 1px 6px; border-radius: var(--r-etiquette); background: var(--exception-fond); color: var(--exception); font-size: var(--t-legende); font-weight: 600; }
 .au-confirmer-texte { flex: 1; min-width: 0; }
-.au-conso { padding: 2px 0; border-bottom: 1px solid var(--bordure); }
-.au-conso:last-child { border-bottom: 0; }
-.au-conso-lien { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--cible); color: var(--texte); text-decoration: none; font-size: var(--t-corps); }
-.au-conso-corps { display: flex; flex-direction: column; min-width: 0; }
-.au-conso-nom { font-weight: 500; overflow-wrap: anywhere; }
-.au-conso-droite { display: flex; flex-direction: column; align-items: flex-end; flex: none; }
-.au-etiquette-statut { padding: 1px 6px; border-radius: var(--r-etiquette); background: var(--carte-2); color: var(--texte-moyen); font-size: var(--t-legende); font-weight: 600; }
-.au-attention { padding-bottom: 6px; font-size: var(--t-legende); color: var(--texte); }
 .au-hors-regle { padding: 1px 6px; border-radius: var(--r-etiquette); background: var(--exception-fond); color: var(--exception); font-size: var(--t-legende); font-weight: 600; }
 .au-hors-regle::before { content: "\25B3\00A0"; }
 .au-allergie { font-weight: 600; }
@@ -824,54 +801,12 @@ body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + en
 .vue-semaine-globale .bord-titre { font-size: clamp(20px, 5.6vw, var(--t-titre)); font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
 .vue-semaine-globale .bord-aujourdhui { border-radius: var(--r-carte-petite); }
 /* ===== Écran Stock (refonte 1) : sélecteur segmenté, Restes, DLC, Achats en cartes. Jetons du socle seulement. ===== */
-.stock-entete { display: flex; flex-direction: column; gap: 4px; }
-.stock-sous { margin: 0; font-size: var(--t-1); font-weight: 500; color: var(--texte-doux); }
-.stock-horsligne { white-space: nowrap; }
-.stock-segments { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: var(--r-bouton); background: var(--carte-2); }
+
 .stock-segment { display: flex; align-items: center; justify-content: center; min-height: var(--cible); border-radius: 9px; font-size: var(--t-1); font-weight: 500; color: var(--texte-doux); text-decoration: none; border: 2px solid transparent; }
 .stock-segment-actif { background: var(--carte); color: var(--texte); font-weight: 700; border-color: var(--encre); }
-.stock-segment:focus-visible, .stock-jour:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.stock-segment:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
-.stock-carte, .stock-groupe, .produits-groupe { background: var(--carte); border-radius: var(--r-carte); padding: 8px 14px 12px; }
-.stock-carte > * + * { margin-top: 10px; }
-.stock-carte-titre, .stock-groupe-titre { margin: 4px 0 6px; font-size: var(--t-legende); font-weight: 650; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); }
-.stock-legende { display: block; font-size: var(--t-legende); color: var(--texte-doux); }
-.stock-qte { font-family: var(--police-qte); font-size: var(--t-qte); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--texte); }
-
-.stock-jours { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
-.stock-jour { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: var(--cible); padding: 2px; border-radius: 10px; border: 1px solid var(--bordure); background: var(--carte); color: var(--texte); font: inherit; font-size: var(--t-1); cursor: pointer; }
-.stock-jour-sous { font-size: var(--t-legende); color: var(--texte-doux); }
-.stock-jour-actif { background: var(--encre); color: var(--sur-encre); border-color: var(--encre); font-weight: 700; }
-.stock-jour-actif .stock-jour-sous { color: inherit; }
-.stock-reste { padding: 10px 0; border-top: 1px solid var(--bordure); }
-.stock-reste:first-of-type { border-top: 0; }
-.stock-reste-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.stock-reste-nom { font-size: var(--t-ligne); font-weight: 600; min-height: var(--cible); display: inline-flex; align-items: center; }
-.stock-valider .btn { width: 100%; min-height: 52px; font-size: var(--t-ligne); }
-
-.stock-dlc-liste { list-style: none; margin: 0; padding: 0; }
-.stock-dlc { padding: 10px 0; border-top: 1px solid var(--bordure); }
-.stock-dlc:first-child { border-top: 0; }
-.stock-dlc-ligne { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: var(--cible); }
-.stock-dlc-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.stock-dlc-nom { font-size: var(--t-ligne); font-weight: 600; overflow-wrap: anywhere; }
-.stock-dlc-alerte { background: var(--exception-fond); border: 1px solid var(--exception-bord); border-radius: var(--r-carte-petite); padding: 10px 12px; margin: 6px 0; }
-.stock-mention { margin: 4px 0 0; font-size: var(--t-1); color: var(--texte-moyen); }
-.stock-mention-alerte { color: var(--exception); font-weight: 600; }
-
-.produits-groupe { padding: 4px 14px 8px 8px; }
-.produits-groupe + .produits-groupe { margin-top: 12px; }
-.produits-groupe-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 10px 0 4px 6px; }
-.produits-groupe-nom { margin: 0; font-size: var(--t-corps); font-weight: 700; }
-.produits-groupe-echeance { font-size: var(--t-legende); color: var(--texte-doux); }
-.produit-ligne { align-items: center; gap: 8px; }
-.produit-marque { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex: none; border: 2px solid var(--bordure-forte); border-radius: var(--r-case); font-size: var(--t-1); font-weight: 700; }
-.produit-titre { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.produit-sous { font-size: var(--t-legende); color: var(--texte-doux); }
-.produit-commande { display: flex; flex-direction: column; align-items: flex-end; flex: none; }
-.produit-commande .produit-chiffre { font-family: var(--police-qte); font-size: var(--t-qte); font-weight: 600; line-height: 1.2; }
-.produit-legende { font-size: var(--t-legende); color: var(--texte-doux); }
-@media (prefers-reduced-motion: reduce) { .stock-segment, .stock-jour { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .stock-segment { transition: none; } }
 
 /* ===== Écran À décider (refonte 1, feuille du bas, maquette Exceptions) ===== */
 dialog.panneau.feuille-decisions {
@@ -973,10 +908,9 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .qte-mot { font-family: var(--police); font-weight: 500; font-size: var(--t-corps); letter-spacing: 0; }
 .tache-quantite { font-family: var(--police); }
 /* Avertissement de conservation : une phrase, puis la provenance courte. */
-.mep-conservation strong, .au-attention strong { font-weight: 600; }
+.mep-conservation strong { font-weight: 600; }
 /* Ligne Achats : la quantité proposée reste lisible à droite. */
-.produit-commande { text-align: right; max-width: 45%; }
-.produit-legende { overflow-wrap: anywhere; }
+
 /* Production : quantité de la ligne en grand, alignée à droite, unité plus petite. */
 .prod-ligne .mep-quantite { align-items: flex-end; text-align: right; }
 .prod-ligne .mep-qte { font-size: max(var(--t-qte), 20px); font-weight: 600; text-align: right; }
@@ -1019,23 +953,15 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 /* ===== Lot Stock et Import (audit v56) : montrer l'exception, pas la normalité. Jetons du socle seulement. ===== */
 /* Achats : une phrase d'en-tête, une légende discrète, changement de semaine par flèches. */
 .achats-regle { margin: 0; font-size: var(--t-corps); font-weight: 600; color: var(--texte-moyen); }
-.stock-achats > .stock-legende { margin: 0; }
+
 .nav-semaine { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; }
 .nav-semaine-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: var(--t-corps); font-weight: 600; }
 .nav-semaine-retour { display: inline-flex; align-items: center; min-height: var(--cible); font-size: var(--t-legende); font-weight: 600; color: var(--action); }
-.produit-etat-texte { font-weight: 600; }
+
 /* Restes : une ligne par produit, champs ouverts au toucher, Enregistrer à portée du pouce. */
-.stock-ventes-champs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: end; }
-.stock-restes-corps > .vide { margin-top: 12px; }
-.stock-reste-tete { align-items: center; }
-.stock-reste-texte { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.stock-reste-resume { overflow-wrap: anywhere; }
-.stock-reste-ouvrir { flex: none; min-height: var(--cible); }
-.stock-reste-champs { display: grid; gap: 8px; padding-top: 6px; }
-.stock-reste-champs[hidden] { display: none; }
-.stock-valider { position: sticky; bottom: calc(var(--haut-onglets) + env(safe-area-inset-bottom)); margin: 12px -14px 0; padding: 10px 14px; background: var(--fond); border-top: 1px solid var(--bordure); }
+
 /* DLC : le lien du nom a la hauteur d'une cible. */
-.stock-dlc-nom, .stock-reste-nom { display: inline-flex; align-items: center; min-height: var(--cible); }
+
 /* Import : flèches de semaine, intitulés d'une ligne qui s'agrandissent, jours remplis repliés sur leur résumé. */
 .imp-semaine-nav { margin-top: 4px; }
 .champ-intitule { min-height: var(--cible); resize: none; overflow: hidden; field-sizing: content; }
@@ -1044,7 +970,7 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .saisie-jour-extrait { font-size: var(--t-legende); color: var(--texte-doux); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .saisie-jour-repliable[open] > summary .saisie-jour-extrait { display: none; }
 .saisie-jour-repliable[open] > summary { margin-bottom: 8px; }
-@media (prefers-reduced-motion: reduce) { .stock-reste-ouvrir, .saisie-jour-repliable, .nav-semaine .btn { transition: none; scroll-behavior: auto; } }
+@media (prefers-reduced-motion: reduce) { .saisie-jour-repliable, .nav-semaine .btn { transition: none; scroll-behavior: auto; } }
 /* ===== Lot Réglages, journal, validation, poste (audit v56) : montrer l'exception, pas la normalité ===== */
 .phrase-gain-sec { max-width: 60ch; }
 .feuille-valider-secondaires { justify-content: flex-start; margin: 4px 0 0; }

@@ -53,15 +53,6 @@ function mercredi() {
   return e;
 }
 
-/** Le jeudi : du riz au menu 2, fait le mardi (J-2 : le repère du référentiel avertit, sans bloquer). */
-function jeudiAvecRizAvance() {
-  const e = etatVide();
-  definirMenu(e, S.jeudi, 2, 'riz, carottes', h());
-  definirPrevision(e, S.jeudi, 2, 10, h());
-  definirStandard(e, 'riz', 'garniture', { valeur: 60, unite: 'g', etat: 'sec' }, h());
-  return e;
-}
-
 test('l\'écran est branché au routeur sous le nom « Aujourd\'hui »', () => {
   assert.equal(routeur.VUES.aujourdhui, vue);
   assert.equal(vue.titre(), "Aujourd'hui");
@@ -198,34 +189,6 @@ test('décisions : « À confirmer · N » compte comme la feuille « À décide
   dom.corps.tous((x) => x.balise === 'dialog').forEach((dl) => dl.remove());
 });
 
-test('à consommer : le calcul du domaine reste (avertissements d\'abord, 3 au plus) ; la zone est masquée sur l\'accueil, sans lien vers les DLC', () => {
-  const e = jeudiAvecRizAvance();
-  // Le riz du jeudi (menu 2), fait mardi (J-2) : dans la règle des deux jours, le repère du référentiel avertit.
-  const rizJeudi = Object.values(e.productions).find((p) => p.composantId === composantDe(e, 'riz').id && p.genre === 'principale');
-  assert.ok(rizJeudi);
-  planifier(e, rizJeudi.id, S.mardi, 'avant_midi', h());
-  marquerFait(e, rizJeudi.id, 5000, `${S.mardi}T08:00:00.000Z`);
-  const d = aujourdhuiDe(e, S.mercredi);
-  assert.equal(d.aConsommer.total, 1);
-  assert.equal(d.aConsommer.lignes[0].avanceJours, 2);
-  assert.ok(d.aConsommer.lignes[0].conservation, 'le repère du référentiel avertit à J-2 pour le riz cuit');
-  const p = page(S.mercredi, e);
-  assert.doesNotMatch(p.textContent, /À consommer en priorité/);
-  assert.ok(!hrefs(p).includes('#/stock/dlc'), 'Restes, DLC et Achats sont masqués');
-  // Plusieurs avances : trois lignes au plus, les avertissements d'abord (même domaine).
-  const e2 = etatVide();
-  for (const j2 of [S.mardi, S.mercredi, S.jeudi, S.vendredi]) { definirMenu(e2, j2, 2, 'riz', h()); definirPrevision(e2, j2, 2, 10, h()); }
-  definirStandard(e2, 'riz', 'plat_principal', { valeur: 60, unite: 'g', etat: 'sec' }, h());
-  definirRegle(e2, { nom: 'riz', avanceMaxJours: 1 }, h());
-  const ids = Object.values(e2.productions).filter((x) => x.genre === 'principale');
-  assert.equal(ids.length, 4);
-  for (const x of ids) { planifier(e2, x.id, S.samediPrecedent, 'avant_midi', h()); marquerFait(e2, x.id, 1000, `${S.samediPrecedent}T08:00:00.000Z`); }
-  const d2 = aujourdhuiDe(e2, S.lundi);
-  assert.equal(d2.aConsommer.total, 4);
-  assert.equal(d2.aConsommer.lignes.length, 3);
-  assert.ok(d2.aConsommer.lignes.every((l) => l.horsRegle || l.conservation));
-});
-
 test('« À avancer » : les avances que la règle des deux jours autorise, 3 lignes au plus, « pour mardi » et la quantité', () => {
   const e = etatVide();
   for (const j2 of [S.mardi, S.mercredi, S.jeudi]) { definirMenu(e, j2, 2, 'riz', h()); definirPrevision(e, j2, 2, 10, h()); }
@@ -338,7 +301,7 @@ test('accessibilité : mots écrits pour les états, quantités en police des qu
   assert.doesNotMatch(bloc, /gradient|https?:\/\//);
   // L'écran ne passe jamais un état par la couleur seule : « hors règle », « provisoire », « à décider » sont écrits.
   const src = readFileSync(new URL('../app/js/ui/vue-aujourdhui.js', import.meta.url), 'utf8');
-  for (const mot of ["'hors règle'", "'à décider'", "provisoire: 'provisoire'", 'phraseConservation']) assert.ok(src.includes(mot), mot);
+  for (const mot of ['hors règle', "'à décider'", "provisoire: 'provisoire'"]) assert.ok(src.includes(mot), mot);
   assert.doesNotMatch(src, /en stock|Synchronisé|Générer le bon/);
 });
 
@@ -377,9 +340,6 @@ test('hors règle : une vraie avance hors règle (plus de 2 jours sans règle) r
   magasin.remplacer(structuredClone(e));
   const jour = aDate(S.lundi, () => prod.rendre(magasin.etat(), S.lundi));
   assert.match(jour.textContent, /hors règle/, 'Production : la ligne le dit en toutes lettres');
-  marquerFait(e, p.id, 100, h());
-  const conso = aujourdhuiDe(e, S.lundi).aConsommer.lignes.find((l) => l.composantId === p.composantId);
-  assert.equal(conso?.horsRegle, true, 'à consommer : même définition');
 });
 
 test('bandeau : même nombre que la feuille « À décider » (sauce implicite seule, plusieurs répartitions provisoires) ; Production n\'a plus de puce', async () => {

@@ -554,3 +554,8 @@ test('export puis import : les traces du harness survivent à la sauvegarde sans
   assert.ok(restaure.journal.some((x) => x.action === 'harness:appliquee'));
   assert.equal(restaure.schema, ref.etat.schema);
 });
+
+test('orchestrateur : sans les valeurs h et aujourdhui, la demande est refusée proprement', async () => {
+  const { e } = lundi();
+  await assert.rejects(proposerPlanningAssiste({ etat: e, dateDebut: S.lundi, dateFin: S.lundi, registre: creerRegistre() }), (x) => x.code === CODES.ENTREE_INVALIDE);
+});

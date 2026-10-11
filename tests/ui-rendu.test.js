@@ -9,7 +9,6 @@ import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import {
   ajouterAdaptation, ajouterComposant, ajouterPreparatoire, creerFiche, definirCapacite, definirCreneau, definirFournisseur, definirMenu, definirRegle,
   definirStandard, marquerFait, memoriser, modifierComposant, planifier, saisirMenusSemaine, saisirVentes, supprimerStandard,
-  controlerProduit,
 } from '../app/js/domaine/actions.js';
 import { calculerComposant } from '../app/js/domaine/calcul.js';
 import { exporter, jourOuVide } from '../app/js/domaine/etat.js';
@@ -19,7 +18,7 @@ import { LIBELLE_ESTIMATION_A_VALIDER } from '../app/js/domaine/statuts.js';
 import { JEU_REPERES as R, JEU_STANDARDS as ST } from './jeux/TEST_ONLY-savoir.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { composantValide, etatVide, h, menuValide, prevision, principaleDe, recetteValidee } from './aide.js';
+import { composantValide, etatVide, h, menuValide, poserControleProduit, prevision, principaleDe, recetteValidee } from './aide.js';
 import { etatReglette } from './aide-tableau.js';
 import { detailDuJour } from './aide-detail.js';
 
@@ -45,7 +44,6 @@ before(async () => {
     detail: await import('../app/js/ui/vue-detail.js'),
     jour: await import('../app/js/ui/vue-production.js'),
     fiche: await import('../app/js/ui/vue-fiche.js'),
-    produits: await import('../app/js/ui/vue-produits.js'),
     reglages: await import('../app/js/ui/vue-reglages.js'),
   };
   dialogues = await import('../app/js/ui/taches.js');
@@ -85,7 +83,7 @@ function etatRiche() {
   definirCreneau(e, S.samediPrecedent, 'avant_soir', 'charge', h());
   definirCapacite(e, 3, h());
   memoriser(e, cru, h());
-  controlerProduit(e, S.lundi, 'produit_sec_test', 'g', 'a_commander', 100, h());
+  poserControleProduit(e, S.lundi, 'produit_sec_test', 'g', 'a_commander', 100);
   return { e, ids: { sec, cru, prep, vague } };
 }
 
@@ -108,7 +106,7 @@ const rendrePage = (vue, param) => (vue === 'detail'
 const pages = (ids) => [
   ['tableau', null], ['tableau', S.lundi], ['tableau', S.lundiSuivant], ['import', S.lundi], ['detail', S.lundi], ['detail', S.mardi], ['detail', S.samedi],
   ['detail', S.dimanche], ['jour', S.lundi], ['jour', S.mardi], ['jour', S.samediPrecedent], ['jour', S.dimanchePrecedent],
-  ['produits', S.lundi], ['reglages', null],
+  ['reglages', null],
   ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees'], ['fiche', 'inconnu'],
   ...Object.values(ids).map((id) => ['fiche', id]),
 ];
@@ -128,7 +126,7 @@ test('chaque vue se dessine avec un état riche', () => {
   }
 });
 
-test('contenus attendus : tableau, détail, produits, réglages', () => {
+test('contenus attendus : tableau, détail, réglages', () => {
   const { e } = etatRiche();
   magasin.remplacer(e);
   const tab = dateDuJour(S.lundi, () => vues.tableau.rendre(magasin.etat(), S.lundi)).textContent;
@@ -148,9 +146,6 @@ test('contenus attendus : tableau, détail, produits, réglages', () => {
   assert.match(det, /tâches :/);
   const samedi = detailDuJour(vues.detail, magasin.etat(), S.samedi).textContent;
   assert.match(samedi, /Pas de menu du jour/);
-  const prod = vues.produits.rendre(magasin.etat(), S.lundi).textContent;
-  assert.match(prod, /Aucun stock théorique, aucun approvisionnement garanti\./);
-  assert.match(prod, /composition à définir/);
   const reg = ['organisation', 'donnees'].map((r) => vues.reglages.rendre(magasin.etat(), r).textContent).join(' ');
   assert.match(reg, /Journal des modifications/);
   assert.match(reg, /ne certifie aucune conservation/);
@@ -310,7 +305,7 @@ async function parcourir(nomVue, param) {
 
 test('chaque bouton de chaque vue s\'active sans erreur de code (état riche)', async () => {
   const pagesParcourues = [['import', S.lundi], ['detail', S.lundi], ['detail', S.mardi], ['jour', S.samediPrecedent],
-    ['jour', S.lundi], ['jour', S.mardi], ['produits', S.lundi], ['reglages', null],
+    ['jour', S.lundi], ['jour', S.mardi], ['reglages', null],
     ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees']];
   for (const [vue, param] of pagesParcourues) {
     const { e } = etatRiche();
@@ -327,7 +322,7 @@ test('chaque bouton de chaque vue s\'active sans erreur de code (état riche)', 
 });
 
 test('chaque bouton s\'active aussi avec une base vide', async () => {
-  for (const [vue, param] of [['import', S.lundi], ['detail', S.lundi], ['jour', S.lundi], ['produits', S.lundi], ['reglages', null],
+  for (const [vue, param] of [['import', S.lundi], ['detail', S.lundi], ['jour', S.lundi], ['reglages', null],
     ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees']]) {
     magasin.remplacer(etatVide());
     await parcourir(vue, param);

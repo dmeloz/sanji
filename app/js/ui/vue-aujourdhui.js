@@ -2,8 +2,7 @@
 // de `aujourdhuiDe(...)` (domaine/tableau-blanc.js). De haut en bas : en-tête (jour, date, heure), menus sur 3 jours, cases
 // Production et Couverts midi, « À avancer » (règle des 2 jours, 3 lignes), fiche de fonction (aujourd'hui ou demain),
 // « À confirmer » (3 lignes), rappels discrets ; la carte « Prochaine » est une carte de la page (sous les chiffres), jamais fixe.
-// Retirés de l'accueil : créneaux du jour, case ambre « À confirmer » dans les chiffres, raccourci Articles, À consommer en
-// priorité (DLC masquées). Interface commune des vues : `titre(param, sous)` et `rendre(etat, param, sous)`.
+// Retirés de l'accueil : créneaux du jour, case ambre « À confirmer » dans les chiffres, raccourci Articles. Interface commune des vues : `titre(param, sous)` et `rendre(etat, param, sous)`.
 
 import { libelleJour, lundiDe } from '../domaine/dates.js';
 import { libelle } from '../domaine/statuts.js';
@@ -19,14 +18,13 @@ import { ouvrirDecisions } from './feuille-decisions.js';
 import { ouvrirCloture } from './feuille-cloture.js';
 import { ouvrirProposition } from './feuille-validation.js';
 import { problemeHorsLigne } from './horsligne.js';
-import { phraseConservation, pluriel, qteNoeuds, quantite } from './format.js';
+import { pluriel, qteNoeuds, quantite } from './format.js';
 import { faireEnUnToucher } from './taches.js';
 
 export function titre() { return "Aujourd'hui"; }
 
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 const CERTITUDE = { estimee: 'estimée', provisoire: 'provisoire', confirmee: 'confirmée', hors_menu: 'hors menu' };
-const courtJour = (date) => `${libelleJour(date).slice(0, 3)}. ${Number(date.slice(8))}`;
 
 function icone(chemins, classe = 'au-icone') {
   return svg('svg', { classe, viewBox: '0 0 24 24', width: 20, height: 20, fill: 'none', stroke: 'currentColor', 'stroke-width': 2,
@@ -144,36 +142,6 @@ function sectionAConfirmer(d, feuille) {
       h('h2', { classe: 'tdb-confirmer-titre' }, icone(['M12 3l10 18H2z', 'M12 10v5M12 18v.5']), `À confirmer · ${total}`),
       h('button', { type: 'button', classe: 'au-lien-court tdb-tout-voir', onClick: () => ouvrirDecisions() }, 'Tout voir ›')),
     lignes.length > 0 ? h('ul', { classe: 'au-lignes' }, lignes.map(ligneAConfirmer)) : null);
-}
-
-// ------------------------------------------------------------------ à consommer en priorité
-
-function ligneAConsommer(l) {
-  const alertes = [];
-  if (l.horsRegle) alertes.push(h('strong', { classe: 'au-hors-regle' }, 'hors règle'));
-  if (l.limiteDepassee) alertes.push(h('strong', { classe: 'au-hors-regle' }, 'limite maison dépassée'));
-  const q = l.quantite !== null ? quantite(l.quantite, l.unite) : null;
-  return h('li', { classe: 'au-conso' },
-    h('a', { href: `#/fiche/${encodeURIComponent(l.composantId)}`, classe: 'au-conso-lien' },
-      h('span', { classe: 'au-conso-corps' },
-        h('span', { classe: 'au-conso-nom' }, l.nom),
-        h('span', { classe: 'au-sous' }, [l.dateFait ? `faite ${courtJour(l.dateFait)}` : null, `pour ${courtJour(l.dateService)}`].filter(Boolean).join(' · '))),
-      h('span', { classe: 'au-conso-droite' }, q ? h('span', { classe: 'au-qte' }, qteNoeuds(q)) : null,
-        h('span', { classe: 'au-etiquette-statut' }, `avance J+${l.avanceJours}`))),
-    alertes.length > 0 ? h('p', { classe: 'au-attention' }, alertes) : null,
-    l.conservation ? h('p', { classe: 'au-attention' }, h('strong', null, phraseConservation(l.conservation.texte, l.avanceJours)), ' ',
-      h('span', { classe: 'au-sous' }, l.conservation.provenance)) : null);
-}
-
-/** Masquée depuis le 2026-10-07 (pas de DLC pour l'instant) : gardée pour le jour où les DLC reviennent. */
-function zoneAConsommer(d) {
-  const { total, lignes } = d.aConsommer;
-  return h('section', { classe: 'au-carte', 'aria-labelledby': 'au-titre-conso' },
-    h('div', { classe: 'au-carte-tete' },
-      h('h2', { classe: 'au-etiquette', id: 'au-titre-conso' }, 'À consommer en priorité'),
-      null),
-    total === 0 ? h('p', { classe: 'au-neutre' }, 'Rien de fait à l\'avance pour un service à venir.')
-      : h('ul', { classe: 'au-lignes' }, lignes.map(ligneAConsommer)));
 }
 
 // ------------------------------------------------------------------ prochaine fiche de fonction

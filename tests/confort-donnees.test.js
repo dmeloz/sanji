@@ -3,14 +3,14 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { controlerProduit, definirMargeSecurite, noterExport, saisirVentes } from '../app/js/domaine/actions.js';
+import { definirMargeSecurite, noterExport, saisirVentes } from '../app/js/domaine/actions.js';
 import { exporter, importer } from '../app/js/domaine/etat.js';
 import { moyenneVentes, repereVentes } from '../app/js/domaine/points.js';
 import { besoinsProduits, suiviProduit } from '../app/js/domaine/produits.js';
 import { tableauBlanc } from '../app/js/domaine/tableau-blanc.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { composantValide, etatVide, h, prevision } from './aide.js';
+import { composantValide, etatVide, h, poserControleProduit, prevision } from './aide.js';
 
 function etatAvecBesoin() {
   const e = etatVide();
@@ -37,7 +37,7 @@ test('marge de sécurité : majore la seule quantité proposée à commander, ja
   const e = etatAvecBesoin();
   const ligne = besoinsProduits(e, S.lundi).lignes[0];
   assert.equal(ligne.besoinBrut, 500);
-  controlerProduit(e, S.lundi, ligne.cle, ligne.unite, 'a_commander', 100, h());
+  poserControleProduit(e, S.lundi, ligne.cle, ligne.unite, 'a_commander', 100);
   assert.equal(suiviProduit(e, S.lundi, ligne).proposeeACommander, 400, 'sans marge');
   definirMargeSecurite(e, 10, h());
   const avec = suiviProduit(e, S.lundi, ligne);

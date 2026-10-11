@@ -33,8 +33,6 @@ before(async () => {
     detail: await import('../app/js/ui/vue-detail.js'),
     jour: await import('../app/js/ui/vue-production.js'),
     composant: await import('../app/js/ui/vue-composant.js'),
-    produits: await import('../app/js/ui/vue-produits.js'),
-    stock: await import('../app/js/ui/vue-stock.js'), // vue masquée (2026-10-07) : toujours rendue ici pour vérifier ses liens
   };
 });
 after(() => dom.restaurer());
@@ -76,8 +74,8 @@ const RENDUS = (e) => {
   const composants = Object.keys(e.composants);
   return [
     ['tableau', null], ['tableau', S.lundiSuivant],
-    ['jour', S.samedi], ['jour', S.lundiSuivant], ['produits', S.lundiSuivant], ['reglages', null],
-    ['aujourdhui', null], ['production', S.samedi], ['semaine', null], ['semaine', S.samedi], ['articles', null], ['stock', S.lundiSuivant], ['import', S.lundiSuivant],
+    ['jour', S.samedi], ['jour', S.lundiSuivant], ['reglages', null],
+    ['aujourdhui', null], ['production', S.samedi], ['semaine', null], ['semaine', S.samedi], ['articles', null], ['import', S.lundiSuivant],
     ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees'],
     ...composants.slice(0, 2).map((id) => ['fiche', id]),
   ];
@@ -252,7 +250,7 @@ test('routeur : #/reglages est la racine, #/reglages/<rubrique> une sous-page, u
 
 test('inventaire : les quatre onglets et les onze vues du routeur sont déclarés, les vues d\'origine existent encore', () => {
   assert.deepEqual(Object.keys(routeur.VUES).sort(), ['articles', 'aujourdhui', 'fiche', 'fiches', 'historique', 'import', 'poste', 'preparer', 'production', 'reglages', 'semaine']);
-  assert.deepEqual(Object.keys(vues).sort(), [...Object.keys(routeur.VUES), 'composant', 'detail', 'jour', 'menus', 'produits', 'stock', 'tableau'].sort());
+  assert.deepEqual(Object.keys(vues).sort(), [...Object.keys(routeur.VUES), 'composant', 'detail', 'jour', 'menus', 'tableau'].sort());
   assert.deepEqual([...new Set(Object.values(routeur.ONGLET_DE_VUE))].sort(), ['articles', 'aujourdhui', 'production', 'semaine']);
 });
 

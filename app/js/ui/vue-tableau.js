@@ -159,9 +159,6 @@ function zoneProduction(bord) {
     lignes.push(h('li', null, h('a', { href: p.lien, classe: 'bord-ligne' },
       h('span', { classe: 'bord-ligne-texte' }, `${pluriel(p.avances, 'avance possible', 'avances possibles')} après le service`))));
   }
-  if (p.commande) {
-    lignes.push(h('li', null, h('a', { href: p.commande.lien, classe: 'bord-ligne' }, h('span', { classe: 'bord-ligne-texte' }, p.commande.texte))));
-  }
   // Pas encore chiffré : information neutre, jamais une alerte ni une décision.
   for (const l of p.chiffrage) {
     lignes.push(h('li', null, h('a', { href: l.lien, classe: 'bord-ligne bord-neutre' },

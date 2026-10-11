@@ -45,7 +45,6 @@ Seule `appliquerProposition` écrit, et seulement à travers l'exécuteur inject
 | `commandes.js` | `decider`, `appliquerProposition` : atomique, refus en cas de conflit ou de double exécution. |
 | `fournisseur.js` | Interface d'un modèle, `fournisseurDesactive`, `interroger` (délai, annulation, réponse validée). Aucun appel réseau. |
 | `orchestrateur.js` | `proposerPlanningAssiste` : calcul d'abord, modèle ensuite (4 échanges au plus, appels répétés interdits), repli toujours possible. |
-| `horloge.js` | Montre interne : horloge injectable, bornes de fin de créneau (réglages de la propriétaire), `creneauPasse`, `exclusionDuPasse`. |
 | `trace.js` | `tracer` (journal existant, détail borné à 240 caractères), `expliquer`, `evenementsHarness`. |
 
 ## Registre des outils
@@ -90,14 +89,14 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 
 ## Décisions métier ouvertes (accord requis)
 
-- **Heures de fin de créneau** : l'horloge interne est en place (`horloge.js`) mais aucune borne n'est renseignée ; sans borne, un créneau du matin peut être proposé l'après-midi. À fournir par la propriétaire.
+- **Heures de fin de créneau** : aucune borne n'est renseignée et l'horloge interne a été retirée (v120, jamais branchée) ; un créneau du matin peut être proposé l'après-midi. À fournir par la propriétaire, puis à recâbler.
 - **Fournisseur d'IA** : en place (`ui/fournisseur-web.js`, API Anthropic, intégration à l'interface en v67). La règle « aucun envoi réseau » est levée pour cette couche optionnelle (décision du 2026-10-06) ; rien ne part tant que l'assistant n'est pas activé dans Réglages > Assistant IA avec une clé, et seules les données décrites plus haut sont transmises.
 
 ## Décisions prises (2026-10-06, la propriétaire)
 
 - Une conservation non validée donne un **avertissement léger**, jamais une confirmation, et n'est jamais présentée comme couverte (`evaluation.couvre` reste faux). Une conservation « référentiel » dépassée avertit aussi, sans confirmation.
 - **Pas de parcours « conservation »** dans le harness : il n'ajoute rien au domaine sur ce sujet.
-- **Horloge interne** : `creerHorloge` / `horlogeFixe`, bornes de fin de créneau `{avant_midi?, apres_midi?, avant_soir?}` validées en `HH:MM`, `creneauPasse`, `exclusionDuPasse`. Le calcul (`suggererCreneau(etat, id, depuis, exclure)`), le validateur et l'application d'une proposition écartent un créneau terminé ; l'application rejoue ce contrôle (conflit si l'heure de fin passe entre la validation et l'application). Sans borne : comportement inchangé.
+- **Horloge interne** (retirée en v120, jamais branchée) : elle devait écarter un créneau terminé via des bornes de fin de créneau ; `suggererCreneau`, le validateur et `appliquerProposition` ne connaissent plus d'heure.
 - **Parcours suivants** (écarts à arbitrer, actions préparatoires, apprentissage des portions, allergies, liste à commander) : non commencés, un par un.
 
 ## Limites
@@ -136,7 +135,7 @@ read -s ANTHROPIC_API_KEY && export ANTHROPIC_API_KEY && node outils/essai-anthr
 
 ## Tests
 
-`npm test` : 970 tests au 2026-10-06 (865 d'origine, 15 d'import des nouveaux fichiers, 89 du harness et de son interface, dont `tests/harness-horloge.test.js`, `tests/fournisseur-anthropic.test.js` et `tests/assistant-ia.test.js`). Une revue indépendante a relevé un point haut (application sans rejeu des contrôles) et six moyens, corrigés sauf la décision métier ci-dessus. Les tests du harness : `tests/harness-socle.test.js` (contrats, politiques, registre, contexte, trace, fournisseur, hygiène) et `tests/harness-parcours.test.js` (parcours complet, conflits, modèle scripté, refus, boucles, indisponibilité, magasin réel, export/import). Données `TEST_ONLY` uniquement ; outils : `tests/aide-harness.js`.
+`npm test` : 970 tests au 2026-10-06 (865 d'origine, 15 d'import des nouveaux fichiers, 89 du harness et de son interface, dont `tests/fournisseur-anthropic.test.js` et `tests/assistant-ia.test.js`). Une revue indépendante a relevé un point haut (application sans rejeu des contrôles) et six moyens, corrigés sauf la décision métier ci-dessus. Les tests du harness : `tests/harness-socle.test.js` (contrats, politiques, registre, contexte, trace, fournisseur, hygiène) et `tests/harness-parcours.test.js` (parcours complet, conflits, modèle scripté, refus, boucles, indisponibilité, magasin réel, export/import). Données `TEST_ONLY` uniquement ; outils : `tests/aide-harness.js`.
 
 ## Lecture hybride : préciser un élément (version 92)
 
