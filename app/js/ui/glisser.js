@@ -3,13 +3,24 @@
 const DISTANCE_MIN = 80;
 const DUREE_MAX_MS = 700;
 const CIBLES_DE_SAISIE = 'input, textarea, select, button';
+const BORD_ECRAN_PX = 24; // un départ si près du bord est le geste de retour d'iOS
 const RAPPORT_HORIZONTAL = 2; // le geste doit être au moins deux fois plus horizontal que vertical
 
 /** @returns {'suivant'|'precedent'|null} Fonction pure : décide si un geste est un feuilletage. */
-export function directionDuGeste({ dx, dy, dt }) {
-  if (Math.abs(dx) < DISTANCE_MIN || dt > DUREE_MAX_MS) return null;
+export function directionDuGeste({ dx, dy, dt }, distanceMin = DISTANCE_MIN) {
+  if (Math.abs(dx) < distanceMin || dt > DUREE_MAX_MS) return null;
   if (Math.abs(dx) < RAPPORT_HORIZONTAL * Math.abs(dy)) return null;
   return dx < 0 ? 'suivant' : 'precedent';
+}
+
+const DISTANCE_FEUILLETAGE = 60; // seuil de Production (`jourApresGeste`), repris par les autres écrans
+
+/**
+ * Feuilleter jour ou semaine (v124) : branche `directionDuGeste` au seuil de 60 px sur `element` ; `suivant` / `precedent` sont les
+ * actions. Un geste qui part d'un champ ou d'un bouton ne déclenche rien (voir `activerGlisser`).
+ */
+export function activerFeuilletage(element, { suivant, precedent }) {
+  activerGlisser(element, { suivant, precedent, decider: (geste) => directionDuGeste(geste, DISTANCE_FEUILLETAGE) });
 }
 
 /**
@@ -21,9 +32,13 @@ export function activerGlisser(element, { suivant, precedent, decider = directio
   let bloqueJusqua = 0;
   element.addEventListener('touchstart', (e) => {
     const t = e.touches?.[0];
+    const largeur = globalThis.window?.innerWidth;
+    const auBord = t && (t.clientX < BORD_ECRAN_PX || (largeur > 0 && t.clientX > largeur - BORD_ECRAN_PX));
     // Un geste qui commence sur un champ ou un bouton est une saisie (sélection de texte, curseur) : jamais un feuilletage.
-    depart = t && !e.target?.closest?.(CIBLES_DE_SAISIE) ? { x: t.clientX, y: t.clientY, h: Date.now() } : null;
+    // Pas non plus un pincement (plusieurs doigts) ni un départ au bord de l'écran.
+    depart = t && e.touches.length === 1 && !auBord && !e.target?.closest?.(CIBLES_DE_SAISIE) ? { x: t.clientX, y: t.clientY, h: Date.now() } : null;
   }, { passive: true });
+  element.addEventListener('touchcancel', () => { depart = null; }, { passive: true });
   element.addEventListener('touchend', (e) => {
     const t = e.changedTouches?.[0];
     if (!depart || !t) return;

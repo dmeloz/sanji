@@ -207,7 +207,7 @@ function entete(tb, actions = null) {
 export function rendre(etat, lundiAffiche, options = {}) {
   const aujourd = aujourdhui();
   const tb = tableauBlanc(etat, aujourd, lundiAffiche ?? undefined);
-  const racine = h('div', { classe: 'vue vue-tableau vue-bord' });
+  const racine = h('div', { classe: 'vue vue-tableau vue-bord', 'data-lundi': tb.lundi });
   racine.appendChild(entete(tb, options.actions ?? null));
   racine.appendChild(zoneMenus(tb.bord, tb.lundi));
   racine.appendChild(zoneFiches(tb.bord, aujourd));

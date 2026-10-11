@@ -11,6 +11,7 @@ import { agir, aujourdhui, redessiner } from '../magasin.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { quantiteEnPoids, raisonNonChiffree } from '../domaine/mise-en-place.js';
 import { h } from './dom.js';
+import { activerFeuilletage } from './glisser.js';
 import { bouton, etatVide, ligneVide, lien, pastille } from './elements.js';
 import { qteNoeuds } from './format.js';
 import { afficherMessage } from './messages.js';
@@ -23,9 +24,11 @@ const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 
 /** Vue choisie, gardée le temps de la session (un simple confort : rien n'est enregistré). */
 let vueChoisie = 'semaine';
+/** Jour de production affiché en vue « Aujourd'hui » après un glissement (null : aujourd'hui). Même durée de vie que `vueChoisie`. */
+let jourGlisse = null;
 
 /** Oublie le choix de vue (retour à « Semaine ») : sert aux tests. */
-export function oublierVue() { vueChoisie = 'semaine'; }
+export function oublierVue() { vueChoisie = 'semaine'; jourGlisse = null; }
 
 /** « lundi 12 » : le jour et son quantième, sans le mois. */
 const jourCourt = (date) => libelleJour(date).split(' ').slice(0, 2).join(' ');
@@ -104,14 +107,17 @@ function selecteur(vue) {
   return h('div', { classe: 'art-segments', role: 'group', 'aria-label': 'Période' },
     VUES.map(([cle, texte]) => h('button', {
       type: 'button', classe: `stock-segment${cle === vue ? ' stock-segment-actif' : ''}`, 'aria-pressed': cle === vue ? 'true' : 'false',
-      onClick: () => { vueChoisie = cle; redessiner(); },
+      onClick: () => { vueChoisie = cle; jourGlisse = null; redessiner(); },
     }, texte)));
 }
 
 export function rendre(etat) {
   const aujourd = aujourdhui();
   const { lundi, jours } = articlesDuPoste(etat, aujourd);
-  const visibles = vueChoisie === 'jour' ? jours.filter((j) => j.estAujourdhui) : jours;
+  // Un jour glissé qui n'est plus dans la liste ou qui est passé (la liste a changé, un autre jour est venu) : retour à aujourd'hui.
+  if (jourGlisse !== null && (jourGlisse < aujourd || !jours.some((j) => j.date === jourGlisse))) jourGlisse = null;
+  const dateVue = jourGlisse ?? aujourd;
+  const visibles = vueChoisie === 'jour' ? jours.filter((j) => j.date === dateVue) : jours;
   const racine = h('div', { classe: 'vue vue-articles' },
     h('header', { classe: 'art-entete' },
       h('p', { classe: 'au-date' }, 'À avoir pour chaque jour de production'),
@@ -130,6 +136,12 @@ export function rendre(etat) {
       h('h2', { classe: 'au-etiquette' }, titreJour(j)),
       groupesParMenu(etat, j)));
   }
+  // Vue « Aujourd'hui » : glisser passe au jour de production suivant ou précédent de la liste (jamais au-delà de ses bornes).
+  const versJour = (voisin) => { if (vueChoisie === 'jour' && voisin) { jourGlisse = voisin.date; redessiner(); } };
+  activerFeuilletage(racine, {
+    suivant: () => versJour(jours.find((j) => j.date > dateVue)),
+    precedent: () => versJour(jours.findLast((j) => j.date < dateVue)),
+  });
   racine.appendChild(h('p', { classe: 'au-sous' }, 'Quantités brutes calculées depuis les menus. Une quantité inconnue reste « à chiffrer », sans alerte.'));
   if (visibles.length > 0) {
     racine.appendChild(h('div', { classe: 'art-pouce pas-imprime' }, bouton('Partager la liste', () => partager(texteDeLaListe(visibles)), 'large')));
