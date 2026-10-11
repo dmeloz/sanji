@@ -722,10 +722,12 @@ body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + en
 .au-lignes { display: flex; flex-direction: column; }
 .au-ligne { display: flex; align-items: center; gap: 10px; width: 100%; min-height: var(--cible); padding: 6px 0; border: 0; border-bottom: 1px solid var(--bordure); background: none; color: var(--texte); font: inherit; font-size: var(--t-corps); text-align: left; text-decoration: none; }
 .au-lignes > li:last-child > .au-ligne { border-bottom: 0; }
-.au-ligne-bouton { cursor: pointer; }
 .au-ligne-lien { color: var(--action); font-weight: 600; }
 .au-confirmer-mot { flex: none; padding: 1px 6px; border-radius: var(--r-etiquette); background: var(--exception-fond); color: var(--exception); font-size: var(--t-legende); font-weight: 600; }
 .au-confirmer-texte { flex: 1; min-width: 0; }
+.au-ligne-geste { flex-wrap: wrap; }
+.geste-rapide-groupe { display: flex; flex-wrap: wrap; gap: 8px; }
+.geste-rapide { min-height: 44px; min-width: 44px; padding: 0 14px; font-size: 15px; font-weight: 600; }
 .au-hors-regle { padding: 1px 6px; border-radius: var(--r-etiquette); background: var(--exception-fond); color: var(--exception); font-size: var(--t-legende); font-weight: 600; }
 .au-hors-regle::before { content: "\25B3\00A0"; }
 .au-allergie { font-weight: 600; }
