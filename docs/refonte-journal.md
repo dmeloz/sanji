@@ -1,3 +1,5 @@
+> Document historique (v62) : l'état actuel est dans `CLAUDE.md` et `docs/conception-technique-v1.md`.
+
 # Journal de la refonte (A et B), exécutée en autonomie
 
 Délégation de la propriétaire, 2026-10-04 : « réaliser la totalité des 2 prompts corrigés en autonomie, revenir quand la refonte est finie ». Sources : `perplex/sanji-prompts-v23.corrige.md` et `perplex/sanji-addendum-metier.corrige.md`.

@@ -101,7 +101,7 @@ function ligneBrut(calc) {
       : h('span', { classe: 'fiche-brut-inconnu' }, h('span', { classe: 'fiche-qte fiche-brut-tiret' }, '—'), ' inconnu · forme achetée à préciser'));
 }
 
-function sectionProvenance(c, calc) {
+function sectionProvenance(calc) {
   return h('section', { classe: 'carte fiche-bloc' },
     h('h2', { classe: 'fiche-titre-bloc' }, 'Calcul et provenance'),
     h('p', null, calc.statut === 'CALCULE' ? pastille(libelle('PROVENANCE', 'CALCULE'), 'vert') : pastille(libelle('PROVENANCE', 'INCONNU'), 'gris'), ' ',
@@ -201,7 +201,7 @@ export function rendre(etat, id) {
     boutonPrecisionIA(c) ? h('div', { classe: 'fiche-actions' }, boutonPrecisionIA(c)) : null,
     sectionQuantite(etat, c, calc),
     ligneBrut(calc),
-    sectionProvenance(c, calc),
+    sectionProvenance(calc),
     sectionIngredients(etat, c, calc),
     sansRecette ? blocSansRecette(c) : sectionEtapes(etapes, c),
     sectionAllergenes(etat, c),

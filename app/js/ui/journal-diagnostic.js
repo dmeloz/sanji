@@ -7,8 +7,6 @@ import { MAX_CONTENU, MAX_LIBELLE, MAX_TEXTE, nettoyer } from '../domaine/rappor
 import { enregistrerPhoto, lirePhoto, supprimerPhoto } from '../stockage.js';
 import { VERSION_APP } from '../version.js';
 
-export { nettoyer };
-
 const CLE = 'sanji-journal-diagnostic';
 const MAX_EVENEMENTS = 300;
 const DUREE_MAX_MS = 14 * 24 * 3600 * 1000;

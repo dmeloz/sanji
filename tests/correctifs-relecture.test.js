@@ -183,7 +183,7 @@ test('étapes : aucune étape fantôme pour un plat dont la finition est faite o
   assert.equal(etapesDe(passe).length, 0, 'service passé : aucune étape');
   assert.equal(etapesDe(fini).length, 0, 'finition faite : aucune étape');
   assert.equal(etapesDe(aVenir).length, 1, 'plat à venir : l\'étape est créée');
-  // Paramètre explicite pour les tests : le plat du lundi 5 est « passé » le mardi 6.
+  // Le plat du lundi 5 est « passé » le mardi 6 (jour tiré de l'horodatage).
   const e3 = etatVide();
   const c3 = composantValide(e3, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'purée de carottes' });
   definirRegle(e3, { nom: 'purée de carottes', etapes }, h());
@@ -191,7 +191,7 @@ test('étapes : aucune étape fantôme pour un plat dont la finition est faite o
   const e4 = etatVide();
   const c4 = composantValide(e4, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'purée de carottes' });
   e4.regles.r = { ...Object.values(e3.regles)[0] };
-  assurerProductions(e4, null, S.mardi);
+  assurerProductions(e4, `${S.mardi}T08:00:00`);
   assert.equal(Object.values(e4.productions).filter((p) => p.composantId === c4 && p.genre === 'preparatoire').length, 0);
 });
 

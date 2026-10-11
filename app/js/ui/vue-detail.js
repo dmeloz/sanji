@@ -1,9 +1,9 @@
 // Détail d'un jour : menus, prévisions, fiches, allergies, créneaux, après service, points à confirmer.
 
 import {
-  ajouterComposant, definirCreneau, definirMenu, modifierComposant, saisirVentes, supprimerComposant, validerComposant,
+  ajouterComposant, definirCreneau, definirMenu, modifierComposant, saisirVentes, supprimerComposant,
 } from '../domaine/actions.js';
-import { ajouterJours, aMenuDuJour, creneauxDuJour, estOuvert, jourSemaine, libelleJour, lundiDe } from '../domaine/dates.js';
+import { aMenuDuJour, creneauxDuJour, libelleJour, lundiDe } from '../domaine/dates.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { alertesAllergenes } from '../domaine/allergenes.js';
 import { chargeCreneau } from '../domaine/planification.js';
@@ -13,7 +13,7 @@ import { CATEGORIE, ETAT_CRENEAU, libelle } from '../domaine/statuts.js';
 import { agir, agirStrict, etat as etatCourant, redessiner } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
-import { bouton, etatVide, ligneVide, lien, navigationPeriode, pastille, repliable } from './elements.js';
+import { bouton, ligneVide, lien, pastille } from './elements.js';
 import {
   confirmerAnnulation, dialogAdaptation, dialogFiche, dialogHistorique, dialogRepartition, repartitionIncoherente, resumeChoix,
 } from './fiches.js';
@@ -27,16 +27,12 @@ import { LIBELLE_SERVICE, libelleAllergene } from './reference.js';
 import { blocBuffet } from './reperes-metier.js';
 import { pastilleCreneau, texteCharge } from './taches.js';
 
-export const titre = () => 'Détail du jour';
-
-/** `plat` (feuille « Détail du jour ») : jamais de repli, le titre reste visible ; sinon un repli (`details`). */
-const rep = (plat) => (plat
-  ? (resume, _ouvert, contenu, { classe = '', ...reste } = {}) => h('section', { classe, ...reste }, resume, contenu)
-  : repliable);
+/** Rubrique à plat de la feuille « Détail du jour » : jamais de repli, le titre reste visible. */
+const rubrique = (resume, contenu, { classe = '', ...reste } = {}) => h('section', { classe, ...reste }, resume, contenu);
 
 // ------------------------------------------------------------------ photo du menu papier
 
-function blocPhoto(date, plat = false) {
+function blocPhoto(date) {
   const zone = h('div', { classe: 'photo-zone' }, h('p', { classe: 'vide' }, 'Aucune photo du menu papier.'));
   const retirer = bouton('Retirer la photo', () => confirmer({
     titre: 'Retirer la photo ?', texte: 'La photo de ce jour sera supprimée de cet appareil.', libelleOk: 'Retirer', danger: true,
@@ -57,8 +53,8 @@ function blocPhoto(date, plat = false) {
       }
     },
   });
-  // Fermé tant qu'il n'y a pas de photo ; la lecture est asynchrone : le bloc s'ouvre quand la photo est trouvée.
-  const bloc = rep(plat)(h('h3', null, 'Menu papier (facultatif)'), false, [
+  // La lecture de la photo est asynchrone : la miniature apparaît quand la photo est trouvée.
+  const bloc = rubrique(h('h3', null, 'Menu papier (facultatif)'), [
     h('p', { classe: 'aide' }, 'La photo sert d\'aide pour la saisie ; elle est réduite à 1600 px, gardée sur l\'appareil et n\'est pas exportée.'),
     zone,
     h('div', { classe: 'actions' },
@@ -68,7 +64,6 @@ function blocPhoto(date, plat = false) {
   urlPhoto(date).then((url) => {
     if (!url) return;
     retirer.hidden = false;
-    bloc.open = true;
     zone.replaceChildren(
       h('button', { type: 'button', classe: 'photo-miniature', 'aria-label': 'Agrandir la photo du menu papier',
         onClick: () => panneau({ titre: 'Menu papier', lectureSeule: true,
@@ -113,7 +108,7 @@ function dialogComposant(date, menu, c) {
         const champsNouveau = { nom: v.nom, categorie: v.categorie };
         if (v.attribue !== 'auto') champsNouveau.attribue = v.attribue === 'oui';
         // Un composant ajouté à la main est pris en compte tout de suite : aucune validation à faire ensuite.
-        agirStrict((e, t) => { validerComposant(e, ajouterComposant(e, date, menu, champsNouveau, t), t); });
+        agirStrict((e, t) => { ajouterComposant(e, date, menu, champsNouveau, t); });
       }
     },
   });
@@ -140,12 +135,11 @@ export function interrupteurAuPoste(c, prefixe = 'poste') {
   return h('label', { classe: 'interrupteur', pour: id }, entree, mot);
 }
 
-function ligneComposant(c, { sansPoste = false } = {}) {
+function ligneComposant(c) {
   return h('li', { classe: 'composant-ligne' },
     h('div', { classe: 'composant-tete' },
       lien(`#/fiche/${encodeURIComponent(c.id)}`, c.nom, 'tache-nom'),
-      // Écran Semaine : l'attribution est déjà dans « Services », on ne la répète pas (« Modifier » la porte aussi).
-      sansPoste ? (c.attribue ? null : h('span', { classe: 'interrupteur-etat' }, 'hors poste')) : interrupteurAuPoste(c)),
+      interrupteurAuPoste(c)),
     h('p', { classe: 'meta' }, libelle('CATEGORIE', c.categorie)),
     h('div', { classe: 'actions' },
       bouton('Modifier', () => dialogComposant(c.date, c.menu, c), 'court'),
@@ -155,7 +149,7 @@ function ligneComposant(c, { sansPoste = false } = {}) {
       }), 'court danger')));
 }
 
-function blocMenu(etat, date, menu, replie = false) {
+function blocMenu(etat, date, menu) {
   const m = jourOuVide(etat, date).menus[menu];
   const saisi = m.intitule.trim() !== '';
   const composants = Object.values(etat.composants).filter((c) => c.date === date && c.menu === menu);
@@ -164,32 +158,29 @@ function blocMenu(etat, date, menu, replie = false) {
     saisi ? h('p', { classe: 'intitule' }, m.intitule) : h('p', { classe: 'vide' }, 'menu non saisi'),
     h('div', { classe: 'actions' },
       bouton(saisi ? 'Modifier l\'intitulé' : 'Saisir l\'intitulé', () => dialogIntitule(date, menu), 'court')),
-    composants.length > 0 ? h('ul', { classe: 'liste-composants' }, composants.map((c) => ligneComposant(c, { sansPoste: replie }))) : (saisi ? ligneVide('Aucun composant : ajoutez-en si besoin.') : null),
+    composants.length > 0 ? h('ul', { classe: 'liste-composants' }, composants.map((c) => ligneComposant(c))) : (saisi ? ligneVide('Aucun composant : ajoutez-en si besoin.') : null),
     h('div', { classe: 'actions' }, bouton('Ajouter un composant', () => dialogComposant(date, menu, null), 'court')));
 }
 
-/** `replie` (écran Semaine) : la section est un repli fermé, au même identifiant, au lieu d'une carte ouverte. */
-function sectionMenus(etat, date, replie = false, plat = false) {
-  const enveloppe = (titreTexte, contenu) => (replie
-    ? repliable(h('h2', { classe: 'section-titre' }, titreTexte), false, contenu, { classe: 'carte', id: 'menus' })
-    : h('section', { classe: 'carte', id: 'menus' }, h('h2', { classe: 'section-titre' }, titreTexte), contenu));
+function sectionMenus(etat, date) {
+  const enveloppe = (titreTexte, contenu) => h('section', { classe: 'carte', id: 'menus' }, h('h2', { classe: 'section-titre' }, titreTexte), contenu);
   if (!aMenuDuJour(date)) return enveloppe('Menus', ligneVide('Pas de menu du jour le samedi.'));
   return enveloppe('Menus du jour', [
     h('div', { classe: 'actions' }, lien(`#/import/${lundiDe(date)}`, 'Saisir toute la semaine', 'btn btn-court')),
     h('p', { classe: 'aide' }, 'L\'application répartit seule ce qui revient au poste ; corrigez seulement une exception.'),
-    blocPhoto(date, plat),
-    blocMenu(etat, date, 1, replie),
-    blocMenu(etat, date, 2, replie)]);
+    blocPhoto(date),
+    blocMenu(etat, date, 1),
+    blocMenu(etat, date, 2)]);
 }
 
 // ------------------------------------------------------------------ couverts midi
 
 /** Décision du 2026-10-07 : plus de saisie menu par menu ; un total, la répartition calculée, la même feuille que sur Aujourd'hui. */
-function sectionPrevisions(etat, date, plat = false) {
+function sectionPrevisions(etat, date) {
   if (!aMenuDuJour(date)) return null;
   const c = couvertsMidiDuJour(etat, date);
   const saisie = c.total !== null;
-  return rep(plat)(h('h2', { classe: 'section-titre' }, 'Couverts midi'), saisie, [
+  return rubrique(h('h2', { classe: 'section-titre' }, 'Couverts midi'), [
     h('p', { classe: 'aide' }, 'Les groupes (fiches de fonction) s\'ajoutent à ce total ; les deux menus restent séparés.'),
     h('p', null, saisie
       ? [pluriel(c.total, 'couvert'), ` · menu 1 : ${c.m1} · menu 2 : ${c.m2} `, pastille(c.manuel ? 'décidé par vous' : 'calculé', 'gris'), ' ', pastille('provisoire', 'gris')]
@@ -221,10 +212,10 @@ function carteFiche(f) {
       bouton('Historique des versions', () => dialogHistorique(f.id), 'court')));
 }
 
-function sectionFiches(etat, date, plat = false) {
+function sectionFiches(etat, date) {
   const fiches = Object.values(etat.fiches).filter((f) => f.date === date)
     .sort((a, b) => a.service.localeCompare(b.service) || a.horaire.localeCompare(b.horaire));
-  return rep(plat)(h('h2', { classe: 'section-titre' }, 'Fiches de fonction'), fiches.length > 0, [
+  return rubrique(h('h2', { classe: 'section-titre' }, 'Fiches de fonction'), [
     fiches.length === 0 ? ligneVide('Aucune fiche de fonction ce jour-là.') : fiches.map(carteFiche),
     h('div', { classe: 'actions' }, bouton('Nouvelle fiche', () => dialogFiche(null, date), 'principal'), boutonLireFiche(date)),
   ], { classe: 'carte', id: 'fiches' });
@@ -232,9 +223,9 @@ function sectionFiches(etat, date, plat = false) {
 
 // ------------------------------------------------------------------ allergies
 
-function sectionAllergies(etat, date, plat = false) {
+function sectionAllergies(etat, date) {
   const alertes = alertesAllergenes(etat, date);
-  return rep(plat)(h('h2', { classe: 'section-titre' }, 'Allergies du jour'), alertes.length > 0, [
+  return rubrique(h('h2', { classe: 'section-titre' }, 'Allergies du jour'), [
     alertes.length === 0 ? ligneVide('Aucune fiche avec allergie signalée ce jour-là.') : alertes.map((a) => h('article', { classe: 'carte-fiche' },
       h('p', null, h('strong', null, `Fiche ${a.numero || ''} (${LIBELLE_SERVICE[a.service]}) : `), a.allergies),
       a.composants.length === 0
@@ -266,12 +257,10 @@ function dialogCreneau(date, creneau) {
   });
 }
 
-function sectionCreneaux(etat, date, plat = false) {
+function sectionCreneaux(etat, date) {
   const jour = jourOuVide(etat, date);
   const charges = creneauxDuJour(date).map((c) => [c, chargeCreneau(etat, date, c)]);
-  const contientUneDonnee = charges.some(([c, charge]) => jour.creneaux[c] !== null
-    || charge.courtes + charge.moyennes + charge.longues + charge.nonEstimees > 0);
-  return rep(plat)(h('h2', { classe: 'section-titre' }, 'Créneaux du jour'), contientUneDonnee, [
+  return rubrique(h('h2', { classe: 'section-titre' }, 'Créneaux du jour'), [
     charges.map(([c, charge]) => h('div', { classe: 'sous-carte' },
       h('h3', null, libelle('CRENEAU', c), ' ', pastilleCreneau(charge.etatCreneau)),
       h('p', { classe: 'meta' }, jour.creneaux[c] === null ? 'état repris de la semaine type' : 'état défini pour ce jour'),
@@ -305,10 +294,10 @@ function dialogVentes(date) {
   });
 }
 
-function sectionApresService(etat, date, plat = false) {
+function sectionApresService(etat, date) {
   if (!aMenuDuJour(date)) return null;
   const v = jourOuVide(etat, date).ventes;
-  return rep(plat)(h('h2', { classe: 'section-titre' }, 'Après service (facultatif)'), Number.isFinite(v[1]) || Number.isFinite(v[2]), [
+  return rubrique(h('h2', { classe: 'section-titre' }, 'Après service (facultatif)'), [
     [1, 2].map((m) => h('p', null, `Menu ${m} : `, Number.isFinite(v[m]) ? pluriel(v[m], 'portion vendue', 'portions vendues') : h('span', { classe: 'discret' }, 'ventes non saisies'))),
     v.h ? h('p', { classe: 'meta' }, `saisie du ${formaterHeure(v.h)}`) : null,
     h('div', { classe: 'actions' }, bouton('Saisir les ventes', () => dialogVentes(date), 'court')),
@@ -335,54 +324,18 @@ function actionPoint(p) {
   return bouton('Aller aux menus', versAncre('menus'), 'court');
 }
 
-function sectionPoints(etat, date, replie = false) {
+function sectionPoints(etat, date) {
   const points = pointsAConfirmer(etat, date);
   const contenu = points.length === 0 ? ligneVide('Rien à confirmer ce jour-là.')
     : h('ul', { classe: 'liste-points' }, points.map((p) => h('li', null, h('span', null, p.texte), actionPoint(p))));
-  return replie
-    ? repliable(h('h2', { classe: 'section-titre' }, 'Points à confirmer'), points.length > 0, contenu, { classe: 'carte', id: 'points' })
-    : h('section', { classe: 'carte', id: 'points' }, h('h2', { classe: 'section-titre' }, 'Points à confirmer'), contenu);
+  return h('section', { classe: 'carte', id: 'points' }, h('h2', { classe: 'section-titre' }, 'Points à confirmer'), contenu);
 }
 
 // ------------------------------------------------------------------ vue
 
-/**
- * Toutes les rubriques du détail d'un jour ouvert, dans l'ordre. `replie` (écran Semaine) : menus et points sont
- * eux aussi des replis ; les autres le sont déjà.
- */
-export function sectionsDuJour(etat, date, { replie = false, plat = false } = {}) {
-  return [sectionMenus(etat, date, replie, plat), sectionPrevisions(etat, date, plat), sectionFiches(etat, date, plat),
-    sectionAllergies(etat, date, plat), sectionCreneaux(etat, date, plat), sectionApresService(etat, date, plat), sectionPoints(etat, date, replie)]
+/** Toutes les rubriques du détail d'un jour ouvert, dans l'ordre, à plat (feuille « Détail du jour »). */
+export function sectionsDuJour(etat, date) {
+  return [sectionMenus(etat, date), sectionPrevisions(etat, date), sectionFiches(etat, date),
+    sectionAllergies(etat, date), sectionCreneaux(etat, date), sectionApresService(etat, date), sectionPoints(etat, date)]
     .filter(Boolean);
 }
-
-/** G2 : un jour de semaine n'a aucun menu. null si au moins un menu est saisi, ou le samedi (jamais de menu, rien à importer). */
-export function etatVideSansMenu(etat, date) {
-  if (jourSemaine(date) > 5) return null;
-  if ([1, 2].some((menu) => jourOuVide(etat, date).menus[menu].intitule.trim() !== '')) return null;
-  return etatVide({
-      etiquette: 'menu à importer', titre: 'Pas encore de menu pour ce jour',
-      texte: `Sans menu, Sanji ne calcule rien pour ${libelleJour(date).split(' ')[0]} : aucune quantité n'est inventée.`,
-      actions: [{ libelle: 'Importer les menus de la semaine', href: `#/import/${lundiDe(date)}`, principal: true }],
-    });
-}
-
-export function rendre(etat, date) {
-  const racine = h('div', { classe: 'vue vue-detail' });
-  racine.appendChild(h('h1', { classe: 'page-titre' }, libelleJour(date)));
-  racine.appendChild(navigationPeriode(
-    { href: `#/production/${ajouterJours(date, -1)}`, texte: '‹ Jour précédent' },
-    { href: `#/semaine/${lundiDe(date)}/tableau`, texte: 'Semaine' },
-    { href: `#/production/${ajouterJours(date, 1)}`, texte: 'Jour suivant ›' }));
-  racine.appendChild(h('p', null, lien(`#/production/${date}`, 'Production du jour ›', 'sa-lien-production')));
-  if (!estOuvert(date)) {
-    racine.appendChild(h('p', { classe: 'ferme' }, 'fermé'));
-    racine.appendChild(h('p', { classe: 'aide' }, 'Le dimanche est non travaillé, sans tâche ; il reste compté dans le temps de conservation.'));
-    return racine;
-  }
-  const vide = etatVideSansMenu(etat, date);
-  if (vide) racine.appendChild(vide);
-  for (const section of sectionsDuJour(etat, date)) racine.appendChild(section);
-  return racine;
-}
-

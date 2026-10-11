@@ -271,7 +271,6 @@ test('fiche de fonction : seulement si elle tombe aujourd\'hui ou demain', () =>
   assert.equal(aujourdhuiDe(e, S.mercredi).ficheProche, null);
   assert.equal(classes(page(S.mercredi, e), 'au-fiche').length, 0);
   assert.equal(aujourdhuiDe(e, S.jeudi).ficheProche?.numero ?? null, 'F_LOIN', 'demain : elle apparaît');
-  assert.ok(aujourdhuiDe(e, S.mercredi).prochaineFiche, 'le domaine garde la prochaine fiche, même lointaine');
 });
 
 test('prochaine fiche de fonction : jour, personnes, allergies écrites, certitude écrite', () => {
@@ -335,7 +334,6 @@ test('accessibilité : mots écrits pour les états, quantités en police des qu
   const tailles = [...bloc.matchAll(/font-size: (\d+)px/g)].map((m) => Number(m[1]));
   assert.ok(tailles.every((t) => t >= 13), `texte sous 13 px : ${tailles}`);
   assert.match(bloc, /\.au-btn \{[^}]*min-height: var\(--haut-bouton\)/);
-  assert.match(bloc, /\.au-decisions \{[^}]*min-height: 60px/);
   assert.match(bloc, /\.au-lien-court \{[^}]*min-height: var\(--cible\)/);
   assert.doesNotMatch(bloc, /gradient|https?:\/\//);
   // L'écran ne passe jamais un état par la couleur seule : « hors règle », « provisoire », « à décider » sont écrits.

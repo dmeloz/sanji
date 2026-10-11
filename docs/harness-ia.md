@@ -91,7 +91,7 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 ## Décisions métier ouvertes (accord requis)
 
 - **Heures de fin de créneau** : l'horloge interne est en place (`horloge.js`) mais aucune borne n'est renseignée ; sans borne, un créneau du matin peut être proposé l'après-midi. À fournir par la propriétaire.
-- **Fournisseur d'IA** : aucun choix fait. La règle « aucun envoi réseau » est levée pour une couche d'IA optionnelle (décision du 2026-10-06), mais rien ne part tant que le fournisseur, la clé et les données transmises ne sont pas validés.
+- **Fournisseur d'IA** : en place (`ui/fournisseur-web.js`, API Anthropic, intégration à l'interface en v67). La règle « aucun envoi réseau » est levée pour cette couche optionnelle (décision du 2026-10-06) ; rien ne part tant que l'assistant n'est pas activé dans Réglages > Assistant IA avec une clé, et seules les données décrites plus haut sont transmises.
 
 ## Décisions prises (2026-10-06, la propriétaire)
 
@@ -103,9 +103,9 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 ## Limites
 
 - Une seule tâche est couverte : le planning de productions non planifiées.
-- Aucune interface : le harness n'est branché à aucun écran. Un écran « brouillon à valider » reste à concevoir (dans `ui/`, sans logique métier).
+- L'interface est branchée depuis la v67 (bouton « Proposer un planning », feuille « Brouillon » : `ui/assistant-planning.js`) ; le harness lui-même reste sans DOM.
 - Les propositions sont perdues au rechargement.
-- Aucun fournisseur réel n'a été éprouvé : seul un fournisseur scripté est testé.
+- Les tests n'utilisent qu'un fournisseur scripté ; le fournisseur réel (`ui/fournisseur-web.js`) est branché mais éprouvé seulement à la main par la propriétaire.
 - Les contrôles de poids cru/cuit et de double perte restent ceux du domaine (`calculerComposant`) ; le harness ne les recalcule pas.
 
 ## Ajouter un outil

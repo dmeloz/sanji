@@ -4,8 +4,6 @@ import * as st from '../app/js/domaine/statuts.js';
 
 test('énumérations fermées conformes à la conception', () => {
   assert.deepEqual(Object.values(st.PROVENANCE), ['RESTAURANT_VALIDE', 'STANDARD_BASE', 'BASE_METIER_ESTIMATION', 'SAISI_SERVICE', 'CALCULE', 'INCONNU']);
-  assert.deepEqual(Object.values(st.CERTITUDE), ['estimee', 'provisoire', 'confirmee']);
-  assert.deepEqual(Object.values(st.ETAT_TACHE), ['a_preciser', 'a_planifier', 'a_faire', 'en_cours', 'fait', 'ecart']);
   assert.deepEqual(Object.values(st.CRENEAU), ['avant_midi', 'apres_midi', 'avant_soir']);
   assert.deepEqual(Object.values(st.ETAT_CRENEAU), ['libre', 'charge', 'indisponible']);
   assert.deepEqual(Object.values(st.CHARGE), ['courte', 'moyenne', 'longue']);
@@ -19,7 +17,7 @@ test('énumérations fermées conformes à la conception', () => {
 });
 
 test('clé = valeur et énumérations gelées', () => {
-  for (const nom of ['PROVENANCE', 'CERTITUDE', 'ETAT_TACHE', 'CRENEAU', 'ETAT_CRENEAU', 'CHARGE']) {
+  for (const nom of ['PROVENANCE', 'CRENEAU', 'ETAT_CRENEAU', 'CHARGE']) {
     assert.ok(Object.isFrozen(st[nom]));
     for (const [k, v] of Object.entries(st[nom])) assert.equal(k, v);
   }

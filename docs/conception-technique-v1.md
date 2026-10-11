@@ -5,7 +5,7 @@ Statut : choix techniques faits par Claude par délégation le 2026-10-02 (« cr
 ## 1. Choix techniques
 
 - Application web installable (PWA), fichiers statiques, **aucune dépendance, aucun build, aucun `npm install`**. JavaScript moderne en modules ES, HTML, CSS.
-- Tests : `node --test tests/` (Node 22). `package.json` minimal avec `"type": "module"`.
+- Tests : `npm test` (Node 22, aucun paquet à installer). `package.json` minimal avec `"type": "module"`.
 - Données : un seul document d'état JSON, persisté dans IndexedDB sur l'appareil. Aucun serveur, aucun compte, aucun envoi réseau.
 - Hors ligne : service worker qui met en cache tous les fichiers de `app/`.
 - Langue de l'interface et des identifiants de code : français. Identifiants techniques sans accent.
@@ -13,34 +13,13 @@ Statut : choix techniques faits par Claude par délégation le 2026-10-02 (« cr
 
 ## 2. Arborescence
 
-```
-sanji/
-  CLAUDE.md
-  package.json
-  conception-technique-v1.md
-  app/                         ← seul dossier servi et déployable
-    index.html
-    manifest.webmanifest
-    sw.js
-    icones/
-    css/style.css
-    js/main.js
-    js/stockage.js             ← IndexedDB (navigateur seulement)
-    js/domaine/                ← logique pure, sans DOM, testée sous Node
-      dates.js  statuts.js  etat.js  analyse-menu.js  calcul.js
-      planification.js  produits.js  allergenes.js  points.js  actions.js
-    js/donnees/base-metier.js  ← généré depuis la base métier, jamais édité à la main
-    js/ui/                     ← vues
-  outils/extraire-base-metier.mjs
-  tests/*.test.js
-  tests/jeux/TEST_ONLY-*.js    ← jeux de test, jamais importés par app/
-```
+Le code vit sous `app/` (seul dossier servi) : `app/js/domaine/` (logique pure, testée sous Node), `app/js/ui/` (vues), `app/js/harness/` (assistant IA), `app/js/donnees/` (données générées), `app/js/stockage.js` (IndexedDB) ; les tests sont dans `tests/` (jeux `TEST_ONLY` dans `tests/jeux/`). Liste à jour : voir `app/js` ; la carte commentée est dans `CLAUDE.md`.
 
 Règle absolue : rien sous `app/` n'importe quoi que ce soit hors de `app/`. Les modules de `js/domaine/` n'utilisent ni `window`, ni `document`, ni `indexedDB`, ni `Date.now()` implicite : la date du jour et l'horodatage sont toujours passés en argument (`aujourdhui` au format `AAAA-MM-JJ`, `h` au format ISO).
 
 ## 3. Vocabulaire fermé (`statuts.js`)
 
-- `PROVENANCE` : `RESTAURANT_VALIDE`, `BASE_METIER_ESTIMATION`, `SAISI_SERVICE`, `CALCULE`, `INCONNU`. Libellés : « validé restaurant », « estimation base métier », « saisi au service », « calculé », « inconnu ».
+- `PROVENANCE` : `RESTAURANT_VALIDE`, `STANDARD_BASE`, `BASE_METIER_ESTIMATION` (ancien nom de `STANDARD_BASE`, lu pareil), `SAISI_SERVICE`, `CALCULE`, `INCONNU`. Libellés : « validé restaurant », « estimation base métier », « saisi au service », « calculé », « inconnu ».
 - `CERTITUDE` (prévisions) : `estimee`, `provisoire`, `confirmee`.
 - `ETAT_TACHE` : `a_preciser`, `a_planifier`, `a_faire`, `en_cours`, `fait`, `ecart`. Libellés : « à préciser », « à planifier », « à faire », « en cours », « fait », « écart à arbitrer ».
 - `CRENEAU` : `avant_midi`, `apres_midi`, `avant_soir`. Libellés : « avant le service de midi », « après le service de midi », « avant le service du soir ».
@@ -48,7 +27,7 @@ Règle absolue : rien sous `app/` n'importe quoi que ce soit hors de `app/`. Les
 - `CHARGE` (d'une production) : `courte`, `moyenne`, `longue` (1, 2, 3 points).
 - `TYPE_COMPOSANT` : `produit_simple`, `preparation_maison`, `generique`, `a_preciser`.
 - `CATEGORIE` : `legume`, `feculent`, `proteine`, `sauce`, `autre`, `a_preciser`.
-- `ROLE` : `plat_principal`, `garniture`, `sauce`, `autre`.
+- `ROLE` : `plat_principal`, `garniture`, `sauce`, `autre`, `composant_recette`, `herbe`.
 - `ETAPE` : `portionnement`, `cuisson`, `parage`.
 - `UNITE` : `g`, `ml`, `piece`.
 - `VERIF` : `a_verifier`, `suffisant`, `a_commander` ; l'état affiché « à revérifier » est dérivé.
@@ -72,7 +51,7 @@ Dates en chaînes `AAAA-MM-JJ`, calculées en UTC pour éviter les décalages. F
   },
   jours: { [date]: {
     date,
-    menus: { 1:{intitule:'', transcriptionValidee:false, composantsValides:false}, 2:{…} },
+    menus: { 1:{intitule:'', transcriptionValidee:false}, 2:{…} },
     previsions: { 1:{portions:null, h:null}, 2:{portions:null, h:null} },   // hors groupes
     creneaux: { avant_midi:null, apres_midi:null, avant_soir:null },        // null = semaine type
     ventes: { 1:null, 2:null, h:null }
@@ -185,7 +164,7 @@ Dates en chaînes `AAAA-MM-JJ`, calculées en UTC pour éviter les décalages. F
 
 ## 11. Actions (`actions.js`)
 
-Fonctions qui modifient l'état reçu et ajoutent une ligne au journal. Chacune prend `h` (horodatage ISO). Liste minimale : `definirMenu`, `validerTranscription`, `genererComposants` (remplace les composants non validés du menu par la proposition), `ajouterComposant`, `modifierComposant`, `validerComposant`, `supprimerComposant`, `validerComposantsMenu`, `definirPrevision`, `creerFiche`, `modifierFiche` (incrémente `version`, ajoute à `historique`), `annulerFiche`, `confirmerRepartition`, `ajouterAdaptation`, `definirCreneau`, `definirSemaineType`, `confirmerSemaineType`, `definirCapacite`, `planifier` (jour + créneau, autorisé même hors règle), `demarrer`, `marquerFait` (réel, instantané des paramètres et de la version de recette), `corrigerReel`, `reporter`, `deciderEcart` (`complement` crée une production `complement`), `ajouterPreparatoire`, `supprimerProduction`, `enregistrerPesee` (avant, après → coefficient `RESTAURANT_VALIDE`, source « pesée du … »), `memoriser` (copie les paramètres validés du composant dans `memoire`), `reprendreMemoire`, `definirRegle`, `supprimerRegle`, `creerRecette`, `modifierRecette` (nouvelle version, l'ancienne dans `historique`), `validerRecette`, `definirFournisseur`, `supprimerFournisseur`, `controlerProduit` (statut, quantité vérifiée, mémorise `besoinAuControle`), `definirAchat`, `marquerCommande`, `saisirVentes`, `saisirApresService`.
+Fonctions qui modifient l'état reçu et ajoutent une ligne au journal. Chacune prend `h` (horodatage ISO). Liste minimale : `definirMenu`, `ajouterComposant`, `modifierComposant`, `supprimerComposant`, `definirPrevision`, `creerFiche`, `modifierFiche` (incrémente `version`, ajoute à `historique`), `annulerFiche`, `confirmerRepartition`, `ajouterAdaptation`, `definirCreneau`, `definirSemaineType`, `confirmerSemaineType`, `definirCapacite`, `planifier` (jour + créneau, autorisé même hors règle), `demarrer`, `marquerFait` (réel, instantané des paramètres et de la version de recette), `corrigerReel`, `reporter`, `deciderEcart` (`complement` crée une production `complement`), `ajouterPreparatoire`, `supprimerProduction`, `enregistrerPesee` (avant, après → coefficient `RESTAURANT_VALIDE`, source « pesée du … »), `memoriser` (copie les paramètres validés du composant dans `memoire`), `reprendreMemoire`, `definirRegle`, `supprimerRegle`, `creerRecette`, `modifierRecette` (nouvelle version, l'ancienne dans `historique`), `validerRecette`, `definirFournisseur`, `supprimerFournisseur`, `controlerProduit` (statut, quantité vérifiée, mémorise `besoinAuControle`), `definirAchat`, `marquerCommande`, `saisirVentes`, `saisirApresService`.
 
 Invariants :
 - `assurerProductions(etat)` est appelé à la fin de chaque action : tout composant attribué **et** validé a exactement une production `principale` ; un composant non attribué ou supprimé perd ses productions non faites.
@@ -194,7 +173,7 @@ Invariants :
 
 ## 12. Interface
 
-Mobile d'abord (largeur 375 px), utilisable à une main, gros boutons, texte ≥ 16 px, thème clair et sombre. Barre d'onglets en bas : **Semaine**, **Jour**, **Produits**, **Réglages**. Toute saisie passe par un panneau (`<dialog>`) avec « Enregistrer » : pas de saisie en ligne qui se re-dessine.
+Mobile d'abord (largeur 375 px), utilisable à une main, gros boutons, texte ≥ 16 px, thème clair seul (le mode sombre est désactivé depuis la v100). Barre d'onglets en bas : **Aujourd'hui**, **Production**, **Semaine**, **Articles** (Réglages s'ouvre depuis l'en-tête d'Aujourd'hui). Toute saisie passe par un panneau (`<dialog>`) avec « Enregistrer » : pas de saisie en ligne qui se re-dessine.
 
 - **Semaine (tableau blanc)** : lundi à samedi, dimanche « fermé ». Par jour : intitulés originaux des menus 1 et 2 en premier, puis prévisions (hors groupes + groupes, avec certitude), fiches de fonction (touche = détail : personnes, horaire, choix confirmés ou non, allergies, remarques), nombre de points à confirmer. Pas de liste de tâches. Service du soir et samedi visibles comme occupation. Vendredi et samedi : la semaine suivante s'affiche sous la semaine en cours. Boutons semaine précédente / suivante.
 - **Détail d'un jour** (depuis Semaine) : menus (photo facultative comme aide à la transcription, saisie de l'intitulé, validation de la transcription, proposition puis validation des composants), prévisions avec repère des ventes, fiches, état des créneaux, après service.
@@ -260,7 +239,7 @@ Sous la réglette, une phrase compte chaque état avec le même pictogramme : el
 ### Tableau de bord (onglet Accueil, écran par défaut)
 Ordre sur iPhone : date et service ; point global éventuel (semaine type à confirmer) ; mise en place du service avec l'action principale « Ouvrir la feuille du jour » ; menus du jour avec portions ; créneaux du jour (état + charge en blocs : courte 1, moyenne 2, longue 3, jamais de minutes) ; à décider ; à avancer ; fiches et allergies du jour ; commandes de la semaine ; la semaine en bandeau de six jours (et la semaine suivante le vendredi et le samedi). Sur iPad : deux colonnes, la mise en place sur toute la largeur.
 
-Les données viennent d'une seule fonction pure et testée, `tableauDeBord(etat, aujourdhui)` dans `app/js/domaine/tableau-bord.js`. La vue ne calcule rien.
+Les données viennent d'une seule fonction pure et testée, `tableauBlanc(etat, aujourdhui, lundiAffiche)` dans `app/js/domaine/tableau-blanc.js` (ancien nom : `tableauDeBord`, `tableau-bord.js`). La vue ne calcule rien.
 
 ### Onglets
 Cinq onglets : Accueil, Semaine, Jour, Produits, Réglages. Barre opaque, pictogrammes en SVG dessinés à la main dans le code, onglet actif marqué par une pilule de fond et un libellé en gras.
@@ -297,8 +276,8 @@ Ce lot remplace la section 14 pour l'accueil : la « réglette de bacs » dispar
 ### 16.1 Domaine
 
 **Plus de validation manuelle.**
-- `definirMenu` : l'intitulé enregistré vaut transcription validée (`transcriptionValidee: true`). Il régénère les composants du menu **en fusionnant** : un composant dont le nom normalisé est inchangé est conservé tel quel (avec ses réglages et ses productions) ; un composant disparu de l'intitulé est supprimé, sauf s'il a une production faite ; un nouveau composant est créé. `composantsValides` passe à vrai.
-- Tout composant créé par l'analyse est `valide: true` d'emblée. `validerTranscription`, `validerComposant`, `validerComposantsMenu`, `genererComposants` restent exportés pour compatibilité mais ne sont plus nécessaires au parcours ; l'interface ne les appelle plus.
+- `definirMenu` : l'intitulé enregistré vaut transcription validée (`transcriptionValidee: true`). Il régénère les composants du menu **en fusionnant** : un composant dont le nom normalisé est inchangé est conservé tel quel (avec ses réglages et ses productions) ; un composant disparu de l'intitulé est supprimé, sauf s'il a une production faite ; un nouveau composant est créé.
+- Tout composant créé par l'analyse est `valide: true` d'emblée. `validerTranscription`, `validerComposant`, `validerComposantsMenu`, `genererComposants` ont été supprimées (v119) ; un ancien état importé peut encore porter `composantsValides`, sans effet.
 - Points à confirmer : les types `transcription` et `composants` disparaissent. Nouveaux types : `composant_inconnu` (catégorie `a_preciser` : « à classer : au poste ou non ? ») et `grammage` (composant attribué sans grammage, hors générique). `composant_a_preciser` reste pour un type non déterminé.
 
 **Savoir culinaire : `app/js/domaine/savoir.js`.**
@@ -340,14 +319,8 @@ Ce lot remplace la section 14 pour l'accueil : la « réglette de bacs » dispar
 
 **Tableau blanc : `app/js/domaine/tableau-blanc.js`** (remplace `tableau-bord.js`, à supprimer avec ses tests une fois les nouveaux en place).
 `tableauBlanc(etat, aujourdhui, lundiAffiche?)` renvoie :
-- `contexte` : `{type, titre, lignes, action}` avec `type` parmi :
-  - `service` : aujourd'hui a des tâches de service non faites → titre « Avant le service de midi », lignes = tâches à faire ou en cours du service du jour avec quantité formatée, puis les décisions ;
-  - `apres_service` : toutes les tâches du service du jour sont faites (ou il n'y en a pas un jour à menu, hors vendredi) → « Après le service », lignes = `aAvancer` du jour ;
-  - `semaine_prochaine` : vendredi une fois le service prêt, samedi, dimanche → « Semaine prochaine », lignes = avances possibles pour lundi et mardi ; si la semaine suivante n'a aucun menu, action « Saisir les menus de la semaine » ;
-  - `vide` : aucun menu sur la semaine affichée → action « Saisir les menus de la semaine ».
-  Le mardi, le contexte `apres_service` ajoute la ligne « revue de mi-semaine ». Chaque ligne : `{texte, quantite, genre:'tache'|'decision'|'avance'|'info', etat, lien}`.
-- `lundi` : semaine affichée. Par défaut la semaine d'aujourd'hui du lundi au jeudi et le vendredi tant que le service n'est pas prêt ; la semaine suivante dans le contexte `semaine_prochaine`. `lundiAffiche` force une semaine (navigation).
-- `jours` : six jours (lundi à samedi), chacun `{date, estAujourdhui, aMenu, menus:[{menu, intitule, portions, morceaux:[{texte, auPoste, composantId}]}], groupes:[{id, numero, service, couverts, horaire, aAllergies, certitude}], miseEnPlace:[{productionId, composantId, nom, quantite, etat, symbole}], soir:boolean, nbPoints}`. `morceaux` découpe l'intitulé du menu en ses composants, dans l'ordre, pour afficher ce qui est au poste et ce qui ne l'est pas. `symbole` : `fait`, `en_cours`, `a_faire`, `a_decider`, `non_couvert`.
+- `date`, `lundi` : semaine affichée (par défaut la semaine d'aujourd'hui ; la suivante le week-end et le vendredi une fois le travail du jour fini ; `lundiAffiche` force une semaine), `estSemaineCourante`, `bord` (tableau de bord de la Semaine). Il n'y a plus de `contexte` (note, lignes, actions) ni de `miseEnPlace`.
+- `jours` : six jours (lundi à samedi), chacun `{date, estAujourdhui, aMenu, menus:[{menu, intitule, saisi, morceaux:[{texte, auPoste, composantId}], couverts, previsionASaisir, provisoires}], nbFiches, couvertsTotal}`. `morceaux` découpe l'intitulé du menu en ses composants, dans l'ordre, pour afficher ce qui est au poste et ce qui ne l'est pas ; `nbFiches` = nombre de fiches de fonction actives du jour.
 - `pointsGlobaux`, `semainePrecedente`, `semaineSuivante`.
 
 ### 16.2 Interface
@@ -358,7 +331,7 @@ Ce lot remplace la section 14 pour l'accueil : la « réglette de bacs » dispar
 - Un panneau blanc dans un cadre d'aluminium (bord de 3 px `#b8c2c8`, rayon 8 px), posé sur le fond inox. En thème sombre, le panneau reste clair d'aspect « ardoise » : surface `--carte`, encre claire.
 - Écriture au feutre : `--police-feutre: "Marker Felt", "Chalkboard SE", "Bradley Hand", ui-rounded, system-ui, sans-serif` (polices déjà présentes sur iPhone et iPad, rien à télécharger). Elle sert aux jours, aux intitulés, aux chiffres et au titre du contexte, jamais sous 18 px. Les petits textes et les boutons restent en police système.
 - Couleurs de feutre : noir (`--texte`) pour ce qui est au poste, bleu (`--bleu`) pour les chiffres de couverts, vert pour ce qui est fait, rouge pour les alertes, allergies et décisions. Ce qui n'est pas au poste (protéine, sauce du menu 2) est écrit en gris, plus petit, en police système. La couleur n'est jamais le seul signal : coche, case, texte barré, point d'exclamation.
-- **En haut du tableau, la note du contexte** : un papillon jaune (fond `--ambre-fond`, bande de ruban `--ambre` en haut) avec le titre du contexte, au plus six lignes, et une seule action principale (« Ouvrir la feuille du jour », ou « Saisir les menus de la semaine »). C'est la réponse à « que dois-je savoir maintenant ».
+- **Note du contexte** : supprimée (v119), le tableau de bord `bord` la remplace.
 - **La grille.** iPad (largeur ≥ 820 px) : une colonne par jour, du lundi au samedi, séparées par des traits noirs de 2 px comme du ruban de traçage ; lignes « Menu 1 », « Menu 2 », « Groupes », « Mise en place ». iPhone : une bande horizontale par jour, le jour écrit à gauche (« Lun » et le numéro), le contenu à droite ; le jour mis en avant par le contexte est déplié (mise en place visible), les autres sont repliés sur leurs deux menus et leurs couverts.
 - Aujourd'hui est marqué par un aimant (pastille ronde rouge) à côté du nom du jour et par le mot « aujourd'hui » en petit.
 - Mise en place : une ligne par tâche, case vide (à faire), case à moitié (en cours), coche et texte barré (fait), point d'exclamation rouge (à décider). Chaque ligne mène au composant, cible de 44 px.
@@ -366,15 +339,15 @@ Ce lot remplace la section 14 pour l'accueil : la « réglette de bacs » dispar
 - Rien de vide n'est écrit : pas de « aucune fiche », pas de « 0 ». Une case sans contenu reste blanche.
 - En tête du tableau : « Semaine du … » au feutre, flèches semaine précédente et suivante, et un bouton discret « Menus de la semaine ».
 
-**Menus de la semaine (`vue-menus.js`, route `#/menus/LUNDI`).**
+**Saisie des menus de la semaine (route `#/import`, `vue-import.js` ; `vue-menus.js` n'est plus qu'une bibliothèque : `blocJour`, `repartir`, `enregistrer`, `reprendreTexte`, la page `rendre` est supprimée).**
 - Une zone « Coller le texte de la feuille » avec le bouton « Répartir dans la semaine » : remplit les champs à partir de `analyserFeuille`, affiche les avertissements, n'enregistre rien.
 - Cinq blocs, du lundi au vendredi : menu 1 et sa prévision, menu 2 et sa prévision (facultatives).
-- Un seul bouton « Enregistrer la semaine » (`saisirMenusSemaine`), puis retour au tableau. Aucune étape de validation.
+- Un seul bouton « Enregistrer la semaine » (`saisirMenusSemaine`), puis retour à la semaine. Aucune étape de validation.
 - La page ne se redessine pas pendant la frappe.
 
-**Détail d'un jour (`vue-detail.js`).** Plus aucun bouton « valider la transcription », « proposer les composants », « valider ». Sous chaque menu : ses composants, chacun avec un interrupteur « au poste » (mémorisé) et un lien vers sa page. Les autres rubriques (prévisions, fiches, allergies, créneaux, après service, photo) sont des blocs repliables, fermés quand ils sont vides.
+**Détail d'un jour (`vue-detail.js`, plus de page : la feuille `sectionsDuJour`, ouverte depuis « Services du jour » de Production).** Plus aucun bouton « valider la transcription », « proposer les composants », « valider ». Sous chaque menu : ses composants, chacun avec un interrupteur « au poste » (mémorisé) et un lien vers sa page. Les autres rubriques (prévisions, fiches, allergies, créneaux, après service, photo) sont des blocs repliables, fermés quand ils sont vides.
 
-**Composant (`vue-composant.js`).** La portion affichée dit d'où elle vient (ce plat, référence de ce nom, standard maison, estimation base métier) et dans quel état de poids elle est exprimée. Une portion manquante propose deux gestes : « Corriger pour ce plat seulement » ou « Régler le standard maison » (lien vers Réglages). Corriger un plat ne touche jamais au standard.
+**Composant (la fiche vivante est `vue-fiche.js` ; `vue-composant.js` n'est plus qu'une bibliothèque de dialogues et de `sectionsReglages`, sa page `rendre` est supprimée).** La portion affichée dit d'où elle vient (ce plat, référence de ce nom, standard maison, estimation base métier) et dans quel état de poids elle est exprimée. Une portion manquante propose deux gestes : « Corriger pour ce plat seulement » ou « Régler le standard maison » (lien vers Réglages). Corriger un plat ne touche jamais au standard.
 
 **Réglages : section « Standards maison ».** Une ligne par famille et par rôle (`lignesStandards`) : libellé de la famille, rôle, la valeur du standard avec son unité et son état de poids, et à côté, s'il existe, le repère de la base métier à titre indicatif. Chaque ligne se modifie ou s'efface dans un panneau. Texte d'aide : le standard maison passe avant l'estimation de la base ; une correction sur un plat ne le change pas.
 
@@ -440,8 +413,8 @@ Décision validée : « Standards de base et ajustement terrain ». Rangement pr
 
 Décisions validées : « Onglets et écrans de la refonte 1 » et « Direction visuelle de la refonte 1 ». Paquet : `docs/maquette-refonte-1/` (brief, jetons, maquettes). Règle d'or : structure et apparence seulement ; aucune logique métier changée (relecture indépendante : rien de modifié dans le domaine hors fonctions de données pures `aujourdhuiDe`, `prochainOuvert`, `decisions.js`).
 
-- **Onglets** : Aujourd'hui (`vue-aujourdhui.js`), Production (`vue-production.js` + `vue-jour.js`), Semaine (`vue-semaine.js` + `vue-detail.js`), Stock (`vue-stock.js` : Restes, DLC, Achats via `vue-produits.js`). Réglages par le bouton de l'accueil. Écrans hors onglets : Fiche technique (`vue-fiche.js`, gestes avancés de `vue-composant.js` dans « Plus de réglages »), Mode en poste (`vue-poste.js`, étapes de la règle de préparation, au moins 2), Import des menus (`vue-import.js`), feuille À décider (`feuille-decisions.js`, même compte que le bandeau d'accueil, `decisionsDe`).
-- **Routes** : `#/aujourdhui`, `#/production[/d]`, `#/semaine[/d]`, `#/stock[/restes|dlc|achats][/d]`, `#/fiche/<id>`, `#/poste/<id>`, `#/import[/d]`, `#/reglages[/rubrique]` ; anciennes adresses redirigées.
+- **Onglets** : Aujourd'hui (`vue-aujourdhui.js`), Production (`vue-production.js` + `vue-jour.js`), Semaine (`vue-semaine.js` → `vue-tableau.js` depuis la v116), Articles (`vue-articles.js` depuis la v71 ; `vue-stock.js` et `vue-produits.js` restent dans le code, sans route). Réglages par le bouton de l'accueil. Écrans hors onglets : Fiche technique (`vue-fiche.js`, gestes avancés de `vue-composant.js` dans « Plus de réglages »), Mode en poste (`vue-poste.js`, étapes de la règle de préparation, au moins 2), Import des menus (`vue-import.js`), feuille À décider (`feuille-decisions.js`, même compte que le bandeau d'accueil, `decisionsDe`).
+- **Routes** : `#/aujourdhui`, `#/production[/d]`, `#/semaine[/d]` (depuis la v116, une date mène à Production de ce jour), `#/articles`, `#/fiche/<id>`, `#/poste/<id>`, `#/import[/d]`, `#/preparer[/d]`, `#/fiches`, `#/historique`, `#/reglages[/rubrique]` ; anciennes adresses redirigées (liste à jour : `app/js/ui/routeur.js`).
 - **Apparence** : jetons de `tokens.css` fusionnés dans `style.css` ; police IBM Plex Mono embarquée (`app/polices/`, licence OFL, mise en cache) pour les quantités ; groupement des milliers étroit, nombres de 4 chiffres non groupés ; thème sombre ; contrastes testés (4,5:1).
 - **Choix par défaut validés avec le plan** : pas de synchronisation (« hors ligne prêt »), couverts par menu et fiches (pas midi/soir), ni minuteur, ni lots/emplacements, ni relevé de températures, ni réglage d'avance « −/+ », ni planning personnel ; « vérifié disponible », jamais « en stock ».
 - **Vérification** : 783 tests ; relecture indépendante (0 critique, 4 importants, 6 mineurs corrigés) ; captures réelles à 390 px en clair et en sombre. Non vérifié : un vrai iPhone.

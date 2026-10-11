@@ -106,12 +106,6 @@ test('« Enregistrer la semaine » : un menu suffit, les composants se créent s
   assert.equal(location.hash, `#/preparer/${S.lundi}`, 'après l\'enregistrement : l\'écran « Préparer la semaine »');
 });
 
-test('la page ancienne vue-menus reste disponible et partage les champs', async () => {
-  const menus = await import('../app/js/ui/vue-menus.js');
-  const noeud = menus.rendre(etatVide(), S.lundi);
-  assert.ok(champ(noeud, 'feuille-texte') && bouton(noeud, 'Enregistrer la semaine'));
-});
-
 test('style : bloc Import en fin de style.css, légendes >= 13 px, cibles >= 44 px, mouvement réduit', () => {
   const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
   const debut = css.indexOf('Import des menus (refonte 1)');

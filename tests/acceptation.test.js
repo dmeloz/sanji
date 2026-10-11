@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 
 import {
   ajouterAdaptation, ajouterPreparatoire, annulerFiche, confirmerRepartition, controlerProduit, creerFiche, definirCapacite,
-  definirCreneau, definirFournisseur, definirPrevision, definirRegle, definirStandard, deciderEcart, marquerCommande, marquerFait,
+  definirCreneau, definirFournisseur, definirRegle, definirStandard, deciderEcart, marquerCommande, marquerFait,
   memoriser, modifierComposant, modifierFiche, planifier, reprendreMemoire, saisirMenusSemaine,
 } from '../app/js/domaine/actions.js';
 import * as allergenes from '../app/js/domaine/allergenes.js';
@@ -572,7 +572,7 @@ test('17. Un paramètre repris des standards de base est visible, étiqueté « 
 });
 
 test('18. Le tableau blanc met en avant, selon le contexte, ce qui reste à faire avant le service, ce qui peut être avancé après, ou la semaine suivante en fin de semaine', async () => {
-  const { tableauBlanc } = await import('../app/js/domaine/tableau-blanc.js');
+  const { tableauBlanc, aujourdhuiDe } = await import('../app/js/domaine/tableau-blanc.js');
   const { definirMenu: saisir, definirRegle: regle, definirStandard: standard, planifier: placer, marquerFait: fait } = await import('../app/js/domaine/actions.js');
   const e = etatVide();
   // Jeu TEST_ONLY : mots de catégorie génériques, portions arbitraires.
@@ -586,24 +586,18 @@ test('18. Le tableau blanc met en avant, selon le contexte, ce qui reste à fair
   regle(e, { nom: 'pâtes', avanceMaxJours: 2 }, h());
   const production = (date) => Object.values(e.productions).find((p) => p.dateService === date).id;
 
-  // Avant le service : ce qui reste à faire, avec sa quantité, et la feuille du jour comme action.
-  const avant = tableauBlanc(e, S.lundi).contexte;
-  assert.equal(avant.type, 'service');
-  assert.deepEqual(avant.lignes.filter((l) => l.genre === 'tache').map((l) => [l.texte, l.quantite]), [['riz et carottes', '1 000 g']]);
-  assert.equal(avant.action.lien, `#/production/${S.lundi}`);
+  // Avant le service : la semaine désignée est la semaine en cours.
+  assert.equal(tableauBlanc(e, S.lundi).lundi, S.lundi);
 
   // Après le service : ce qui peut être avancé pour le lendemain.
   placer(e, production(S.lundi), S.lundi, 'avant_midi', h());
   fait(e, production(S.lundi), null, h());
-  const apres = tableauBlanc(e, S.lundi).contexte;
-  assert.equal(apres.type, 'apres_service');
   // « pâtes aux courgettes » se lit en deux éléments (pâtes, courgettes) et une sauce à confirmer : on suit la ligne des pâtes.
-  assert.deepEqual(apres.lignes.filter((l) => l.genre === 'avance' && /^pâtes,/.test(l.texte)).map((l) => [l.texte, l.quantite]),
-    [['pâtes, pour mardi 6 octobre', '1 000 g']]);
+  assert.deepEqual(aujourdhuiDe(e, S.lundi).aAvancer.lignes.filter((l) => l.nom === 'pâtes').map((l) => [l.dateService, l.quantite]),
+    [[S.mardi, 1000]]);
 
   // En fin de semaine : le tableau affiche la semaine suivante.
   const samedi = tableauBlanc(e, S.samediPrecedent);
-  assert.equal(samedi.contexte.type, 'semaine_prochaine');
   assert.equal(samedi.lundi, S.lundi);
   assert.equal(tableauBlanc(e, S.mercredi).lundi, S.lundi, 'en semaine : la semaine en cours');
 });

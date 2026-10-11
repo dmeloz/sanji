@@ -7,6 +7,7 @@ import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { etatVide } from './aide.js';
 import { lireChampsFiche } from '../app/js/harness/lecture-fiche-ia.js';
 import { construireCorpsFiche, creerFournisseurWeb } from '../app/js/ui/fournisseur-web.js';
+import { detailDuJour } from './aide-detail.js';
 
 const FAUSSE_CLE = 'sk-ant-FAUX1234';
 const DATE = '2026-11-04';
@@ -102,7 +103,7 @@ async function page({ cle = true, reponse = outil(FICHE_LUE) } = {}) {
   magasin.remplacer(etatVide());
   const appels = [];
   globalThis.fetch = async (url, options) => { appels.push(JSON.parse(options.body)); return typeof reponse === 'function' ? reponse() : reponseHttp(200, reponse); };
-  const noeud = vue.rendre(magasin.etat(), DATE);
+  const noeud = detailDuJour(vue, magasin.etat(), DATE);
   await attendre();
   return { noeud, appels };
 }

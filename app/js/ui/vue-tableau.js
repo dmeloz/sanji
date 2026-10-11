@@ -2,7 +2,7 @@
 // Fiches de fonction, À confirmer (3 lignes au plus), Production et commandes. La vue ne calcule rien : tout vient
 // de `tableauBlanc(...).bord`. Chaque ligne est un lien (ou le cercle de prévision) ; aucun bouton « valider ».
 
-import { libelleJour, lundiDe } from '../domaine/dates.js';
+import { libelleJour } from '../domaine/dates.js';
 import { tableauBlanc } from '../domaine/tableau-blanc.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
@@ -11,7 +11,6 @@ import { ouvrirProposition } from './feuille-validation.js';
 import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { problemeHorsLigne } from './horsligne.js';
 
-export function titre() { return 'Tableau'; }
 
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 const pluriel = (n, un, plusieurs) => `${n} ${n >= 2 ? plusieurs : un}`;

@@ -9,6 +9,7 @@ import { ALLERGENES } from '../app/js/ui/reference.js';
 import { rattachementsDe, reperesAide } from '../app/js/domaine/standards-base.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h } from './aide.js';
+import { detailDuJour } from './aide-detail.js';
 
 let dom;
 let magasin;
@@ -22,7 +23,7 @@ before(async () => {
   reperes = await import('../app/js/ui/reperes-metier.js');
   reference = await import('../app/js/ui/reference.js');
   vues = {
-    composant: await import('../app/js/ui/vue-composant.js'),
+    fiche: await import('../app/js/ui/vue-fiche.js'),
     detail: await import('../app/js/ui/vue-detail.js'),
   };
 });
@@ -103,7 +104,7 @@ test('composant : le bloc « Repères métier » est présent, fermé, et ne tou
   const riz = Object.values(e.composants).find((c) => c.famille === 'riz');
   magasin.remplacer(e);
   const avant = structuredClone(magasin.etat());
-  const page = vues.composant.rendre(magasin.etat(), riz.id);
+  const page = vues.fiche.rendre(magasin.etat(), riz.id);
   const bloc = tout(page, 'details').find((d) => d.attributs.id === 'reperes-metier');
   assert.ok(bloc, 'bloc présent');
   assert.equal(bloc.open, false);
@@ -126,7 +127,7 @@ const blocBuffet = (page) => tout(page, 'details').find((d) => /buffet-couvert/.
 test('fiche de fonction : buffet par couvert multiplié par les couverts, étiqueté, viande à état de poids non établi', () => {
   ficheAvec(40);
   const avant = structuredClone(magasin.etat());
-  const page = vues.detail.rendre(magasin.etat(), S.lundi);
+  const page = detailDuJour(vues.detail, magasin.etat(), S.lundi);
   const bloc = blocBuffet(page);
   assert.ok(bloc, 'bloc buffet');
   assert.equal(bloc.open, false);
@@ -144,7 +145,7 @@ test('fiche de fonction : buffet par couvert multiplié par les couverts, étiqu
 
 test('fiche de fonction sans couverts connus : quantités par couvert seulement', () => {
   ficheAvec(0);
-  const page = vues.detail.rendre(magasin.etat(), S.lundi);
+  const page = detailDuJour(vues.detail, magasin.etat(), S.lundi);
   const bloc = blocBuffet(page);
   assert.ok(bloc);
   assert.match(bloc.textContent, /Par couvert/);

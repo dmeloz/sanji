@@ -68,14 +68,6 @@ export function encadre(niveau, ...contenu) {
   return h('div', { classe: `encadre encadre-${niveau}`, role: niveau === 'info' ? undefined : 'alert' }, contenu);
 }
 
-/** Barre de navigation précédent / aujourd'hui / suivant. */
-export function navigationPeriode(precedent, courant, suivant) {
-  return h('nav', { classe: 'nav-periode', 'aria-label': 'Navigation' },
-    lien(precedent.href, precedent.texte, 'btn'),
-    lien(courant.href, courant.texte, 'btn'),
-    lien(suivant.href, suivant.texte, 'btn'));
-}
-
 /** Liste de définitions (terme / valeur). `lignes` : [terme, valeur][] ; les valeurs vides sont ignorées. */
 export function definitions(lignes) {
   const dl = h('dl', { classe: 'definitions' });

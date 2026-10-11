@@ -53,16 +53,16 @@ test('marge de sécurité : majore la seule quantité proposée à commander, ja
 test('sauvegarde : le rappel n\'apparaît qu\'après une semaine sans export, et disparaît à l\'export', () => {
   const e = etatVide();
   prevision(e, S.lundi, 1, 10);
-  const rappel = (aujourdhui) => tableauBlanc(e, aujourdhui).contexte.lignes.find((l) => /sauvegarde/i.test(l.texte));
-  assert.equal(rappel(S.lundi), undefined, 'données toutes neuves : pas de rappel');
-  const tard = tableauBlanc(e, '2026-10-20').contexte.lignes.find((l) => /sauvegarde/i.test(l.texte));
+  const rappel = (aujourdhui) => tableauBlanc(e, aujourdhui).bord.entete.sauvegarde;
+  assert.equal(rappel(S.lundi), null, 'données toutes neuves : pas de rappel');
+  const tard = rappel('2026-10-20');
   assert.ok(tard, 'jamais exportée et données anciennes : rappel');
   assert.match(tard.texte, /Sauvegarde à faire/);
   assert.equal(tard.lien, '#/reglages');
   noterExport(e, '2026-10-19T08:00:00');
   assert.equal(e.reglages.dernierExport, '2026-10-19T08:00:00');
-  assert.equal(tableauBlanc(e, '2026-10-20').contexte.lignes.some((l) => /sauvegarde/i.test(l.texte)), false);
-  const dixJoursApres = tableauBlanc(e, '2026-10-30').contexte.lignes.find((l) => /sauvegarde/i.test(l.texte));
+  assert.equal(rappel('2026-10-20'), null);
+  const dixJoursApres = rappel('2026-10-30');
   assert.match(dixJoursApres.detail, /dernier export il y a 11 jours/);
   assert.equal(importer(JSON.parse(JSON.stringify(exporter(e)))).reglages.dernierExport, '2026-10-19T08:00:00');
 });

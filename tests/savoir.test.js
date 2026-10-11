@@ -189,7 +189,7 @@ test('appliquerSavoir : remplit famille, produit, rôle, type et étapes (standa
   const etat = etatInitial();
   etat.standards = { riz: { garniture: { valeur: 100, unite: 'g', etat: 'sec', h: null } } };
   const c = composant({ nom: 'riz', categorie: 'feculent' });
-  assert.equal(appliquerSavoir(etat, c), c, 'renvoie le composant modifié');
+  assert.equal(appliquerSavoir(c), c, 'renvoie le composant modifié');
   assert.equal(c.famille, 'riz');
   assert.equal(c.produitNom, 'riz');
   assert.equal(c.role, 'garniture');
@@ -200,25 +200,25 @@ test('appliquerSavoir : remplit famille, produit, rôle, type et étapes (standa
   assert.deepEqual(rendementDeBase('riz', 'cuisson').ecart, { referentiel: { min: 2, max: 3 }, base_metier: { min: 2.5, max: 3 } });
   assert.deepEqual(c.grammage, composantVide('x').grammage, 'le grammage n\'est pas copié, même avec un standard défini');
   // Parage : une famille de légumes.
-  const carottes = appliquerSavoir(etat, composant({ nom: 'Carottes', categorie: 'legume' }));
+  const carottes = appliquerSavoir(composant({ nom: 'Carottes', categorie: 'legume' }));
   assert.deepEqual(carottes.etapes.map((e) => [e.etape, e.coefficient, e.statut]), [['parage', 0.815, 'STANDARD_BASE']]);
   // Une famille sans valeur confirmée au référentiel garde la base métier.
-  const navets = appliquerSavoir(etat, composant({ nom: 'navets', categorie: 'legume' }));
+  const navets = appliquerSavoir(composant({ nom: 'navets', categorie: 'legume' }));
   assert.deepEqual(navets.etapes, [{ etape: 'parage', coefficient: milieu(ligneBase('parage', 'Navets')), statut: 'STANDARD_BASE',
     source: `base métier : Navets ${ligneBase('parage', 'Navets').texte}` }]);
   // Rôles : menu 1 -> plat principal ; menu 2 -> garniture, ou sauce pour une sauce.
-  assert.equal(appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'feculent', menu: 1 })).role, 'plat_principal');
-  assert.equal(appliquerSavoir(etat, composant({ nom: 'sauce TEST', categorie: 'sauce', menu: 2 })).role, 'sauce');
+  assert.equal(appliquerSavoir(composant({ nom: 'riz', categorie: 'feculent', menu: 1 })).role, 'plat_principal');
+  assert.equal(appliquerSavoir(composant({ nom: 'sauce TEST', categorie: 'sauce', menu: 2 })).role, 'sauce');
   // Type : générique si la catégorie est connue sans famille ; à préciser sinon.
-  const poulet = appliquerSavoir(etat, composant({ nom: 'poulet', categorie: 'proteine' }));
+  const poulet = appliquerSavoir(composant({ nom: 'poulet', categorie: 'proteine' }));
   assert.deepEqual([poulet.type, poulet.famille, poulet.produitNom, poulet.etapes], ['generique', null, '', []]);
-  assert.equal(appliquerSavoir(etat, composant({ nom: 'ELEMENT_INCONNU_TEST', categorie: 'a_preciser' })).type, 'a_preciser');
+  assert.equal(appliquerSavoir(composant({ nom: 'ELEMENT_INCONNU_TEST', categorie: 'a_preciser' })).type, 'a_preciser');
   // Une famille sans ligne de cuisson dans la base est reconnue, sans étape inventée.
-  const orge = appliquerSavoir(etat, composant({ nom: 'orge', categorie: 'feculent' }));
+  const orge = appliquerSavoir(composant({ nom: 'orge', categorie: 'feculent' }));
   assert.deepEqual([orge.famille, orge.type, orge.etapes], ['orge', 'produit_simple', []]);
   // Toutes les familles : une étape par standard de base trouvé, avec le coefficient du standard.
   for (const f of FAMILLES) {
-    const x = appliquerSavoir(etat, composant({ nom: f.mots[0], categorie: f.categorie }));
+    const x = appliquerSavoir(composant({ nom: f.mots[0], categorie: f.categorie }));
     assert.equal(x.famille, f.cle);
     assert.deepEqual(x.etapes.map((e) => e.etape), f.etapes.map((e) => e.etape), f.cle);
     assert.ok(x.etapes.every((e) => e.statut === 'STANDARD_BASE' && /^(base métier|référentiel culinaire) : /.test(e.source)));
@@ -231,18 +231,18 @@ test('appliquerSavoir : ne remplit que les champs vides, et respecte une catégo
   const etapeChef = { etape: 'cuisson', coefficient: 5, statut: 'RESTAURANT_VALIDE', source: 'TEST_ONLY' };
   const c = composant({ nom: 'riz', categorie: 'feculent', famille: 'carottes', produitNom: 'PRODUIT_CHEF_TEST', role: 'autre',
     type: 'preparation_maison', etapes: [etapeChef] });
-  appliquerSavoir(etat, c);
+  appliquerSavoir(c);
   assert.deepEqual([c.famille, c.produitNom, c.role, c.type, c.etapes], ['carottes', 'PRODUIT_CHEF_TEST', 'autre', 'preparation_maison', [etapeChef]]);
   // Champs partiellement remplis : seuls les vides le sont.
   const d = composant({ nom: 'riz', categorie: 'feculent', role: 'plat_principal' });
-  appliquerSavoir(etat, d);
+  appliquerSavoir(d);
   assert.deepEqual([d.role, d.famille, d.type], ['plat_principal', 'riz', 'produit_simple']);
   // Idempotent.
   const avant = structuredClone(d);
-  appliquerSavoir(etat, d);
+  appliquerSavoir(d);
   assert.deepEqual(d, avant);
   // Catégorie corrigée par le chef : elle l'emporte sur la famille lue dans le nom.
-  const e = appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'autre' }));
+  const e = appliquerSavoir(composant({ nom: 'riz', categorie: 'autre' }));
   assert.deepEqual([e.famille, e.type, e.etapes], [null, 'generique', []]);
 });
 
@@ -250,7 +250,7 @@ test('appliquerSavoir : ne remplit que les champs vides, et respecte une catégo
 // Le « sans aucune source » se teste donc avec `reperes = []` explicite ; le défaut est vérifié dans savoir-metier.test.js.
 test('grammageEffectif : plat, référence du nom, standard maison, base, sinon null (dans cet ordre)', () => {
   const etat = etatInitial();
-  const c = appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'feculent' }));
+  const c = appliquerSavoir(composant({ nom: 'riz', categorie: 'feculent' }));
   const reperes = [R.groupeCereales];
   assert.equal(grammageEffectif(etat, c, []), null, 'aucune source : null, rien n\'est inventé');
   // 4. repère de la base : milieu de la fourchette, standard de base (adapté le 2026-10-04).
@@ -290,7 +290,7 @@ test('grammageEffectif : plat, référence du nom, standard maison, base, sinon 
 // Adapté B-P0 : `reperes = []` explicite quand on vérifie « aucune portion » (le défaut contient les repères validés).
 test('grammageEffectif : sources invalides ignorées, état ancien sans standards, clés dangereuses', () => {
   const etat = etatInitial();
-  const c = appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'feculent' }));
+  const c = appliquerSavoir(composant({ nom: 'riz', categorie: 'feculent' }));
   for (const standard of [{ valeur: 0, unite: 'g', etat: 'sec' }, { valeur: -5, unite: 'g', etat: 'sec' },
     { valeur: '100', unite: 'g', etat: 'sec' }, { valeur: 100, unite: 'kg', etat: 'sec' }, null, 'texte']) {
     etat.standards = { riz: { garniture: standard } };
@@ -332,7 +332,7 @@ test('grammageEffectif : une préparation maison se compte en quantité finie, �
 
 test('repères de la base par groupe : une ligne de groupe sert toutes les familles du groupe, la ligne de famille passe avant', () => {
   const etat = etatInitial();
-  const plat = (cle, role = 'garniture') => appliquerSavoir(etat, composant({ nom: familleParCle(cle).mots[0], categorie: familleParCle(cle).categorie, menu: role === 'garniture' ? 2 : 1 }));
+  const plat = (cle, role = 'garniture') => appliquerSavoir(composant({ nom: familleParCle(cle).mots[0], categorie: familleParCle(cle).categorie, menu: role === 'garniture' ? 2 : 1 }));
   // Ligne de groupe seule (rôle garniture) : toutes les familles du groupe « Pâtes, riz, céréales » la reçoivent.
   const groupe = [R.groupeCereales];
   const cereales = FAMILLES.filter((f) => f.groupe === 'cereales');

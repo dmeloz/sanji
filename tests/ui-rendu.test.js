@@ -21,6 +21,7 @@ import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, etatVide, h, menuValide, prevision, principaleDe, recetteValidee } from './aide.js';
 import { etatReglette } from './aide-tableau.js';
+import { detailDuJour } from './aide-detail.js';
 
 // Le tableau s'ouvre sur le jour courant : sans date figée, le test dépend du jour où on le lance (la fixture met les menus le lundi).
 const dateDuJour = (jour, fonction) => {
@@ -40,10 +41,10 @@ before(async () => {
   magasin = await import('../app/js/magasin.js');
   vues = {
     tableau: await import('../app/js/ui/vue-tableau.js'),
-    menus: await import('../app/js/ui/vue-menus.js'),
+    import: await import('../app/js/ui/vue-import.js'),
     detail: await import('../app/js/ui/vue-detail.js'),
     jour: await import('../app/js/ui/vue-production.js'),
-    composant: await import('../app/js/ui/vue-composant.js'),
+    fiche: await import('../app/js/ui/vue-fiche.js'),
     produits: await import('../app/js/ui/vue-produits.js'),
     reglages: await import('../app/js/ui/vue-reglages.js'),
   };
@@ -101,18 +102,21 @@ function verifierTexte(noeud, contexte) {
   return texte;
 }
 
+const rendrePage = (vue, param) => (vue === 'detail'
+  ? detailDuJour(vues.detail, magasin.etat(), param) : vues[vue].rendre(magasin.etat(), param));
+
 const pages = (ids) => [
-  ['tableau', null], ['tableau', S.lundi], ['tableau', S.lundiSuivant], ['menus', S.lundi], ['detail', S.lundi], ['detail', S.mardi], ['detail', S.samedi],
+  ['tableau', null], ['tableau', S.lundi], ['tableau', S.lundiSuivant], ['import', S.lundi], ['detail', S.lundi], ['detail', S.mardi], ['detail', S.samedi],
   ['detail', S.dimanche], ['jour', S.lundi], ['jour', S.mardi], ['jour', S.samediPrecedent], ['jour', S.dimanchePrecedent],
   ['produits', S.lundi], ['reglages', null],
-  ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees'], ['composant', 'inconnu'],
-  ...Object.values(ids).map((id) => ['composant', id]),
+  ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees'], ['fiche', 'inconnu'],
+  ...Object.values(ids).map((id) => ['fiche', id]),
 ];
 
 test('chaque vue se dessine avec une base vide', () => {
   magasin.remplacer(etatVide());
   for (const [vue, param] of pages({ a: 'x' })) {
-    verifierTexte(vues[vue].rendre(magasin.etat(), param), `${vue} ${param} (base vide)`);
+    verifierTexte(rendrePage(vue, param), `${vue} ${param} (base vide)`);
   }
 });
 
@@ -120,7 +124,7 @@ test('chaque vue se dessine avec un état riche', () => {
   const { e, ids } = etatRiche();
   magasin.remplacer(e);
   for (const [vue, param] of pages(ids)) {
-    verifierTexte(vues[vue].rendre(magasin.etat(), param), `${vue} ${param} (état riche)`);
+    verifierTexte(rendrePage(vue, param), `${vue} ${param} (état riche)`);
   }
 });
 
@@ -134,7 +138,7 @@ test('contenus attendus : tableau, détail, produits, réglages', () => {
   assert.match(tab, /Semaine type à confirmer|autres? sujets?, à voir/);
   assert.match(tab, /sujets? attendent? le chef/);
   assert.match(tab, /allergie/);
-  const det = vues.detail.rendre(magasin.etat(), S.lundi).textContent;
+  const det = detailDuJour(vues.detail, magasin.etat(), S.lundi).textContent;
   assert.match(det, /L'application répartit seule ce qui revient au poste ; corrigez seulement une exception\./);
   assert.doesNotMatch(det, /Rappel : le menu 1/);
   assert.match(det, /Couverts midi/);
@@ -142,7 +146,7 @@ test('contenus attendus : tableau, détail, produits, réglages', () => {
   assert.match(det, /allergènes à confirmer/);
   assert.match(det, /Noter une adaptation décidée/);
   assert.match(det, /tâches :/);
-  const samedi = vues.detail.rendre(magasin.etat(), S.samedi).textContent;
+  const samedi = detailDuJour(vues.detail, magasin.etat(), S.samedi).textContent;
   assert.match(samedi, /Pas de menu du jour/);
   const prod = vues.produits.rendre(magasin.etat(), S.lundi).textContent;
   assert.match(prod, /Aucun stock théorique, aucun approvisionnement garanti\./);
@@ -196,7 +200,7 @@ test('composant : « Composer un mélange » crée une recette en parts, non val
   prevision(e, S.lundi, 2, 10);
   const id = ajouterComposant(e, S.lundi, 2, { nom: 'légumes du jour', categorie: 'legume', attribue: true }, h());
   magasin.remplacer(e);
-  const noeud = vues.composant.rendre(magasin.etat(), id);
+  const noeud = vues.fiche.rendre(magasin.etat(), id);
   await boutonNomme(noeud, 'Composer un mélange').click();
   const d = panneauOuvert();
   remplir(d, 'Composant 1', 'carottes'); remplir(d, 'Parts du composant 1', '2');
@@ -211,7 +215,7 @@ test('composant : « Composer un mélange » crée une recette en parts, non val
   const e2 = etatVide();
   const id2 = ajouterComposant(e2, S.lundi, 2, { nom: 'autre mélange', categorie: 'legume', attribue: true }, h());
   magasin.remplacer(e2);
-  const noeud2 = vues.composant.rendre(magasin.etat(), id2);
+  const noeud2 = vues.fiche.rendre(magasin.etat(), id2);
   nettoyerPanneaux();
   await boutonNomme(noeud2, 'Composer un mélange').click();
   const d2 = panneauOuvert();
@@ -265,7 +269,7 @@ test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide
 test('composant : pastilles, formule, provenance, ce qui manque, allergènes, pas de « compatible »', () => {
   const { e, ids } = etatRiche();
   magasin.remplacer(e);
-  const cru = vues.composant.rendre(magasin.etat(), ids.cru).textContent;
+  const cru = vues.fiche.rendre(magasin.etat(), ids.cru).textContent;
   assert.match(cru, /calculé/);
   assert.match(cru, /Paramètres utilisés et provenance/);
   assert.match(cru, /Ce qui manque/);
@@ -273,19 +277,18 @@ test('composant : pastilles, formule, provenance, ce qui manque, allergènes, pa
   assert.match(cru, /Reprendre la référence maison/);
   assert.match(cru, /allergènes à confirmer/);
   assert.match(cru, /Le rebut n'est pas une perte normale/);
-  const vague = vues.composant.rendre(magasin.etat(), ids.vague).textContent;
+  const vague = vues.fiche.rendre(magasin.etat(), ids.vague).textContent;
   assert.match(vague, /composition à définir/);
-  const prep = vues.composant.rendre(magasin.etat(), ids.prep).textContent;
+  const prep = vues.fiche.rendre(magasin.etat(), ids.prep).textContent;
   assert.match(prep, /INGREDIENT_A_TEST/);
-  assert.match(prep, /Ingrédients calculés/);
+  assert.match(prep, /Ingrédients recalculés/);
 });
 
 /** Active chaque bouton d'une vue, ouvre puis valide chaque panneau, et signale toute erreur de code. */
 async function parcourir(nomVue, param) {
   const corps = dom.corps;
-  const vue = vues[nomVue];
   for (let i = 0; i < 500; i += 1) {
-    const racine = vue.rendre(magasin.etat(), param);
+    const racine = rendrePage(nomVue, param);
     const liste = boutons(racine);
     if (i >= liste.length) return i;
     const libelle = liste[i].textContent;
@@ -306,7 +309,7 @@ async function parcourir(nomVue, param) {
 }
 
 test('chaque bouton de chaque vue s\'active sans erreur de code (état riche)', async () => {
-  const pagesParcourues = [['menus', S.lundi], ['detail', S.lundi], ['detail', S.mardi], ['jour', S.samediPrecedent],
+  const pagesParcourues = [['import', S.lundi], ['detail', S.lundi], ['detail', S.mardi], ['jour', S.samediPrecedent],
     ['jour', S.lundi], ['jour', S.mardi], ['produits', S.lundi], ['reglages', null],
     ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees']];
   for (const [vue, param] of pagesParcourues) {
@@ -319,12 +322,12 @@ test('chaque bouton de chaque vue s\'active sans erreur de code (état riche)', 
   const { e, ids } = etatRiche();
   for (const id of Object.values(ids)) {
     magasin.remplacer(structuredClone(e));
-    await parcourir('composant', id);
+    await parcourir('fiche', id);
   }
 });
 
 test('chaque bouton s\'active aussi avec une base vide', async () => {
-  for (const [vue, param] of [['menus', S.lundi], ['detail', S.lundi], ['jour', S.lundi], ['produits', S.lundi], ['reglages', null],
+  for (const [vue, param] of [['import', S.lundi], ['detail', S.lundi], ['jour', S.lundi], ['produits', S.lundi], ['reglages', null],
     ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees']]) {
     magasin.remplacer(etatVide());
     await parcourir(vue, param);
@@ -451,10 +454,6 @@ function etatSemaineSaisie() {
   definirMenu(e, S.mardi, 1, 'ELEMENT_INCONNU_TEST', h());
   return e;
 }
-
-test('tableau : le titre de la barre est « Tableau »', () => {
-  assert.equal(vues.tableau.titre(), 'Tableau');
-});
 
 test('tableau : base vide un lundi, invitation à saisir les menus, rien de vide n\'est écrit', () => {
   const noeud = tableau(S.lundi, etatVide());
@@ -592,7 +591,7 @@ const boutonNomme = (noeud, libelle) => boutons(noeud).find((b) => b.textContent
 
 test('menus de la semaine : répartir sur des intitulés déjà écrits prévient qu\'ils sont remplacés dans les champs', async () => {
   magasin.remplacer(etatVide());
-  const noeud = vues.menus.rendre(magasin.etat(), S.lundi);
+  const noeud = vues.import.rendre(magasin.etat(), S.lundi);
   champ(noeud, `menu-${S.lundi}-1`).value = 'ancien intitulé TEST';
   champ(noeud, 'feuille-texte').value = 'Lundi 05 octobre\nriz et carottes\npoulet, riz, carottes';
   await boutonNomme(noeud, 'Répartir dans la semaine').click();
@@ -601,7 +600,7 @@ test('menus de la semaine : répartir sur des intitulés déjà écrits prévien
   assert.match(texte, /Rien n'est enregistré avant « Enregistrer la semaine »/);
   assert.equal(champ(noeud, `menu-${S.lundi}-1`).value, 'riz et carottes');
   // Sans intitulé déjà écrit : pas d'avertissement.
-  const propre = vues.menus.rendre(etatVide(), S.lundi);
+  const propre = vues.import.rendre(etatVide(), S.lundi);
   champ(propre, 'feuille-texte').value = 'Lundi 05 octobre\nriz et carottes\npoulet, riz, carottes';
   await boutonNomme(propre, 'Répartir dans la semaine').click();
   assert.doesNotMatch(propre.textContent, /déjà écrits/);
@@ -610,7 +609,7 @@ test('menus de la semaine : répartir sur des intitulés déjà écrits prévien
 test('menus de la semaine : une ligne laissée de côté se remet dans un menu, sans rien enregistrer', async () => {
   nettoyerPanneaux();
   magasin.remplacer(etatVide());
-  const noeud = vues.menus.rendre(magasin.etat(), S.lundi);
+  const noeud = vues.import.rendre(magasin.etat(), S.lundi);
   champ(noeud, 'feuille-texte').value = 'Lundi 05 octobre\nriz et carottes\npoulet, riz\n+ pas de gluten';
   await boutonNomme(noeud, 'Répartir dans la semaine').click();
   const restaurer = boutons(noeud).find((b) => b.attributs['aria-label'] === 'Ajouter « + pas de gluten » à un menu');
@@ -627,9 +626,8 @@ test('menus de la semaine : une ligne laissée de côté se remet dans un menu, 
 
 test('menus de la semaine : coller, répartir, enregistrer, sans aucune étape de validation', async () => {
   magasin.remplacer(etatVide());
-  const noeud = vues.menus.rendre(magasin.etat(), S.lundi);
+  const noeud = vues.import.rendre(magasin.etat(), S.lundi);
   verifierTexte(noeud, 'menus de la semaine');
-  assert.equal(vues.menus.titre(), 'Menus de la semaine');
   champ(noeud, 'feuille-texte').value = 'Menu du marché\nriz et carottes\nLundi 05 octobre\npoulet, riz, carottes\n19.-\n24.-';
   await boutonNomme(noeud, 'Répartir dans la semaine').click();
   assert.equal(champ(noeud, `menu-${S.lundi}-1`).value, 'riz et carottes');
@@ -646,12 +644,12 @@ test('menus de la semaine : coller, répartir, enregistrer, sans aucune étape d
   assert.equal(composants.length, 4);
   assert.ok(composants.every((c) => c.valide), 'les composants sont valides sans geste du chef');
   assert.deepEqual(composants.filter((c) => !c.attribue).map((c) => c.nom), ['poulet']);
-  assert.equal(globalThis.location.hash, `#/semaine/${S.lundi}/tableau`, 'retour au tableau de la semaine');
+  assert.equal(globalThis.location.hash, `#/preparer/${S.lundi}`, 'après l\'enregistrement : l\'écran « Préparer la semaine »');
 });
 
 test('menus de la semaine : champs préremplis, texte incohérent signalé, prévision illisible refusée', async () => {
   magasin.remplacer(etatSemaineSaisie());
-  const noeud = vues.menus.rendre(magasin.etat(), S.lundi);
+  const noeud = vues.import.rendre(magasin.etat(), S.lundi);
   assert.equal(champ(noeud, `menu-${S.lundi}-2`).value, 'poulet, riz, carottes');
   champ(noeud, 'feuille-texte').value = 'lundi 5 octobre\nriz\nmardi 6 octobre\npâtes\npoisson, riz';
   await boutonNomme(noeud, 'Répartir dans la semaine').click();
@@ -918,7 +916,7 @@ test('réglages : le journal nomme en clair les nouvelles actions', () => {
 test('détail : plus aucun bouton ni pastille de validation ; l\'intitulé se modifie par son panneau', async () => {
   for (const [nom, etat] of [['menus saisis', etatSemaineSaisie()], ['état riche', etatRiche().e]]) {
     magasin.remplacer(etat);
-    const noeud = vues.detail.rendre(magasin.etat(), S.lundi);
+    const noeud = detailDuJour(vues.detail, magasin.etat(), S.lundi);
     const texte = verifierTexte(noeud, `détail ${nom}`);
     assert.deepEqual(boutons(noeud).map((b) => b.textContent).filter((t) => /alider|Proposer les composants/.test(t)), [], `${nom} : bouton de validation`);
     assert.doesNotMatch(texte, /à valider|transcription validée|transcription à valider|Valider/, `${nom} : mot de validation`);
@@ -926,7 +924,7 @@ test('détail : plus aucun bouton ni pastille de validation ; l\'intitulé se mo
   }
   nettoyerPanneaux();
   magasin.remplacer(etatSemaineSaisie());
-  const noeud = vues.detail.rendre(magasin.etat(), S.lundi);
+  const noeud = detailDuJour(vues.detail, magasin.etat(), S.lundi);
   await boutonNomme(noeud, 'Modifier l\'intitulé').click(); // menu 1
   const d = panneauOuvert();
   assert.doesNotMatch(d.textContent, /à valider/);
@@ -939,7 +937,7 @@ test('détail : plus aucun bouton ni pastille de validation ; l\'intitulé se mo
 
 test('détail : sous chaque menu, ses composants avec catégorie, lien et interrupteur « au poste »', () => {
   magasin.remplacer(etatSemaineSaisie());
-  const noeud = vues.detail.rendre(magasin.etat(), S.lundi);
+  const noeud = detailDuJour(vues.detail, magasin.etat(), S.lundi);
   const menu2 = champ(noeud, 'menu-2');
   const lignes = classes(menu2, 'composant-ligne');
   assert.deepEqual(lignes.map((l) => l.querySelector('a').textContent), ['poulet', 'riz', 'carottes']);
@@ -960,7 +958,7 @@ test('détail : sous chaque menu, ses composants avec catégorie, lien et interr
 test('détail : l\'interrupteur « au poste » change l\'attribution et la mémorise', async () => {
   magasin.remplacer(etatSemaineSaisie());
   const poulet = composantNomme(magasin.etat(), 'poulet').id;
-  const interrupteur = () => champ(vues.detail.rendre(magasin.etat(), S.lundi), `poste-${poulet}`);
+  const interrupteur = () => champ(detailDuJour(vues.detail, magasin.etat(), S.lundi), `poste-${poulet}`);
   assert.equal(interrupteur().checked, false);
   assert.equal(magasin.etat().memoire['poulet|2'], undefined, 'rien n\'est mémorisé avant le geste');
   assert.equal(principaleDe(magasin.etat(), poulet), undefined);
@@ -988,7 +986,7 @@ test('détail : l\'interrupteur « au poste » change l\'attribution et la mémo
 test('détail : un composant ajouté à la main est valide et pris en compte sans autre geste', async () => {
   nettoyerPanneaux();
   magasin.remplacer(etatSemaineSaisie());
-  const noeud = vues.detail.rendre(magasin.etat(), S.lundi);
+  const noeud = detailDuJour(vues.detail, magasin.etat(), S.lundi);
   const ajouts = boutons(noeud).filter((b) => b.textContent === 'Ajouter un composant');
   assert.equal(ajouts.length, 2, 'un bouton par menu');
   await ajouts[1].click();
@@ -1002,9 +1000,9 @@ test('détail : un composant ajouté à la main est valide et pris en compte san
   assert.ok(c, 'composant créé');
   assert.deepEqual([c.valide, c.attribue, c.menu], [true, true, 2], 'valide aussitôt, attribué par la règle du domaine');
   assert.ok(principaleDe(magasin.etat(), c.id), 'sa production existe');
-  assert.match(vues.detail.rendre(magasin.etat(), S.lundi).textContent, /courgettes/);
+  assert.match(detailDuJour(vues.detail, magasin.etat(), S.lundi).textContent, /courgettes/);
   // Un choix explicite « non » est respecté.
-  await boutonNomme(vues.detail.rendre(magasin.etat(), S.lundi), 'Ajouter un composant').click(); // menu 1
+  await boutonNomme(detailDuJour(vues.detail, magasin.etat(), S.lundi), 'Ajouter un composant').click(); // menu 1
   const e = panneauOuvert();
   remplir(e, 'Nom du composant', 'poulet');
   remplir(e, 'Attribué au poste', 'non');
@@ -1014,33 +1012,20 @@ test('détail : un composant ajouté à la main est valide et pris en compte san
   assert.equal(principaleDe(magasin.etat(), p.id), undefined, 'non attribué : pas de production');
 });
 
-test('détail : les rubriques vides sont repliées, celles qui contiennent une donnée sont ouvertes', () => {
-  const ouvertes = (noeud) => noeud.tous((x) => x.balise === 'details').filter((b) => b.open).map((b) => b.attributs.id ?? b.querySelector('summary').textContent);
+test('détail : les rubriques sont à plat (sections, jamais de repli), dans l\'ordre, avec leur identifiant', () => {
   magasin.remplacer(etatVide());
-  const vide = vues.detail.rendre(magasin.etat(), S.lundi);
+  const vide = detailDuJour(vues.detail, magasin.etat(), S.lundi);
   verifierTexte(vide, 'détail base vide');
-  const blocs = vide.tous((x) => x.balise === 'details').map((b) => b.attributs.id ?? 'photo');
-  assert.deepEqual(blocs, ['photo', 'previsions', 'fiches', 'allergies', 'creneaux', 'apres-service']);
-  assert.deepEqual(ouvertes(vide), [], 'rien de saisi : tout est replié');
-  assert.equal(champ(vide, 'menus').balise, 'section', 'la rubrique des menus n\'est pas repliable');
-  assert.equal(vide.tous((x) => x.balise === 'details' && x.querySelector('summary') === null).length, 0, 'chaque bloc a son résumé');
-
-  magasin.remplacer(etatRiche().e);
-  const riche = vues.detail.rendre(magasin.etat(), S.lundi);
-  assert.deepEqual(ouvertes(riche), ['previsions', 'fiches', 'allergies', 'creneaux'], 'après service et photo : rien de saisi, replié');
-  magasin.remplacer(etatSemaineSaisie());
-  assert.deepEqual(ouvertes(vues.detail.rendre(magasin.etat(), S.mardi)), [], 'un jour sans prévision, fiche, ni vente');
-  // Une vente saisie ouvre « Après service ».
-  const e = etatVide();
-  saisirVentes(e, S.lundi, 1, 31, h());
-  magasin.remplacer(e);
-  assert.deepEqual(ouvertes(vues.detail.rendre(magasin.etat(), S.lundi)), ['apres-service']);
+  const ids = vide.tous((x) => x.balise === 'section' && x.attributs.id).map((x) => x.attributs.id);
+  assert.deepEqual(ids, ['menus', 'previsions', 'fiches', 'allergies', 'creneaux', 'apres-service', 'points']);
+  assert.equal(vide.tous((x) => x.balise === 'details').length, 0, 'aucun repli');
+  assert.equal(detailDuJour(vues.detail, magasin.etat(), S.samedi).tous((x) => x.balise === 'section' && x.attributs.id === 'previsions').length, 0, 'samedi : pas de menu du jour');
 });
 
 test('détail : « Saisir toute la semaine » mène au lundi ; la phrase d\'aide remplace le rappel', () => {
   magasin.remplacer(etatVide());
   for (const jour of [S.lundi, S.mercredi, S.vendredi]) {
-    const noeud = vues.detail.rendre(magasin.etat(), jour);
+    const noeud = detailDuJour(vues.detail, magasin.etat(), jour);
     const lien = liens(champ(noeud, 'menus'))[0];
     assert.equal(lien.textContent, 'Saisir toute la semaine', `${jour} : le lien est en tête de la rubrique des menus`);
     assert.equal(lien.attributs.href, `#/import/${S.lundi}`);
@@ -1052,7 +1037,7 @@ test('détail : « Saisir toute la semaine » mène au lundi ; la phrase d\'aide
 
 test('détail : « Aller aux prévisions » ouvre la rubrique repliée avant d\'y aller', async () => {
   magasin.remplacer(etatSemaineSaisie()); // menus saisis, prévisions manquantes
-  const noeud = vues.detail.rendre(magasin.etat(), S.lundi);
+  const noeud = detailDuJour(vues.detail, magasin.etat(), S.lundi);
   dom.corps.appendChild(noeud);
   try {
     assert.equal(champ(noeud, 'previsions').open, false);
@@ -1074,7 +1059,7 @@ function etatPourPortion() {
   prevision(e, S.lundi, 2, 20);
   return e;
 }
-const pageComposant = (nom = 'polenta') => vues.composant.rendre(magasin.etat(), composantNomme(magasin.etat(), nom).id);
+const pageComposant = (nom = 'polenta') => vues.fiche.rendre(magasin.etat(), composantNomme(magasin.etat(), nom).id);
 
 test('composant : la portion affiche son état de poids et son origine, pour chaque origine', async () => {
   const portionDe = (e, nom = 'polenta') => { magasin.remplacer(e); return portionAffichee(pageComposant(nom)); };
@@ -1106,10 +1091,10 @@ test('composant : la portion affiche son état de poids et son origine, pour cha
   // Une préparation maison se compte en quantité finie : pas de « poids cuit » pour une sauce.
   const riche = etatRiche();
   magasin.remplacer(riche.e);
-  assert.equal(portionAffichee(vues.composant.rendre(magasin.etat(), riche.ids.prep)), 'Portion : 50 ml, quantité finie, corrigée pour ce plat');
-  assert.equal(portionAffichee(vues.composant.rendre(magasin.etat(), riche.ids.sec)), 'Portion : 100 g, poids cuit, corrigée pour ce plat');
-  assert.equal(portionAffichee(vues.composant.rendre(magasin.etat(), riche.ids.vague)), undefined, 'un composant générique n\'a pas de portion par produit');
-  assert.doesNotMatch(vues.composant.rendre(magasin.etat(), riche.ids.vague).textContent, /Portion :/);
+  assert.equal(portionAffichee(vues.fiche.rendre(magasin.etat(), riche.ids.prep)), 'Portion : 50 ml, quantité finie, corrigée pour ce plat');
+  assert.equal(portionAffichee(vues.fiche.rendre(magasin.etat(), riche.ids.sec)), 'Portion : 100 g, poids cuit, corrigée pour ce plat');
+  assert.equal(portionAffichee(vues.fiche.rendre(magasin.etat(), riche.ids.vague)), undefined, 'un composant générique n\'a pas de portion par produit');
+  assert.doesNotMatch(vues.fiche.rendre(magasin.etat(), riche.ids.vague).textContent, /Portion :/);
 });
 
 test('composant : sans portion, un encadré propose deux gestes ; avec une portion, les deux gestes restent', () => {

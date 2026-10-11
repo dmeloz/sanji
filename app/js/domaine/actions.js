@@ -134,10 +134,10 @@ export function terminer(etat, h, action, detail, valeur) {
  * Si la règle du composant a au moins deux étapes : une production « preparatoire » par étape sauf la dernière
  * (la principale est la finition). `h` (facultatif) sert à journaliser ce qu'un changement de règle retire.
  * Aucune étape n'est créée pour un composant dont la finition est faite ou dont le service est passé : la date du
- * jour vient de `aujourdhui` (AAAA-MM-JJ, pour les tests) ou, à défaut, de `h` ; sans l'une ni l'autre, seule la finition faite compte.
+ * jour vient de `h` ; sans lui, seule la finition faite compte.
  */
-export function assurerProductions(etat, h = null, aujourdhui = null) {
-  const jour = aujourdhui ?? (typeof h === 'string' && /^\d{4}-\d{2}-\d{2}/.test(h) ? h.slice(0, 10) : null);
+export function assurerProductions(etat, h = null) {
+  const jour = (typeof h === 'string' && /^\d{4}-\d{2}-\d{2}/.test(h) ? h.slice(0, 10) : null);
   for (const p of Object.values(etat.productions)) {
     const c = etat.composants[p.composantId];
     if (p.etat !== 'fait' && (!c || !c.attribue || !c.valide)) delete etat.productions[p.id];
@@ -249,13 +249,12 @@ function fusionnerComposants(etat, date, menu, retires = []) {
     if (p.implicite && gardeeConfirmee) continue;
     presents.add(cle);
     const c = creerComposant(etat, date, menu, { ...p, valide: true });
-    appliquerSavoir(etat, c);
+    appliquerSavoir(c);
     reprendreFiche(etat, c, true); // rôle et portion retenus pour ce nom (le rôle n'a été posé que par défaut)
     ids.push(c.id);
   }
   const saisi = m.intitule.trim() !== '';
   m.transcriptionValidee = saisi;
-  m.composantsValides = saisi;
   return ids;
 }
 
@@ -280,7 +279,7 @@ function texteRetires(retires) {
 
 /**
  * Saisit l'intitulé complet d'un menu (transcription exacte). L'intitulé enregistré vaut transcription validée
- * (`transcriptionValidee`, `composantsValides` : vrai) et les composants du menu sont régénérés par fusion.
+ * (`transcriptionValidee` : vrai) et les composants du menu sont régénérés par fusion.
  * Un intitulé identique à l'enregistré ne change rien.
  */
 export function definirMenu(etat, date, menu, intitule, h) {
@@ -289,32 +288,6 @@ export function definirMenu(etat, date, menu, intitule, h) {
   const retires = [];
   const m = enregistrerMenu(etat, date, menu, String(intitule ?? ''), retires);
   return terminer(etat, h, 'definirMenu', `${date} menu ${menu}${texteRetires(retires)}`, m);
-}
-
-/**
- * Compatibilité : le chef n'a plus à valider la transcription (definirMenu la valide). Conservée sans effet
- * nuisible : l'intitulé doit être non vide.
- */
-export function validerTranscription(etat, date, menu, h) {
-  verifierH(h);
-  verifierMenuDuJour(date, menu);
-  const m = assurerJour(etat, date).menus[menu];
-  if (m.intitule.trim() === '') throw new Error("Rien à valider : l'intitulé du menu est vide.");
-  m.transcriptionValidee = true;
-  return terminer(etat, h, 'validerTranscription', `${date} menu ${menu}`, m);
-}
-
-/**
- * Régénère les composants du menu par fusion (comme definirMenu), sans exiger de validation préalable.
- * Retourne les identifiants des composants créés.
- */
-export function genererComposants(etat, date, menu, h) {
-  verifierH(h);
-  verifierMenuDuJour(date, menu);
-  assurerJour(etat, date);
-  const retires = [];
-  const ids = fusionnerComposants(etat, date, menu, retires);
-  return terminer(etat, h, 'genererComposants', `${date} menu ${menu} : ${ids.length} créé(s)${texteRetires(retires).replace(' : retiré', ', retiré')}`, ids);
 }
 
 /**
@@ -386,7 +359,7 @@ export function ajouterComposant(etat, date, menu, champs, h) {
   // Plus de validation manuelle (conception, section 16) : le composant est valide d'emblée et reçoit le savoir
   // de l'application (famille, rôle, type, étapes de la base), comme un composant issu de l'intitulé.
   const c = creerComposant(etat, date, menu, { ...champs, nom: nomPropre, categorie, attribue, valide: true });
-  appliquerSavoir(etat, c);
+  appliquerSavoir(c);
   reprendreFiche(etat, c, true); // le rôle n'a été posé que par défaut
   assurerJour(etat, date);
   return terminer(etat, h, 'ajouterComposant', `${c.nom} (${date} menu ${menu})`, c.id);
@@ -407,7 +380,7 @@ function memoriserAttribution(etat, c) {
 /**
  * Modifie un composant. Champs acceptés : nom, categorie, attribue, type, role, produitNom, grammage
  * ({valeur, unite, statut, source, etat}, fusionné avec l'existant), etapes (liste complète, remplace l'existante),
- * recetteId, charge, allergenes ({statut, liste}). Le champ `valide` ne se change que par validerComposant.
+ * recetteId, charge, allergenes ({statut, liste}). Le champ `valide` n'est pas modifiable (un composant créé est valide d'emblée).
  * Une étape en double, un coefficient nul ou négatif sont refusés.
  * Seul un changement d'attribution (au poste ou non) ou de catégorie est mémorisé, par nom, et réappliqué à la saisie
  * suivante. Une correction de portion, de type ou d'étape reste sur ce plat : ni standard, ni base, ni autre plat.
@@ -458,34 +431,12 @@ export function modifierComposant(etat, composantId, champs, h) {
   return terminer(etat, h, 'modifierComposant', `${c.nom} : ${Object.keys(maj).join(', ')}`, c);
 }
 
-/** Compatibilité : un composant créé par l'analyse est déjà valide. Conservée sans effet nuisible. */
-export function validerComposant(etat, composantId, h) {
-  verifierH(h);
-  const c = exigerComposant(etat, composantId);
-  c.valide = true;
-  return terminer(etat, h, 'validerComposant', c.nom, c);
-}
-
 /** Supprime un composant et ses productions non faites (les productions faites sont conservées). */
 export function supprimerComposant(etat, composantId, h) {
   verifierH(h);
   const c = exigerComposant(etat, composantId);
   delete etat.composants[composantId];
   return terminer(etat, h, 'supprimerComposant', c.nom, true);
-}
-
-/** Compatibilité : valide tous les composants du menu (transcription validée requise). Retourne les identifiants validés. */
-export function validerComposantsMenu(etat, date, menu, h) {
-  verifierH(h);
-  verifierMenuDuJour(date, menu);
-  const m = assurerJour(etat, date).menus[menu];
-  if (!m.transcriptionValidee) throw new Error("Validez d'abord la transcription du menu.");
-  const ids = [];
-  for (const c of Object.values(etat.composants)) {
-    if (c.date === date && c.menu === menu) { c.valide = true; ids.push(c.id); }
-  }
-  m.composantsValides = true;
-  return terminer(etat, h, 'validerComposantsMenu', `${date} menu ${menu} : ${ids.length} composant(s)`, ids);
 }
 
 // ---------------------------------------------------------------- prévisions et fiches

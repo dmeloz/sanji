@@ -81,7 +81,7 @@ export function creerRegistre() {
         dates: [...new Set(donnees.items.flatMap((i) => [i.date, i.dateService]))],
       };
       const proposition = {
-        id: nouvelId('prop'), type: 'planning', origine: donnees.origine, creeLe: h,
+        id: nouvelId('prop'), origine: donnees.origine,
         empreinte: empreinteEtat(etat, perimetre), perimetre,
         items: donnees.items, aDecider: donnees.aDecider,
         sources: donnees.sources ?? [], hypotheses: donnees.hypotheses ?? [], incertitudes: donnees.incertitudes ?? [],
@@ -91,7 +91,6 @@ export function creerRegistre() {
       return structuredClone(proposition);
     },
     lire: (id) => structuredClone(exiger(id)),
-    lister: () => [...parId.values()].map((p) => structuredClone(p)),
 
     /** Le chef valide : sans confirmation explicite, un item à conservation non validée reste hors de la décision. */
     valider(id, h, { itemsConfirmes = [], itemsRetires = [] } = {}) {

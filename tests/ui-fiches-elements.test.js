@@ -5,7 +5,6 @@ import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
-import { definirMenu } from '../app/js/domaine/actions.js';
 import { etatInitial } from '../app/js/domaine/etat.js';
 import { retenirFiche } from '../app/js/domaine/fiches-retenues.js';
 import { h } from './aide.js';

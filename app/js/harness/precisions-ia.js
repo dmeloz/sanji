@@ -2,17 +2,16 @@
 // comment lire sa réponse. Seuls le nom, le numéro de menu et l'intitulé du plat partent ; jamais une quantité ni une
 // donnée de personne. La réponse n'est qu'une proposition « à confirmer ». Module pur : ni DOM ni réseau.
 
-import { contientMarqueurPersonnel, nomTransmissible } from './contexte.js';
+import { NOM_NON_TRANSMIS, contientMarqueurPersonnel, nomTransmissible } from './contexte.js';
 import { CATEGORIE } from '../domaine/statuts.js';
 
 export const INTITULE_MAX = 200;
 export const REMARQUE_MAX = 120;
-const NOM_REFUSE = 'composant (nom non transmis)';
 
 /** @returns {{nom:string, menu:number, intitule:string, texte:string}|null} null si le nom ne peut pas partir */
 export function apercuEnvoi(composant, intitule) {
   const nom = nomTransmissible(composant?.nom);
-  if (nom === NOM_REFUSE) return null;
+  if (nom === NOM_NON_TRANSMIS) return null;
   const menu = composant.menu;
   if (menu !== 1 && menu !== 2) return null;
   // Même filtre que le nom : un intitulé qui parle d'une personne ou d'une allergie ne part pas, seul le nom part.

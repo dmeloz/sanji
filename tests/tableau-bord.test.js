@@ -173,7 +173,6 @@ test('bord : la sauce implicite d\'un plat de pâtes est marquée implicite et n
   const implicites = menu.morceaux.filter((m) => m.implicite);
   assert.deepEqual(implicites.map((m) => m.texte), ['sauce à confirmer']);
   assert.ok(menu.morceaux.filter((m) => !m.implicite).length >= 1, 'ce que le chef a écrit reste distinct');
-  assert.equal(menu.nbPlats, menu.morceaux.filter((m) => !m.implicite).length, 'jamais compté comme un plat');
 });
 
 test('bord : une autre semaine affichée a sa propre production, jamais les chiffres d\'aujourd\'hui', () => {

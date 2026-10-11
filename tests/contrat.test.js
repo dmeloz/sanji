@@ -26,17 +26,17 @@ test('exports du contrat', () => {
   contient(analyse, ['proposerComposants', 'categoriePropose']);
   contient(savoir, ['familleParCle', 'lireNom', 'familleDe', 'appliquerSavoir', 'grammageEffectif', 'lignesStandards']);
   assert.ok(Array.isArray(savoir.FAMILLES) && Array.isArray(savoir.GROUPES));
-  contient(calcul, ['portionsMenu', 'calculerComposant', 'chercherBase']);
+  contient(calcul, ['portionsMenu', 'calculerComposant']);
   contient(base, ['chercherBase']);
   contient(planification, ['etatCreneau', 'cibleProduction', 'etatTache', 'ecartProduction', 'evaluerAvance', 'regleDe',
     'suggererCreneau', 'avancesPossibles', 'chargeCreneau', 'feuilleDuJour']);
   contient(produits, ['besoinsProduits', 'suiviProduit', 'echeanceCommande']);
   contient(allergenes, ['alertesAllergenes']);
-  contient(tableauBlanc, ['tableauBlanc', 'decisionsSansDoublon']);
+  contient(tableauBlanc, ['tableauBlanc']);
   contient(feuille, ['analyserFeuille', 'repartirSurSemaine']);
   contient(points, ['pointsAConfirmer', 'pointsGlobaux', 'repereVentes']);
-  contient(actions, ['definirMenu', 'validerTranscription', 'genererComposants', 'ajouterComposant', 'modifierComposant',
-    'validerComposant', 'supprimerComposant', 'validerComposantsMenu', 'definirPrevision', 'creerFiche', 'modifierFiche',
+  contient(actions, ['definirMenu', 'ajouterComposant', 'modifierComposant',
+    'supprimerComposant', 'definirPrevision', 'creerFiche', 'modifierFiche',
     'annulerFiche', 'confirmerRepartition', 'ajouterAdaptation', 'definirCreneau', 'definirSemaineType', 'confirmerSemaineType',
     'definirCapacite', 'planifier', 'demarrer', 'marquerFait', 'corrigerReel', 'reporter', 'deciderEcart', 'ajouterPreparatoire',
     'supprimerProduction', 'enregistrerPesee', 'memoriser', 'reprendreMemoire', 'definirRegle', 'supprimerRegle', 'creerRecette',

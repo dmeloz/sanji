@@ -229,18 +229,18 @@ test('feuille Jour du lundi : l\'étape faite le samedi est dans « faites », l
 let dom;
 let magasin;
 let vueJour;
-let vueComposant;
+let vueFiche;
 let vueReglages;
 before(async () => {
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   vueJour = await import('../app/js/ui/vue-production.js');
-  vueComposant = await import('../app/js/ui/vue-composant.js');
+  vueFiche = await import('../app/js/ui/vue-fiche.js');
   vueReglages = await import('../app/js/ui/vue-reglages.js');
 });
 after(() => dom.restaurer());
 
-test('vues : Jour montre « déjà avancé sam. », Composant liste les étapes', () => {
+test('vues : Jour montre « déjà avancé sam. », la fiche liste les étapes', () => {
   const { e, c } = scenario();
   const couper = etape(e, c, 'couper');
   planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
@@ -248,19 +248,19 @@ test('vues : Jour montre « déjà avancé sam. », Composant liste les étapes'
   magasin.remplacer(e);
   const jour = vueJour.rendre(magasin.etat(), S.lundi).textContent;
   assert.match(jour, /déjà avancé sam\./);
-  const composant = vueComposant.rendre(magasin.etat(), c).textContent;
-  assert.match(composant, /Étapes de préparation/);
+  const composant = vueFiche.rendre(magasin.etat(), c).textContent;
+  assert.match(composant, /Étapes/);
   assert.match(composant, /Couper/);
   assert.match(composant, /Blanchir/);
   assert.match(composant, /déjà avancé sam\./);
 });
 
-test('vue Composant : aucun bloc d\'étapes sans règle d\'étapes', () => {
+test('fiche : sans règle d\'étapes, elle dit qu\'aucune étape n\'est définie', () => {
   const e = etatVide();
   prevision(e, S.lundi, 1, 40);
   const c = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'pates' });
   magasin.remplacer(e);
-  assert.doesNotMatch(vueComposant.rendre(magasin.etat(), c).textContent, /Étapes de préparation/);
+  assert.match(vueFiche.rendre(magasin.etat(), c).textContent, /Aucune étape de préparation définie dans la règle/);
 });
 
 test('Réglages : la règle affiche ses étapes et dit que l\'avance n\'est pas une conservation', () => {

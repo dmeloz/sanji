@@ -4,9 +4,9 @@ import {
   annulerFiche, creerFiche, definirPrevision, modifierComposant, modifierFiche,
 } from '../app/js/domaine/actions.js';
 import {
-  arrondirQuantite, calculerComposant, chercherBase, formaterQuantite, portionsMenu,
+  arrondirQuantite, calculerComposant, formaterQuantite, portionsMenu,
 } from '../app/js/domaine/calcul.js';
-import { chercherBase as chercherBaseDirect } from '../app/js/domaine/base.js';
+import { chercherBase } from '../app/js/domaine/base.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, etatVide, h, prevision, recetteValidee } from './aide.js';
@@ -223,7 +223,6 @@ test('pièces : arrondi à la pièce supérieure ; g et ml à l\'unité', () => 
 });
 
 test('chercherBase : proposition explicite, normalisée, jamais de remplissage', () => {
-  assert.equal(chercherBase, chercherBaseDirect);
   const r = chercherBase('POMMES DE TERRE');
   assert.ok(r.length >= 1);
   assert.ok(r.every((l) => l.produit.toLowerCase().includes('pommes de terre')));

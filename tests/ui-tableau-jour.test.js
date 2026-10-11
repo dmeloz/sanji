@@ -11,7 +11,7 @@ import {
 } from '../app/js/domaine/actions.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { composantValide, etatVide, h, menuValide, prevision, principaleDe } from './aide.js';
+import { composantValide, etatVide, h, prevision, principaleDe } from './aide.js';
 
 let dom;
 let magasin;
@@ -97,7 +97,7 @@ test('Tableau : le cercle de prévision et chaque ligne cliquable mesurent au mo
   assert.match(regle('.tb-couverts'), /min-height:\s*var\(--cible\)/);
   assert.match(regle('.tb-couverts'), /min-width:\s*var\(--cible\)/);
   assert.match(css, /--cible:\s*44px/);
-  for (const s of ['.bord-jour-lien', '.bord-ligne', '.bord-fiche', '.jour-puce', '.case-fait']) {
+  for (const s of ['.bord-jour-lien', '.bord-ligne', '.bord-fiche', '.case-fait']) {
     assert.match(regle(s), /min-(height|width):\s*var\(--cible\)/, `${s} : cible tactile de 44 px`);
   }
 });

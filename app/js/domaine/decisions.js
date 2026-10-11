@@ -111,8 +111,3 @@ export function decisionsDe(etat, aujourd) {
   cartes.sort((a, b) => GENRES.indexOf(a.genre) - GENRES.indexOf(b.genre));
   return { total: cartes.length, cartes };
 }
-
-/** « 1 décision à prendre » / « N décisions à prendre » : le même mot partout. */
-export function texteDecisions(total) {
-  return total === 1 ? '1 décision à prendre' : `${total} décisions à prendre`;
-}

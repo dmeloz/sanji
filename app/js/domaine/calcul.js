@@ -6,8 +6,6 @@ import { valeurEffective } from './ajustements.js';
 import { grammageEffectif } from './savoir.js';
 import { ETAT_POIDS, estStandardBase, libelle } from './statuts.js';
 
-export { chercherBase } from './base.js';
-
 const ORDRE_ETAPES = ['portionnement', 'cuisson', 'parage'];
 const ETAPES_PREPARATION = ['portionnement'];
 const SEUIL_A_MESURER = 0.15;

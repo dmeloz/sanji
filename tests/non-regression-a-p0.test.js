@@ -75,11 +75,10 @@ const liensDe = (noeud) => noeud.tous((x) => x.balise === 'a').map((a) => a.attr
 const RENDUS = (e) => {
   const composants = Object.keys(e.composants);
   return [
-    ['tableau', null], ['tableau', S.lundiSuivant], ['menus', S.lundiSuivant], ['detail', S.lundiSuivant], ['detail', S.samedi],
+    ['tableau', null], ['tableau', S.lundiSuivant],
     ['jour', S.samedi], ['jour', S.lundiSuivant], ['produits', S.lundiSuivant], ['reglages', null],
     ['aujourdhui', null], ['production', S.samedi], ['semaine', null], ['semaine', S.samedi], ['articles', null], ['stock', S.lundiSuivant], ['import', S.lundiSuivant],
     ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees'],
-    ...composants.slice(0, 4).map((id) => ['composant', id]),
     ...composants.slice(0, 2).map((id) => ['fiche', id]),
   ];
 };
