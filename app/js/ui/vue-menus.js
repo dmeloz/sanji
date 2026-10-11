@@ -1,4 +1,4 @@
-// Menus de la semaine (ancienne page, toujours disponible par `rendre`) ; ses morceaux sont réutilisés par l'écran Import (vue-import.js).
+// Morceaux de la saisie des menus de la semaine, réutilisés par l'écran Import (vue-import.js).
 // Les dix intitulés (et les prévisions) saisis en une fois, sans étape de validation.
 // La page ne se redessine pas pendant la frappe : rien ne change dans l'état avant « Enregistrer la semaine ».
 
@@ -9,15 +9,13 @@ import { analyserFeuille, repartirSurSemaine } from '../domaine/feuille.js';
 import { agir } from '../magasin.js';
 import { champs as construireChamps } from './champs.js';
 import { h } from './dom.js';
-import { bouton, encadre, lien, pastille, repliable } from './elements.js';
+import { bouton, encadre, pastille, repliable } from './elements.js';
 import { parseEntier, pluriel } from './format.js';
 import { noter } from './journal-diagnostic.js';
 import { afficherMessage } from './messages.js';
 import { panneau } from './panneau.js';
 
 export const JOURS_A_MENU = [0, 1, 2, 3, 4]; // lundi à vendredi
-
-export function titre() { return 'Menus de la semaine'; }
 
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 
@@ -229,39 +227,4 @@ export function enregistrer(champs, etat, lundi, destination = `#/semaine/${lund
     location.hash = destination;
   }
   return Boolean(resultat.ok);
-}
-
-export function rendre(etat, lundi) {
-  const champs = new Map();
-  const reprise = reprendreTexte();
-  const racine = h('div', { classe: 'vue vue-menus' });
-  racine.appendChild(h('h1', { classe: 'page-titre' }, `Menus de la semaine du ${libelleJour(lundi)}`));
-  racine.appendChild(h('nav', { classe: 'nav-periode', 'aria-label': 'Semaine' },
-    lien(`#/import/${ajouterJours(lundi, -7)}`, '‹ Semaine précédente', 'btn'),
-    lien(`#/import/${ajouterJours(lundi, 7)}`, 'Semaine suivante ›', 'btn')));
-
-  // La semaine a déjà des menus : le collage est replié, on vient surtout corriger un intitulé ou saisir des prévisions.
-  const dejaSaisie = JOURS_A_MENU.some((decalage) => {
-    const jour = jourOuVide(etat, ajouterJours(lundi, decalage));
-    return [1, 2].some((menu) => jour.menus[menu].intitule.trim() !== '');
-  });
-  racine.appendChild(h('section', { classe: 'imp-section-plate' },
-    repliable(h('h2', { classe: 'section-titre', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie || reprise !== null, [
-      h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
-      h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),
-      champSaisi(champs, 'textarea', { id: 'feuille-texte', rows: 6, placeholder: 'texte copié depuis la photo de la feuille', value: '' }),
-      h('div', { classe: 'actions' }, bouton('Répartir dans la semaine', () => repartir(champs, lundi, { enregistrerLeLu: () => enregistrer(champs, etat, lundi) }))),
-      champSaisi(champs, 'div', { id: 'feuille-retour', classe: 'saisie-retour', 'aria-live': 'polite' }),
-    ])));
-
-  for (const decalage of JOURS_A_MENU) racine.appendChild(blocJour(champs, etat, ajouterJours(lundi, decalage)));
-
-  racine.appendChild(h('div', { classe: 'barre-enregistrer' },
-    lien(`#/semaine/${lundi}/tableau`, 'Annuler', 'btn'),
-    bouton('Enregistrer la semaine', () => enregistrer(champs, etat, lundi), 'principal')));
-  if (reprise !== null) {
-    champs.get('feuille-texte').value = reprise.texte;
-    repartir(champs, lundi, { deplaceeDepuis: reprise.depuis });
-  }
-  return racine;
 }

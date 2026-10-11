@@ -104,13 +104,13 @@ export function aideRefroidissement() {
  * @param {string|null} dateProduction
  * @param {string} dateService
  * @param {object|null} regle règle de préparation (avanceMaxJours, limiteUtilisationJours)
- * @param {{jours:number, texte:string, provenance:string}|null} [repere] repère de conservation du référentiel
+ * @param {{jours:number, texte:string, provenance:string}|null} [repere] (absent = null) repère de conservation du référentiel
  *   (`repereConservation`), lu seulement quand la propriétaire n'a pas saisi de limite : il avertit, il ne bloque pas.
  * @returns {{jours:number|null, exception:boolean, autorisee:boolean,
  *   conservation:'sans_objet'|'validee'|'a_confirmer'|'referentiel'|'depassee', couvre:boolean, alertes:string[],
  *   repere?:{jours:number, texte:string, provenance:string, depasse:boolean}}}
  */
-export function evaluerAvance(dateProduction, dateService, regle, repere = null) {
+export function evaluerAvance(dateProduction, dateService, regle, repere) {
   const res = { jours: null, exception: false, autorisee: false, conservation: 'sans_objet', couvre: false, alertes: [] };
   if (!dateProduction) { res.alertes.push('date de production non décidée'); return res; }
   res.jours = joursEntre(dateProduction, dateService);
@@ -150,7 +150,7 @@ function appliquerRepere(res, repere) {
 }
 
 /** Avance d'une étape : son propre maximum (jamais la règle générale de deux jours seule, jamais une conservation). */
-function evaluerEtape(res, regle, limite, repere = null) {
+function evaluerEtape(res, regle, limite, repere) {
   const maximum = Number.isFinite(regle.avanceMaxJours) ? regle.avanceMaxJours : null;
   res.exception = res.jours > AVANCE_HABITUELLE;
   if (maximum === null) {

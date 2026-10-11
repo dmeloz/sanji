@@ -172,7 +172,7 @@ export function ouvrirDetailDuJour(date, { ancre = null } = {}) {
     titre: 'Détail du jour',
     construire: (etat) => h('div', { classe: 'vue-detail' },
       h('p', { classe: 'aide' }, `${majuscule(libelleJour(date))}. La carte n'est qu'un contexte : aucune quantité n'en est calculée.`),
-      ...vueDetail.sectionsDuJour(etat, date, { plat: true })),
+      ...vueDetail.sectionsDuJour(etat, date)),
     apres: () => { if (ancre) document.getElementById(ancre)?.scrollIntoView?.({ block: 'start' }); },
   });
 }

@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ajouterComposant, definirMenu, definirStandard, genererComposants, marquerFait, memoriser, modifierComposant, planifier,
+  ajouterComposant, definirMenu, definirStandard, marquerFait, memoriser, modifierComposant, planifier,
   saisirMenusSemaine, supprimerComposant, supprimerStandard,
 } from '../app/js/domaine/actions.js';
 import { calculerComposant } from '../app/js/domaine/calcul.js';
@@ -55,7 +55,6 @@ test('fusion : un intitulé modifié garde les composants inchangés avec leurs 
   assert.ok(principaleDe(e, courgettes.id), 'attribué : il reçoit sa production');
   assert.deepEqual(noms(duMenu(e, S.lundi, 2)), ['courgettes', 'poulet', 'riz']);
   assert.equal(e.jours[S.lundi].menus[2].transcriptionValidee, true);
-  assert.equal(e.jours[S.lundi].menus[2].composantsValides, true);
   // L'autre menu du jour n'est pas touché.
   definirMenu(e, S.lundi, 1, M.principal, h());
   definirMenu(e, S.lundi, 2, M.unSeul, h());
@@ -90,13 +89,14 @@ test('fusion : nom comparé sans accent ni casse, doublon d\'intitulé ignoré, 
   definirMenu(e, S.lundi, 2, ' Riz , CAROTTES ', h());
   assert.deepEqual(duMenu(e, S.lundi, 2).map((c) => c.id).sort(), ids, 'même nom normalisé : mêmes composants');
   assert.deepEqual(noms(duMenu(e, S.lundi, 2)), ['carottes', 'riz'], 'le nom d\'origine est conservé');
-  // Un intitulé identique ne change rien : une suppression faite à la main est respectée ; genererComposants recrée.
+  // Un intitulé identique ne change rien : une suppression faite à la main est respectée ; un intitulé modifié la recrée.
   const carottes = parNom(e, S.lundi, 'carottes');
   supprimerComposant(e, carottes.id, h());
   definirMenu(e, S.lundi, 2, ' Riz , CAROTTES ', h());
   assert.deepEqual(noms(duMenu(e, S.lundi, 2)), ['riz']);
-  const crees = genererComposants(e, S.lundi, 2, h());
-  assert.deepEqual(crees.map((i) => e.composants[i].nom), ['CAROTTES']);
+  definirMenu(e, S.lundi, 2, 'Riz, CAROTTES', h());
+  assert.deepEqual(noms(duMenu(e, S.lundi, 2)).sort(), ['CAROTTES', 'riz']);
+  definirMenu(e, S.lundi, 2, ' Riz , CAROTTES ', h());
   // Un composant ajouté à la main survit à l'enregistrement d'un intitulé identique, mais pas à un intitulé qui change.
   const main = ajouterComposant(e, S.lundi, 2, { nom: 'ELEMENT_MANUEL_TEST', categorie: 'legume' }, h());
   definirMenu(e, S.lundi, 2, ' Riz , CAROTTES ', h());
@@ -109,7 +109,7 @@ test('fusion : nom comparé sans accent ni casse, doublon d\'intitulé ignoré, 
   assert.ok(e.composants[manuel]);
   // Donnée d'avant la section 16 : intitulé saisi mais non validé, composant non valide → l'enregistrement le régularise.
   const ancien = etatVide();
-  assurerJour(ancien, S.lundi).menus[1] = { intitule: 'riz', transcriptionValidee: false, composantsValides: false };
+  assurerJour(ancien, S.lundi).menus[1] = { intitule: 'riz', transcriptionValidee: false };
   const herite = ajouterComposant(ancien, S.lundi, 1, { nom: 'riz', categorie: 'feculent' }, h());
   ancien.composants[herite].valide = false; // tel qu'il était enregistré par l'ancien parcours
   definirMenu(ancien, S.lundi, 1, 'riz', h());
@@ -130,8 +130,6 @@ test('composants créés par l\'analyse : valides d\'emblée, attribués selon l
   assert.equal(principaleDe(e, parNom(e, S.lundi, 'poulet', 2).id), undefined);
   // Aucun point de validation n'existe plus.
   assert.equal(types(e, S.lundi).some((t) => t === 'transcription' || t === 'composants'), false);
-  // Compatibilité : les anciennes actions de validation restent sans effet nuisible.
-  assert.doesNotThrow(() => genererComposants(e, S.lundi, 2, h()));
 });
 
 // ---------------------------------------------------------------- points : composant inconnu, grammage

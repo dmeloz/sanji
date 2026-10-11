@@ -20,56 +20,46 @@ test('chaque action exige un horodatage ISO en dernier argument', () => {
 
 test('menus : l\'intitulé enregistré vaut transcription validée, sans validation manuelle ; pas de menu samedi/dimanche', () => {
   const e = etatVide();
-  // Conservée pour compatibilité : rien à valider si l'intitulé est vide.
-  assert.throws(() => A.validerTranscription(e, S.lundi, 2, h()), /vide/);
   A.definirMenu(e, S.lundi, 1, 'INTITULE_TEST', h());
-  assert.deepEqual(e.jours[S.lundi].menus[1], { intitule: 'INTITULE_TEST', transcriptionValidee: true, composantsValides: true });
+  assert.deepEqual(e.jours[S.lundi].menus[1], { intitule: 'INTITULE_TEST', transcriptionValidee: true });
   const composants = copie(e.composants);
   A.definirMenu(e, S.lundi, 1, 'INTITULE_TEST', h()); // identique : rien ne change
   assert.deepEqual(e.composants, composants);
   A.definirMenu(e, S.lundi, 1, 'INTITULE_TEST_2', h()); // modifié : plus rien à revalider
-  assert.deepEqual(e.jours[S.lundi].menus[1], { intitule: 'INTITULE_TEST_2', transcriptionValidee: true, composantsValides: true });
-  A.validerTranscription(e, S.lundi, 1, h()); // sans effet nuisible
-  assert.equal(e.jours[S.lundi].menus[1].transcriptionValidee, true);
+  assert.deepEqual(e.jours[S.lundi].menus[1], { intitule: 'INTITULE_TEST_2', transcriptionValidee: true });
   A.definirMenu(e, S.lundi, 1, '', h()); // intitulé effacé : rien n'est validé, plus de composant
-  assert.deepEqual(e.jours[S.lundi].menus[1], { intitule: '', transcriptionValidee: false, composantsValides: false });
+  assert.deepEqual(e.jours[S.lundi].menus[1], { intitule: '', transcriptionValidee: false });
   assert.deepEqual(e.composants, {});
   assert.throws(() => A.definirMenu(e, S.samedi, 1, 'x', h()), /Pas de menu du jour/);
   assert.throws(() => A.definirMenu(e, S.dimanche, 2, 'x', h()), /Pas de menu du jour/);
   assert.throws(() => A.definirMenu(e, S.lundi, 3, 'x', h()), /menu doit être 1 ou 2/);
 });
 
-test('genererComposants : même fusion que definirMenu, sans validation préalable, composants valides d\'emblée', () => {
+test('definirMenu : composants créés valides d\'emblée, un composant supprimé à la main est recréé par un intitulé modifié', () => {
   const e = etatVide();
   A.definirMenu(e, S.lundi, 2, 'riz, carottes, poulet', h());
   const [riz, carottes, poulet] = ['riz', 'carottes', 'poulet'].map((n) => Object.values(e.composants).find((c) => c.nom === n));
   assert.deepEqual([riz, carottes, poulet].map((c) => [c.nom, c.attribue, c.valide]),
     [['riz', true, true], ['carottes', true, true], ['poulet', false, true]]);
   assert.equal(Object.keys(e.productions).length, 2, 'seuls les attribués reçoivent une production');
-  // Un composant supprimé à la main est recréé, les autres sont gardés tels quels, rien n'est dupliqué.
+  // Les autres sont gardés tels quels, rien n'est dupliqué.
   A.supprimerComposant(e, carottes.id, h());
-  const ids = A.genererComposants(e, S.lundi, 2, h());
-  assert.deepEqual(ids.map((i) => e.composants[i].nom), ['carottes']);
+  A.definirMenu(e, S.lundi, 2, 'riz, carottes, poulet,', h());
   assert.equal(Object.keys(e.composants).length, 3);
+  assert.deepEqual(Object.values(e.composants).map((c) => c.nom).sort(), ['carottes', 'poulet', 'riz']);
   assert.equal(e.composants[riz.id], riz);
   assert.equal(e.composants[poulet.id], poulet);
-  assert.equal(A.genererComposants(e, S.lundi, 2, h()).length, 0, 'idempotent');
-  // Aucune validation préalable n'est exigée, même sans intitulé.
-  assert.deepEqual(A.genererComposants(e, S.mardi, 1, h()), []);
-  A.validerComposantsMenu(e, S.lundi, 2, h()); // compatibilité : sans effet nuisible
-  assert.equal(Object.keys(e.productions).length, 2);
 });
 
 test('mémoire : l\'exception mémorisée influence la proposition suivante', () => {
   const e = etatVide();
-  menuValide(e, S.lundi, 2, 'poulet');
-  const [c] = A.genererComposants(e, S.lundi, 2, h());
+  A.definirMenu(e, S.lundi, 2, 'poulet', h());
+  const [c] = Object.keys(e.composants);
   assert.equal(e.composants[c].attribue, false);
   A.modifierComposant(e, c, { attribue: true }, h());
-  A.validerComposant(e, c, h());
   A.memoriser(e, c, h());
-  menuValide(e, S.mardi, 2, 'poulet');
-  const [d] = A.genererComposants(e, S.mardi, 2, h());
+  A.definirMenu(e, S.mardi, 2, 'poulet', h());
+  const d = Object.values(e.composants).find((x) => x.date === S.mardi).id;
   assert.equal(e.composants[d].attribue, true, 'mémorisé : attribué malgré le menu 2');
 });
 

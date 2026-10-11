@@ -41,7 +41,7 @@ import { LIBELLE_STANDARD_BASE } from './statuts.js';
 export const USAGES = Object.freeze(['rendement_parage', 'rendement_cuisson', 'conservation', 'cuisson_temps',
   'temperature', 'buffet_couvert', 'refroidissement', 'limite_duree', 'duree_stockage', 'allergene']);
 export const STATUT_STANDARD_BASE = 'STANDARD_BASE';
-export { LIBELLE_STANDARD_BASE, REGLES_GENERALES, VERSION_REFERENTIEL };
+export { LIBELLE_STANDARD_BASE, REGLES_GENERALES };
 
 const RATTACHEES = SAVOIR_CULINAIRE.filter((x) => x.rattachement);
 const REGLES = new Map(REGLES_GENERALES.map((r) => [r.cle, r]));

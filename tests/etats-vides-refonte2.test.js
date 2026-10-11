@@ -23,7 +23,7 @@ before(async () => {
     jour: await import('../app/js/ui/vue-production.js'),
     detail: await import('../app/js/ui/vue-detail.js'),
     articles: await import('../app/js/ui/vue-articles.js'),
-    menus: await import('../app/js/ui/vue-menus.js'),
+    import: await import('../app/js/ui/vue-import.js'),
     fiche: await import('../app/js/ui/vue-fiche.js'),
   };
 });
@@ -66,29 +66,6 @@ test('G1 : absent quand des tâches existent (« Tout est fait. » ou liste)', (
   assert.doesNotMatch(p.textContent, /Rien à produire/);
 });
 
-test('G2 : jour sans menu, étiquette, titre, bouton d\'import ; jamais le samedi (aucun menu à importer)', () => {
-  magasin.remplacer(etatVide());
-  const mer = vues.detail.rendre(magasin.etat(), S.mercredi);
-  assert.match(mer.textContent, /menu à importer/);
-  assert.match(mer.textContent, /Pas encore de menu pour ce jour/);
-  assert.match(mer.textContent, /Sans menu, Sanji ne calcule rien pour mercredi : aucune quantité n'est inventée\./);
-  assert.ok(liens(mer).some(([t, href]) => t === 'Importer les menus de la semaine' && href === `#/import/${S.lundi}`));
-  assert.doesNotMatch(mer.textContent, /le samedi n'est jamais présumé/);
-  assert.doesNotMatch(vues.detail.rendre(magasin.etat(), S.samedi).textContent, /Pas encore de menu pour ce jour/);
-});
-
-test('G2 : absent quand le jour a un menu', () => {
-  const e = etatVide();
-  prevision(e, S.mercredi, 1, 10);
-  composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
-  // un intitulé saisi suffit : on le pose par l'action du domaine
-  return import('../app/js/domaine/actions.js').then(({ definirMenu }) => {
-    definirMenu(e, S.mercredi, 1, 'INTITULE_TEST', '2026-10-01T08:00:00.000Z');
-    magasin.remplacer(e);
-    assert.doesNotMatch(vues.detail.rendre(magasin.etat(), S.mercredi).textContent, /Pas encore de menu pour ce jour/);
-  });
-});
-
 test('G3 : articles, état vide seulement sans aucun jour ; sinon lignes simples', () => {
   vues.articles.oublierVue();
   magasin.remplacer(etatVide());
@@ -110,7 +87,7 @@ test('G4 : lignes non comprises citées, état par jour, deux boutons ; analyser
   assert.deepEqual(a.nonComprises, ['+ note au stylo'], 'ni prix ni titre');
   assert.ok(a.ignorees.includes('19.-'));
   magasin.remplacer(etatVide());
-  const racine = vues.menus.rendre(magasin.etat(), S.lundi);
+  const racine = vues.import.rendre(magasin.etat(), S.lundi);
   const par = (id) => racine.tous((x) => x.attributs.id === id)[0];
   par('feuille-texte').value = 'lundi 5 octobre\nSoupe\nPoulet\n+ note au stylo\n= autre reste';
   racine.tous((x) => x.balise === 'button' && x.textContent === 'Répartir dans la semaine')[0].click();
@@ -127,7 +104,7 @@ test('G4 : lignes non comprises citées, état par jour, deux boutons ; analyser
 
 test('G4 : pas de zone quand tout est compris', () => {
   magasin.remplacer(etatVide());
-  const racine = vues.menus.rendre(magasin.etat(), S.lundi);
+  const racine = vues.import.rendre(magasin.etat(), S.lundi);
   const par = (id) => racine.tous((x) => x.attributs.id === id)[0];
   par('feuille-texte').value = 'lundi 5 octobre\nSoupe\nPoulet';
   racine.tous((x) => x.balise === 'button' && x.textContent === 'Répartir dans la semaine')[0].click();

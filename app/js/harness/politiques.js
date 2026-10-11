@@ -12,7 +12,7 @@ export const ORIGINE_CHEF = 'chef';
  */
 export const ACTIONS_RESERVEES_AU_CHEF = Object.freeze([
   'definirRegle', 'supprimerRegle', 'definirStandard', 'supprimerStandard', 'ajusterStandard', 'validerStandard',
-  'corrigerStandard', 'accepterApprentissage', 'ecarterApprentissage', 'validerRecette', 'modifierRecette', 'validerComposant',
+  'corrigerStandard', 'accepterApprentissage', 'ecarterApprentissage', 'validerRecette', 'modifierRecette',
   'modifierComposant', 'confirmerRepartition', 'deciderEcart', 'marquerFait', 'corrigerReel', 'supprimerProduction',
   'annulerFiche', 'modifierFiche', 'importer', 'remplacer', 'ajouterAdaptation',
 ]);

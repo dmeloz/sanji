@@ -11,7 +11,7 @@ import { evenementsHarness } from './trace.js';
 export const JOURS_MAX = 14;
 const NB_DECISIONS_ANTERIEURES = 10;
 const LONGUEUR_NOM_MAX = 60;
-const NOM_NON_TRANSMIS = 'composant (nom non transmis)';
+export const NOM_NON_TRANSMIS = 'composant (nom non transmis)';
 // Un nom vient d'un menu importé : texte libre. Un nom long ou qui ressemble à une remarque sur une personne ne part pas.
 const MARQUEURS_PERSONNELS = /(allerg|intol[ée]?ran|c(?:oe|œ)?e?liaque|gluten|lactose|regime|\bpour (m\.|mme|mr|monsieur|madame|le client|la cliente))/i;
 /** Vrai si le texte parle d'une personne ou d'un régime (accents décomposés et sans accent compris). */

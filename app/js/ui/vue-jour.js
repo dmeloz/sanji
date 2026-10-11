@@ -5,7 +5,6 @@
 // hors règle et les avertissements de conservation ; un plat sans portion dit « à saisir » sur la ligne (un toucher, un champ).
 // Le créneau, les portions et la provenance se lisent dans la fiche.
 
-import { calculerComposant } from '../domaine/calcul.js';
 import { estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js';
 import { definirCouvertsMidi } from '../domaine/actions-couverts.js';
 import { saisirPortionInconnue } from '../domaine/actions-preparation.js';
@@ -23,7 +22,6 @@ import {
   actionsTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, defaireEnUnToucher, noeudEvaluation, pastilleCreneau, texteCharge,
 } from './taches.js';
 
-export const titre = () => 'Production';
 
 /** « mar. 6 » : jour abrégé et numéro. */
 const courtJour = (date) => `${libelleJour(date).slice(0, 3)}. ${Number(date.slice(8))}`;
@@ -109,25 +107,6 @@ function actionsDeLigne(etat, l, date) {
   return { directes: [], autres: actionsTache(l, p).filter((n) => n.textContent !== 'Fait') };
 }
 
-/** Provenance de la quantité d'une ligne, avec le vocabulaire existant ; null quand la quantité n'est pas calculée. */
-export function provenanceQuantite(etat, composantId) {
-  if (!etat.composants?.[composantId]) return null;
-  const calc = calculerComposant(etat, composantId);
-  if (calc.statut !== 'CALCULE') return null;
-  if (calc.standardBase) return libelle('PROVENANCE', 'STANDARD_BASE');
-  const grammage = calc.dependances.find((d) => d.parametre === 'grammage');
-  if (grammage && ['RESTAURANT_VALIDE', 'SAISI_SERVICE'].includes(grammage.statut)) return libelle('PROVENANCE', grammage.statut);
-  return libelle('PROVENANCE', 'CALCULE');
-}
-
-/**
- * Provenance à dire sur la ligne : seulement quand elle sort de l'ordinaire (« standard de base », « inconnu »). Une valeur
- * calculée, validée ou saisie ne se répète pas sur chaque ligne ; la provenance complète reste dans la fiche.
- */
-export function provenanceAMontrer(provenance) {
-  return provenance === libelle('PROVENANCE', 'STANDARD_BASE') || provenance === libelle('PROVENANCE', 'INCONNU') ? provenance : null;
-}
-
 let compteurActions = 0;
 
 /** Borne haute d'une portion tapée (g, ml…) : au-delà, c'est une faute de frappe. */
@@ -184,7 +163,7 @@ export function feuilleChiffrage(etat, l, nom, raison) {
  * seulement pour l'exception (voir `notesDeLigne`). Les autres gestes s'ouvrent depuis « ⋯ » (Actions : <plat>), qui porte aussi
  * l'évaluation de l'avance. Une proposition montre « Planifier » directement. Les avertissements de conservation restent dits.
  */
-function ligneTache(etat, ligneBrute, date, options) {
+function ligneTache(etat, ligneBrute, date) {
   const l = { ...ligneBrute, avanceJours: ligneBrute.avanceJours ?? Math.max(0, joursEntre(date, ligneBrute.dateService)) };
   const p = etat.productions[l.productionId];
   const fait = p?.etat === 'fait';
@@ -249,7 +228,7 @@ function bloc(titreTexte, lignes, etat, date, aide = null) {
   return h('section', { classe: 'jour-bloc' },
     h('h2', { classe: 'section-titre prod-groupe-titre' }, titreTexte),
     aide ? h('p', { classe: 'aide mep-aide-froid' }, aide) : null,
-    h('ul', { classe: 'mep-liste' }, faitesEnBas(lignes).map((l) => ligneTache(etat, l, date, {}))));
+    h('ul', { classe: 'mep-liste' }, faitesEnBas(lignes).map((l) => ligneTache(etat, l, date))));
 }
 
 /** Une ligne de résumé tappable (compte + ›) qui ouvre une feuille en lecture seule : jamais une liste à dérouler. */

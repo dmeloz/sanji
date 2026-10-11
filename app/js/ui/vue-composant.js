@@ -1,19 +1,18 @@
-// Composant : calcul, formule, paramètres et provenance, étapes, pesée, mémoire maison, allergènes, productions.
+// Gestes avancés d'un composant (repli « Plus de réglages » de la fiche) : calcul, étapes, pesée, mémoire maison, allergènes, productions.
+// Les dialogues (modifier, sauce, allergènes, IA) servent aussi vue-fiche.js et feuille-decisions.js.
 
 import {
   composerMelange, enregistrerPesee, memoriser, modifierComposant, reprendreMemoire, saisirApresService, supprimerComposant,
 } from '../domaine/actions.js';
 import { obstacleValidationAllergenes, statutAllergenes } from '../domaine/allergenes.js';
 import { chercherBase } from '../domaine/base.js';
-import { calculerComposant } from '../domaine/calcul.js';
 import { apercuEnvoi, champsApresProposition, lirePropositionCategorie } from '../harness/precisions-ia.js';
 import { libelleJour } from '../domaine/dates.js';
 import { estSauceAConfirmer, lireMemoire, normaliser } from '../domaine/etat.js';
 import { SAUCES } from '../domaine/vocabulaire-plats.js';
-import { etapesComposant } from '../domaine/planification.js';
 import { cleStandardDe, valeurPour } from '../domaine/validation.js';
 import {
-  CHARGE, ETAPE, ETAT_POIDS, LIBELLE_ESTIMATION_A_VALIDER, ROLE, TYPE_COMPOSANT, UNITE, CATEGORIE, libelle,
+  CHARGE, ETAPE, ETAT_POIDS, ROLE, TYPE_COMPOSANT, UNITE, CATEGORIE, libelle,
 } from '../domaine/statuts.js';
 import { VERSION_BASE } from '../donnees/base-metier.js';
 import { agir, agirStrict, aujourdhui, etat as etatCourant } from '../magasin.js';
@@ -23,16 +22,12 @@ import { ouvrirValidation } from './feuille-validation.js';
 import { h } from './dom.js';
 import { bouton, ligneVide, lien, pastille, repliable } from './elements.js';
 import {
-  coefficientDepuis, formaterNombre, libelleCoefficient, milieu, modeDepuisCoefficient, pluriel, precisionQuantite, quantite, quantiteNoeuds,
+  coefficientDepuis, formaterNombre, libelleCoefficient, milieu, modeDepuisCoefficient, pluriel, quantite,
 } from './format.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { ALLERGENES, PROVENANCES_SAISIE, libelleAllergene, texteSourceAllergenes } from './reference.js';
-import { blocReperes } from './reperes-metier.js';
-import { blocEnseigner } from './enseigner-mot.js';
 import { carteTache, dialogPreparatoire, ligneProduction } from './taches.js';
-
-export const titre = () => 'Composant';
 
 const VARIANTE_PROVENANCE = {
   RESTAURANT_VALIDE: 'vert', STANDARD_BASE: 'gris', BASE_METIER_ESTIMATION: 'gris', SAISI_SERVICE: 'gris', CALCULE: 'vert', INCONNU: 'gris',
@@ -381,26 +376,6 @@ function blocPortion(c, calc) {
   return h('div', { classe: 'encadre portion' }, h('p', null, h('strong', null, `Portion : ${textePortion(d, c)}`)), gestes);
 }
 
-function sectionEntete(etat, c, calc) {
-  const p = calc.portions;
-  return h('section', { classe: 'carte' },
-    h('h1', { classe: 'page-titre' }, c.nom),
-    h('p', { classe: 'meta' }, `Menu ${c.menu} · service de destination : ${libelleJour(c.date)}`),
-    h('p', null, pastille(c.attribue ? 'attribué au poste' : 'non attribué', c.attribue ? 'gris' : 'ambre'), ' ',
-      pastille(libelle('TYPE_COMPOSANT', c.type), 'gris')),
-    calc.statut === 'CALCULE'
-      ? h('p', { classe: 'quantite-grande' }, quantiteNoeuds(calc.quantiteTravail, calc.uniteTravail), h('small', null, ` ${precisionQuantite(calc)}`))
-      : h('p', { classe: 'quantite-grande discret' }, 'quantité inconnue', h('small', null, ` ${precisionQuantite(calc)}`)),
-    blocPortion(c, calc),
-    h('p', null,
-      calc.statut === 'CALCULE' ? pastille(libelle('PROVENANCE', 'CALCULE'), 'vert') : pastille(libelle('PROVENANCE', 'INCONNU'), 'gris'), ' ',
-      calc.aValider ? pastille(LIBELLE_ESTIMATION_A_VALIDER, 'ambre') : null, ' ',
-      calc.aMesurer ? pastille('à mesurer', 'ambre') : null),
-    h('p', { classe: 'meta' }, `Portions : ${pluriel(p.total, 'portion')} (hors groupes ${p.prevision}${p.previsionManquante ? ', non saisie' : ''} ; groupes confirmés ${p.groupesConfirmes} ; groupes provisoires ${p.groupesProvisoires})`),
-    blocEnseigner(c),
-    blocGestes(c));
-}
-
 /** Décision du 2026-10-07 : seul le texte du menu part, après aperçu, à chaque clic ; la réponse reste une proposition à confirmer. */
 function dialogPrecisionIA(c) {
   const apercu = apercuEnvoi(c, etatCourant().jours?.[c.date]?.menus?.[c.menu]?.intitule);
@@ -446,12 +421,11 @@ export function boutonPrecisionIA(c) {
   return c.categorie === 'a_preciser' && assistantPret() ? bouton("Demander à l'IA", () => dialogPrecisionIA(c), 'court') : null;
 }
 
-/** Gestes de l'en-tête : modifier, choisir la sauce, composer un mélange, supprimer (partagés avec la fiche technique). */
-export function blocGestes(c, { sansIA = false } = {}) {
+/** Gestes avancés : modifier, choisir la sauce, composer un mélange, supprimer. (Le geste IA est dans l'en-tête de la fiche.) */
+function blocGestes(c) {
   return h('div', { classe: 'actions' },
     bouton('Modifier', () => dialogModifier(c), 'court'),
     estSauceAConfirmer(c) ? bouton('Choisir la sauce', () => dialogChoisirSauce(c), 'court') : null,
-    sansIA ? null : boutonPrecisionIA(c),
     c.recetteId ? null : bouton('Composer un mélange', () => dialogMelange(c), 'court'),
     bouton('Supprimer', () => confirmer({
       titre: 'Supprimer ce composant ?', texte: `${c.nom} et ses tâches non faites seront supprimés.`, libelleOk: 'Supprimer', danger: true,
@@ -461,7 +435,7 @@ export function blocGestes(c, { sansIA = false } = {}) {
 
 /** Gestes avancés de la fiche technique (repli « Plus de réglages ») : tout ce que vue-composant offrait, sans l'en-tête. */
 export function sectionsReglages(etat, c, calc) {
-  return [blocPortion(c, calc), blocGestes(c, { sansIA: true }), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionProductions(etat, c),
+  return [blocPortion(c, calc), blocGestes(c), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionProductions(etat, c),
     sectionMemoire(etat, c), sectionAllergenes(etat, c), sectionApresService(c, calc)].filter(Boolean);
 }
 
@@ -537,23 +511,6 @@ function sectionAllergenes(etat, c) {
     h('div', { classe: 'actions' }, bouton('Renseigner les allergènes', () => dialogAllergenes(c), 'court')));
 }
 
-/** « ven. 2 » : jour abrégé et numéro. */
-const courtJour = (date) => `${libelleJour(date).slice(0, 3)}. ${Number(date.slice(8))}`;
-
-/** Étapes de préparation de la règle (liste ordonnée) ; rien si le composant n'a pas d'étapes. */
-function sectionEtapesPreparation(etat, c) {
-  const etapes = etapesComposant(etat, c.id);
-  if (etapes.length === 0) return null;
-  const VARIANTE = { fait: 'vert', en_cours: 'vert', a_planifier: 'ambre', ecart: 'rouge' };
-  return h('section', { classe: 'carte' },
-    h('h2', { classe: 'section-titre' }, 'Étapes de préparation'),
-    h('ol', { classe: 'liste-simple' }, etapes.map((x) => h('li', null,
-      h('strong', null, x.libelle), ' ', pastille(libelle('ETAT_TACHE', x.etat), VARIANTE[x.etat] ?? 'gris'),
-      x.faitLe && x.faitLe < c.date ? h('span', { classe: 'meta' }, ` · déjà avancé ${courtJour(x.faitLe)}`)
-        : (x.jourDecide && x.etat !== 'fait' ? h('span', { classe: 'meta' }, ` · prévu ${courtJour(x.jourDecide)}`) : null)))),
-    h('p', { classe: 'aide' }, 'La dernière étape est la finition. L\'avance d\'une étape n\'est pas une durée de conservation de la préparation finie.'));
-}
-
 function sectionProductions(etat, c) {
   const ordre = { principale: 0, complement: 1, preparatoire: 2 };
   const lignes = Object.values(etat.productions).filter((p) => p.composantId === c.id)
@@ -562,18 +519,6 @@ function sectionProductions(etat, c) {
     h('h2', { classe: 'section-titre' }, 'Productions du composant'),
     lignes.length === 0 ? ligneVide('Aucune production : le composant doit être attribué au poste.') : lignes.map((l) => carteTache(etat, l)),
     h('div', { classe: 'actions' }, bouton('Noter une action préparatoire', () => dialogPreparatoire(c.id), 'court')));
-}
-
-function sectionIngredients(etat, c, calc) {
-  if (c.type !== 'preparation_maison') return null;
-  const recette = c.recetteId ? etat.recettes[c.recetteId] : null;
-  return h('section', { classe: 'carte' },
-    h('h2', { classe: 'section-titre' }, 'Ingrédients calculés'),
-    calc.ingredients
-      ? h('ul', { classe: 'liste-simple' }, calc.ingredients.map((i) => h('li', null, `${i.nom} : ${quantite(i.quantite, i.unite)}`)))
-      : ligneVide(recette ? (recette.valide ? 'Recette validée, mais rendement ou quantités inutilisables : voir « Ce qui manque ».' : 'Recette liée non validée : ingrédients non calculés.')
-        : 'Aucune recette liée : ingrédients non calculés.'),
-    recette ? h('p', { classe: 'meta' }, `Recette : ${recette.nom}, version ${recette.version}${recette.valide ? ', validée' : ', non validée'}`) : null);
 }
 
 function sectionApresService(c, calc) {
@@ -587,22 +532,3 @@ function sectionApresService(c, calc) {
     h('div', { classe: 'actions' }, bouton('Saisir après service', () => dialogApresService(c, u), 'court')),
     h('p', { classe: 'aide' }, 'Le rebut n\'est pas une perte normale de parage ou de cuisson.'));
 }
-
-export function rendre(etat, id) {
-  const c = etat.composants[id];
-  const racine = h('div', { classe: 'vue vue-composant' });
-  if (!c) {
-    racine.appendChild(h('h1', { classe: 'page-titre' }, 'Composant introuvable'));
-    racine.appendChild(h('p', null, 'Ce composant n\'existe plus.'));
-    racine.appendChild(h('p', null, lien('#/production', 'Retour à la feuille du jour')));
-    return racine;
-  }
-  const calc = calculerComposant(etat, id);
-  racine.appendChild(h('p', null, lien(`#/production/${c.date}`, '‹ Feuille du jour')));
-  for (const s of [sectionEntete(etat, c, calc), sectionCalcul(c, calc), sectionEtapes(c, calc), sectionEtapesPreparation(etat, c), sectionProductions(etat, c),
-    sectionIngredients(etat, c, calc), sectionMemoire(etat, c), sectionAllergenes(etat, c), sectionApresService(c, calc), blocReperes(c.famille, etat)]) {
-    if (s) racine.appendChild(s);
-  }
-  return racine;
-}
-

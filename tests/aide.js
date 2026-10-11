@@ -2,8 +2,8 @@
 // Les données viennent de tests/jeux/TEST_ONLY-*.js ; rien de tout cela n'existe dans app/.
 
 import {
-  ajouterComposant, assurerProductions, creerRecette, definirMenu, definirPrevision, modifierComposant, validerComposant,
-  validerRecette, validerTranscription,
+  ajouterComposant, assurerProductions, creerRecette, definirMenu, definirPrevision, modifierComposant,
+  validerRecette,
 } from '../app/js/domaine/actions.js';
 import { enseignerMot } from '../app/js/domaine/actions-mots.js';
 import { etatInitial } from '../app/js/domaine/etat.js';
@@ -20,7 +20,6 @@ export const etatVide = () => etatInitial();
  */
 export function menuValide(etat, date, menu, intitule = 'INTITULE_TEST') {
   definirMenu(etat, date, menu, intitule, h());
-  validerTranscription(etat, date, menu, h());
   for (const c of Object.values(etat.composants)) if (c.date === date && c.menu === menu) delete etat.composants[c.id];
   assurerProductions(etat);
 }
@@ -34,7 +33,6 @@ export function composantValide(etat, date, menu, def, surcharge = {}) {
   if (d.type) champs.type = d.type;
   if (d.recetteId) champs.recetteId = d.recetteId;
   modifierComposant(etat, id, champs, h());
-  validerComposant(etat, id, h());
   return id;
 }
 

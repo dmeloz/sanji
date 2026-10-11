@@ -2,19 +2,15 @@
 
 import { clePhoto, notesPourEnvoi, nouveautes, resumeEtat, texteDiagnostic } from '../domaine/rapport-diagnostic.js';
 import { texteRapport } from '../domaine/retour-essai.js';
-import { redessiner, statutStockage } from '../magasin.js';
+import { statutStockage } from '../magasin.js';
 import { VERSION_APP } from '../version.js';
 import { h } from './dom.js';
 import { bouton, pastille } from './elements.js';
 import { pluriel } from './format.js';
-import { effacerJournal, lireEvenements, photosGardees } from './journal-diagnostic.js';
+import { lireEvenements, photosGardees } from './journal-diagnostic.js';
 import { lireNotes, marquerTransmises } from './notes-dev.js';
 import { lireRetours } from './retours-essai.js';
 import { lireRepere, marquerEnvoi } from './dernier-envoi.js';
-import { confirmer } from './panneau.js';
-
-const AIDE = 'Un seul geste : « Partager le fichier » envoie ce qui est nouveau depuis le dernier envoi (journal, texte lu par l\'IA, retours d\'essai, notes de test, photos). Rien n\'est envoyé automatiquement. '
-  + 'Le journal et les photos (les 5 dernières) sont gardés 14 jours sur l\'appareil.';
 
 const nombreErreurs = () => lireEvenements().filter((e) => e.type === 'erreur').length;
 
@@ -115,18 +111,4 @@ export function boutonsEnvoi(etat, surEnvoi = () => {}) {
     minuteur = setTimeout(effacer, DUREE_CONFIRMATION_MS);
   };
   return h('div', null, h('div', { classe: 'actions' }, bouton('Partager le fichier', surPartager, 'court principal')), info, statut);
-}
-
-export function sectionDiagnostic(etat) {
-  const evenements = lireEvenements();
-  return h('section', { classe: 'carte' },
-    h('h2', { classe: 'section-titre' }, 'Journal de diagnostic'),
-    h('p', { classe: 'aide' }, AIDE),
-    h('p', null, `${pluriel(evenements.length, 'événement noté', 'événements notés')} · ${pluriel(nombreErreurs(), 'erreur', 'erreurs')}`),
-    boutonsEnvoi(etat),
-    h('div', { classe: 'actions' },
-      bouton('Effacer le journal', () => confirmer({
-        titre: 'Effacer le journal de diagnostic ?', texte: 'Le journal gardé sur cet appareil sera supprimé. Vos menus ne changent pas.', libelleOk: 'Effacer', danger: true,
-        action: () => { effacerJournal(); redessiner(); },
-      }), 'court', { disabled: evenements.length === 0 })));
 }

@@ -135,31 +135,17 @@ test('avances : « Après service » est une section toujours visible (aucun rep
   assert.equal(classes(noeud, 'prod-avances').length, 0);
 });
 
-test('ligne : la provenance ne se dit que pour « standard de base » ou « inconnu »', () => {
-  assert.equal(vueJour.provenanceAMontrer('calculé'), null);
-  assert.equal(vueJour.provenanceAMontrer('validé restaurant'), null);
-  assert.equal(vueJour.provenanceAMontrer('saisi au service'), null);
-  assert.equal(vueJour.provenanceAMontrer('standard de base'), 'standard de base');
-  assert.equal(vueJour.provenanceAMontrer('inconnu'), 'inconnu');
-  assert.equal(vueJour.provenanceAMontrer(null), null);
-});
-
 test('ligne : la provenance ne se dit plus sur la ligne (elle reste dans la fiche), même au standard de base', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'riz', h());
   definirPrevision(e, S.lundi, 1, 10, h());
   definirStandard(e, 'riz', 'plat_principal', { valeur: 70, unite: 'g', etat: 'sec' }, h());
-  const riz = Object.values(e.composants).find((c) => c.nom === 'riz');
-  const valide = vueJour.provenanceQuantite(e, riz.id);
-  assert.notEqual(valide, 'standard de base');
-  assert.equal(vueJour.provenanceAMontrer(valide), null, 'un grammage validé ne se répète pas sur la ligne');
   assert.doesNotMatch(texteVisible(ligneDe(production(e), 'riz')), /provenance : /);
   // Sans standard maison : la portion vient du standard de base, et la ligne le dit.
   const b = etatVide();
   prevision(b, S.lundi, 1, 10);
   const grammageBase = { valeur: 50, unite: 'ml', statut: 'STANDARD_BASE', source: 'TEST_ONLY' };
   const prepBase = composantValide(b, S.lundi, 1, { ...J.PREPARATION_TEST, grammage: grammageBase }, { nom: 'PREP_BASE_TEST' });
-  assert.equal(vueJour.provenanceQuantite(b, prepBase), 'standard de base');
   assert.doesNotMatch(texteVisible(ligneDe(production(b), 'PREP_BASE_TEST')), /provenance/, 'dite dans la fiche, plus sur la ligne');
 });
 
@@ -315,7 +301,7 @@ test('composant (page complète) : « 25 portions » n\'est pas écrit deux fois
   e.composants[c].type = 'generique';
   e.composants[c].grammage.valeur = null; // sans portion connue : seules les portions se comptent
   magasin.remplacer(e);
-  const texte = vueComposant.rendre(magasin.etat(), c).textContent;
+  const texte = vueFiche.rendre(magasin.etat(), c).textContent;
   assert.doesNotMatch(texte, /portions?\s+portions?/i);
   assert.match(texte, /composition à définir/);
 });

@@ -63,13 +63,13 @@ test('demanderPrecision : refus, HTTP 401 et réponse sans outil lèvent une err
 
 let dom;
 let magasin;
-let vueComposant;
+let vueFiche;
 let reglages;
 let fetchReel;
 before(async () => {
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
-  vueComposant = await import('../app/js/ui/vue-composant.js');
+  vueFiche = await import('../app/js/ui/vue-fiche.js');
   reglages = await import('../app/js/ui/assistant-reglages.js');
   fetchReel = globalThis.fetch;
 });
@@ -86,7 +86,7 @@ function fiche({ cle = true, categorie = 'a_preciser' } = {}) {
   magasin.remplacer(e);
   const appels = [];
   globalThis.fetch = async (url, options) => { appels.push(JSON.parse(options.body)); return reponseHttp(200, outil({ categorie: 'legume', remarque: 'accompagnement' })); };
-  const noeud = vueComposant.rendre(magasin.etat(), c.id);
+  const noeud = vueFiche.rendre(magasin.etat(), c.id);
   const bouton = (libelle, racine = noeud) => boutons(racine).find((b) => b.textContent === libelle);
   return { c, appels, bouton };
 }
@@ -168,7 +168,6 @@ test('champsApresProposition : un légume ou un féculent va au poste, les autre
 
 test('fiche technique : « Demander à l\'IA » apparaît une seule fois, hors du repli « Plus de réglages »', async () => {
   const { c } = fiche();
-  const vueFiche = await import('../app/js/ui/vue-fiche.js');
   const noeud = vueFiche.rendre(magasin.etat(), c.id);
   const ia = boutons(noeud).filter((b) => b.textContent === "Demander à l'IA");
   assert.equal(ia.length, 1);

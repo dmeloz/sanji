@@ -10,18 +10,18 @@ import { etatVide, h } from './aide.js';
 
 let dom;
 let magasin;
-let vueComposant;
+let vueFiche;
 before(async () => {
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
-  vueComposant = await import('../app/js/ui/vue-composant.js');
+  vueFiche = await import('../app/js/ui/vue-fiche.js');
 });
 after(() => dom.restaurer());
 
 const sauceDe = (e) => Object.values(e.composants).find((c) => c.categorie === 'sauce');
 
 function ouvrirPanneau(id) {
-  const noeud = vueComposant.rendre(magasin.etat(), id);
+  const noeud = vueFiche.rendre(magasin.etat(), id);
   return { noeud, bouton: boutons(noeud).find((b) => b.textContent === 'Choisir la sauce') };
 }
 

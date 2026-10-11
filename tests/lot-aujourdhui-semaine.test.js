@@ -8,6 +8,7 @@ import { installerFauxDom } from './aide-dom.js';
 import { creerFiche, definirMenu, definirPrevision } from '../app/js/domaine/actions.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h } from './aide.js';
+import { detailDuJour } from './aide-detail.js';
 
 let dom; let magasin; let aujourdhuiVue; let productionVue; let services; let detailVue; let fiches; let horsligne; let reglages;
 before(async () => {
@@ -196,7 +197,7 @@ test('fiche de fonction à menu fixe : pas de buffet, et la fiche dit « sans ob
   const e = mercrediAvecFiche('menu_fixe');
   magasin.remplacer(e);
   const f = Object.values(e.fiches)[0];
-  const jour = detailVue.rendre(e, S.mercredi);
+  const jour = detailDuJour(detailVue, e, S.mercredi);
   assert.equal(jour.tous((x) => x.balise === 'details' && /buffet-couvert/.test(x.className)).length, 0, 'rien dans la carte du détail');
   fiches.ouvrirFiche(f.id);
   const panneau = dom.corps.tous((x) => x.balise === 'dialog' && x.open).at(-1);
@@ -217,19 +218,6 @@ test('Aujourd\'hui, dimanche : « Prochaine production : lundi 12 » est un lien
   assert.equal(liens[0].textContent, 'lundi 12');
   assert.match(blocLot, /\.au-lien-prochaine \{[^}]*min-height: var\(--cible\)/);
 });
-
-// ---------------------------------------------------------------- 5. sombre
-
-const jetons = (bloc) => Object.fromEntries([...bloc.matchAll(/--([a-z0-9-]+):\s*(#[0-9A-Fa-f]{6})/g)].map((m) => [m[1], m[2]]));
-const luminance = (hex) => {
-  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
-  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-};
-const contraste = (a, b) => {
-  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
-  return (x + 0.05) / (y + 0.05);
-};
-
 
 test('CSS du lot : en fin de fichier, dans un bloc commenté, sans texte sous 13 px ni animation', () => {
   assert.ok(debutLot > 0 && blocLot.length > 0, 'bloc du lot présent');

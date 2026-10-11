@@ -105,8 +105,8 @@ export function jourVide(date) {
   return {
     date,
     menus: {
-      1: { intitule: '', transcriptionValidee: false, composantsValides: false },
-      2: { intitule: '', transcriptionValidee: false, composantsValides: false },
+      1: { intitule: '', transcriptionValidee: false },
+      2: { intitule: '', transcriptionValidee: false },
     },
     previsions: { 1: { portions: null, h: null }, 2: { portions: null, h: null } },
     creneaux: { avant_midi: null, apres_midi: null, avant_soir: null },

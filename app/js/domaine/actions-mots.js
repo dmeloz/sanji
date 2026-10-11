@@ -19,7 +19,7 @@ export function classer(etat, c, categorie, h) {
   modifierComposant(etat, c.id, champsPourMot(categorie, c.menu), h);
   // La mémoire du nom écrite par ce geste porte le mot : « Oublier » la retire, celle posée avant par la propriétaire reste.
   if (!existait && Object.hasOwn(etat.memoire, cle)) etat.memoire[cle].viaMot = motDe(c.nom);
-  appliquerSavoir(etat, etat.composants[c.id]);
+  appliquerSavoir(etat.composants[c.id]);
   delete etat.composants[c.id].suggestion;
 }
 

@@ -1,3 +1,5 @@
+> OBSOLÈTE : routes et onglets d'avant la refonte 1 ; voir `app/js/ui/routeur.js`.
+
 # Sanji v23 — Inventaire de l'existant (A-P0)
 
 Statut : inventaire de départ avant la refonte A (Tableau, Jour, Réglages), établi le 2026-10-04 par lecture du code et des écrans. Aucun comportement n'a été modifié. Les tests qui verrouillent cet inventaire sont dans `tests/non-regression-a-p0.test.js`. FAITS = lus dans le code ou observés ; PROPOSITIONS = destinations suggérées, à valider.

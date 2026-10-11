@@ -58,7 +58,7 @@ test('importer complète les champs absents', () => {
   const e = importer(minimal);
   assert.equal(e.jours['2026-10-05'].menus[1].intitule, 'INTITULE_TEST');
   assert.equal(e.jours['2026-10-05'].menus[1].transcriptionValidee, false);
-  assert.deepEqual(e.jours['2026-10-05'].menus[2], { intitule: '', transcriptionValidee: false, composantsValides: false });
+  assert.deepEqual(e.jours['2026-10-05'].menus[2], { intitule: '', transcriptionValidee: false });
   assert.deepEqual(e.jours['2026-10-05'].previsions, { 1: { portions: null, h: null }, 2: { portions: null, h: null } });
   assert.equal(e.fiches.f1.statut, 'active');
   assert.deepEqual(e.fiches.f1.repartition, { 1: 0, 2: 0 });

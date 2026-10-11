@@ -1,7 +1,6 @@
 // Réinitialiser une semaine à venir. Données TEST_ONLY.
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { etatVide, h } from './aide.js';
 import { creerFiche, definirMenu, definirPrevision } from '../app/js/domaine/actions.js';
 import { reinitialiserSemaine, semaineReinitialisable } from '../app/js/domaine/actions-semaine.js';

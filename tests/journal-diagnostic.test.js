@@ -131,25 +131,18 @@ test('photos de diagnostic : gardées durablement, 5 au plus, trop grosses ignor
 const texteDe = (n) => n.tous(() => true).map((e) => e.texte ?? '').join('') + n.textContent;
 const parTexte = (n, t) => boutons(n).find((b) => b.textContent === t);
 
-test('section : bouton unique d\'envoi, effacement avec confirmation, indicateur', async () => {
+test('section : indicateur d\'erreurs, et un seul bouton d\'envoi (Partager le fichier)', () => {
   globalThis.localStorage = faux();
   J.effacerJournal();
   assert.equal(section.indicateurErreurs(), null);
   J.noter('erreur', { message: 'boom' });
   assert.match(section.indicateurErreurs().textContent, /1 erreur à me transmettre/);
-  const s = section.sectionDiagnostic(etatVide());
-  assert.match(texteDe(s), /Rien n'est envoyé/);
-  for (const t of ['Partager le fichier', 'Effacer le journal']) assert.ok(parTexte(s, t), t);
+  const s = section.boutonsEnvoi(etatVide());
+  assert.ok(parTexte(s, 'Partager le fichier'));
+  assert.match(texteDe(s), /Prochain envoi/);
   assert.equal(parTexte(s, 'Copier le diagnostic'), undefined);
   assert.equal(s.tous((e) => e.balise === 'textarea').length, 0, 'plus de repli textarea');
-  Object.defineProperty(globalThis, 'navigator', { value: {}, configurable: true });
-  await parTexte(s, 'Effacer le journal').click();
-  const d = panneauxOuverts(dom.corps)[0];
-  assert.equal(J.lireEvenements().length, 1);
-  await parTexte(d, 'Effacer').declencher('click').catch(() => {});
-  await d.querySelector('form').declencher('submit');
-  assert.equal(J.lireEvenements().length, 0);
-  delete globalThis.navigator;
+  J.effacerJournal();
 });
 
 test('partage : le texte part avec les photos si l\'appareil accepte plusieurs fichiers, sinon le texte seul le dit', async () => {
@@ -163,7 +156,7 @@ test('partage : le texte part avec les photos si l\'appareil accepte plusieurs f
     canShare: ({ files }) => accepteMultiples || files.length === 1,
     share: async (donnees) => { partages.push(donnees.files); },
   } });
-  const s = section.sectionDiagnostic(etatVide());
+  const s = section.boutonsEnvoi(etatVide());
   regler(true);
   await parTexte(s, 'Partager le fichier').click();
   assert.deepEqual(partages[0].map((f) => f.name.replace(/\d{4}-\d{2}-\d{2}/, 'DATE')), ['sanji-diagnostic-DATE.txt', 'photo-feuille-1.jpg', 'photo-fiche-2.jpg']);

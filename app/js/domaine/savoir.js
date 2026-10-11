@@ -211,10 +211,9 @@ function etapesDeBase(f) {
  * famille, produitNom, role, type, etapes. Le grammage n'est jamais copié : il se résout au calcul (grammageEffectif).
  * La famille n'est retenue que si elle est compatible avec la catégorie du composant (une catégorie corrigée
  * par le chef l'emporte). Modifie et renvoie le composant.
- * @param {object} etat
  * @param {object} composant
  */
-export function appliquerSavoir(etat, composant) {
+export function appliquerSavoir(composant) {
   const c = composant;
   const lue = familleDe(c.nom) ?? familleDe(canonique(c.nom)); // « pdt » se lit comme « pomme de terre »
   const compatible = lue && (c.categorie === 'a_preciser' || c.categorie === lue.categorie) ? lue : null;

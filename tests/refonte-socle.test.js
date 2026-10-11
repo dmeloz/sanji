@@ -85,7 +85,7 @@ test('polices : fichiers embarqués, déclarés dans le CSS et dans le cache hor
   assert.match(css, /font-family: "Sanji Mono"; src: url\("\.\.\/polices\/IBMPlexMono-Medium\.woff2"\)/);
   assert.match(css, /--police-qte: "Sanji Mono", ui-monospace, monospace;/);
   assert.doesNotMatch(css, /https?:\/\//, 'aucune ressource en ligne');
-  for (const classe of ['quantite-grande', 'tache-quantite', 'mep-qte', 'produit-besoin', 'standard-valeur']) {
+  for (const classe of ['quantite-grande', 'tache-quantite', 'mep-qte', 'standard-valeur']) {
     assert.match(css, new RegExp(`\\.${classe} \\{[^}]*var\\(--police-qte\\)`), classe);
   }
 });

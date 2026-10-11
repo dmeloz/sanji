@@ -1,6 +1,6 @@
 // Vocabulaire fermé : identifiants techniques sans accent, libellés accentués pour l'écran.
 // Convention : la clé de chaque énumération est égale à sa valeur (PROVENANCE.CALCULE === 'CALCULE',
-// CERTITUDE.estimee === 'estimee').
+// CRENEAU.avant_midi === 'avant_midi').
 
 const enumeration = (valeurs) => Object.freeze(Object.fromEntries(valeurs.map((v) => [v, v])));
 
@@ -8,8 +8,6 @@ const enumeration = (valeurs) => Object.freeze(Object.fromEntries(valeurs.map((v
 // utilisée directement (décision du 2026-10-04). BASE_METIER_ESTIMATION : ancien nom, encore présent dans les données
 // enregistrées avant cette décision ; il se lit comme STANDARD_BASE.
 export const PROVENANCE = enumeration(['RESTAURANT_VALIDE', 'STANDARD_BASE', 'BASE_METIER_ESTIMATION', 'SAISI_SERVICE', 'CALCULE', 'INCONNU']);
-export const CERTITUDE = enumeration(['estimee', 'provisoire', 'confirmee']);
-export const ETAT_TACHE = enumeration(['a_preciser', 'a_planifier', 'a_faire', 'en_cours', 'fait', 'ecart']);
 export const CRENEAU = enumeration(['avant_midi', 'apres_midi', 'avant_soir']);
 export const ETAT_CRENEAU = enumeration(['libre', 'charge', 'indisponible']);
 export const CHARGE = enumeration(['courte', 'moyenne', 'longue']);

@@ -11,7 +11,7 @@ import {
   appliquerSavoir, cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes,
 } from '../app/js/domaine/savoir.js';
 import { tableauBlanc } from '../app/js/domaine/tableau-blanc.js';
-import { JEU_REPERES as R, JEU_STANDARDS as ST } from './jeux/TEST_ONLY-savoir.js';
+import { JEU_REPERES as R } from './jeux/TEST_ONLY-savoir.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h, prevision } from './aide.js';
 
@@ -24,7 +24,7 @@ test('clé de standard de catégorie : « groupe: » suivi de la clé du groupe'
 
 test('portion : la famille avant la catégorie, la catégorie avant la base, la correction du plat avant tout', () => {
   const etat = etatInitial();
-  const c = appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'feculent' }));
+  const c = appliquerSavoir(composant({ nom: 'riz', categorie: 'feculent' }));
   const reperes = [R.groupeCereales];
   assert.equal(grammageEffectif(etat, c, reperes).origine, 'standard_base');
 
@@ -54,13 +54,13 @@ test('portion : la famille avant la catégorie, la catégorie avant la base, la 
 test('une famille ne prend jamais le standard d\'une autre catégorie', () => {
   const etat = etatInitial();
   etat.standards = { [cleStandardGroupe('legumes')]: { garniture: std(120, 'cru_net') } };
-  const c = appliquerSavoir(etat, composant({ nom: 'riz', categorie: 'feculent' }));
+  const c = appliquerSavoir(composant({ nom: 'riz', categorie: 'feculent' }));
   assert.equal(grammageEffectif(etat, c, []), null);
 });
 
 test('légume sans famille : il prend le standard « Légumes » s\'il existe, sinon aucune portion inventée', () => {
   const etat = etatInitial();
-  const c = appliquerSavoir(etat, composant({ nom: 'tomates', categorie: 'legume' }));
+  const c = appliquerSavoir(composant({ nom: 'tomates', categorie: 'legume' }));
   assert.equal(c.famille, null);
   assert.equal(grammageEffectif(etat, c, []), null, 'rien de réglé : pas de poids');
   etat.standards = { [cleStandardGroupe('legumes')]: { garniture: std(120, 'cru_net') } };
@@ -69,7 +69,7 @@ test('légume sans famille : il prend le standard « Légumes » s\'il existe, s
     source: 'standard maison de la catégorie « Légumes »', origine: 'standard',
   });
   // Un féculent sans famille (gnocchis…) n'a pas de catégorie de portion : rien n'est deviné.
-  const g = appliquerSavoir(etat, composant({ nom: 'gnocchi', categorie: 'feculent' }));
+  const g = appliquerSavoir(composant({ nom: 'gnocchi', categorie: 'feculent' }));
   assert.equal(grammageEffectif(etat, g, []), null);
   // Une préparation maison reste en quantité finie : un standard en cru net ne lui est pas appliqué.
   c.type = 'preparation_maison';
@@ -135,7 +135,7 @@ test('calcul : un légume sans famille chiffré par le standard de catégorie, s
 test('tableau : un légume sans famille et sans standard est une portion à régler dans « Légumes »', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 2, 'poulet, tomates', h());
-  const ligne = (tb) => tb.contexte.lignes.find((l) => /portion/.test(l.texte) && /régler/.test(l.texte));
+  const ligne = (tb) => tb.bord.production.chiffrage.find((l) => /portion/.test(l.texte) && /régler/.test(l.texte));
   const avant = ligne(tableauBlanc(e, S.lundi));
   assert.ok(avant, 'la portion à régler est signalée');
   assert.match(avant.detail, /Légumes en garniture/);

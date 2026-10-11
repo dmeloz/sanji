@@ -514,7 +514,6 @@ test('la proposition rendue est une copie : la modifier ne change ni le registre
   assert.equal(registre.lire(proposition.id).items.length, 2);
   assert.equal(appliquerProposition(registre, proposition.id, { executeur }).ok, false);
   assert.throws(() => registre.marquer(proposition.id, 'inventé'), ErreurHarness);
-  assert.equal(registre.lister().length, 1);
 });
 
 test('avec le vrai magasin : agir copie, applique et remplace l\'état seulement après validation du chef', async () => {

@@ -5,9 +5,7 @@ import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { ajusterStandard } from '../app/js/domaine/actions-ajustements.js';
-import { definirMenu } from '../app/js/domaine/actions.js';
-import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { etatVide, h, prevision } from './aide.js';
+import { etatVide, h } from './aide.js';
 
 let dom;
 let magasin;

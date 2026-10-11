@@ -1,81 +1,30 @@
-// Tableau blanc : ce que l'écran d'accueil affiche, et la note du contexte (« que dois-je savoir maintenant »).
+// Tableau blanc : ce que l'écran d'accueil et le tableau de la semaine affichent.
 // Aucune règle métier propre : le module assemble les fonctions du domaine. Ni DOM ni heure courante.
 
 import { proposerComposants } from './analyse-menu.js';
 import { propositionsApprentissage } from './apprentissage.js';
-import { calculerComposant, formaterQuantite, portionsMenu } from './calcul.js';
+import { portionsMenu } from './calcul.js';
 import { couvertsMidiDuJour, ventesASaisir } from './couverts-midi.js';
 import { decisionsDe } from './decisions.js';
-import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, libelleJour, lundiDe } from './dates.js';
+import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, lundiDe } from './dates.js';
 import { jourOuVide, normaliser } from './etat.js';
-import { avancesPossibles, cibleProduction, etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
+import { etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
 import { rappelCloture } from './cloture.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
 import { besoinsProduits, echeanceCommande, suiviProduit } from './produits.js';
 import { cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes } from './savoir.js';
 
-/** Ordre d'affichage d'une mise en place : ce qui demande une action d'abord, ce qui est prêt à la fin. */
-export const ORDRE_SYMBOLES = Object.freeze(['a_decider', 'a_faire', 'en_cours', 'non_couvert', 'pret']);
-
-const LIGNES_MAX = 6;
-// Points déjà dits une fois dans la note du contexte : ils ne sont pas répétés jour par jour sur le tableau.
-const POINTS_DITS_DANS_LA_NOTE = new Set(['grammage', 'prevision_manquante']);
-
 /**
- * Décisions de la feuille du jour sans doublon : une tâche seulement « à planifier » déjà proposée dans
- * « À avancer si possible » n'est pas répétée dans les décisions.
+ * Reste-t-il une tâche à faire ou à contrôler ce jour-là ? Tâches = productions principales et compléments dont le
+ * service est ce jour ; « prête » = faite et le besoin couvert.
  */
-export function decisionsSansDoublon(feuille) {
-  const aAvancer = new Set(feuille.aAvancer.map((a) => a.productionId));
-  return feuille.decisions.filter((t) => !(t.motif === 'a_planifier' && aAvancer.has(t.productionId)));
-}
-
-/**
- * Symbole d'une tâche. Seul un écart à arbitrer est « à décider » : une tâche pas encore planifiée ou sans
- * quantité reste « à faire », l'application ne demande pas de décision pour cela.
- */
-function symboleDe(etat, production, etatDeLaTache) {
-  if (etatDeLaTache === 'ecart') return 'a_decider';
-  if (etatDeLaTache === 'en_cours') return 'en_cours';
-  if (etatDeLaTache === 'fait') {
-    const evaluation = evaluationProduction(etat, production.id);
-    return evaluation && !evaluation.couvre ? 'non_couvert' : 'pret';
-  }
-  return 'a_faire';
-}
-
-/** Quantité affichée d'une tâche : le réel si elle est faite, sinon la cible ; null si rien n'est calculable. */
-function quantiteDe(etat, production) {
-  const unite = production.unite ?? calculerComposant(etat, production.composantId).uniteTravail;
-  if (production.etat === 'fait' && Number.isFinite(production.quantiteReelle)) return formaterQuantite(production.quantiteReelle, unite);
-  const cible = cibleProduction(etat, production.id);
-  return Number.isFinite(cible) && unite ? formaterQuantite(cible, unite) : null;
-}
-
-/** Tâches (productions principales et compléments) dont le service est ce jour-là. */
-function miseEnPlace(etat, date) {
-  const taches = [];
-  for (const p of Object.values(etat.productions ?? {})) {
-    if ((p.genre !== 'principale' && p.genre !== 'complement') || p.dateService !== date) continue;
-    const composant = etat.composants?.[p.composantId];
-    if (!composant) continue;
-    const etatDeLaTache = etatTache(etat, p.id);
-    taches.push({
-      productionId: p.id, composantId: composant.id, genre: p.genre,
-      nom: p.genre === 'complement' ? `Complément : ${composant.nom}` : composant.nom,
-      quantite: quantiteDe(etat, p), etat: etatDeLaTache, symbole: symboleDe(etat, p, etatDeLaTache),
-      planifiee: Boolean(p.jourDecide),
-    });
-  }
-  taches.sort((a, b) => ORDRE_SYMBOLES.indexOf(a.symbole) - ORDRE_SYMBOLES.indexOf(b.symbole));
-  return taches;
-}
-
-function compter(taches) {
-  const compte = Object.fromEntries(ORDRE_SYMBOLES.map((s) => [s, 0]));
-  for (const t of taches) compte[t.symbole] += 1;
-  compte.total = taches.length;
-  return compte;
+function resteDuTravail(etat, date) {
+  return Object.values(etat.productions ?? {}).some((p) => {
+    if ((p.genre !== 'principale' && p.genre !== 'complement') || p.dateService !== date || !etat.composants?.[p.composantId]) return false;
+    if (etatTache(etat, p.id) !== 'fait') return true;
+    const evaluation = evaluationProduction(etat, p.id);
+    return Boolean(evaluation) && !evaluation.couvre;
+  });
 }
 
 /** L'intitulé découpé en ses composants, pour montrer ce qui est au poste et ce qui ne l'est pas. */
@@ -90,25 +39,7 @@ function morceauxDuMenu(etat, date, menu, intitule) {
   });
 }
 
-function groupesDuJour(etat, date) {
-  return Object.values(etat.fiches ?? {})
-    .filter((f) => f.statut === 'active' && f.date === date)
-    .sort((a, b) => String(a.service).localeCompare(String(b.service)) || String(a.horaire).localeCompare(String(b.horaire)))
-    .map((f) => ({
-      id: f.id, numero: f.numero, service: f.service, couverts: f.couverts, horaire: f.horaire,
-      aAllergies: String(f.allergies ?? '').trim() !== '',
-    }));
-}
-
-/**
- * Points à confirmer d'un jour qui méritent d'être écrits sur le tableau : ceux que la note dit déjà une fois
- * (portions, prévisions) n'y sont pas répétés.
- */
-function pointsDuJour(etat, date) {
-  return pointsAConfirmer(etat, date).filter((p) => !POINTS_DITS_DANS_LA_NOTE.has(p.type));
-}
-
-function jourDuTableau(etat, date, aujourdhui, deplie) {
+function jourDuTableau(etat, date, aujourdhui) {
   const jour = jourOuVide(etat, date);
   const aMenu = aMenuDuJour(date);
   const menus = aMenu ? [1, 2].map((menu) => {
@@ -118,20 +49,18 @@ function jourDuTableau(etat, date, aujourdhui, deplie) {
     return {
       menu, intitule, saisi: intitule !== '',
       // Un élément implicite (sauce ou base « à confirmer ») n'est pas écrit dans l'intitulé : jamais compté comme un plat.
-      morceaux, nbPlats: morceaux.filter((m) => !m.implicite).length,
+      morceaux,
       // Sans prévision ni groupe, aucun chiffre : un « 0 » laisserait croire à zéro portion.
       couverts: portions.total > 0 || !portions.previsionManquante ? Math.round(portions.total) : null,
       previsionASaisir: intitule !== '' && portions.previsionManquante,
       provisoires: portions.groupesProvisoires > 0,
     };
   }) : [];
-  const taches = miseEnPlace(etat, date);
   return {
-    date, estAujourdhui: date === aujourdhui, aMenu, deplie,
-    menus, groupes: groupesDuJour(etat, date), miseEnPlace: taches, compte: compter(taches),
+    date, estAujourdhui: date === aujourdhui, aMenu,
+    menus, nbFiches: Object.values(etat.fiches ?? {}).filter((f) => f.statut === 'active' && f.date === date).length,
     // Couverts du jour : somme des menus chiffrés ; null quand aucun menu n'a de chiffre (jamais un « 0 » inventé).
     couvertsTotal: menus.some((m) => m.couverts !== null) ? menus.reduce((n, m) => n + (m.couverts ?? 0), 0) : null,
-    nbPoints: pointsDuJour(etat, date).length,
   };
 }
 
@@ -170,45 +99,6 @@ function joursSansPrevision(etat, dates) {
     const portions = portionsMenu(etat, date, menu);
     return saisi && portions.previsionManquante && portions.total === 0;
   }));
-}
-
-const ligneTache = (t) => ({
-  genre: 'tache', texte: t.nom, quantite: t.quantite, detail: null,
-  symbole: t.symbole, lien: `#/fiche/${t.composantId}`,
-});
-
-function ligneAvance(a) {
-  const ev = a.evaluation;
-  const jours = ev.jours <= 1 ? `${ev.jours} jour d'avance` : `${ev.jours} jours d'avance`;
-  const suite = ev.conservation === 'a_confirmer' ? 'conservation à confirmer'
-    : ev.conservation === 'depassee' ? 'limite maison dépassée' : null;
-  return {
-    genre: 'avance', texte: `${a.nom}, pour ${libelleJour(a.dateService)}`,
-    detail: suite ? `${jours}, ${suite}` : jours,
-    quantite: Number.isFinite(a.cible) && a.unite ? formaterQuantite(a.cible, a.unite) : null,
-    symbole: 'a_faire', lien: `#/fiche/${a.composantId}`,
-  };
-}
-
-/**
- * Lignes d'avance : seules les avances autorisées et chiffrées sont proposées. Celles qui demanderaient une règle
- * de préparation validée sont résumées en une ligne, sans alarme.
- */
-function lignesAvances(avances, aucune) {
-  const chiffrees = avances.filter((a) => Number.isFinite(a.cible));
-  const autorisees = chiffrees.filter((a) => a.evaluation.autorisee);
-  const horsRegle = chiffrees.length - autorisees.length;
-  const lignes = autorisees.map(ligneAvance);
-  if (horsRegle > 0) {
-    lignes.push({
-      genre: 'info', lien: '#/reglages',
-      texte: horsRegle === 1
-        ? "1 préparation pourrait être avancée dès aujourd'hui avec une règle de préparation validée."
-        : `${horsRegle} préparations pourraient être avancées dès aujourd'hui avec une règle de préparation validée.`,
-    });
-  }
-  if (lignes.length === 0) lignes.push({ genre: 'info', texte: aucune });
-  return lignes;
 }
 
 function semaineSansMenu(etat, lundi) {
@@ -258,87 +148,17 @@ function besoinsDe(etat, semaine) {
   return { lignes, action };
 }
 
-/** La note du contexte : ce qu'il faut savoir maintenant, et une seule action principale. */
-function contexteDe(etat, aujourdhui) {
-  const numeroJour = jourSemaine(aujourdhui);
+/**
+ * Semaine désignée par défaut : le week-end, et le vendredi une fois le travail du jour terminé, la semaine suivante.
+ * `vide` : aucun menu saisi cette semaine (du lundi au jeudi, sans travail restant).
+ */
+function semaineParDefaut(etat, aujourdhui) {
   const lundi = lundiDe(aujourdhui);
-  const lundiSuivant = ajouterJours(lundi, 7);
-  const feuille = estOuvert(aujourdhui) ? feuilleDuJour(etat, aujourdhui) : null;
-  const tachesDuJour = aMenuDuJour(aujourdhui) ? miseEnPlace(etat, aujourdhui) : [];
-  const resteAFaire = tachesDuJour.filter((t) => t.symbole !== 'pret');
-  const arbitrages = feuille ? decisionsSansDoublon(feuille).filter((d) => d.motif === 'ecart') : [];
-  const lignes = [];
-  let type;
-  let titre;
-  let action;
-  let semaine = lundi;
-
-  if (resteAFaire.length > 0) {
-    type = 'service';
-    titre = 'Avant le service de midi';
-    lignes.push(...resteAFaire.map(ligneTache));
-    const prets = tachesDuJour.length - resteAFaire.length;
-    if (prets > 0) lignes.push({ genre: 'info', texte: prets === 1 ? '1 tâche prête' : `${prets} tâches prêtes`, symbole: 'pret' });
-    action = { libelle: 'Ouvrir la feuille du jour', lien: `#/production/${aujourdhui}` };
-    lignes.push(...besoinsDe(etat, lundi).lignes);
-  } else if (numeroJour >= 5) {
-    type = 'semaine_prochaine';
-    titre = numeroJour === 7 ? "Fermé aujourd'hui" : 'Semaine prochaine';
-    semaine = lundiSuivant;
-    if (semaineSansMenu(etat, lundiSuivant)) {
-      lignes.push({ genre: 'info', texte: 'Les menus de la semaine prochaine ne sont pas saisis.' });
-      action = { libelle: 'Saisir les menus de la semaine', lien: `#/import/${lundiSuivant}` };
-    } else {
-      const besoins = besoinsDe(etat, lundiSuivant);
-      lignes.push(...besoins.lignes);
-      if (numeroJour !== 7) {
-        const limite = ajouterJours(lundiSuivant, 1); // lundi et mardi
-        const avances = avancesPossibles(etat, aujourdhui).filter((a) => a.dateService >= lundiSuivant && a.dateService <= limite);
-        if (avances.some((a) => Number.isFinite(a.cible)) || besoins.lignes.length === 0) {
-          lignes.push(...lignesAvances(avances, 'Rien à avancer pour lundi et mardi pour le moment.'));
-        }
-      }
-      action = besoins.action ?? (numeroJour === 7
-        ? { libelle: 'Voir la feuille de lundi', lien: `#/production/${lundiSuivant}` }
-        : { libelle: 'Ouvrir la feuille du jour', lien: `#/production/${aujourdhui}` });
-    }
-  } else if (semaineSansMenu(etat, lundi)) {
-    type = 'vide';
-    titre = 'Aucun menu saisi cette semaine';
-    lignes.push({ genre: 'info', texte: 'Saisissez les menus de la semaine : le tableau se remplit seul.' });
-    action = { libelle: 'Saisir les menus de la semaine', lien: `#/import/${lundi}` };
-  } else {
-    type = 'apres_service';
-    titre = 'Après le service';
-    const besoins = besoinsDe(etat, lundi);
-    lignes.push(...besoins.lignes);
-    const avances = feuille ? feuille.aAvancer : [];
-    if (avances.some((a) => Number.isFinite(a.cible)) || besoins.lignes.length === 0) {
-      lignes.push(...lignesAvances(avances, 'Rien à avancer pour le moment.'));
-    }
-    if (numeroJour === 2) lignes.push({ genre: 'info', texte: 'Revue de mi-semaine : préparations de mercredi à vendredi.' });
-    action = besoins.action ?? { libelle: 'Ouvrir la feuille du jour', lien: `#/production/${aujourdhui}` };
-  }
-
-  if (arbitrages.length > 0) {
-    lignes.push({
-      genre: 'decision', symbole: 'a_decider', lien: `#/production/${aujourdhui}`,
-      texte: arbitrages.length === 1 ? '1 écart à arbitrer' : `${arbitrages.length} écarts à arbitrer`,
-    });
-  }
-  for (const point of pointsGlobaux(etat)) {
-    lignes.push({ genre: 'besoin', symbole: 'a_faire', lien: '#/reglages', texte: point.texte });
-  }
-  const visibles = lignes.slice(0, LIGNES_MAX);
-  return { type, titre, date: aujourdhui, lignes: visibles, autres: lignes.length - visibles.length, action, semaine };
+  if (aMenuDuJour(aujourdhui) && resteDuTravail(etat, aujourdhui)) return { semaine: lundi, vide: false };
+  if (jourSemaine(aujourdhui) >= 5) return { semaine: ajouterJours(lundi, 7), vide: false };
+  return { semaine: lundi, vide: semaineSansMenu(etat, lundi) };
 }
 
-/**
- * Données du tableau blanc (voir conception, section 16).
- * @param {object} etat
- * @param {string} aujourdhui AAAA-MM-JJ
- * @param {string} [lundiAffiche] force la semaine affichée (navigation) ; sinon la semaine que le contexte désigne
- */
 const JOURS_AVANT_RAPPEL = 7;
 
 /**
@@ -383,7 +203,7 @@ function menusDuBord(jours, aujourdhui) {
   const depart = dansLaSemaine && aVenir.length > 0 ? aVenir : (!dansLaSemaine && saisis.length > 0 ? saisis : avecMenu);
   const visibles = depart.slice(0, MENUS_VISIBLES);
   const reste = avecMenu.filter((j) => !visibles.includes(j));
-  const aucunMenu = !avecMenu.some((j) => j.menus.some((m) => m.saisi)) && jours.every((j) => j.groupes.length === 0);
+  const aucunMenu = !avecMenu.some((j) => j.menus.some((m) => m.saisi)) && jours.every((j) => j.nbFiches === 0);
   return { visibles, reste, aucunMenu };
 }
 
@@ -488,13 +308,13 @@ function productionDuBord(etat, aujourdhui, lundi) {
   };
 }
 
-function bordDe(etat, aujourdhui, lundi, jours, contexte, rappel) {
+function bordDe(etat, aujourdhui, lundi, jours, aucunMenuCetteSemaine, rappel) {
   const datesSemaine = jours.map((j) => j.date);
   const aVenir = datesSemaine.includes(aujourdhui) ? datesSemaine.filter((d) => d >= aujourdhui) : datesSemaine;
   return {
     entete: {
       date: aujourdhui, semaine: numeroSemaine(lundi), lundi, lienJour: `#/production/${aujourdhui}`, sauvegarde: rappel,
-      aucunMenuCetteSemaine: contexte.type === 'vide',
+      aucunMenuCetteSemaine,
     },
     menus: menusDuBord(jours, aujourdhui),
     fiches: fichesDuBord(etat, aVenir, lundi),
@@ -503,26 +323,25 @@ function bordDe(etat, aujourdhui, lundi, jours, contexte, rappel) {
   };
 }
 
+/**
+ * Données du tableau blanc (voir conception, section 16).
+ * @param {object} etat
+ * @param {string} aujourdhui AAAA-MM-JJ
+ * @param {string} [lundiAffiche] force la semaine affichée (navigation) ; sinon la semaine par défaut
+ */
 export function tableauBlanc(etat, aujourdhui, lundiAffiche) {
-  const contexte = contexteDe(etat, aujourdhui);
+  const defaut = semaineParDefaut(etat, aujourdhui);
   const rappel = rappelSauvegarde(etat, aujourdhui);
-  if (rappel) contexte.lignes.push(rappel);
-  const lundi = lundiAffiche ? lundiDe(lundiAffiche) : contexte.semaine;
-  // Le jour déplié : aujourd'hui s'il est dans la semaine affichée et ouvert, sinon le premier jour à menu saisi.
+  const lundi = lundiAffiche ? lundiDe(lundiAffiche) : defaut.semaine;
   const dates = [0, 1, 2, 3, 4, 5].map((i) => ajouterJours(lundi, i));
-  let deplie = dates.includes(aujourdhui) ? aujourdhui : null;
-  if (!deplie) {
-    deplie = dates.find((d) => [1, 2].some((m) => String(jourOuVide(etat, d).menus[m]?.intitule ?? '').trim() !== '')) ?? dates[0];
-  }
-  const joursDuTableau = dates.map((date) => jourDuTableau(etat, date, aujourdhui, date === deplie));
+  const joursDuTableau = dates.map((date) => jourDuTableau(etat, date, aujourdhui));
   return {
     date: aujourdhui,
     lundi,
-    bord: bordDe(etat, aujourdhui, lundi, joursDuTableau, contexte, rappel),
+    bord: bordDe(etat, aujourdhui, lundi, joursDuTableau, defaut.vide, rappel),
     estSemaineCourante: lundi === lundiDe(aujourdhui),
     semainePrecedente: ajouterJours(lundi, -7),
     semaineSuivante: ajouterJours(lundi, 7),
-    contexte,
     jours: joursDuTableau,
     pointsGlobaux: pointsGlobaux(etat),
   };
@@ -694,6 +513,7 @@ export function aujourdhuiDe(etat, aujourd, heure = null) {
   const ouvert = estOuvert(aujourd);
   const feuille = ouvert ? feuilleDuJour(etat, aujourd) : null;
   const datesSemaine = [0, 1, 2, 3, 4, 5].map((i) => ajouterJours(lundi, i)).filter((d) => d >= aujourd);
+  const ficheProche = prochaineFiche(etat, aujourd);
   return {
     date: aujourd, lundi, ouvert,
     // Jour fermé : la prochaine journée ouverte (information seule, aucun calcul de production).
@@ -708,9 +528,8 @@ export function aujourdhuiDe(etat, aujourd, heure = null) {
     avancementJour: avancementDuJour(feuille),
     decisions: aConfirmerDuBord(etat, datesSemaine, aujourd),
     aConsommer: aConsommerDe(etat, aujourd),
-    prochaineFiche: prochaineFiche(etat, aujourd),
     // Fiche de fonction du tableau de bord : seulement si elle tombe aujourd'hui ou demain.
-    ficheProche: (() => { const f = prochaineFiche(etat, aujourd); return f && f.date <= ajouterJours(aujourd, 1) ? f : null; })(),
+    ficheProche: ficheProche && ficheProche.date <= ajouterJours(aujourd, 1) ? ficheProche : null,
     production: productionDuBord(etat, aujourd, lundi),
     sauvegarde: rappelSauvegarde(etat, aujourd),
     semaineSansMenu: semaineSansMenu(etat, lundi),
