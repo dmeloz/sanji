@@ -196,7 +196,7 @@ test('Prochaine : une fois tout fait, la carte le dit et ne propose plus rien', 
   assert.equal(boutons(carte).length, 0);
 });
 
-test('décisions : « À confirmer · N » compte comme la feuille « À décider », « Tout voir » l\'ouvre ; les lignes restent des liens', () => {
+test('décisions : « À confirmer · N » compte comme la feuille « À décider », « Tout voir » l\'ouvre ; chaque ligne a son geste ou « Décider »', () => {
   const e = mercredi();
   creerFiche(e, { numero: 'F_LIBRE', date: S.mercredi, service: 'midi', horaire: '12:30', couverts: 6, mode: 'choix_libre', repartition: { 1: 4, 2: 2 } }, h());
   const d = aujourdhuiDe(e, S.mercredi);
@@ -206,8 +206,8 @@ test('décisions : « À confirmer · N » compte comme la feuille « À décide
   assert.ok(carte, 'carte « À confirmer » présente');
   assert.match(carte.textContent, new RegExp(`À confirmer · ${aDate(S.mercredi, () => decisionsDe(e, S.mercredi).total)}`));
   assert.ok(classes(carte, 'au-ligne').length <= 3, 'trois lignes au plus');
-  // Chaque ligne reste un lien (ou un bouton pour une proposition) : rien n'a disparu.
-  assert.ok(hrefs(carte).some((x) => x.startsWith('#/production/')));
+  // Une ligne = un titre et ses boutons (geste d'un toucher ou « Décider ») : rien n'est un simple lien.
+  for (const ligne of classes(carte, 'au-ligne')) assert.ok(boutons(ligne).length > 0);
   globalThis.location.hash = '#/aujourdhui';
   aDate(S.mercredi, () => parTexte(carte, /Tout voir/).click());
   assert.ok(dom.corps.tous((x) => x.balise === 'dialog' && x.open).length >= 1, 'la feuille « À décider » s\'ouvre');
@@ -297,7 +297,7 @@ test('les zones de l\'ancien tableau restent accessibles : Semaine, Production, 
   assert.ok(liens.includes(`#/import/${S.lundi}`));
 });
 
-test('une proposition d\'apprentissage garde son bouton dans « À confirmer » (ouvre sa feuille)', async () => {
+test('une proposition d\'apprentissage garde ses boutons Oui / Non dans « À confirmer »', async () => {
   const { composantVide } = await import('../app/js/domaine/etat.js');
   const e = calme(etatVide());
   [['2026-10-01', 80], ['2026-10-02', 90], ['2026-10-05', 86]].forEach(([date, valeur], i) => {
@@ -306,10 +306,9 @@ test('une proposition d\'apprentissage garde son bouton dans « À confirmer » 
   });
   const p = page(S.lundi, e);
   assert.match(classes(p, 'tdb-confirmer')[0].textContent, /À confirmer · 1/);
-  const bouton = parTexte(classes(p, 'tdb-confirmer')[0], /Vous corrigez souvent riz/);
-  assert.ok(bouton);
-  aDate(S.lundi, () => bouton.click());
-  assert.ok(dom.corps.tous((x) => x.balise === 'dialog' && x.open).length >= 1, 'la feuille de validation s\'ouvre');
+  const ligne = classes(classes(p, 'tdb-confirmer')[0], 'au-ligne')[0];
+  assert.match(ligne.textContent, /Vous corrigez souvent riz/);
+  assert.ok(parTexte(ligne, /^Oui$/) && parTexte(ligne, /^Non$/), 'geste d\'un toucher : Oui ou Non');
   dom.corps.tous((x) => x.balise === 'dialog').forEach((d) => d.remove());
 });
 

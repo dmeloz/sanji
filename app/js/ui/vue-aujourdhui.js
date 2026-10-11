@@ -17,7 +17,7 @@ import { lien, pastille } from './elements.js';
 import { ouvrirCouvertsMidi, ouvrirVentesMidi } from './feuille-couverts.js';
 import { ouvrirDecisions } from './feuille-decisions.js';
 import { ouvrirCloture } from './feuille-cloture.js';
-import { ouvrirProposition } from './feuille-validation.js';
+import { boutonsGestes, titreCarte } from './geste-rapide.js';
 import { problemeHorsLigne } from './horsligne.js';
 import { pluriel, qteNoeuds, quantite } from './format.js';
 import { faireEnUnToucher } from './taches.js';
@@ -125,25 +125,27 @@ function sectionAAvancer(d, aujourd) {
 
 // ------------------------------------------------------------------ à confirmer
 
-function ligneAConfirmer(l) {
-  const contenu = [h('span', { classe: 'au-confirmer-mot' }, 'à décider'), h('span', { classe: 'au-confirmer-texte' }, l.texte,
-    l.detail ? h('span', { classe: 'au-sous' }, l.detail) : null)];
-  if (l.proposition) {
-    return h('li', null, h('button', { type: 'button', classe: 'au-ligne au-ligne-bouton', onClick: () => ouvrirProposition(l.proposition) }, contenu));
-  }
-  return h('li', null, h('a', { href: l.lien, classe: 'au-ligne' }, contenu));
+const LIGNES_A_CONFIRMER = 3;
+
+/** Une décision : son titre, puis son geste d'un toucher quand il est sûr, sinon « Décider » (ouvre la feuille « À décider »). */
+function ligneAConfirmer(carte, etat) {
+  const gestes = boutonsGestes(etat, carte);
+  return h('li', null, h('div', { classe: 'au-ligne au-ligne-geste' },
+    h('span', { classe: 'au-confirmer-mot' }, 'à décider'),
+    h('span', { classe: 'au-confirmer-texte' }, titreCarte(carte, etat)),
+    h('span', { classe: 'geste-rapide-groupe' },
+      gestes.length > 0 ? gestes : h('button', { type: 'button', classe: 'btn geste-rapide', 'aria-label': `Décider : ${titreCarte(carte, etat)}`, onClick: () => ouvrirDecisions() }, 'Décider'))));
 }
 
-/** « À confirmer · N » : même compte que la feuille « À décider » (`decisionsDe`) ; trois lignes au plus, « Tout voir » ouvre la feuille. */
-function sectionAConfirmer(d, feuille) {
-  const { total } = feuille;
+/** « À confirmer · N » : le total ET les lignes viennent de `decisionsDe` (les cartes de la feuille « À décider ») ; trois lignes au plus, « Tout voir » ouvre la feuille. */
+function sectionAConfirmer(etat, feuille) {
+  const { total, cartes } = feuille;
   if (total === 0) return null;
-  const { lignes } = d.decisions;
   return h('section', { classe: 'tdb-confirmer', 'aria-label': 'À confirmer' },
     h('div', { classe: 'tdb-tete' },
       h('h2', { classe: 'tdb-confirmer-titre' }, icone(['M12 3l10 18H2z', 'M12 10v5M12 18v.5']), `À confirmer · ${total}`),
       h('button', { type: 'button', classe: 'au-lien-court tdb-tout-voir', onClick: () => ouvrirDecisions() }, 'Tout voir ›')),
-    lignes.length > 0 ? h('ul', { classe: 'au-lignes' }, lignes.map(ligneAConfirmer)) : null);
+    h('ul', { classe: 'au-lignes' }, cartes.slice(0, LIGNES_A_CONFIRMER).map((c) => ligneAConfirmer(c, etat))));
 }
 
 // ------------------------------------------------------------------ prochaine fiche de fonction
@@ -241,7 +243,7 @@ export function rendre(etat) {
   const donnees = aujourdhuiDe(etat, aujourd, maintenant().slice(11, 16));
   const racine = h('div', { classe: 'vue vue-aujourdhui' });
   const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), carteProchaine(donnees, aujourd, etat), carteCloture(donnees),
-    sectionAAvancer(donnees, aujourd), carteFiche(donnees, aujourd, etat), sectionAConfirmer(donnees, decisionsDe(etat, aujourd)), sectionRappels(donnees, preparationSemaine(etat, donnees.lundi, aujourd).aFaire)];
+    sectionAAvancer(donnees, aujourd), carteFiche(donnees, aujourd, etat), sectionAConfirmer(etat, decisionsDe(etat, aujourd)), sectionRappels(donnees, preparationSemaine(etat, donnees.lundi, aujourd).aFaire)];
   for (const m of morceaux) if (m) racine.appendChild(m);
   return racine;
 }

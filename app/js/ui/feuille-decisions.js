@@ -4,14 +4,14 @@
 // valeur. Une quantité absente n'est jamais une décision. Aucune logique métier ici. La feuille se met à jour sur place quand l'état
 // change (une décision prise disparaît) et reste ouverte jusqu'à « OK » ; vide : « Tout est réglé ». Fermeture au bouton et à Échap, focus rendu à l'appelant.
 
-import { ecarterApprentissage } from '../domaine/actions-apprentissage.js';
 import { libelleJour } from '../domaine/dates.js';
 import { decisionsDe } from '../domaine/decisions.js';
-import { abonner, agir, aujourdhui, etat as etatCourant } from '../magasin.js';
+import { abonner, aujourdhui, etat as etatCourant } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { dialogRepartition } from './fiches.js';
 import { ouvrirProposition, ouvrirValidations, texteFourchette } from './feuille-validation.js';
 import { qteNoeuds, quantite } from './format.js';
+import { boutonsGestes, texteRepartition } from './geste-rapide.js';
 import { panneau } from './panneau.js';
 import { dialogCorriger, dialogDecider, dialogPlanifier } from './taches.js';
 import { dialogAllergenes, dialogChoisirSauce, dialogModifier, texteObstacleAllergenes } from './vue-composant.js';
@@ -32,7 +32,9 @@ function icone(chemins, classe = 'dec-icone', taille = 16) {
 
 /** Une carte : étiquette (mot écrit + icône), titre, détail, un ou deux gestes. `fermer` ferme la feuille avant un changement de page. */
 /** `valeurs` : toutes les valeurs à valider de la feuille, pour le parcours « une par une » (la valeur touchée d'abord). */
-function carte(c, fermer, valeurs = []) {
+function carte(c, fermer, valeurs = [], etat = etatCourant()) {
+  // Geste d'un toucher quand il est sûr (geste-rapide.js) : en tête de la carte ; les dialogues des autres genres ne changent pas.
+  const gestes = boutonsGestes(etat, c, 'btn btn-decision dec-btn');
   // `bouton()` préfixe chaque classe par « btn- » : la classe de mise en page `dec-btn` est donc posée ici, sans préfixe.
   const geste = (classe) => (texte, surClic, extra) => h('button', { type: 'button', classe, onClick: surClic, ...extra }, texte);
   const principal = geste('btn btn-decision dec-btn');
@@ -85,8 +87,9 @@ function carte(c, fermer, valeurs = []) {
     case 'repartition':
       etiquette = 'Répartition provisoire';
       titre = `Fiche ${c.numero}`;
-      detail = [`${libelleJour(c.date)} : `, h('span', { classe: 'dec-qte' }, String(c.couverts)), ' couverts, répartition entre les menus provisoire.'];
-      actions = [principal('Confirmer la répartition', () => dialogRepartition(c.ficheId), { 'aria-label': `Confirmer la répartition : fiche ${c.numero}` }),
+      detail = [`${libelleJour(c.date)} : `, h('span', { classe: 'dec-qte' }, String(c.couverts)), ' couverts, répartition provisoire : ',
+        h('strong', { classe: 'dec-mot' }, texteRepartition(etat, c.ficheId)), '.'];
+      actions = [...gestes, secondaire('Modifier la répartition', () => dialogRepartition(c.ficheId), { 'aria-label': `Modifier la répartition : fiche ${c.numero}` }),
         versLien(`#/production/${c.date}`, 'Voir le jour')];
       break;
     case 'point': {
@@ -109,7 +112,7 @@ function carte(c, fermer, valeurs = []) {
         }
         break;
       }
-      actions = [h('a', { href, classe: 'btn dec-btn btn-decision', onClick: fermer }, 'Ouvrir')];
+      actions = [...gestes, h('a', { href, classe: gestes.length > 0 ? 'btn dec-btn' : 'btn dec-btn btn-decision', onClick: fermer }, 'Ouvrir')];
       break;
     }
     case 'apprentissage': {
@@ -117,8 +120,7 @@ function carte(c, fermer, valeurs = []) {
       etiquette = "Proposition de l'apprentissage";
       titre = p.texte;
       detail = "Vous corrigez souvent cette portion dans le même sens. Rien n'est appliqué sans votre accord.";
-      actions = [principal('Examiner', () => ouvrirProposition(p), { 'aria-label': `Examiner la proposition : ${p.libelle}` }),
-        secondaire('Non, garder', () => { agir((e, t) => ecarterApprentissage(e, p.cleFamille, p.role, t)); }, { 'aria-label': `Non, garder la valeur actuelle : ${p.libelle}` })];
+      actions = [...gestes, secondaire('Examiner', () => ouvrirProposition(p), { 'aria-label': `Examiner la proposition : ${p.libelle}` })];
       break;
     }
     default: {
@@ -126,7 +128,7 @@ function carte(c, fermer, valeurs = []) {
       etiquette = 'Valeur à valider';
       titre = `${v.libelle} ${ROLE_EN_CLAIR[v.role] ?? ''}`.trim();
       detail = ['Estimation à valider : ', h('span', { classe: 'dec-qte' }, texteFourchette(v.proposition)), '.'];
-      actions = [principal('Valider', () => { fermer(); ouvrirValidations([v, ...valeurs.filter((x) => x !== v)]); }, { 'aria-label': `Valider la valeur : ${titre}` })];
+      actions = [...gestes, secondaire('Autre valeur', () => { fermer(); ouvrirValidations([v, ...valeurs.filter((x) => x !== v)]); }, { 'aria-label': `Choisir une autre valeur : ${titre}` })];
     }
   }
   return h('article', { classe: 'dec-carte', dataset: { genre: c.genre } },
@@ -154,7 +156,7 @@ export function contenuDecisions(etat, aujourd, fermer = () => {}) {
       h('p', { classe: 'dec-sous' }, 'Sanji continue avec vos décisions.')), boutonOk(fermer)];
   }
   const valeurs = cartes.filter((c) => c.genre === 'valeur').map((c) => c.valeur);
-  return [entete, h('div', { classe: 'dec-cartes' }, cartes.map((c) => carte(c, fermer, valeurs))), boutonOk(fermer)];
+  return [entete, h('div', { classe: 'dec-cartes' }, cartes.map((c) => carte(c, fermer, valeurs, etat))), boutonOk(fermer)];
 }
 
 /** Ouvre la feuille « À décider » (appelée par le bandeau de l'écran Aujourd'hui). Une seule feuille à la fois. */

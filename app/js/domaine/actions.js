@@ -430,6 +430,16 @@ export function modifierComposant(etat, composantId, champs, h) {
   return terminer(etat, h, 'modifierComposant', `${c.nom} : ${Object.keys(maj).join(', ')}`, c);
 }
 
+/**
+ * La propriétaire classe un composant « à préciser » : au poste ou hors poste. Le choix est toujours mémorisé par nom
+ * (même quand il confirme l'attribution actuelle), ce qui retire le point « à classer ».
+ */
+export function confirmerAttribution(etat, composantId, attribue, h) {
+  modifierComposant(etat, composantId, { attribue }, h);
+  memoriserAttribution(etat, exigerComposant(etat, composantId));
+  return etat.composants[composantId];
+}
+
 /** Supprime un composant et ses productions non faites (les productions faites sont conservées). */
 export function supprimerComposant(etat, composantId, h) {
   verifierH(h);

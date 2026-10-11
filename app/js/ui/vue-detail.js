@@ -17,6 +17,7 @@ import { bouton, ligneVide, lien, pastille } from './elements.js';
 import {
   confirmerAnnulation, dialogAdaptation, dialogFiche, dialogHistorique, dialogRepartition, repartitionIncoherente, resumeChoix,
 } from './fiches.js';
+import { boutonsGestes } from './geste-rapide.js';
 import { boutonLireFiche } from './lecture-fiche.js';
 import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { formaterHeure, pluriel } from './format.js';
@@ -327,7 +328,7 @@ function actionPoint(p) {
 function sectionPoints(etat, date) {
   const points = pointsAConfirmer(etat, date);
   const contenu = points.length === 0 ? ligneVide('Rien à confirmer ce jour-là.')
-    : h('ul', { classe: 'liste-points' }, points.map((p) => h('li', null, h('span', null, p.texte), actionPoint(p))));
+    : h('ul', { classe: 'liste-points' }, points.map((p) => h('li', null, h('span', null, p.texte), boutonsGestes(etat, p), actionPoint(p))));
   return h('section', { classe: 'carte', id: 'points' }, h('h2', { classe: 'section-titre' }, 'Points à confirmer'), contenu);
 }
 

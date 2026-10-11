@@ -231,7 +231,7 @@ test('feuille : sauce à confirmer = « Choisir la sauce » ouvre le panneau exi
   d.close();
 });
 
-test('feuille : répartition provisoire = « Confirmer la répartition » ouvre le panneau existant', () => {
+test('feuille : répartition provisoire = « Modifier la répartition » ouvre le panneau existant', () => {
   nettoyer();
   magasin.remplacer(avecRepartition());
   aDate(S.lundi, () => feuille.ouvrirDecisions());
@@ -239,13 +239,13 @@ test('feuille : répartition provisoire = « Confirmer la répartition » ouvre 
   const carte = classes(d, 'dec-carte').find((c) => c.dataset.genre === 'repartition');
   assert.ok(carte);
   assert.match(carte.textContent, /Répartition provisoire/);
-  parTexte(carte, /^Confirmer la répartition$/).click();
+  parTexte(carte, /^Modifier la répartition$/).click();
   assert.equal(ouverts().length, 2);
   ouverts()[1].close();
   d.close();
 });
 
-test('feuille : apprentissage = « Examiner » ouvre la proposition ; « Non, garder » l\'écarte et la carte disparaît', () => {
+test('feuille : apprentissage = « Examiner » ouvre la proposition ; « Non » l\'écarte et la carte disparaît', () => {
   nettoyer();
   magasin.remplacer(avecApprentissage());
   aDate(S.lundi, () => feuille.ouvrirDecisions());
@@ -256,7 +256,7 @@ test('feuille : apprentissage = « Examiner » ouvre la proposition ; « Non, ga
   const proposition = ouverts()[1];
   assert.ok(parTexte(proposition, /^Non, garder$/) && parTexte(proposition, /En faire mon standard/));
   proposition.close();
-  aDate(S.lundi, () => parTexte(carte, /^Non, garder$/).click());
+  aDate(S.lundi, () => parTexte(carte, /^Non$/).click());
   assert.equal(classes(d, 'dec-carte').filter((c) => c.dataset.genre === 'apprentissage').length, 0);
   assert.ok(magasin.etat().validations['apprentissage:riz|garniture'], 'la proposition est mémorisée comme écartée');
   d.close();
