@@ -409,9 +409,11 @@ dialog.panneau::backdrop { background: rgba(8, 12, 16, 0.5); }
 /* Un jour : la ligne entière est cliquable (le lien d'en-tête est étiré sur la ligne) ; plats et cercle passent au-dessus. */
 .bord-jour { position: relative; padding: 0 0 8px; border-bottom: 1px solid var(--bordure); }
 .bord-jour:last-child { border-bottom: 0; }
-.bord-jour-lien { display: flex; align-items: center; gap: 8px; min-height: var(--cible); color: var(--texte); text-decoration: none; font-size: var(--t0); }
+.bord-jour-lien { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: var(--cible); color: var(--texte); text-decoration: none; font-size: var(--t0); }
 .bord-jour-lien::after { content: ""; position: absolute; inset: 0; }
 .bord-aujourdhui { background: var(--bleu-fond); border-radius: 8px; padding: 0 8px 8px; }
+.bord-signe { display: inline-flex; align-items: center; gap: 4px; font-size: var(--t-1); font-weight: 600; color: var(--texte); border: 1px solid var(--bordure); border-radius: 999px; padding: 0 8px; }
+.bord-signe-icone { font-weight: 700; }
 .bord-badge { font-size: var(--t-1); font-weight: 600; color: var(--bleu-texte); border: 1px solid var(--bleu); border-radius: 999px; padding: 0 8px; }
 .bord-menu { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 8px; align-items: center; min-height: var(--cible); }
 .bord-menu a, .bord-menu button { position: relative; z-index: 1; }

@@ -17,14 +17,14 @@ import {
   chargeCreneau, ecartProduction, etatTache, evaluerAvance, feuilleDuJour, suggererCreneau,
 } from '../app/js/domaine/planification.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
-import { besoinsProduits, suiviProduit } from '../app/js/domaine/produits.js';
+import { besoinsProduits } from '../app/js/domaine/produits.js';
 import { BASE_METIER } from '../app/js/donnees/base-metier.js';
 import { grammageEffectif } from '../app/js/domaine/savoir.js';
 import { libelle } from '../app/js/domaine/statuts.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_MENUS as M, JEU_STANDARDS as ST } from './jeux/TEST_ONLY-savoir.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { composantValide, copie, etatVide, h, menuValide, poserControleProduit, prevision, principaleDe, recetteValidee } from './aide.js';
+import { composantValide, copie, etatVide, h, menuValide, prevision, principaleDe, recetteValidee } from './aide.js';
 
 const tachesDe = (feuille) => feuille.aFaire.flatMap((g) => g.taches);
 
@@ -252,35 +252,6 @@ test('8. Une allergie de groupe reste visible ; aucune compatibilité n\'est aff
   assert.equal(allergenes.alertesAllergenes(etat, S.mercredi)[0].adaptations[0].texte, 'ADAPTATION_TEST décidée par le chef');
   // L'allergie de groupe reste visible tant que la fiche est active.
   assert.equal(allergenes.alertesAllergenes(etat, S.mercredi).length, 1);
-});
-
-test('9. Si un besoin change après vérification des produits, seuls les contrôles concernés repassent à vérifier ; besoin brut, disponible vérifié et commande restent séparés', () => {
-  const etat = etatVide();
-  prevision(etat, S.lundi, 1, 40);
-  prevision(etat, S.mardi, 1, 10);
-  composantValide(etat, S.lundi, 1, J.PRODUIT_SEC_TEST); // 2000 g
-  composantValide(etat, S.mardi, 1, J.PRODUIT_CRU_TEST); // 10 × 200 ÷ 0,9 ÷ 0,8 ÷ 0,5 = 5556 g
-  const cleSec = 'produit_sec_test';
-  const cleCru = 'produit_cru_test';
-  poserControleProduit(etat, S.lundi, cleSec, 'g', 'suffisant', 2500);
-  poserControleProduit(etat, S.lundi, cleCru, 'g', 'a_commander', 1000);
-
-  const ligne = (cle) => besoinsProduits(etat, S.lundi).lignes.find((l) => l.cle === cle);
-  assert.equal(suiviProduit(etat, S.lundi, ligne(cleSec)).statutAffiche, 'suffisant');
-  assert.equal(suiviProduit(etat, S.lundi, ligne(cleCru)).statutAffiche, 'a_commander');
-
-  prevision(etat, S.lundi, 1, 50); // le besoin du produit sec change
-  const sec = suiviProduit(etat, S.lundi, ligne(cleSec));
-  const cru = suiviProduit(etat, S.lundi, ligne(cleCru));
-  assert.equal(sec.statutAffiche, 'a_reverifier');
-  assert.equal(cru.statutAffiche, 'a_commander', "le produit non touché n'est pas repassé à vérifier");
-  // Trois quantités séparées, et rien n'est acheté automatiquement.
-  assert.equal(sec.besoinBrut, 2500);
-  assert.equal(sec.quantiteVerifiee, 2500);
-  assert.equal(sec.quantiteAcheter, null);
-  assert.equal(cru.proposeeACommander, 5556 - 1000);
-  assert.equal(cru.quantiteAcheter, null);
-  assert.notEqual(cru.besoinBrut, cru.quantiteVerifiee);
 });
 
 test('10. Un délai de commande dépassé ou inconnu est signalé ; la charge d\'un créneau n\'est pas présentée comme une durée de travail mesurée', () => {
@@ -536,12 +507,6 @@ test('17. Un paramètre repris des standards de base est visible, étiqueté « 
   const ligneCarottes = besoins.lignes.find((l) => l.cle === 'carottes');
   assert.deepEqual([ligneCarottes.aValider, ligneCarottes.standardBase], [false, true]);
   assert.ok(Math.abs(ligneCarottes.besoinBrut - 6000 / 0.815) < 1e-6);
-  const suivi = suiviProduit(etat, S.lundi, ligneCarottes);
-  assert.equal(suivi.estimationAValider, false);
-  assert.deepEqual([suivi.quantiteAcheter, suivi.proposeeACommander, suivi.commandeLe], [null, null, null]);
-  poserControleProduit(etat, S.lundi, 'carottes', 'g', 'a_commander', 100);
-  const apres = suiviProduit(etat, S.lundi, ligneCarottes);
-  assert.equal(apres.quantiteAcheter, null, 'même après un contrôle : la quantité achetée n\'est jamais remplie par le calcul');
 
   // 3. Sans donnée dans la base, aucune valeur n'est inventée.
   const orge = composantDe(etat, S.lundi, 2, 'orge');

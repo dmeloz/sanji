@@ -2,10 +2,11 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { creerFiche, definirMenu, definirStandard } from '../app/js/domaine/actions.js';
+import { creerFiche, definirCreneau, definirMenu, definirStandard, planifier } from '../app/js/domaine/actions.js';
 import { tableauBlanc } from '../app/js/domaine/tableau-blanc.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
-import { etatVide, h, prevision } from './aide.js';
+import { composantValide, etatVide, h, prevision, principaleDe } from './aide.js';
+import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { etatReglette } from './aide-tableau.js';
 
 const textes = (lignes) => lignes.map((l) => l.texte);
@@ -106,4 +107,24 @@ test('une garniture générique sans chiffre n\'est pas une question posée au c
   assert.equal(Object.values(e.composants).find((c) => c.nom === 'tomates').type, 'generique');
   assert.deepEqual(tb.bord.aConfirmer.lignes.filter((l) => l.genre !== 'global'), []);
   assert.ok(!textes(tb.bord.production.chiffrage).some((t) => /préciser/.test(t)));
+});
+
+test('signes du jour : hors règle, à confirmer et jour off, seulement quand il y a quelque chose à signaler', () => {
+  const e = etatVide();
+  // Lundi : menu saisi sans prévision = un point à confirmer.
+  definirMenu(e, S.lundi, 1, 'riz', h());
+  // Mardi : avance de 3 jours (lundi pour jeudi), sans règle : hors règle le jour décidé (lundi).
+  prevision(e, S.jeudi, 1, 20);
+  const id = composantValide(e, S.jeudi, 1, J.PRODUIT_SEC_TEST);
+  planifier(e, principaleDe(e, id), S.lundi, 'avant_midi', h());
+  // Mercredi : tous les créneaux indisponibles.
+  for (const c of ['avant_midi', 'apres_midi', 'avant_soir']) definirCreneau(e, S.mercredi, c, 'indisponible', h());
+  const jours = Object.fromEntries(tableauBlanc(e, S.lundi).jours.map((j) => [j.date, j]));
+  assert.equal(jours[S.lundi].horsRegle, true);
+  assert.equal(jours[S.lundi].aConfirmer, true);
+  assert.equal(jours[S.lundi].jourOff, false);
+  assert.equal(jours[S.mardi].horsRegle, false);
+  assert.equal(jours[S.mardi].aConfirmer, false);
+  assert.equal(jours[S.mercredi].jourOff, true);
+  assert.equal(jours[S.jeudi].jourOff, false);
 });

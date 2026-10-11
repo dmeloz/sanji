@@ -7,7 +7,6 @@ import {
 } from '../app/js/domaine/actions.js';
 import { enseignerMot } from '../app/js/domaine/actions-mots.js';
 import { etatInitial, suiviProduitVide } from '../app/js/domaine/etat.js';
-import { besoinsProduits, cleSuivi } from '../app/js/domaine/produits.js';
 
 /** Horodatage de test déterministe, n minutes après un point fixe. */
 export const h = (n = 0) => new Date(Date.UTC(2026, 9, 1, 8, n)).toISOString();
@@ -59,15 +58,4 @@ export const copie = (x) => structuredClone(x);
 export function enseignerAuPoste(etat, composantId, categorie, hh) {
   enseignerMot(etat, composantId, categorie, hh);
   modifierComposant(etat, composantId, { attribue: true }, hh);
-}
-
-/**
- * Pose un contrôle de produit directement dans l'état, comme le ferait un ancien fichier enregistré (l'action
- * `controlerProduit` n'existe plus, v120) : statut, quantité vérifiée et besoin du moment.
- */
-export function poserControleProduit(etat, lundi, cle, unite, statut, quantiteVerifiee) {
-  const ligne = besoinsProduits(etat, lundi).lignes.find((l) => l.cle === cle && l.unite === unite);
-  if (!ligne) throw new Error(`poserControleProduit : aucune ligne ${cle} (${unite}) pour la semaine ${lundi}`);
-  const k = cleSuivi(lundi, cle, unite);
-  etat.produits[k] = { ...suiviProduitVide(), ...etat.produits[k], statut, quantiteVerifiee, besoinAuControle: ligne.besoinBrut };
 }

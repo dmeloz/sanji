@@ -153,8 +153,7 @@ Dates en chaînes `AAAA-MM-JJ`, calculées en UTC pour éviter les décalages. F
 ## 9. Produits et commande (`produits.js`)
 
 - `besoinsProduits(etat, lundi)` : pour les services du lundi au samedi de cette semaine, lignes agrégées par `(normaliser(produit), unite)` à partir des composants attribués et validés : `produit_simple` → `brut` sous `produitNom || nom` ; `preparation_maison` avec recette validée → ses ingrédients. Chaque ligne : `{cle, nom, unite, besoinBrut, aValider, contributions:[{composantId, date, quantite}], premiereUtilisation}`. Les composants non chiffrables sont renvoyés à part (`nonChiffrables`), sans quantité inventée.
-- `suiviProduit(etat, lundi, ligne)` → `{ statutAffiche:'a_verifier'|'suffisant'|'a_commander'|'a_reverifier', quantiteVerifiee, proposeeACommander, quantiteAcheter, … }`. `a_reverifier` si le statut enregistré n'est pas `a_verifier` et que `besoinAuControle !== besoinBrut` (arrondi). `proposeeACommander = max(0, besoinBrut − quantiteVerifiee)`. `quantiteAcheter` n'est **jamais** remplie automatiquement.
-- `echeanceCommande(ligne, fournisseur, aujourdhui)` → `{ statut:'a_renseigner'|'ok'|'aujourdhui'|'depassee', dateLimite }`, avec `dateLimite = premiereUtilisation − delaiJours`.
+- Le suivi de commande (`suiviProduit`, contrôle, achat) a été retiré en v121 ; `etat.produits` n'est plus lu que pour accepter un ancien fichier.
 
 ## 10. Allergènes et points à confirmer
 
@@ -321,6 +320,7 @@ Ce lot remplace la section 14 pour l'accueil : la « réglette de bacs » dispar
 `tableauBlanc(etat, aujourdhui, lundiAffiche?)` renvoie :
 - `date`, `lundi` : semaine affichée (par défaut la semaine d'aujourd'hui ; la suivante le week-end et le vendredi une fois le travail du jour fini ; `lundiAffiche` force une semaine), `estSemaineCourante`, `bord` (tableau de bord de la Semaine). Il n'y a plus de `contexte` (note, lignes, actions) ni de `miseEnPlace`.
 - `jours` : six jours (lundi à samedi), chacun `{date, estAujourdhui, aMenu, menus:[{menu, intitule, saisi, morceaux:[{texte, auPoste, composantId}], couverts, previsionASaisir, provisoires}], nbFiches, couvertsTotal}`. `morceaux` découpe l'intitulé du menu en ses composants, dans l'ordre, pour afficher ce qui est au poste et ce qui ne l'est pas ; `nbFiches` = nombre de fiches de fonction actives du jour.
+- Chaque jour porte aussi `horsRegle` (une production décidée ce jour, non faite, avance non autorisée), `aConfirmer` (`pointsAConfirmer(date)` non vide) et `jourOff` (tous les créneaux indisponibles) : la vue en fait de petites étiquettes icône + mot (v121), rien si rien à signaler ; les trois sont faux sur un jour fermé.
 - `pointsGlobaux`, `semainePrecedente`, `semaineSuivante`.
 
 ### 16.2 Interface
