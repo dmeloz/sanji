@@ -13,7 +13,7 @@ import { aujourdhui } from '../magasin.js';
 import { assistantPret, fournisseurDepuisReglages } from './assistant-reglages.js';
 import { h, svg } from './dom.js';
 import { activerFeuilletage } from './glisser.js';
-import { bouton, lien, repliable } from './elements.js';
+import { bouton, lien } from './elements.js';
 import { pluriel } from './format.js';
 import { problemeHorsLigne } from './horsligne.js';
 import { demanderReinitialisation, peutReinitialiser } from './reinitialiser-semaine.js';
@@ -69,23 +69,19 @@ function blocLectureMenu(menu, lecture) {
     doute ? h('ul', { classe: 'imp-doutes' }, lecture.ambiguites.map((a) => h('li', null, motAmbiguite(a)))) : null);
 }
 
-/** Une ligne par jour : « 2 menus · lu » ou « 1 à vérifier » ; dépliée quand il y a un doute. */
-function ligneLectureJour(etat, champs, date, ouverts) {
+/** Une section par jour : « 2 menus · lu » ou « 1 à vérifier », avec la lecture de chaque menu, toujours visible. */
+function ligneLectureJour(etat, champs, date) {
   const lectures = [1, 2].map((menu) => lire(etat, champs.get(`menu-${date}-${menu}`).value, menu));
   const saisis = lectures.filter(Boolean);
   const doutes = saisis.reduce((n, l) => n + l.ambiguites.length, 0);
   const verifier = doutes > 0;
   const etatTexte = saisis.length === 0 ? 'non saisi' : verifier ? `${doutes} à vérifier` : `${pluriel(saisis.length, 'menu')} · lu`;
-  const details = repliable(
-    h('span', { classe: 'imp-jour-tete' },
+  return h('div', { classe: 'imp-jour' },
+    h('div', { classe: 'imp-jour-tete' },
       h('span', { classe: 'imp-jour-nom' }, majuscule(libelleJour(date))),
       h('span', { classe: verifier ? 'imp-jour-etat imp-jour-etat-doute' : 'imp-jour-etat' }, etatTexte)),
-    ouverts.get(date) ?? verifier,
     saisis.length === 0 ? h('p', { classe: 'imp-neutre' }, 'Aucun menu saisi ce jour-là.')
-      : h('div', { classe: 'imp-jour-corps' }, blocLectureMenu(1, lectures[0]), blocLectureMenu(2, lectures[1])),
-    { classe: 'imp-jour' });
-  details.addEventListener('toggle', () => ouverts.set(date, details.open));
-  return details;
+      : h('div', { classe: 'imp-jour-corps' }, blocLectureMenu(1, lectures[0]), blocLectureMenu(2, lectures[1])));
 }
 
 const TEXTE_ENVOI_PHOTO = 'La photo va être envoyée à l\'IA pour transcrire le texte imprimé. Les notes écrites à la main sont ignorées. Rien d\'autre ne part. Le texte rendu par l\'IA est gardé 14 jours sur cet appareil pour le diagnostic.';
@@ -197,18 +193,17 @@ function blocPhoto(lundi, surLecture) {
       }
     },
   });
-  const bloc = repliable(h('h2', { classe: 'imp-titre-section' }, 'Photo du menu (aide visuelle)'), false, [
+  const bloc = h('section', { classe: 'imp-section-plate imp-photo' },
+    h('h2', { classe: 'imp-titre-section' }, 'Photo du menu (aide visuelle)'),
     h('p', { classe: 'aide' }, lirePhotoIA ? AIDE_PHOTO_IA : AIDE_PHOTO_SANS_IA),
     zone,
-    h('div', { classe: 'actions' }, h('label', { classe: 'btn btn-court' }, 'Prendre ou importer une photo', entree), lirePhotoIA, retirer),
-  ], { classe: 'imp-section-plate imp-photo' });
-  urlPhoto(lundi).then((url) => { if (url) { montrer(url); bloc.open = true; } }).catch(() => {});
+    h('div', { classe: 'actions' }, h('label', { classe: 'btn btn-court' }, 'Prendre ou importer une photo', entree), lirePhotoIA, retirer));
+  urlPhoto(lundi).then((url) => { if (url) montrer(url); }).catch(() => {});
   return bloc;
 }
 
 export function rendre(etat, lundi) {
   const champs = new Map();
-  const ouverts = new Map();
   const reprise = reprendreTexte();
   const dates = JOURS_A_MENU.map((decalage) => ajouterJours(lundi, decalage));
   const numero = tableauBlanc(etat, aujourdhui(), lundi).bord.entete.semaine;
@@ -223,9 +218,8 @@ export function rendre(etat, lundi) {
       h('h1', { classe: 'page-titre' }, 'Importer les menus')),
     h('a', { href: `#/import/${ajouterJours(lundi, 7)}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')));
 
-  const dejaSaisie = dates.some((date) => [1, 2].some((menu) => jourOuVide(etat, date).menus[menu].intitule.trim() !== ''));
   const zoneLecture = h('div', { classe: 'imp-lecture-jours' });
-  const majLecture = () => zoneLecture.replaceChildren(...dates.map((date) => ligneLectureJour(etat, champs, date, ouverts)));
+  const majLecture = () => zoneLecture.replaceChildren(...dates.map((date) => ligneLectureJour(etat, champs, date)));
   const repartirEtLire = () => { repartir(champs, lundi, { enregistrerLeLu: () => enregistrerEtNoter() }); majLecture(); };
   // Les lignes de l'IA remplacent le champ de texte puis passent par la même répartition que le bouton ; rien n'est enregistré.
   let lignesIA = null; // lignes lues par l'IA sur cette page : sert au retour d'essai (local, rien n'est envoyé)
@@ -257,24 +251,22 @@ export function rendre(etat, lundi) {
     lienSignaler.hidden = false;
     const remplace = champs.get('feuille-texte').value.trim() !== '';
     champs.get('feuille-texte').value = lignes.join('\n');
-    sectionFeuille.open = true;
     repartirEtLire();
     afficherMessage(`L'IA a lu ${pluriel(lignes.length, 'ligne')}. Relisez « Ce que Sanji a lu » avant d'enregistrer.${remplace ? ' Le texte collé précédemment a été remplacé.' : ''}${illisibles > 0 ? ` ${pluriel(illisibles, 'ligne illisible', 'lignes illisibles')} : complétez à la main.` : ''}`);
   };
   racine.appendChild(blocScanner(lundi, surLecturePhoto));
   racine.appendChild(blocPhoto(lundi, surLecturePhoto));
   racine.appendChild(h('p', { classe: 'aide retour-essai-lien' }, lienSignaler));
-  const sectionFeuille = repliable(h('h2', { classe: 'imp-titre-section', id: 'titre-feuille' }, 'Coller le texte de la feuille'), !dejaSaisie || reprise !== null, [
-      h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
-      h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),
-      champSaisi(champs, 'textarea', { id: 'feuille-texte', rows: 6, placeholder: 'texte copié depuis la photo de la feuille', value: '' }),
-      h('div', { classe: 'actions' }, bouton('Répartir dans la semaine', repartirEtLire)),
-      champSaisi(champs, 'div', { id: 'feuille-retour', classe: 'saisie-retour', 'aria-live': 'polite' }),
-    ]);
-  racine.appendChild(h('section', { classe: 'imp-section-plate' }, sectionFeuille));
+  racine.appendChild(h('section', { classe: 'imp-section-plate' },
+    h('h2', { classe: 'imp-titre-section', id: 'titre-feuille' }, 'Coller le texte de la feuille'),
+    h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
+    h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),
+    champSaisi(champs, 'textarea', { id: 'feuille-texte', rows: 6, placeholder: 'texte copié depuis la photo de la feuille', value: '' }),
+    h('div', { classe: 'actions' }, bouton('Répartir dans la semaine', repartirEtLire)),
+    champSaisi(champs, 'div', { id: 'feuille-retour', classe: 'saisie-retour', 'aria-live': 'polite' })));
 
   racine.appendChild(h('h2', { classe: 'imp-titre-section imp-titre-hors' }, 'Ou taper jour par jour'));
-  for (const date of dates) racine.appendChild(blocJour(champs, etat, date, { repliable: true }));
+  for (const date of dates) racine.appendChild(blocJour(champs, etat, date));
   // La lecture suit la frappe ; les champs n'enregistrent rien avant « Enregistrer la semaine ».
   for (const date of dates) for (const menu of [1, 2]) champs.get(`menu-${date}-${menu}`).addEventListener('input', majLecture);
 

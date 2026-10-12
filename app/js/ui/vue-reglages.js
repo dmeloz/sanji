@@ -22,7 +22,7 @@ import { champs } from './champs.js';
 import { ouvrirValidation } from './feuille-validation.js';
 import { MODELES } from './fournisseur-web.js';
 import { h } from './dom.js';
-import { bouton, ligneVide, pastille, repliable, titreSection } from './elements.js';
+import { bouton, ligneVide, pastille, titreSection } from './elements.js';
 import { formaterHeure, formaterNombre, nomFichierSauvegarde, parseNombre, pluriel } from './format.js';
 import { libelleHorsLigne, problemeHorsLigne, situationHorsLigne } from './horsligne.js';
 import { afficherMessage } from './messages.js';
@@ -125,12 +125,12 @@ function sectionStandards(etat) {
     enVue.length === 0 ? ligneVide('Aucun standard réglé, aucune famille saisie dans un menu pour l\'instant.')
       : h('ul', { classe: 'liste-standards' }, enVue.map(ligneStandard)),
     h('h3', { classe: 'bloc-titre' }, 'Autres standards, par catégorie'),
-    parGroupe.map(({ g, lignes: duGroupe }) => {
+    h('div', { classe: 'standards-autres' }, parGroupe.map(({ g, lignes: duGroupe }) => {
       const restantes = duGroupe.filter((l) => !enUsage(l));
       if (restantes.length === 0) return null;
-      return repliable(`${g.libelle} · ${restantes.length} à régler`, false,
-        h('ul', { classe: 'liste-standards' }, restantes.map(ligneStandard)), { classe: 'repliable-groupe' });
-    }),
+      return [h('h4', { classe: 'bloc-titre' }, `${g.libelle} · ${restantes.length} à régler`),
+        h('ul', { classe: 'liste-standards' }, restantes.map(ligneStandard))];
+    })),
   ];
   const zone = h('div', { classe: 'zone-standards' }, defaut());
   const chercher = (ev) => {
@@ -154,14 +154,9 @@ function sectionStandards(etat) {
 
 const UNITE_BASE = { '%': '% de perte', x: '× le poids de départ', jours: 'jours', min: 'min', '°C': '°C' };
 const uniteBase = (u) => UNITE_BASE[u] ?? u;
-/** Usages dont le repli reste ouvert après « Revenir au standard » (sinon le repli se refermait et la ligne disparaissait). */
-const repliesOuverts = new Set();
-/** Oublie les replis gardés ouverts (essais). */
-export function oublierReplis() { repliesOuverts.clear(); }
 /** Règle du calcul (calcul.js : la cuisson n'est appliquée qu'à une portion en poids cuit) dite en clair sous un gain de cuisson. */
 export const PHRASE_GAIN_SEC = 'Sans effet sur une portion saisie en poids sec (les pâtes et le riz sont souvent comptés secs) : il sert quand la portion est en poids cuit.';
 function reviens(l) {
-  repliesOuverts.add(l.usage);
   agir((e, t) => revenirAuStandard(e, l.sujet, l.usage, t));
   afficherMessage('Valeur de base rétablie', 'ok');
 }
@@ -183,7 +178,7 @@ function dialogAjustement(l) {
   panneau({
     titre: `Changer : ${l.libelle} (${l.usageTitre})`,
     corps: [h('p', { classe: 'aide' }, 'Votre valeur passe devant le standard de base, pour tous les plats concernés.'), ...f.noeuds],
-    extras: l.ajuste ? [{ libelle: 'Revenir au standard', action: (api) => { repliesOuverts.add(l.usage); agirStrict((e, t) => revenirAuStandard(e, l.sujet, l.usage, t)); afficherMessage('Valeur de base rétablie', 'ok'); api.fermer(); } }] : [],
+    extras: l.ajuste ? [{ libelle: 'Revenir au standard', action: (api) => { agirStrict((e, t) => revenirAuStandard(e, l.sujet, l.usage, t)); afficherMessage('Valeur de base rétablie', 'ok'); api.fermer(); } }] : [],
     surEnregistrer: () => {
       const v = f.lire().valeur;
       if (v === null) throw new Error('Saisissez la valeur.');
@@ -220,9 +215,10 @@ function sectionStandardsBase(etat) {
   return h('section', { classe: 'carte' },
     h('p', { classe: 'aide', id: 'standards-base' }, 'Rendements, conservation, cuissons et températures. On part de ce que disent les manuels. Quand la réalité de votre cuisine est différente, changez la valeur : '
       + 'votre valeur passe devant, pour toujours. « Revenir au standard » rétablit la valeur de base.'),
-    lignesStandardsBase(etat).map((u) => (u.lignes.length === 0 ? null
-      : repliable(`${u.titre} · ${texteChanges(u.lignes.filter((l) => l.ajuste).length, u.lignes.length)}`, u.lignes.some((l) => l.ajuste) || repliesOuverts.has(u.usage),
-        h('ul', { classe: 'liste-standards' }, u.lignes.map((l) => ligneBase({ ...l, usageTitre: u.titre }))), { classe: 'repliable-groupe' }))));
+    lignesStandardsBase(etat).map((u) => (u.lignes.length === 0 ? null : [
+      h('h3', { classe: 'bloc-titre' }, `${u.titre} · ${texteChanges(u.lignes.filter((l) => l.ajuste).length, u.lignes.length)}`),
+      h('ul', { classe: 'liste-standards' }, u.lignes.map((l) => ligneBase({ ...l, usageTitre: u.titre }))),
+    ])));
 }
 
 // ------------------------------------------------------------------ semaine type et capacité
@@ -763,8 +759,7 @@ const RUBRIQUES = [
     blocs: (e) => [sectionStandardsBase(e)] },
   { cle: 'standards', titre: 'Standards maison',
     resume: (e) => { const c = compteStandards(e); return `${pluriel(c.regles, 'standard réglé', 'standards réglés')} · ${c.aRegler} à régler`; },
-    blocs: (e) => [h('p', { classe: 'aide' }, h('a', { href: '#/reglages/standards-base' }, 'Standards de base : changer une valeur de départ ›')),
-      sectionStandards(e), sectionMemoire(e)] },
+    blocs: (e) => [sectionStandards(e), sectionMemoire(e)] },
   { cle: 'reperes', titre: 'Repères métier',
     resume: () => 'temps, températures, conservation, techniques : consultation',
     blocs: () => { const c = h('div'); pageReperesMetier(c, { sansTitre: true, etat: etatCourant() }); return [c]; } },
@@ -838,8 +833,7 @@ export function rendre(etat, param = null) {
       groupe('Assistant', ligneRubrique('assistant-ia', etat, assistantPret(lireReglagesIA()) ? pastille('activé', 'vert') : null)),
       groupe('Données',
         ligneRubrique('apprentissage', etat),
-        ligneRubrique('donnees', etat),
-        ligneInfo('Version', `Sanji ${VERSION_APP}`)),
+        ligneRubrique('donnees', etat)),
       ligneVerifierMiseAJour(),
       h('p', { classe: 'reglages-note' }, 'Apparence : toujours claire. Écran allumé : en Production et en mode poste.'),
       h('p', { classe: 'reglages-pied' }, pastilleHorsLigne(hl), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));

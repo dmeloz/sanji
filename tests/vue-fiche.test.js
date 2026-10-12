@@ -3,7 +3,7 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { boutons, installerFauxDom } from './aide-dom.js';
+import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { creerFiche, definirRegle, marquerFait, planifier } from '../app/js/domaine/actions.js';
 import { calculerComposant } from '../app/js/domaine/calcul.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
@@ -21,6 +21,11 @@ before(async () => {
 after(() => dom.restaurer());
 
 const liens = (racine) => racine.tous((x) => x.balise === 'a').map((a) => a.attributs.href);
+/** Ouvre la feuille « Plus de réglages » de la fiche et la rend ; l'appelant la ferme. */
+const feuilleReglages = (racine) => {
+  boutons(racine).find((b) => /Plus de réglages/.test(b.textContent)).click();
+  return panneauxOuverts(dom.corps).at(-1);
+};
 const libellesBoutons = (racine) => boutons(racine).map((b) => b.textContent);
 
 function scenario(etapes = []) {
@@ -76,8 +81,11 @@ test('fiche : une quantité absente n\'est ni une décision ni une alerte', () =
   const c = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'carottes' }); // aucune prévision
   magasin.remplacer(e);
   const racine = vue.rendre(magasin.etat(), c);
-  assert.match(racine.textContent, /quantité inconnue/);
+  const feuille = feuilleReglages(racine);
+  assert.match(feuille.textContent, /quantité inconnue/);
   assert.equal(racine.tous((x) => x.attributs.role === 'alert').length, 0);
+  assert.equal(feuille.tous((x) => x.attributs.role === 'alert' && !x.hidden).length, 0);
+  feuille.close();
 });
 
 test('fiche : étiquette Recette et ingrédients recalculés pour une préparation maison', () => {
@@ -188,16 +196,18 @@ test('fiche : « Fait » marque la production principale puis propose « Corrige
 test('fiche : « Plus de réglages » garde les gestes avancés de l\'ancienne vue composant', () => {
   const { e, c } = scenario();
   const racine = vue.rendre(e, c);
-  const repli = racine.tous((x) => x.balise === 'details' && x.attributs.id === 'fiche-reglages')[0];
-  assert.ok(repli, 'repli présent');
-  assert.equal(repli.open, false, 'fermé par défaut');
-  assert.match(repli.querySelector('summary').textContent, /Plus de réglages/);
+  assert.equal(racine.tous((x) => x.balise === 'details').length, 0, 'aucun repli');
+  const ligne = racine.tous((x) => x.attributs.id === 'fiche-reglages')[0];
+  assert.ok(ligne, 'ligne présente');
+  assert.equal(libellesBoutons(racine).includes('Supprimer'), false, 'les gestes avancés ne sont pas déroulés dans la page');
+  const repli = feuilleReglages(racine);
   const dans = libellesBoutons(repli);
   for (const attendu of ['Modifier', 'Composer un mélange', 'Supprimer', 'Ajouter une étape', 'Enregistrer une pesée',
     'Mémoriser comme référence maison', 'Renseigner les allergènes', 'Saisir après service', 'Corriger pour ce plat seulement']) {
     assert.ok(dans.includes(attendu), `« ${attendu} » accessible`);
   }
   assert.ok(liens(repli).includes('#/reglages/standards'), 'standard maison');
+  repli.close();
 });
 
 test('fiche : composant introuvable', () => {

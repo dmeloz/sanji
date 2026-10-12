@@ -11,7 +11,7 @@ import {
   LIBELLE_STANDARD_BASE, rattachementsDe, reperesAide, reperesConservation, reperesCuisson, standardDeBase, texteProvenance,
 } from '../domaine/standards-base.js';
 import { h } from './dom.js';
-import { pastille, repliable } from './elements.js';
+import { ligneFeuille, pastille } from './elements.js';
 import { pluriel } from './format.js';
 
 export const THEMES = Object.freeze([
@@ -98,23 +98,20 @@ function rubriques(lignes, max = Infinity) {
     if (l.length === 0) return null;
     reste += Math.max(0, l.length - max);
     const liste = h('ul', { classe: 'liste-simple' }, l.slice(0, max).map(rendreLigne));
-    // Page complète : une rubrique repliée par sujet (fermée), pour ne pas imposer des milliers de pixels à lire.
-    if (max === Infinity) return repliable(h('strong', null, `${r} (${l.length})`), false, [liste], { classe: 'repliable-groupe' });
-    return h('div', null, h('h4', { classe: 'bloc-titre' }, r), liste);
+    return h('div', null, h('h4', { classe: 'bloc-titre' }, max === Infinity ? `${r} (${l.length})` : r), liste);
   });
   return { blocs, reste };
 }
 
-/** Bloc replié (fermé) « Repères métier » d'une famille, ou null s'il n'y a rien à dire. Lecture seule. */
+/** Ligne « Repères métier › » d'une famille, qui ouvre ses repères en feuille ; null s'il n'y a rien à dire. Lecture seule. */
 export function blocReperes(cle, etat = null) {
   const lignes = reperesPour(cle, etat);
   if (lignes.length === 0) return null;
   const { blocs, reste } = rubriques(lignes, MAX_PAR_RUBRIQUE);
-  return repliable(h('h2', { classe: 'section-titre' }, 'Repères métier'), false, [
+  return h('section', { classe: 'carte reperes-metier', id: 'reperes-metier' }, ligneFeuille('Repères métier', 'Repères métier', () => h('div', null,
     h('p', { classe: 'aide' }, 'Aide à la lecture : rien de ceci n\'est copié dans vos valeurs. Votre valeur passe toujours devant.'),
     blocs,
-    reste > 0 ? h('p', { classe: 'meta' }, `${reste} ${reste > 1 ? 'autres repères' : 'autre repère'} dans la page « Repères métier » des Réglages.`) : null,
-  ], { classe: 'carte reperes-metier', id: 'reperes-metier' });
+    reste > 0 ? h('p', { classe: 'meta' }, `${reste} ${reste > 1 ? 'autres repères' : 'autre repère'} dans la page « Repères métier » des Réglages.`) : null)));
 }
 
 /** Page de consultation d'un thème (tous les repères) ; le thème par défaut est le premier. Remplit `conteneur`. */
@@ -161,7 +158,7 @@ export function blocBuffet(couverts) {
   const n = Number.isFinite(Number(couverts)) && Number(couverts) > 0 ? Number(couverts) : 0;
   const standards = standardsBuffet();
   if (standards.length === 0) return null;
-  return repliable(h('strong', null, 'Buffet : quantités par couvert'), false, [
+  return ligneFeuille('Buffet : quantités par couvert', 'Buffet : quantités par couvert', () => h('div', null,
     h('p', { classe: 'meta' }, `Lecture seule, ${LIBELLE_STANDARD_BASE} : sans effet sur les portions du menu ni sur les commandes.`),
     h('ul', { classe: 'liste-simple' }, standards.map((s) => {
       const etat = POIDS_ETAT[s.etatPoids];
@@ -173,6 +170,5 @@ export function blocBuffet(couverts) {
           ? h('p', null, `Pour ${pluriel(n, 'couvert')} : ${grammes(min * n)}–${grammes(max * n)}`) : null,
         s.etatPoids ? null : h('p', { classe: 'alerte-texte' }, 'État de poids non établi (cru ou cuit), à confirmer avant tout calcul.'),
         h('p', { classe: 'meta' }, `Provenance : ${provenanceBuffet(s)}`));
-    })),
-  ], { classe: 'sous-carte buffet-couvert' });
+    }))), { classe: 'sous-carte buffet-couvert' });
 }

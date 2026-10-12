@@ -83,15 +83,13 @@ test('ligne : plus de « Actions ▸ » sous chaque ligne ; un bouton « ⋯ » 
   const plus = boutons(ligne).find((b) => b.attributs['aria-label'] === 'Actions : ELEMENT_M1_TEST');
   assert.ok(plus, 'bouton ⋯ accessible');
   assert.equal(plus.textContent, '⋯');
-  assert.equal(plus.attributs['aria-expanded'], 'false');
-  const panneau = classes(ligne, 'prod-actions')[0];
-  assert.equal(panneau.hidden, true, 'replié au départ');
-  assert.ok(boutons(panneau).some((b) => b.textContent === 'Démarrer'), 'les gestes existants sont rangés ici');
+  assert.equal(plus.attributs['aria-haspopup'], 'dialog');
+  assert.equal(classes(ligne, 'prod-actions').length, 0, 'rien n\'est déroulé sur la ligne');
+  assert.equal(boutons(ligne).some((b) => b.textContent === 'Démarrer'), false, 'les gestes rares ne sont pas sur la ligne');
   await plus.click();
-  assert.equal(panneau.hidden, false);
-  assert.equal(plus.attributs['aria-expanded'], 'true');
-  await plus.click();
-  assert.equal(panneau.hidden, true);
+  const feuille = panneauxOuverts(dom.corps).at(-1);
+  assert.ok(boutons(feuille).some((b) => b.textContent === 'Démarrer'), 'les gestes existants sont rangés dans la feuille de ⋯');
+  feuille.close();
   // Le nom est un lien vers la fiche (maquette refonte 2) : il n'ouvre plus les actions.
   const nom = classes(ligne, 'prod-nom')[0];
   assert.equal(nom.balise, 'a');
@@ -118,8 +116,7 @@ test('ligne : « ⋯ » occupe sa propre colonne, la même à chaque ligne (alig
 test('ligne : une proposition à planifier montre « Planifier » directement, et seulement « Pour mer. 7 » en mention', () => {
   const noeud = production(lundi().e);
   const ligne = ligneDe(noeud, 'ELEMENT_MERCREDI_TEST');
-  const panneau = classes(ligne, 'prod-actions')[0];
-  const directs = boutons(ligne).filter((b) => !panneau.tous((x) => x === b).length && b.textContent === 'Planifier');
+  const directs = boutons(ligne).filter((b) => b.textContent === 'Planifier');
   assert.equal(directs.length, 1, '« Planifier » est sur la ligne, pas derrière ⋯');
   const meta = texteVisible(ligne);
   assert.match(meta, /Pour mer\. 7/);
@@ -324,7 +321,7 @@ test('choisir la sauce : le titre dit le plat, le jour et le menu', async () => 
   dialogue.close();
 });
 
-test('choisir la sauce : les sauces du plat d\'abord, « Autres sauces » repliées, aucune présélection', async () => {
+test('choisir la sauce : les sauces du plat d\'abord, « Autres sauces » à plat ensuite, aucune présélection', async () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'Penne aux courgettes', h());
   const sauce = sauceDe(e);
@@ -334,9 +331,9 @@ test('choisir la sauce : les sauces du plat d\'abord, « Autres sauces » repli�
   const radios = dialogue.tous((x) => x.balise === 'input' && x.attributs.type === 'radio');
   assert.equal(radios.length, SAUCES.length, 'toutes les sauces restent accessibles');
   assert.equal(radios.some((r) => r.checked), false, 'aucune présélection, jamais la crème');
-  const autres = dialogue.tous((x) => x.balise === 'details').find((d) => /Autres sauces/.test(d.querySelector('summary').textContent));
-  assert.ok(autres, '« Autres sauces » est un repli');
-  assert.equal(autres.open, false);
+  assert.equal(dialogue.tous((x) => x.balise === 'details').length, 0, 'aucun repli');
+  const autres = dialogue.tous((x) => x.balise === 'fieldset').find((d) => /^Autres sauces/.test(d.querySelector('legend').textContent));
+  assert.ok(autres, '« Autres sauces » est une liste à plat, sous les sauces du plat');
   const dansAutres = autres.tous((x) => x.balise === 'input' && x.attributs.type === 'radio').length;
   assert.ok(dansAutres > 0 && dansAutres < SAUCES.length);
   const habituelles = radios.slice(0, radios.length - dansAutres);
@@ -359,7 +356,7 @@ test('choisir la sauce : pour un risotto, le safran est habituel et la tomate es
   magasin.remplacer(e);
   vueComposant.dialogChoisirSauce(magasin.etat().composants[sauce.id]);
   const [dialogue] = panneauxOuverts(dom.corps);
-  const autres = dialogue.tous((x) => x.balise === 'details').find((d) => /Autres sauces/.test(d.querySelector('summary').textContent));
+  const autres = dialogue.tous((x) => x.balise === 'fieldset').find((d) => /^Autres sauces/.test(d.querySelector('legend').textContent));
   assert.doesNotMatch(autres.textContent, /sauce safran/);
   assert.match(autres.textContent, /sauce tomate/);
   dialogue.close();

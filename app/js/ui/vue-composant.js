@@ -20,7 +20,7 @@ import { assistantPret, fournisseurDepuisReglages } from './assistant-reglages.j
 import { champs } from './champs.js';
 import { ouvrirValidation } from './feuille-validation.js';
 import { h } from './dom.js';
-import { bouton, ligneVide, lien, pastille, repliable } from './elements.js';
+import { bouton, ligneVide, lien, pastille } from './elements.js';
 import {
   coefficientDepuis, formaterNombre, libelleCoefficient, milieu, modeDepuisCoefficient, pluriel, quantite,
 } from './format.js';
@@ -130,8 +130,7 @@ export function dialogChoisirSauce(c) {
     corps: [
       h('p', { classe: 'aide' }, 'Rien n\'est choisi à votre place : cochez une sauce ou tapez la vôtre.'),
       h('fieldset', { classe: 'champ' }, h('legend', null, 'Sauces qui vont avec ce plat'), habituelles.map((x, i) => ligne(x, i))),
-      repliable('Autres sauces', false, h('fieldset', { classe: 'champ' }, h('legend', { classe: 'sr' }, 'Autres sauces'),
-        autres.map((x, i) => ligne(x, habituelles.length + i)))),
+      h('fieldset', { classe: 'champ' }, h('legend', null, 'Autres sauces'), autres.map((x, i) => ligne(x, habituelles.length + i))),
       ...f.noeuds],
     libelleEnregistrer: 'Valider la sauce',
     surEnregistrer: () => {

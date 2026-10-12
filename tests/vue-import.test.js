@@ -67,7 +67,7 @@ test('lecture jour par jour : les intitulés saisis sont lus (menu 1 / menu 2), 
   assert.equal(Object.keys(magasin.etat().composants).length, 0, 'rien n\'est enregistré en tapant');
 });
 
-test('lecture : une ambiguïté de lirePlat est écrite « à vérifier » en mots, le jour est déplié', async () => {
+test('lecture : une ambiguïté de lirePlat est écrite « à vérifier » en mots, sans aucun repli', async () => {
   magasin.remplacer(etatVide());
   const noeud = vue.rendre(magasin.etat(), S.lundi);
   await saisir(noeud, `menu-${S.lundi}-1`, 'pâtes');
@@ -75,11 +75,12 @@ test('lecture : une ambiguïté de lirePlat est écrite « à vérifier » en mo
   assert.match(lundi.textContent, /1 à vérifier/);
   assert.match(lundi.textContent, /Menu 1 · à vérifier/);
   assert.match(lundi.textContent, /sauce implicite à confirmer/);
-  assert.equal(lundi.open, true, 'un jour à vérifier est déplié');
+  assert.equal(parClasse(noeud, 'imp-jour').some((j) => j.balise === 'details'), false, 'la lecture d\'un jour est toujours visible');
   assert.equal(parClasse(lundi, 'imp-jour-etat-doute').length, 1);
-  // Un jour sans doute reste replié.
+  // Un jour sans doute est lu de la même façon, à plat.
   await saisir(noeud, `menu-${S.mardi}-2`, 'courgettes');
-  assert.equal(ligneDuJour(noeud, 'Mardi').open, false);
+  assert.match(ligneDuJour(noeud, 'Mardi').textContent, /courgettes/);
+  assert.doesNotMatch(ligneDuJour(noeud, 'Mardi').textContent, /à vérifier/);
 });
 
 test('coller puis répartir remplit les champs et la lecture, sans rien enregistrer', async () => {
@@ -138,29 +139,27 @@ test('intitulés : champs d\'une ligne qui s\'agrandissent ; les cinq jours rest
   assert.ok(intitule.className.split(' ').includes('champ-intitule'));
   const jours = parClasse(noeud, 'saisie-jour');
   assert.equal(jours.length, 5, 'lundi à vendredi, jeudi compris');
-  assert.ok(jours.every((j) => j.balise === 'details' && j.open === true), 'jours vides : ouverts d\'emblée');
+  assert.ok(jours.every((j) => j.balise === 'section'), 'jours à plat : aucun repli');
   assert.ok(jours.some((j) => j.textContent.startsWith('Jeudi')));
 });
 
-test('jours déjà remplis : repliés sur leur résumé, un jour vide reste ouvert, les champs restent atteignables', async () => {
+test('jours déjà remplis : tous à plat avec leurs champs ; enregistrer sans rien changer ne perd rien', async () => {
   magasin.remplacer(etatVide());
   magasin.agir((x, t) => saisirMenusSemaine(x, S.lundi, { [S.lundi]: { menu1: 'riz et carottes', menu2: 'courgettes' } }, t));
   const noeud = vue.rendre(magasin.etat(), S.lundi);
   const lundi = parClasse(noeud, 'saisie-jour').find((j) => j.textContent.startsWith('Lundi'));
-  assert.equal(lundi.open, false, 'jour rempli : replié');
-  assert.match(parClasse(lundi, 'saisie-jour-extrait')[0].textContent, /Menu 1 : riz et carottes · Menu 2 : courgettes/);
-  assert.ok(champ(lundi, `menu-${S.lundi}-1`), 'le champ reste dans la page (replié, pas retiré)');
+  assert.equal(lundi.balise, 'section', 'jour rempli : à plat, pas replié');
+  assert.equal(champ(lundi, `menu-${S.lundi}-1`).value, 'riz et carottes', 'le champ montre l\'intitulé enregistré');
   const mardi = parClasse(noeud, 'saisie-jour').find((j) => j.textContent.startsWith('Mardi'));
-  assert.equal(mardi.open, true);
-  assert.equal(parClasse(mardi, 'saisie-jour-extrait')[0].textContent, 'à saisir');
+  assert.equal(mardi.balise, 'section');
+  assert.equal(champ(mardi, `menu-${S.mardi}-1`).value, '');
   await bouton(noeud, 'Enregistrer la semaine').click();
   assert.equal(magasin.etat().jours[S.lundi].menus[1].intitule, 'riz et carottes', 'enregistrer sans rien changer ne perd rien');
 });
 
-test('CSS (lot Stock et Import) : cible de 44 px sur le résumé d\'un jour, intitulé à hauteur de cible, mouvement réduit', () => {
+test('CSS (lot Stock et Import) : intitulé à hauteur de cible, mouvement réduit', () => {
   const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
   const bloc = css.slice(css.indexOf('/* ===== Lot Stock et Import'));
-  assert.match(bloc, /\.saisie-jour-repliable > summary \{[^}]*min-height: var\(--cible\)/);
   assert.match(bloc, /\.champ-intitule \{[^}]*min-height: var\(--cible\)/);
   assert.match(bloc, /prefers-reduced-motion/);
 });

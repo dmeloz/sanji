@@ -447,7 +447,6 @@ dialog.panneau::backdrop { background: rgba(8, 12, 16, 0.5); }
 button.tb-couverts { cursor: pointer; font-family: inherit; }
 button.tb-couverts:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .tb-couverts-vide { color: var(--texte-doux); font-size: var(--t-1); text-decoration-style: dotted; }
-.bord-reste { margin-top: 6px; }
 .tb-allergie { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: var(--rouge-texte); }
 
 .bord-fiche { display: grid; gap: 2px; min-height: var(--cible); padding: 8px 0; color: var(--texte); text-decoration: none; border-bottom: 1px solid var(--bordure); }
@@ -505,26 +504,13 @@ button.tb-couverts:focus-visible { outline: 3px solid var(--focus); outline-offs
 
 /* ------------------------------------------------------------ standards maison, détail, composant (lot C) */
 
-/* Blocs repliables (<details>) : le résumé est le titre, cible tactile de 44 px au moins. */
-.repliable > summary {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: var(--cible);
-  cursor: pointer;
-  list-style: none;
-  font-weight: 700;
-}
-.repliable > summary::-webkit-details-marker { display: none; }
-.repliable > summary::before { content: "▸"; flex: none; width: 1em; color: var(--texte-doux); }
-.repliable[open] > summary::before { content: "▾"; }
-.repliable > summary h2, .repliable > summary h3 { margin: 0; }
-details.carte.repliable { padding-top: 4px; padding-bottom: 4px; }
-details.carte.repliable[open] { padding-bottom: 16px; }
+/* Ligne tappable qui ouvre une feuille (plus aucun bloc repliable) : cible de 44 px au moins, flèche à droite. */
+.ligne-feuille { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: var(--cible); padding: 10px 0; background: transparent; border: 0; border-top: 1px solid var(--bordure); font: inherit; font-size: var(--t-corps); color: inherit; text-align: left; cursor: pointer; }
+.ligne-feuille:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.ligne-feuille-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fiche-reglages-corps > * + * { margin-top: 12px; }
 
 /* Réglages : standards maison, une ligne par famille et par rôle, regroupées par grande catégorie. */
-.repliable-groupe { border-top: 1px solid var(--bordure); }
-.repliable-groupe > summary { font-size: var(--t0); }
 .liste-standards { margin-bottom: 6px; }
 .ligne-standard { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--bordure); }
 .ligne-standard:first-child { border-top: 0; }
@@ -771,7 +757,6 @@ body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + en
 .fiche-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .fiche-actions .btn { flex: 1 1 140px; min-height: 52px; border-radius: 14px; font-size: var(--t0); font-weight: 600; text-decoration: none; }
 .fiche-actions .fiche-poste { flex: 2 1 200px; }
-.fiche-reglages > :not(summary) { margin-top: 12px; }
 @media (prefers-reduced-motion: reduce) { .fiche-actions .btn:active { transform: none; } }
 /* ============================================================ Écran Semaine (refonte 1, onglet 3)
    Jetons seulement. Un état (hors règle, fermé, jour off, certitude) est toujours écrit en texte. */
@@ -852,7 +837,6 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .imp-legende { font-size: var(--t-legende); font-weight: 500; color: var(--texte-doux); }
 .imp-titre-section { font-size: var(--t-legende); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texte-doux); margin: 0; }
 .imp-titre-hors { margin-top: 20px; }
-.imp-photo > summary, .imp-lecture-jours .imp-jour > summary { min-height: var(--cible); display: flex; align-items: center; cursor: pointer; }
 .imp-scanner { margin: 12px 0; }
 .btn-scanner { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 56px; cursor: pointer; }
 .imp-lecture { display: grid; gap: 10px; }
@@ -873,7 +857,6 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 .imp-etiquette { font-size: var(--t-legende); font-weight: 600; color: var(--texte-moyen); }
 .imp-doutes { display: grid; gap: 2px; font-size: var(--t-legende); font-weight: 600; color: var(--exception); }
 .imp-neutre { font-size: var(--t-legende); color: var(--texte-doux); }
-@media (prefers-reduced-motion: reduce) { .imp-jour, .imp-jour > summary { transition: none; scroll-behavior: auto; } }
 /* ===== Écran Réglages (refonte 1) : sections de lignes, informations sans réglage, pied hors ligne. Jetons du socle seulement. ===== */
 .vue-reglages-racine { display: flex; flex-direction: column; gap: 6px; }
 .reglages-groupe { display: flex; flex-direction: column; }
@@ -970,12 +953,8 @@ dialog.panneau.feuille-decisions[open] { animation: dec-montee 200ms ease-out; }
 /* Import : flèches de semaine, intitulés d'une ligne qui s'agrandissent, jours remplis repliés sur leur résumé. */
 .imp-semaine-nav { margin-top: 4px; }
 .champ-intitule { min-height: var(--cible); resize: none; overflow: hidden; field-sizing: content; }
-.saisie-jour-repliable > summary { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: var(--cible); cursor: pointer; }
-.saisie-jour-repliable > summary .saisie-jour-titre { font-size: var(--t-ligne); font-weight: 650; }
-.saisie-jour-extrait { font-size: var(--t-legende); color: var(--texte-doux); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.saisie-jour-repliable[open] > summary .saisie-jour-extrait { display: none; }
-.saisie-jour-repliable[open] > summary { margin-bottom: 8px; }
-@media (prefers-reduced-motion: reduce) { .saisie-jour-repliable, .nav-semaine .btn { transition: none; scroll-behavior: auto; } }
+@media (prefers-reduced-motion: reduce) { .nav-semaine .btn { transition: none; scroll-behavior: auto; } }
+
 /* ===== Lot Réglages, journal, validation, poste (audit v56) : montrer l'exception, pas la normalité ===== */
 .phrase-gain-sec { max-width: 60ch; }
 .feuille-valider-secondaires { justify-content: flex-start; margin: 4px 0 0; }
@@ -1211,8 +1190,6 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 /* Historique des semaines (#/historique). À coller dans app/css/style.css. Variables existantes uniquement. */
 .vue-historique .hist-liste { display: flex; flex-direction: column; }
 .hist-semaine { border-bottom: 1px solid var(--bordure); }
-.hist-semaine > summary { list-style: none; cursor: pointer; }
-.hist-semaine > summary::-webkit-details-marker { display: none; }
 .hist-ligne, .hist-jour { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 56px; }
 .hist-jour { min-height: 64px; border-top: 1px solid var(--bordure); }
 .hist-jours { list-style: none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid var(--bordure); }
@@ -1221,7 +1198,6 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .hist-qte .qte { font-family: var(--police-qte); font-size: 1rem; }
 .vue-historique .doux { color: var(--texte-doux); font-weight: 400; }
 .vue-historique .nom { font-weight: 600; }
-.hist-semaine > summary .petit { font-weight: 400; }
 .hist-jour .nom { font-weight: 500; }
 .photo-apercu { max-height: 38vh; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto 12px; }
 

@@ -101,12 +101,7 @@ function zoneMenus(bord, lundi) {
   if (aucunMenu) {
     contenu.push(h('p', { classe: 'vide' }, 'Aucun menu saisi cette semaine.'));
   } else {
-    contenu.push(h('ul', { classe: 'bord-jours liste' }, visibles.map(jourDuBord)));
-    if (reste.length > 0) {
-      contenu.push(h('details', { classe: 'repliable bord-reste' },
-        h('summary', null, 'Afficher le reste de la semaine'),
-        h('ul', { classe: 'bord-jours liste' }, reste.map(jourDuBord))));
-    }
+    contenu.push(h('ul', { classe: 'bord-jours liste' }, [...visibles, ...reste].map(jourDuBord)));
   }
   contenu.push(h('p', { classe: 'bord-actions' },
     lien(`#/import/${lundi}`, aucunMenu ? 'Saisir les menus de la semaine' : 'Menus de la semaine', 'btn btn-court')));

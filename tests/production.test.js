@@ -4,7 +4,7 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { installerFauxDom } from './aide-dom.js';
+import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { marquerFait, planifier } from '../app/js/domaine/actions.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
@@ -120,7 +120,12 @@ test('gestes conservés : case « Fait », Corriger le réel, impression, case c
   const noeud = page(e);
   const faite = classes(ligneDe(noeud, 'BRUT_TEST'), 'case-fait')[0];
   assert.equal(faite.attributs['aria-checked'], 'true');
-  assert.match(ligneDe(noeud, 'BRUT_TEST').textContent, /Corriger/);
+  // « Corriger le réel » n'est plus déroulé sur la ligne : il est dans la feuille de « ⋯ ».
+  assert.doesNotMatch(ligneDe(noeud, 'BRUT_TEST').textContent, /Corriger/);
+  boutons(ligneDe(noeud, 'BRUT_TEST')).find((b) => b.attributs['aria-label'] === 'Actions : BRUT_TEST').click();
+  const [feuille] = panneauxOuverts(dom.corps);
+  assert.match(feuille.textContent, /Corriger/);
+  feuille.close();
   assert.equal(classes(ligneDe(noeud, 'RECETTE_TEST'), 'case-fait')[0].attributs['aria-checked'], 'false');
   assert.match(noeud.textContent, /Imprimer la feuille du jour/);
 });

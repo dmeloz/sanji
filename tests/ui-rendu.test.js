@@ -5,7 +5,7 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { boutons, installerFauxDom, panneauxOuverts, ficheAvecReglages } from './aide-dom.js';
 import {
   ajouterAdaptation, ajouterComposant, ajouterPreparatoire, creerFiche, definirCapacite, definirCreneau, definirFournisseur, definirMenu, definirRegle,
   definirStandard, marquerFait, memoriser, modifierComposant, planifier, saisirMenusSemaine, saisirVentes, supprimerStandard,
@@ -49,6 +49,8 @@ before(async () => {
   dialogues = await import('../app/js/ui/taches.js');
 });
 after(() => dom.restaurer());
+/** La fiche et sa feuille « Plus de réglages » (les gestes avancés n'y sont plus déroulés). */
+const fiche = (etat, id) => ficheAvecReglages(dom.corps, vues.fiche.rendre(etat, id));
 
 /** État riche construit uniquement avec le jeu TEST_ONLY. */
 function etatRiche() {
@@ -194,7 +196,7 @@ test('composant : « Composer un mélange » crée une recette en parts, non val
   prevision(e, S.lundi, 2, 10);
   const id = ajouterComposant(e, S.lundi, 2, { nom: 'légumes du jour', categorie: 'legume', attribue: true }, h());
   magasin.remplacer(e);
-  const noeud = vues.fiche.rendre(magasin.etat(), id);
+  const noeud = fiche(magasin.etat(), id);
   await boutonNomme(noeud, 'Composer un mélange').click();
   const d = panneauOuvert();
   remplir(d, 'Composant 1', 'carottes'); remplir(d, 'Parts du composant 1', '2');
@@ -209,7 +211,7 @@ test('composant : « Composer un mélange » crée une recette en parts, non val
   const e2 = etatVide();
   const id2 = ajouterComposant(e2, S.lundi, 2, { nom: 'autre mélange', categorie: 'legume', attribue: true }, h());
   magasin.remplacer(e2);
-  const noeud2 = vues.fiche.rendre(magasin.etat(), id2);
+  const noeud2 = fiche(magasin.etat(), id2);
   nettoyerPanneaux();
   await boutonNomme(noeud2, 'Composer un mélange').click();
   const d2 = panneauOuvert();
@@ -263,7 +265,7 @@ test('jour : rubriques dans l\'ordre, mardi = revue de mi-semaine, rubrique vide
 test('composant : pastilles, formule, provenance, ce qui manque, allergènes, pas de « compatible »', () => {
   const { e, ids } = etatRiche();
   magasin.remplacer(e);
-  const cru = vues.fiche.rendre(magasin.etat(), ids.cru).textContent;
+  const cru = fiche(magasin.etat(), ids.cru).textContent;
   assert.match(cru, /calculé/);
   assert.match(cru, /Paramètres utilisés et provenance/);
   assert.match(cru, /Ce qui manque/);
@@ -271,9 +273,9 @@ test('composant : pastilles, formule, provenance, ce qui manque, allergènes, pa
   assert.match(cru, /Reprendre la référence maison/);
   assert.match(cru, /allergènes à confirmer/);
   assert.match(cru, /Le rebut n'est pas une perte normale/);
-  const vague = vues.fiche.rendre(magasin.etat(), ids.vague).textContent;
+  const vague = fiche(magasin.etat(), ids.vague).textContent;
   assert.match(vague, /composition à définir/);
-  const prep = vues.fiche.rendre(magasin.etat(), ids.prep).textContent;
+  const prep = fiche(magasin.etat(), ids.prep).textContent;
   assert.match(prep, /INGREDIENT_A_TEST/);
   assert.match(prep, /Ingrédients recalculés/);
 });
@@ -697,11 +699,11 @@ const panneauOuvert = () => panneauxOuverts(dom.corps)[0];
 const parAria = (noeud, texte) => boutons(noeud).find((b) => b.attributs['aria-label'] === texte);
 
 const composantNomme = (etat, nom, date = S.lundi, menu = 2) => Object.values(etat.composants).find((c) => c.date === date && c.menu === menu && c.nom === nom);
-const groupesDe = (noeud) => noeud.tous((x) => x.balise === 'details' && x.className.split(' ').includes('repliable-groupe'));
-const groupesOuverts = (noeud) => groupesDe(noeud).filter((g) => g.open).map((g) => g.querySelector('summary').textContent);
-const dansRepliable = (n) => { for (let p = n.parent; p; p = p.parent) if (p.balise === 'details') return true; return false; };
-/** Noms des standards montrés d'emblée (hors catégories repliées), sans doublon, dans l'ordre. */
-const nomsEnVue = (noeud) => [...new Set(classes(noeud, 'ligne-standard').filter((l) => !dansRepliable(l)).map((l) => l.querySelector('strong').textContent))];
+// « Autres standards, par catégorie » : sections à plat (un titre h4 par catégorie), sous la section « Réglés ou utilisés ».
+const groupesDe = (noeud) => noeud.tous((x) => x.balise === 'h4' && x.className.split(' ').includes('bloc-titre'));
+const dansAutres = (n) => { for (let p = n.parent; p; p = p.parent) if (p.className.split(' ').includes('standards-autres')) return true; return false; };
+/** Noms des standards montrés d'emblée (hors « Autres standards, par catégorie »), sans doublon, dans l'ordre. */
+const nomsEnVue = (noeud) => [...new Set(classes(noeud, 'ligne-standard').filter((l) => !dansAutres(l)).map((l) => l.querySelector('strong').textContent))];
 const pastilleTexte = (noeud, texte) => classes(noeud, 'pastille').find((p) => p.textContent === texte);
 /** Texte de la portion annoncée en tête d'un composant. */
 const portionAffichee = (noeud) => classes(noeud, 'portion')[0]?.querySelector('strong').textContent;
@@ -709,7 +711,7 @@ const portionAffichee = (noeud) => classes(noeud, 'portion')[0]?.querySelector('
 // ---------------------------------------------------------------- réglages : standards maison
 
 // Adapté B-P0 : les quatre repères validés applicables (pâtes ×2, riz, légumineuses) sont indiqués ; il n'y en a pas d'autre.
-test('réglages : « Standards maison » en tête, groupée, repliée sans rien de réglé ni de saisi', () => {
+test('réglages : « Standards maison » en tête, groupée à plat, sans rien de réglé ni de saisi', () => {
   nettoyerPanneaux();
   magasin.remplacer(etatVide());
   const noeud = vues.reglages.rendre(magasin.etat(), 'standards');
@@ -725,10 +727,10 @@ test('réglages : « Standards maison » en tête, groupée, repliée sans rien 
     lignesStandards(magasin.etat()).length + lignesStandardsGroupes(magasin.etat()).length,
     'une ligne par famille et par rôle, plus une par catégorie et par rôle');
   assert.match(texte, /Légumes \(toute la catégorie\) en garniture/);
-  const resumes = groupesDe(noeud).map((g) => g.querySelector('summary').textContent);
+  const resumes = groupesDe(noeud).map((g) => g.textContent);
   assert.equal(resumes.length, GROUPES.length);
   GROUPES.forEach((g, i) => assert.match(resumes[i], new RegExp(`^${g.libelle} · \\d+ à régler$`)));
-  assert.deepEqual(groupesOuverts(noeud), [], 'rien de réglé, aucun menu saisi : tout est replié');
+  assert.equal(noeud.tous((x) => x.balise === 'details').length, 0, 'aucun repli : tout est à plat');
   assert.deepEqual(nomsEnVue(noeud), [], 'rien de réglé ni de saisi : rien d\'emblée');
   const total = lignesStandards(magasin.etat()).length + lignesStandardsGroupes(magasin.etat()).length;
   assert.match(texte, new RegExp(`${total} à régler`), 'compteur neutre');
@@ -746,12 +748,11 @@ test('réglages : « Standards maison » en tête, groupée, repliée sans rien 
   assert.equal(boutons(noeud).filter((b) => b.textContent === 'Valider la proposition').length, 4, 'une par ligne qui a un repère');
 });
 
-test('réglages : un standard réglé ou une famille saisie dans un menu est montré d\'emblée, le reste reste replié', () => {
+test('réglages : un standard réglé ou une famille saisie dans un menu est montré d\'emblée, le reste est dans « Autres standards »', () => {
   const e = etatSemaineSaisie(); // riz, carottes, poulet
   magasin.remplacer(e);
   const noeud = vues.reglages.rendre(magasin.etat(), 'standards');
   verifierTexte(noeud, 'réglages menus saisis');
-  assert.deepEqual(groupesOuverts(noeud), []);
   const noms = nomsEnVue(noeud);
   assert.ok(noms.includes('riz') && noms.includes('carottes'), 'riz et carottes sont dans un menu');
   assert.ok(!noms.includes('pommes de terre'));
@@ -776,7 +777,7 @@ test('réglages : la recherche locale filtre les standards sans accent ni casse,
   const trouvees = classes(noeud, 'ligne-standard');
   assert.ok(trouvees.length >= 2 && trouvees.length < avant);
   assert.ok(trouvees.every((l) => /carottes/i.test(l.textContent)), 'ne reste que ce qui correspond');
-  assert.equal(groupesDe(noeud).length, 0, 'pendant la recherche, une seule liste');
+  assert.equal(noeud.tous((x) => x.balise === 'h4').length, 0, 'pendant la recherche, une seule liste');
   champ.value = 'zzzz';
   await champ.declencher('input', { target: champ });
   assert.match(noeud.textContent, /Aucun standard ne correspond/);
@@ -1053,7 +1054,7 @@ function etatPourPortion() {
   prevision(e, S.lundi, 2, 20);
   return e;
 }
-const pageComposant = (nom = 'polenta') => vues.fiche.rendre(magasin.etat(), composantNomme(magasin.etat(), nom).id);
+const pageComposant = (nom = 'polenta') => fiche(magasin.etat(), composantNomme(magasin.etat(), nom).id);
 
 test('composant : la portion affiche son état de poids et son origine, pour chaque origine', async () => {
   const portionDe = (e, nom = 'polenta') => { magasin.remplacer(e); return portionAffichee(pageComposant(nom)); };
@@ -1085,10 +1086,10 @@ test('composant : la portion affiche son état de poids et son origine, pour cha
   // Une préparation maison se compte en quantité finie : pas de « poids cuit » pour une sauce.
   const riche = etatRiche();
   magasin.remplacer(riche.e);
-  assert.equal(portionAffichee(vues.fiche.rendre(magasin.etat(), riche.ids.prep)), 'Portion : 50 ml, quantité finie, corrigée pour ce plat');
-  assert.equal(portionAffichee(vues.fiche.rendre(magasin.etat(), riche.ids.sec)), 'Portion : 100 g, poids cuit, corrigée pour ce plat');
-  assert.equal(portionAffichee(vues.fiche.rendre(magasin.etat(), riche.ids.vague)), undefined, 'un composant générique n\'a pas de portion par produit');
-  assert.doesNotMatch(vues.fiche.rendre(magasin.etat(), riche.ids.vague).textContent, /Portion :/);
+  assert.equal(portionAffichee(fiche(magasin.etat(), riche.ids.prep)), 'Portion : 50 ml, quantité finie, corrigée pour ce plat');
+  assert.equal(portionAffichee(fiche(magasin.etat(), riche.ids.sec)), 'Portion : 100 g, poids cuit, corrigée pour ce plat');
+  assert.equal(portionAffichee(fiche(magasin.etat(), riche.ids.vague)), undefined, 'un composant générique n\'a pas de portion par produit');
+  assert.doesNotMatch(fiche(magasin.etat(), riche.ids.vague).textContent, /Portion :/);
 });
 
 test('composant : sans portion, un encadré propose deux gestes ; avec une portion, les deux gestes restent', () => {

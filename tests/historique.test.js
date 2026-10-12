@@ -1,7 +1,7 @@
 // Historique des semaines : domaine (ordre, semaine vide, ventes, total, état intact) et vue sous faux DOM (lecture seule). Jeux TEST_ONLY.
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { installerFauxDom } from './aide-dom.js';
+import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { assurerJour } from '../app/js/domaine/etat.js';
 import { historiqueSemaines } from '../app/js/domaine/historique.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
@@ -79,13 +79,20 @@ test('routeur : #/historique mène à la vue, onglet Semaine', () => {
   assert.equal(routeur.ONGLET_DE_VUE.historique, 'semaine');
 });
 
-test('vue : liste des semaines, jours et menus, sans bouton ni champ de saisie', () => {
+test('vue : une ligne par semaine (aucun repli) ; sa feuille montre les jours et menus, sans champ de saisie', () => {
   const p = page(etatJeu());
   assert.match(p.textContent, /Semaine du lundi 28 septembre/);
   assert.match(p.textContent, /ventes à compléter/);
-  assert.match(p.textContent, /PLAT_C/);
-  assert.equal(p.tous((x) => x.balise === 'details').length, 2);
-  assert.equal(p.tous((x) => ['button', 'input', 'textarea', 'select'].includes(x.balise)).length, 0);
+  assert.doesNotMatch(p.textContent, /PLAT_C/, 'les jours ne sont pas déroulés dans la page');
+  assert.equal(p.tous((x) => x.balise === 'details').length, 0);
+  assert.equal(p.tous((x) => ['input', 'textarea', 'select'].includes(x.balise)).length, 0);
+  const lignes = boutons(p);
+  assert.equal(lignes.length, 2, 'une ligne tappable par semaine');
+  lignes[0].click();
+  const [feuille] = panneauxOuverts(dom.corps);
+  assert.match(feuille.textContent, /PLAT_C/);
+  assert.equal(feuille.tous((x) => ['input', 'textarea', 'select'].includes(x.balise)).length, 0);
+  feuille.close();
 });
 
 test('vue : état vide', () => {

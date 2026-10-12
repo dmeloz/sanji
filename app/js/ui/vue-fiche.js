@@ -9,7 +9,7 @@ import { etapesComposant } from '../domaine/planification.js';
 import { LIBELLE_ESTIMATION_A_VALIDER, libelle } from '../domaine/statuts.js';
 import { aujourdhui } from '../magasin.js';
 import { h, svg } from './dom.js';
-import { bouton, ligneVide, lien, pastille, repliable } from './elements.js';
+import { bouton, ligneFeuille, ligneVide, lien, pastille } from './elements.js';
 import { pluriel, precisionQuantite, qteNoeuds, quantiteNoeuds } from './format.js';
 import { libelleAllergene } from './reference.js';
 import { blocReperes } from './reperes-metier.js';
@@ -207,7 +207,7 @@ export function rendre(etat, id) {
     sectionAllergenes(etat, c),
     blocReperes(c.famille, etat),
     (poste || fait) ? h('div', { classe: 'fiche-actions' }, poste, fait) : null,
-    repliable(h('strong', null, 'Plus de réglages'), false, sectionsReglages(etat, c, calc), { classe: 'carte fiche-reglages', id: 'fiche-reglages' }),
+    ligneFeuille('Plus de réglages', 'Plus de réglages', () => h('div', { classe: 'fiche-reglages-corps' }, sectionsReglages(etat, c, calc)), { classe: 'carte fiche-reglages', id: 'fiche-reglages' }),
   ];
   for (const s of sections) if (s) racine.appendChild(s);
   return racine;
