@@ -2,6 +2,7 @@
 // Rien n'est deviné : en cas de doute, la fonction renvoie un avertissement et laisse les champs vides.
 
 import { ajouterJours, joursEntre, jourSemaine } from './dates.js';
+import { cleLigne } from './lignes-ignorees.js';
 
 const JOURS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 const MOIS = ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre',
@@ -55,14 +56,16 @@ function estAnnotation(ligne) {
  * exactement deux plats est réparti (le premier est le menu 1, le second le menu 2) ; un autre nombre n'est pas réparti :
  * le jour est signalé (`avertissements`, `aVerifier` avec ses lignes) sans gêner les autres. Un même jour deux fois bloque tout.
  * @param {string} texte
+ * @param {object|null} [lignesIgnorees] `etat.lignes_ignorees` : une ligne apprise est écartée (listée dans `ignorees` et `apprises`)
  * @returns {{jours:{jourSemaine:number, numero:number, mois:number|null, menu1:string, menu2:string}[],
- *   lignes:string[], ignorees:string[], nonComprises:string[], avertissements:string[],
+ *   lignes:string[], ignorees:string[], apprises:string[], nonComprises:string[], avertissements:string[],
  *   aVerifier:{jourSemaine:number, libelle:string, plats:string[]}[]}}
  */
-export function analyserFeuille(texte) {
+export function analyserFeuille(texte, lignesIgnorees = null) {
   const jours = [];
   const lignes = [];
   const ignorees = [];
+  const apprises = []; // sous-ensemble de `ignorees` : lignes que la propriétaire a écartées (`lignesIgnorees`), à garder visibles
   const nonComprises = []; // sous-ensemble de `ignorees` : annotations et restes que rien ne reconnaît (ni prix, ni titre, ni enseigne)
   const avertissements = [];
   const aVerifier = [];
@@ -104,17 +107,18 @@ export function analyserFeuille(texte) {
     while (MOTIF_PRIX_FIN.test(ligne)) ligne = ligne.replace(MOTIF_PRIX_FIN, '').trim();
     if (MOTIF_TITRE.test(ligne)) { ignorees.push(ligne); continue; }
     if (estAnnotation(ligne)) { ignorees.push(ligne); nonComprises.push(ligne); continue; }
+    if (lignesIgnorees && Object.hasOwn(lignesIgnorees, cleLigne(ligne))) { ignorees.push(ligne); apprises.push(ligne); continue; }
     lignes.push(ligne);
     if (jours.length === 0) platAvantJour = true; else platsDuJour[jours.length - 1].push(ligne);
   }
   if (jours.length === 0) {
     avertissements.push('Aucun jour reconnu dans le texte : écrivez les jours sous la forme « lundi 5 octobre ».');
-    return { jours, lignes, ignorees, nonComprises, avertissements, aVerifier };
+    return { jours, lignes, ignorees, nonComprises, apprises, avertissements, aVerifier };
   }
   const repetes = jours.map((j) => j.jourSemaine).filter((j, i, tous) => tous.indexOf(j) !== i);
   if (repetes.length > 0) {
     avertissements.push('Un même jour apparaît deux fois dans le texte : les menus ne sont pas répartis.');
-    return { jours, lignes, ignorees, nonComprises, avertissements, aVerifier };
+    return { jours, lignes, ignorees, nonComprises, apprises, avertissements, aVerifier };
   }
   if (platAvantJour) {
     // La date est écrite entre ou après les plats : le rangement par jour n'est plus possible, on répartit deux par deux
@@ -122,10 +126,10 @@ export function analyserFeuille(texte) {
     if (lignes.length !== jours.length * 2) {
       avertissements.push(`${jours.length} jour(s) reconnu(s) mais ${lignes.length} ligne(s) de menu : il en faut deux par jour. `
         + 'Les menus ne sont pas répartis ; placez les lignes à la main.');
-      return { jours, lignes, ignorees, nonComprises, avertissements, aVerifier };
+      return { jours, lignes, ignorees, nonComprises, apprises, avertissements, aVerifier };
     }
     jours.forEach((jour, i) => { jour.menu1 = lignes[2 * i]; jour.menu2 = lignes[2 * i + 1]; });
-    return { jours, lignes, ignorees, nonComprises, avertissements, aVerifier };
+    return { jours, lignes, ignorees, nonComprises, apprises, avertissements, aVerifier };
   }
   jours.forEach((jour, i) => {
     const plats = platsDuJour[i];
@@ -135,7 +139,7 @@ export function analyserFeuille(texte) {
     aVerifier.push({ jourSemaine: jour.jourSemaine, libelle, plats });
     avertissements.push(`${libelle} : ${plats.length} ligne${plats.length > 1 ? 's' : ''} de menu au lieu de 2, à placer à la main.`);
   });
-  return { jours, lignes, ignorees, nonComprises, avertissements, aVerifier };
+  return { jours, lignes, ignorees, nonComprises, apprises, avertissements, aVerifier };
 }
 
 /**

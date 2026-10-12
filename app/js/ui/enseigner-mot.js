@@ -4,7 +4,7 @@
 import { estSauceAConfirmer } from '../domaine/etat.js';
 import { classerEtRetenir, retenirElement } from '../domaine/actions-fiches.js';
 import { enseignerMot } from '../domaine/actions-mots.js';
-import { CATEGORIES_MOT, categorieMotValide, choixMotDe } from '../domaine/mots-retenus.js';
+import { CATEGORIES_MOT, CLASSEMENTS_ELEMENT, categorieMotValide, choixMotDe } from '../domaine/mots-retenus.js';
 import { agirStrict } from '../magasin.js';
 import { h, svg } from './dom.js';
 import { bouton } from './elements.js';
@@ -16,6 +16,7 @@ const ICONES = {
   sauce: 'M12 3c3 4 6 6.5 6 10a6 6 0 0 1-12 0c0-3.5 3-6 6-10z',
   produit: 'M12 3l8 4.5v9L12 21l-8-4.5v-9z',
   garniture: 'M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M12 4v2M12 18v2M4 12h2M18 12h2',
+  mode: 'M4 18h16M6 18a6 6 0 0 1 12 0M12 8V5M9 9l-1.5-2M15 9l1.5-2',
 };
 
 /** Suggestion valide de l'élément, ou null. */
@@ -72,7 +73,7 @@ export function blocFicheElement(c, fiche, ouvrirFiche) {
   };
   return h('section', { classe: 'enseigner', 'aria-label': 'Fiche de l\'élément' },
     h('p', { classe: 'aide' }, fiche ? `« ${c.nom} » a sa fiche. Catégorie :` : `« ${c.nom} » n'a pas encore de fiche. Catégorie :`),
-    h('div', { classe: 'actions' }, Object.keys(CATEGORIES_MOT).map((cle) => h('button', {
+    h('div', { classe: 'actions' }, CLASSEMENTS_ELEMENT.map((cle) => h('button', {
       type: 'button', classe: `btn btn-court enseigner-choix${cle === actuel ? ' btn-principal' : ''}`, 'aria-pressed': cle === actuel ? 'true' : 'false', onClick: () => choisir(cle),
     }, iconeChoix(cle), cle === actuel ? `${CATEGORIES_MOT[cle]} · actuel` : CATEGORIES_MOT[cle]))),
     h('div', { classe: 'actions' }, fiche ? bouton('Voir sa fiche retenue', ouvrirFiche, 'court')

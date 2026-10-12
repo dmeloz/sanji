@@ -313,6 +313,8 @@ export function rendre(etat, lundi) {
   if (reprise !== null) {
     champs.get('feuille-texte').value = reprise.texte;
     repartir(champs, lundi, { deplaceeDepuis: reprise.depuis });
+    // La valeur saisie à la main gagne sur la répartition (un champ vide n'a rien saisi : il laisse la répartition remplir).
+    for (const [k, v] of Object.entries(reprise.valeurs ?? {})) if (champs.has(k) && String(v).trim() !== '') champs.get(k).value = v;
     majLecture();
   }
   return racine;

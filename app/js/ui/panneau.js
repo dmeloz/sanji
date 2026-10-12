@@ -76,11 +76,12 @@ export function panneau(options) {
 }
 
 /** Confirmation explicite avant une action irréversible ou lourde. `action` peut lever une Error. */
-export function confirmer({ titre, texte, libelleOk = 'Confirmer', danger = false, action }) {
+export function confirmer({ titre, texte, libelleOk = 'Confirmer', libelleAnnuler = 'Annuler', danger = false, action }) {
   return panneau({
     titre,
     corps: [h('p', null, texte)],
     libelleEnregistrer: libelleOk,
+    libelleAnnuler,
     danger,
     surEnregistrer: action,
   });

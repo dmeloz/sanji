@@ -3,10 +3,13 @@
 
 import { normaliser } from './etat.js';
 
-/** Les quatre classements possibles d'un mot, avec leur libellé. */
+/** Les classements possibles d'un mot, avec leur libellé (« mode » : mode de préparation, v128 ; il reste « à confirmer » à la lecture). */
 export const CATEGORIES_MOT = Object.freeze({
-  forme_pates: 'Forme de pâtes', sauce: 'Sauce', produit: 'Produit', garniture: 'Garniture',
+  forme_pates: 'Forme de pâtes', sauce: 'Sauce', produit: 'Produit', garniture: 'Garniture', mode: 'Mode de préparation',
 });
+
+/** Les quatre classements d'un ÉLÉMENT (fiche retenue, page des fiches) : un mode ne concerne que la lecture d'un mot. */
+export const CLASSEMENTS_ELEMENT = Object.freeze(Object.keys(CATEGORIES_MOT).filter((c) => c !== 'mode'));
 
 export const MOT_MAX = 40;
 /** Nombre maximal de mots gardés à l'import (le surplus est écarté). */
@@ -38,8 +41,10 @@ export function expressionsApprises(mots) {
     .filter(([mot, e]) => mot !== '' && categorieMotValide(e?.categorie))
     .map(([mot, e]) => ({
       mots: mot.split(' '), appris: true, lexique: false,
-      categorie: { forme_pates: 'feculent', sauce: 'sauce', produit: 'autre', garniture: 'autre' }[e.categorie],
-      kind: { forme_pates: 'pate', sauce: 'sauce', produit: null, garniture: 'garniture' }[e.categorie],
+      categorie: { forme_pates: 'feculent', sauce: 'sauce', produit: 'autre', garniture: 'autre', mode: 'autre' }[e.categorie],
+      kind: { forme_pates: 'pate', sauce: 'sauce', produit: null, garniture: 'garniture', mode: 'mode' }[e.categorie],
+      // Un mode appris se lit comme les modes fixes : « à confirmer », sans composition (rien n'est décidé à la place de la propriétaire).
+      ...(e.categorie === 'mode' ? { mode: { ingredients: [] } } : {}),
     }))
     .sort((a, b) => b.mots.length - a.mots.length);
 }
@@ -50,6 +55,7 @@ export function champsPourMot(categorie, menu) {
   switch (categorie) {
     case 'forme_pates': return { categorie: 'feculent', attribue: true };
     case 'sauce': return { categorie: 'sauce', role: 'sauce', attribue: poste };
+    case 'mode': // le classement est celui d'une garniture : sa composition et son attribution restent à confirmer
     case 'garniture': return { categorie: 'autre', role: 'garniture', attribue: poste };
     case 'produit': return { categorie: 'autre', attribue: poste };
     default: throw new Error(`Classement de mot inconnu : « ${categorie} ».`);

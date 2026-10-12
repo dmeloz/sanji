@@ -6,14 +6,15 @@ import { saisirMenusSemaine } from '../domaine/actions.js';
 import { ajouterJours, libelleJour } from '../domaine/dates.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { analyserFeuille, repartirSurSemaine } from '../domaine/feuille.js';
-import { agir } from '../magasin.js';
+import { ignorerLigne, oublierLigne } from '../domaine/actions-mots.js';
+import { agir, etat as etatActuel } from '../magasin.js';
 import { champs as construireChamps } from './champs.js';
 import { h } from './dom.js';
 import { bouton, encadre, pastille } from './elements.js';
 import { parseEntier, pluriel } from './format.js';
 import { noter } from './journal-diagnostic.js';
 import { afficherMessage } from './messages.js';
-import { panneau } from './panneau.js';
+import { confirmer, panneau } from './panneau.js';
 
 export const JOURS_A_MENU = [0, 1, 2, 3, 4]; // lundi à vendredi
 
@@ -117,10 +118,21 @@ function zoneLue(champs, lundi, saisie, nonComprises, enregistrerLeLu) {
       enregistrerLeLu ? bouton('Enregistrer le lu', enregistrerLeLu, 'principal') : null));
 }
 
+/**
+ * Geste sur une ligne : l'écarter ou la remettre pour toutes les semaines. L'état change, la page est redessinée (le routeur la
+ * refait) : le texte collé est donc repris tel quel et réparti à nouveau, rien n'est enregistré dans la semaine.
+ */
+function apprendreLigne(champs, lundi, fonction) {
+  // Les intitulés et portions tapés à la main sont repris aussi : la saisie gagne sur la répartition (vue-import.js).
+  const valeurs = Object.fromEntries([...champs].filter(([k]) => /^(menu|prevision)-/.test(k)).map(([k, c]) => [k, c.value]));
+  texteAReprendre = { texte: champs.get('feuille-texte').value, depuis: null, valeurs };
+  if (!agir(fonction).ok) texteAReprendre = null;
+}
+
 /** Remplit les champs à partir du texte collé. N'enregistre rien. `deplaceeDepuis` : le lundi de l'écran où il a été collé. */
 export function repartir(champs, lundi, { deplaceeDepuis = null, enregistrerLeLu = null } = {}) {
   const retour = champs.get('feuille-retour');
-  const analyse = analyserFeuille(champs.get('feuille-texte').value);
+  const analyse = analyserFeuille(champs.get('feuille-texte').value, etatActuel()?.lignes_ignorees);
   const { saisie, avertissements, corrections, semaine } = repartirSurSemaine(analyse, lundi);
   if (deplaceeDepuis === null && semaine && semaine.lundi !== lundi && semaine.accord >= JOURS_D_ACCORD) {
     texteAReprendre = { texte: champs.get('feuille-texte').value, depuis: lundi };
@@ -158,13 +170,27 @@ export function repartir(champs, lundi, { deplaceeDepuis = null, enregistrerLeLu
   // Un jour douteux garde ses lignes visibles (rien n'y est réparti) ; les autres jours sont remplis.
   for (const jour of analyse.aVerifier) {
     messages.push(h('p', { classe: 'aide' }, `${jour.libelle} : lignes lues, à placer à la main dans les menus du jour.`),
-      jour.plats.length === 0 ? null : h('ul', { classe: 'liste-simple lignes-ecartees' }, jour.plats.map((ligne) => h('li', null, ligne))));
+      jour.plats.length === 0 ? null : h('ul', { classe: 'liste-simple lignes-ecartees' }, jour.plats.map((ligne) => h('li', null,
+        h('span', null, ligne),
+        bouton('Pas un plat, l\'ignorer à l\'avenir', () => confirmer({
+          titre: 'Écarter cette ligne ?',
+          texte: 'Cette ligne sera écartée pour toutes les semaines. Vous pourrez la remettre ou l\'oublier dans Réglages > Apprentissage.',
+          libelleOk: 'Oui',
+          action: () => apprendreLigne(champs, lundi, (e, t) => ignorerLigne(e, ligne, t)),
+        }), 'court',
+          { 'aria-label': `Pas un plat, l'ignorer à l'avenir : ${ligne}` })))));
+  }
+  if (analyse.apprises.length > 0) {
+    messages.push(encadre('info', `${pluriel(analyse.apprises.length, 'ligne écartée apprise', 'lignes écartées apprises')} : voir ci-dessous.`));
   }
   if (analyse.ignorees.length > 0) {
     messages.push(h('p', { classe: 'aide' }, 'Lignes laissées de côté (prix, titre, annotations). Une ligne utile peut être remise dans un menu :'),
-      h('ul', { classe: 'liste-simple lignes-ecartees' }, analyse.ignorees.map((ligne) => h('li', null,
-        h('span', null, ligne),
-        bouton('Ajouter à un menu', () => dialogRestaurer(champs, lundi, ligne), 'court', { 'aria-label': `Ajouter « ${ligne} » à un menu` })))));
+      h('ul', { classe: 'liste-simple lignes-ecartees' }, analyse.ignorees.map((ligne) => (analyse.apprises.includes(ligne)
+        ? h('li', null, h('span', null, ligne), pastille('écartée', 'gris'),
+          bouton('Remettre', () => apprendreLigne(champs, lundi, (e, t) => oublierLigne(e, ligne, t)), 'court', { 'aria-label': `Remettre la ligne écartée : ${ligne}` }))
+        : h('li', null,
+          h('span', null, ligne),
+          bouton('Ajouter à un menu', () => dialogRestaurer(champs, lundi, ligne), 'court', { 'aria-label': `Ajouter « ${ligne} » à un menu` }))))));
   }
   if (analyse.nonComprises.length > 0) messages.push(zoneLue(champs, lundi, saisie, analyse.nonComprises, enregistrerLeLu));
   if (jours.length === 0 && avertissements.length === 0) messages.push(encadre('alerte', 'Aucun menu reconnu dans ce texte.'));
