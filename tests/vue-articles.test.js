@@ -185,3 +185,16 @@ test('CSS : cibles de 44 px, quantité en police dédiée, barre de partage fixe
   assert.match(css, /\.au-qte \{[^}]*var\(--police-qte\)/);
   assert.doesNotMatch(bloc, /gradient|https?:\/\//);
 });
+
+test('texteDeLaListe : seules les lignes non cochées sont partagées ; tout coché = « Rien à commander »', () => {
+  const art = (nom, coche) => ({ nom, coche, menu: 1, dateService: '2026-10-05', quantite: 500, unite: 'g' });
+  const jours = [
+    { date: '2026-10-05', services: ['2026-10-05'], estAujourdhui: true, articles: [art('A_FAIRE_TEST', false), art('DEJA_TEST', true)] },
+    { date: '2026-10-06', services: ['2026-10-06'], estAujourdhui: false, articles: [art('TOUT_COCHE_TEST', true)] },
+  ];
+  const texte = vue.texteDeLaListe(jours);
+  assert.match(texte, /A_FAIRE_TEST/);
+  assert.doesNotMatch(texte, /DEJA_TEST|TOUT_COCHE_TEST|\[x\]/);
+  assert.doesNotMatch(texte, /Mardi 6/, 'un jour entièrement coché disparaît');
+  assert.equal(vue.texteDeLaListe([jours[1]]), 'Rien à commander.');
+});

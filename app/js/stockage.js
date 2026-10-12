@@ -118,3 +118,23 @@ export async function supprimerPhoto(date) {
     // Base inaccessible : la copie en mémoire est déjà retirée.
   }
 }
+
+// Accès par clé au magasin « etat », pour les copies de sécurité (sauvegarde-auto.js). La clé de l'état courant
+// (« principal ») ne sert qu'à chargerEtat/enregistrerEtat ; les copies ont toutes le préfixe « copie| ».
+
+/** Toutes les clés du magasin « etat ». */
+export async function listerCles() {
+  return (await transaction(MAGASIN_ETAT, 'readonly', (s) => s.getAllKeys())) ?? [];
+}
+
+export async function lireCle(cle) {
+  return (await transaction(MAGASIN_ETAT, 'readonly', (s) => s.get(cle))) ?? null;
+}
+
+export async function ecrireCle(cle, valeur) {
+  await transaction(MAGASIN_ETAT, 'readwrite', (s) => s.put(valeur, cle));
+}
+
+export async function supprimerCle(cle) {
+  await transaction(MAGASIN_ETAT, 'readwrite', (s) => s.delete(cle));
+}

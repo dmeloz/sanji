@@ -44,12 +44,13 @@ function titreJour(j) {
 /** Quantité en g ou kg comme Production, ou null si elle est inconnue. */
 const texteQuantite = (a) => (a.quantite !== null ? quantiteEnPoids(a.quantite, a.unite) : null);
 
-/** La liste en texte simple, pour la partager : un jour de production par bloc, une ligne par article, les cases cochées marquées. */
+/** La liste en texte simple, pour la partager : un jour de production par bloc, une ligne par article NON coché (le reste est déjà fait). */
 export function texteDeLaListe(jours) {
-  return jours.map((j) => [titreJour(j), ...j.articles.map((a) => {
+  const blocs = jours.map((j) => [titreJour(j), ...j.articles.filter((a) => !a.coche).map((a) => {
     const service = a.dateService === j.date ? `menu ${a.menu}` : `${jourCourt(a.dateService)} · menu ${a.menu}`;
-    return `${a.coche ? '[x]' : '[ ]'} ${a.nom} (${service}) · ${texteQuantite(a) ?? 'à chiffrer'}`;
-  })].join('\n')).join('\n\n');
+    return `[ ] ${a.nom} (${service}) · ${texteQuantite(a) ?? 'à chiffrer'}`;
+  })]).filter((lignes) => lignes.length > 1);
+  return blocs.length === 0 ? 'Rien à commander.' : blocs.map((lignes) => lignes.join('\n')).join('\n\n');
 }
 
 /** Partage natif (iPhone) ; à défaut, copie dans le presse-papiers ; sinon un message. Annuler le partage n'est pas une erreur. */

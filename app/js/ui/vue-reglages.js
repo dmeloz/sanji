@@ -19,6 +19,7 @@ import { VERSION_APP } from '../version.js';
 import { agir, agirStrict, aujourdhui, etat as etatCourant, maintenant, redessiner, remplacer, statutStockage } from '../magasin.js';
 import { assistantPret, cleMasquee, effacerReglagesIA, enregistrerReglagesIA, lireReglagesIA } from './assistant-reglages.js';
 import { champs } from './champs.js';
+import { sectionCopies } from './section-copies.js';
 import { ouvrirValidation } from './feuille-validation.js';
 import { MODELES } from './fournisseur-web.js';
 import { h } from './dom.js';
@@ -777,7 +778,7 @@ const RUBRIQUES = [
     blocs: (e) => sectionsApprentissage(e) },
   { cle: 'donnees', titre: 'Données et hors ligne',
     resume: (e) => (e.reglages.dernierExport ? `dernier export : ${formaterHeure(e.reglages.dernierExport)}` : 'aucun export noté sur cet appareil'),
-    blocs: (e) => [sectionSauvegarde(), sectionEtat(), sectionJournal(e)] },
+    blocs: (e) => [sectionSauvegarde(), sectionCopies(), sectionEtat(), sectionJournal(e)] },
 ];
 
 export const CLES_RUBRIQUES = RUBRIQUES.map((r) => r.cle);
