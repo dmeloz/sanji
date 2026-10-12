@@ -3,6 +3,7 @@
 
 import { ajouterJournal, etatInitial, importer, exporter } from './domaine/etat.js';
 import { chargerEtat, demanderPersistance, enregistrerEtat, stockageDisponible } from './stockage.js';
+import { copieDuJour } from './sauvegarde-auto.js';
 import { horodatageLocal } from './ui/format.js';
 
 let etatCourant = etatInitial();
@@ -14,6 +15,15 @@ const statut = { enregistre: false, raison: 'démarrage en cours', persistant: n
 
 let ecritureEnCours = false;
 let ecritureEnAttente = false;
+let jourCopieTente = null;
+
+/** Copie de sécurité du jour, une seule tentative par jour et par session ; jamais attendue, jamais bloquante. */
+function copierSiBesoin() {
+  const jour = aujourdhui();
+  if (jour === jourCopieTente || statut.illisible || !statut.utilisable) return;
+  jourCopieTente = jour;
+  try { copieDuJour(exporter(etatCourant, maintenant()), jour).catch(() => {}); } catch { /* jamais bloquant */ }
+}
 
 /** Heure locale « AAAA-MM-JJTHH:MM:SS » (sans Z). */
 export function maintenant() { return horodatageLocal(new Date()); }
@@ -42,6 +52,7 @@ async function ecrire() {
       try {
         await enregistrerEtat(etatCourant);
         if (!statut.enregistre) { statut.enregistre = true; statut.raison = ''; redessiner(); }
+        copierSiBesoin();
       } catch (erreur) {
         statut.enregistre = false;
         statut.raison = erreur?.message ?? 'écriture impossible';
@@ -81,6 +92,7 @@ export async function charger() {
         etatCourant = etatInitial();
         signaler('Les données enregistrées sur cet appareil sont illisibles. Rien ne sera écrasé : restaurez une sauvegarde pour reprendre.', 'erreur');
       }
+      copierSiBesoin();
     }
   } catch (erreur) {
     statut.enregistre = false;
