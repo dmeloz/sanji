@@ -5,7 +5,7 @@ import { classer } from './actions-mots.js';
 import { elementsDeLaSemaine, lectureDeCloture } from './cloture.js';
 import { cleMemoire, estSauceAConfirmer, normaliser } from './etat.js';
 import { nomDeFiche } from './fiches-elements.js';
-import { FICHES_MAX, NOM_MAX, champsDeComposant, cleDeNom, evincerLePlusAncien, grammageValide, reprendreSurAVenir, retenirFiche } from './fiches-retenues.js';
+import { FICHES_MAX, NOM_MAX, champsDeComposant, cleDeNom, evincerLePlusAncien, grammageValide, reprendreSurAVenir, retenirFiche, verbeValide } from './fiches-retenues.js';
 import { categorieMotValide, champsPourMot } from './mots-retenus.js';
 import { ROLES_STANDARD, familleDe } from './savoir.js';
 import { ETAT_POIDS } from './statuts.js';
@@ -213,3 +213,17 @@ export function definirPortionFiche(etat, cle, valeur, etatPoids, h) {
   return { portee: 'fiche' };
 }
 
+
+/**
+ * Verbe de mise en place d'un élément AU POSTE (« Cuire », « Sauter »… ou `aucun`) : retenu dans sa fiche, repris sur ses lignes
+ * de Production. Un élément hors poste n'a pas de fiche : refusé.
+ */
+export function definirVerbe(etat, composantId, verbe, h) {
+  verifierH(h);
+  const c = etat.composants[composantId];
+  if (!c) throw new Error('Composant introuvable.');
+  if (c.attribue !== true) throw new Error('Seul un élément au poste a une fiche.');
+  if (!verbeValide(verbe)) throw new Error(`Verbe inconnu : « ${verbe} ».`);
+  retenirFiche(etat, c.nom, { verbe }, h);
+  return terminer(etat, h, 'definirVerbe', `${c.nom} : ${verbe}`, true);
+}

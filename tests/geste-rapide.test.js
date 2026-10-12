@@ -127,6 +127,19 @@ test('apprentissage : « Oui » accepte la proposition, « Non » l\'écarte ; l
   assert.equal(magasin.etat().standards.riz?.garniture, undefined, 'rien n\'est appliqué');
 });
 
+test('apprentissage « première valeur » (actuelle null) : « Oui » pose le standard', () => {
+  const e = calme(etatVide());
+  ['a', 'b'].forEach((x, i) => {
+    e.composants[`p${i}`] = { ...composantVide(`p${i}`), date: `2026-10-0${i + 1}`, menu: 1, nom: `polenta ${x}`, categorie: 'feculent', famille: 'polenta',
+      role: 'garniture', attribue: true, valide: true, grammage: { valeur: 150, unite: 'g', etat: 'cuit', statut: 'RESTAURANT_VALIDE', source: 'corrigé pour ce plat' } };
+  });
+  const carte = cartes(e).find((c) => c.genre === 'apprentissage');
+  assert.equal(carte.proposition.premiereValeur, true);
+  assert.equal(carte.proposition.actuelle, null);
+  toucher(e, S.lundi, 'apprentissage', /^Oui$/);
+  assert.equal(magasin.etat().standards.polenta.garniture.valeur, 150);
+});
+
 test('répartition provisoire : « Confirmer telle quelle » garde la répartition et la confirme', () => {
   const e = avecRepartition();
   const { carte, apres } = toucher(e, S.mercredi, 'repartition', /^Confirmer telle quelle$/);

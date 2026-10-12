@@ -12,18 +12,25 @@
 // (`reprendreMemoire`, marqué `repris`) n'est pas une correction ; dès que les deux sens sont présents, rien n'est proposé : la médiane des valeurs corrigées
 // dans ce sens, arrondie au gramme. Seules comptent les corrections postérieures au dernier standard maison (celui
 // qu'on vient de valider ne se rediscute pas avec les corrections qui l'ont produit). Rien n'est appliqué ici.
+// Première valeur (v129, principe 13) : une famille SANS aucun standard (ni maison ni de base : polenta, quinoa, orge…) reçoit
+// une proposition dès 2 valeurs concordantes (même famille, même rôle, même état du poids, écart de 10 % au plus, jamais une
+// date future) tapées pour des plats ou des fiches retenues différents : médiane arrondie. Même silence, mêmes gestes.
 // Une proposition écartée (`etat.validations['apprentissage:famille|rôle']`, statut « ecarte ») se tait 30 jours, ou
 // jusqu'à 3 nouvelles corrections.
 
 import { ajouterJours, joursEntre } from './dates.js';
 import { normaliser } from './etat.js';
-import { GROUPES, ROLES_STANDARD, cleStandardGroupe, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
+import { nomDeFiche } from './fiches-elements.js';
+import { GROUPES, ROLES_STANDARD, cleStandardGroupe, familleDe, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import { estStandardBase, libelle } from './statuts.js';
 import { cleStandardDe } from './validation.js';
 
 export const MIN_CORRECTIONS = 3;
 export const JOURS_FENETRE = 30;
 export const JOURS_SILENCE = 30;
+export const MIN_PREMIERES_VALEURS = 2;
+/** Écart maximal (rapport du plus grand au plus petit) pour que des valeurs soient dites concordantes. */
+const ECART_CONCORDANT = 1.1;
 
 /** Clé, dans `etat.validations`, de l'état d'une proposition (famille ou catégorie, et rôle). */
 export const cleApprentissage = (cleFamille, role) => `apprentissage:${cleFamille}|${role}`;
@@ -66,13 +73,52 @@ function corrections(etat, debut, fin) {
     if (!cleFamille || !ROLES_STANDARD.includes(c.role)) continue;
     const actuel = grammageEffectif(sansMemoire, { ...c, grammage: { valeur: null, unite: g.unite, statut: 'INCONNU', source: '', etat: g.etat } });
     // Comparable seulement dans la même unité et le même état du poids.
-    if (!actuel || actuel.unite !== g.unite || actuel.etat !== (g.etat ?? 'cuit') || actuel.valeur === g.valeur) continue;
+    // Sans aucun standard (`actuel` null) : valeur d'une première proposition, voir `premieresValeurs`.
+    if (actuel && (actuel.unite !== g.unite || actuel.etat !== (g.etat ?? 'cuit') || actuel.valeur === g.valeur)) continue;
     liste.push({
       id: c.id, nom: c.nom, date: c.date, cleFamille, role: c.role, unite: g.unite, etatPoids: g.etat ?? 'cuit',
-      valeur: g.valeur, menu: c.menu ?? 0, sens: g.valeur > actuel.valeur ? 'plus' : 'moins', actuel,
+      valeur: g.valeur, menu: c.menu ?? 0, sens: actuel ? (g.valeur > actuel.valeur ? 'plus' : 'moins') : null, actuel,
     });
   }
   return liste;
+}
+
+/** Portions des fiches retenues dont la famille et le rôle n'ont aucun standard, dans la fenêtre (jamais une date future). */
+function valeursDeFiches(etat, debut, fin) {
+  const liste = [];
+  for (const [cle, f] of Object.entries(etat.fiches_retenues ?? {})) {
+    const g = f.grammage;
+    const jour = jourDe(f.h);
+    if (!positif(g?.valeur) || !ROLES_STANDARD.includes(f.role) || jour < debut || jour > fin) continue;
+    const nom = nomDeFiche(cle, f);
+    const cleFamille = f.famille ?? familleDe(nom)?.cle;
+    if (!cleFamille) continue;
+    const sansStandard = grammageEffectif({ ...etat, memoire: {} }, { nom, famille: cleFamille, role: f.role, categorie: f.categorie, menu: 1,
+      grammage: { valeur: null, unite: g.unite, statut: 'INCONNU', source: '', etat: g.etat } }) === null;
+    if (!sansStandard) continue;
+    liste.push({ id: `fiche:${cle}`, nom, date: jour, cleFamille, role: f.role, unite: g.unite, etatPoids: g.etat, valeur: g.valeur,
+      menu: 0, sens: null, actuel: null });
+  }
+  return liste;
+}
+
+/**
+ * Valeurs concordantes d'une famille sans standard : un plat (nom normalisé) compte une fois (sa valeur la plus récente), une
+ * fiche retenue du même nom que le plat aussi. Renvoie les groupes de MIN_PREMIERES_VALEURS valeurs au moins, toutes à 10 %
+ * les unes des autres ; ceux qui divergent n'en donnent aucun.
+ */
+function premieresValeurs(etat, debut, fin, corrigees) {
+  const parPlat = new Map();
+  const toutes = [...corrigees.filter((x) => !x.actuel), ...valeursDeFiches(etat, debut, fin)]
+    .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+  for (const x of toutes) {
+    if (x.date <= dernierStandard(etat, x.cleFamille, x.role)) continue;
+    parPlat.set(`${x.cleFamille}|${x.role}|${x.etatPoids}|${x.unite}|${normaliser(x.nom)}`, x);
+  }
+  const groupes = new Map();
+  for (const [plat, x] of parPlat) groupes.set(plat.slice(0, plat.lastIndexOf('|')), [...(groupes.get(plat.slice(0, plat.lastIndexOf('|'))) ?? []), x]);
+  return [...groupes.values()].filter((l) => l.length >= MIN_PREMIERES_VALEURS
+    && Math.max(...l.map((x) => x.valeur)) <= Math.min(...l.map((x) => x.valeur)) * ECART_CONCORDANT);
 }
 
 /**
@@ -89,7 +135,8 @@ export function propositionsApprentissage(etat, aujourdhui) {
   const groupes = new Map();
   // Une correction par plat (nom normalisé) et par jour au plus : le même plat corrigé en menu 1 et en menu 2 compte une fois.
   const vusParJour = new Set();
-  const triees = corrections(etat, debut, aujourdhui).sort((a, b) => a.menu - b.menu || a.id.localeCompare(b.id));
+  const toutes = corrections(etat, debut, aujourdhui);
+  const triees = toutes.filter((x) => x.actuel).sort((a, b) => a.menu - b.menu || a.id.localeCompare(b.id));
   for (const x of triees) {
     if (x.date <= dernierStandard(etat, x.cleFamille, x.role)) continue;
     const cle = `${x.cleFamille}|${x.role}|${x.etatPoids}|${x.unite}`;
@@ -100,12 +147,14 @@ export function propositionsApprentissage(etat, aujourdhui) {
     groupes.get(cle).push(x);
   }
   const propositions = [];
-  for (const toutes of groupes.values()) {
+  const candidats = [...groupes.values()].map((g) => {
     // Les deux sens dans la fenêtre : pas de tendance, rien à proposer (même si un sens atteint le seuil).
-    const [plus, moins] = ['plus', 'moins'].map((sens) => toutes.filter((x) => x.sens === sens));
-    if (plus.length > 0 && moins.length > 0) continue;
-    const liste = plus.length > 0 ? plus : moins;
-    if (liste.length < MIN_CORRECTIONS) continue;
+    const [plus, moins] = ['plus', 'moins'].map((sens) => g.filter((x) => x.sens === sens));
+    const liste = plus.length > 0 && moins.length > 0 ? [] : (plus.length > 0 ? plus : moins);
+    return liste.length >= MIN_CORRECTIONS ? liste : [];
+  }).concat(premieresValeurs(etat, debut, aujourdhui, toutes));
+  for (const liste of candidats) {
+    if (liste.length === 0) continue;
     const { cleFamille, role, etatPoids, unite, sens } = liste[0];
     const ecart = etat.validations?.[cleApprentissage(cleFamille, role)];
     if (ecart?.statut === 'ecarte') {
@@ -117,16 +166,19 @@ export function propositionsApprentissage(etat, aujourdhui) {
     const ordonnees = [...liste].sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
     const actuelle = ordonnees.at(-1).actuel;
     const valeur = Math.round(mediane(liste.map((x) => x.valeur)));
-    if (!positif(valeur) || valeur === actuelle.valeur) continue;
+    if (!positif(valeur) || valeur === actuelle?.valeur) continue;
     const nom = libelleDe(cleFamille);
     const roleTexte = role.replace('_', ' ');
     propositions.push({
       cle: cleApprentissage(cleFamille, role), cleFamille, libelle: nom, role, etatPoids, unite, valeur, sens,
+      premiereValeur: !actuelle,
       nombre: liste.length, dates: ordonnees.map((x) => x.date), valeursCorrigees: ordonnees.map((x) => x.valeur),
-      actuelle: { valeur: actuelle.valeur, unite: actuelle.unite, etat: actuelle.etat, origine: actuelle.origine, source: actuelle.source },
+      actuelle: actuelle ? { valeur: actuelle.valeur, unite: actuelle.unite, etat: actuelle.etat, origine: actuelle.origine, source: actuelle.source } : null,
       historique: ordonnees.slice(-5).map((x) => ({ date: x.date, nom: x.nom, valeur: x.valeur })),
       composantIds: ordonnees.map((x) => x.id),
-      texte: `Vous corrigez souvent ${nom} (${roleTexte}) vers ${valeur} ${libelle('UNITE', unite)} : en faire votre standard ?`,
+      texte: actuelle
+        ? `Vous corrigez souvent ${nom} (${roleTexte}) vers ${valeur} ${libelle('UNITE', unite)} : en faire votre standard ?`
+        : `Vous avez tapé ${liste.length} fois à peu près ${valeur} ${libelle('UNITE', unite)} pour ${nom} (${roleTexte}) : en faire votre première valeur ?`,
     });
   }
   return propositions.sort((a, b) => a.libelle.localeCompare(b.libelle) || a.role.localeCompare(b.role)

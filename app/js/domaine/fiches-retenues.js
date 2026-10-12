@@ -3,7 +3,8 @@
 //  - `etat.fiches_retenues` : { [nom correct normalisé]: { nom?, famille?, categorie?, role?, attribue?, grammage?: {valeur, unite, etat}, h } },
 //    la fiche d'un ÉLÉMENT AU POSTE (v118 : jamais d'un plat entier ni d'un élément hors poste, dont la décision reste dans
 //    `etat.memoire`), indépendante du menu ; reprise à la création d'un élément du même nom. `nom` = nom d'affichage ;
-//    `famille` = clé de famille du lexique. `attribue` (vrai) ne s'écrit et ne se lit qu'en menu 2.
+//    `famille` = clé de famille du lexique. `verbe` (v129) = verbe de mise en place choisi par la propriétaire (liste `VERBES`, ou
+//    `aucun`) ; une fiche peut ne retenir que lui. `attribue` (vrai) ne s'écrit et ne se lit qu'en menu 2.
 
 import { normaliser } from './etat.js';
 import { CATEGORIE, ETAT_POIDS, ROLE, UNITE } from './statuts.js';
@@ -11,6 +12,10 @@ import { CATEGORIE, ETAT_POIDS, ROLE, UNITE } from './statuts.js';
 export const NOM_MAX = 60;
 /** Plafond d'entrées de chaque collection (le surplus est écarté à l'import, l'écriture d'une 501e est ignorée). */
 export const FICHES_MAX = 500;
+/** Verbes de mise en place proposés (vocabulaire général, sans chiffre). `aucun` = la ligne n'affiche aucun verbe. */
+export const VERBES = Object.freeze(['Cuire', 'Sauter', 'Rôtir', 'Blanchir', 'Éplucher', 'Tailler', 'Mixer', 'Réduire', 'Pocher', 'Gratiner', 'Braiser', 'Griller']);
+export const AUCUN_VERBE = 'aucun';
+export const verbeValide = (v) => v === AUCUN_VERBE || VERBES.includes(v);
 const CLES_INTERDITES = new Set(['__proto__', 'constructor', 'prototype']);
 
 const estObjet = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -51,6 +56,7 @@ function ficheValide(f) {
   if (dans(CATEGORIE, f.categorie) && f.categorie !== 'a_preciser') s.categorie = f.categorie;
   if (dans(ROLE, f.role)) s.role = f.role;
   if (typeof f.attribue === 'boolean') s.attribue = f.attribue;
+  if (verbeValide(f.verbe)) s.verbe = f.verbe;
   const g = grammageValide(f.grammage);
   if (g && s.role) s.grammage = g; // une portion n'a de sens que pour un rôle
   if (Object.keys(s).length === 0) return null;
@@ -129,7 +135,9 @@ export function retenirFiche(etat, nom, champs, h) {
   if (!ajout) return; // rien de valide : rien n'est écrit ni évincé
   const existe = Object.hasOwn(etat.fiches_retenues, cle);
   if (!existe) evincerLePlusAncien(etat.fiches_retenues, FICHES_MAX);
-  etat.fiches_retenues[cle] = { ...(existe ? etat.fiches_retenues[cle] : {}), ...ajout, h };
+  // Régler seulement le verbe ne rajeunit pas la fiche : `h` date sa portion (apprentissage des premières valeurs).
+  const seulVerbe = existe && Object.keys(champs).every((k) => k === 'verbe') && etat.fiches_retenues[cle].h;
+  etat.fiches_retenues[cle] = { ...(existe ? etat.fiches_retenues[cle] : {}), ...ajout, h: seulVerbe || h };
 }
 
 /**

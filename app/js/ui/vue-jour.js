@@ -17,6 +17,7 @@ import { agir } from '../magasin.js';
 import { bouton, etatVide, imprimer, encadre, ligneVide, lien, ouvrirFeuilleLecture, pastille } from './elements.js';
 import { parseNombre, phraseConservation, qteNoeuds } from './format.js';
 import { afficherMessage } from './messages.js';
+import { ligneVerbe } from './choix-verbe.js';
 import { panneau } from './panneau.js';
 import {
   actionsTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, defaireEnUnToucher, noeudEvaluation, pastilleCreneau, texteCharge,
@@ -167,7 +168,7 @@ function ligneTache(etat, ligneBrute, date) {
   const fait = p?.etat === 'fait';
   const q = texteQuantite(etat, l);
   const nom = l.genre === 'principale' ? l.nom : (l.libelle || l.nom);
-  const verbe = l.genre === 'principale' ? verbeDe(etat.composants?.[l.composantId]) : null;
+  const verbe = l.genre === 'principale' ? verbeDe(etat.composants?.[l.composantId], etat) : null;
   // L'évaluation de l'avance (limite d'utilisation, règle) reste lisible, dans la feuille de « ⋯ ».
   const ev = l.evaluation ?? evaluationProduction(etat, l.productionId);
   const notes = notesDeLigne({ ...l, fait }, ev, date);
@@ -176,9 +177,10 @@ function ligneTache(etat, ligneBrute, date) {
   const evaluation = ev && ev.jours > 0 ? noeudEvaluation(ev) : null;
   const surLaLigne = directes.filter(Boolean);
   // « ⋯ » ouvre une feuille : l'évaluation de l'avance puis les gestes rares (rien n'est déroulé dans la liste).
-  const plus = actions.length > 0 || evaluation ? h('button', {
+  const lignePourVerbe = l.genre === 'principale' ? ligneVerbe(etat, l.composantId) : null;
+  const plus = actions.length > 0 || evaluation || lignePourVerbe ? h('button', {
     type: 'button', classe: 'prod-plus', 'aria-label': `Actions : ${nom}`, 'aria-haspopup': 'dialog',
-    onClick: () => ouvrirFeuilleLecture(nom, [evaluation, h('div', { classe: 'actions' }, actions)]),
+    onClick: () => ouvrirFeuilleLecture(nom, [evaluation, lignePourVerbe, h('div', { classe: 'actions' }, actions)]),
   }, '⋯') : null;
   // Quantité : en g ou kg ; inconnue, la ligne dit « à chiffrer » et un toucher ouvre sa feuille (la raison, puis ce qui manque).
   const raison = !q && !fait ? raisonNonChiffree(etat, l) : null;
