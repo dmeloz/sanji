@@ -33,17 +33,16 @@ test('B2 : un gain de cuisson dit qu\'il est sans effet sur une portion en poids
   assert.doesNotMatch(ligneDe(p, 'Carottes').textContent, /Sans effet/);
 });
 
-test('« Revenir au standard » garde le repli ouvert et dit « Valeur de base rétablie »', () => {
-  reglages.oublierReplis();
+test('« Revenir au standard » rétablit la valeur, la ligne reste à sa place et dit « Valeur de base rétablie »', () => {
   const e = etatVide();
   ajusterStandard(e, 'carottes', 'rendement_parage', 30, h());
   magasin.remplacer(e);
   bouton(ligneDe(reglages.rendre(magasin.etat(), 'standards-base'), 'Carottes'), 'Revenir au standard').click();
   assert.deepEqual(magasin.etat().ajustements, {});
-  const replis = reglages.rendre(magasin.etat(), 'standards-base').tous((x) => x.balise === 'details');
-  assert.equal(replis[0].open, true, 'le repli reste ouvert');
+  const page = reglages.rendre(magasin.etat(), 'standards-base');
+  assert.equal(page.tous((x) => x.balise === 'details').length, 0, 'plus aucun repli');
+  assert.ok(ligneDe(page, 'Carottes'), 'la ligne est toujours visible');
   assert.ok(messages().some((m) => /Valeur de base rétablie/.test(m)));
-  reglages.oublierReplis();
 });
 
 test('libellés : routes inchangées, titres explicites', () => {

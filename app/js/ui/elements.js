@@ -1,6 +1,7 @@
 // Petits éléments d'interface réutilisés par les vues.
 
 import { h, svg } from './dom.js';
+import { panneau } from './panneau.js';
 
 // Étiquette d'état : un état porté par une couleur a toujours une icône ET un mot. Le ton neutre (gris) reste en mot seul.
 const ICONES_ETIQUETTE = {
@@ -54,13 +55,27 @@ export function titreSection(texte, id) {
 }
 
 /**
- * Bloc repliable : un <details> dont le résumé est le titre. `ouvert` le laisse déplié (rubrique qui contient une
- * donnée) ; sans donnée, il reste fermé. `attributs` : classe, id…
+ * Feuille de lecture : un toucher sur un bouton ou un lien du corps la ferme une fois son geste lancé (le geste ouvre sa
+ * propre feuille ou redessine la page : la feuille ne reste jamais ouverte sur un contenu périmé).
  */
-export function repliable(resume, ouvert, contenu, attributs = {}) {
-  const { classe = '', ...reste } = attributs;
-  return h('details', { classe: `repliable ${classe}`.trim(), open: Boolean(ouvert), ...reste },
-    h('summary', null, resume), contenu);
+export function ouvrirFeuilleLecture(titre, corps) {
+  const feuille = panneau({ titre, lectureSeule: true, corps });
+  feuille.addEventListener('click', (ev) => {
+    if (ev.target?.closest?.('.panneau-corps button, .panneau-corps a')) feuille.close();
+  });
+  return feuille;
+}
+
+/**
+ * Ligne tappable (cible de 44 px, flèche ›) qui ouvre une feuille en lecture seule : le détail n'est jamais déroulé dans la
+ * page. `contenu()` est appelé à chaque ouverture (contenu toujours à jour).
+ */
+export function ligneFeuille(libelle, titre, contenu, { classe = '', resume = null, ...attributs } = {}) {
+  return h('button', {
+    type: 'button', classe: `ligne-feuille ${classe}`.trim(), ...attributs,
+    onClick: () => ouvrirFeuilleLecture(titre, [contenu()]),
+  }, h('span', { classe: 'ligne-feuille-texte' }, h('strong', null, libelle), resume ? h('span', { classe: 'meta' }, resume) : null),
+  h('span', { classe: 'reglage-fleche', 'aria-hidden': 'true' }, '›'));
 }
 
 /** Message d'alerte ou d'information dans la page. @param {'alerte'|'info'|'erreur'} niveau */

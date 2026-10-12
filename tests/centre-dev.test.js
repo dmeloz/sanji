@@ -58,7 +58,8 @@ test('Réglages > Apprentissage : une seule carte Notes et diagnostic, plus les 
   assert.ok(t.includes('Pastille « Dev » sur chaque écran'));
   for (const ancien of ['Retours d\'essai', 'Notes de test', 'Journal de diagnostic']) assert.equal(t.includes(ancien), false, ancien);
   assert.equal(parTexte(page, 'Copier le rapport'), undefined);
-  await parTexte(page, 'Ouvrir notes et diagnostic').click();
+  assert.equal(parTexte(page, 'Ouvrir notes et diagnostic'), undefined, 'une seule porte vers le centre : la pastille « Dev »');
+  centre.ouvrirCentreDev();
   assert.ok(parTexte(dernier(), 'Partager le fichier'));
 });
 

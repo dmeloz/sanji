@@ -75,15 +75,12 @@ test('Tableau : quatre zones sous un en-tête, jamais plus de cinq, et plus de n
 test('Tableau : menus = aujourd\'hui et 2 jours suivants ; ligne entière vers le détail du jour, plat vers sa fiche', () => {
   const noeud = tableau(S.mardi, semaine());
   const zone = classes(noeud, 'bord-menus')[0];
-  const visibles = zone.tous((x) => x.className.split(' ').includes('bord-jour')).filter((li) => !li.parent.parent.className.includes('bord-reste'));
-  assert.equal(visibles.length, 3, 'mardi, mercredi, jeudi');
+  const visibles = zone.tous((x) => x.className.split(' ').includes('bord-jour'));
+  assert.equal(visibles.length, 5, 'toute la semaine à plat : mardi, mercredi, jeudi, puis lundi et vendredi');
   const entetes = classes(zone, 'bord-jour-lien').map((a) => a.attributs.href);
   assert.deepEqual(entetes.slice(0, 3), [`#/production/${S.mardi}`, `#/production/${S.mercredi}`, `#/production/${S.jeudi}`]);
   assert.match(classes(zone, 'bord-jour-lien')[0].textContent, /Mar 6 · 64 couverts/);
-  // Le reste de la semaine : une touche, rien n'est perdu.
-  const reste = classes(zone, 'bord-reste')[0];
-  assert.match(reste.querySelector('summary').textContent, /Afficher le reste de la semaine/);
-  assert.equal(classes(reste, 'bord-jour').length, 2, 'lundi et vendredi');
+  assert.equal(classes(zone, 'bord-reste').length, 0, 'plus de « reste de la semaine » replié');
   // Un plat mène à la fiche du plat (composant) ; tous les liens du Tableau existent.
   const plats = classes(zone, 'bord-plat');
   assert.ok(plats.length > 0);

@@ -6,9 +6,8 @@ import { CATEGORIES_MOT } from '../domaine/mots-retenus.js';
 import { rapportApprentissage } from '../domaine/rapport-apprentissage.js';
 import { agir } from '../magasin.js';
 import { h } from './dom.js';
-import { bouton, ligneVide, lien } from './elements.js';
+import { bouton, ligneVide } from './elements.js';
 import { pluriel } from './format.js';
-import { ouvrirCentreDev } from './centre-dev.js';
 import { lireEvenements } from './journal-diagnostic.js';
 import { notesParEtat } from './notes-dev.js';
 import { indicateurErreurs } from './section-diagnostic.js';
@@ -34,7 +33,7 @@ function sectionAppris(etat) {
     h('p', null, `${pluriel(r.motsRetenus, 'mot retenu', 'mots retenus')}${r.motsRetenus > r.mots.length ? ` (les ${r.mots.length} premiers sont listés)` : ''}.`),
     r.mots.length === 0 ? ligneVide('Aucun mot retenu pour l\'instant.')
       : h('ul', { classe: 'liste-simple' }, r.mots.map(ligneMot)),
-    h('p', null, `${pluriel(r.fichesRetenues, 'fiche d\'élément retenue', 'fiches d\'éléments retenues')}. `, lien('#/fiches', 'Voir les fiches des éléments')),
+    h('p', null, `${pluriel(r.fichesRetenues, 'fiche d\'élément retenue', 'fiches d\'éléments retenues')} (Réglages > Poste > Fiches des éléments).`),
     h('h3', { classe: 'retour-essai-sous-titre' }, 'À préciser par semaine'),
     r.semaines.length === 0 ? ligneVide('Aucune semaine avec des composants.')
       : h('ul', { classe: 'liste-simple' }, r.semaines.map((s) => h('li', null, `Semaine du ${libelleJour(s.lundi)} : ${s.aPreciser} à préciser sur ${s.composants}`))));
@@ -43,10 +42,9 @@ function sectionAppris(etat) {
 function sectionCentre() {
   const nouvelles = notesParEtat('nouvelle').length;
   return carte('Notes et diagnostic',
-    h('p', { classe: 'aide' }, 'Notes, retours d\'essai et journal partent ensemble, d\'un seul geste, depuis une même feuille. Rien n\'est envoyé automatiquement.'),
+    h('p', { classe: 'aide' }, 'Notes, retours d\'essai et journal partent ensemble, d\'un seul geste, depuis une même feuille, qu\'ouvre la pastille « Dev » (à activer ci-dessous). Rien n\'est envoyé automatiquement.'),
     interrupteurPastille(),
-    h('p', null, `${pluriel(nouvelles, 'note nouvelle', 'notes nouvelles')} · ${pluriel(lireEvenements().length, 'événement noté', 'événements notés')}`),
-    h('div', { classe: 'actions' }, bouton('Ouvrir notes et diagnostic', () => ouvrirCentreDev(), 'court')));
+    h('p', null, `${pluriel(nouvelles, 'note nouvelle', 'notes nouvelles')} · ${pluriel(lireEvenements().length, 'événement noté', 'événements notés')}`));
 }
 
 export const sectionsApprentissage = (etat) => [indicateurErreurs(), sectionAppris(etat), sectionCentre()];

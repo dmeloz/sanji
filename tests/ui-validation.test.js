@@ -3,7 +3,7 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { boutons, installerFauxDom, panneauxOuverts, ficheAvecReglages } from './aide-dom.js';
 import { definirMenu } from '../app/js/domaine/actions.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h, prevision } from './aide.js';
@@ -21,6 +21,8 @@ before(async () => {
   };
 });
 after(() => dom.restaurer());
+/** La fiche et sa feuille « Plus de réglages » (les gestes avancés n'y sont plus déroulés). */
+const fiche = (etat, id) => ficheAvecReglages(dom.corps, vues.fiche.rendre(etat, id));
 
 const nettoyer = () => { for (const d of dom.corps.tous((x) => x.balise === 'dialog')) d.remove(); };
 const ouvert = () => panneauxOuverts(dom.corps)[0];
@@ -51,7 +53,7 @@ const dateDuJour = (jour, fonction) => {
 test('feuille : s\'ouvre depuis le plat, montre la fourchette, l\'état du poids, l\'effet, et un geste principal, deux secondaires, Annuler en lien', () => {
   nettoyer();
   const id = monde();
-  const page = vues.fiche.rendre(magasin.etat(), id);
+  const page = fiche(magasin.etat(), id);
   assert.ok(parTexte(page, 'Valider la portion'));
   dateDuJour(S.lundi, () => parTexte(page, 'Valider la portion').click());
   const d = ouvert();
@@ -73,7 +75,7 @@ test('feuille : s\'ouvre depuis le plat, montre la fourchette, l\'état du poids
 test('feuille depuis le plat : sans valeur tapée, « Valider » est refusé et rien n\'est écrit', async () => {
   nettoyer();
   const id = monde();
-  dateDuJour(S.lundi, () => parTexte(vues.fiche.rendre(magasin.etat(), id), 'Valider la portion').click());
+  dateDuJour(S.lundi, () => parTexte(fiche(magasin.etat(), id), 'Valider la portion').click());
   const d = ouvert();
   await d.enfants[0].declencher('submit');
   assert.match(alertes(d).join(' '), /valeur/i);
@@ -84,20 +86,20 @@ test('feuille depuis le plat : sans valeur tapée, « Valider » est refusé et 
 test('feuille depuis le plat : valider crée le standard avec la valeur tapée', async () => {
   nettoyer();
   const id = monde();
-  dateDuJour(S.lundi, () => parTexte(vues.fiche.rendre(magasin.etat(), id), 'Valider la portion').click());
+  dateDuJour(S.lundi, () => parTexte(fiche(magasin.etat(), id), 'Valider la portion').click());
   const d = ouvert();
   controleDe(d, 'Valeur de la portion').value = '55';
   await d.enfants[0].declencher('submit');
   assert.deepEqual(alertes(d), []);
   assert.equal(magasin.etat().standards.riz.garniture.valeur, 55);
   assert.equal(d.open, false);
-  assert.equal(parTexte(vues.fiche.rendre(magasin.etat(), id), 'Valider la portion'), undefined, 'plus une estimation');
+  assert.equal(parTexte(fiche(magasin.etat(), id), 'Valider la portion'), undefined, 'plus une estimation');
 });
 
 test('feuille : une valeur hors fourchette demande une confirmation explicite', async () => {
   nettoyer();
   const id = monde();
-  dateDuJour(S.lundi, () => parTexte(vues.fiche.rendre(magasin.etat(), id), 'Valider la portion').click());
+  dateDuJour(S.lundi, () => parTexte(fiche(magasin.etat(), id), 'Valider la portion').click());
   const d = ouvert();
   controleDe(d, 'Valeur de la portion').value = '90';
   await d.enfants[0].declencher('submit');
@@ -110,7 +112,7 @@ test('feuille : une valeur hors fourchette demande une confirmation explicite', 
 test('feuille depuis le plat : « Seulement cette fois » corrige le plat, jamais le standard', async () => {
   nettoyer();
   const id = monde();
-  dateDuJour(S.lundi, () => parTexte(vues.fiche.rendre(magasin.etat(), id), 'Valider la portion').click());
+  dateDuJour(S.lundi, () => parTexte(fiche(magasin.etat(), id), 'Valider la portion').click());
   const d = ouvert();
   controleDe(d, 'Valeur de la portion').value = '52';
   await parTexte(d, 'Seulement cette fois').click();
@@ -122,7 +124,7 @@ test('feuille depuis le plat : « Seulement cette fois » corrige le plat, jamai
 test('feuille depuis le plat : « Plus tard » masque la valeur sans rien changer', async () => {
   nettoyer();
   const id = monde();
-  dateDuJour(S.lundi, () => parTexte(vues.fiche.rendre(magasin.etat(), id), 'Valider la portion').click());
+  dateDuJour(S.lundi, () => parTexte(fiche(magasin.etat(), id), 'Valider la portion').click());
   const d = ouvert();
   await parTexte(d, 'Plus tard').click();
   assert.equal(magasin.etat().validations['riz|garniture'].statut, 'plus_tard');
@@ -138,7 +140,7 @@ test('« Plus tard » masque vraiment la valeur le même jour (valeursAValider e
   const cles = (jour) => valeursAValider(magasin.etat(), jour).map((v) => v.cle);
   const feuilleOuverte = () => ouvert() !== undefined;
   assert.deepEqual(cles(S.lundi), ['riz|garniture'], 'avant : la valeur est proposée');
-  dateDuJour(S.lundi, () => parTexte(vues.fiche.rendre(magasin.etat(), id), 'Valider la portion').click());
+  dateDuJour(S.lundi, () => parTexte(fiche(magasin.etat(), id), 'Valider la portion').click());
   assert.equal(feuilleOuverte(), true, 'avant : la feuille propose la valeur');
   await dateDuJour(S.lundi, () => parTexte(ouvert(), 'Plus tard').click());
   assert.match(magasin.etat().validations['riz|garniture'].h, /^2026-10-0[45]/, 'masquée à la date du clic simulé');

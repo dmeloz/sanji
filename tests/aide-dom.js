@@ -114,3 +114,20 @@ export function installerFauxDom() {
 export const boutons = (racine) => racine.tous((e) => e.balise === 'button' && !e.disabled);
 /** Panneaux <dialog> ouverts dans le faux document. */
 export const panneauxOuverts = (corps) => corps.tous((e) => e.balise === 'dialog' && e.open);
+
+/**
+ * La fiche suivie du contenu de sa feuille « Plus de réglages » (la ligne ouvre une feuille : on la touche, on déplace son corps
+ * à la suite de la page, on la ferme). Les gestes de la feuille gardent leurs écouteurs.
+ */
+export function ficheAvecReglages(corps, page) {
+  const ligne = page.tous((e) => e.balise === 'button' && /Plus de réglages/.test(e.textContent))[0];
+  if (!ligne) return page;
+  ligne.click();
+  const feuille = panneauxOuverts(corps).at(-1);
+  const contenu = feuille.tous((e) => e.className.split(' ').includes('panneau-corps'))[0];
+  const racine = new Element('div');
+  racine.appendChild(page);
+  racine.appendChild(contenu);
+  feuille.close();
+  return racine;
+}

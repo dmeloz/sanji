@@ -12,7 +12,7 @@ import { expliquer } from '../harness/trace.js';
 import { agir, aujourdhui, etat as etatCourant, maintenant } from '../magasin.js';
 import { assistantPret, fournisseurDepuisReglages, lireReglagesIA } from './assistant-reglages.js';
 import { h } from './dom.js';
-import { bouton, encadre, pastille, repliable } from './elements.js';
+import { bouton, encadre, pastille } from './elements.js';
 import { quantite } from './format.js';
 import { afficherMessage } from './messages.js';
 import { panneau } from './panneau.js';
@@ -99,7 +99,8 @@ export function contenuProposition(proposition, { mode, avertissements, periode 
     nodes.push(h('h3', { classe: 'section-titre' }, 'À décider'),
       h('ul', { classe: 'ia-liste' }, proposition.aDecider.map((d) => h('li', { classe: 'ia-ligne' }, pastille('à décider', 'ambre'), ` ${d.texte}`))));
   }
-  nodes.push(repliable('Pourquoi cette proposition', false, h('ul', { classe: 'ia-pourquoi' }, expliquer(proposition).map((l) => h('li', { classe: 'meta' }, l)))));
+  nodes.push(h('h3', { classe: 'section-titre' }, 'Pourquoi cette proposition'),
+    h('ul', { classe: 'ia-pourquoi' }, expliquer(proposition).map((l) => h('li', { classe: 'meta' }, l))));
   return nodes;
 }
 

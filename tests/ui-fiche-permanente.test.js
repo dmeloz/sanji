@@ -85,7 +85,7 @@ test('feuille de clôture : un élément à la fois ou tous les nommés ; la sau
   fermerFeuilles();
 });
 
-test('Réglages > Apprentissage : plus de liste de fiches ni de plats, un lien vers les fiches des éléments', () => {
+test('Réglages > Apprentissage : plus de liste de fiches ni de plats, aucun second lien vers les fiches (déjà dans Réglages > Poste)', () => {
   const e = etatInitial();
   retenirFiche(e, 'Zorbi', { categorie: 'autre', role: 'garniture' }, h());
   magasin.remplacer(e);
@@ -94,6 +94,5 @@ test('Réglages > Apprentissage : plus de liste de fiches ni de plats, un lien v
   assert.doesNotMatch(texte, /Plats retenus|Fiches retenues par nom/);
   assert.match(texte, /1 fiche d'élément retenue/);
   const lien = sections.flatMap((s) => (s ? s.tous((x) => x.balise === 'a' && x.attributs.href === '#/fiches') : []));
-  assert.equal(lien.length, 1);
-  assert.match(lien[0].textContent, /Voir les fiches des éléments/);
+  assert.equal(lien.length, 0);
 });

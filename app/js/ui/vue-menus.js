@@ -9,7 +9,7 @@ import { analyserFeuille, repartirSurSemaine } from '../domaine/feuille.js';
 import { agir } from '../magasin.js';
 import { champs as construireChamps } from './champs.js';
 import { h } from './dom.js';
-import { bouton, encadre, pastille, repliable } from './elements.js';
+import { bouton, encadre, pastille } from './elements.js';
 import { parseEntier, pluriel } from './format.js';
 import { noter } from './journal-diagnostic.js';
 import { afficherMessage } from './messages.js';
@@ -57,23 +57,9 @@ function blocMenu(champs, date, menu, jour) {
         value: Number.isFinite(prevision) ? String(prevision) : '' })));
 }
 
-/**
- * Un jour de saisie. Avec `options.repliable` (écran Import) : un jour déjà rempli est replié sur son résumé (les deux
- * intitulés), un jour vide reste ouvert ; tous les jours restent des lignes visibles, rien n'est caché derrière un bouton.
- */
-export function blocJour(champs, etat, date, options = {}) {
+/** Un jour de saisie : ses deux menus, toujours visibles (rien n'est caché derrière un bouton). */
+export function blocJour(champs, etat, date) {
   const jour = jourOuVide(etat, date);
-  if (options.repliable) {
-    const intitules = [1, 2].map((m) => String(jour.menus[m].intitule ?? '').replace(/\s+/g, ' ').trim());
-    const rempli = intitules.some(Boolean);
-    const resume = rempli ? intitules.map((t, i) => (t ? `Menu ${i + 1} : ${t}` : null)).filter(Boolean).join(' · ') : 'à saisir';
-    return h('details', { classe: 'carte saisie-jour saisie-jour-repliable', open: !rempli },
-      h('summary', { classe: 'saisie-jour-resume' },
-        h('span', { classe: 'saisie-jour-titre' }, majuscule(libelleJour(date))),
-        h('span', { classe: 'saisie-jour-extrait' }, resume)),
-      blocMenu(champs, date, 1, jour),
-      blocMenu(champs, date, 2, jour));
-  }
   return h('section', { classe: 'carte saisie-jour', 'aria-label': libelleJour(date) },
     h('h2', { classe: 'feutre saisie-jour-titre' }, majuscule(libelleJour(date))),
     blocMenu(champs, date, 1, jour),

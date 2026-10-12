@@ -186,8 +186,10 @@ test('fiche de fonction : le buffet par couvert est visible dans la fiche (feuil
   const f = Object.values(e.fiches)[0];
   fiches.ouvrirFiche(f.id);
   const panneau = dom.corps.tous((x) => x.balise === 'dialog' && x.open).at(-1);
-  const buffet = panneau.tous((x) => x.balise === 'details' && /buffet-couvert/.test(x.className))[0];
-  assert.ok(buffet, 'buffet dans la fiche');
+  const ligne = panneau.tous((x) => x.balise === 'button' && /buffet-couvert/.test(x.className))[0];
+  assert.ok(ligne, 'ligne « Buffet » dans la fiche, sans repli');
+  ligne.click();
+  const buffet = dom.corps.tous((x) => x.balise === 'dialog' && x.open).at(-1);
   assert.match(buffet.textContent, /Pour 8 couverts/);
   assert.match(buffet.textContent, /Provenance : standard de base/);
   assert.doesNotMatch(buffet.textContent, /organisation\.banquet|hygiene\.|\.buffet-/, 'aucun identifiant technique');
@@ -198,7 +200,7 @@ test('fiche de fonction à menu fixe : pas de buffet, et la fiche dit « sans ob
   magasin.remplacer(e);
   const f = Object.values(e.fiches)[0];
   const jour = detailDuJour(detailVue, e, S.mercredi);
-  assert.equal(jour.tous((x) => x.balise === 'details' && /buffet-couvert/.test(x.className)).length, 0, 'rien dans la carte du détail');
+  assert.equal(jour.tous((x) => /buffet-couvert/.test(x.className)).length, 0, 'rien dans la carte du détail');
   fiches.ouvrirFiche(f.id);
   const panneau = dom.corps.tous((x) => x.balise === 'dialog' && x.open).at(-1);
   assert.equal(panneau.tous((x) => /buffet-couvert/.test(x.className)).length, 0);

@@ -1,11 +1,11 @@
 // Historique des semaines passées (#/historique), en lecture seule : aucun bouton de saisie, aucune écriture.
-// Une semaine se déplie (jours, menus 1 et 2, couverts servis). Ne calcule rien : lit domaine/historique.js.
+// Une semaine s'ouvre en feuille (jours, menus 1 et 2, couverts servis). Ne calcule rien : lit domaine/historique.js.
 
 import { libelleJour } from '../domaine/dates.js';
 import { historiqueSemaines } from '../domaine/historique.js';
 import { aujourdhui } from '../magasin.js';
 import { h } from './dom.js';
-import { ligneVide, repliable } from './elements.js';
+import { ligneFeuille, ligneVide } from './elements.js';
 
 export function titre() { return 'Historique'; }
 
@@ -26,11 +26,11 @@ function ligneJour(j) {
     j.servis === null ? h('span', { classe: 'petit doux' }, 'ventes à saisir') : servis(j.servis));
 }
 
+/** Une ligne par semaine : un toucher ouvre la feuille de ses jours (lecture seule). */
 function semaine(s) {
-  const resume = h('span', { classe: 'hist-ligne' },
-    h('span', { classe: 'hist-texte' }, h('span', { classe: 'nom' }, `Semaine du ${libelleJour(s.lundi)}`), h('span', { classe: 'petit doux' }, etatSemaine(s))),
-    servis(s.totalServi));
-  return repliable(resume, false, h('ul', { classe: 'hist-jours' }, s.jours.map(ligneJour)), { classe: 'hist-semaine' });
+  const titre = `Semaine du ${libelleJour(s.lundi)}`;
+  return h('li', { classe: 'hist-semaine' },
+    ligneFeuille(titre, titre, () => h('ul', { classe: 'hist-jours' }, s.jours.map(ligneJour)), { resume: `${etatSemaine(s)} · ${s.totalServi} servis` }));
 }
 
 export function rendre(etat) {
@@ -39,6 +39,6 @@ export function rendre(etat) {
     h('a', { href: '#/semaine', classe: 'retour' }, '‹ Semaine'),
     h('p', { classe: 'petit doux' }, "Toutes les semaines restent sur l'iPhone"),
     h('h1', null, 'Historique'),
-    semaines.length === 0 ? ligneVide('Aucune semaine passée') : h('div', { classe: 'hist-liste' }, semaines.map(semaine)),
+    semaines.length === 0 ? ligneVide('Aucune semaine passée') : h('ul', { classe: 'hist-liste liste' }, semaines.map(semaine)),
     semaines.length === 0 ? null : h('p', { classe: 'petit doux' }, 'Lecture seule : menus et ventes du midi de chaque semaine.'));
 }

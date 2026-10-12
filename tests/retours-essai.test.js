@@ -56,7 +56,7 @@ test('Réglages : rubrique présente, accès au centre ; le centre efface les re
   const page = reglages.rendre(magasin.etat(), 'apprentissage');
   assert.ok(page.textContent.includes('Rien n\'est envoyé'));
   assert.ok(page.textContent.includes('Ce que Sanji a appris'));
-  assert.ok(texteBouton(page, 'Ouvrir notes et diagnostic'));
+  assert.ok(!texteBouton(page, 'Ouvrir notes et diagnostic'), 'une seule porte vers le centre : la pastille « Dev »');
   const { ouvrirCentreDev } = await import('../app/js/ui/centre-dev.js');
   const J = await import('../app/js/ui/journal-diagnostic.js');
   J.noter('erreur', { message: 'x' });

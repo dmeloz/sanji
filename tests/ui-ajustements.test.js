@@ -21,7 +21,6 @@ before(async () => {
 after(() => dom.restaurer());
 
 const nettoyer = () => {
-  reglages.oublierReplis();
   for (const d of dom.corps.tous((x) => x.balise === 'dialog')) d.remove();
   for (const m of dom.corps.tous((x) => x.attributs.role === 'status' || x.attributs.role === 'alert')) m.remove();
 };
@@ -45,11 +44,13 @@ test('route : #/reglages/standards-base est une sous-page de Réglages, listée 
   assert.ok(racine.tous((x) => x.balise === 'a').some((a) => a.attributs.href === '#/reglages/standards-base'));
 });
 
-test('page : un repli par usage, une ligne par sujet avec valeur, fourchette et provenance', () => {
+const titresUsages = (p) => p.tous((x) => x.balise === 'h3' && x.className.split(' ').includes('bloc-titre'));
+
+test('page : une section à plat par usage (aucun repli), une ligne par sujet avec valeur, fourchette et provenance', () => {
   magasin.remplacer(etatVide());
   const p = page();
-  const replis = p.tous((x) => x.balise === 'details');
-  assert.deepEqual(replis.map((d) => d.querySelector('summary').textContent.split(' · ')[0]),
+  assert.equal(p.tous((x) => x.balise === 'details').length, 0);
+  assert.deepEqual(titresUsages(p).map((d) => d.textContent.split(' · ')[0]),
     ['Rendements de parage', 'Rendements de cuisson', 'Conservation', 'Cuisson', 'Températures']);
   const ligne = ligneDe(p, 'Carottes');
   assert.ok(ligne, 'ligne des carottes');
@@ -115,16 +116,14 @@ test('hygiène : une valeur au-delà de la limite est enregistrée et l\'avertis
   assert.match(messages.map((m) => m.textContent).join(' '), /au-delà de la limite de référence.*plan d'autocontrôle/);
 });
 
-test('une ligne ajustée déplie son repli ; le titre compte les valeurs changées', () => {
+test('le titre d\'un usage compte les valeurs changées', () => {
   nettoyer();
   magasin.remplacer(etatVide());
-  const vide = page().tous((x) => x.balise === 'details')[0];
-  assert.equal(vide.open, false);
-  assert.match(vide.querySelector('summary').textContent, /\d+ valeurs? de base/);
+  const vide = titresUsages(page())[0];
+  assert.match(vide.textContent, /\d+ valeurs? de base/);
   const e = etatVide();
   e.ajustements['rendement_parage|carottes'] = { valeur: 30, unite: '%', le: null, avant: { valeur: 18.5, origine: 'referentiel' } };
   magasin.remplacer(e);
-  const un = page().tous((x) => x.balise === 'details')[0];
-  assert.equal(un.open, true);
-  assert.match(un.querySelector('summary').textContent, /1 sur \d+ changée par vous/);
+  const un = titresUsages(page())[0];
+  assert.match(un.textContent, /1 sur \d+ changée par vous/);
 });

@@ -55,7 +55,7 @@ export function texteDeLaListe(jours) {
 /** Partage natif (iPhone) ; à défaut, copie dans le presse-papiers ; sinon un message. Annuler le partage n'est pas une erreur. */
 async function partager(texte) {
   try {
-    if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: 'Articles du poste', text: texte }); return; }
+    if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ text: texte }); return; } // pas de `title` : iOS l'afficherait en plus du texte, qui commence déjà par son titre
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(texte);
       afficherMessage('Liste copiée.', 'ok');

@@ -2,7 +2,7 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { Element, installerFauxDom } from './aide-dom.js';
+import { Element, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { definirMenu } from '../app/js/domaine/actions.js';
 import { ajusterStandard } from '../app/js/domaine/actions-ajustements.js';
 import { ALLERGENES } from '../app/js/ui/reference.js';
@@ -30,6 +30,14 @@ before(async () => {
 after(() => dom.restaurer());
 
 const tout = (n, balise) => n.tous((x) => x.balise === balise);
+/** Touche la ligne tappable d'un bloc (rien n'est déroulé dans la page) et rend la feuille qu'elle ouvre, déjà fermée. */
+function lire(bloc) {
+  const ligne = bloc.balise === 'button' ? bloc : tout(bloc, 'button')[0];
+  ligne.click();
+  const feuille = panneauxOuverts(dom.corps).at(-1);
+  feuille.close();
+  return feuille;
+}
 
 test('repères d\'une famille : cuisson, conservation, avec fourchette, standard de base et provenance', () => {
   const lignes = reperes.reperesPour('riz');
@@ -54,20 +62,21 @@ test('repère ajusté par la propriétaire : « votre valeur : N » en premier, 
   assert.equal(ligne.votre, 'votre valeur : 3 jours');
   assert.match(ligne.standard, /^standard de base : 1 jours?$/, 'le standard de base reste visible');
   assert.equal(lignes.filter((l) => l.votre).length, 1, 'seul le repère ajusté est concerné');
-  const texte = reperes.blocReperes('riz', e).textContent;
-  assert.match(texte, /votre valeur : 3 jours/);
-  const ligneTexte = reperes.blocReperes('riz', e).tous((x) => x.dataset?.repere === ligne.id)[0].textContent;
+  const feuilleRiz = lire(reperes.blocReperes('riz', e));
+  assert.match(feuilleRiz.textContent, /votre valeur : 3 jours/);
+  const ligneTexte = lire(reperes.blocReperes('riz', e)).tous((x) => x.dataset?.repere === ligne.id)[0].textContent;
   assert.ok(ligneTexte.indexOf('votre valeur : 3 jours') < ligneTexte.indexOf('standard de base : 1 jour'), 'votre valeur avant le standard de base');
   // Sans état : comme avant.
   assert.equal(reperes.reperesPour('riz').some((l) => l.votre), false);
 });
 
-test('bloc replié : fermé par défaut, provenance et « à valider localement » en texte, aucun champ de saisie', () => {
-  const bloc = reperes.blocReperes('pates_seches');
-  assert.equal(bloc.balise, 'details');
-  assert.equal(bloc.open, false);
+test('bloc : une ligne « Repères métier » (aucun repli) ; sa feuille montre provenance et « à valider localement », aucun champ', () => {
+  const ligne = reperes.blocReperes('pates_seches');
+  assert.equal(tout(ligne, 'details').length, 0);
+  assert.match(ligne.textContent, /Repères métier/);
+  assert.doesNotMatch(ligne.textContent, /Provenance/, 'les repères ne sont pas déroulés dans la page');
+  const bloc = lire(ligne);
   const texte = bloc.textContent;
-  assert.match(texte, /Repères métier/);
   assert.match(texte, /standard de base/);
   assert.match(texte, /Provenance/);
   assert.match(texte, /référentiel culinaire|base métier|Confédération|Swiss|Food|Küchen|Base officielle/i);
@@ -80,7 +89,7 @@ test('bloc replié : fermé par défaut, provenance et « à valider localement 
 test('aucun repère : pas de bloc ; limite par rubrique et renvoi vers la page complète', () => {
   assert.equal(reperes.blocReperes('inconnue'), null);
   assert.equal(reperes.blocReperes(null), null);
-  const bloc = reperes.blocReperes('pommes_de_terre');
+  const bloc = lire(reperes.blocReperes('pommes_de_terre'));
   assert.ok(tout(bloc, 'li').length <= 12);
   assert.match(bloc.textContent, /autres? repères?/);
 });
@@ -98,18 +107,18 @@ test('page complète : pageReperesMetier(conteneur, { theme }) affiche tout le t
   assert.ok(tout(cible, 'li').length > 0, 'thème par défaut');
 });
 
-test('composant : le bloc « Repères métier » est présent, fermé, et ne touche pas l\'état', () => {
+test('composant : le bloc « Repères métier » est présent, sans repli, et ne touche pas l\'état', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 2, 'riz', h());
   const riz = Object.values(e.composants).find((c) => c.famille === 'riz');
   magasin.remplacer(e);
   const avant = structuredClone(magasin.etat());
   const page = vues.fiche.rendre(magasin.etat(), riz.id);
-  const bloc = tout(page, 'details').find((d) => d.attributs.id === 'reperes-metier');
+  const bloc = page.tous((x) => x.attributs.id === 'reperes-metier')[0];
   assert.ok(bloc, 'bloc présent');
-  assert.equal(bloc.open, false);
+  assert.equal(tout(page, 'details').length, 0);
   assert.deepEqual(magasin.etat(), avant);
-  assert.match(page.textContent, /Source légale/);
+  assert.match(lire(tout(page, 'button').find((b) => /Plus de réglages/.test(b.textContent))).textContent, /Source légale/);
 });
 
 function ficheAvec(couverts, mode = 'choix_libre') {
@@ -122,7 +131,8 @@ function ficheAvec(couverts, mode = 'choix_libre') {
   magasin.remplacer(e);
   return e;
 }
-const blocBuffet = (page) => tout(page, 'details').find((d) => /buffet-couvert/.test(d.className));
+const ligneBuffet = (page) => page.tous((x) => x.balise === 'button' && /buffet-couvert/.test(x.className))[0];
+const blocBuffet = (page) => { const l = ligneBuffet(page); return l ? lire(l) : undefined; };
 
 test('fiche de fonction : buffet par couvert multiplié par les couverts, étiqueté, viande à état de poids non établi', () => {
   ficheAvec(40);
@@ -130,7 +140,7 @@ test('fiche de fonction : buffet par couvert multiplié par les couverts, étiqu
   const page = detailDuJour(vues.detail, magasin.etat(), S.lundi);
   const bloc = blocBuffet(page);
   assert.ok(bloc, 'bloc buffet');
-  assert.equal(bloc.open, false);
+  assert.equal(tout(page, 'details').length, 0, 'aucun repli');
   const t = bloc.textContent;
   assert.match(t, /standard de base/);
   assert.match(t, /40 couverts/);

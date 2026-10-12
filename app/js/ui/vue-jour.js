@@ -14,7 +14,7 @@ import { aideRefroidissement, evaluationProduction } from '../domaine/planificat
 import { libelle } from '../domaine/statuts.js';
 import { h } from './dom.js';
 import { agir } from '../magasin.js';
-import { bouton, etatVide, imprimer, encadre, ligneVide, lien, pastille } from './elements.js';
+import { bouton, etatVide, imprimer, encadre, ligneVide, lien, ouvrirFeuilleLecture, pastille } from './elements.js';
 import { parseNombre, phraseConservation, qteNoeuds } from './format.js';
 import { afficherMessage } from './messages.js';
 import { panneau } from './panneau.js';
@@ -107,8 +107,6 @@ function actionsDeLigne(etat, l, date) {
   return { directes: [], autres: actionsTache(l, p).filter((n) => n.textContent !== 'Fait') };
 }
 
-let compteurActions = 0;
-
 /** Borne haute d'une portion tapée (g, ml…) : au-delà, c'est une faute de frappe. */
 const PORTION_MAX = 2000;
 
@@ -170,24 +168,18 @@ function ligneTache(etat, ligneBrute, date) {
   const q = texteQuantite(etat, l);
   const nom = l.genre === 'principale' ? l.nom : (l.libelle || l.nom);
   const verbe = l.genre === 'principale' ? verbeDe(etat.composants?.[l.composantId]) : null;
-  // L'évaluation de l'avance (limite d'utilisation, règle) reste lisible, derrière « ⋯ ».
+  // L'évaluation de l'avance (limite d'utilisation, règle) reste lisible, dans la feuille de « ⋯ ».
   const ev = l.evaluation ?? evaluationProduction(etat, l.productionId);
   const notes = notesDeLigne({ ...l, fait }, ev, date);
   const { directes, autres: autresActions } = actionsDeLigne(etat, l, date);
   const actions = autresActions.filter(Boolean);
   const evaluation = ev && ev.jours > 0 ? noeudEvaluation(ev) : null;
   const surLaLigne = directes.filter(Boolean);
-  let panneau = null;
-  let plus = null;
-  if (actions.length > 0 || evaluation) {
-    compteurActions += 1;
-    const idActions = `prod-actions-${compteurActions}`;
-    panneau = h('div', { classe: 'prod-actions', id: idActions, hidden: true }, evaluation, h('div', { classe: 'actions' }, actions));
-    plus = h('button', {
-      type: 'button', classe: 'prod-plus', 'aria-label': `Actions : ${nom}`, 'aria-expanded': 'false', 'aria-controls': idActions,
-      onClick: () => { panneau.hidden = !panneau.hidden; plus.setAttribute('aria-expanded', String(!panneau.hidden)); },
-    }, '⋯');
-  }
+  // « ⋯ » ouvre une feuille : l'évaluation de l'avance puis les gestes rares (rien n'est déroulé dans la liste).
+  const plus = actions.length > 0 || evaluation ? h('button', {
+    type: 'button', classe: 'prod-plus', 'aria-label': `Actions : ${nom}`, 'aria-haspopup': 'dialog',
+    onClick: () => ouvrirFeuilleLecture(nom, [evaluation, h('div', { classe: 'actions' }, actions)]),
+  }, '⋯') : null;
   // Quantité : en g ou kg ; inconnue, la ligne dit « à chiffrer » et un toucher ouvre sa feuille (la raison, puis ce qui manque).
   const raison = !q && !fait ? raisonNonChiffree(etat, l) : null;
   let quantiteNoeud = null;
@@ -210,8 +202,7 @@ function ligneTache(etat, ligneBrute, date) {
         surLaLigne.length > 0 ? h('div', { classe: 'actions prod-directes' }, surLaLigne) : null),
       h('div', { classe: 'mep-quantite' }, quantiteNoeud),
       // « ⋯ » a sa propre colonne (la même à chaque ligne) ; sans actions, son emplacement reste vide.
-      plus ?? h('span', { classe: 'prod-plus-vide', 'aria-hidden': 'true' })),
-    panneau);
+      plus ?? h('span', { classe: 'prod-plus-vide', 'aria-hidden': 'true' })));
 }
 
 const estHorsRegle = (l) => !l.fait && Boolean(l.evaluation) && l.evaluation.jours > 0 && !l.evaluation.autorisee;
