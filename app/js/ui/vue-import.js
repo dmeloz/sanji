@@ -20,6 +20,7 @@ import { demanderReinitialisation, peutReinitialiser } from './reinitialiser-sem
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { garderPhotoPourDiagnostic, noter } from './journal-diagnostic.js';
+import { estSemainePassee, noteSemainePassee } from './semaine-passee.js';
 import { noterRetour } from './retours-essai.js';
 import { importerPhoto, photoBlob, photoEnBase64, retirerPhoto, urlPhoto } from './photo.js';
 import { JOURS_A_MENU, blocJour, champSaisi, enregistrer, repartir, reprendreTexte } from './vue-menus.js';
@@ -202,6 +203,19 @@ function blocPhoto(lundi, surLecture) {
   return bloc;
 }
 
+/** Semaine passée : les intitulés enregistrés se lisent, rien ne se saisit ni ne s'enregistre. */
+function lectureSeule(racine, etat, dates, lundi) {
+  racine.appendChild(noteSemainePassee());
+  for (const date of dates) {
+    const menus = jourOuVide(etat, date).menus;
+    racine.appendChild(h('section', { classe: 'imp-section-plate' },
+      h('h2', { classe: 'imp-titre-section' }, libelleJour(date)),
+      ...[1, 2].map((m) => h('p', null, `Menu ${m} : ${String(menus[m].intitule ?? '').trim() || 'non saisi'}`))));
+  }
+  racine.appendChild(h('div', { classe: 'barre-enregistrer' }, lien(`#/semaine/${lundi}/tableau`, 'Retour', 'btn')));
+  return racine;
+}
+
 export function rendre(etat, lundi) {
   const champs = new Map();
   const reprise = reprendreTexte();
@@ -217,6 +231,8 @@ export function rendre(etat, lundi) {
       h('p', { classe: 'imp-legende' }, [`Semaine ${numero} · du ${libelleJour(lundi)}`, problemeHorsLigne() ? ` · ${problemeHorsLigne()}` : ''].join('')),
       h('h1', { classe: 'page-titre' }, 'Importer les menus')),
     h('a', { href: `#/import/${ajouterJours(lundi, 7)}`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')));
+
+  if (estSemainePassee(lundi)) return lectureSeule(racine, etat, dates, lundi);
 
   const zoneLecture = h('div', { classe: 'imp-lecture-jours' });
   const majLecture = () => zoneLecture.replaceChildren(...dates.map((date) => ligneLectureJour(etat, champs, date)));

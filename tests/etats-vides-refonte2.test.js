@@ -3,7 +3,7 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { installerFauxDom, panneauxOuverts, figerHorloge } from './aide-dom.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, etatVide, prevision } from './aide.js';
@@ -14,7 +14,9 @@ let magasin;
 let vues;
 let elements;
 let panneau;
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   elements = await import('../app/js/ui/elements.js');
@@ -27,7 +29,7 @@ before(async () => {
     fiche: await import('../app/js/ui/vue-fiche.js'),
   };
 });
-after(() => dom.restaurer());
+after(() => { dom.restaurer(); rendreHorloge(); });
 
 function aDate(iso, fonction) {
   const reelle = Date;

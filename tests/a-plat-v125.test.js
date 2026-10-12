@@ -4,14 +4,16 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { boutons, Element, installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { boutons, Element, installerFauxDom, panneauxOuverts, figerHorloge } from './aide-dom.js';
 import { definirMenu } from '../app/js/domaine/actions.js';
 import { assurerJour } from '../app/js/domaine/etat.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h } from './aide.js';
 
 let dom; let magasin; let vues;
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   vues = {
@@ -25,7 +27,7 @@ before(async () => {
     articles: await import('../app/js/ui/vue-articles.js'),
   };
 });
-after(() => dom.restaurer());
+after(() => { dom.restaurer(); rendreHorloge(); });
 
 const aucunRepli = (noeud, qui) => assert.equal(
   noeud.tous((x) => x.balise === 'details' || x.balise === 'summary' || x.className.split(' ').includes('repliable')).length, 0, `${qui} : aucun repli`);

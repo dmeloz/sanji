@@ -24,6 +24,7 @@ import { formaterHeure, pluriel } from './format.js';
 import { afficherMessage } from './messages.js';
 import { confirmer, panneau } from './panneau.js';
 import { importerPhoto, retirerPhoto, urlPhoto } from './photo.js';
+import { estSemainePassee, noteSemainePassee } from './semaine-passee.js';
 import { LIBELLE_SERVICE, libelleAllergene } from './reference.js';
 import { blocBuffet } from './reperes-metier.js';
 import { pastilleCreneau, texteCharge } from './taches.js';
@@ -142,7 +143,7 @@ function ligneComposant(c) {
       lien(`#/fiche/${encodeURIComponent(c.id)}`, c.nom, 'tache-nom'),
       interrupteurAuPoste(c)),
     h('p', { classe: 'meta' }, libelle('CATEGORIE', c.categorie)),
-    h('div', { classe: 'actions' },
+    estSemainePassee(c.date) ? null : h('div', { classe: 'actions' },
       bouton('Modifier', () => dialogComposant(c.date, c.menu, c), 'court'),
       bouton('Supprimer', () => confirmer({
         titre: 'Supprimer ce composant ?', texte: `${c.nom} et ses tâches non faites seront supprimés.`, libelleOk: 'Supprimer', danger: true,
@@ -157,15 +158,16 @@ function blocMenu(etat, date, menu) {
   return h('div', { classe: 'sous-carte', id: `menu-${menu}` },
     h('h3', null, `Menu ${menu}`),
     saisi ? h('p', { classe: 'intitule' }, m.intitule) : h('p', { classe: 'vide' }, 'menu non saisi'),
-    h('div', { classe: 'actions' },
+    estSemainePassee(date) ? null : h('div', { classe: 'actions' },
       bouton(saisi ? 'Modifier l\'intitulé' : 'Saisir l\'intitulé', () => dialogIntitule(date, menu), 'court')),
     composants.length > 0 ? h('ul', { classe: 'liste-composants' }, composants.map((c) => ligneComposant(c))) : (saisi ? ligneVide('Aucun composant : ajoutez-en si besoin.') : null),
-    h('div', { classe: 'actions' }, bouton('Ajouter un composant', () => dialogComposant(date, menu, null), 'court')));
+    estSemainePassee(date) ? null : h('div', { classe: 'actions' }, bouton('Ajouter un composant', () => dialogComposant(date, menu, null), 'court')));
 }
 
 function sectionMenus(etat, date) {
   const enveloppe = (titreTexte, contenu) => h('section', { classe: 'carte', id: 'menus' }, h('h2', { classe: 'section-titre' }, titreTexte), contenu);
   if (!aMenuDuJour(date)) return enveloppe('Menus', ligneVide('Pas de menu du jour le samedi.'));
+  if (estSemainePassee(date)) return enveloppe('Menus du jour', [noteSemainePassee(), blocMenu(etat, date, 1), blocMenu(etat, date, 2)]);
   return enveloppe('Menus du jour', [
     h('div', { classe: 'actions' }, lien(`#/import/${lundiDe(date)}`, 'Saisir toute la semaine', 'btn btn-court')),
     h('p', { classe: 'aide' }, 'L\'application répartit seule ce qui revient au poste ; corrigez seulement une exception.'),
@@ -186,7 +188,7 @@ function sectionPrevisions(etat, date) {
     h('p', null, saisie
       ? [pluriel(c.total, 'couvert'), ` · menu 1 : ${c.m1} · menu 2 : ${c.m2} `, pastille(c.manuel ? 'décidé par vous' : 'calculé', 'gris'), ' ', pastille('provisoire', 'gris')]
       : 'couverts à saisir'),
-    h('div', { classe: 'actions' }, bouton(saisie ? 'Modifier les couverts' : 'Saisir les couverts', () => ouvrirCouvertsMidi(date), 'court')),
+    estSemainePassee(date) ? null : h('div', { classe: 'actions' }, bouton(saisie ? 'Modifier les couverts' : 'Saisir les couverts', () => ouvrirCouvertsMidi(date), 'court')),
   ], { classe: 'carte', id: 'previsions' });
 }
 
@@ -194,6 +196,7 @@ function sectionPrevisions(etat, date) {
 
 function carteFiche(f) {
   const annulee = f.statut === 'annulee';
+  const figee = estSemainePassee(f.date); // semaine passée : ni modification ni annulation
   return h('article', { classe: `carte-fiche${annulee ? ' annulee' : ''}` },
     h('div', { classe: 'composant-tete' },
       h('strong', null, `Fiche ${f.numero || '(sans identifiant)'} · ${LIBELLE_SERVICE[f.service]}`),
@@ -206,10 +209,10 @@ function carteFiche(f) {
     f.remarques.trim() ? h('p', null, h('strong', null, 'Remarques : '), f.remarques) : null,
     f.mode === 'menu_fixe' ? null : annulee ? null : blocBuffet(f.couverts),
     h('div', { classe: 'actions' },
-      annulee ? null : bouton('Modifier', () => dialogFiche(f, f.date), 'court'),
+      annulee || figee ? null : bouton('Modifier', () => dialogFiche(f, f.date), 'court'),
       !annulee && f.mode === 'choix_libre' && f.statutRepartition !== 'confirmee'
         ? bouton('Confirmer la répartition', () => dialogRepartition(f.id), 'court principal') : null,
-      annulee ? null : bouton('Annuler la fiche', () => confirmerAnnulation(f.id), 'court danger'),
+      annulee || figee ? null : bouton('Annuler la fiche', () => confirmerAnnulation(f.id), 'court danger'),
       bouton('Historique des versions', () => dialogHistorique(f.id), 'court')));
 }
 
@@ -218,7 +221,7 @@ function sectionFiches(etat, date) {
     .sort((a, b) => a.service.localeCompare(b.service) || a.horaire.localeCompare(b.horaire));
   return rubrique(h('h2', { classe: 'section-titre' }, 'Fiches de fonction'), [
     fiches.length === 0 ? ligneVide('Aucune fiche de fonction ce jour-là.') : fiches.map(carteFiche),
-    h('div', { classe: 'actions' }, bouton('Nouvelle fiche', () => dialogFiche(null, date), 'principal'), boutonLireFiche(date)),
+    estSemainePassee(date) ? null : h('div', { classe: 'actions' }, bouton('Nouvelle fiche', () => dialogFiche(null, date), 'principal'), boutonLireFiche(date)),
   ], { classe: 'carte', id: 'fiches' });
 }
 

@@ -131,3 +131,15 @@ export function ficheAvecReglages(corps, page) {
   feuille.close();
   return racine;
 }
+
+/**
+ * Fige l'horloge locale (new Date() sans argument) à une date de la semaine de test : une semaine passée ne se modifie plus
+ * (garde-fou sur le temps), il faut donc que les dates de test soient « courantes ». Renvoie la fonction qui la restaure.
+ */
+export function figerHorloge(iso, heure = '10:00') {
+  const reelle = Date;
+  globalThis.Date = class extends reelle {
+    constructor(...a) { super(...(a.length ? a : [`${iso}T${heure}:00`])); }
+  };
+  return () => { globalThis.Date = reelle; };
+}

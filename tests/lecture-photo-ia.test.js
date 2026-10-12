@@ -3,7 +3,7 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { boutons, installerFauxDom, panneauxOuverts, figerHorloge } from './aide-dom.js';
 import { etatVide } from './aide.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { lireLignesFeuille } from '../app/js/harness/lecture-photo-ia.js';
@@ -64,7 +64,9 @@ let dom; let magasin; let vue; let reglages; let photo; let stockage; let fetchR
 const OCTETS = new Uint8Array([1, 2, 3, 250, 255, 0, 65]);
 const LUNDI_SANS_PHOTO = '2026-11-02';
 
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   vue = await import('../app/js/ui/vue-import.js');
@@ -80,7 +82,7 @@ before(async () => {
     ? { getContext: () => ({ drawImage() {} }), toBlob: (cb) => cb(new Blob([OCTETS], { type: 'image/jpeg' })) } : creerReel.call(globalThis.document, balise));
   await stockage.enregistrerPhoto(S.lundi, new Blob([OCTETS], { type: 'image/jpeg' }));
 });
-after(() => { globalThis.Image = imageReelle; globalThis.document.createElement = creerReel; dom.restaurer(); globalThis.fetch = fetchReel; reglages.effacerReglagesIA(); });
+after(() => { globalThis.Image = imageReelle; globalThis.document.createElement = creerReel; dom.restaurer(); rendreHorloge(); globalThis.fetch = fetchReel; reglages.effacerReglagesIA(); });
 
 const champ = (n, id) => n.tous((x) => x.attributs.id === id)[0];
 const bouton = (n, texte) => boutons(n).find((b) => b.textContent === texte);

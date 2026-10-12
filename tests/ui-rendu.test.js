@@ -5,7 +5,7 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { boutons, installerFauxDom, panneauxOuverts, ficheAvecReglages } from './aide-dom.js';
+import { boutons, installerFauxDom, panneauxOuverts, ficheAvecReglages, figerHorloge } from './aide-dom.js';
 import {
   ajouterAdaptation, ajouterComposant, ajouterPreparatoire, creerFiche, definirCapacite, definirCreneau, definirFournisseur, definirMenu, definirRegle,
   definirStandard, marquerFait, memoriser, modifierComposant, planifier, saisirMenusSemaine, saisirVentes, supprimerStandard,
@@ -35,7 +35,9 @@ let magasin;
 let vues;
 let dialogues;
 
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   vues = {
@@ -48,7 +50,7 @@ before(async () => {
   };
   dialogues = await import('../app/js/ui/taches.js');
 });
-after(() => dom.restaurer());
+after(() => { dom.restaurer(); rendreHorloge(); });
 /** La fiche et sa feuille « Plus de réglages » (les gestes avancés n'y sont plus déroulés). */
 const fiche = (etat, id) => ficheAvecReglages(dom.corps, vues.fiche.rendre(etat, id));
 

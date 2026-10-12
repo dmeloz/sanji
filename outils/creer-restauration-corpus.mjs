@@ -13,6 +13,7 @@ const dossier = fileURLToPath(new URL('../corpus/menus-marche/', import.meta.url
 const sortie = process.argv[2] ?? `${homedir()}/Atelier-Claude/Imports/sanji-restauration-2026-10-07.json`;
 const AUJOURDHUI = '2026-10-07';
 const H = `${AUJOURDHUI}T12:00:00`;
+const H_SAISIE = '2026-01-01T12:00:00'; // antérieure à tous les lundis du corpus : une semaine passée ne se saisit plus
 const MOIS = { janvier: '01', février: '02', mars: '03', avril: '04', mai: '05', juin: '06', juillet: '07', août: '08', septembre: '09', octobre: '10' };
 if (!existsSync(dossier)) { console.error('Pas de corpus : rien à restaurer.'); process.exit(1); }
 
@@ -32,7 +33,7 @@ const etat = etatInitial();
 for (const [lundi, jours] of [...parLundi].sort()) {
   const saisie = {};
   jours.slice(0, 5).forEach((jour, i) => { saisie[ajouterJours(lundi, i)] = jour; });
-  saisirMenusSemaine(etat, lundi, saisie, H);
+  saisirMenusSemaine(etat, lundi, saisie, H_SAISIE);
 }
 const texte = exporter(etat, H);
 const relu = importer(texte, AUJOURDHUI); // la même lecture que l'app : doit passer sans erreur

@@ -3,7 +3,7 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { boutons, installerFauxDom, panneauxOuverts, figerHorloge } from './aide-dom.js';
 import { definirMenu, definirStandard, saisirVentes } from '../app/js/domaine/actions.js';
 import { calculerComposant } from '../app/js/domaine/calcul.js';
 import { jourOuVide } from '../app/js/domaine/etat.js';
@@ -14,13 +14,15 @@ let dom;
 let magasin;
 let feuille;
 let accueil;
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   feuille = await import('../app/js/ui/feuille-couverts.js');
   accueil = await import('../app/js/ui/vue-aujourdhui.js');
 });
-after(() => dom.restaurer());
+after(() => { dom.restaurer(); rendreHorloge(); });
 
 /** Fige la date et l'heure locales (la classe Date est remplacée le temps de l'appel). */
 function aLHeure(iso, heure, fonction) {

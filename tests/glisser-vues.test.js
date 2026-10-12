@@ -3,7 +3,7 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { installerFauxDom, panneauxOuverts, figerHorloge } from './aide-dom.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, etatVide, menuValide, prevision } from './aide.js';
@@ -11,7 +11,9 @@ import { articlesDuPoste } from '../app/js/domaine/articles.js';
 import { directionDuGeste } from '../app/js/ui/glisser.js';
 
 let dom; let magasin; let articles; let importation; let semaine; let services;
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   articles = await import('../app/js/ui/vue-articles.js');
@@ -19,7 +21,7 @@ before(async () => {
   semaine = await import('../app/js/ui/vue-semaine.js');
   services = await import('../app/js/ui/feuille-services.js');
 });
-after(() => dom.restaurer());
+after(() => { dom.restaurer(); rendreHorloge(); });
 
 const classes = (n, c) => n.tous((x) => x.className.split(' ').includes(c));
 const champ = (n, id) => n.tous((x) => x.attributs.id === id)[0];

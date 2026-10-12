@@ -15,6 +15,7 @@ import { h } from './dom.js';
 import { qteNoeuds, quantite } from './format.js';
 import { afficherMessage } from './messages.js';
 import { panneau } from './panneau.js';
+import { estSemainePassee } from './semaine-passee.js';
 
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 const pluriel = (n, un, plusieurs) => `${n} ${n >= 2 ? plusieurs : un}`;
@@ -185,7 +186,7 @@ export function ouvrirVentesMidi(date) {
     titre: 'Ventes du midi',
     corps: [zone],
     libelleAnnuler: 'Plus tard',
-    extras: [{ libelle: 'Modifier les couverts', action: (api) => { api.fermer(); ouvrirCouvertsMidi(date); } }],
+    extras: estSemainePassee(date) ? [] : [{ libelle: 'Modifier les couverts', action: (api) => { api.fermer(); ouvrirCouvertsMidi(date); } }],
     surEnregistrer: () => {
       // Un 0 / 0 jamais touché n'est pas une vente : il fausserait la moyenne des 3 derniers jours identiques.
       if (valeurs[1] + valeurs[2] === 0 && !Number.isFinite(jour.ventes[1]) && !Number.isFinite(jour.ventes[2])) throw new Error('Saisissez au moins une vente, ou fermez avec « Plus tard ».');

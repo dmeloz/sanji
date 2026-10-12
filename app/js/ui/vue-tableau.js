@@ -10,6 +10,7 @@ import { lien } from './elements.js';
 import { ouvrirProposition } from './feuille-validation.js';
 import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { problemeHorsLigne } from './horsligne.js';
+import { estSemainePassee } from './semaine-passee.js';
 
 
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
@@ -48,6 +49,8 @@ function morceaux(menu) {
 function couvertsDuMenu(jour, menu) {
   // Le nombre est du texte (plus de rond) ; il ouvre la feuille « Couverts midi » du jour (la même que sur Aujourd'hui).
   const ouvrir = () => ouvrirCouvertsMidi(jour.date);
+  // Semaine passée : lecture seule, le nombre s'affiche sans bouton (les ventes se saisissent dans Production).
+  if (estSemainePassee(jour.date)) return menu.couverts !== null ? h('span', { classe: 'tb-couverts' }, String(menu.couverts)) : null;
   if (menu.couverts !== null) {
     return h('button', {
       type: 'button', onClick: ouvrir, classe: `tb-couverts feutre${menu.provisoires ? ' tb-provisoire' : ''}`,

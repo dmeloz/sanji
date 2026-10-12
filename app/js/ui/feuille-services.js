@@ -19,6 +19,7 @@ import { activerFeuilletage } from './glisser.js';
 import { ouvrirCouvertsMidi } from './feuille-couverts.js';
 import { boutonLireFiche } from './lecture-fiche.js';
 import { panneau } from './panneau.js';
+import { estSemainePassee, noteSemainePassee } from './semaine-passee.js';
 import * as vueDetail from './vue-detail.js';
 
 const MENUS = [1, 2];
@@ -101,7 +102,7 @@ function ligneCouverts(etat, date, fermer) {
   return h('div', { classe: 'sa-couverts' },
     h('span', { classe: 'sa-couverts-texte' }, h('span', { classe: 'sem-rang' }, 'Couverts midi'),
       saisi ? h('span', { classe: 'sa-couverts-nombres' }, h('span', { classe: 'sem-qte' }, String(c.total)), `  ·  M1 ${c.m1 ?? '—'}  ·  M2 ${c.m2 ?? '—'}`) : h('span', { classe: 'sem-neutre' }, 'à saisir')),
-    h('button', {
+    estSemainePassee(date) ? null : h('button', {
       type: 'button', classe: 'btn btn-court', onClick: () => ouvrirApres(fermer, () => ouvrirCouvertsMidi(date)),
       'aria-label': `${saisi ? 'Modifier' : 'Saisir'} les couverts midi du ${libelleJour(date)}`,
     }, saisi ? 'Modifier' : 'Saisir'));
@@ -129,7 +130,7 @@ function blocFiches(etat, date) {
     h('h3', { classe: 'sem-sous-titre' }, 'Fiches de fonction'),
     fiches.length === 0 ? h('p', { classe: 'sem-neutre' }, 'Aucune fiche de fonction ce jour-là.')
       : h('ul', { classe: 'sem-liste' }, fiches.map((f) => ficheDuJour(f, alertes))),
-    h('div', { classe: 'actions' },
+    estSemainePassee(date) ? null : h('div', { classe: 'actions' },
       bouton('Nouvelle fiche', () => dialogFiche(null, date), 'court'),
       boutonLireFiche(date)));
 }
@@ -189,6 +190,7 @@ export function ouvrirServices(date) {
   return feuilleVivante({
     titre: `Services · ${libelleJour(date)}`,
     construire: (etat, { fermer }) => h('div', { classe: 'sem-carte' },
+      estSemainePassee(date) ? noteSemainePassee() : null,
       bandeauPoints(etat, date, fermer),
       aDesMenus(date)
         ? [ligneCouverts(etat, date, fermer), ...MENUS.map((m) => blocMenu(etat, date, m))]
