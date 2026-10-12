@@ -1,5 +1,7 @@
 // Notes de test (partie « dev ») : validation et rapport en texte. PUR : rien n'est lu ni envoyé ici.
 
+import { normaliser } from './etat.js';
+import { motDe } from './mots-retenus.js';
 import { nettoyer } from './rapport-diagnostic.js';
 
 export const MAX_NOTE = 500;
@@ -74,4 +76,29 @@ export function texteNotes(notes, { version = '', date = '' } = {}) {
     `Notes nouvelles : ${liste.length}`,
     ...CATEGORIES.flatMap((c) => blocCategorie(c, liste)),
   ].join('\n');
+}
+
+// Mots qu'une note apprend à Sanji : « X = sauce », « X c'est une sauce », « X est une sauce » (sauce, pâtes, produit, garniture).
+// Pure : elle ne fait que lire ; retenir le mot reste un geste de la propriétaire (`retenirMot`).
+const CLASSEMENT_DE = { sauce: 'sauce', pate: 'forme_pates', pates: 'forme_pates', 'forme de pates': 'forme_pates', 'forme de pate': 'forme_pates',
+  produit: 'produit', garniture: 'garniture' };
+const MOTIF_EGAL = /^(.+?)\s*=\s*(.+)$/;
+const MOTIF_EST = /^(.+?)\s+(?:c'est|est)\s+(?:une?\s+)?(.+)$/;
+const MOTS_MAX_NOTE = 3; // « X » de plus de trois mots : une phrase, pas un mot
+const PROPOSITIONS_MAX = 3;
+const MOTS_VIDES = new Set(['ca', 'ce', 'cela', 'ceci', 'c', 'il', 'elle']); // un pronom n'est pas un mot à retenir
+
+/** @returns {{mot:string, categorie:'sauce'|'forme_pates'|'produit'|'garniture'}[]} au plus 3, sans doublon */
+export function motsDansNote(texte) {
+  const trouves = new Map();
+  for (const ligne of String(texte ?? '').split(/\r?\n|;/)) {
+    const brute = ligne.replace(/[’‘]/g, "'").trim();
+    const m = MOTIF_EGAL.exec(brute) ?? MOTIF_EST.exec(brute);
+    if (!m) continue;
+    const categorie = CLASSEMENT_DE[normaliser(m[2]).replace(/[.!\s]+$/, '').replace(/^(?:une?\s+)/, '')];
+    const mot = motDe(m[1]);
+    if (!categorie || mot === '' || m[1].includes(':') || MOTS_VIDES.has(normaliser(m[1]).replace(/'$/, '')) || m[1].trim().split(/\s+/).length > MOTS_MAX_NOTE) continue;
+    trouves.set(mot, { mot, categorie });
+  }
+  return [...trouves.values()].slice(0, PROPOSITIONS_MAX);
 }

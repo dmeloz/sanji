@@ -5,6 +5,7 @@ import { cleMemoire, lireMemoire } from './etat.js';
 import { CATEGORIES_MOT, categorieMotValide, champsPourMot, motDe } from './mots-retenus.js';
 import { champsDeComposant, retenirFiche } from './fiches-retenues.js';
 import { appliquerSavoir } from './savoir.js';
+import { cleLigne, plafonnerLignes } from './lignes-ignorees.js';
 
 function verifierH(h) {
   if (typeof h !== 'string' || Number.isNaN(Date.parse(h))) {
@@ -61,4 +62,23 @@ export function oublierMot(etat, mot, h) {
   delete etat.mots[mot];
   for (const [cle, m] of Object.entries(etat.memoire)) if (m?.viaMot === mot) delete etat.memoire[cle];
   return terminer(etat, h, 'oublierMot', mot, true);
+}
+
+/** Écarte une ligne de feuille (« Pas un plat ») pour toutes les semaines : la plus ancienne est évincée au-delà du plafond. */
+export function ignorerLigne(etat, texte, h) {
+  verifierH(h);
+  const ligne = String(texte ?? '').replace(/\s+/g, ' ').trim();
+  const cle = cleLigne(ligne);
+  if (cle === '') throw new Error('Cette ligne ne peut pas être écartée (vide ou trop longue).');
+  etat.lignes_ignorees = plafonnerLignes({ ...(etat.lignes_ignorees ?? {}), [cle]: { ligne, h } });
+  return terminer(etat, h, 'ignorerLigne', ligne, cle);
+}
+
+/** Remet une ligne écartée : elle redevient un plat possible à la prochaine lecture. */
+export function oublierLigne(etat, texte, h) {
+  verifierH(h);
+  const cle = cleLigne(texte);
+  if (cle === '' || !Object.hasOwn(etat.lignes_ignorees ?? {}, cle)) throw new Error("Cette ligne n'est pas écartée.");
+  delete etat.lignes_ignorees[cle];
+  return terminer(etat, h, 'oublierLigne', cle, true);
 }

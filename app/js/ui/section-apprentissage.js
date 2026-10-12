@@ -1,7 +1,7 @@
 // Réglages > Apprentissage et essais : ce que Sanji a appris (lecture seule) et l'accès à « Notes et diagnostic ».
 
 import { libelleJour } from '../domaine/dates.js';
-import { oublierMot } from '../domaine/actions-mots.js';
+import { oublierLigne, oublierMot } from '../domaine/actions-mots.js';
 import { CATEGORIES_MOT } from '../domaine/mots-retenus.js';
 import { rapportApprentissage } from '../domaine/rapport-apprentissage.js';
 import { agir } from '../magasin.js';
@@ -27,12 +27,21 @@ function ligneMot(m) {
     bouton('Oublier', () => agir((e, t) => oublierMot(e, m.nom, t)), 'court', { 'aria-label': `Oublier le mot : ${m.nom}` }));
 }
 
+/** Une ligne de feuille écartée (« Pas un plat ») : « Oublier » la fait redevenir un plat possible. */
+function ligneEcartee([cle, e]) {
+  const texte = e?.ligne ?? cle;
+  return h('li', { classe: 'ligne-mot' }, h('span', null, `${texte} · écartée à l'import`),
+    bouton('Oublier', () => agir((x, t) => oublierLigne(x, cle, t)), 'court', { 'aria-label': `Oublier la ligne écartée : ${texte}` }));
+}
+
 function sectionAppris(etat) {
   const r = rapportApprentissage(etat);
   return carte('Ce que Sanji a appris',
     h('p', null, `${pluriel(r.motsRetenus, 'mot retenu', 'mots retenus')}${r.motsRetenus > r.mots.length ? ` (les ${r.mots.length} premiers sont listés)` : ''}.`),
     r.mots.length === 0 ? ligneVide('Aucun mot retenu pour l\'instant.')
       : h('ul', { classe: 'liste-simple' }, r.mots.map(ligneMot)),
+    h('p', null, `${pluriel(Object.keys(etat.lignes_ignorees ?? {}).length, 'ligne écartée à l\'import', 'lignes écartées à l\'import')}.`),
+    Object.keys(etat.lignes_ignorees ?? {}).length === 0 ? null : h('ul', { classe: 'liste-simple' }, Object.entries(etat.lignes_ignorees).map(ligneEcartee)),
     h('p', null, `${pluriel(r.fichesRetenues, 'fiche d\'élément retenue', 'fiches d\'éléments retenues')} (Réglages > Poste > Fiches des éléments).`),
     h('h3', { classe: 'retour-essai-sous-titre' }, 'À préciser par semaine'),
     r.semaines.length === 0 ? ligneVide('Aucune semaine avec des composants.')

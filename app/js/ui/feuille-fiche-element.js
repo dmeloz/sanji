@@ -5,7 +5,7 @@
 import { definirPortionFiche, oublierFiche, reclasserFiche, renommerFiche } from '../domaine/actions-fiches.js';
 import { nomDeFiche, portionDeFiche, resumeDeFiche } from '../domaine/fiches-elements.js';
 import { cleDeNom } from '../domaine/fiches-retenues.js';
-import { CATEGORIES_MOT, choixMotDe } from '../domaine/mots-retenus.js';
+import { CATEGORIES_MOT, CLASSEMENTS_ELEMENT, choixMotDe } from '../domaine/mots-retenus.js';
 import { ROLES_STANDARD } from '../domaine/savoir.js';
 import { ETAT_POIDS, LIBELLES } from '../domaine/statuts.js';
 import { agir } from '../magasin.js';
@@ -41,7 +41,7 @@ function blocCategorie(cle, fiche) {
   const actuel = choixMotDe(fiche);
   return h('div', { classe: 'fe-bloc' }, sousTitre('Catégorie'),
     h('p', null, actuel ? pastille(CATEGORIES_MOT[actuel], 'vert') : pastille('à préciser', 'ambre')),
-    h('div', { classe: 'enseigner' }, h('div', { classe: 'actions' }, Object.keys(CATEGORIES_MOT).map((choix) => h('button', {
+    h('div', { classe: 'enseigner' }, h('div', { classe: 'actions' }, CLASSEMENTS_ELEMENT.map((choix) => h('button', {
       type: 'button', classe: `btn btn-court enseigner-choix${choix === actuel ? ' btn-principal' : ''}`, 'aria-pressed': choix === actuel ? 'true' : 'false',
       onClick: () => agir((e, t) => reclasserFiche(e, cle, choix, t)),
     }, iconeChoix(choix), CATEGORIES_MOT[choix])))));

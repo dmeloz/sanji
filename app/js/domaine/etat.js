@@ -4,6 +4,7 @@
 import { controleAjustement } from './ajustements.js';
 import { fichesDepuisPlats, fichesValides, nomsValides } from './fiches-retenues.js';
 import { categorieMotValide, motsValides } from './mots-retenus.js';
+import { lignesIgnoreesValides } from './lignes-ignorees.js';
 import { ETAT_POIDS } from './statuts.js';
 
 export const APPLICATION = 'sanji-entremetier';
@@ -84,6 +85,8 @@ export function etatInitial() {
     memoire: {},
     // Mots retenus (clé = mot normalisé) : { categorie: 'forme_pates'|'sauce'|'produit'|'garniture', h }, valables pour tous les plats.
     mots: {},
+    // Lignes de feuille écartées par la propriétaire (clé = ligne normalisée) : { ligne, h }. Voir lignes-ignorees.js.
+    lignes_ignorees: {},
     // Orthographes retenues (clé = variante normalisée) : { nom: 'nom correct', h }. Voir fiches-retenues.js.
     noms: {},
     // Fiches d'ÉLÉMENTS retenues par nom correct normalisé, indépendantes du menu : { nom?, famille?, categorie?, role?, attribue?, grammage?, h }.
@@ -365,6 +368,11 @@ export function importer(texte, aujourdhui = null) {
   if (source.mots !== undefined) {
     if (!estObjet(source.mots)) throw new Error('Export corrompu : « mots » est invalide.');
     etat.mots = motsValides(source.mots);
+  }
+  // Lignes de feuille écartées : entrées invalides écartées, plafond de 200 (voir lignes-ignorees.js).
+  if (source.lignes_ignorees !== undefined) {
+    if (!estObjet(source.lignes_ignorees)) throw new Error('Export corrompu : « lignes_ignorees » est invalide.');
+    etat.lignes_ignorees = lignesIgnoreesValides(source.lignes_ignorees);
   }
   // Orthographes et fiches retenues : entrées invalides écartées, plafond de 500 (voir fiches-retenues.js).
   if (source.noms !== undefined) {

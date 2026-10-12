@@ -1,14 +1,17 @@
 // Notes de test : stockage local à l'appareil (HORS de l'état et de la sauvegarde), pastille « Dev » et feuille de saisie.
 // Rien n'est envoyé : les notes ne partent qu'avec le fichier de diagnostic que la propriétaire partage.
 
-import { CATEGORIES, ETATS, MAX_GESTES, MAX_NOTE, TYPES, TYPE_PAR_DEFAUT, etatNote, gesteTexte, validerNote } from '../domaine/notes-dev.js';
+import { retenirMot } from '../domaine/actions-mots.js';
+import { CATEGORIES, ETATS, MAX_GESTES, MAX_NOTE, TYPES, TYPE_PAR_DEFAUT, etatNote, gesteTexte, motsDansNote, validerNote } from '../domaine/notes-dev.js';
+import { CATEGORIES_MOT } from '../domaine/mots-retenus.js';
+import { agir } from '../magasin.js';
 import { VERSION_APP } from '../version.js';
 import { h, parId, svg } from './dom.js';
 import { lireRepere } from './dernier-envoi.js';
 import { lireEvenements } from './journal-diagnostic.js';
 import { afficherMessage } from './messages.js';
 import { ouvrirCentreDev } from './centre-dev.js';
-import { panneau } from './panneau.js';
+import { confirmer, panneau } from './panneau.js';
 
 const CLE = 'sanji-notes-dev';
 const CLE_PASTILLE = 'sanji-pastille-dev';
@@ -115,6 +118,20 @@ function groupeType(categorie, controles, nom) {
     }));
 }
 
+/** Un mot que la note apprend (« nduja = sauce ») : proposé, jamais retenu sans un « Oui ». */
+function proposerMot({ mot, categorie }) {
+  const classement = CATEGORIES_MOT[categorie].toLowerCase();
+  confirmer({
+    titre: `Retenir « ${mot} » comme ${classement} ?`,
+    texte: `Sanji le retiendra pour tous les plats : « ${mot} » sera lu comme ${classement}. Vous pourrez l'oublier dans Réglages > Apprentissage et essais.`,
+    libelleOk: 'Oui', libelleAnnuler: 'Non',
+    action: () => {
+      const r = agir((e, t) => retenirMot(e, mot, categorie, t));
+      if (r.ok) afficherMessage(`Retenu : ${mot} = ${classement}, pour tous les plats.`, 'ok');
+    },
+  });
+}
+
 /** Feuille « Noter une remarque ». `contexte` : { ecran, gestes } fixés à l'ouverture. */
 export function ouvrirFeuilleNote(contexte = { ecran: ecranCourant(), gestes: derniersGestes() }) {
   const controles = new Map();
@@ -131,6 +148,7 @@ export function ouvrirFeuilleNote(contexte = { ecran: ecranCourant(), gestes: de
       const type = [...controles].find(([, r]) => r.checked)?.[0];
       ajouterNote({ type, texte: zone.value, ecran: contexte.ecran, gestes: contexte.gestes });
       afficherMessage('Remarque notée. Elle reste sur cet appareil.', 'ok');
+      for (const proposition of motsDansNote(zone.value)) proposerMot(proposition);
     },
   });
 }

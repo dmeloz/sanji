@@ -226,12 +226,12 @@ before(async () => {
 });
 after(() => dom.restaurer());
 
-test('geste : quatre choix, un toucher classe, retient et annonce le mot', () => {
+test('geste : cinq choix (dont le mode de préparation), un toucher classe, retient et annonce le mot', () => {
   const etat = monde();
   magasin.remplacer(etat);
   const c = duJour(magasin.etat(), FUTUR, 1);
   const bloc = enseigner.blocEnseigner(c);
-  assert.deepEqual(boutons(bloc).map((b) => b.textContent), ['Forme de pâtes', 'Sauce', 'Produit', 'Garniture']);
+  assert.deepEqual(boutons(bloc).map((b) => b.textContent), ['Forme de pâtes', 'Sauce', 'Produit', 'Garniture', 'Mode de préparation']);
   boutons(bloc).find((b) => b.textContent === 'Sauce').click();
   assert.equal(magasin.etat().mots.sorrentina.categorie, 'sauce');
   assert.equal(duJour(magasin.etat(), FUTUR, 1).categorie, 'sauce');
@@ -239,14 +239,14 @@ test('geste : quatre choix, un toucher classe, retient et annonce le mot', () =>
   assert.equal(enseigner.blocEnseigner(duJour(magasin.etat(), FUTUR, 1)), null, 'plus à préciser : plus de choix');
 });
 
-test('fiche d\'un élément proposé : pastille « proposée · à confirmer », 4 choix, le suggéré en principal', () => {
+test('fiche d\'un élément proposé : pastille « proposée · à confirmer », 5 choix, le suggéré en principal', () => {
   const etat = monde();
   magasin.remplacer(etat);
   const c = duJour(magasin.etat(), FUTUR, 1);
   const page = fiche.rendre(magasin.etat(), c.id);
   assert.match(page.textContent, /sauce proposée · à confirmer/);
   const choix = boutons(page).filter((b) => /enseigner-choix/.test(b.className));
-  assert.deepEqual(choix.map((b) => b.textContent), ['Forme de pâtes', 'Sauce', 'Produit', 'Garniture']);
+  assert.deepEqual(choix.map((b) => b.textContent), ['Forme de pâtes', 'Sauce', 'Produit', 'Garniture', 'Mode de préparation']);
   assert.deepEqual(choix.filter((b) => /btn-principal/.test(b.className)).map((b) => b.textContent), ['Sauce']);
 });
 
