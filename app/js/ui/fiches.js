@@ -10,6 +10,7 @@ import { bouton, definitions } from './elements.js';
 import { formaterHeure } from './format.js';
 import { noter } from './journal-diagnostic.js';
 import { confirmer, panneau } from './panneau.js';
+import { estSemainePassee } from './semaine-passee.js';
 import { LIBELLE_MODE, LIBELLE_SERVICE } from './reference.js';
 import { blocBuffet } from './reperes-metier.js';
 
@@ -58,7 +59,7 @@ export function ouvrirFiche(ficheId) {
       repartitionIncoherente(f)
         ? h('p', { classe: 'alerte-texte' }, `La répartition (${sommeRepartition(f)}) ne correspond pas aux couverts (${f.couverts}).`) : null,
       buffetDeLaFiche(f),
-      h('div', { classe: 'actions' }, bouton('Modifier la fiche', () => { fermer(); dialogFiche(f, f.date); }, 'court')),
+      estSemainePassee(f.date) ? null : h('div', { classe: 'actions' }, bouton('Modifier la fiche', () => { fermer(); dialogFiche(f, f.date); }, 'court')),
     ],
   });
 }

@@ -4,20 +4,22 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { boutons, installerFauxDom } from './aide-dom.js';
+import { boutons, installerFauxDom, figerHorloge } from './aide-dom.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide } from './aide.js';
 import { saisirMenusSemaine } from '../app/js/domaine/actions.js';
 
 let dom; let magasin; let vue; let routeur;
 
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   vue = await import('../app/js/ui/vue-import.js');
   routeur = await import('../app/js/ui/routeur.js');
 });
-after(() => dom.restaurer());
+after(() => { dom.restaurer(); rendreHorloge(); });
 
 const champ = (n, id) => n.tous((x) => x.attributs.id === id)[0];
 const parClasse = (n, c) => n.tous((x) => x.className.split(' ').includes(c));

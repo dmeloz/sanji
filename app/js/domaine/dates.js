@@ -97,3 +97,8 @@ export function libelleJour(date) {
 export function datesDeLaSemaine(lundi) {
   return [0, 1, 2, 3, 4, 5, 6].map((i) => ajouterJours(lundi, i));
 }
+
+/** Vrai si la date appartient à une semaine dont le lundi est antérieur au lundi de `aujourd` (semaine passée). */
+export function semainePassee(date, aujourd) {
+  return lundiDe(date) < lundiDe(aujourd);
+}

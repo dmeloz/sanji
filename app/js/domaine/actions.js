@@ -3,7 +3,7 @@
 // Invariant : aucune action (hors marquerFait et corrigerReel) ne touche à `quantiteReelle` ni à `instantane`.
 
 import {
-  aMenuDuJour, creneauxDuJour, creneauxDuJourSemaine, datesDeLaSemaine, estOuvert, estDateValide, jourSemaine,
+  aMenuDuJour, creneauxDuJour, creneauxDuJourSemaine, datesDeLaSemaine, estOuvert, estDateValide, jourSemaine, semainePassee,
 } from './dates.js';
 import {
   ajouterJournal, assurerJour, composantVide, estSauceAConfirmer, ficheVide, fournisseurVide, memoireVide, normaliser, nouvelId,
@@ -67,6 +67,14 @@ const exigerComposant = (etat, id) => exiger(etat.composants, id, 'Composant');
 const exigerProduction = (etat, id) => exiger(etat.productions, id, 'Production');
 const exigerFiche = (etat, id) => exiger(etat.fiches, id, 'Fiche');
 const exigerRecette = (etat, id) => exiger(etat.recettes, id, 'Recette');
+
+/**
+ * Garde-fou sur le temps : une semaine passée (lundi avant celui de la semaine de `h`) ne se modifie plus par erreur.
+ * Ne s'applique qu'aux menus, composants, prévisions et fiches de fonction ; ventes, « fait » et corrections restent possibles.
+ */
+export function verifierSemaineModifiable(date, h) {
+  if (estDateValide(date) && semainePassee(date, h.slice(0, 10))) throw new Error('Cette semaine est passée : elle ne peut plus être modifiée.');
+}
 
 function verifierLundi(lundi) {
   verifierDate(lundi);
@@ -284,6 +292,7 @@ function texteRetires(retires) {
 export function definirMenu(etat, date, menu, intitule, h) {
   verifierH(h);
   verifierMenuDuJour(date, menu);
+  verifierSemaineModifiable(date, h);
   const retires = [];
   const m = enregistrerMenu(etat, date, menu, String(intitule ?? ''), retires);
   return terminer(etat, h, 'definirMenu', `${date} menu ${menu}${texteRetires(retires)}`, m);
@@ -299,6 +308,7 @@ export function definirMenu(etat, date, menu, intitule, h) {
 export function saisirMenusSemaine(etat, lundi, saisie, h) {
   verifierH(h);
   verifierLundi(lundi);
+  verifierSemaineModifiable(lundi, h);
   if (saisie === null || typeof saisie !== 'object' || Array.isArray(saisie)) throw new Error('Saisie de la semaine invalide.');
   const jours = datesDeLaSemaine(lundi).slice(0, 5);
   const horsSemaine = Object.keys(saisie).filter((d) => !jours.includes(d));
@@ -344,6 +354,7 @@ export function saisirMenusSemaine(etat, lundi, saisie, h) {
 export function ajouterComposant(etat, date, menu, champs, h) {
   verifierH(h);
   verifierMenuDuJour(date, menu);
+  verifierSemaineModifiable(date, h);
   if (typeof champs?.nom !== 'string' || champs.nom.trim() === '') throw new Error('Le nom du composant est obligatoire.');
   if (champs.categorie !== undefined) verifierDans(champs.categorie, CATEGORIE, 'Catégorie');
   if (champs.type !== undefined) verifierDans(champs.type, TYPE_COMPOSANT, 'Type');
@@ -444,6 +455,7 @@ export function confirmerAttribution(etat, composantId, attribue, h) {
 export function supprimerComposant(etat, composantId, h) {
   verifierH(h);
   const c = exigerComposant(etat, composantId);
+  verifierSemaineModifiable(c.date, h);
   delete etat.composants[composantId];
   return terminer(etat, h, 'supprimerComposant', c.nom, true);
 }
@@ -454,6 +466,7 @@ export function supprimerComposant(etat, composantId, h) {
 export function definirPrevision(etat, date, menu, portions, h) {
   verifierH(h);
   verifierMenuDuJour(date, menu);
+  verifierSemaineModifiable(date, h);
   verifierEntierOuNul(portions, 'Prévision');
   const j = assurerJour(etat, date);
   const avant = j.previsions[menu].portions;
@@ -505,6 +518,7 @@ export function creerFiche(etat, champs, h) {
   const id = nouvelId('fiche');
   const fiche = ficheVide(id);
   appliquerChampsFiche(fiche, champs);
+  verifierSemaineModifiable(fiche.date, h);
   fiche.historique.push({ version: 1, h, resume: 'création' });
   etat.fiches[id] = fiche;
   return terminer(etat, h, 'creerFiche', `${fiche.date} ${fiche.service} ${fiche.numero}`, id);
@@ -518,6 +532,8 @@ export function modifierFiche(etat, ficheId, champs, h) {
   verifierH(h);
   const f = exigerFiche(etat, ficheId);
   if (f.statut === 'annulee') throw new Error('Cette fiche est annulée : elle ne se modifie plus.');
+  verifierSemaineModifiable(f.date, h);
+  if (champs && 'date' in champs) verifierSemaineModifiable(champs.date, h);
   const modifies = appliquerChampsFiche(f, champs);
   if (modifies.includes('repartition') || modifies.includes('mode')) f.statutRepartition = 'provisoire';
   if (modifies.length > 0) {
@@ -531,6 +547,7 @@ export function modifierFiche(etat, ficheId, champs, h) {
 export function annulerFiche(etat, ficheId, h) {
   verifierH(h);
   const f = exigerFiche(etat, ficheId);
+  verifierSemaineModifiable(f.date, h);
   if (f.statut !== 'annulee') {
     f.statut = 'annulee';
     f.version += 1;

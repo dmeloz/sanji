@@ -1,6 +1,6 @@
 // Action sur les couverts du midi (voir couverts-midi.js) : un total, une répartition calculée ou décidée par le chef.
 
-import { terminer } from './actions.js';
+import { terminer, verifierSemaineModifiable } from './actions.js';
 import { repartitionCalculee } from './couverts-midi.js';
 import { aMenuDuJour, estDateValide } from './dates.js';
 import { assurerJour } from './etat.js';
@@ -19,6 +19,7 @@ export function definirCouvertsMidi(etat, date, { total, repartition = null } = 
   }
   if (!estDateValide(date)) throw new Error(`Date invalide : « ${date} » (format attendu AAAA-MM-JJ).`);
   if (!aMenuDuJour(date)) throw new Error('Pas de menu du jour ce jour-là : les menus existent du lundi au vendredi.');
+  verifierSemaineModifiable(date, h);
   if (!entierPositif(total)) throw new Error('Les couverts du midi : entier supérieur ou égal à 0 attendu.');
   let m1;
   let m2;

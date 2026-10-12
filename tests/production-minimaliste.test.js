@@ -4,7 +4,7 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { installerFauxDom, panneauxOuverts, figerHorloge } from './aide-dom.js';
 import { definirMenu, definirPrevision, definirRegle, definirStandard, marquerFait, annulerFait, planifier } from '../app/js/domaine/actions.js';
 import { etatTache } from '../app/js/domaine/planification.js';
 import { jourApresGeste, jourOuvertVoisin } from '../app/js/domaine/dates.js';
@@ -16,12 +16,14 @@ import { composantValide, etatVide, h, prevision, principaleDe } from './aide.js
 let dom;
 let magasin;
 let vue;
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   vue = await import('../app/js/ui/vue-production.js');
 });
-after(() => dom.restaurer());
+after(() => { dom.restaurer(); rendreHorloge(); });
 
 const classes = (noeud, classe) => noeud.tous((x) => x.className.split(' ').includes(classe));
 const page = (etat, date = S.lundi) => { magasin.remplacer(etat); return vue.rendre(magasin.etat(), date); };
