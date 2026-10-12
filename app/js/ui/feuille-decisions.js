@@ -119,7 +119,7 @@ function carte(c, fermer, valeurs = [], etat = etatCourant()) {
       const p = c.proposition;
       etiquette = "Proposition de l'apprentissage";
       titre = p.texte;
-      detail = "Vous corrigez souvent cette portion dans le même sens. Rien n'est appliqué sans votre accord.";
+      detail = p.actuelle ? "Vous corrigez souvent cette portion dans le même sens. Rien n'est appliqué sans votre accord." : "Cette famille n'a pas encore de standard. Rien n'est appliqué sans votre accord.";
       actions = [...gestes, secondaire('Examiner', () => ouvrirProposition(p), { 'aria-label': `Examiner la proposition : ${p.libelle}` })];
       break;
     }

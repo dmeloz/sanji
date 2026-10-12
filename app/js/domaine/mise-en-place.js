@@ -3,6 +3,7 @@
 
 import { calculerComposant, formaterQuantite, portionsMenu } from './calcul.js';
 import { libelleJour } from './dates.js';
+import { AUCUN_VERBE, ficheDe } from './fiches-retenues.js';
 import { grammageEffectif } from './savoir.js';
 
 const GRAMMES_PAR_KILO = 1000;
@@ -31,11 +32,13 @@ const CATEGORIE_CUIRE = 'feculent';
 const NOM_DIT_L_ACTION = /\b(saut|brais|roti|gratin|poel|grill|frit|vapeur|bouilli|poche|mijot)/;
 
 /**
- * Verbe de la ligne (« Cuire ») d'après le composant, ou null : alors la ligne n'affiche que le nom du produit.
- * Table minimale : un féculent de base (pâtes, riz, quinoa, légumineuses, pommes de terre) se cuit ; tout le reste reste
+ * Verbe de la ligne (« Cuire ») ou null : alors la ligne n'affiche que le nom du produit. Le verbe retenu par la propriétaire
+ * dans la fiche de l'élément (`etat`, v129 ; `aucun` = pas de verbe) passe d'abord ; sinon la table minimale ci-dessous : : un féculent de base (pâtes, riz, quinoa, légumineuses, pommes de terre) se cuit ; tout le reste reste
  * sans verbe plutôt qu'un verbe inventé.
  */
-export function verbeDe(composant) {
+export function verbeDe(composant, etat = null) {
+  const retenu = composant && etat ? ficheDe(etat, composant.nom)?.verbe : undefined;
+  if (retenu) return retenu === AUCUN_VERBE ? null : retenu;
   if (!composant || composant.type === 'preparation_maison' || composant.type === 'a_preciser') return null;
   if (NOM_DIT_L_ACTION.test(sansAccent(composant.nom))) return null;
   if (composant.categorie === CATEGORIE_CUIRE && composant.famille) return 'Cuire';

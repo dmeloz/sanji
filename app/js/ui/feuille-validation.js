@@ -182,17 +182,19 @@ export function ouvrirProposition(proposition) {
       aide: `Valeur proposée d'après vos corrections (${unite}, poids ${libelle('ETAT_POIDS', p.etatPoids)}) ; vous pouvez la changer.` },
   ]);
   const lire = () => ({ valeur: f.lire().valeur, unite: p.unite, etat: p.etatPoids });
-  const origine = ORIGINE_EN_CLAIR[p.actuelle.origine] ?? p.actuelle.origine;
+  const origine = p.actuelle ? (ORIGINE_EN_CLAIR[p.actuelle.origine] ?? p.actuelle.origine) : null;
   panneau({
     titre: `Votre standard : ${p.libelle} ${ROLE_EN_CLAIR[p.role] ?? ''}`.trim(),
     corps: [
       h('p', { classe: 'quantite-grande' }, `${formaterNombre(p.valeur)} ${unite}`, h('small', null, ` poids ${libelle('ETAT_POIDS', p.etatPoids)}`)),
-      h('p', { classe: 'aide' }, `Vous avez corrigé ${pluriel(p.nombre, 'fois')} la portion dans le même sens (du ${libelleJour(p.dates[0])} au ${libelleJour(p.dates.at(-1))}).`),
-      h('p', { classe: 'meta' }, `Valeur actuelle : ${formaterNombre(p.actuelle.valeur)} ${libelle('UNITE', p.actuelle.unite)} (${origine}).`),
+      h('p', { classe: 'aide' }, p.actuelle
+        ? `Vous avez corrigé ${pluriel(p.nombre, 'fois')} la portion dans le même sens (du ${libelleJour(p.dates[0])} au ${libelleJour(p.dates.at(-1))}).`
+        : `Vous avez tapé ${pluriel(p.nombre, 'fois')} à peu près la même portion (du ${libelleJour(p.dates[0])} au ${libelleJour(p.dates.at(-1))}) : cette famille n'a encore aucun standard.`),
+      p.actuelle ? h('p', { classe: 'meta' }, `Valeur actuelle : ${formaterNombre(p.actuelle.valeur)} ${libelle('UNITE', p.actuelle.unite)} (${origine}).`) : null,
       h('ul', { classe: 'meta' }, p.historique.map((x) => h('li', null, `${libelleJour(x.date)} : ${x.nom}, ${formaterNombre(x.valeur)} ${unite}`))),
       ...f.noeuds,
     ],
-    libelleEnregistrer: 'En faire mon standard',
+    libelleEnregistrer: p.actuelle ? 'En faire mon standard' : 'En faire ma première valeur',
     surEnregistrer: () => { agirStrict((e, t) => accepterApprentissage(e, p.cleFamille, p.role, lire(), t)); },
     extras: [
       { libelle: 'Non, garder', action: (api) => { agirStrict((e, t) => ecarterApprentissage(e, p.cleFamille, p.role, t)); api.fermer(); } },

@@ -1,10 +1,10 @@
 // Actions sur une proposition d'apprentissage (apprentissage.js). Chacune prend l'horodatage ISO `h` en dernier argument.
 //  - accepterApprentissage : la valeur proposée (ou celle que la propriétaire a retapée) devient le standard maison,
-//    par validerStandard ou corrigerStandard : elle passe devant pour toujours.
+//    par validerStandard, corrigerStandard ou, pour une première valeur (famille sans repère), definirStandard : elle passe devant pour toujours.
 //  - ecarterApprentissage : « Non, garder » ; mémorisé dans `etat.validations`, la proposition se tait 30 jours
 //    ou jusqu'à 3 nouvelles corrections. Le standard n'est pas touché.
 
-import { terminer } from './actions.js';
+import { definirStandard, terminer } from './actions.js';
 import { corrigerStandard, validerStandard } from './actions-validation.js';
 import { cleApprentissage, propositionsApprentissage } from './apprentissage.js';
 import { ROLES_STANDARD, lignesStandards, lignesStandardsGroupes } from './savoir.js';
@@ -40,6 +40,7 @@ export function accepterApprentissage(etat, cleFamille, role, saisie, h) {
   const proposition = propositionsApprentissage(etat, h.slice(0, 10))
     .find((p) => p.cleFamille === cleFamille && p.role === role && p.etatPoids === etatPoids);
   if (!ligne.standard && r && r.unite === unite && r.etat === etatPoids) validerStandard(etat, cleFamille, role, choix, h);
+  else if (!ligne.standard && !r) definirStandard(etat, cleFamille, role, choix, h); // première valeur : ni repère ni standard à corriger
   else corrigerStandard(etat, cleFamille, role, choix, h);
   if (etat.validations) delete etat.validations[cleApprentissage(cleFamille, role)];
   const standard = etat.standards[cleFamille][role];
