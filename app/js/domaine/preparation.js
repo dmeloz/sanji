@@ -5,6 +5,7 @@
 import { COUVERTS_RAPIDES, couvertsMidiDuJour } from './couverts-midi.js';
 import { aMenuDuJour, datesDeLaSemaine } from './dates.js';
 import { jourOuVide } from './etat.js';
+import { etatPortionTapee } from './mise-en-place.js';
 import { ROLES_STANDARD, grammageEffectif } from './savoir.js';
 import { cleStandardDe, valeursAValider } from './validation.js';
 
@@ -49,7 +50,7 @@ export function preparationSemaine(etat, lundi, aujourd) {
       id: `portion:${c.id}`, libelle: c.nom,
       // Famille et rôle connus : la valeur tapée devient le standard maison (retenu pour toutes les semaines).
       cible: { type: 'composant', composantId: c.id, famille: ROLES_STANDARD.includes(c.role) ? cleStandardDe(c) : null, role: c.role },
-      valeurStandard: null, unite: c.grammage.unite, etatPoids: c.grammage.etat, estInconnu: true,
+      valeurStandard: null, unite: c.grammage.unite, etatPoids: etatPortionTapee(etat, c.id), estInconnu: true,
     }));
 
   const aConfirmer = [...avecStandard, ...sansStandard];

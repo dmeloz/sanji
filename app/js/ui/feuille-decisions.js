@@ -18,7 +18,7 @@ import { dialogAllergenes, dialogChoisirSauce, dialogModifier, texteObstacleAlle
 
 const ETIQUETTE_POINT = {
   allergenes: 'Allergènes à confirmer', conservation: 'Conservation à confirmer', composant_inconnu: 'À classer',
-  creneau_charge: 'Créneau chargé', repartition_incoherente: 'Répartition incohérente', semaine_type: 'Semaine type à confirmer',
+  creneau_charge: 'Créneau chargé', repartition_incoherente: 'Répartition incohérente', semaine_type: 'Semaine type à confirmer', etat_poids_portion: 'État du poids à confirmer',
 };
 const ROLE_EN_CLAIR = { plat_principal: 'en plat principal', garniture: 'en garniture' };
 
@@ -95,7 +95,7 @@ function carte(c, fermer, valeurs = [], etat = etatCourant()) {
     case 'point': {
       etiquette = ETIQUETTE_POINT[c.type] ?? 'À confirmer';
       titre = c.texte;
-      const href = c.composantId ? `#/fiche/${encodeURIComponent(c.composantId)}` : c.date ? `#/production/${c.date}` : '#/reglages';
+      const href = c.composantId ? `#/fiche/${encodeURIComponent(c.composantId)}` : c.date ? `#/production/${c.date}` : c.type === 'etat_poids_portion' ? '#/reglages/standards' : '#/reglages';
       if (c.type === 'allergenes' && c.composantId && etatCourant().composants[c.composantId]) {
         // Valider la liste ne règle rien quand la composition manque : l'action proposée est celle qui règle vraiment.
         const composant = () => etatCourant().composants[c.composantId];

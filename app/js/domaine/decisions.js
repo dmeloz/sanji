@@ -10,7 +10,8 @@ import { ajouterJours, jourSemaine, lundiDe } from './dates.js';
 import { estSauceAConfirmer } from './etat.js';
 import { cibleProduction, ecartProduction, etatTache, evaluationProduction, reelNonCompte } from './planification.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
-import { valeursAValider } from './validation.js';
+import { libelle } from './statuts.js';
+import { portionsCuitesSuspectes, valeursAValider } from './validation.js';
 
 /** Points de quantité manquante : jamais une décision. */
 export const POINTS_SANS_DECISION = Object.freeze(new Set(['grammage', 'prevision_manquante', 'composant_a_preciser']));
@@ -99,6 +100,13 @@ export function decisionsDe(etat, aujourd) {
     if (dates.includes(c.date) && estSauceAConfirmer(c)) {
       cartes.push({ id: `sauce:${c.id}`, genre: 'sauce', composantId: c.id, nom: c.nom, date: c.date });
     }
+  }
+
+  // Portion enregistrée « cuit » alors que le repère validé est « sec » : jamais corrigée seule, c'est la propriétaire qui tranche.
+  for (const p of portionsCuitesSuspectes(etat)) {
+    cartes.push({ id: `point:etat_poids_portion:${p.cleFamille}|${p.role}`, genre: 'point', type: 'etat_poids_portion', composantId: null, ficheId: null, date: null,
+      cleFamille: p.cleFamille, role: p.role,
+      texte: `Votre portion de ${p.libelle.toLowerCase()} (${String(p.valeur).replace('.', ',')} ${libelle('UNITE', p.unite)}) est enregistrée en poids cuit : le repère est en poids sec. C'est bien du cuit ?` });
   }
 
   for (const proposition of propositionsApprentissage(etat, aujourd)) {

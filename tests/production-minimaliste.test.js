@@ -45,13 +45,19 @@ function lundiFusilli() {
 
 // ------------------------------------------------------------------ quantités en g / kg
 
-test('quantiteEnPoids : « 850 g » sous 1000 g, « 1,2 kg » dès 1000 g (virgule, une décimale), jamais « portion » pour un poids', () => {
+test('quantiteEnPoids : « 850 g » sous 1000 g, « 1,2 kg » dès 1000 g (virgule, jusqu’à deux décimales), jamais « portion » pour un poids', () => {
   assert.equal(quantiteEnPoids(850, 'g'), '850 g');
   assert.equal(quantiteEnPoids(1200, 'g'), '1,2 kg');
   assert.equal(quantiteEnPoids(4500, 'g'), '4,5 kg');
-  assert.equal(quantiteEnPoids(2526, 'g'), '2,5 kg');
+  assert.equal(quantiteEnPoids(2526, 'g'), '2,53 kg');
+  assert.equal(quantiteEnPoids(1049, 'g'), '1,05 kg', 'plus d\'erreur de 50 g : deux décimales');
+  assert.equal(quantiteEnPoids(1250, 'g'), '1,25 kg');
+  assert.equal(quantiteEnPoids(1800, 'g'), '1,8 kg');
   assert.equal(quantiteEnPoids(1000, 'g'), '1 kg');
-  assert.equal(quantiteEnPoids(999.6, 'g'), '1 kg', 'arrondi avant le seuil : jamais « 1000 g »');
+  assert.equal(quantiteEnPoids(999.4, 'g'), '999 g');
+  assert.equal(quantiteEnPoids(999.5, 'g'), '1 kg', 'arrondi avant le seuil : jamais « 1000 g »');
+  assert.equal(quantiteEnPoids(999.6, 'g'), '1 kg');
+  assert.equal(quantiteEnPoids(Number.NaN, 'g'), null, 'inconnu : rien d\'inventé (la ligne dit « à chiffrer »)');
   assert.equal(quantiteEnPoids(null, 'g'), null, 'inconnu : rien d\'inventé');
   assert.equal(quantiteEnPoids(3, 'piece'), '3 pièces');
 });
@@ -355,4 +361,12 @@ test('la page ignore un glissement qui commence sur un champ, une zone de texte,
   noeud.declencher('touchstart', { target: { closest: () => null }, touches: [{ clientX: 300, clientY: 100 }] });
   await noeud.declencher('touchend', { changedTouches: [{ clientX: 180, clientY: 110 }] });
   assert.equal(globalThis.location.hash, `#/production/${S.mardi}`, 'ailleurs : le geste fonctionne');
+});
+
+test('une production « faite » en unité portion ne s\'affiche jamais « 13 portions » (règle v122 : « à chiffrer » ou le poids réel)', () => {
+  const { e, c } = platSansPortion();
+  marquerFait(e, principaleDe(e, c), 13, h());
+  const ligne = ligneDe(page(e), 'GENERIQUE_TEST');
+  assert.doesNotMatch(texte(ligne), /portion/);
+  assert.equal(classes(ligne, 'mep-qte').length, 0, 'aucune quantité en portions');
 });

@@ -9,6 +9,8 @@ import { libelleJour } from '../domaine/dates.js';
 import { preparationSemaine } from '../domaine/preparation.js';
 import { libelle } from '../domaine/statuts.js';
 import { agir, aujourdhui, redessiner } from '../magasin.js';
+import { MESSAGE_POIDS_A_CHOISIR } from '../domaine/mise-en-place.js';
+import { choixEtatPoids } from './choix-poids.js';
 import { h } from './dom.js';
 import { bouton, lien, pastille } from './elements.js';
 import { parseNombre, pluriel, quantite } from './format.js';
@@ -57,12 +59,14 @@ function ligneStandard(l) {
 function ligneInconnue(l, champs, lundi) {
   const champ = h('input', { type: 'number', inputmode: 'decimal', min: '0', step: 'any', classe: 'prep-champ', 'aria-label': `${l.libelle} : valeur en ${libelle('UNITE', l.unite)}` });
   champs.set(l.id, champ);
+  const poids = choixEtatPoids(l.etatPoids);
   const valider = () => {
     let valeur;
     try { valeur = parseNombre(champ.value, l.libelle); } catch (erreur) { afficherMessage(erreur.message, 'erreur'); return; }
     if (valeur === null) { afficherMessage(`${l.libelle} : tapez une valeur.`, 'erreur'); return; }
+    if (poids.valeur() === null) { afficherMessage(MESSAGE_POIDS_A_CHOISIR, 'erreur'); return; }
     bilan = null;
-    const r = agir((e, t) => saisirPortionInconnue(e, l.cible.composantId, valeur, t));
+    const r = agir((e, t) => saisirPortionInconnue(e, l.cible.composantId, valeur, t, poids.valeur()));
     if (!r.ok) return;
     const texte = `${l.libelle} : ${TEXTE_PORTEE[r.valeur.portee]}.`;
     retenus = { lundi, textes: [...(retenus.lundi === lundi ? retenus.textes : []), texte] };
@@ -71,7 +75,8 @@ function ligneInconnue(l, champs, lundi) {
   return h('li', { classe: 'prep-ligne' },
     h('div', { classe: 'prep-ligne-texte' },
       h('span', { classe: 'prep-ligne-nom' }, l.libelle),
-      h('span', { classe: 'prep-ligne-valeur' }, `à saisir (${libelle('UNITE', l.unite)}, poids ${libelle('ETAT_POIDS', l.etatPoids)})`)),
+      h('span', { classe: 'prep-ligne-valeur' }, `à saisir (${libelle('UNITE', l.unite)} par portion) : choisissez le poids`)),
+    poids.noeud,
     h('div', { classe: 'prep-saisie' }, champ, bouton('OK', valider, 'court', { 'aria-label': `Valider ${l.libelle} avec la valeur tapée` })));
 }
 

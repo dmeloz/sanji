@@ -5,6 +5,7 @@
 
 import { calculerComposant } from './calcul.js';
 import { ajouterJours } from './dates.js';
+import { etatRepereFamille } from './mise-en-place.js';
 import {
   ROLES_STANDARD, cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes, reperesParDefaut,
 } from './savoir.js';
@@ -13,6 +14,22 @@ const ORIGINES_REPERE = ['standard_base'];
 
 /** Clé d'une valeur à valider : « famille|rôle » (ou « groupe:…|rôle » pour une catégorie). */
 export const cleValidation = (cleFamille, role) => `${cleFamille}|${role}`;
+
+/** Clé, dans `etat.validations`, de « oui, ce standard est bien du cuit » (portion en cuit alors que le repère validé est sec). */
+export const cleCuitConfirme = (cleFamille, role) => `etat_poids:${cleFamille}|${role}`;
+
+/**
+ * Standards maison d'une famille enregistrés en poids CUIT alors que le repère validé de la même famille est en poids SEC (portions
+ * tapées avant la v131, lues « cuit » par défaut) : à confirmer par la propriétaire, jamais corrigés seuls. Une confirmation
+ * (« c'est bien du cuit ») les fait taire.
+ * @returns {{cleFamille:string, role:string, libelle:string, valeur:number, unite:string}[]}
+ */
+export function portionsCuitesSuspectes(etat) {
+  const lignes = lignesStandards(etat);
+  return lignes.filter((l) => l.standard?.etat === 'cuit' && etatRepereFamille(lignes, l.cleFamille, l.standard.unite) === 'sec'
+    && !etat.validations?.[cleCuitConfirme(l.cleFamille, l.role)])
+    .map((l) => ({ cleFamille: l.cleFamille, role: l.role, libelle: l.libelle, valeur: l.standard.valeur, unite: l.standard.unite }));
+}
 
 /** Clé de standard (famille, ou catégorie « légumes » pour un légume sans famille) d'un composant, ou null. */
 export function cleStandardDe(composant) {
