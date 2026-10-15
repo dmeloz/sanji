@@ -114,7 +114,7 @@ test('INCONNU avec famille connue : la valeur tapée devient le standard maison 
   const ligne = preparationSemaine(e, S.lundi, S.lundi).aConfirmer.find((l) => l.estInconnu);
   assert.equal(ligne.cible.famille, 'polenta');
   assert.equal(ligne.valeurStandard, null, 'aucun chiffre proposé');
-  assert.deepEqual(saisirPortionInconnue(e, ligne.cible.composantId, 150, h(4)), { portee: 'standard' });
+  assert.deepEqual(saisirPortionInconnue(e, ligne.cible.composantId, 150, h(4), 'sec'), { portee: 'standard' });
   assert.equal(e.standards.polenta.plat_principal.valeur, 150);
   assert.equal(preparationSemaine(e, S.lundiSuivant, S.lundiSuivant).restantInconnu, 0, 'semaine suivante : rien à retaper');
   assert.equal(grammageEffectif(e, e.composants[ids[1]]).valeur, 150);
@@ -135,7 +135,7 @@ test('la valeur de la propriétaire passe devant ; « Tout valider » ne touche 
   const r = validerToutAvecStandards(e, S.lundi, h(3));
   assert.deepEqual(r, { validees: 0, restantInconnu: 1 });
   assert.equal(grammageEffectif(e, e.composants[ids[0]]), null);
-  saisirPortionInconnue(e, ids[0], 150, h(4));
-  saisirPortionInconnue(e, ids[1], 180, h(5)); // la semaine suivante a déjà sa valeur : une nouvelle saisie la remplace, jamais l'inverse
+  saisirPortionInconnue(e, ids[0], 150, h(4), 'sec');
+  saisirPortionInconnue(e, ids[1], 180, h(5), 'sec'); // la semaine suivante a déjà sa valeur : une nouvelle saisie la remplace, jamais l'inverse
   assert.equal(e.standards.polenta.plat_principal.valeur, 180);
 });

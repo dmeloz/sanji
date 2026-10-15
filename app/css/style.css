@@ -1242,6 +1242,7 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .prep-nombre { font-family: var(--police-qte); font-weight: 600; font-size: var(--t-qte); }
 .prep-valeurs { display: flex; flex-wrap: wrap; gap: 6px; }
 .prep-valeur { min-height: var(--cible); min-width: var(--cible); padding: 0 14px; font-family: var(--police-qte); }
+.choix-poids { width: 100%; }
 .prep-valeur[aria-pressed="true"] { background: var(--encre); color: var(--sur-encre); border-color: var(--encre); }
 .prep-ligne-texte { display: grid; gap: 2px; min-width: 0; }
 .prep-ligne-valeur { font-size: var(--t-legende); color: var(--texte-doux); }

@@ -5,7 +5,9 @@
 //  - reporterValidation : « plus tard » ; ne bloque ni ne change aucune quantité.
 // Le milieu d'une fourchette n'est jamais pris à la place du chef : une valeur absente est refusée.
 
-import { modifierComposant, terminer } from './actions.js';
+import { definirStandard, modifierComposant, terminer } from './actions.js';
+import { etatPortionTapee, MESSAGE_POIDS_A_CHOISIR } from './mise-en-place.js';
+import { cleCuitConfirme } from './validation.js';
 import { grammageEffectif, groupeDeCleStandard, familleParCle, ROLES_STANDARD, lignesStandards, lignesStandardsGroupes } from './savoir.js';
 import { ETAT_POIDS, UNITE } from './statuts.js';
 
@@ -113,11 +115,34 @@ export function correctionDuJour(etat, composantId, saisie, h) {
   const valeur = exigerValeur(saisie);
   const actuel = grammageEffectif(etat, c);
   const unite = saisie.unite ?? actuel?.unite ?? c.grammage.unite;
-  const etatPoids = saisie.etat ?? actuel?.etat ?? c.grammage.etat;
+  const etatPoids = saisie.etat ?? actuel?.etat ?? etatPortionTapee(etat, composantId);
+  if (etatPoids === null) throw new Error(MESSAGE_POIDS_A_CHOISIR);
   modifierComposant(etat, composantId, {
     grammage: { valeur, unite, etat: etatPoids, statut: 'SAISI_SERVICE', source: 'corrigé pour ce plat seulement (validation de la portion)' },
   }, h);
   return c;
+}
+
+/**
+ * « Non, c'est du sec » (ou cru net) : l'état du poids du standard maison change, JAMAIS sa valeur ni son unité. Passe par `definirStandard`.
+ */
+export function corrigerEtatPoids(etat, cleFamille, role, etatPoids, h) {
+  verifierH(h);
+  const standard = ligneDe(etat, cleFamille, role).standard;
+  if (!standard) throw new Error('Aucun standard maison à corriger pour cette portion.');
+  if (!Object.hasOwn(ETAT_POIDS, etatPoids)) throw new Error(`État du poids inconnu : « ${etatPoids} ».`);
+  return definirStandard(etat, cleFamille, role, { valeur: standard.valeur, unite: standard.unite, etat: etatPoids }, h);
+}
+
+/** « Oui, c'est du cuit » : le standard n'est pas touché, la carte « à confirmer » se tait pour cette portion. */
+export function confirmerPortionCuite(etat, cleFamille, role, h) {
+  verifierH(h);
+  const ligne = ligneDe(etat, cleFamille, role);
+  if (!ligne.standard) throw new Error('Aucun standard maison à confirmer pour cette portion.');
+  if (etat.validations === null || typeof etat.validations !== 'object') etat.validations = {};
+  const entree = { statut: 'cuit_confirme', h };
+  etat.validations[cleCuitConfirme(cleFamille, role)] = entree;
+  return terminer(etat, h, 'confirmerPortionCuite', `${nomDe(ligne)} : confirmé en poids cuit`, entree);
 }
 
 /** « Plus tard » : la valeur est masquée jusqu'au lendemain. Ne change aucune quantité, ne bloque rien. */

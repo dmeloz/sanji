@@ -4,13 +4,14 @@
 import { calculerComposant, formaterQuantite, portionsMenu } from './calcul.js';
 import { libelleJour } from './dates.js';
 import { AUCUN_VERBE, ficheDe } from './fiches-retenues.js';
-import { grammageEffectif } from './savoir.js';
+import { grammageEffectif, lignesStandards } from './savoir.js';
+import { rendementDeBase } from './standards-base.js';
 
 const GRAMMES_PAR_KILO = 1000;
-const DIXIEMES_DE_KILO = 100;
+const CENTIEMES_DE_KILO = 10;
 
 /**
- * Quantité à lire sur la ligne : « 850 g », « 1,2 kg » (une décimale, virgule française). Une autre unité (ml, pièces,
+ * Quantité à lire sur la ligne : « 850 g », « 1,25 kg » (jusqu'à deux décimales, virgule française : 1 049 g ne devient jamais « 1 kg »). Une autre unité (ml, pièces,
  * portions) garde son formatage habituel ; une valeur inconnue donne null (jamais un « 0 » inventé).
  * @param {number|null} valeur
  * @param {string|null} unite
@@ -21,7 +22,7 @@ export function quantiteEnPoids(valeur, unite) {
   if (unite !== 'g') return formaterQuantite(valeur, unite);
   const grammes = Math.round(valeur);
   if (grammes < GRAMMES_PAR_KILO) return `${grammes} g`;
-  const kilos = Math.round(grammes / DIXIEMES_DE_KILO) / 10;
+  const kilos = Math.round(grammes / CENTIEMES_DE_KILO) / 100;
   return `${String(kilos).replace('.', ',')} kg`;
 }
 
@@ -56,6 +57,32 @@ export function aSaisirPortion(etat, composantId) {
   const portions = portionsMenu(etat, c.date, c.menu);
   if (portions.previsionManquante && portions.total === 0) return false;
   return grammageEffectif(etat, c) === null;
+}
+
+/**
+ * État du poids d'une portion TAPÉE pour un élément sans standard (portion à saisir) : celui du repère validé de la même famille
+ * (un riz se tape en poids sec, comme ses repères), sinon celui du composant. Jamais une valeur inventée. Sans cela, un riz tapé
+ * en sec était lu « cuit » et divisé par le gain de cuisson (risotto du menu 1 : 2,5 fois trop peu).
+ * @returns {string|null} 'sec' | 'cru_net' | 'cuit' ; null si le composant n'existe pas, ou si la famille gagne à la cuisson sans repère (à choisir)
+ */
+export function etatPortionTapee(etat, composantId) {
+  const c = etat.composants?.[composantId];
+  if (!c) return null;
+  const repere = c.type === 'preparation_maison' || !c.famille ? null : etatRepereFamille(lignesStandards(etat), c.famille, c.grammage?.unite);
+  if (repere) return repere;
+  // Gain de cuisson réel et aucun repère : sec, cru ou cuit changent la quantité, rien n'est présélectionné (null).
+  if (c.famille && c.type !== 'preparation_maison' && (rendementDeBase(c.famille, 'cuisson')?.valeur ?? 1) > 1) return null;
+  return c.grammage?.etat ?? null;
+}
+
+/** Phrase dite quand aucun état du poids n'est choisi pour une famille qui gagne à la cuisson. */
+export const MESSAGE_POIDS_A_CHOISIR = "Choisissez d'abord : poids sec, cru ou cuit.";
+
+/** État du poids du repère validé d'une famille (tous rôles : le riz n'a un repère qu'en garniture), s'il est unique et de cette unité, sinon null. */
+export function etatRepereFamille(lignes, cleFamille, unite) {
+  const etats = new Set(lignes.filter((l) => l.cleFamille === cleFamille && l.repereBase?.portee === 'famille' && l.repereBase.valide
+    && l.repereBase.unite === unite).map((l) => l.repereBase.etat));
+  return etats.size === 1 ? [...etats][0] : null;
 }
 
 /**

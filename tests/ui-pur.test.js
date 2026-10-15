@@ -65,8 +65,8 @@ test('milieu d\'une fourchette de coefficients', () => {
 
 test('quantite, pluriel, nom de fichier', () => {
   assert.equal(quantite(null, 'g'), '—');
-  assert.equal(quantite(2526.4, 'g'), '2,5 kg');
-  assert.equal(quantite(1250, 'g'), '1,3 kg');
+  assert.equal(quantite(2526.4, 'g'), '2,53 kg');
+  assert.equal(quantite(1250, 'g'), '1,25 kg');
   assert.equal(quantite(850, 'g'), '850 g');
   assert.equal(quantite(12, null), '12');
   assert.equal(pluriel(1, 'jour'), '1 jour');

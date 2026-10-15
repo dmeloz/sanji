@@ -147,6 +147,7 @@ test('« OK » sans standard dit ce qui est retenu : pour toutes les semaines, q
   magasin.remplacer(e);
   for (const [nom, valeur] of [['polenta', '150'], ['PRODUIT_SEC_TEST', '90']]) {
     const n = page();
+    if (nom === 'polenta') n.tous((x) => x.balise === 'button' && x.textContent === 'Poids sec')[0].click(); // gain de cuisson sans repère : à choisir
     n.tous((x) => x.balise === 'input' && (x.attributs['aria-label'] ?? '').startsWith(nom))[0].value = valeur;
     dateDuJour(S.lundi, () => parNom(n, `Valider ${nom} avec la valeur tapée`).click());
   }
@@ -154,4 +155,37 @@ test('« OK » sans standard dit ce qui est retenu : pour toutes les semaines, q
   assert.match(t, /polenta : retenu pour toutes les semaines\./);
   assert.match(t, /PRODUIT_SEC_TEST : retenu pour toutes les semaines\./);
   assert.equal(magasin.etat().standards.polenta.plat_principal.valeur, 150);
+});
+
+test('ligne « à saisir » d\'un riz : choix Poids sec / cru / cuit, « sec » présélectionné, l\'état choisi est enregistré', () => {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'Risotto aux bolets', h());
+  prevision(e, S.lundi, 1, 20);
+  magasin.remplacer(e);
+  const n = page();
+  const poids = n.tous((x) => x.balise === 'button' && /^(✓ )?Poids (sec|cru|cuit)$/.test(x.textContent));
+  assert.equal(poids.length, 3);
+  assert.deepEqual(poids.map((b) => b.getAttribute('aria-pressed')), ['true', 'false', 'false']);
+  assert.match(n.textContent, /choisissez le poids/);
+  poids.find((b) => b.textContent.endsWith('cuit')).click();
+  const champ = n.tous((x) => x.balise === 'input' && /valeur en g/.test(x.attributs['aria-label'] ?? ''))[0];
+  champ.value = '200';
+  n.tous((x) => /Valider Risotto avec la valeur tapée/.test(x.attributs['aria-label'] ?? ''))[0].click();
+  assert.equal(magasin.etat().standards.riz.plat_principal.etat, 'cuit');
+});
+
+test('ligne « à saisir » d\'une polenta : aucun bouton enfoncé, OK refusé sans choix (message), accepté après choix', () => {
+  const e = etatVide();
+  definirMenu(e, S.lundi, 1, 'polenta', h());
+  prevision(e, S.lundi, 1, 20, h());
+  magasin.remplacer(e);
+  const n = page();
+  const poids = n.tous((x) => x.balise === 'button' && /^(✓ )?Poids (sec|cru|cuit)$/.test(x.textContent));
+  assert.deepEqual(poids.map((b) => b.getAttribute('aria-pressed')), ['false', 'false', 'false']);
+  n.tous((x) => x.balise === 'input' && /^polenta/.test(x.attributs['aria-label'] ?? ''))[0].value = '60';
+  dateDuJour(S.lundi, () => parNom(n, 'Valider polenta avec la valeur tapée').click());
+  assert.equal(magasin.etat().standards?.polenta, undefined);
+  poids.find((b) => b.textContent.endsWith('cru')).click();
+  dateDuJour(S.lundi, () => parNom(n, 'Valider polenta avec la valeur tapée').click());
+  assert.equal(magasin.etat().standards.polenta.plat_principal.etat, 'cru_net');
 });

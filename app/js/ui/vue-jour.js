@@ -9,9 +9,10 @@ import { estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js
 import { definirCouvertsMidi } from '../domaine/actions-couverts.js';
 import { saisirPortionInconnue } from '../domaine/actions-preparation.js';
 import { COUVERTS_RAPIDES } from '../domaine/couverts-midi.js';
-import { quantiteEnPoids, raisonNonChiffree, verbeDe } from '../domaine/mise-en-place.js';
+import { etatPortionTapee, MESSAGE_POIDS_A_CHOISIR, quantiteEnPoids, raisonNonChiffree, verbeDe } from '../domaine/mise-en-place.js';
 import { aideRefroidissement, evaluationProduction } from '../domaine/planification.js';
 import { libelle } from '../domaine/statuts.js';
+import { choixEtatPoids } from './choix-poids.js';
 import { h } from './dom.js';
 import { agir } from '../magasin.js';
 import { bouton, etatVide, imprimer, encadre, ligneVide, lien, ouvrirFeuilleLecture, pastille } from './elements.js';
@@ -50,9 +51,9 @@ h('span', { classe: 'sr' }, `Marquer non fait : ${l.genre === 'principale' ? l.n
 function texteQuantite(etat, l) {
   const p = etat.productions[l.productionId];
   if (l.genre === 'preparatoire') return null;
-  if (p?.etat === 'fait') return quantiteEnPoids(l.quantiteReelle, l.unite);
-  // Un plat « composition à définir » n'a que ses portions (unité « portion ») : ce n'est pas une quantité à cuire.
+  // Un plat « composition à définir » n'a que ses portions (unité « portion ») : ce n'est pas une quantité à cuire, même une fois « fait ».
   if (l.unite === 'portion') return null;
+  if (p?.etat === 'fait') return quantiteEnPoids(l.quantiteReelle, l.unite);
   return quantiteEnPoids(l.cible, l.unite);
 }
 
@@ -114,6 +115,10 @@ const PORTION_MAX = 2000;
 /** Portion tapée en un toucher : un champ (g par portion) et « OK ». Toute erreur se dit DANS la feuille (`api.erreur`). */
 function formulairePortion(etat, l, nom, api) {
   const unite = libelle('UNITE', etat.composants[l.composantId].grammage?.unite ?? 'g');
+  const libelleUnite = h('span', { classe: 'prod-saisie-unite' });
+  const poids = choixEtatPoids(etatPortionTapee(etat, l.composantId), () => dire());
+  const dire = () => { libelleUnite.textContent = `${unite} par portion${poids.valeur() ? ` (poids ${libelle('ETAT_POIDS', poids.valeur())})` : ''}`; };
+  dire();
   const champ = h('input', { type: 'number', inputmode: 'decimal', min: '0', step: 'any', classe: 'prep-champ', 'aria-label': `${nom} : portion en ${unite}` });
   const valider = (evenement) => {
     evenement?.preventDefault?.();
@@ -122,13 +127,14 @@ function formulairePortion(etat, l, nom, api) {
     if (valeur === null) { api.erreur(`Tapez une portion en ${unite}, par exemple 120.`); return; }
     if (valeur <= 0) { api.erreur('La portion doit être supérieure à 0.'); return; }
     if (valeur > PORTION_MAX) { api.erreur(`La portion ne peut pas dépasser ${PORTION_MAX} ${unite}.`); return; }
-    const r = agir((e, t) => saisirPortionInconnue(e, l.composantId, valeur, t), { afficher: false });
+    if (poids.valeur() === null) { api.erreur(MESSAGE_POIDS_A_CHOISIR); return; }
+    const r = agir((e, t) => saisirPortionInconnue(e, l.composantId, valeur, t, poids.valeur()), { afficher: false });
     if (!r.ok) { api.erreur(r.erreur); return; }
     api.fermer();
     afficherMessage(`${nom} : ${valeur} ${unite} par portion retenu${' pour toutes les semaines'}.`, 'ok');
   };
   return h('form', { classe: 'prod-saisie prod-saisie-feuille', novalidate: true, onSubmit: valider },
-    champ, h('span', { classe: 'prod-saisie-unite' }, `${unite} par portion`), bouton('OK', valider, 'court', { type: 'submit', 'aria-label': `Valider la portion de ${nom}` }));
+    poids.noeud, champ, libelleUnite, bouton('OK', valider, 'court', { type: 'submit', 'aria-label': `Valider la portion de ${nom}` }));
 }
 
 /** Les couverts du jour en un toucher (40 à 80, comme « Préparer la semaine ») : la ligne se chiffre aussitôt. */

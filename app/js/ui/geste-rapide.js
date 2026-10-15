@@ -5,7 +5,7 @@
 // Accepte une carte de `decisionsDe` ou un point de `pointsAConfirmer` (`type` seul). Aucune logique métier ici.
 
 import { accepterApprentissage, ecarterApprentissage } from '../domaine/actions-apprentissage.js';
-import { validerStandard } from '../domaine/actions-validation.js';
+import { confirmerPortionCuite, corrigerEtatPoids, validerStandard } from '../domaine/actions-validation.js';
 import { confirmerAttribution, confirmerRepartition } from '../domaine/actions.js';
 import { libelle } from '../domaine/statuts.js';
 import { agir } from '../magasin.js';
@@ -64,6 +64,13 @@ function gestesRepartition(etat, ficheId) {
     (e, t) => confirmerRepartition(e, ficheId, repartition, t))];
 }
 
+function gestesPortionCuite(c) {
+  return [
+    geste("Oui, c'est du cuit", `Oui, c'est du cuit : ${c.texte}`, (e, t) => confirmerPortionCuite(e, c.cleFamille, c.role, t)),
+    geste('Non, c\'est du sec : corriger', `Non, c'est du sec, corriger l'état du poids : ${c.texte}`, (e, t) => corrigerEtatPoids(e, c.cleFamille, c.role, 'sec', t)),
+  ];
+}
+
 /**
  * Gestes d'un toucher d'une carte : `[{ texte, aria, agir:(etat, h) => … }]`, vide si la carte demande un vrai choix.
  */
@@ -71,6 +78,7 @@ export function gestesRapides(etat, carte) {
   if (carte.genre === 'valeur') return gestesValeur(carte.valeur);
   if (carte.genre === 'apprentissage') return gestesApprentissage(carte.proposition);
   if (carte.genre === 'repartition' || carte.type === 'repartition_provisoire') return gestesRepartition(etat, carte.ficheId);
+  if (carte.type === 'etat_poids_portion') return gestesPortionCuite(carte);
   if (carte.type === 'composant_inconnu' && carte.composantId) {
     const nom = etat.composants?.[carte.composantId]?.nom;
     if (!nom) return [];
