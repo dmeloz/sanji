@@ -1,6 +1,7 @@
 // Gestes avancés d'un composant (repli « Plus de réglages » de la fiche) : calcul, étapes, pesée, mémoire maison, allergènes, productions.
 // Les dialogues (modifier, sauce, allergènes, IA) servent aussi vue-fiche.js et feuille-decisions.js.
 
+import { etatPortionTapee } from '../domaine/mise-en-place.js';
 import {
   composerMelange, enregistrerPesee, memoriser, modifierComposant, reprendreMemoire, saisirApresService, supprimerComposant,
 } from '../domaine/actions.js';
@@ -161,7 +162,7 @@ export function dialogModifier(c) {
     { cle: 'gramValeur', type: 'nombre', libelle: 'Grammage par portion', valeur: c.grammage.valeur,
       aide: 'Portion de ce plat seulement. Vide : l\'application prend la référence de ce nom, le standard maison ou le standard de base.' },
     { cle: 'gramUnite', type: 'choix', libelle: 'Unité du grammage', valeur: c.grammage.unite, options: Object.keys(UNITE).map((x) => [x, nomUnite(x)]) },
-    { cle: 'gramEtat', type: 'choix', libelle: 'État du poids du grammage', valeur: c.grammage.etat ?? 'cuit', options: optionsEtatPoids(),
+    { cle: 'gramEtat', type: 'choix', libelle: 'État du poids du grammage', valeur: c.grammage.valeur === null ? (etatPortionTapee(e, c.id) ?? 'cuit') : (c.grammage.etat ?? 'cuit'), options: optionsEtatPoids(),
       aide: 'Sec : produit sec, avant cuisson. Cru net : cru et déjà paré. Cuit : poids servi.' },
     { cle: 'gramStatut', type: 'choix', libelle: 'Provenance du grammage', valeur: c.grammage.statut, options: optionsProvenance() },
     { cle: 'gramSource', type: 'texte', libelle: 'Source du grammage', valeur: c.grammage.source, placeholder: 'd\'où vient ce grammage' },
