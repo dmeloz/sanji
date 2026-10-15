@@ -4,11 +4,12 @@
 
 import { h } from './dom.js';
 import { bouton } from './elements.js';
+import { VERSION_APP } from '../version.js';
 
 /** Le bandeau : une phrase et « Mettre à jour » (`recharger` = rechargement de la page). */
-export function bandeauNouvelleVersion(recharger) {
+export function bandeauNouvelleVersion(recharger, courante = VERSION_APP) {
   return h('div', { classe: 'encadre encadre-info bandeau-version', role: 'status' },
-    h('span', null, 'Nouvelle version prête.'),
+    h('span', null, `Nouvelle version prête. Vous êtes en version ${courante}.`),
     bouton('Mettre à jour', recharger, 'principal'));
 }
 
@@ -26,46 +27,79 @@ export function surveillerNouvelleVersion(conteneur, montrer) {
   });
 }
 
-/** Demande au navigateur de chercher une nouvelle version : 'a_jour' | 'en_cours' (le bandeau suivra) | 'indisponible'. */
-export async function verifierMiseAJour(conteneur) {
+const FICHIER_VERSION = 'sw.js'; // jamais mis en cache par sw.js : il vient toujours du réseau (js/version.js serait servi par le cache)
+const MOTIF_VERSION = /const VERSION = '(\d+)';/;
+const REPERE_RELANCE = 'sanji-maj-relancee';
+
+/** Numéro de version lu dans le texte de sw.js (motif strict, rien n'est exécuté) ; null si le contenu est inattendu. */
+export function lireVersionServie(texte) {
+  const trouve = typeof texte === 'string' ? MOTIF_VERSION.exec(texte) : null;
+  return trouve ? Number(trouve[1]) : null;
+}
+
+/**
+ * Cherche une nouvelle version et la COMPARE à celle qui tourne : { resultat: 'a_jour' | 'plus_recente' | 'indisponible', servie }.
+ * (sw.js s'active seul : regarder installing/waiting disait « à jour » alors que la page gardait l'ancien code.)
+ */
+export async function verifierMiseAJour(conteneur, {
+  chercher = (url, options) => globalThis.fetch(url, options),
+  courante = VERSION_APP,
+  maintenant = () => Date.now(),
+} = {}) {
   try {
     const inscription = await conteneur?.getRegistration?.();
-    if (!inscription) return 'indisponible';
-    await inscription.update();
-    return inscription.installing || inscription.waiting ? 'en_cours' : 'a_jour';
+    await inscription?.update?.();
+  } catch { /* la comparaison ci-dessous décide */ }
+  try {
+    const reponse = await chercher(`${FICHIER_VERSION}?v=${maintenant()}`, { cache: 'no-store' });
+    if (!reponse?.ok) return { resultat: 'indisponible', servie: null };
+    const servie = lireVersionServie(await reponse.text());
+    if (servie === null) return { resultat: 'indisponible', servie: null };
+    return { resultat: servie > Number(courante) ? 'plus_recente' : 'a_jour', servie };
   } catch {
-    return 'indisponible';
+    return { resultat: 'indisponible', servie: null };
   }
 }
 
-const MESSAGES = {
-  a_jour: 'Sanji est à jour.',
-  en_cours: 'Mise à jour en cours : Sanji va se relancer.',
-  indisponible: 'Impossible de vérifier pour l\'instant (réseau ou mode hors ligne).',
-};
+function messageDe({ resultat, servie }, courante) {
+  if (resultat === 'plus_recente') return `Version ${servie} disponible : Sanji va se relancer.`;
+  if (resultat === 'a_jour') return `Sanji est à jour (version ${courante}).`;
+  return `Impossible de vérifier (réseau ou hors ligne). Vous êtes en version ${courante}.`;
+}
 
 /** Au-delà, on relance quand même : le nouveau worker est installé et prend la main (skipWaiting). */
 const DELAI_RELANCE_MS = 6000;
 
+const memoireSession = () => { try { return globalThis.sessionStorage; } catch { return undefined; } };
+const essayer = (f) => { try { return f(); } catch { return undefined; } };
+
 /**
- * Réglages : bouton « Vérifier les mises à jour » et le résultat dessous. Une mise à jour trouvée est appliquée tout de suite
- * (relance de l'app), sans passer par le bandeau. Dépendances injectables pour les tests.
+ * Réglages : version installée, bouton « Vérifier les mises à jour » et le résultat dessous. Une version plus récente est
+ * appliquée tout de suite (relance de l'app) ; une seule relance par version servie (repère de session) : jamais de boucle.
+ * Dépendances injectables pour les tests.
  */
 export function ligneVerifierMiseAJour(verifier = () => verifierMiseAJour(typeof navigator === 'undefined' ? undefined : navigator.serviceWorker), {
   conteneur = typeof navigator === 'undefined' ? undefined : navigator.serviceWorker,
   recharger = () => globalThis.location.reload(),
   delaiMs = DELAI_RELANCE_MS,
+  memoire = memoireSession(),
+  courante = VERSION_APP,
 } = {}) {
   const message = h('p', { classe: 'meta', role: 'status' });
   const declencheur = bouton('Vérifier les mises à jour', async () => {
     message.textContent = 'Vérification…';
     const resultat = await verifier();
-    message.textContent = MESSAGES[resultat];
-    if (resultat !== 'en_cours') return;
+    message.textContent = messageDe(resultat, courante);
+    if (resultat.resultat !== 'plus_recente') { essayer(() => memoire?.removeItem(REPERE_RELANCE)); return; }
+    if (essayer(() => memoire?.getItem(REPERE_RELANCE)) === String(resultat.servie)) {
+      message.textContent = `Version ${resultat.servie} disponible, mais pas encore appliquée : fermez Sanji puis rouvrez-le. Vous êtes en version ${courante}.`;
+      return;
+    }
+    essayer(() => memoire?.setItem(REPERE_RELANCE, String(resultat.servie)));
     let fait = false;
     const relancer = () => { if (!fait) { fait = true; recharger(); } };
     conteneur?.addEventListener?.('controllerchange', relancer);
     setTimeout(relancer, delaiMs);
   }, 'court');
-  return h('div', { classe: 'reglages-maj' }, declencheur, message);
+  return h('div', { classe: 'reglages-maj' }, h('p', { classe: 'reglages-version' }, `Version installée : ${courante}`), declencheur, message);
 }

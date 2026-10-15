@@ -3,7 +3,7 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { boutons, figerHorloge, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { etatVide } from './aide.js';
 import { lireChampsFiche } from '../app/js/harness/lecture-fiche-ia.js';
 import { construireCorpsFiche, creerFournisseurWeb } from '../app/js/ui/fournisseur-web.js';
@@ -73,7 +73,9 @@ test('demanderLectureFiche : valide ; refus, HTTP 401 et réponse sans outil lè
 let dom; let magasin; let vue; let reglages; let stockage; let fetchReel; let imageReelle;
 const OCTETS = new Uint8Array([1, 2, 3, 250, 255, 0, 65]);
 
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(DATE);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   vue = await import('../app/js/ui/vue-detail.js');
@@ -88,6 +90,7 @@ before(async () => {
     ? { getContext: () => ({ drawImage() {} }), toBlob: (cb) => cb(new Blob([OCTETS], { type: 'image/jpeg' })) } : base(balise));
 });
 after(() => {
+  rendreHorloge();
   globalThis.Image = imageReelle;
   dom.restaurer(); globalThis.fetch = fetchReel; reglages.effacerReglagesIA();
 });

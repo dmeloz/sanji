@@ -821,6 +821,7 @@ export function rendre(etat, param = null) {
     return h('div', { classe: 'vue vue-reglages vue-reglages-racine' },
       h('a', { href: '#/aujourdhui', classe: 'reglage-retour' }, '‹ Aujourd\'hui'),
       h('h1', { classe: 'page-titre' }, 'Réglages'),
+      ligneVerifierMiseAJour(),
       groupe('Production',
         ligneInfo('Avance normale', '2 jours (règle)'),
         ligneRubrique('standards-base', etat),
@@ -835,7 +836,6 @@ export function rendre(etat, param = null) {
       groupe('Données',
         ligneRubrique('apprentissage', etat),
         ligneRubrique('donnees', etat)),
-      ligneVerifierMiseAJour(),
       h('p', { classe: 'reglages-note' }, 'Apparence : toujours claire. Écran allumé : en Production et en mode poste.'),
       h('p', { classe: 'reglages-pied' }, pastilleHorsLigne(hl), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
   }

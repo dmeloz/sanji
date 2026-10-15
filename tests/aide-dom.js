@@ -140,6 +140,7 @@ export function figerHorloge(iso, heure = '10:00') {
   const reelle = Date;
   globalThis.Date = class extends reelle {
     constructor(...a) { super(...(a.length ? a : [`${iso}T${heure}:00`])); }
+    static now() { return new reelle(`${iso}T${heure}:00`).getTime(); }
   };
   return () => { globalThis.Date = reelle; };
 }

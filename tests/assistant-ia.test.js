@@ -129,7 +129,7 @@ test('fournisseur : en-têtes d\'un appel navigateur, clé seulement dans l\'en-
   assert.ok(!appels[0].options.body.includes('FAUX1234'));
 });
 
-test('hygiène : seul fournisseur-web.js nomme l\'API Anthropic ou lit le fetch global dans app/', () => {
+test('hygiène : seul fournisseur-web.js nomme l\'API Anthropic ou lit le fetch global dans app/ (et nouvelle-version.js, pour sw.js seulement)', () => {
   const racine = fileURLToPath(new URL('../app/', import.meta.url));
   const parcourir = (dossier) => readdirSync(dossier).flatMap((nom) => {
     const chemin = join(dossier, nom);
@@ -138,7 +138,8 @@ test('hygiène : seul fournisseur-web.js nomme l\'API Anthropic ou lit le fetch 
   const fichiers = parcourir(racine).filter((f) => /\.(js|html|css|webmanifest)$/.test(f));
   const nomment = fichiers.filter((f) => /api\.anthropic\.com|globalThis\.fetch/.test(readFileSync(f, 'utf8'))).map((f) => f.slice(racine.length));
   // index.html cite l'API seulement dans la CSP (autorisation de connexion), jamais pour l'appeler.
-  assert.deepEqual(nomment, ['index.html', 'js/ui/fournisseur-web.js']);
+  // nouvelle-version.js (v130) relit sw.js sur l'origine de l'application, pour comparer la version servie (jamais un autre site).
+  assert.deepEqual(nomment, ['index.html', 'js/ui/fournisseur-web.js', 'js/ui/nouvelle-version.js']);
 });
 
 test('CSP : scripts de l\'application seulement, réseau limité à elle-même et à l\'API Anthropic', () => {

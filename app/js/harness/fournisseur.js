@@ -1,6 +1,6 @@
 // Adaptateur de modèle : une interface minimale, indépendante de tout fournisseur. Ce module ne contient aucun appel
-// réseau : le fournisseur est injecté par l'appelant (en production `ui/fournisseur-web.js`, seul fichier de l'application
-// qui parle au réseau, activé par la propriétaire dans Réglages > Assistant IA). Choisir un fournisseur reste sa décision.
+// réseau : le fournisseur est injecté par l'appelant (en production `ui/fournisseur-web.js`, seul fichier qui parle à un service EXTERNE ;
+// `ui/nouvelle-version.js` relit seulement sw.js sur la même origine pour comparer la version ; activé par la propriétaire dans Réglages > Assistant IA). Choisir un fournisseur reste sa décision.
 //
 // Interface `Fournisseur` :
 //   nom: string

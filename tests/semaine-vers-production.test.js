@@ -3,13 +3,15 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { installerFauxDom } from './aide-dom.js';
+import { figerHorloge, installerFauxDom } from './aide-dom.js';
 import { etatVide, h as horo } from './aide.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 
 let dom; let magasin; let production; let routeur; let actions; let dates; let tableau; let feuille; let couverts;
 
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   production = await import('../app/js/ui/vue-production.js');
@@ -20,7 +22,7 @@ before(async () => {
   feuille = await import('../app/js/ui/feuille-services.js');
   couverts = await import('../app/js/domaine/actions-couverts.js');
 });
-after(() => dom.restaurer());
+after(() => { dom.restaurer(); rendreHorloge(); });
 
 const parClasse = (n, c) => n.tous((x) => x.className.split(' ').includes(c));
 const liens = (n) => n.tous((x) => x.balise === 'a').map((a) => a.attributs.href);
