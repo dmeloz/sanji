@@ -7,7 +7,7 @@
 
 import { definirStandard, modifierComposant, terminer } from './actions.js';
 import { etatPortionTapee, MESSAGE_POIDS_A_CHOISIR } from './mise-en-place.js';
-import { cleCuitConfirme } from './validation.js';
+import { confirmerPortionsCuites } from './poids-portion.js';
 import { grammageEffectif, groupeDeCleStandard, familleParCle, ROLES_STANDARD, lignesStandards, lignesStandardsGroupes } from './savoir.js';
 import { ETAT_POIDS, UNITE } from './statuts.js';
 
@@ -134,15 +134,11 @@ export function corrigerEtatPoids(etat, cleFamille, role, etatPoids, h) {
   return definirStandard(etat, cleFamille, role, { valeur: standard.valeur, unite: standard.unite, etat: etatPoids }, h);
 }
 
-/** « Oui, c'est du cuit » : le standard n'est pas touché, la carte « à confirmer » se tait pour cette portion. */
+/** « Oui, c'est du cuit » pour un standard maison : il n'est pas touché, la carte « à confirmer » se tait. */
 export function confirmerPortionCuite(etat, cleFamille, role, h) {
   verifierH(h);
-  const ligne = ligneDe(etat, cleFamille, role);
-  if (!ligne.standard) throw new Error('Aucun standard maison à confirmer pour cette portion.');
-  if (etat.validations === null || typeof etat.validations !== 'object') etat.validations = {};
-  const entree = { statut: 'cuit_confirme', h };
-  etat.validations[cleCuitConfirme(cleFamille, role)] = entree;
-  return terminer(etat, h, 'confirmerPortionCuite', `${nomDe(ligne)} : confirmé en poids cuit`, entree);
+  if (!ligneDe(etat, cleFamille, role).standard) throw new Error('Aucun standard maison à confirmer pour cette portion.');
+  return confirmerPortionsCuites(etat, [{ type: 'standard', cleFamille, role }], h);
 }
 
 /** « Plus tard » : la valeur est masquée jusqu'au lendemain. Ne change aucune quantité, ne bloque rien. */

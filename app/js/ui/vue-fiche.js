@@ -12,6 +12,7 @@ import { h, svg } from './dom.js';
 import { bouton, ligneFeuille, ligneVide, lien, pastille } from './elements.js';
 import { pluriel, precisionQuantite, qteNoeuds, quantiteNoeuds } from './format.js';
 import { libelleAllergene } from './reference.js';
+import { blocCommentCalcule } from './comment-calcule.js';
 import { blocReperes } from './reperes-metier.js';
 import { defaireEnUnToucher, dialogCorriger, faireEnUnToucher } from './taches.js';
 import { CATEGORIES_MOT } from '../domaine/mots-retenus.js';
@@ -101,7 +102,7 @@ function ligneBrut(calc) {
       : h('span', { classe: 'fiche-brut-inconnu' }, h('span', { classe: 'fiche-qte fiche-brut-tiret' }, '—'), ' inconnu · forme achetée à préciser'));
 }
 
-function sectionProvenance(calc) {
+function sectionProvenance(etat, c, calc) {
   return h('section', { classe: 'carte fiche-bloc' },
     h('h2', { classe: 'fiche-titre-bloc' }, 'Calcul et provenance'),
     h('p', null, calc.statut === 'CALCULE' ? pastille(libelle('PROVENANCE', 'CALCULE'), 'vert') : pastille(libelle('PROVENANCE', 'INCONNU'), 'gris'), ' ',
@@ -109,6 +110,7 @@ function sectionProvenance(calc) {
       calc.standardBase ? pastille(libelle('PROVENANCE', 'STANDARD_BASE'), 'gris') : null, ' ',
       calc.aMesurer ? pastille('à mesurer', 'ambre') : null),
     h('p', { classe: 'meta' }, detailPortions(calc.portions)),
+    blocCommentCalcule(etat, c.id),
     calc.dependances.length === 0 ? ligneVide('Aucun paramètre renseigné.')
       : h('ul', { classe: 'liste-simple' }, calc.dependances.map((d) => h('li', null,
         h('strong', null, d.parametre === 'recette' ? 'recette' : d.parametre === 'grammage' ? 'grammage' : libelle('ETAPE', d.parametre)), ' ',
@@ -201,7 +203,7 @@ export function rendre(etat, id) {
     boutonPrecisionIA(c) ? h('div', { classe: 'fiche-actions' }, boutonPrecisionIA(c)) : null,
     sectionQuantite(etat, c, calc),
     ligneBrut(calc),
-    sectionProvenance(calc),
+    sectionProvenance(etat, c, calc),
     sectionIngredients(etat, c, calc),
     sansRecette ? blocSansRecette(c) : sectionEtapes(etapes, c),
     sectionAllergenes(etat, c),

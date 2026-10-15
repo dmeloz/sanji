@@ -22,7 +22,7 @@ test('un riz maison en poids cuit alors que le repère validé est sec : une car
   const cartes = cartesEtat(avecRizCuit());
   assert.equal(cartes.length, 1);
   assert.equal(cartes[0].genre, 'point');
-  assert.match(cartes[0].texte, /Votre portion de riz \(60 g\) est enregistrée en poids cuit : le repère est en poids sec\. C'est bien du cuit \?/);
+  assert.match(cartes[0].texte, /Votre standard de riz \(60 g\) est enregistré en poids cuit : le repère de riz est en poids sec \(50–70 g\)\. C'est bien du cuit \?/);
 });
 
 test('aucune carte : standard déjà sec, ou sans standard, ou famille sans repère sec', () => {

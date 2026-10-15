@@ -10,13 +10,12 @@ import { ajouterJours, jourSemaine, lundiDe } from './dates.js';
 import { estSauceAConfirmer } from './etat.js';
 import { cibleProduction, ecartProduction, etatTache, evaluationProduction, reelNonCompte } from './planification.js';
 import { pointsAConfirmer, pointsGlobaux } from './points.js';
-import { libelle } from './statuts.js';
 import { portionsCuitesSuspectes, valeursAValider } from './validation.js';
 
 /** Points de quantité manquante : jamais une décision. */
 export const POINTS_SANS_DECISION = Object.freeze(new Set(['grammage', 'prevision_manquante', 'composant_a_preciser']));
 
-/** Genres de cartes, dans l'ordre d'affichage (ce qui bloque le travail d'abord). */
+/** Genres de cartes, dans l'ordre d'affichage (ce qui bloque le travail d'abord) ; l'état du poids d'une portion passe avant tous. */
 export const GENRES = Object.freeze(['ecart', 'avance_hors_regle', 'sauce', 'repartition', 'point', 'apprentissage', 'valeur']);
 
 /**
@@ -102,11 +101,11 @@ export function decisionsDe(etat, aujourd) {
     }
   }
 
-  // Portion enregistrée « cuit » alors que le repère validé est « sec » : jamais corrigée seule, c'est la propriétaire qui tranche.
-  for (const p of portionsCuitesSuspectes(etat)) {
-    cartes.push({ id: `point:etat_poids_portion:${p.cleFamille}|${p.role}`, genre: 'point', type: 'etat_poids_portion', composantId: null, ficheId: null, date: null,
-      cleFamille: p.cleFamille, role: p.role,
-      texte: `Votre portion de ${p.libelle.toLowerCase()} (${String(p.valeur).replace('.', ',')} ${libelle('UNITE', p.unite)}) est enregistrée en poids cuit : le repère est en poids sec. C'est bien du cuit ?` });
+  // Portion enregistrée « cuit » alors que le repère validé est « sec » (standard, plat, référence du nom ou fiche retenue) :
+  // jamais corrigée seule, c'est la propriétaire qui tranche. Une carte par portion ; `lieux` dit où elle est enregistrée.
+  for (const p of portionsCuitesSuspectes(etat, aujourd)) {
+    cartes.push({ id: `point:etat_poids_portion:${p.cle}`, genre: 'point', type: 'etat_poids_portion', composantId: p.composantId, ficheId: null, date: null,
+      cleFamille: p.cleFamille, role: p.role, lieux: p.lieux, texte: p.texte });
   }
 
   for (const proposition of propositionsApprentissage(etat, aujourd)) {
@@ -116,6 +115,8 @@ export function decisionsDe(etat, aujourd) {
     cartes.push({ id: `valeur:${valeur.cle}`, genre: 'valeur', valeur });
   }
 
-  cartes.sort((a, b) => GENRES.indexOf(a.genre) - GENRES.indexOf(b.genre));
+  // Une portion au mauvais état du poids fausse des quantités : elle passe avant tout le reste (tri stable, ordre des genres ensuite).
+  const rangCarte = (c) => (c.type === 'etat_poids_portion' ? -1 : GENRES.indexOf(c.genre));
+  cartes.sort((a, b) => rangCarte(a) - rangCarte(b));
   return { total: cartes.length, cartes };
 }

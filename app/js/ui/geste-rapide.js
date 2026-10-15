@@ -5,7 +5,8 @@
 // Accepte une carte de `decisionsDe` ou un point de `pointsAConfirmer` (`type` seul). Aucune logique métier ici.
 
 import { accepterApprentissage, ecarterApprentissage } from '../domaine/actions-apprentissage.js';
-import { confirmerPortionCuite, corrigerEtatPoids, validerStandard } from '../domaine/actions-validation.js';
+import { validerStandard } from '../domaine/actions-validation.js';
+import { confirmerPortionsCuites, corrigerEtatPoidsLieux } from '../domaine/poids-portion.js';
 import { confirmerAttribution, confirmerRepartition } from '../domaine/actions.js';
 import { libelle } from '../domaine/statuts.js';
 import { agir } from '../magasin.js';
@@ -66,8 +67,8 @@ function gestesRepartition(etat, ficheId) {
 
 function gestesPortionCuite(c) {
   return [
-    geste("Oui, c'est du cuit", `Oui, c'est du cuit : ${c.texte}`, (e, t) => confirmerPortionCuite(e, c.cleFamille, c.role, t)),
-    geste('Non, c\'est du sec : corriger', `Non, c'est du sec, corriger l'état du poids : ${c.texte}`, (e, t) => corrigerEtatPoids(e, c.cleFamille, c.role, 'sec', t)),
+    geste("Oui, c'est du cuit", `Oui, c'est du cuit : ${c.texte}`, (e, t) => confirmerPortionsCuites(e, c.lieux, t)),
+    geste('Non, c\'est du sec : corriger', `Non, c'est du sec, corriger l'état du poids : ${c.texte}`, (e, t) => corrigerEtatPoidsLieux(e, c.lieux, 'sec', t)),
   ];
 }
 

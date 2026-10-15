@@ -19,6 +19,7 @@ import { bouton, etatVide, imprimer, encadre, ligneVide, lien, ouvrirFeuilleLect
 import { parseNombre, phraseConservation, qteNoeuds } from './format.js';
 import { afficherMessage } from './messages.js';
 import { ligneVerbe } from './choix-verbe.js';
+import { blocCommentCalcule } from './comment-calcule.js';
 import { panneau } from './panneau.js';
 import {
   actionsTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, defaireEnUnToucher, noeudEvaluation, pastilleCreneau, texteCharge,
@@ -184,9 +185,10 @@ function ligneTache(etat, ligneBrute, date) {
   const surLaLigne = directes.filter(Boolean);
   // « ⋯ » ouvre une feuille : l'évaluation de l'avance puis les gestes rares (rien n'est déroulé dans la liste).
   const lignePourVerbe = l.genre === 'principale' ? ligneVerbe(etat, l.composantId) : null;
-  const plus = actions.length > 0 || evaluation || lignePourVerbe ? h('button', {
+  const avecCalcul = l.genre === 'principale'; // le bloc « Comment c'est calculé » ne se construit qu'à l'ouverture de la feuille
+  const plus = actions.length > 0 || evaluation || lignePourVerbe || avecCalcul ? h('button', {
     type: 'button', classe: 'prod-plus', 'aria-label': `Actions : ${nom}`, 'aria-haspopup': 'dialog',
-    onClick: () => ouvrirFeuilleLecture(nom, [evaluation, lignePourVerbe, h('div', { classe: 'actions' }, actions)]),
+    onClick: () => ouvrirFeuilleLecture(nom, [evaluation, avecCalcul ? blocCommentCalcule(etat, l.composantId) : null, lignePourVerbe, h('div', { classe: 'actions' }, actions)]),
   }, '⋯') : null;
   // Quantité : en g ou kg ; inconnue, la ligne dit « à chiffrer » et un toucher ouvre sa feuille (la raison, puis ce qui manque).
   const raison = !q && !fait ? raisonNonChiffree(etat, l) : null;
