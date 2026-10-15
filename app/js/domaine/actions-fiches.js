@@ -7,7 +7,7 @@ import { cleMemoire, estSauceAConfirmer, normaliser } from './etat.js';
 import { nomDeFiche } from './fiches-elements.js';
 import { FICHES_MAX, NOM_MAX, champsDeComposant, cleDeNom, evincerLePlusAncien, grammageValide, reprendreSurAVenir, retenirFiche, verbeValide } from './fiches-retenues.js';
 import { categorieMotValide, champsPourMot } from './mots-retenus.js';
-import { ROLES_STANDARD, familleDe } from './savoir.js';
+import { MESSAGE_PORTION_TROP_GRANDE, PORTION_MAX_G, ROLES_STANDARD, familleDe } from './savoir.js';
 import { ETAT_POIDS } from './statuts.js';
 
 function verifierH(h) {
@@ -198,6 +198,7 @@ export function definirPortionFiche(etat, cle, valeur, etatPoids, h) {
   if (!Object.hasOwn(ETAT_POIDS, etatPoids)) throw new Error('État du poids inconnu : sec, cru net ou cuit.');
   const g = grammageValide({ valeur, unite: 'g', etat: etatPoids });
   if (!g) throw new Error('La portion doit être un nombre strictement positif.');
+  if (valeur > PORTION_MAX_G) throw new Error(MESSAGE_PORTION_TROP_GRANDE);
   const famille = fiche.famille ?? familleDe(nomDeFiche(cle, fiche))?.cle;
   // La portion tapée est toujours celle de la fiche. Le standard maison de la famille n'est posé que s'il n'y en avait ni dans
   // la fiche ni dans les réglages : jamais écrasé par ce geste.

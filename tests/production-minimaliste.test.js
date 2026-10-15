@@ -134,7 +134,7 @@ test('ligne sans portion : chaque saisie invalide dit son message DANS la feuill
   const formulaire = classes(feuille, 'prod-saisie')[0];
   const alerte = () => feuille.tous((x) => x.attributs.role === 'alert' && !x.hidden)[0]?.textContent ?? '';
   const cas = [['', /Tapez une portion en g, par exemple 120/], ['abc', /n'est pas un nombre/], ['1e3', /n'est pas un nombre/],
-    ['0', /supérieure à 0/], ['-5', /supérieure à 0/], ['2001', /ne peut pas dépasser 2000/]];
+    ['0', /supérieure à 0/], ['-5', /supérieure à 0/], ['2001', /Portion trop grande : au plus 2000 g/]];
   for (const [saisie, attendu] of cas) {
     formulaire.querySelector('input').value = saisie;
     await formulaire.declencher('submit');

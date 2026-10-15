@@ -139,3 +139,9 @@ test('poste : moins de deux étapes, message et lien vers la fiche', () => {
   const sans = vue.rendre(magasin.etat(), 'inconnu');
   assert.match(sans.textContent, /Pas d'étapes pour ce composant/);
 });
+
+test('poste : composant inconnu, « Retour à la fiche » mène à Production et non à une fiche absente', () => {
+  magasin.remplacer(etatVide());
+  const racine = vue.rendre(magasin.etat(), 'inconnu');
+  assert.deepEqual(liens(racine), ['#/production']);
+});

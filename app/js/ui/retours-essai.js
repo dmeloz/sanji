@@ -1,6 +1,7 @@
 // Retours d'essai : stockage local à l'appareil, HORS de l'état et de la sauvegarde. Rien n'est envoyé.
 
 import { VERSION_APP } from '../version.js';
+import { horodatageLocal } from './format.js';
 
 const CLE = 'sanji-retours-essai';
 const MAX_RETOURS = 30;
@@ -28,7 +29,7 @@ function ecrire(liste) {
 
 /** Ajoute un retour en tête ; `type` : 'menu' | 'fiche'. Renvoie le retour noté. */
 export function noterRetour({ type, lu, final, remarque }) {
-  const retour = { type, h: new Date().toISOString(), version: VERSION_APP, lu, final, ...(remarque ? { remarque } : {}) };
+  const retour = { type, h: horodatageLocal(new Date()), version: VERSION_APP, lu, final, ...(remarque ? { remarque } : {}) };
   const limite = Date.now() - DUREE_MAX_MS;
   const recents = lireRetours().filter((r) => Date.parse(r.h) >= limite);
   ecrire([retour, ...recents].slice(0, MAX_RETOURS));

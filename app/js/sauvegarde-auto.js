@@ -8,8 +8,11 @@ export const CLE_ETAT_COURANT = 'principal';
 export const PREFIXE_COPIE = 'copie|';
 export const COPIES_CONSERVEES = 7;
 export const CLE_AVANT_RESTAURATION = 'avant-restauration';
+export const CLE_AVANT_IMPORT_ECARTE = 'avant-import-ecarte';
+export const CLE_AVANT_REMISE_A_NEUF = 'avant-remise-a-neuf';
+export const CLE_AVANT_REMISE_PRECEDENTE = 'avant-remise-a-neuf-precedente';
 
-const MAGASIN_REEL = { lister: listerCles, lire: lireCle, ecrire: ecrireCle, supprimer: supprimerCle };
+export const MAGASIN_REEL = { lister: listerCles, lire: lireCle, ecrire: ecrireCle, supprimer: supprimerCle };
 const MOTIF_CLE = /^copie\|\d{4}-\d{2}-\d{2}$/;
 
 /** Dates des copies présentes, les plus récentes d'abord. Seules les clés « copie|date » comptent. */
@@ -56,4 +59,30 @@ export async function lireAvantRestauration(magasin = MAGASIN_REEL) {
   } catch {
     return null;
   }
+}
+
+/** Texte de l'état gardé avant la remise à neuf (`cle` : la dernière, ou la précédente), ou null (aucun, ou lecture impossible). */
+export async function lireAvantRemiseANeuf(magasin = MAGASIN_REEL, cle = CLE_AVANT_REMISE_A_NEUF) {
+  try {
+    const texte = await magasin.lire(cle);
+    return typeof texte === 'string' ? texte : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Efface la copie d'avant la remise à neuf (geste explicite de la propriétaire, irréversible). Lève si la suppression échoue. */
+export async function supprimerAvantRemiseANeuf(magasin = MAGASIN_REEL, cle = CLE_AVANT_REMISE_A_NEUF) {
+  await magasin.supprimer(cle);
+}
+
+/**
+ * Garde le texte brut d'un état dont des entrées abîmées ont été écartées à la lecture, sous « avant-import-ecarte ».
+ * La PREMIÈRE copie est gardée tant qu'elle existe (jamais remplacée, jamais nettoyée seule). Renvoie true si écrite ;
+ * false si une copie existait déjà. Lève si l'écriture échoue.
+ */
+export async function garderAvantImportEcarte(texteBrut, magasin = MAGASIN_REEL) {
+  if (typeof await magasin.lire(CLE_AVANT_IMPORT_ECARTE) === 'string') return false;
+  await magasin.ecrire(CLE_AVANT_IMPORT_ECARTE, texteBrut);
+  return true;
 }

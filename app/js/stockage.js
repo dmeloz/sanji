@@ -119,6 +119,12 @@ export async function supprimerPhoto(date) {
   }
 }
 
+/** Efface toutes les photos (menus et diagnostic) : le magasin « photos » et la mémoire. Rejette si la base est inaccessible. */
+export async function viderPhotos() {
+  photosEnMemoire.clear();
+  await transaction(MAGASIN_PHOTOS, 'readwrite', (s) => s.clear());
+}
+
 // Accès par clé au magasin « etat », pour les copies de sécurité (sauvegarde-auto.js). La clé de l'état courant
 // (« principal ») ne sert qu'à chargerEtat/enregistrerEtat ; les copies ont toutes le préfixe « copie| ».
 

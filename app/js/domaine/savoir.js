@@ -381,3 +381,7 @@ export function lignesStandardsGroupes(etat, reperes = reperesParDefaut()) {
     };
   }));
 }
+
+/** Borne haute d'une portion saisie (g, ml…) : au-delà, c'est une faute de frappe. Partagée par les saisies et le domaine. */
+export const PORTION_MAX_G = 2000;
+export const MESSAGE_PORTION_TROP_GRANDE = `Portion trop grande : au plus ${PORTION_MAX_G} g par portion.`;

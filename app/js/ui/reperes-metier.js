@@ -2,7 +2,7 @@
 // temps et températures de cuisson, techniques et conservation, avec fourchette, « standard de base », provenance courte
 // et « à valider localement ». Rien n'est copié dans un champ de saisie ni dans l'état. Aucun chiffre ici.
 //
-// API : reperesPour(cle, etat?) -> lignes ; blocReperes(cle, etat?) -> <details> fermé ou null ; blocBuffet(couverts) -> <details> ;
+// API : reperesPour(cle, etat?) -> lignes ; blocReperes(cle, etat?) -> ligne « Repères métier › » (ouvre une feuille) ou null ; blocBuffet(couverts) -> ligne « Buffet › » ;
 //       pageReperesMetier(conteneur, { theme, etat? }) -> page de consultation (branchée par l'intégrateur).
 //       Avec `etat`, un repère que la propriétaire a ajusté montre d'abord « votre valeur : N », puis le standard de base.
 

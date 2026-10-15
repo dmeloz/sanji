@@ -62,6 +62,11 @@ function oublier(date) {
   urls.delete(date);
 }
 
+/** Oublie toutes les adresses de photos en mémoire (après l'effacement des photos). */
+export function oublierToutesLesUrls() {
+  for (const date of [...urls.keys()]) oublier(date);
+}
+
 /** La photo stockée d'une date (blob), ou null : sert à joindre la photo envoyée à l'IA au diagnostic, en mémoire seulement. */
 export async function photoBlob(date) {
   return (await lirePhoto(date)) ?? null;

@@ -4,6 +4,7 @@
 
 import { definirCouvertsMidi } from '../domaine/actions-couverts.js';
 import { saisirPortionInconnue, validerToutAvecStandards } from '../domaine/actions-preparation.js';
+import { MESSAGE_PORTION_TROP_GRANDE, PORTION_MAX_G } from '../domaine/savoir.js';
 import { validerStandard } from '../domaine/actions-validation.js';
 import { libelleJour } from '../domaine/dates.js';
 import { preparationSemaine } from '../domaine/preparation.js';
@@ -12,7 +13,7 @@ import { agir, aujourdhui, redessiner } from '../magasin.js';
 import { MESSAGE_POIDS_A_CHOISIR } from '../domaine/mise-en-place.js';
 import { choixEtatPoids } from './choix-poids.js';
 import { h } from './dom.js';
-import { bouton, lien, pastille } from './elements.js';
+import { bouton, etatVide, lien, pastille } from './elements.js';
 import { parseNombre, pluriel, quantite } from './format.js';
 import { afficherMessage } from './messages.js';
 
@@ -64,6 +65,8 @@ function ligneInconnue(l, champs, lundi) {
     let valeur;
     try { valeur = parseNombre(champ.value, l.libelle); } catch (erreur) { afficherMessage(erreur.message, 'erreur'); return; }
     if (valeur === null) { afficherMessage(`${l.libelle} : tapez une valeur.`, 'erreur'); return; }
+    if (valeur <= 0) { afficherMessage(`${l.libelle} : la portion doit être supérieure à 0.`, 'erreur'); return; }
+    if (valeur > PORTION_MAX_G) { afficherMessage(MESSAGE_PORTION_TROP_GRANDE, 'erreur'); return; }
     if (poids.valeur() === null) { afficherMessage(MESSAGE_POIDS_A_CHOISIR, 'erreur'); return; }
     bilan = null;
     const r = agir((e, t) => saisirPortionInconnue(e, l.cible.composantId, valeur, t, poids.valeur()));
@@ -111,7 +114,7 @@ export function rendre(etat, lundi) {
       lien(`#/semaine/${lundi}/tableau`, 'Semaine', 'btn')),
     h('section', { classe: 'prep-section', 'aria-labelledby': 'prep-titre-couverts' },
       h('h2', { classe: 'sem-section', id: 'prep-titre-couverts' }, 'Couverts du midi'),
-      p.jours.length === 0 ? h('p', { classe: 'sem-neutre' }, 'Aucun menu enregistré cette semaine.')
+      p.jours.length === 0 ? etatVide({ titre: 'Aucun menu enregistré cette semaine', texte: 'Importez les menus pour préparer la semaine.', actions: [{ libelle: 'Importer les menus', href: `#/import/${lundi}`, principal: true }] })
         : h('ul', { classe: 'prep-liste' }, p.jours.map(ligneCouverts))),
     sectionAConfirmer(p, lundi),
     h('div', { classe: 'prep-fin' },

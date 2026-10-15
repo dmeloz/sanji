@@ -13,21 +13,25 @@ import { activerFermetureParGlisse } from './glisser.js';
  * @param {string} [options.libelleAnnuler] « Annuler » par défaut
  * @param {boolean} [options.lectureSeule] un seul bouton « Fermer »
  * @param {boolean} [options.danger] bouton principal en rouge
+ * @param {boolean} [options.okDesactive] bouton principal inactif au départ ; `api.autoriser(vrai|faux)` l'active
  * @param {boolean} [options.annulerEnLien] « Annuler » discret, en lien (moins de boutons visibles)
  * @param {{libelle:string, action:(api)=>any}[]} [options.extras] boutons supplémentaires
  */
 export function panneau(options) {
   const { titre, corps, surEnregistrer, libelleEnregistrer = 'Enregistrer', libelleAnnuler = 'Annuler',
-    lectureSeule = false, danger = false, extras = [], annulerEnLien = false } = options;
+    lectureSeule = false, danger = false, extras = [], annulerEnLien = false, okDesactive = false } = options;
   const dialogue = h('dialog', { classe: 'panneau', 'aria-labelledby': 'panneau-titre' });
   const zoneErreur = h('p', { classe: 'panneau-erreur', role: 'alert', hidden: true });
+  let autorise = !okDesactive;
   const api = {
     fermer: () => dialogue.close(),
+    autoriser(oui) { autorise = oui; if (boutonOk) boutonOk.disabled = !oui; },
     erreur(texte) { zoneErreur.textContent = texte; zoneErreur.hidden = !texte; },
   };
   const contenu = typeof corps === 'function' ? corps(api) : corps;
   const boutonOk = lectureSeule ? null
     : h('button', { type: 'submit', classe: danger ? 'btn btn-danger' : 'btn btn-principal' }, libelleEnregistrer);
+  if (boutonOk && okDesactive) boutonOk.disabled = true;
   const boutons = [
     ...extras.map((x) => h('button', {
       type: 'button', classe: 'btn',
@@ -58,7 +62,7 @@ export function panneau(options) {
         api.erreur(e?.message ?? String(e));
       } finally {
         enCours = false;
-        boutonOk.disabled = false;
+        boutonOk.disabled = !autorise;
       }
     },
   },

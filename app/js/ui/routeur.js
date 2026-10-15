@@ -106,7 +106,8 @@ export function rendre() {
     noeud = VUES[vue].rendre(etat(), param, sous);
   } catch (erreur) {
     noeud = h('div', { classe: 'vue' }, encadre('erreur', `Cette page n'a pas pu s'afficher : ${erreur.message}`),
-      h('p', null, h('a', { href: '#/aujourdhui' }, "Retour à Aujourd'hui")));
+      h('p', null, h('a', { href: '#/aujourdhui' }, "Retour à Aujourd'hui")),
+      h('p', null, h('a', { href: '#/reglages/donnees' }, 'Réglages > Données (restaurer une copie)')));
   }
   racine.replaceChildren(noeud);
   const titrePage = VUES[vue].titre(param, sous);

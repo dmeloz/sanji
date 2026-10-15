@@ -13,7 +13,7 @@ import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from '.
 import { calculerComposant } from './calcul.js';
 import { champsDeComposant, ficheEnMemoire, nomCorrect, reprendreFiche, reprendreSurAVenir, retenirFiche } from './fiches-retenues.js';
 import { chargeCreneau, cibleProduction, ecartProduction, etatTache, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
-import { GROUPES, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
+import { GROUPES, MESSAGE_PORTION_TROP_GRANDE, PORTION_MAX_G, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
   CATEGORIE, CHARGE, ETAPE, ETAT_CRENEAU, ETAT_POIDS, PROVENANCE, ROLE, TYPE_COMPOSANT, UNITE,
 } from './statuts.js';
@@ -92,6 +92,7 @@ function normaliserGrammage(g, existant) {
     throw new Error('Le grammage doit être un nombre strictement positif (ou vide).');
   }
   verifierDans(res.unite, UNITE, 'Unité du grammage');
+  if (res.unite === 'g' && res.valeur !== null && res.valeur > PORTION_MAX_G) throw new Error(MESSAGE_PORTION_TROP_GRANDE);
   if (!STATUTS_SAISIE.includes(res.statut)) throw new Error(`Provenance du grammage inconnue : « ${res.statut} ».`);
   const etat = res.etat ?? ETAT_POIDS.cuit;
   verifierDans(etat, ETAT_POIDS, 'État du poids');
@@ -907,6 +908,7 @@ export function definirStandard(etat, cleFamille, role, saisie, h) {
   if (saisie === null || typeof saisie !== 'object') throw new Error("Standard invalide : une valeur, une unité et l'état du poids sont attendus.");
   const { valeur, unite, etat: etatPoids } = saisie;
   if (!Number.isFinite(valeur) || valeur <= 0) throw new Error('La portion du standard doit être un nombre strictement positif.');
+  if (valeur > PORTION_MAX_G) throw new Error(MESSAGE_PORTION_TROP_GRANDE);
   verifierDans(unite, UNITE, 'Unité du standard');
   verifierDans(etatPoids, ETAT_POIDS, 'État du poids du standard');
   if (etat.standards === null || typeof etat.standards !== 'object') etat.standards = {};
