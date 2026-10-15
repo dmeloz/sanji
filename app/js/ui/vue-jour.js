@@ -8,6 +8,7 @@
 import { estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js';
 import { definirCouvertsMidi } from '../domaine/actions-couverts.js';
 import { saisirPortionInconnue } from '../domaine/actions-preparation.js';
+import { MESSAGE_PORTION_TROP_GRANDE, PORTION_MAX_G } from '../domaine/savoir.js';
 import { COUVERTS_RAPIDES } from '../domaine/couverts-midi.js';
 import { etatPortionTapee, MESSAGE_POIDS_A_CHOISIR, quantiteEnPoids, raisonNonChiffree, verbeDe } from '../domaine/mise-en-place.js';
 import { aideRefroidissement, evaluationProduction } from '../domaine/planification.js';
@@ -110,9 +111,6 @@ function actionsDeLigne(etat, l, date) {
   return { directes: [], autres: actionsTache(l, p).filter((n) => n.textContent !== 'Fait') };
 }
 
-/** Borne haute d'une portion tapée (g, ml…) : au-delà, c'est une faute de frappe. */
-const PORTION_MAX = 2000;
-
 /** Portion tapée en un toucher : un champ (g par portion) et « OK ». Toute erreur se dit DANS la feuille (`api.erreur`). */
 function formulairePortion(etat, l, nom, api) {
   const unite = libelle('UNITE', etat.composants[l.composantId].grammage?.unite ?? 'g');
@@ -127,7 +125,7 @@ function formulairePortion(etat, l, nom, api) {
     try { valeur = parseNombre(champ.value, nom); } catch { api.erreur("Cette valeur n'est pas un nombre."); return; }
     if (valeur === null) { api.erreur(`Tapez une portion en ${unite}, par exemple 120.`); return; }
     if (valeur <= 0) { api.erreur('La portion doit être supérieure à 0.'); return; }
-    if (valeur > PORTION_MAX) { api.erreur(`La portion ne peut pas dépasser ${PORTION_MAX} ${unite}.`); return; }
+    if (valeur > PORTION_MAX_G) { api.erreur(MESSAGE_PORTION_TROP_GRANDE); return; }
     if (poids.valeur() === null) { api.erreur(MESSAGE_POIDS_A_CHOISIR); return; }
     const r = agir((e, t) => saisirPortionInconnue(e, l.composantId, valeur, t, poids.valeur()), { afficher: false });
     if (!r.ok) { api.erreur(r.erreur); return; }

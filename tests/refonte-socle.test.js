@@ -45,9 +45,9 @@ test('vues-relais : chacune exporte titre et rendre', () => {
 });
 
 // Adapté pour l'écran Mode en poste (refonte 1) : sans étapes, il ramène à la fiche ; le détail est dans tests/vue-poste.test.js.
-test('vue Mode en poste : sans étapes, elle ramène à la fiche', () => {
+test('vue Mode en poste : sans étapes (composant inconnu), elle ramène à Production', () => {
   const liens = relais.poste.rendre(magasin.etat(), 'comp 1').tous((x) => x.balise === 'a').map((a) => a.attributs.href);
-  assert.deepEqual(liens, ['#/fiche/comp%201']);
+  assert.deepEqual(liens, ['#/production']);
 });
 
 test('feuille des décisions : ouvrirDecisions existe et ouvre la feuille « À décider » sans quitter la page', async () => {

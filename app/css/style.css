@@ -1316,3 +1316,6 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .fe-sous-titre { margin: 8px 0 4px; font-size: var(--t0); font-weight: 700; }
 .cloture-element { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; padding: 6px 0; }
 .cloture-element-nom { flex: 1 1 140px; min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+.reglage-danger { color: var(--rouge-texte); }
+.reglage-danger .reglage-rubrique-texte { flex: 1; }
+.reglage-danger svg { flex: none; }

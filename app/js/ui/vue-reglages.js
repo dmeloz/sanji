@@ -20,6 +20,7 @@ import { agir, agirStrict, aujourdhui, etat as etatCourant, maintenant, redessin
 import { assistantPret, cleMasquee, effacerReglagesIA, enregistrerReglagesIA, lireReglagesIA } from './assistant-reglages.js';
 import { champs } from './champs.js';
 import { sectionCopies } from './section-copies.js';
+import { sectionNeuf } from './section-neuf.js';
 import { ouvrirValidation } from './feuille-validation.js';
 import { MODELES } from './fournisseur-web.js';
 import { h } from './dom.js';
@@ -490,7 +491,7 @@ const LIBELLE_ACTION = {
   reporterValidation: 'Validation reportée à plus tard',
   ajusterStandard: 'Valeur de base changée', revenirAuStandard: 'Valeur de base rétablie',
   accepterApprentissage: 'Proposition acceptée comme standard maison', ecarterApprentissage: 'Proposition écartée',
-  restaurer: 'Sauvegarde restaurée', noterAchat: 'Ligne notée à commander', retirerAchat: 'Ligne retirée de la liste', restaurerAchat: 'Ligne remise dans la liste',
+  restaurer: 'Sauvegarde restaurée', remiseANeuf: 'Remise à neuf', noterAchat: 'Ligne notée à commander', retirerAchat: 'Ligne retirée de la liste', restaurerAchat: 'Ligne remise dans la liste',
 };
 const MOTS_TECHNIQUES = [
   ['avant_midi', 'avant midi'], ['apres_midi', 'après midi'], ['avant_soir', 'avant soir'], ['->', '→'],
@@ -778,7 +779,7 @@ const RUBRIQUES = [
     blocs: (e) => sectionsApprentissage(e) },
   { cle: 'donnees', titre: 'Données et hors ligne',
     resume: (e) => (e.reglages.dernierExport ? `dernier export : ${formaterHeure(e.reglages.dernierExport)}` : 'aucun export noté sur cet appareil'),
-    blocs: (e) => [sectionSauvegarde(), sectionCopies(), sectionEtat(), sectionJournal(e)] },
+    blocs: (e) => [sectionSauvegarde(), sectionCopies(), sectionEtat(), sectionJournal(e), sectionNeuf()] },
 ];
 
 export const CLES_RUBRIQUES = RUBRIQUES.map((r) => r.cle);

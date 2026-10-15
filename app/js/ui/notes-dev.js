@@ -12,6 +12,7 @@ import { lireEvenements } from './journal-diagnostic.js';
 import { afficherMessage } from './messages.js';
 import { ouvrirCentreDev } from './centre-dev.js';
 import { confirmer, panneau } from './panneau.js';
+import { horodatageLocal } from './format.js';
 
 const CLE = 'sanji-notes-dev';
 const CLE_PASTILLE = 'sanji-pastille-dev';
@@ -59,7 +60,7 @@ export function ajouterNote({ type, texte, ecran = '', gestes = [] }) {
   const v = validerNote({ type, texte });
   if (!v.ok) throw new Error(v.erreur);
   const note = { id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, type: v.type, categorie: v.categorie, texte: v.texte,
-    ecran: String(ecran).slice(0, 80), version: VERSION_APP, h: new Date().toISOString(), etat: 'nouvelle', gestes: gestes.slice(-MAX_GESTES) };
+    ecran: String(ecran).slice(0, 80), version: VERSION_APP, h: horodatageLocal(new Date()), etat: 'nouvelle', gestes: gestes.slice(-MAX_GESTES) };
   ecrire([note, ...lireNotes()].slice(0, MAX_NOTES));
   return note;
 }

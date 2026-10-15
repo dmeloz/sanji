@@ -8,7 +8,7 @@
 import { definirStandard, modifierComposant, terminer } from './actions.js';
 import { etatPortionTapee, MESSAGE_POIDS_A_CHOISIR } from './mise-en-place.js';
 import { confirmerPortionsCuites } from './poids-portion.js';
-import { grammageEffectif, groupeDeCleStandard, familleParCle, ROLES_STANDARD, lignesStandards, lignesStandardsGroupes } from './savoir.js';
+import { MESSAGE_PORTION_TROP_GRANDE, PORTION_MAX_G, grammageEffectif, groupeDeCleStandard, familleParCle, ROLES_STANDARD, lignesStandards, lignesStandardsGroupes } from './savoir.js';
 import { ETAT_POIDS, UNITE } from './statuts.js';
 
 const CLES_INTERDITES = new Set(['__proto__', 'constructor', 'prototype']);
@@ -25,6 +25,7 @@ function exigerValeur(saisie) {
   if (typeof valeur !== 'number' || !Number.isFinite(valeur) || valeur <= 0) {
     throw new Error("Saisissez la valeur de la portion (nombre positif) : l'application ne choisit pas à votre place.");
   }
+  if (valeur > PORTION_MAX_G) throw new Error(MESSAGE_PORTION_TROP_GRANDE);
   return valeur;
 }
 

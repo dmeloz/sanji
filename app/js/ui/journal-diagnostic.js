@@ -6,6 +6,7 @@
 import { MAX_CONTENU, MAX_LIBELLE, MAX_TEXTE, nettoyer } from '../domaine/rapport-diagnostic.js';
 import { enregistrerPhoto, lirePhoto, supprimerPhoto } from '../stockage.js';
 import { VERSION_APP } from '../version.js';
+import { horodatageLocal } from './format.js';
 
 const CLE = 'sanji-journal-diagnostic';
 const MAX_EVENEMENTS = 300;
@@ -66,7 +67,7 @@ export function noter(type, donnees = {}) {
       const valeur = nettoyer(v, cle === 'libelle' ? MAX_LIBELLE : cle === 'contenu' ? MAX_CONTENU : MAX_TEXTE);
       if (nom && nom !== 'h' && nom !== 'type' && valeur !== undefined) propre[nom] = valeur;
     }
-    const evenement = { ...propre, h: new Date().toISOString(), type: nettoyer(String(type), 30) };
+    const evenement = { ...propre, h: horodatageLocal(new Date()), type: nettoyer(String(type), 30) };
     ecrire([...lireEvenements(), evenement].slice(-MAX_EVENEMENTS));
   } catch { /* le journal ne doit jamais gêner l'application */ }
 }
@@ -105,7 +106,8 @@ function ecrireRegistre(liste) {
 export async function garderPhotoPourDiagnostic(type, blob) {
   try {
     if (!blob || typeof blob.size !== 'number' || blob.size === 0 || blob.size > TAILLE_PHOTO_MAX) return;
-    const h = new Date().toISOString();
+    const maintenant = new Date(); // millisecondes en plus : deux photos dans la même seconde gardent des clés distinctes
+    const h = `${horodatageLocal(maintenant)}.${String(maintenant.getMilliseconds()).padStart(3, '0')}`;
     const entree = { cle: `diag|${h}|${type === 'fiche' ? 'fiche' : 'feuille'}`, type: type === 'fiche' ? 'fiche' : 'feuille', h };
     await enregistrerPhoto(entree.cle, blob);
     const toutes = [...lireRegistre(), entree];

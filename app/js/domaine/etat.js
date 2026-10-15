@@ -1,6 +1,7 @@
 // Document d'état unique : création, normalisation, export et import.
 // Aucune lecture de l'heure : l'horodatage `h` (ISO) est toujours un argument .
 
+import { estDateValide } from './dates.js';
 import { controleAjustement } from './ajustements.js';
 import { fichesDepuisPlats, fichesValides, nomsValides } from './fiches-retenues.js';
 import { categorieMotValide, motsValides } from './mots-retenus.js';
@@ -245,6 +246,39 @@ function contientTestOnly(valeur) {
   return false;
 }
 
+const dateOuNull = (d) => d === null || (typeof d === 'string' && estDateValide(d));
+const chaineOuNull = (v) => v === null || typeof v === 'string';
+const horodatageOuNull = (h) => h === null || (typeof h === 'string' && !Number.isNaN(Date.parse(h)));
+const grammageValide = (g) => estObjet(g) && Object.hasOwn(ETAT_POIDS, g.etat) && (g.valeur === null || (Number.isFinite(g.valeur) && g.valeur >= 0));
+const menuValide = (m) => estObjet(m) && typeof m.intitule === 'string';
+// Anomalie scalaire sûre à corriger plutôt qu'à rejeter : un nombre devient sa chaîne, tout autre type devient ''.
+const enChaine = (v) => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '');
+
+/**
+ * Une entrée importée est-elle exploitable par les écrans ? Elle doit être un objet dont l'`id` (ou la `date` d'un jour) est sa
+ * clé, avec les dates AAAA-MM-JJ lisibles et les champs de type connu. Sinon elle est écartée (le reste de l'état est gardé).
+ */
+const VALIDEURS = {
+  jours: (j, cle) => j.date === cle && estDateValide(cle) && estObjet(j.menus) && menuValide(j.menus[1]) && menuValide(j.menus[2]),
+  fiches: (f, cle) => f.id === cle && dateOuNull(f.date),
+  composants: (c, cle) => c.id === cle && estDateValide(c.date) && typeof c.nom === 'string' && typeof c.produitNom === 'string' && chaineOuNull(c.famille) && chaineOuNull(c.role) && Array.isArray(c.etapes) && c.etapes.every(estObjet) && grammageValide(c.grammage),
+  productions: (p, cle) => p.id === cle && estDateValide(p.dateService) && dateOuNull(p.jourDecide) && horodatageOuNull(p.hFait),
+  regles: (r, cle) => r.id === cle && Array.isArray(r.etapes) && r.etapes.every(estObjet),
+  recettes: (r, cle) => r.id === cle,
+  fournisseurs: (f, cle) => f.id === cle,
+  memoire: () => true,
+  produits: () => true,
+};
+
+/** Corrections sûres appliquées avant validation (jamais sur l'id, la date ni une structure). */
+const CORRECTEURS = {
+  jours: (j) => { for (const m of [1, 2]) if (estObjet(j.menus) && estObjet(j.menus[m])) j.menus[m].intitule = enChaine(j.menus[m].intitule); },
+  composants: (c) => {
+    c.produitNom = enChaine(c.produitNom);
+    if (typeof c.nom === 'number') c.nom = String(c.nom);
+  },
+};
+
 const COLLECTIONS = {
   jours: jourVide, fiches: ficheVide, composants: composantVide, productions: productionVide,
   regles: regleVide, recettes: recetteVide, fournisseurs: fournisseurVide,
@@ -294,7 +328,11 @@ function ecartApprentissageValide(e, aujourdhui) {
  * @param {string} [aujourdhui] AAAA-MM-JJ ; sert à écarter les dates futures des propositions écartées (donnée par l'appelant, jamais lue ici ; absente : pas de contrôle de futur)
  * @returns {object} l'état complet ; lève une Error en français sinon
  */
-export function importer(texte, aujourdhui = null) {
+export function importer(texte, aujourdhui = null) { return importerAvecBilan(texte, aujourdhui).etat; }
+
+/** Comme `importer`, avec le nombre d'entrées écartées (abîmées) : `{ etat, ecartes }`. */
+export function importerAvecBilan(texte, aujourdhui = null) {
+  let ecartes = 0;
   let doc;
   try { doc = JSON.parse(texte); } catch { throw new Error("Fichier illisible : ce n'est pas un export valide."); }
   if (contientTestOnly(doc)) {
@@ -323,7 +361,11 @@ export function importer(texte, aujourdhui = null) {
     if (!estObjet(source[nom])) throw new Error(`Export corrompu : « ${nom} » est invalide.`);
     for (const id of Object.keys(source[nom])) {
       if (CLES_INTERDITES.has(id)) continue;
-      etat[nom][id] = fusionner(fabrique(id), source[nom][id]);
+      if (nom !== 'validations' && !estObjet(source[nom][id])) { ecartes++; continue; }
+      const entree = fusionner(fabrique(id), source[nom][id]);
+      CORRECTEURS[nom]?.(entree);
+      if (VALIDEURS[nom] && !VALIDEURS[nom](entree, id)) { ecartes++; continue; }
+      etat[nom][id] = entree;
     }
   }
   // Suggestion d'un composant (lecture) : seulement un classement autorisé, sinon retirée.
@@ -416,5 +458,5 @@ export function importer(texte, aujourdhui = null) {
     if (!Array.isArray(source.journal)) throw new Error('Export corrompu : « journal » est invalide.');
     etat.journal = source.journal.slice(-TAILLE_JOURNAL);
   }
-  return etat;
+  return { etat, ecartes };
 }

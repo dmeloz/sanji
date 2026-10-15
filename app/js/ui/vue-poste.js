@@ -47,7 +47,7 @@ function remplir(racine, etat, id) {
     racine.replaceChildren(
       h('h1', { classe: 'page-titre' }, 'Mode en poste'),
       h('p', { classe: 'vide' }, 'Pas d\'étapes pour ce composant'),
-      h('p', null, lienFiche(id ?? '', 'btn', c ? 'Retour à la fiche' : 'Retour à la fiche (composant introuvable)')));
+      h('p', null, c ? lienFiche(id, 'btn', 'Retour à la fiche') : h('a', { href: '#/production', classe: 'btn' }, 'Retour à Production (composant introuvable)')));
     return;
   }
   if (position.id !== id) position = { id, i: indiceDeDepart(etapes) };

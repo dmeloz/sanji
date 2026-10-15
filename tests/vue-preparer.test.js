@@ -189,3 +189,10 @@ test('ligne « à saisir » d\'une polenta : aucun bouton enfoncé, OK refusé s
   dateDuJour(S.lundi, () => parNom(n, 'Valider polenta avec la valeur tapée').click());
   assert.equal(magasin.etat().standards.polenta.plat_principal.etat, 'cru_net');
 });
+
+test('semaine vide : « Préparer la semaine » propose « Importer les menus » vers l\'import de cette semaine', () => {
+  magasin.remplacer(etatVide());
+  const racine = dateDuJour(S.lundi, () => vue.rendre(magasin.etat(), S.lundi));
+  assert.ok(liens(racine).includes(`#/import/${S.lundi}`));
+  assert.ok(racine.tous((x) => x.balise === 'a' && x.textContent === 'Importer les menus').length === 1);
+});

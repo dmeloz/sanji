@@ -6,7 +6,7 @@ import { statutStockage } from '../magasin.js';
 import { VERSION_APP } from '../version.js';
 import { h } from './dom.js';
 import { bouton, pastille } from './elements.js';
-import { pluriel } from './format.js';
+import { horodatageLocal, pluriel } from './format.js';
 import { lireEvenements, photosGardees } from './journal-diagnostic.js';
 import { lireNotes, marquerTransmises } from './notes-dev.js';
 import { lireRetours } from './retours-essai.js';
@@ -27,7 +27,7 @@ function environnement() {
   return { version: VERSION_APP, standalone, enLigne: nav?.onLine !== false, agent: nav?.userAgent ?? '?', persistant: statutStockage().persistant };
 }
 
-const maintenant = () => new Date().toISOString();
+const maintenant = () => horodatageLocal(new Date());
 
 /** Tout ce qui est lu à un instant : le journal, les notes, les retours et les photos, filtrés selon le repère du dernier envoi. */
 async function preparer() {

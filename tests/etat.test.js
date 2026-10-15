@@ -88,7 +88,7 @@ test('importer refuse un document étranger, un schéma inconnu et un contenu co
 });
 
 test('importer ignore les clés dangereuses', () => {
-  const texte = '{"application":"sanji-entremetier","schema":1,"etat":{"composants":{"__proto__":{"x":1},"c1":{"id":"c1"}}}}';
+  const texte = '{"application":"sanji-entremetier","schema":1,"etat":{"composants":{"__proto__":{"x":1},"c1":{"id":"c1","date":"2026-10-05"}}}}';
   const e = importer(texte);
   assert.deepEqual(Object.keys(e.composants), ['c1']);
   assert.equal({}.x, undefined);

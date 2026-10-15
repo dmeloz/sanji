@@ -1,9 +1,9 @@
 // Magasin : détient l'état courant. Toute modification passe par `agir`, qui travaille sur une copie
 // et ne remplace l'état que si aucune erreur n'est levée.
 
-import { ajouterJournal, etatInitial, importer, exporter } from './domaine/etat.js';
+import { ajouterJournal, etatInitial, importerAvecBilan, exporter } from './domaine/etat.js';
 import { chargerEtat, demanderPersistance, enregistrerEtat, stockageDisponible } from './stockage.js';
-import { copieDuJour } from './sauvegarde-auto.js';
+import { copieDuJour, garderAvantImportEcarte } from './sauvegarde-auto.js';
 import { horodatageLocal } from './ui/format.js';
 
 let etatCourant = etatInitial();
@@ -64,6 +64,16 @@ async function ecrire() {
   }
 }
 
+/** Des entrées abîmées ont été écartées : garde le brut d'origine avant tout enregistrement, puis le dit (une fois par copie gardée). */
+async function signalerEcartes(texteBrut, nombre) {
+  const ecartes = `${nombre} élément(s) abîmé(s) n'ont pas pu être relus et ont été écartés.`;
+  try {
+    if (await garderAvantImportEcarte(texteBrut)) signaler(`${ecartes} Une copie de l'état d'origine est gardée dans Réglages > Données.`, 'erreur');
+  } catch {
+    signaler(`${ecartes} La copie de l'état d'origine n'a pas pu être gardée.`, 'erreur');
+  }
+}
+
 /**
  * Charge l'état enregistré. Sans IndexedDB (ou si la lecture échoue), l'application reste utilisable en mémoire.
  * Si les données enregistrées sont illisibles, l'écriture est suspendue pour ne pas les écraser.
@@ -84,7 +94,10 @@ export async function charger() {
     demanderPersistance().then((persistant) => { statut.persistant = persistant; });
     if (brut) {
       try {
-        etatCourant = importer(exporter(brut, maintenant()), aujourdhui());
+        const texteBrut = exporter(brut, maintenant());
+        const bilan = importerAvecBilan(texteBrut, aujourdhui());
+        etatCourant = bilan.etat;
+        if (bilan.ecartes > 0) await signalerEcartes(texteBrut, bilan.ecartes);
       } catch (erreur) {
         statut.illisible = true;
         statut.enregistre = false;
@@ -130,10 +143,11 @@ export function agirStrict(fonction) {
 }
 
 /** Remplace tout l'état (restauration d'une sauvegarde déjà validée par `importer`). */
-export function remplacer(nouvelEtat, detail = '') {
+export function remplacer(nouvelEtat, detail = '', action = 'restaurer') {
   const copie = structuredClone(nouvelEtat);
-  ajouterJournal(copie, maintenant(), 'restaurer', detail);
+  ajouterJournal(copie, maintenant(), action, detail);
   etatCourant = copie;
+  jourCopieTente = null; // la copie du jour est refaite à ce prochain enregistrement
   if (statut.illisible) { statut.illisible = false; statut.raison = ''; statut.enregistre = true; }
   ecrire();
   redessiner();
