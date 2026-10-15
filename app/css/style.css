@@ -1131,6 +1131,9 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 
 /* E1 Réglages : note de fin de page (apparence, écran allumé), à la place du groupe « Affichage ». */
 .reglages-note { margin: 12px 16px 0; font-size: var(--t-legende); color: var(--texte-doux); }
+.reglages-version { margin: 12px 16px 4px; font-size: var(--t-1); font-weight: 600; }
+.reglages-maj { margin-bottom: 8px; }
+.reglages-maj > button, .reglages-maj > .meta { margin-left: 16px; margin-right: 16px; }
 
 /* Aujourd'hui : l'en-tête porte le bouton Réglages (plus de barre du haut). */
 .au-tete-ligne { display: flex; align-items: center; justify-content: space-between; gap: 10px; }

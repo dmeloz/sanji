@@ -10,7 +10,7 @@ import { etatInitial, exporter, importer } from '../app/js/domaine/etat.js';
 import { motDe } from '../app/js/domaine/mots-retenus.js';
 import { rapportApprentissage } from '../app/js/domaine/rapport-apprentissage.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
-import { boutons, installerFauxDom } from './aide-dom.js';
+import { boutons, figerHorloge, installerFauxDom } from './aide-dom.js';
 import { h } from './aide.js';
 
 const PASSE = '2026-09-28'; // avant h() (2026-10-01)
@@ -218,13 +218,15 @@ let dom;
 let magasin;
 let enseigner;
 let fiche;
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge(FUTUR); // le geste lit l'horloge : FUTUR doit rester « à venir »
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   enseigner = await import('../app/js/ui/enseigner-mot.js');
   fiche = await import('../app/js/ui/vue-fiche.js');
 });
-after(() => dom.restaurer());
+after(() => { dom.restaurer(); rendreHorloge(); });
 
 test('geste : cinq choix (dont le mode de préparation), un toucher classe, retient et annonce le mot', () => {
   const etat = monde();

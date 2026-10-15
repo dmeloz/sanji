@@ -141,12 +141,23 @@ test('code : aucune des vues concernées ne construit de repli', () => {
 
 // ---------------------------------------------------------------- B. doublons
 
-test('Réglages, racine : un seul lien par destination, la version n\'y est pas', () => {
+test('Réglages, racine : un seul lien par destination, la version installée est visible une fois (v130)', () => {
   magasin.remplacer(etatVide());
   const r = vues.reglages.rendre(magasin.etat(), null);
   const hrefs = r.tous((x) => x.balise === 'a').map((a) => a.attributs.href);
   assert.deepEqual(hrefs.filter((l, i) => hrefs.indexOf(l) !== i), [], 'aucun lien en double');
-  assert.doesNotMatch(r.textContent, /Version/);
+  assert.equal(r.textContent.match(/Version installée : \d+/g).length, 1);
+});
+
+test('Réglages, racine : la version et « Vérifier les mises à jour » sont en haut, sous le titre, avant tout groupe (v130)', () => {
+  magasin.remplacer(etatVide());
+  const r = vues.reglages.rendre(magasin.etat(), null);
+  const ordre = r.enfants.map((e) => e.attributs?.class ?? e.attributs?.classe ?? e.classe ?? '');
+  const iVersion = r.enfants.findIndex((e) => /Version installée/.test(e.textContent ?? ''));
+  const iGroupe = r.enfants.findIndex((e) => e.balise === 'section');
+  assert.ok(iVersion >= 0 && iGroupe >= 0, ordre.join('|'));
+  assert.ok(iVersion < iGroupe, 'la version précède le premier groupe');
+  assert.equal(r.tous((x) => x.balise === 'button' && x.textContent === 'Vérifier les mises à jour').length, 1);
 });
 
 test('Réglages > Données : la version de l\'application est affichée une fois', () => {

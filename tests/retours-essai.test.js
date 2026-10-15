@@ -2,7 +2,7 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { boutons, installerFauxDom, panneauxOuverts } from './aide-dom.js';
+import { boutons, figerHorloge, installerFauxDom, panneauxOuverts } from './aide-dom.js';
 import { etatVide } from './aide.js';
 
 let dom; let magasin; let essai; let reglages; let vueImport; let assistant;
@@ -10,7 +10,9 @@ const faux = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? n
 const attendre = () => new Promise((r) => setImmediate(r));
 const texteBouton = (n, t) => boutons(n).find((b) => b.textContent === t);
 
+let rendreHorloge;
 before(async () => {
+  rendreHorloge = figerHorloge('2026-11-02');
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   essai = await import('../app/js/ui/retours-essai.js');
@@ -18,7 +20,7 @@ before(async () => {
   vueImport = await import('../app/js/ui/vue-import.js');
   assistant = await import('../app/js/ui/assistant-reglages.js');
 });
-after(() => { dom.restaurer(); delete globalThis.localStorage; });
+after(() => { dom.restaurer(); rendreHorloge(); delete globalThis.localStorage; });
 
 test('stockage : 30 entrées au plus, les plus récentes d\'abord, version notée', () => {
   globalThis.localStorage = faux();

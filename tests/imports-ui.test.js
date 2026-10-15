@@ -68,7 +68,8 @@ test('aucun appel réseau ni ressource distante dans app/', () => {
     const texte = readFileSync(fichier, 'utf8');
     const sansSw = fichier.endsWith('sw.js') ? texte.replace(/return await fetch\(requete\);/, '') : texte;
     assert.equal(/\bXMLHttpRequest\b|\bWebSocket\b|\bsendBeacon\b/.test(sansSw), false, relative(RACINE, fichier));
-    assert.equal(/\bfetch\s*\(/.test(sansSw), false, `${relative(RACINE, fichier)} : fetch`);
+    // nouvelle-version.js (v130) : fetch injectable, seulement sur sw.js (même origine, comparaison des versions).
+    if (!fichier.endsWith('nouvelle-version.js')) assert.equal(/\bfetch\s*\(/.test(sansSw), false, `${relative(RACINE, fichier)} : fetch`);
     assert.equal(/(src|href)=["']https?:\/\//.test(sansSw) || /url\(\s*["']?https?:/.test(sansSw) || /@import/.test(sansSw), false, relative(RACINE, fichier));
   }
 });
