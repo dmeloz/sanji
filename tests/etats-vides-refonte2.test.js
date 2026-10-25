@@ -72,8 +72,8 @@ test('G3 : articles, état vide seulement sans aucun jour ; sinon lignes simples
   vues.articles.oublierVue();
   magasin.remplacer(etatVide());
   const p = aDate(S.lundi, () => vues.articles.rendre(magasin.etat()));
-  assert.match(p.textContent, /Aucun article pour l'instant/);
-  assert.match(p.textContent, /La liste se remplit dès que les menus de la semaine sont importés\./);
+  assert.match(p.textContent, /Aucun article sur les deux prochaines semaines/);
+  assert.match(p.textContent, /La liste se remplit quand des éléments au poste sont prévus dans les menus\./);
   assert.ok(liens(p).some(([t, href]) => t === 'Importer les menus' && href === `#/import/${S.lundi}`));
   assert.equal(classes(p, 'etat-vide').length, 1);
   const e = etatVide();

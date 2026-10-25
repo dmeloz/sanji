@@ -145,7 +145,7 @@ test('Semaine / Aujourd\'hui : le choix filtre les jours, l\'état pressé est �
 test('rien à lister : une phrase et le lien pour saisir les menus ; le dimanche dit « Fermé »', () => {
   vue.oublierVue();
   const vide = page(S.lundi, etatVide());
-  assert.match(vide.textContent, /Aucun article pour l'instant/);
+  assert.match(vide.textContent, /Aucun article sur les deux prochaines semaines/);
   assert.ok(vide.tous((x) => x.balise === 'a').some((a) => a.attributs.href === `#/import/${S.lundi}`));
   assert.equal(classes(vide, 'art-pouce').length, 0, 'rien à partager');
   vue.oublierVue();

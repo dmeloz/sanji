@@ -1377,3 +1377,35 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .vue-preparer .prep-etape h2 { display: flex; align-items: center; gap: 10px; }
 .vue-preparer .prep-etape-3 { border-bottom: 1px solid var(--bordure); }
 .vue-preparer .prep-etape-3 .prep-fiche { min-height: var(--cible); }
+
+/* ===== Refonte 3 — lot 5 : lecture de Semaine et repères dans Articles. ===== */
+.vue-semaine-globale .bord-jours { display: grid; gap: 10px; border: 0; }
+.vue-semaine-globale .bord-jour {
+  min-width: 0;
+  padding: 8px 12px 10px;
+  border: 1px solid var(--bordure);
+  border-radius: var(--r-carte-petite);
+  background: var(--carte);
+}
+.vue-semaine-globale .bord-jour:last-child { border-bottom: 1px solid var(--bordure); }
+.vue-semaine-globale .bord-jour.bord-aujourdhui { border-left: 4px solid var(--action); }
+.vue-semaine-globale .bord-jour-lien { min-height: var(--cible); gap: 4px 8px; }
+.vue-semaine-globale .bord-menu {
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 8px;
+  padding-block: 3px;
+  border-top: 1px solid var(--bordure);
+}
+.vue-semaine-globale .tb-intitule { min-width: 0; overflow-wrap: anywhere; }
+.vue-articles .art-vide-aujourdhui {
+  display: grid;
+  gap: 10px;
+  margin-block: 16px;
+  padding: 16px;
+  border: 1px solid var(--bordure);
+  border-radius: var(--r-carte);
+  background: var(--carte);
+}
+.vue-articles .art-vide-aujourdhui h2 { font-size: var(--t-ligne); }
+.vue-articles .art-vide-aujourdhui p { color: var(--texte-doux); }
+.vue-articles .art-vide-aujourdhui .btn { min-height: var(--cible); justify-self: start; }
