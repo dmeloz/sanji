@@ -1314,3 +1314,32 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .reglage-danger { color: var(--rouge-texte); }
 .reglage-danger .reglage-rubrique-texte { flex: 1; }
 .reglage-danger svg { flex: none; }
+
+/* Refonte 3 — lot 2 : Aujourd'hui en priorité, jours proches en liste, Production à lire sans tronquer les noms ni les dates. */
+.vue-aujourdhui .prochaine { border-radius: var(--r-carte); padding: 14px 16px; }
+.vue-aujourdhui .prochaine-etiquette { font-size: var(--t-corps); letter-spacing: 0; text-transform: none; opacity: 1; }
+.tdb-jours { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--bordure); }
+.tdb-jour { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 12px; min-width: 0; min-height: var(--cible); padding: 10px 8px; border: 0; border-bottom: 1px solid var(--bordure); border-radius: 0; background: transparent; }
+.tdb-jour-date { align-self: start; padding-top: 2px; font-size: var(--t-corps); font-weight: 700; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.tdb-jour-contenu { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.tdb-m { flex-direction: row; align-items: baseline; gap: 8px; }
+.tdb-m b { flex: none; }
+.tdb-intitule { display: block; min-width: 0; overflow: visible; overflow-wrap: anywhere; -webkit-line-clamp: unset; -webkit-box-orient: initial; }
+.tdb-jour-auj { padding-left: 5px; border-left: 3px solid var(--encre); background: var(--carte); }
+.tdb-jour-vide { border: 0; border-bottom: 1px solid var(--bordure); background: transparent; }
+.tdb-a-importer { margin: 0; color: var(--texte); font-size: var(--t-corps); }
+.tdb-etiquette { margin: 0; }
+.vue-production .prod-titre-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "titre fleches" "date fleches"; align-items: center; gap: 2px 8px; }
+.vue-production .prod-titre-ligne .page-titre { grid-area: titre; }
+.vue-production .prod-date { grid-area: date; min-width: 0; overflow: visible; font-size: var(--t-corps); font-weight: 600; line-height: 1.25; text-overflow: clip; white-space: normal; }
+.vue-production .prod-fleches { grid-area: fleches; align-self: stretch; align-items: center; }
+.vue-production .prod-principal { align-items: start; gap: 6px; padding: 8px 0; }
+.vue-production .prod-principal > .case-fait, .vue-production .prod-principal > .case-fait-boite { align-self: start; margin-top: 0; }
+.vue-production .prod-nom-ligne { min-width: 0; align-items: baseline; }
+.vue-production .prod-nom { flex: 1 1 auto; min-width: 0; overflow: visible; overflow-wrap: anywhere; line-height: 1.3; text-overflow: clip; white-space: normal; }
+.vue-production .mep-quantite { min-width: 0; align-self: start; white-space: normal; }
+.vue-production .mep-quantite .mep-qte { text-align: right; }
+
+@media (min-width: 700px) {
+  .vue-production .prod-titre-ligne { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "titre date fleches"; gap: 8px; }
+}

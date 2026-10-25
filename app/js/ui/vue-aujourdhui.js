@@ -53,24 +53,26 @@ const NOM_COURT = (date) => majuscule(libelleJour(date).slice(0, 3));
 
 function colonneJour(jour, lundi) {
   const nom = libelleJour(jour.date).split(' ')[0];
+  const numero = libelleJour(jour.date).split(' ')[1];
+  const dateCourte = `${NOM_COURT(jour.date)} ${numero}${jour.estAujourdhui ? ' · auj.' : ''}`;
   if (jour.aImporter) {
     return h('a', { href: `#/import/${lundi(jour.date)}`, classe: 'tdb-jour tdb-jour-vide', 'aria-label': `${majuscule(nom)}, menu à importer` },
-      h('span', { classe: 'tdb-j' }, NOM_COURT(jour.date)),
-      h('span', { classe: 'tdb-a-importer' }, 'menu à importer'),
-      h('span', { classe: 'tdb-etiquette' }, 'Importer'));
+      h('span', { classe: 'tdb-jour-date' }, dateCourte),
+      h('span', { classe: 'tdb-jour-contenu' }, h('span', { classe: 'tdb-a-importer' }, 'menu à importer'),
+        h('span', { classe: 'tdb-etiquette' }, 'Importer')));
   }
   const dits = jour.menus.map((m) => `menu ${m.menu} : ${m.intitule || 'non saisi'}`).join(', ');
   return h('a', { href: `#/production/${jour.date}`, classe: `tdb-jour${jour.estAujourdhui ? ' tdb-jour-auj' : ''}`,
     'aria-label': `${majuscule(nom)}${jour.estAujourdhui ? ", aujourd'hui" : ''}, ${dits}` },
-  h('span', { classe: 'tdb-j' }, `${NOM_COURT(jour.date)}${jour.estAujourdhui ? ' · auj.' : ''}`),
-  jour.menus.map((m) => h('span', { classe: 'tdb-m' }, h('b', null, `M${m.menu}`),
-    h('span', { classe: m.intitule ? 'tdb-intitule' : 'tdb-intitule au-neutre' }, m.intitule || 'non saisi'))));
+  h('span', { classe: 'tdb-jour-date' }, dateCourte),
+  h('span', { classe: 'tdb-jour-contenu' }, jour.menus.map((m) => h('span', { classe: 'tdb-m' }, h('b', null, `M${m.menu}`),
+    h('span', { classe: m.intitule ? 'tdb-intitule' : 'tdb-intitule au-neutre' }, m.intitule || 'non saisi')))));
 }
 
 function sectionMenus(d, lundiDe) {
   if (d.menusSurTrois.length === 0) return null;
-  return h('section', { classe: 'tdb-section', 'aria-label': 'Menus sur trois jours' },
-    h('div', { classe: 'tdb-tete' }, h('h2', { classe: 'au-etiquette' }, 'Menus'), lien('#/semaine', 'Semaine ›', 'au-lien-court')),
+  return h('section', { classe: 'tdb-section tdb-section-jours', 'aria-label': 'Jours proches' },
+    h('div', { classe: 'tdb-tete' }, h('h2', { classe: 'au-etiquette' }, 'Jours proches'), lien('#/semaine', 'Semaine ›', 'au-lien-court')),
     h('div', { classe: 'tdb-jours' }, d.menusSurTrois.map((j) => colonneJour(j, lundiDe))));
 }
 
@@ -215,7 +217,7 @@ function boutonAChiffrer(etat, m) {
 function carteProchaine(d, aujourd, etat) {
   const m = d.maintenant;
   if (!m) {
-    return h('section', { classe: 'prochaine prochaine-vide', 'aria-label': 'Prochaine tâche' },
+    return h('section', { classe: 'prochaine prochaine-vide', 'aria-label': 'Prochaine action' },
       h('p', { classe: 'prochaine-vide-texte' }, !d.ouvert
         ? ["Fermé aujourd'hui", d.prochainOuvert ? [' · Prochaine production : ',
           h('a', { href: `#/production/${d.prochainOuvert}`, classe: 'au-lien-prochaine' }, libelleJour(d.prochainOuvert).split(' ').slice(0, 2).join(' '))] : null]
@@ -223,9 +225,9 @@ function carteProchaine(d, aujourd, etat) {
   }
   const q = m.genre !== 'preparatoire' && m.cible !== null && m.unite !== 'portion' ? quantite(m.cible, m.unite) : null;
   const quand = m.dateService === aujourd ? null : `pour ${libelleJour(m.dateService).split(' ')[0]}`;
-  return h('section', { classe: 'prochaine', 'aria-label': 'Prochaine tâche' },
+  return h('section', { classe: 'prochaine', 'aria-label': 'Prochaine action' },
     h('div', { classe: 'prochaine-tete' },
-      h('h2', { classe: 'prochaine-etiquette' }, ['Prochaine', quand ? ` · ${quand}` : null]),
+      h('h2', { classe: 'prochaine-etiquette' }, ['Prochaine action', quand ? ` · ${quand}` : null]),
       h('span', { classe: 'prochaine-menu' }, [m.menu ? `menu ${m.menu}` : null, m.horsRegle ? h('strong', { classe: 'au-hors-regle' }, ' · hors règle') : null])),
     h('div', { classe: 'prochaine-ligne' },
       h('p', { classe: 'prochaine-nom' }, m.nom),
@@ -241,8 +243,10 @@ export function rendre(etat) {
   const aujourd = aujourdhui();
   const donnees = aujourdhuiDe(etat, aujourd, maintenant().slice(11, 16));
   const racine = h('div', { classe: 'vue vue-aujourdhui' });
-  const morceaux = [entete(donnees), sectionMenus(donnees, lundiDe), sectionChiffres(donnees, aujourd), carteProchaine(donnees, aujourd, etat), carteCloture(donnees),
-    sectionAAvancer(donnees, aujourd), carteFiche(donnees, aujourd, etat), sectionAConfirmer(etat, decisionsDe(etat, aujourd)), sectionRappels(donnees, preparationSemaine(etat, donnees.lundi, aujourd).aFaire)];
+  const morceaux = [entete(donnees), carteProchaine(donnees, aujourd, etat), sectionMenus(donnees, lundiDe),
+    sectionAConfirmer(etat, decisionsDe(etat, aujourd)), carteCloture(donnees),
+    sectionRappels(donnees, preparationSemaine(etat, donnees.lundi, aujourd).aFaire), sectionChiffres(donnees, aujourd),
+    sectionAAvancer(donnees, aujourd), carteFiche(donnees, aujourd, etat)];
   for (const m of morceaux) if (m) racine.appendChild(m);
   return racine;
 }

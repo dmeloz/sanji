@@ -18,7 +18,7 @@ export function titre() { return 'Production'; }
 
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 
-/** « Production » et la date en une ligne, flèches ‹ › discrètes à droite (l'autre moyen de changer de jour que le glissement). */
+/** Titre et date complète, flèches ‹ › à portée du pouce (l'autre moyen de changer de jour que le glissement). */
 function entete(date) {
   const flecheJour = (sens, texte, nom) => h('a', { href: `#/production/${jourOuvertVoisin(date, sens)}`, classe: 'prod-fleche', 'aria-label': nom }, texte);
   return h('header', { classe: 'jour-tete prod-tete' },
