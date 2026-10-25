@@ -81,9 +81,9 @@ test('polices : fichiers embarqués, déclarés dans le CSS et dans le cache hor
   }
 });
 
-test('style : aucun texte sous 13 px, mouvement réduit respecté, onglet actif aussi en graisse', () => {
+test('style : aucun texte sous 15 px, mouvement réduit respecté, onglet actif aussi en graisse', () => {
   const css = lire('css/style.css');
-  for (const m of css.matchAll(/font-size:\s*(\d+(?:\.\d+)?)px/g)) assert.ok(Number(m[1]) >= 13, `taille ${m[1]} px`);
+  for (const m of css.matchAll(/font-size:\s*(\d+(?:\.\d+)?)px/g)) assert.ok(Number(m[1]) >= 15, `taille ${m[1]} px`);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(css, /\.onglets a\[aria-current="page"\] \{ color: var\(--action\); font-weight: 600; \}/);
   assert.match(css, /--haut-onglets: 84px/);

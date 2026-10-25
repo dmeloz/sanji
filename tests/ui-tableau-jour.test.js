@@ -401,7 +401,9 @@ test('tableau : un petit signe par jour (hors règle, à confirmer), icône et m
   assert.equal(classes(tableau(S.lundi, etatVide()), 'bord-signe').length, 0, 'rien à signaler : aucun signe');
 });
 
-test('tableau : la légende du signe est lisible (13 px au moins)', () => {
+test('tableau : la légende du signe respecte les 15 px minimum', () => {
   const regle = css.match(/\.bord-signe\s*\{[^}]*\}/)?.[0] ?? '';
   assert.match(regle, /font-size:\s*var\(--t-1\)/);
+  assert.match(css, /--t-1:\s*var\(--t-corps\)/);
+  assert.match(css, /--t-corps:\s*15px/);
 });

@@ -138,7 +138,7 @@ test('vocabulaire : aucun terme écarté par la propriétaire sur l\'écran', ()
   }
 });
 
-test('accessibilité : cibles de 44 px, légendes de 13 px, quantités en police dédiée, mouvement réduit déjà respecté', () => {
+test('accessibilité : cibles de 44 px, légendes de 15 px, quantités en police dédiée, mouvement réduit déjà respecté', () => {
   const debut = css.indexOf('Production (refonte 1, onglet 2)');
   const fin = css.indexOf('/* =====', debut);
   const bloc = css.slice(debut, fin > debut ? fin : undefined); // le bloc Production d'origine, pas ceux des écrans suivants
@@ -150,7 +150,7 @@ test('accessibilité : cibles de 44 px, légendes de 13 px, quantités en police
   assert.match(css, /\.prod-plus \{[^}]*min-width: var\(--cible\)[^}]*min-height: var\(--cible\)/);
   assert.match(bloc, /\.prod-ligne \.mep-qte \{ font-family: var\(--police-qte\)/);
   assert.match(css, /--cible: 44px/);
-  assert.match(css, /--t-legende: 13px/);
+  assert.match(css, /--t-legende: 15px/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.doesNotMatch(bloc, /transition|animation/, 'aucun mouvement ajouté');
 });

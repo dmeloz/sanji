@@ -1,7 +1,7 @@
 /* Sanji : feuille de style écrite à la main. Refonte 2 (décision « Écrans et direction visuelle de la refonte 2 », 2026-10-07, palette G « Grand large ») :
    fond parchemin, cartes crème et opaques, filets fins, bleu océan pour l'action, or paille réservé à ce que le chef doit trancher, noir pour décider,
    quantités en IBM Plex Mono embarquée (app/polices/, jamais chargée en ligne). Mobile d'abord (390 px), lisible en cuisine.
-   Règles : texte courant 15 px et plus, légendes 13 px au moins ; un état ne se lit jamais par la couleur seule ; mouvement réduit respecté. */
+   Règles : tout texte d’interface fait 15 px et plus ; un état ne se lit jamais par la couleur seule ; mouvement réduit respecté. */
 
 /* Police des quantités : fichiers locaux ; sans eux, le repli ui-monospace s'applique. */
 @font-face { font-family: "Sanji Mono"; src: url("../polices/IBMPlexMono-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
@@ -57,8 +57,8 @@
   --police-titre: var(--police);
   --police-qte: "Sanji Mono", ui-monospace, monospace;
 
-  /* Tailles : texte courant 15 px et plus, légendes et étiquettes 13 px au moins */
-  --t-legende: 13px;
+  /* Tailles : tout texte d’interface fait au moins 15 px. */
+  --t-legende: 15px;
   --t-corps: 15px;
   --t-ligne: 16px;
   --t-section: 17px;

@@ -64,10 +64,10 @@ test('sous-pages : lien « ‹ Réglages », titre propre', () => {
   }
 });
 
-test('style : bloc Réglages en fin de feuille, cibles par jeton, légendes à 13 px au moins', () => {
+test('style : bloc Réglages en fin de feuille, cibles par jeton, légendes à 15 px au moins', () => {
   const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
   const bloc = css.slice(css.indexOf('/* ===== Écran Réglages (refonte 1)'));
   assert.ok(bloc.length > 100);
   assert.match(bloc, /\.reglage-info[^}]*var\(--cible\)/);
-  assert.doesNotMatch(bloc, /font-size:\s*(1[0-2]|[0-9])px/);
+  assert.doesNotMatch(bloc, /font-size:\s*(1[0-4]|[0-9])px/);
 });
