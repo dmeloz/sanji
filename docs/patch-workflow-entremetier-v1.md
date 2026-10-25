@@ -1,5 +1,7 @@
 # Patch — Alignement du plan V1 avec le workflow réel
 
+> **Note du 2026-10-25 (v134).** Document historique, conservé tel quel. Les passages sur les créneaux horaires (audit croisé, écart 2 ; P1 : « planifie par créneau de travail » et « créneau libéré après service » ; P3 : charge ou indisponibilité d’un créneau ; tests 10 et 12) sont caducs depuis la v134 : la planification repose sur le jour de travail (date cible) seul, décision de la propriétaire. Texte en vigueur : `plan-final-copilote-entremetier-v1.md` (révision du 2026-10-25) ; proposition de révision des décisions : [[2026-10-25 - Sanji - Suppression des creneaux horaires (revision de decisions)]].
+
 Statut : appliqué le 2026-10-02 au « Plan final — Copilote entremétier V1 », à la demande de l’utilisateur. Version du plan avant patch : `archives/plan-final-copilote-entremetier-v1.avant-patch-2026-10-02.md`. Ne pas réappliquer. Le présent fichier est un patch de spécification, pas des données de restaurant ni un remplacement de la base métier.
 
 ## Résultat de l’audit croisé

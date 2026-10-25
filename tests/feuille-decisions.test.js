@@ -24,7 +24,7 @@ before(async () => {
 });
 after(() => dom.restaurer());
 
-const calme = (e) => { e.reglages.semaineTypeConfirmee = true; return e; };
+const calme = (e) => e;
 const genres = (e, date = S.lundi) => decisionsDe(e, date).cartes.map((c) => c.genre);
 const nettoyer = () => { for (const d of dom.corps.tous((x) => x.balise === 'dialog')) d.remove(); };
 const ouverts = () => panneauxOuverts(dom.corps);
@@ -68,7 +68,7 @@ function avecAvanceHorsRegle() {
   definirPrevision(e, S.vendredi, 1, 20, h());
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   const p = Object.values(e.productions).find((x) => x.genre === 'principale');
-  planifier(e, p.id, S.lundi, 'avant_midi', h());
+  planifier(e, p.id, S.lundi, h());
   return { e, p };
 }
 /** Carottes du lundi faites à une autre quantité que la cible : écart à arbitrer. */
@@ -78,7 +78,7 @@ function avecEcart() {
   definirPrevision(e, S.lundi, 1, 20, h());
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   const p = Object.values(e.productions).find((x) => x.genre === 'principale');
-  planifier(e, p.id, S.lundi, 'avant_midi', h());
+  planifier(e, p.id, S.lundi, h());
   marquerFait(e, p.id, 1000, h());
   return { e, p };
 }
@@ -115,11 +115,8 @@ test('données : écart, avance hors règle, sauce, répartition provisoire, app
   assert.ok(genres(avecApprentissage(), S.lundi).includes('apprentissage'));
 });
 
-test('données : le point global « semaine type à confirmer » est une carte tant qu\'il n\'est pas réglé', () => {
-  const e = etatVide();
-  const c = decisionsDe(e, S.lundi).cartes.find((x) => x.type === 'semaine_type');
-  assert.ok(c);
-  assert.equal(c.genre, 'point');
+test('données : une base neuve n\'a aucune carte (plus de point global « semaine type »)', () => {
+  assert.deepEqual(decisionsDe(etatVide(), S.lundi).cartes, []);
 });
 
 test('données : l\'ordre suit les genres (sauce avant répartition)', () => {
@@ -339,7 +336,7 @@ test('B1 : le dimanche, une avance hors règle pour le lundi suivant apparaît',
   definirPrevision(e, S.mardi, 1, 20, h());
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   const p = Object.values(e.productions).find((x) => x.genre === 'principale');
-  planifier(e, p.id, S.veille, 'avant_midi', h());
+  planifier(e, p.id, S.veille, h());
   // Même carte qu'en semaine : le point existe (avance de 4 jours, sans règle), et le dimanche la montre aussi.
   assert.equal(pointsAConfirmer(e, S.mardi).some((x) => x.type === 'avance_hors_regle'), true, 'le cas est bien une avance hors règle');
   const carte = decisionsDe(e, S.dimanchePrecedent).cartes.find((c) => c.genre === 'avance_hors_regle');
@@ -363,7 +360,7 @@ test('B1 bis : un écart à arbitrer est une décision, aussi le dimanche et pou
 test('un même écart n\'est jamais compté deux fois : principale et complément faites, prévision changée = une seule carte par composant, et une décision règle le composant', () => {
   const { e, p } = avecEcart();
   const { complement } = deciderEcart(e, p.id, 'complement', h());
-  planifier(e, complement.id, S.lundi, 'avant_midi', h());
+  planifier(e, complement.id, S.lundi, h());
   marquerFait(e, complement.id, undefined, h()); // la cible du complément, soit exactement le manque
   const cartesEcart = () => decisionsDe(e, S.lundi).cartes.filter((c) => c.genre === 'ecart');
   assert.equal(cartesEcart().length, 0, 'le complément couvre le besoin');

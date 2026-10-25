@@ -91,7 +91,7 @@ function platSansPortion() {
   const c = composantValide(e, S.lundi, 1, { ...J.PRODUIT_SEC_TEST, type: 'generique' }, { nom: 'GENERIQUE_TEST', type: 'generique' });
   e.composants[c].type = 'generique';
   e.composants[c].grammage.valeur = null;
-  planifier(e, principaleDe(e, c), S.lundi, 'avant_midi', h());
+  planifier(e, principaleDe(e, c), S.lundi, h());
   return { e, c };
 }
 

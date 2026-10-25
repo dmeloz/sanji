@@ -1,9 +1,9 @@
 // Premier parcours vertical : menus validés → composants du poste → calcul → proposition de planning.
-// Tout est déterministe et réutilise le domaine (`suggererCreneau`, `etatTache`) ; le modèle, s'il existe, ne fait que
+// Tout est déterministe et réutilise le domaine (`suggererJour`, `etatTache`) ; le modèle, s'il existe, ne fait que
 // proposer une autre répartition que `controlerBrouillon` revérifie. Aucune écriture dans l'état réel.
 
 import { planifier } from '../domaine/actions.js';
-import { etatTache, sansAvanceParDefaut, suggererCreneau } from '../domaine/planification.js';
+import { etatTache, sansAvanceParDefaut, suggererJour } from '../domaine/planification.js';
 
 /**
  * Productions « à planifier » du poste dans la période : composant attribué, pas encore décidée, pas commencée.
@@ -11,7 +11,7 @@ import { etatTache, sansAvanceParDefaut, suggererCreneau } from '../domaine/plan
  */
 export function productionsAPlanifier(etat, dateDebut, dateFin) {
   return Object.values(etat.productions ?? {})
-    .filter((p) => p.etat === 'a_faire' && !p.jourDecide && !p.creneauDecide
+    .filter((p) => p.etat === 'a_faire' && !p.jourDecide
       && p.dateService >= dateDebut && p.dateService <= dateFin && etat.composants?.[p.composantId]?.attribue)
     .sort((a, b) => a.dateService.localeCompare(b.dateService)
       || etat.composants[a.composantId].nom.localeCompare(etat.composants[b.composantId].nom)
@@ -19,8 +19,8 @@ export function productionsAPlanifier(etat, dateDebut, dateFin) {
 }
 
 /**
- * Propose un créneau pour chaque production à planifier. La copie de simulation reçoit chaque choix pour que la charge
- * des créneaux soit comptée d'une production à l'autre. Ce qui ne peut pas être placé sans règle validée reste « à décider ».
+ * Propose un jour pour chaque production à planifier. La copie de simulation reçoit chaque choix pour que les étapes
+ * d'un même composant se voient d'une production à l'autre. Ce qui ne peut pas être placé sans règle validée reste « à décider ».
  * @param {object} etat
  * @param {{h:string, aujourdhui:string, dateDebut:string, dateFin:string}} periode
  * @returns {{brouillon:object, nonPlacees:{productionId:string, composantId:string, texte:string}[]}}
@@ -36,18 +36,18 @@ export function proposerPlanning(etat, { h, aujourdhui, dateDebut, dateFin }) {
       nonPlacees.push({ productionId: id, composantId: composant.id, texte: `${composant.nom} : quantité inconnue, à préciser avant de planifier` });
       continue;
     }
-    const suggestion = suggererCreneau(sim, id, aujourdhui);
+    const suggestion = suggererJour(sim, id, aujourdhui);
     // Base du menu 1 (pâtes, risotto) : jour même uniquement, sans règle d'avance validée.
     const sansAvance = sansAvanceParDefaut(sim, composant, p);
     if (!suggestion || (sansAvance && suggestion.date !== p.dateService)) {
       nonPlacees.push({
         productionId: id, composantId: composant.id,
-        texte: `${composant.nom} : aucun créneau libre compatible avec les règles pour le service du ${p.dateService}`,
+        texte: `${composant.nom} : aucun jour compatible avec les règles pour le service du ${p.dateService}`,
       });
       continue;
     }
-    items.push({ productionId: id, date: suggestion.date, creneau: suggestion.creneau });
-    planifier(sim, id, suggestion.date, suggestion.creneau, h);
+    items.push({ productionId: id, date: suggestion.date });
+    planifier(sim, id, suggestion.date, h);
   }
   return { brouillon: { type: 'planning', items }, nonPlacees };
 }

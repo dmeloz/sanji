@@ -3,11 +3,8 @@
 // Une proposition garde l'empreinte de l'état qu'elle a lu : si l'état change, elle ne s'applique plus.
 
 import { nouvelId } from '../domaine/etat.js';
-import { chargeCreneau, etatCreneau, regleDe, repereConservation } from '../domaine/planification.js';
-import { CRENEAU } from '../domaine/statuts.js';
+import { regleDe, repereConservation } from '../domaine/planification.js';
 import { CODES, ErreurHarness, ORIGINES, STATUTS_PROPOSITION } from './contrats.js';
-
-const CRENEAUX = Object.values(CRENEAU);
 
 /** Statut visé → statuts de départ admis. Valider et refuser passent par `valider` et `refuser`, jamais par `marquer`. */
 const TRANSITIONS = Object.freeze({
@@ -29,8 +26,8 @@ function fnv1a(texte) {
 const choisir = (objet, cles) => (objet ? Object.fromEntries(cles.map((c) => [c, objet[c] ?? null])) : null);
 
 /**
- * Empreinte de la part de l'état dont dépend une proposition : productions et composants concernés, règles, état et
- * charge des créneaux des jours visés. Deux états de même empreinte donnent le même brouillon.
+ * Empreinte de la part de l'état dont dépend une proposition : productions et composants concernés, règles,
+ * productions décidées et prévisions des jours visés. Deux états de même empreinte donnent le même brouillon.
  * @param {object} etat
  * @param {{productionIds:string[], dates:string[]}} perimetre
  */
@@ -41,16 +38,17 @@ export function empreinteEtat(etat, { productionIds, dates }) {
     const c = etat.composants?.[p?.composantId];
     parties.push([
       id,
-      choisir(p, ['etat', 'jourDecide', 'creneauDecide', 'dateService', 'composantId', 'genre', 'etapeCle', 'unite']),
+      choisir(p, ['etat', 'jourDecide', 'dateService', 'composantId', 'genre', 'etapeCle', 'unite']),
       choisir(c, ['attribue', 'valide', 'grammage', 'etapes', 'charge', 'famille', 'categorie', 'role', 'type', 'menu', 'nom', 'recetteId']),
       c ? regleDe(etat, c, p.etapeCle ?? null) : null,
       c ? repereConservation(c, etat) : null,
     ]);
   }
   for (const date of [...dates].sort()) {
-    parties.push([date, CRENEAUX.map((cr) => [etatCreneau(etat, date, cr), chargeCreneau(etat, date, cr)]), etat.jours?.[date]?.previsions ?? null]);
+    const decideesCeJour = Object.values(etat.productions ?? {}).filter((p) => p.jourDecide === date).map((p) => p.id).sort();
+    parties.push([date, decideesCeJour, etat.jours?.[date]?.previsions ?? null]);
   }
-  parties.push(etat.reglages?.capaciteCreneau ?? null, etat.reglages?.margeSecurite ?? null);
+  parties.push(etat.reglages?.margeSecurite ?? null);
   return fnv1a(JSON.stringify(parties));
 }
 
@@ -92,8 +90,11 @@ export function creerRegistre() {
     },
     lire: (id) => structuredClone(exiger(id)),
 
-    /** Le chef valide : sans confirmation explicite, un item à conservation non validée reste hors de la décision. */
-    valider(id, h, { itemsConfirmes = [], itemsRetires = [] } = {}) {
+    /**
+     * Le chef valide : sans confirmation explicite, un item à conservation non validée reste hors de la décision.
+     * `items` (facultatif) remplace les items par leur version aux jours corrigés, déjà rejouée par `commandes.js`.
+     */
+    valider(id, h, { itemsConfirmes = [], itemsRetires = [], jours = {}, items = null } = {}) {
       const p = exiger(id);
       if (p.statut !== STATUTS_PROPOSITION.BROUILLON) throw new ErreurHarness(CODES.STATUT_INCOMPATIBLE, `Proposition ${p.statut} : elle ne peut plus être validée.`);
       const connus = new Set(p.items.map((i) => i.id));
@@ -104,8 +105,9 @@ export function creerRegistre() {
       for (const x of itemsConfirmes) {
         if (!exigeants.has(x)) throw new ErreurHarness(CODES.PRECONDITION, `L'item ${x} n'exige pas de confirmation.`);
       }
+      if (items) p.items = structuredClone(items);
       p.statut = STATUTS_PROPOSITION.VALIDEE;
-      p.decision = { h, par: 'chef', choix: 'valider', itemsConfirmes: [...itemsConfirmes], itemsRetires: [...itemsRetires] };
+      p.decision = { h, par: 'chef', choix: 'valider', itemsConfirmes: [...itemsConfirmes], itemsRetires: [...itemsRetires], jours: { ...jours } };
       return structuredClone(p);
     },
     refuser(id, h, raison = '') {

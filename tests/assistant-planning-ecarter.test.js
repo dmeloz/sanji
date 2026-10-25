@@ -28,7 +28,7 @@ function aDate(iso, fonction) {
 }
 
 const ouverts = () => panneauxOuverts(dom.corps);
-const boutonsDe = (racine) => racine.querySelectorAll('button');
+const boutonsDe = (racine) => Array.from(racine.querySelectorAll('button'));
 const parNom = (racine, nom) => boutonsDe(racine).find((b) => b.getAttribute('aria-label') === nom);
 const valider = (racine) => boutonsDe(racine).find((b) => b.getAttribute('type') === 'submit');
 

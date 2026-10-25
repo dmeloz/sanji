@@ -90,7 +90,7 @@ test('Production : la quantité de chaque ligne est en grand (graisse 600, à dr
   definirPrevision(e, S.lundi, 1, 40, h());
   definirStandard(e, 'pates_seches', 'plat_principal', { valeur: 100, unite: 'g', etat: 'sec' }, h());
   const prod = Object.values(e.productions).find((p) => p.genre === 'principale');
-  planifier(e, prod.id, S.lundi, 'avant_midi', h());
+  planifier(e, prod.id, S.lundi, h());
   magasin.remplacer(e);
   const page = aDate(S.lundi, () => production.rendre(magasin.etat(), S.lundi));
   const qte = classes(page, 'mep-qte');

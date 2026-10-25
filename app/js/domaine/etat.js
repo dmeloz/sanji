@@ -60,22 +60,12 @@ export function nouvelId(prefixe = 'id') {
 
 const cloner = (v) => (v === undefined ? v : structuredClone(v));
 
-/** Réglages par défaut d'un jour de semaine (1 à 6) : tous les créneaux libres. */
-function semaineTypeVide() {
-  const s = {};
-  for (let j = 1; j <= 6; j += 1) {
-    s[j] = j <= 2 ? { avant_midi: 'libre', apres_midi: 'libre' }
-      : { avant_midi: 'libre', apres_midi: 'libre', avant_soir: 'libre' };
-  }
-  return s;
-}
-
 /** Base vide : aucun couvert, aucune recette, aucune production, aucun fournisseur. */
 export function etatInitial() {
   return {
     application: APPLICATION,
     schema: SCHEMA,
-    reglages: { semaineTypeConfirmee: false, semaineType: semaineTypeVide(), capaciteCreneau: null, margeSecurite: null, dernierExport: null },
+    reglages: { margeSecurite: null, dernierExport: null },
     jours: {},
     fiches: {},
     composants: {},
@@ -113,7 +103,6 @@ export function jourVide(date) {
       2: { intitule: '', transcriptionValidee: false },
     },
     previsions: { 1: { portions: null, h: null }, 2: { portions: null, h: null } },
-    creneaux: { avant_midi: null, apres_midi: null, avant_soir: null },
     ventes: { 1: null, 2: null, h: null },
     // Total de couverts du midi saisi par le chef : { total, repartition: null | {1,2} (décidée par lui), h } ; null = non saisi.
     couverts: null,
@@ -152,7 +141,7 @@ export function composantVide(id) {
 export function productionVide(id) {
   return {
     id, composantId: null, dateService: null, genre: 'principale', libelle: '',
-    jourDecide: null, creneauDecide: null, etat: 'a_faire', cibleAuDemarrage: null,
+    jourDecide: null, etat: 'a_faire', cibleAuDemarrage: null,
     quantiteReelle: null, unite: null, hFait: null, instantane: null, decisionEcart: null,
     avantFait: null, // { etat, cibleAuDemarrage } avant le marquage « fait », pour pouvoir l'annuler juste après
     // Étape d'une préparation (clé de l'étape de la règle et rang, 0 = première) ; null hors règle d'étapes.
@@ -330,9 +319,10 @@ function ecartApprentissageValide(e, aujourdhui) {
  */
 export function importer(texte, aujourdhui = null) { return importerAvecBilan(texte, aujourdhui).etat; }
 
-/** Comme `importer`, avec le nombre d'entrées écartées (abîmées) : `{ etat, ecartes }`. */
+/** Comme `importer`, avec le nombre d'entrées écartées (abîmées) et les migrations appliquées : `{ etat, ecartes, migrations }`. */
 export function importerAvecBilan(texte, aujourdhui = null) {
   let ecartes = 0;
+  const migrations = [];
   let doc;
   try { doc = JSON.parse(texte); } catch { throw new Error("Fichier illisible : ce n'est pas un export valide."); }
   if (contientTestOnly(doc)) {
@@ -368,6 +358,14 @@ export function importerAvecBilan(texte, aujourdhui = null) {
       etat[nom][id] = entree;
     }
   }
+  // Migration v134 : plus de créneaux horaires. `fusionner` garde toute clé inconnue : les anciens champs sont retirés
+  // explicitement (réglages, `creneaux` d'un jour, `creneauDecide` d'une production) ; `jourDecide` reste.
+  let creneauxRetires = false;
+  const retirer = (objet, cle) => { if (aCle(objet, cle)) { delete objet[cle]; creneauxRetires = true; } };
+  for (const cle of ['semaineType', 'semaineTypeConfirmee', 'capaciteCreneau']) retirer(etat.reglages, cle);
+  for (const j of Object.values(etat.jours)) retirer(j, 'creneaux');
+  for (const p of Object.values(etat.productions)) retirer(p, 'creneauDecide');
+  if (creneauxRetires) migrations.push('v134 : créneaux horaires retirés');
   // Suggestion d'un composant (lecture) : seulement un classement autorisé, sinon retirée.
   for (const c of Object.values(etat.composants)) {
     if (estObjet(c) && aCle(c, 'suggestion') && !categorieMotValide(c.suggestion)) delete c.suggestion;
@@ -458,5 +456,5 @@ export function importerAvecBilan(texte, aujourdhui = null) {
     if (!Array.isArray(source.journal)) throw new Error('Export corrompu : « journal » est invalide.');
     etat.journal = source.journal.slice(-TAILLE_JOURNAL);
   }
-  return { etat, ecartes };
+  return { etat, ecartes, migrations };
 }

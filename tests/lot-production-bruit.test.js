@@ -47,8 +47,8 @@ function lundi({ type = 'produit_simple' } = {}) {
   const m1 = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_M1_TEST' });
   const mardi = composantValide(e, S.mardi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_MARDI_TEST' });
   composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_MERCREDI_TEST' });
-  planifier(e, principaleDe(e, m1), S.lundi, 'avant_midi', h());
-  planifier(e, principaleDe(e, mardi), S.lundi, 'apres_midi', h());
+  planifier(e, principaleDe(e, m1), S.lundi, h());
+  planifier(e, principaleDe(e, mardi), S.lundi, h());
   e.composants[m1].type = type;
   e.composants[mardi].type = type;
   return { e, m1, mardi };
@@ -207,7 +207,7 @@ test('« Déjà prêt pour plus tard » : une ligne tappable avec son compte, la
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_PRET_TEST' });
-  planifier(e, principaleDe(e, c), S.samediPrecedent, 'apres_midi', h());
+  planifier(e, principaleDe(e, c), S.samediPrecedent, h());
   marquerFait(e, principaleDe(e, c), undefined, h(1));
   const noeud = production(e, S.lundi);
   assert.equal(noeud.tous((x) => x.balise === 'details').length, 0);

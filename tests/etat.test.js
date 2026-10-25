@@ -16,12 +16,7 @@ test('base neuve vide : aucun couvert, recette, production ni fournisseur', () =
     assert.deepEqual(e[c], {}, c);
   }
   assert.deepEqual(e.journal, []);
-  assert.equal(e.reglages.semaineTypeConfirmee, false);
-  assert.equal(e.reglages.capaciteCreneau, null);
-  assert.deepEqual(Object.keys(e.reglages.semaineType), ['1', '2', '3', '4', '5', '6']);
-  assert.deepEqual(Object.keys(e.reglages.semaineType[1]), ['avant_midi', 'apres_midi']);
-  assert.deepEqual(Object.keys(e.reglages.semaineType[6]), ['avant_midi', 'apres_midi', 'avant_soir']);
-  assert.ok(Object.values(e.reglages.semaineType).every((j) => Object.values(j).every((v) => v === 'libre')));
+  assert.deepEqual(e.reglages, { margeSecurite: null, dernierExport: null }, 'plus aucun réglage de créneau ni de semaine type');
   assert.notEqual(etatInitial().reglages, e.reglages, 'chaque appel renvoie un objet neuf');
 });
 

@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom } from './aide-dom.js';
 import {
-  ajouterPreparatoire, creerFiche, definirCreneau, definirMenu, definirStandard, marquerFait, planifier,
+  ajouterPreparatoire, creerFiche, definirMenu, definirStandard, marquerFait, planifier,
 } from '../app/js/domaine/actions.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
@@ -128,7 +128,7 @@ test('Tableau : production = jauge « x/y fait » vers Jour ; commande à relire
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const p = principaleDe(e, composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST));
-  planifier(e, p, S.mardi, 'apres_midi', h());
+  planifier(e, p, S.mardi, h());
   const zone = classes(tableau(S.mardi, e), 'bord-production')[0];
   const jauge = classes(zone, 'bord-jauge')[0];
   assert.match(jauge.textContent, /Aujourd'hui 0\/1 fait/);
@@ -158,10 +158,10 @@ function lundiTravail() {
   const fait = composantValide(e, S.lundi, 2, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_FAIT_TEST' });
   const mardi = composantValide(e, S.mardi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_MARDI_TEST' });
   composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_MERCREDI_TEST' });
-  planifier(e, principaleDe(e, m1), S.lundi, 'avant_midi', h());
-  planifier(e, principaleDe(e, m2), S.lundi, 'avant_midi', h());
-  planifier(e, principaleDe(e, fait), S.lundi, 'avant_midi', h());
-  planifier(e, principaleDe(e, mardi), S.lundi, 'apres_midi', h());
+  planifier(e, principaleDe(e, m1), S.lundi, h());
+  planifier(e, principaleDe(e, m2), S.lundi, h());
+  planifier(e, principaleDe(e, fait), S.lundi, h());
+  planifier(e, principaleDe(e, mardi), S.lundi, h());
   marquerFait(e, principaleDe(e, fait), undefined, h(1));
   return { e, m1, m2 };
 }
@@ -280,7 +280,7 @@ test('Jour : plus de puce « à décider » ni de résumé ni de centre « À co
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_ECART_TEST' });
-  planifier(e, principaleDe(e, c), S.mardi, 'apres_midi', h());
+  planifier(e, principaleDe(e, c), S.mardi, h());
   marquerFait(e, principaleDe(e, c), undefined, h(1));
   prevision(e, S.mercredi, 1, 20);
   const noeud = jour(S.mardi, e);
@@ -319,7 +319,7 @@ test('Jour : une action préparatoire est une autre tâche ; avec un standard, l
   const riz = Object.values(e.composants).find((c) => c.nom === 'riz');
   ajouterPreparatoire(e, riz.id, 'ACTION_TEST', h());
   const prep = Object.values(e.productions).find((p) => p.genre === 'preparatoire');
-  planifier(e, prep.id, S.lundi, 'avant_midi', h());
+  planifier(e, prep.id, S.lundi, h());
   const noeud = jour(S.lundi, e);
   assert.match(classes(noeud, 'jour-bloc')[0].textContent.replace(/[\u202f\u00a0]/g, ' '), /700 g/);
   assert.match(classes(noeud, 'jour-bloc')[0].textContent, /Cuire\s*riz/, 'féculent de base : le verbe « Cuire » devant le nom');
@@ -383,18 +383,17 @@ test('Tableau : sur une autre semaine, Production dit de quelle semaine elle par
   assert.doesNotMatch(zoneCourante.textContent, /Semaine du/);
 });
 
-test('tableau : un petit signe par jour (hors règle, à confirmer, jour off), icône et mot, rien quand il n\'y a rien à signaler', () => {
+test('tableau : un petit signe par jour (hors règle, à confirmer), icône et mot, rien quand il n\'y a rien à signaler ; plus aucun « Jour off » (v134)', () => {
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'riz', h());
   prevision(e, S.jeudi, 1, 20);
   const id = composantValide(e, S.jeudi, 1, J.PRODUIT_SEC_TEST);
-  planifier(e, principaleDe(e, id), S.lundi, 'avant_midi', h());
-  for (const c of ['avant_midi', 'apres_midi', 'avant_soir']) definirCreneau(e, S.mercredi, c, 'indisponible', h());
+  planifier(e, principaleDe(e, id), S.lundi, h());
   const racine = tableau(S.lundi, e);
   const signes = classes(racine, 'bord-signe').map((x) => x.textContent);
   assert.ok(signes.some((t) => /hors règle/.test(t)), 'lundi : hors règle');
   assert.ok(signes.some((t) => /à confirmer/.test(t)), 'lundi : à confirmer');
-  assert.ok(signes.some((t) => /Jour off selon la semaine type/.test(t)), 'mercredi : jour off');
+  assert.ok(!signes.some((t) => /jour off|semaine type/i.test(t)), 'aucune étiquette « Jour off » n\'existe plus (v134)');
   const mardi = classes(racine, 'bord-jour').find((x) => x.textContent.startsWith('Mar'));
   assert.equal(classes(mardi, 'bord-signe').length, 0, 'mardi, sans rien à signaler, n\'a aucun signe');
   assert.ok(classes(racine, 'bord-signe').every((x) => classes(x, 'bord-signe-icone').length === 1), 'une icône avec chaque mot');

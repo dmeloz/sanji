@@ -20,9 +20,8 @@ const bornerTextes = (textes) => (textes ?? []).slice(0, NB_TEXTES_MAX).map((x) 
 const SOURCES = Object.freeze([
   'Menus, composants et prévisions de l\'état local (aucune donnée externe)',
   'Quantités : calculerComposant (standards de base, valeurs du chef, état du poids)',
-  'Créneaux et avances : suggererCreneau, evaluerAvance et règles de préparation validées',
+  'Jours et avances : suggererJour, evaluerAvance et règles de préparation validées',
 ]);
-const HYPOTHESE_SANS_HEURE = 'Un créneau du jour courant est supposé disponible même si son heure est passée (aucune heure de fin de créneau n\'est renseignée).';
 
 /** Construit la proposition à partir d'un contrôle réussi. */
 function enregistrer(registre, etat, h, origine, controle, { nonPlacees = [], hypotheses = [], incertitudes = [], aDeciderEn = [] }) {
@@ -38,7 +37,7 @@ function enregistrer(registre, etat, h, origine, controle, { nonPlacees = [], hy
   ];
   return registre.creer({
     origine, items: controle.items, aDecider, controles: controle.controles,
-    sources: [...SOURCES], hypotheses: [HYPOTHESE_SANS_HEURE, ...hypotheses], incertitudes: incertains,
+    sources: [...SOURCES], hypotheses: [...hypotheses], incertitudes: incertains,
   }, etat, h);
 }
 

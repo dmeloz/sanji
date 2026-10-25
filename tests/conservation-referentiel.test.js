@@ -96,21 +96,21 @@ test('étape de finition : sans limite saisie, le repère avertit ; une avance d
 test('planification : le riz planifié à J-2 est accepté, couvrant, avec avertissement ; à J-1 sans', () => {
   const e = jeudi();
   const p = prodDe(e, 'riz');
-  const res = planifier(e, p, S.mardi, 'avant_midi', h());
+  const res = planifier(e, p, S.mardi, h());
   assert.ok(res.alertes.some((a) => /se garde 1 jour/.test(a)));
   assert.equal(res.evaluation.couvre, true);
   assert.equal(evaluationProduction(e, p).conservation, 'referentiel');
-  const res1 = planifier(e, p, S.mercredi, 'avant_midi', h());
+  const res1 = planifier(e, p, S.mercredi, h());
   assert.deepEqual(res1.alertes.filter((a) => /conservation/.test(a)), []);
   // Carottes (2 jours) à J-2 : la durée le permet.
-  const c = planifier(e, prodDe(e, 'carottes'), S.mardi, 'avant_midi', h());
+  const c = planifier(e, prodDe(e, 'carottes'), S.mardi, h());
   assert.deepEqual(c.alertes.filter((a) => /conservation/.test(a)), []);
 });
 
 test('planification : la règle maison du nom prime sur le référentiel', () => {
   const e = jeudi();
   definirRegle(e, { nom: 'riz', avanceMaxJours: 2, limiteUtilisationJours: 3 }, h());
-  const res = planifier(e, prodDe(e, 'riz'), S.mardi, 'avant_midi', h());
+  const res = planifier(e, prodDe(e, 'riz'), S.mardi, h());
   assert.equal(res.evaluation.conservation, 'validee');
   assert.deepEqual(res.alertes.filter((a) => /conservation/.test(a)), []);
 });
@@ -129,7 +129,7 @@ test('refroidissement : phrase du standard de base (2 h, de 50 à 10 °C)', () =
 
 test('vue Jour : le riz à J-2 porte l\'avertissement en texte et sa provenance ; à J-1 rien', () => {
   const e = jeudi();
-  planifier(e, prodDe(e, 'riz'), S.mardi, 'avant_midi', h());
+  planifier(e, prodDe(e, 'riz'), S.mardi, h());
   magasin.remplacer(e);
   const noeud = vueJour.rendre(magasin.etat(), S.mardi);
   const avert = noeud.tous((x) => classes(x).includes('mep-conservation'));
@@ -139,7 +139,7 @@ test('vue Jour : le riz à J-2 porte l\'avertissement en texte et sa provenance 
   assert.equal(aide.length, 1);
   assert.match(aide[0].textContent, /^Refroidir vite après la cuisson : 2 h au plus\.$/, 'une ligne courte : le détail des températures reste dans la fiche');
   assert.doesNotMatch(aide[0].textContent, /°C/);
-  planifier(e, prodDe(e, 'riz'), S.mercredi, 'avant_midi', h());
+  planifier(e, prodDe(e, 'riz'), S.mercredi, h());
   magasin.remplacer(e);
   assert.doesNotMatch(vueJour.rendre(magasin.etat(), S.mercredi).textContent, /Se garde 1 jour/);
 });
@@ -156,7 +156,7 @@ test('repère : la valeur de la propriétaire (riz réglé à 3 jours) remplace 
   const ev = (jour) => evaluerAvance(jour, S.jeudi, null, r);
   assert.deepEqual(ev(S.mardi).alertes, [], 'J-2 : plus d\'avertissement « se garde 1 jour »');
   assert.equal(ev(S.mardi).repere.depasse, false);
-  assert.equal(planifier(e, prodDe(e, 'riz'), S.mardi, 'avant_midi', h()).alertes.filter((a) => /conservation/.test(a)).length, 0);
+  assert.equal(planifier(e, prodDe(e, 'riz'), S.mardi, h()).alertes.filter((a) => /conservation/.test(a)).length, 0);
   ajusterStandard(e, 'riz', 'conservation', 1.5, h());
   const court = evaluerAvance(S.mardi, S.jeudi, null, repereConservation(composantDe(e, 'riz'), e));
   assert.ok(court.alertes.some((a) => /se garde 1,5 jours/.test(a)));

@@ -14,7 +14,7 @@ test('chaque action exige un horodatage ISO en dernier argument', () => {
   const e = etatVide();
   assert.throws(() => A.definirMenu(e, S.lundi, 1, 'INTITULE_TEST'), /Horodatage/);
   assert.throws(() => A.definirMenu(e, S.lundi, 1, 'INTITULE_TEST', 'hier'), /Horodatage/);
-  assert.throws(() => A.confirmerSemaineType(e), /Horodatage/);
+  assert.throws(() => A.noterExport(e), /Horodatage/);
   assert.deepEqual(e, etatInitial(), 'un refus ne modifie rien');
 });
 
@@ -228,8 +228,7 @@ test('invariant : ni prévision, ni fiche, ni recette, ni composant ne touchent 
   A.memoriser(e, c, h());
   A.saisirApresService(e, c, { surplus: 1, rebut: 2 }, h());
   A.saisirVentes(e, S.lundi, 1, 12, h());
-  A.definirCreneau(e, S.lundi, 'avant_midi', 'charge', h());
-  A.definirCapacite(e, 3, h());
+  A.definirMargeSecurite(e, 10, h());
   assert.deepEqual(photo(), avant);
 });
 
@@ -240,7 +239,7 @@ test('deciderEcart : complément seulement s\'il manque quelque chose, jamais en
   const p = principaleDe(e, c);
   assert.throws(() => A.deciderEcart(e, p, 'complement', h()), /une fois la production faite/);
   assert.throws(() => A.deciderEcart(e, p, 'peut-etre', h()), /inconnue/);
-  A.planifier(e, p, S.lundi, 'avant_midi', h());
+  A.planifier(e, p, S.lundi, h());
   A.marquerFait(e, p, 2000, h());
   assert.throws(() => A.deciderEcart(e, p, 'complement', h()), /Aucun complément/);
   A.definirPrevision(e, S.lundi, 1, 50, h());
@@ -370,13 +369,13 @@ test('prévision, ventes, après service : validations', () => {
 
 test('journal : une ligne par action réussie, aucune pour un refus', () => {
   const e = etatVide();
-  A.definirCapacite(e, 4, h(1));
-  assert.deepEqual(e.journal.map((x) => [x.h, x.action]), [[h(1), 'definirCapacite']]);
-  assert.throws(() => A.definirCapacite(e, -2, h(2)));
+  A.definirMargeSecurite(e, 4, h(1));
+  assert.deepEqual(e.journal.map((x) => [x.h, x.action]), [[h(1), 'definirMargeSecurite']]);
+  assert.throws(() => A.definirMargeSecurite(e, -2, h(2)));
   assert.equal(e.journal.length, 1);
-  A.confirmerSemaineType(e, h(3));
-  A.definirSemaineType(e, 1, 'avant_midi', 'charge', h(4));
-  assert.equal(e.reglages.semaineTypeConfirmee, true);
-  assert.equal(e.reglages.semaineType[1].avant_midi, 'charge');
+  A.noterExport(e, h(3));
+  A.definirMargeSecurite(e, null, h(4));
+  assert.equal(e.reglages.dernierExport, h(3));
+  assert.equal(e.reglages.margeSecurite, null);
   assert.equal(e.journal.length, 3);
 });

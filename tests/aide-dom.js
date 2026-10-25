@@ -74,11 +74,19 @@ export class Element extends Noeud {
 
   querySelector(balise) { return this.tous((e) => e.balise === balise)[0] ?? null; }
 
-  /** Uniquement « balise » ou « balise[open] » (un dialogue ouvert). */
+  /** Uniquement « balise » ou « balise[open] » (un dialogue ouvert). Renvoie une liste SANS méthodes de tableau (comme la
+   * NodeList d'un navigateur) : `Array.from(...)` d'abord, sinon `.find` ou `.filter` passeraient ici et casseraient en vrai. */
   querySelectorAll(selecteur) {
     const balise = selecteur.replace(/\[open\]$/, '');
-    return this.tous((e) => e.balise === balise && (!selecteur.endsWith('[open]') || e.open));
+    return listeNoeuds(this.tous((e) => e.balise === balise && (!selecteur.endsWith('[open]') || e.open)));
   }
+}
+
+/** Liste de nœuds à la manière d'une NodeList : longueur, index, `forEach`, `item`, itérable ; aucune méthode de tableau. */
+function listeNoeuds(elements) {
+  const liste = { length: elements.length, forEach: (f) => elements.forEach(f), item: (i) => elements[i] ?? null, [Symbol.iterator]: () => elements[Symbol.iterator]() };
+  elements.forEach((e, i) => { liste[i] = e; });
+  return liste;
 }
 
 export function installerFauxDom() {

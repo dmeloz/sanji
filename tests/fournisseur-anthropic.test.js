@@ -36,8 +36,8 @@ test('schéma : le schéma du brouillon se convertit en JSON Schema fermé et re
   assert.deepEqual(js.required, ['type', 'items']);
   assert.deepEqual(js.properties.type.enum, ['planning']);
   assert.equal(js.properties.items.items.additionalProperties, false);
-  assert.deepEqual(js.properties.items.items.properties.creneau.enum, ['avant_midi', 'apres_midi', 'avant_soir']);
-  assert.deepEqual(js.properties.items.items.required, ['productionId', 'date', 'creneau']);
+  assert.equal(js.properties.items.items.properties.creneau, undefined, 'plus de créneau (v134)');
+  assert.deepEqual(js.properties.items.items.required, ['productionId', 'date']);
   assert.throws(() => versJsonSchema({ type: 'inconnu' }), /inconnu/);
   assert.deepEqual(verifierSchema({ type: 'planning', items: [] }, SCHEMA_BROUILLON), []);
 });
@@ -79,9 +79,9 @@ test('disponibilité : sans clé le fournisseur est indisponible (aucun appel po
 test('réponses : brouillon rendu, usage conservé, refus, absence d\'outil, erreurs HTTP sans fuite de clé', async () => {
   const f = (reponse) => creerFournisseurAnthropic({ cle: CLE_DE_TEST, fetchImpl: faussaire(reponse).fetchImpl });
   const requete = { contexte: {}, brouillonDeterministe: {} };
-  const ok = f(reponseHttp(200, outilBrouillon([{ productionId: 'p', date: S.lundi, creneau: 'avant_midi' }])));
+  const ok = f(reponseHttp(200, outilBrouillon([{ productionId: 'p', date: S.lundi }])));
   const r = await ok.demander(requete, {});
-  assert.deepEqual(r.brouillon.items, [{ productionId: 'p', date: S.lundi, creneau: 'avant_midi' }]);
+  assert.deepEqual(r.brouillon.items, [{ productionId: 'p', date: S.lundi }]);
   assert.deepEqual(ok.dernierUsage, { input_tokens: 10, output_tokens: 5 });
   await assert.rejects(f(reponseHttp(200, { stop_reason: 'refusal', content: [] })).demander(requete, {}), /refusé/);
   await assert.rejects(f(reponseHttp(200, { stop_reason: 'end_turn', content: [{ type: 'text', text: 'bonjour' }] })).demander(requete, {}), /pas rendu de brouillon/);
@@ -98,13 +98,13 @@ test('avec le harness : un brouillon valide du modèle est retenu, un brouillon 
   const demande = (fournisseur) => ({
     etat: e, h: '2026-10-02T08:00:00', aujourdhui: S.veille, dateDebut: S.lundi, dateFin: S.lundi, registre: creerRegistre(), fournisseur,
   });
-  const valide = creerFournisseurAnthropic({ cle: CLE_DE_TEST, fetchImpl: faussaire(reponseHttp(200, outilBrouillon([{ productionId: p, date: S.lundi, creneau: 'apres_midi' }], { incertitudes: ['à vérifier'] }))).fetchImpl });
+  const valide = creerFournisseurAnthropic({ cle: CLE_DE_TEST, fetchImpl: faussaire(reponseHttp(200, outilBrouillon([{ productionId: p, date: S.samediPrecedent }], { incertitudes: ['à vérifier'] }))).fetchImpl });
   const a = await proposerPlanningAssiste(demande(valide));
   assert.equal(a.mode, 'modele');
-  assert.equal(a.proposition.items[0].creneau, 'apres_midi');
+  assert.equal(a.proposition.items[0].date, S.samediPrecedent);
   assert.ok(a.proposition.incertitudes.includes('modèle : à vérifier'));
 
-  const faux = creerFournisseurAnthropic({ cle: CLE_DE_TEST, fetchImpl: faussaire(reponseHttp(200, outilBrouillon([{ productionId: 'inconnue', date: S.lundi, creneau: 'avant_midi' }]))).fetchImpl });
+  const faux = creerFournisseurAnthropic({ cle: CLE_DE_TEST, fetchImpl: faussaire(reponseHttp(200, outilBrouillon([{ productionId: 'inconnue', date: S.lundi }]))).fetchImpl });
   const b = await proposerPlanningAssiste(demande(faux));
   assert.equal(b.mode, 'deterministe');
   assert.match(b.avertissements[0], /refusée par les contrôles/);

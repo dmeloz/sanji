@@ -203,13 +203,8 @@ a { color: var(--bleu-texte); }
 .liste-points li:first-child { border-top: 0; }
 .liste-composants > li { display: block; }
 .liste-journal li { padding: 6px 0; border-top: 1px solid var(--bordure); overflow-wrap: anywhere; font-size: var(--t-1); }
-.ligne-creneau { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 0; border-top: 1px solid var(--bordure); }
-.ligne-creneau strong { min-width: 6.5em; }
-.creneaux-etats { display: flex; flex-wrap: wrap; gap: 6px 14px; flex: 1; }
 .ligne-etape { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .composant-tete, .tache-tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
-.groupe-creneau { margin-top: 12px; }
-.groupe-creneau > h3 { font-size: var(--t0); margin-bottom: 6px; }
 
 /* ------------------------------------------------------------ tâches */
 
@@ -1186,7 +1181,7 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 /* Import des menus : un mot très long sans espace (adresse, texte collé par erreur) se coupe au lieu d'élargir la page. */
 .vue-import, .vue-menus { overflow-wrap: anywhere; }
 .imp-jour-tete, .imp-jour-tete > * { min-width: 0; }
-/* Brouillon : le détail d'une ligne (jour, créneau, quantité) passe à la ligne au lieu d'être coupé à droite. */
+/* Brouillon : le détail d'une ligne (jour, quantité) passe à la ligne au lieu d'être coupé à droite. */
 .ia-ligne-texte, .ia-ligne-quand { min-width: 0; overflow-wrap: anywhere; }
 .ia-ligne-quand { flex: 1 1 100%; text-align: left; }
 

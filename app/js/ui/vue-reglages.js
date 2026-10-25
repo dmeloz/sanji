@@ -1,19 +1,18 @@
 // Réglages : une racine courte (quatre rubriques) puis une sous-page par rubrique. Standards maison, références
-// mémorisées, semaine type, capacité, règles de préparation, recettes, fournisseurs, marge de commande, sauvegarde,
+// mémorisées, règles de préparation, recettes, fournisseurs, marge de commande, sauvegarde,
 // état de l'application et journal : aucun réglage n'a été retiré, seulement réparti.
 
 import { ligneVerifierMiseAJour } from './nouvelle-version.js';
 import {
-  confirmerSemaineType, creerRecette, definirCapacite, definirFournisseur, definirMargeSecurite, definirRegle, definirSemaineType,
+  creerRecette, definirFournisseur, definirMargeSecurite, definirRegle,
   definirStandard, modifierRecette, noterExport, supprimerFournisseur, supprimerRegle, supprimerStandard, validerRecette,
 } from '../domaine/actions.js';
 import { ajusterStandard, revenirAuStandard } from '../domaine/actions-ajustements.js';
 import { lignesStandardsBase } from '../domaine/ajustements.js';
-import { creneauxDuJourSemaine } from '../domaine/dates.js';
 import { valeurPour } from '../domaine/validation.js';
 import { exporter, importer } from '../domaine/etat.js';
 import { FAMILLES, GROUPES, lignesStandards, lignesStandardsGroupes } from '../domaine/savoir.js';
-import { ETAT_CRENEAU, ETAT_POIDS, UNITE, libelle } from '../domaine/statuts.js';
+import { ETAT_POIDS, UNITE, libelle } from '../domaine/statuts.js';
 import { VERSION_BASE } from '../donnees/base-metier.js';
 import { VERSION_APP } from '../version.js';
 import { agir, agirStrict, aujourdhui, etat as etatCourant, maintenant, redessiner, remplacer, statutStockage } from '../magasin.js';
@@ -32,9 +31,7 @@ import { confirmer, panneau } from './panneau.js';
 import { ALLERGENES, libelleAllergene } from './reference.js';
 import { resumeApprentissage, sectionsApprentissage } from './section-apprentissage.js';
 import { pageReperesMetier } from './reperes-metier.js';
-import { pastilleCreneau } from './taches.js';
 
-const JOURS = ['', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const TAILLE_PAGE_JOURNAL = 25;
 let pageJournal = 0;
 
@@ -221,55 +218,6 @@ function sectionStandardsBase(etat) {
       h('h3', { classe: 'bloc-titre' }, `${u.titre} · ${texteChanges(u.lignes.filter((l) => l.ajuste).length, u.lignes.length)}`),
       h('ul', { classe: 'liste-standards' }, u.lignes.map((l) => ligneBase({ ...l, usageTitre: u.titre }))),
     ])));
-}
-
-// ------------------------------------------------------------------ semaine type et capacité
-
-function dialogJourType(numero) {
-  const creneaux = creneauxDuJourSemaine(numero);
-  const type = etatCourant().reglages.semaineType[numero];
-  const f = champs(creneaux.map((c) => ({
-    cle: c, type: 'choix', libelle: libelle('CRENEAU', c), valeur: type[c],
-    options: Object.keys(ETAT_CRENEAU).map((x) => [x, libelle('ETAT_CRENEAU', x)]),
-  })));
-  panneau({
-    titre: `Semaine type : ${JOURS[numero].toLowerCase()}`,
-    corps: f.noeuds,
-    surEnregistrer: () => {
-      const v = f.lire();
-      agirStrict((e, t) => {
-        for (const c of creneaux) if (v[c] !== e.reglages.semaineType[numero][c]) definirSemaineType(e, numero, c, v[c], t);
-      });
-    },
-  });
-}
-
-function sectionSemaineType(etat) {
-  const r = etat.reglages;
-  return carte('Semaine type des créneaux',
-    h('p', { classe: 'aide' }, 'État par défaut de chaque créneau, modifiable jour par jour. Les créneaux réellement disponibles ne sont jamais présumés.'),
-    r.semaineTypeConfirmee ? h('p', null, pastille('semaine type confirmée', 'vert')) : h('p', null, pastille('semaine type à confirmer', 'ambre')),
-    [1, 2, 3, 4, 5, 6].map((n) => h('div', { classe: 'ligne-creneau' },
-      h('strong', null, JOURS[n]),
-      h('span', { classe: 'creneaux-etats' }, creneauxDuJourSemaine(n).map((c) => h('span', { classe: 'creneau-etat' },
-        h('span', { classe: 'meta' }, `${libelle('CRENEAU', c).replace('avant le service de ', 'avant ').replace('après le service de ', 'après ').replace('avant le service du ', 'avant ')} `),
-        pastilleCreneau(r.semaineType[n][c])))),
-      bouton('Modifier', () => dialogJourType(n), 'court'))),
-    h('div', { classe: 'actions' },
-      bouton('Confirmer la semaine type', () => agir((e, t) => confirmerSemaineType(e, t)), 'principal', { disabled: r.semaineTypeConfirmee })),
-    h('h3', { classe: 'bloc-titre' }, 'Capacité par créneau'),
-    h('p', null, Number.isFinite(r.capaciteCreneau) ? `${r.capaciteCreneau} points de charge par créneau` : 'non renseignée : aucune alerte de capacité'),
-    h('div', { classe: 'actions' }, bouton('Modifier la capacité', () => dialogCapacite(), 'court')));
-}
-
-function dialogCapacite() {
-  const f = champs([{ cle: 'capacite', type: 'entier', libelle: 'Capacité par créneau (points de charge)', valeur: etatCourant().reglages.capaciteCreneau,
-    aide: 'Facultative. Une tâche courte compte 1 point, moyenne 2, longue 3. Vide : aucune alerte de capacité.' }]);
-  panneau({
-    titre: 'Capacité par créneau',
-    corps: f.noeuds,
-    surEnregistrer: () => { agirStrict((e, t) => definirCapacite(e, f.valeur('capacite'), t)); },
-  });
 }
 
 // ------------------------------------------------------------------ règles de préparation
@@ -475,6 +423,7 @@ const LIBELLE_ACTION = {
   validerComposant: 'Composant validé', supprimerComposant: 'Composant supprimé', validerComposantsMenu: 'Composants du menu validés',
   definirPrevision: 'Prévision modifiée', definirCouvertsMidi: 'Couverts midi enregistrés', creerFiche: 'Fiche de fonction créée', modifierFiche: 'Fiche de fonction modifiée',
   annulerFiche: 'Fiche de fonction annulée', confirmerRepartition: 'Répartition confirmée', ajouterAdaptation: 'Adaptation notée',
+  // Anciennes entrées, avant v134 (créneaux retirés) : restent lisibles dans le journal.
   definirCreneau: 'État de créneau modifié', definirSemaineType: 'Semaine type modifiée', confirmerSemaineType: 'Semaine type confirmée',
   definirCapacite: 'Capacité modifiée', planifier: 'Tâche planifiée', reporter: 'Tâche reportée', demarrer: 'Tâche démarrée',
   marquerFait: 'Tâche faite', corrigerReel: 'Quantité réelle corrigée', deciderEcart: 'Écart arbitré',
@@ -493,7 +442,10 @@ const LIBELLE_ACTION = {
   accepterApprentissage: 'Proposition acceptée comme standard maison', ecarterApprentissage: 'Proposition écartée',
   restaurer: 'Sauvegarde restaurée', remiseANeuf: 'Remise à neuf', noterAchat: 'Ligne notée à commander', retirerAchat: 'Ligne retirée de la liste', restaurerAchat: 'Ligne remise dans la liste',
 };
+/** Anciennes entrées du journal, avant v134 : états de créneau, pour relire l'historique. */
+const ETAT_CRENEAU_ANCIEN = { libre: 'libre', charge: 'chargé', indisponible: 'indisponible' };
 const MOTS_TECHNIQUES = [
+  // avant_midi, apres_midi, avant_soir : anciennes entrées, avant v134 (créneaux retirés).
   ['avant_midi', 'avant midi'], ['apres_midi', 'après midi'], ['avant_soir', 'avant soir'], ['->', '→'],
   ['plat_principal', 'plat principal'], ['cru_net', 'cru net'],
   ...FAMILLES.filter((f) => f.cle.includes('_')).map((f) => [f.cle, f.libelle]),
@@ -532,8 +484,9 @@ const DETAIL_JOURNAL = {
   controlerProduit: (d) => apresDernierDeuxPoints(produitLisible(d), (x) => libelle('VERIF', x)),
   noterAchat: produitLisible, retirerAchat: produitLisible, restaurerAchat: produitLisible, definirAchat: produitLisible,
   marquerCommande: produitLisible,
-  definirCreneau: (d) => apresDernierDeuxPoints(d, (x) => libelle('ETAT_CRENEAU', x)),
-  definirSemaineType: (d) => apresDernierDeuxPoints(d, (x) => libelle('ETAT_CRENEAU', x)),
+  // Anciennes entrées, avant v134 : libellés des états de créneau gardés ici pour relire le journal.
+  definirCreneau: (d) => apresDernierDeuxPoints(d, (x) => ETAT_CRENEAU_ANCIEN[x] ?? x),
+  definirSemaineType: (d) => apresDernierDeuxPoints(d, (x) => ETAT_CRENEAU_ANCIEN[x] ?? x),
   noterExport: () => '', // le détail enregistré est l'heure, déjà affichée en tête de ligne
   restaurer: (d) => (d ? `depuis ${d}` : ''),
 };
@@ -766,8 +719,8 @@ const RUBRIQUES = [
     resume: () => 'temps, températures, conservation, techniques : consultation',
     blocs: () => { const c = h('div'); pageReperesMetier(c, { sansTitre: true, etat: etatCourant() }); return [c]; } },
   { cle: 'organisation', titre: 'Organisation du poste',
-    resume: (e) => `${e.reglages.semaineTypeConfirmee ? 'semaine type confirmée' : 'semaine type à confirmer'} · ${pluriel(Object.keys(e.regles).length, 'règle')} de préparation`,
-    blocs: (e) => [sectionSemaineType(e), sectionRegles(e)] },
+    resume: (e) => `${pluriel(Object.keys(e.regles).length, 'règle')} de préparation`,
+    blocs: (e) => [sectionRegles(e)] },
   { cle: 'produits', titre: 'Produits et commandes',
     resume: (e) => `${pluriel(Object.keys(e.recettes).length, 'recette')} · ${pluriel(Object.keys(e.fournisseurs).length, 'fournisseur')}`,
     blocs: (e) => [sectionRecettes(e), sectionFournisseurs(e), sectionMarge(e)] },
@@ -829,7 +782,7 @@ export function rendre(etat, param = null) {
         ligneRubrique('standards', etat),
         ligneRubrique('reperes', etat)),
       groupe('Poste',
-        ligneRubrique('organisation', etat, etat.reglages.semaineTypeConfirmee ? null : pastille('à confirmer', 'ambre')),
+        ligneRubrique('organisation', etat),
         ligneRubrique('produits', etat),
         ligneLien('#/fiches', 'Fiches des éléments', `· ${Object.keys(etat.fiches_retenues ?? {}).length}`),
         ligneLien('#/import', 'Import des menus', 'saisie de la semaine')),

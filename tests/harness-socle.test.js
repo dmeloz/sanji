@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { creerFiche, definirCreneau } from '../app/js/domaine/actions.js';
+import { creerFiche, planifier } from '../app/js/domaine/actions.js';
 import { CODES, DECISIONS, ErreurHarness, NIVEAUX, ORIGINES, PROVENANCES, VERSION_CONTEXTE, verifierSchema } from '../app/js/harness/contrats.js';
 import { construireContexte } from '../app/js/harness/contexte.js';
 import { ATTENTE, fournisseurScripte } from './aide-harness.js';
@@ -76,7 +76,7 @@ test('outils : refus des outils inconnus, des actions réservées au chef et des
   }
   assert.throws(() => executerOutil('definirRegle', {}, ctx), /réservée au chef/);
   assert.throws(
-    () => executerOutil('planifier_production', { productionId: 'a', date: S.lundi, creneau: 'avant_midi' }, ctx),
+    () => executerOutil('planifier_production', { productionId: 'a', date: S.lundi }, ctx),
     (x) => x.code === CODES.INTERDIT,
   );
   assert.throws(() => executerOutil('lire_menus', { date: S.lundi, en_plus: 1 }, ctx), (x) => x.code === CODES.ENTREE_INVALIDE);
@@ -84,7 +84,7 @@ test('outils : refus des outils inconnus, des actions réservées au chef et des
   assert.throws(() => executerOutil('calculer_quantites', { composantId: 'absent' }, ctx), (x) => x.code === CODES.REFERENCE_INCONNUE);
   for (const cle of ['constructor', '__proto__', 'toString']) {
     assert.throws(() => executerOutil('calculer_quantites', { composantId: cle }, ctx), (x) => x instanceof ErreurHarness && x.code === CODES.REFERENCE_INCONNUE, cle);
-    assert.throws(() => executerOutil('suggerer_creneau', { productionId: cle }, ctx), (x) => x instanceof ErreurHarness && x.code === CODES.REFERENCE_INCONNUE, cle);
+    assert.throws(() => executerOutil('suggerer_jour', { productionId: cle }, ctx), (x) => x instanceof ErreurHarness && x.code === CODES.REFERENCE_INCONNUE, cle);
   }
   assert.throws(() => executerOutil('proposer_planning', { dateDebut: S.mardi, dateFin: S.lundi }, ctx), (x) => x.code === CODES.PRECONDITION);
 });
@@ -100,8 +100,10 @@ test('outils : lecture et calcul réutilisent le domaine, ne modifient pas l\'é
   assert.equal(calcul.provenance, PROVENANCES.CALCUL_DETERMINISTE);
   assert.equal(calcul.resultat.statut, 'CALCULE');
   assert.ok(calcul.resultat.libelle);
-  const sug = executerOutil('suggerer_creneau', { productionId: p }, ctx).resultat;
-  assert.deepEqual([sug.date, sug.creneau], [S.lundi, 'avant_midi']);
+  const sug = executerOutil('suggerer_jour', { productionId: p }, ctx).resultat;
+  assert.deepEqual(Object.keys(sug).sort(), ['date', 'evaluation']);
+  assert.equal(sug.date, S.lundi);
+  assert.equal(outil('suggerer_creneau'), null, 'plus de créneau (v134)');
   assert.equal(executerOutil('evaluer_avance', { productionId: p, date: S.lundi }, ctx).resultat.autorisee, true);
   assert.equal(executerOutil('composants_du_poste', { date: S.lundi }, ctx).resultat.length, 1);
   assert.equal(executerOutil('lire_planning', { date: S.lundi }, ctx).resultat[0].productionId, p);
@@ -198,9 +200,9 @@ test('hygiène : le harness ne touche ni au réseau, ni au DOM, ni au stockage',
   }
 });
 
-test('contexte, suite : le créneau chargé n\'efface pas la prévision', () => {
-  const { e } = etatDeTest();
-  definirCreneau(e, S.lundi, 'avant_midi', 'charge', h());
+test('contexte, suite : une production décidée n\'efface pas la prévision', () => {
+  const { e, p } = etatDeTest();
+  planifier(e, p, S.lundi, h());
   const ctx = construireContexte(e, { tache: 'planning', dateDebut: S.lundi, dateFin: S.lundi, aujourdhui: AUJOURDHUI });
   assert.ok(ctx.donnees.estimees.length > 0);
 });

@@ -3,7 +3,7 @@
 // à droite. Aucune liste à dérouler : ce qui est secondaire tient en une ligne tappable qui ouvre une feuille (lecture seule).
 // Montrer l'exception, pas la normalité : la sous-ligne ne dit que les avances (« Pour mar. 6 »), « déjà avancé », les avances
 // hors règle et les avertissements de conservation ; un plat sans portion dit « à saisir » sur la ligne (un toucher, un champ).
-// Le créneau, les portions et la provenance se lisent dans la fiche.
+// Le jour décidé, les portions et la provenance se lisent dans la fiche.
 
 import { estOuvert, joursEntre, libelleJour, lundiDe } from '../domaine/dates.js';
 import { definirCouvertsMidi } from '../domaine/actions-couverts.js';
@@ -23,7 +23,7 @@ import { ligneVerbe } from './choix-verbe.js';
 import { blocCommentCalcule } from './comment-calcule.js';
 import { panneau } from './panneau.js';
 import {
-  actionsTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, defaireEnUnToucher, noeudEvaluation, pastilleCreneau, texteCharge,
+  actionsTache, dialogPlanifier, dialogPreparatoire, faireEnUnToucher, defaireEnUnToucher, noeudEvaluation,
 } from './taches.js';
 
 
@@ -104,7 +104,7 @@ function actionsDeLigne(etat, l, date) {
   if (l.source === 'suggestion') {
     const horsRegle = !l.evaluation.autorisee;
     return {
-      directes: [bouton(horsRegle ? 'Planifier quand même' : 'Planifier', () => dialogPlanifier(l.productionId, 'planifier', { date, creneau: l.creneau ?? undefined }), 'court')],
+      directes: [bouton(horsRegle ? 'Planifier quand même' : 'Planifier', () => dialogPlanifier(l.productionId, 'planifier', { date }), 'court')],
       autres: [horsRegle ? bouton('Noter une action préparatoire', () => dialogPreparatoire(l.composantId), 'court') : null],
     };
   }
@@ -250,16 +250,6 @@ function rubriqueLots(feuille) {
       lien(`#/fiche/${encodeURIComponent(l.productions[0].composantId)}`, 'Détail', 'jour-lien'))))));
 }
 
-/** Charge des créneaux : une ligne discrète. */
-function chargeDesCreneaux(feuille) {
-  const groupes = feuille.aFaire.filter((g) => g.creneau && g.charge && g.taches.length > 0);
-  if (groupes.length === 0) return null;
-  return resume('Charge des créneaux', 'Charge des créneaux', () => h('div', null, groupes.map((g) => h('div', { classe: 'groupe-creneau' },
-    h('p', { classe: 'meta' }, `${libelle('CRENEAU', g.creneau)} : ${texteCharge(g.charge)} `,
-      g.etatCreneau && g.etatCreneau !== 'libre' ? pastilleCreneau(g.etatCreneau) : null),
-    g.charge.alertes.map((a) => h('p', { classe: 'alerte-texte' }, a))))));
-}
-
 /** Les préparations faites un jour précédent pour plus tard : une ligne, la liste en lecture seule dans la feuille. */
 function rubriquePretes(lignes) {
   if (lignes.length === 0) return null;
@@ -304,7 +294,7 @@ export function corps(etat, date, feuille) {
     bloc('Autres', lecture.autres, etat, date),
     bloc('Après service', apres, etat, date, aideCourte()),
   ]) if (b) noeuds.push(b);
-  const resumes = [rubriquePretes(lecture.pretsPlusTard), rubriqueLots(feuille), chargeDesCreneaux(feuille)].filter(Boolean);
+  const resumes = [rubriquePretes(lecture.pretsPlusTard), rubriqueLots(feuille)].filter(Boolean);
   if (resumes.length > 0) noeuds.push(h('div', { classe: 'prod-resumes' }, resumes));
   noeuds.push(h('div', { classe: 'barre-jour pas-imprime' }, bouton('Imprimer la feuille du jour', imprimer, 'court')));
   return noeuds;

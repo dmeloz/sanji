@@ -1,10 +1,10 @@
 // Tâches de production : carte, évaluation d'avance et panneaux (planifier, reporter, fait, corriger, décider).
 // Partagé entre la feuille quotidienne et la vue d'un composant.
 
-import { creneauxDuJour, estDateValide, libelleJour } from '../domaine/dates.js';
+import { estDateValide, libelleJour } from '../domaine/dates.js';
 import { calculerComposant } from '../domaine/calcul.js';
 import {
-  chargeCreneau, cibleProduction, ecartProduction, etatCreneau, etatTache, evaluerAvance, regleDe, reelNonCompte, repereConservation, suggererCreneau,
+  cibleProduction, ecartProduction, etatTache, evaluerAvance, regleDe, reelNonCompte, repereConservation, suggererJour,
 } from '../domaine/planification.js';
 import {
   ajouterPreparatoire, annulerFait, corrigerReel, deciderEcart, demarrer, marquerFait, planifier, reporter, supprimerProduction,
@@ -29,7 +29,7 @@ export function ligneProduction(etat, p) {
   return {
     productionId: p.id, composantId: p.composantId, nom: composant?.nom ?? p.libelle, menu: composant?.menu ?? null,
     dateService: p.dateService, genre: p.genre, libelle: p.libelle, jourDecide: p.jourDecide,
-    creneauDecide: p.creneauDecide, etat: etatTache(etat, p.id), cible: cibleProduction(etat, p.id),
+    etat: etatTache(etat, p.id), cible: cibleProduction(etat, p.id),
     unite: p.unite ?? calc?.uniteTravail ?? null, quantiteReelle: p.quantiteReelle, charge: composant?.charge ?? null,
     etapeCle: p.etapeCle ?? null, ordre: p.ordre ?? null,
   };
@@ -59,19 +59,6 @@ export function noeudEvaluation(ev) {
   return h('div', { classe: 'evaluation' }, morceaux, aSignaler.map((a) => h('p', { classe: 'alerte-texte' }, a)));
 }
 
-/** Texte « charge » d'un créneau : nombre de tâches courtes, moyennes, longues (jamais des minutes). */
-export function texteCharge(c) {
-  const parties = [];
-  if (c.courtes) parties.push(pluriel(c.courtes, 'courte'));
-  if (c.moyennes) parties.push(pluriel(c.moyennes, 'moyenne'));
-  if (c.longues) parties.push(pluriel(c.longues, 'longue'));
-  if (c.nonEstimees) parties.push(`${c.nonEstimees} sans charge estimée`);
-  return parties.length > 0 ? `tâches : ${parties.join(', ')}` : 'aucune tâche décidée';
-}
-
-const VARIANTE_CRENEAU = { libre: 'vert', charge: 'ambre', indisponible: 'rouge' };
-export const pastilleCreneau = (valeur) => pastille(libelle('ETAT_CRENEAU', valeur), VARIANTE_CRENEAU[valeur] ?? 'gris');
-
 // ------------------------------------------------------------------ carte de tâche
 
 /**
@@ -95,9 +82,7 @@ export function carteTache(etat, ligne, options = {}) {
   const meta = [];
   if (ligne.menu) meta.push(`menu ${ligne.menu}`);
   meta.push(`pour le service du ${libelleJour(ligne.dateService)}`);
-  if (ligne.jourDecide) {
-    meta.push(`prévu ${libelleJour(ligne.jourDecide)}${ligne.creneauDecide ? `, ${libelle('CRENEAU', ligne.creneauDecide)}` : ''}`);
-  }
+  if (ligne.jourDecide) meta.push(`prévu ${libelleJour(ligne.jourDecide)}`);
   return h('article', { classe: `tache tache-${ligne.etat}` },
     h('div', { classe: 'tache-tete' },
       lien(`#/fiche/${encodeURIComponent(ligne.composantId)}`, titre, 'tache-nom'),
@@ -286,59 +271,37 @@ export function dialogPreparatoire(composantId) {
 }
 
 /**
- * Planifier ou reporter : choix du jour et du créneau, avec l'évaluation affichée avant d'enregistrer.
+ * Planifier ou reporter : choix du jour (date seule), avec l'évaluation affichée avant d'enregistrer.
  * Un choix hors règle reste possible mais affiche l'alerte.
  * @param {'planifier'|'reporter'} mode
- * @param {{date?:string, creneau?:string}} [preset]
+ * @param {{date?:string}} [preset]
  */
 export function dialogPlanifier(productionId, mode, preset = {}) {
   const e = etatCourant();
   const p = e.productions[productionId];
   const composant = e.composants[p.composantId] ?? null;
   const regle = regleDe(e, composant);
-  const suggestion = suggererCreneau(e, productionId);
+  const suggestion = suggererJour(e, productionId);
   const dateInit = preset.date ?? p.jourDecide ?? suggestion?.date ?? p.dateService;
-  const optionsCreneaux = (date) => (estDateValide(date) ? creneauxDuJour(date) : [])
-    .map((c) => [c, libelle('CRENEAU', c)]);
-  const creneauInit = preset.creneau ?? p.creneauDecide ?? suggestion?.creneau ?? null;
-  const f = champs([
-    { cle: 'date', type: 'date', libelle: 'Jour', valeur: dateInit },
-    { cle: 'creneau', type: 'choix', libelle: 'Créneau', options: optionsCreneaux(dateInit), valeur: creneauInit },
-  ]);
+  const f = champs([{ cle: 'date', type: 'date', libelle: 'Jour', valeur: dateInit }]);
   const zoneEvaluation = h('div', { classe: 'evaluation-bloc', 'aria-live': 'polite' });
   const miseAJour = () => {
     const date = f.valeur('date');
     if (!estDateValide(date)) { zoneEvaluation.replaceChildren(h('p', { classe: 'vide' }, 'Choisissez un jour.')); return; }
-    const creneau = f.valeur('creneau');
     const ev = evaluerAvance(date, p.dateService, regle, repereConservation(composant, e));
-    const lignes = [h('p', { classe: 'meta' }, `Service : ${libelleJour(p.dateService)}. Production : ${libelleJour(date)}.`),
-      noeudEvaluation(ev)];
-    if (creneau) {
-      const c = chargeCreneau(e, date, creneau);
-      lignes.push(h('p', { classe: 'meta' }, 'Créneau : ', pastilleCreneau(etatCreneau(e, date, creneau)), ` ${texteCharge(c)}`));
-      for (const a of c.alertes) lignes.push(h('p', { classe: 'alerte-texte' }, a));
-    } else lignes.push(h('p', { classe: 'vide' }, creneauxDuJour(date).length === 0 ? 'Jour non travaillé : aucun créneau.' : 'Choisissez un créneau.'));
-    zoneEvaluation.replaceChildren(...lignes);
+    zoneEvaluation.replaceChildren(h('p', { classe: 'meta' }, `Service : ${libelleJour(p.dateService)}. Production : ${libelleJour(date)}.`),
+      noeudEvaluation(ev));
   };
-  f.surChangement('date', () => {
-    const date = f.valeur('date');
-    f.remplacerOptions('creneau', optionsCreneaux(date), null);
-    miseAJour();
-  });
-  f.surChangement('creneau', miseAJour);
+  f.surChangement('date', miseAJour);
   const zoneSuggestion = h('div', { classe: 'suggestion' },
     suggestion
-      ? [h('p', null, `Suggestion : ${libelleJour(suggestion.date)}, ${libelle('CRENEAU', suggestion.creneau)}.`),
-        bouton('Utiliser la suggestion', () => {
-          f.fixer('date', suggestion.date);
-          f.remplacerOptions('creneau', optionsCreneaux(suggestion.date), suggestion.creneau);
-          miseAJour();
-        }, 'court')]
-      : h('p', { classe: 'vide' }, 'Aucun créneau libre à suggérer : choisissez-en un vous-même.'));
+      ? [h('p', null, `Suggestion : ${libelleJour(suggestion.date)}.`),
+        bouton('Utiliser la suggestion', () => { f.fixer('date', suggestion.date); miseAJour(); }, 'court')]
+      : h('p', { classe: 'vide' }, 'Aucun jour à suggérer : choisissez-en un vous-même.'));
   miseAJour();
   const extras = mode === 'reporter' && p.jourDecide ? [{
     libelle: 'Remettre à planifier',
-    action: (api) => { agirStrict((x, t) => reporter(x, productionId, null, null, t)); api.fermer(); },
+    action: (api) => { agirStrict((x, t) => reporter(x, productionId, null, t)); api.fermer(); },
   }] : [];
   panneau({
     titre: `${mode === 'reporter' ? 'Reporter' : 'Planifier'} : ${p.libelle}`,
@@ -346,14 +309,11 @@ export function dialogPlanifier(productionId, mode, preset = {}) {
     extras,
     surEnregistrer: () => {
       const date = f.valeur('date');
-      const creneau = f.valeur('creneau');
       if (!estDateValide(date)) throw new Error('Choisissez un jour.');
-      if (!creneau) throw new Error('Choisissez un créneau.');
       const action = mode === 'reporter' ? reporter : planifier;
-      const res = agirStrict((x, t) => action(x, productionId, date, creneau, t));
+      const res = agirStrict((x, t) => action(x, productionId, date, t));
       const alertes = [...new Set(res.alertes)];
       if (alertes.length > 0) afficherMessage(`Enregistré, avec alerte : ${alertes.join(' ; ')}`, 'alerte');
     },
   });
 }
-

@@ -1,7 +1,7 @@
 // Gestes d'un toucher (v123, principe « valider vite, en un geste ») : pour une carte de décision, le geste SÛR qui appelle
 // l'action existante par `agir`. Le toucher EST le geste de la propriétaire : rien n'est choisi à sa place. Seuls genres
 // concernés : valeur (valeur exacte du standard de base), apprentissage (oui / non), répartition provisoire (telle quelle, seulement si la somme des parts égale les couverts),
-// composant à classer. Pas de geste pour la semaine type (le toucher ne la montre pas : elle décide des jours « off »). Allergènes, écart, avance hors règle, sauce et autres points : aucun geste (leur dialogue).
+// composant à classer. Allergènes, écart, avance hors règle, sauce et autres points : aucun geste (leur dialogue).
 // Accepte une carte de `decisionsDe` ou un point de `pointsAConfirmer` (`type` seul). Aucune logique métier ici.
 
 import { accepterApprentissage, ecarterApprentissage } from '../domaine/actions-apprentissage.js';

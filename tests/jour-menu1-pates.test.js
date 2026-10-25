@@ -65,7 +65,7 @@ test('menu 1 : une règle sans avance (0) ne la rend pas avançable', () => {
 test('menu 1 : une production déjà planifiée à l\'avance à la main reste affichée, avec son évaluation', () => {
   const e = mercredi();
   const p = Object.values(e.productions).find((x) => x.dateService === S.mercredi && e.composants[x.composantId].nom === 'Tagliatelles');
-  planifier(e, p.id, S.lundi, 'apres_midi', h());
+  planifier(e, p.id, S.lundi, h());
   const avance = avancesPossibles(e, S.lundi).find((a) => a.nom === 'Tagliatelles');
   assert.ok(avance, 'jamais cachée');
   assert.equal(avance.evaluation.jours, 2);
@@ -119,7 +119,7 @@ test('vue Jour : toutes les lignes d\'un bloc sont visibles (aucun « Voir les N
   definirPrevision(e, S.lundi, 2, 10, h());
   for (let i = 1; i <= 11; i += 1) {
     const id = composantValide(e, S.lundi, 2, J.PRODUIT_SEC_TEST, { nom: `ELEMENT_${String(i).padStart(2, '0')}_TEST` });
-    planifier(e, principaleDe(e, id), S.lundi, 'avant_midi', h());
+    planifier(e, principaleDe(e, id), S.lundi, h());
   }
   magasin.remplacer(e);
   const noeud = vueJour.rendre(magasin.etat(), S.lundi);

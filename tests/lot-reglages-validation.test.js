@@ -95,6 +95,7 @@ test('journal : retour d\'un gain de cuisson dit « Gain », pas « Perte » ; r
   assert.equal(phrase('modifierComposant', 'Bolets : nom, allergenes, produitNom').detail, 'Bolets : nom, allergènes, produit acheté');
   assert.equal(phrase('reprendreMemoire', 'Riz : type, etapes').detail, 'Riz : type, étapes');
   assert.equal(phrase('modifierFiche', 'F1 : menuFixe, couverts').detail, 'F1 : menu fixé, couverts');
+  // Ancienne entrée (avant v134, créneaux retirés) : reste lisible dans l'historique.
   assert.equal(phrase('definirCreneau', '2026-10-05 avant_midi : charge').detail, '05/10/2026 avant midi : chargé');
   assert.equal(phrase('noterExport', '2026-10-04T08:00:00.000Z').detail, '');
   for (const [action, detail] of [['noterAchat', 'carottes|kg : 5 kg'], ['deciderEcart', 'X : complement'], ['modifierComposant', 'X : allergenes']]) {

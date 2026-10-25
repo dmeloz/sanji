@@ -62,7 +62,7 @@ test('articles : le dimanche mène au lundi, jour de production du service du lu
 
 test('articles : un jour planifié à la main est le jour de production (planifie)', () => {
   const { e, b } = semaine();
-  planifier(e, principaleDe(e, b), S.mardi, 'avant_midi', h());
+  planifier(e, principaleDe(e, b), S.mardi, h());
   const mardi = articlesDuPoste(e, S.lundi).jours.find((j) => j.date === S.mardi);
   assert.deepEqual(mardi.articles.map((x) => x.nom), ['ARTICLE_MARDI_TEST']);
 });
@@ -78,7 +78,7 @@ test('articles : une production faite sort de la liste ; une case cochée reste 
   const { e, a, b } = semaine();
   const avant = aplatir(articlesDuPoste(e, S.lundi)).find((x) => x.nom === 'ARTICLE_MARDI_TEST');
   cocherArticle(e, avant.cle, true, h(1));
-  planifier(e, principaleDe(e, b), S.mardi, 'avant_midi', h());
+  planifier(e, principaleDe(e, b), S.mardi, h());
   const apres = aplatir(articlesDuPoste(e, S.lundi)).find((x) => x.nom === 'ARTICLE_MARDI_TEST');
   assert.notEqual(apres.date, avant.date, 'le jour de production a changé');
   assert.equal(apres.cle, avant.cle);

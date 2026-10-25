@@ -168,7 +168,7 @@ export function feuilleVivante({ titre, construire, apres }) {
   return dialogue;
 }
 
-/** Feuille « Détail du jour » : intitulés, composants, prévisions, fiches, allergies, créneaux, après service, points (tout à plat). */
+/** Feuille « Détail du jour » : intitulés, composants, prévisions, fiches, allergies, après service, points (tout à plat). */
 export function ouvrirDetailDuJour(dateDepart, { ancre = null } = {}) {
   let date = dateDepart;
   return feuilleVivante({

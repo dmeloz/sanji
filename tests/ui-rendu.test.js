@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { boutons, installerFauxDom, panneauxOuverts, ficheAvecReglages, figerHorloge } from './aide-dom.js';
 import {
-  ajouterAdaptation, ajouterComposant, ajouterPreparatoire, creerFiche, definirCapacite, definirCreneau, definirFournisseur, definirMenu, definirRegle,
+  ajouterAdaptation, ajouterComposant, ajouterPreparatoire, creerFiche, definirFournisseur, definirMenu, definirRegle,
   definirStandard, marquerFait, memoriser, modifierComposant, planifier, saisirMenusSemaine, saisirVentes, supprimerStandard,
 } from '../app/js/domaine/actions.js';
 import { calculerComposant } from '../app/js/domaine/calcul.js';
@@ -76,16 +76,14 @@ function etatRiche() {
   creerFiche(e, { numero: 'FICHE_TEST_2', date: S.lundi, service: 'soir', horaire: '19:30', couverts: 8, mode: 'hors_menu' }, h());
   creerFiche(e, { numero: 'FICHE_TEST_3', date: S.mardi, service: 'midi', couverts: 6, mode: 'menu_fixe', menuFixe: 2, allergies: 'ALLERGIE_TEST' }, h());
   ajouterAdaptation(e, Object.keys(e.fiches)[0], 'ADAPTATION_TEST', h());
-  planifier(e, principaleDe(e, sec), S.samediPrecedent, 'apres_midi', h());
-  planifier(e, principaleDe(e, prep), S.lundi, 'avant_midi', h());
-  planifier(e, principaleDe(e, vague), S.lundi, 'avant_midi', h());
+  planifier(e, principaleDe(e, sec), S.samediPrecedent, h());
+  planifier(e, principaleDe(e, prep), S.lundi, h());
+  planifier(e, principaleDe(e, vague), S.lundi, h());
   marquerFait(e, principaleDe(e, cru), null, h());
   prevision(e, S.lundi, 1, 60); // crée un écart sur la production faite
   ajouterPreparatoire(e, sec, 'ACTION_TEST', h());
   definirRegle(e, { nom: 'PREPARATION_TEST', avanceMaxJours: 3, limiteUtilisationJours: 3, note: 'NOTE_TEST' }, h());
   definirFournisseur(e, { nom: 'FOURNISSEUR_TEST', delaiJours: 2, heureLimite: '10:00' }, h());
-  definirCreneau(e, S.samediPrecedent, 'avant_soir', 'charge', h());
-  definirCapacite(e, 3, h());
   memoriser(e, cru, h());
   return { e, ids: { sec, cru, prep, vague } };
 }
@@ -135,8 +133,7 @@ test('contenus attendus : tableau, détail, réglages', () => {
   const tab = dateDuJour(S.lundi, () => vues.tableau.rendre(magasin.etat(), S.lundi)).textContent;
   assert.match(tab, /Semaine du 5 octobre/);
   assert.match(tab, /INTITULE_TEST_1/);
-  // Trois lignes au plus : selon le jour réel (l'écart compte aussi un jour fermé), la semaine type est une ligne ou fait partie du « reste ».
-  assert.match(tab, /Semaine type à confirmer|autres? sujets?, à voir/);
+  assert.doesNotMatch(tab, /Semaine type|créneau/i, 'plus de semaine type ni de créneau (v134)');
   assert.match(tab, /sujets? attendent? le chef/);
   assert.match(tab, /allergie/);
   const det = detailDuJour(vues.detail, magasin.etat(), S.lundi).textContent;
@@ -146,7 +143,7 @@ test('contenus attendus : tableau, détail, réglages', () => {
   assert.match(det, /Saisir les couverts|Modifier les couverts/);
   assert.match(det, /allergènes à confirmer/);
   assert.match(det, /Noter une adaptation décidée/);
-  assert.match(det, /tâches :/);
+  assert.doesNotMatch(det, /Créneaux du jour|tâches :/, 'plus de section Créneaux ni de charge (v134)');
   const samedi = detailDuJour(vues.detail, magasin.etat(), S.samedi).textContent;
   assert.match(samedi, /Pas de menu du jour/);
   const reg = ['organisation', 'donnees'].map((r) => vues.reglages.rendre(magasin.etat(), r).textContent).join(' ');
@@ -161,9 +158,9 @@ test('jour : « Fait » marque fait en un toucher avec la cible ; sans quantité
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
   const p = principaleDe(e, c);
-  planifier(e, p, S.mardi, 'apres_midi', h());
+  planifier(e, p, S.mardi, h());
   const inconnu = composantValide(e, S.mercredi, 2, J.PRODUIT_SEC_TEST, { nom: 'SANS_PREVISION_TEST' });
-  planifier(e, principaleDe(e, inconnu), S.mardi, 'apres_midi', h());
+  planifier(e, principaleDe(e, inconnu), S.mardi, h());
   magasin.remplacer(e);
   const noeud = vues.jour.rendre(magasin.etat(), S.mardi);
   const faits = boutons(noeud).filter((b) => /^Marquer fait : /.test(b.textContent));
@@ -227,7 +224,7 @@ test('jour : l\'en-tête ne porte plus de « x/n » ; le jour sans tâche n\'a p
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const p = principaleDe(e, composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST));
-  planifier(e, p, S.mardi, 'apres_midi', h());
+  planifier(e, p, S.mardi, h());
   magasin.remplacer(e);
   const comptes = (noeud) => noeud.tous((x) => x.className.split(' ').includes('prod-compte'));
   assert.equal(comptes(vues.jour.rendre(magasin.etat(), S.mardi)).length, 0);
@@ -350,7 +347,7 @@ test('panneaux partagés : planifier, reporter, fait, corriger, décider, prépa
     if (d.open) d.close();
     return erreurs;
   };
-  let d = await ouvrir(() => dialogues.dialogPlanifier(prod(ids.sec), 'planifier', { date: S.samediPrecedent, creneau: 'avant_midi' }));
+  let d = await ouvrir(() => dialogues.dialogPlanifier(prod(ids.sec), 'planifier', { date: S.samediPrecedent }));
   assert.match(d.textContent, /Service : /);
   assert.deepEqual(await valider(d), [], 'planifier : aucune erreur');
   d = await ouvrir(() => dialogues.dialogPlanifier(prod(ids.cru), 'planifier'));
@@ -406,10 +403,10 @@ test('agir : une erreur laisse l\'état intact et ne redessine pas ; un succès 
   assert.deepEqual(echec, { ok: false, erreur: 'Refus de test' });
   assert.equal(magasin.etat(), avant);
   assert.equal(dessins, 0);
-  const succes = magasin.agir((e, t) => { assert.match(t, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/); e.reglages.capaciteCreneau = 4; return 'ok'; });
+  const succes = magasin.agir((e, t) => { assert.match(t, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/); e.reglages.margeSecurite = 4; return 'ok'; });
   assert.equal(succes.ok, true);
-  assert.equal(magasin.etat().reglages.capaciteCreneau, 4);
-  assert.equal(avant.reglages.capaciteCreneau, null, 'l\'ancien état n\'est pas modifié (copie)');
+  assert.equal(magasin.etat().reglages.margeSecurite, 4);
+  assert.equal(avant.reglages.margeSecurite, null, 'l\'ancien état n\'est pas modifié (copie)');
   assert.equal(dessins, 1);
   assert.match(magasin.aujourdhui(), /^\d{4}-\d{2}-\d{2}$/);
   desabonner();
@@ -1014,7 +1011,7 @@ test('détail : les rubriques sont à plat (sections, jamais de repli), dans l\'
   const vide = detailDuJour(vues.detail, magasin.etat(), S.lundi);
   verifierTexte(vide, 'détail base vide');
   const ids = vide.tous((x) => x.balise === 'section' && x.attributs.id).map((x) => x.attributs.id);
-  assert.deepEqual(ids, ['menus', 'previsions', 'fiches', 'allergies', 'creneaux', 'apres-service', 'points']);
+  assert.deepEqual(ids, ['menus', 'previsions', 'fiches', 'allergies', 'apres-service', 'points']);
   assert.equal(vide.tous((x) => x.balise === 'details').length, 0, 'aucun repli');
   assert.equal(detailDuJour(vues.detail, magasin.etat(), S.samedi).tous((x) => x.balise === 'section' && x.attributs.id === 'previsions').length, 0, 'samedi : pas de menu du jour');
 });

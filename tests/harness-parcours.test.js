@@ -3,8 +3,8 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { definirCapacite, definirCreneau } from '../app/js/domaine/actions.js';
-import { suggererCreneau } from '../app/js/domaine/planification.js';
+import { definirRegle, planifier } from '../app/js/domaine/actions.js';
+import { suggererJour } from '../app/js/domaine/planification.js';
 import { CODES, ErreurHarness, ORIGINES, STATUTS_PROPOSITION } from '../app/js/harness/contrats.js';
 import { appliquerProposition, decider } from '../app/js/harness/commandes.js';
 import { fournisseurDesactive } from '../app/js/harness/fournisseur.js';
@@ -49,12 +49,13 @@ test('sans modèle : un brouillon déterministe, expliqué, sans aucune écritur
   assert.deepEqual(proposition.items.map((i) => i.productionId).sort(), [pSec, pCru].sort());
   for (const i of proposition.items) {
     assert.equal(i.date, S.lundi);
-    assert.equal(i.creneau, 'avant_midi');
+    assert.equal(i.creneau, undefined, 'plus de créneau (v134)');
     assert.equal(i.quantite.statut, 'CALCULE');
     assert.ok(i.quantite.libelle);
     assert.equal(i.exigeConfirmation, false);
   }
-  assert.ok(proposition.sources.length >= 3 && proposition.hypotheses.length >= 1);
+  assert.ok(proposition.sources.length >= 3 && Array.isArray(proposition.hypotheses));
+  assert.ok(!JSON.stringify(proposition).toLowerCase().includes('créneau'), 'plus aucune mention de créneau');
   assert.ok(proposition.controles.every((c) => c.ok));
   assert.ok(expliquer(proposition).some((l) => l.startsWith('Origine : calcul déterministe')));
 });
@@ -78,10 +79,7 @@ test('validation puis enregistrement : seule la décision du chef planifie, tout
   const r = appliquerProposition(registre, proposition.id, { executeur });
   assert.equal(r.ok, true);
   assert.deepEqual([...r.appliques].sort(), [pSec, pCru].sort());
-  for (const id of [pSec, pCru]) {
-    assert.equal(ref.etat.productions[id].jourDecide, S.lundi);
-    assert.equal(ref.etat.productions[id].creneauDecide, 'avant_midi');
-  }
+  for (const id of [pSec, pCru]) assert.equal(ref.etat.productions[id].jourDecide, S.lundi);
   assert.equal(registre.lire(proposition.id).statut, STATUTS_PROPOSITION.APPLIQUEE);
   const actions = ref.etat.journal.map((x) => x.action);
   assert.ok(actions.includes('harness:validee') && actions.includes('harness:appliquee') && actions.includes('planifier'));
@@ -161,7 +159,7 @@ test('modèle : un item hors de la période demandée ou hors du poste est refus
   const ref = { etat: c.e };
   for (const productionId of [principaleDe(c.e, mardi)]) {
     const r = await proposerPlanningAssiste(demande(ref, creerRegistre(), {
-      fournisseur: fournisseurScripte([brouillon([{ productionId, date: S.lundi, creneau: 'apres_midi' }])]),
+      fournisseur: fournisseurScripte([brouillon([{ productionId, date: S.lundi }])]),
     }));
     assert.equal(r.mode, 'deterministe');
     assert.match(r.avertissements[0], /hors période|après le service/);
@@ -200,16 +198,17 @@ test('une avance à conservation non validée n\'est jamais exposée comme « co
   const e = etatVide();
   prevision(e, S.mercredi, 1, 20);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
-  definirCreneau(e, S.mercredi, 'avant_midi', 'charge', h());
   const { executerOutil } = await import('../app/js/harness/outils.js');
   const p = principaleDe(e, c);
   const ctx = { etat: e, aujourdhui: AUJOURDHUI, h: h() };
-  const suggestion = executerOutil('suggerer_creneau', { productionId: p }, ctx).resultat;
-  assert.equal(suggestion.evaluation.conservation, 'a_confirmer');
-  assert.equal(suggestion.evaluation.couvre, false);
+  const suggestion = executerOutil('suggerer_jour', { productionId: p }, ctx).resultat;
+  assert.deepEqual(Object.keys(suggestion).sort(), ['date', 'evaluation']);
+  assert.equal(suggestion.date, S.mercredi, 'sans contrainte, le jour du service');
   assert.equal(executerOutil('evaluer_avance', { productionId: p, date: S.mardi }, ctx).resultat.couvre, false);
-  const { proposition } = await proposerPlanningAssiste(demande({ etat: e }, creerRegistre(), { dateDebut: S.mercredi, dateFin: S.mercredi }));
-  assert.equal(proposition.items[0].evaluation.couvre, false);
+  const controle = controlerBrouillon({ type: 'planning', items: [{ productionId: p, date: S.mardi }] }, e, { h: h(), aujourdhui: AUJOURDHUI });
+  assert.deepEqual(controle.erreurs, []);
+  assert.equal(controle.items[0].evaluation.conservation, 'a_confirmer');
+  assert.equal(controle.items[0].evaluation.couvre, false);
 });
 
 test('conflit : si l\'état change entre le brouillon et l\'application, rien n\'est écrit et le brouillon est périmé', async () => {
@@ -219,25 +218,28 @@ test('conflit : si l\'état change entre le brouillon et l\'application, rien n\
   const registre = creerRegistre();
   const { proposition } = await proposerPlanningAssiste(demande(ref, registre));
   decider(registre, proposition.id, { choix: 'valider' }, { executeur });
-  executeur((etat, t) => definirCreneau(etat, S.lundi, 'avant_midi', 'charge', t));
+  executeur((etat, t) => planifier(etat, pSec, S.lundi, t));
   const avant = copie(ref.etat);
   const r = appliquerProposition(registre, proposition.id, { executeur });
   assert.deepEqual([r.ok, r.code], [false, CODES.CONFLIT]);
   assert.deepEqual(ref.etat, avant, 'aucune écriture partielle');
-  assert.equal(ref.etat.productions[pSec].jourDecide, null);
+  assert.equal(ref.etat.productions[pSec].jourDecide, S.lundi, 'décidée à la main entre-temps, intacte');
   assert.equal(registre.lire(proposition.id).statut, STATUTS_PROPOSITION.CONFLIT);
   const neuve = await proposerPlanningAssiste(demande(ref, registre));
-  assert.notDeepEqual(neuve.proposition.items.map((i) => i.creneau), proposition.items.map((i) => i.creneau), 'le recalcul tient compte du créneau chargé');
+  assert.ok(!neuve.proposition.items.some((i) => i.productionId === pSec), 'le recalcul ne reprend pas une production déjà décidée');
 });
 
-test('empreinte : stable sans changement, sensible au planning, aux créneaux et aux composants du périmètre', () => {
-  const { e, pSec } = lundi();
+test('empreinte : stable sans changement, sensible au jour décidé (de la production ou d\'une autre, ce jour-là) et aux composants du périmètre', () => {
+  const { e, pSec, pCru } = lundi();
   const perimetre = { productionIds: [pSec], dates: [S.lundi] };
   const a = empreinteEtat(e, perimetre);
   assert.equal(empreinteEtat(copie(e), perimetre), a);
   const autre = copie(e);
-  definirCreneau(autre, S.lundi, 'apres_midi', 'charge', h());
-  assert.notEqual(empreinteEtat(autre, perimetre), a);
+  planifier(autre, pSec, S.lundi, h());
+  assert.notEqual(empreinteEtat(autre, perimetre), a, 'jourDecide de la production');
+  const voisine = copie(e);
+  planifier(voisine, pCru, S.lundi, h());
+  assert.notEqual(empreinteEtat(voisine, perimetre), a, 'une autre production décidée un jour du périmètre');
   const modifie = copie(e);
   modifie.composants[modifie.productions[pSec].composantId].grammage.valeur = 999;
   assert.notEqual(empreinteEtat(modifie, perimetre), a);
@@ -248,11 +250,12 @@ test('conservation non validée : avertissement léger (décision du 2026-10-06)
   const e = etatVide();
   prevision(e, S.mercredi, 1, 20);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
-  definirCreneau(e, S.mercredi, 'avant_midi', 'charge', h());
   const ref = { etat: e };
   const executeur = executeurDe(ref);
   const registre = creerRegistre();
-  const { proposition } = await proposerPlanningAssiste(demande(ref, registre, { dateDebut: S.mercredi, dateFin: S.mercredi }));
+  const fournisseur = fournisseurScripte([brouillon([{ productionId: principaleDe(e, c), date: S.mardi }])]);
+  const { proposition, mode } = await proposerPlanningAssiste(demande(ref, registre, { dateDebut: S.mercredi, dateFin: S.mercredi, fournisseur }));
+  assert.equal(mode, 'modele');
   assert.equal(proposition.items.length, 1);
   const item = proposition.items[0];
   assert.equal(item.date, S.mardi);
@@ -274,8 +277,8 @@ test('mécanisme de confirmation par item (disponible pour de futures commandes)
   const registre = creerRegistre();
   const item = {
     id: 'item-manuel', productionId: pSec, composantId: e.productions[pSec].composantId, nom: 'MANUEL_TEST', dateService: S.lundi,
-    date: S.lundi, creneau: 'avant_midi', exigeConfirmation: true, motifs: [],
-    commande: { outil: 'planifier_production', entrees: { productionId: pSec, date: S.lundi, creneau: 'avant_midi' } },
+    date: S.lundi, exigeConfirmation: true, motifs: [],
+    commande: { outil: 'planifier_production', entrees: { productionId: pSec, date: S.lundi } },
   };
   const creer = () => registre.creer({ origine: ORIGINES.DETERMINISTE, items: [item], aDecider: [], controles: [] }, ref.etat, h());
   const sans = creer();
@@ -303,39 +306,28 @@ test('confirmer un item qui n\'en exige pas, ou retirer un item : contrôlé', a
   assert.equal(ref.etat.productions[pCru].jourDecide, null, 'l\'item retiré par le chef n\'est pas planifié');
 });
 
-test('manque de donnée : quantité inconnue et base du menu 1 sans jour libre vont dans « À décider », jamais devinées', async () => {
+test('manque de donnée : quantité inconnue va dans « À décider », jamais devinée ; la base du menu 1 reste au jour même', async () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 20);
   prevision(e, S.mercredi, 2, 20);
   const inconnue = composantValide(e, S.mercredi, 2, J.PRODUIT_SEC_TEST, { grammage: INCONNU });
   const base = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST, { nom: 'BASE_TEST', role: 'plat_principal' });
   const normal = composantValide(e, S.mercredi, 2, J.PRODUIT_CRU_TEST);
-  definirCreneau(e, S.mercredi, 'avant_midi', 'charge', h());
   const ref = { etat: e };
   const { proposition } = await proposerPlanningAssiste(demande(ref, creerRegistre(), { dateDebut: S.mercredi, dateFin: S.mercredi }));
-  const aDeciderIds = proposition.aDecider.map((d) => d.composantId).sort();
-  assert.deepEqual(aDeciderIds, [inconnue, base].sort());
-  assert.ok(proposition.aDecider.find((d) => d.composantId === base).texte.includes('aucun créneau libre'));
-  assert.ok(proposition.items.every((i) => i.composantId === normal), 'seul le composant sans manque est proposé');
-  assert.ok(proposition.items.every((i) => i.date === S.mardi));
+  assert.deepEqual(proposition.aDecider.map((d) => d.composantId), [inconnue]);
+  assert.deepEqual(proposition.items.map((i) => i.composantId).sort(), [base, normal].sort());
+  assert.ok(proposition.items.every((i) => i.date === S.mercredi), 'sans contrainte, le jour du service');
 });
 
-test('capacité des créneaux : le brouillon ne surcharge jamais un créneau', async () => {
-  const { e, pSec, pCru } = lundi();
-  definirCapacite(e, 2, h());
-  const ref = { etat: e };
-  const { proposition } = await proposerPlanningAssiste(demande(ref, creerRegistre()));
-  const parCreneau = new Map();
-  for (const i of proposition.items) {
-    const points = { courte: 1, moyenne: 2, longue: 3 }[e.composants[i.composantId].charge] ?? 0;
-    const cle = `${i.date}|${i.creneau}`;
-    parCreneau.set(cle, (parCreneau.get(cle) ?? 0) + points);
-  }
-  for (const total of parCreneau.values()) assert.ok(total <= 2);
-  const surcharge = controlerBrouillon({ type: 'planning', items: [
-    { productionId: pSec, date: S.lundi, creneau: 'avant_midi' }, { productionId: pCru, date: S.lundi, creneau: 'avant_midi' },
-  ] }, e, { h: h(), aujourdhui: AUJOURDHUI });
-  assert.ok(surcharge.erreurs.some((x) => x.includes('capacité')));
+test('aucun jour compatible (service déjà passé pour « aujourd\'hui ») : « À décider » avec le texte du jour, jamais deviné', async () => {
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 20);
+  const c = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST);
+  const { proposition } = await proposerPlanningAssiste(demande({ etat: e }, creerRegistre(), { aujourdhui: S.mardi }));
+  assert.deepEqual(proposition.items, []);
+  assert.equal(proposition.aDecider[0].composantId, c);
+  assert.match(proposition.aDecider[0].texte, /aucun jour compatible avec les règles/);
 });
 
 test('modèle scripté : outils lus puis brouillon valide accepté, quantités et contrôles refaits par le calcul', async () => {
@@ -343,13 +335,13 @@ test('modèle scripté : outils lus puis brouillon valide accepté, quantités e
   const ref = { etat: e };
   const fournisseur = fournisseurScripte([
     { type: 'appel_outil', outil: 'lire_menus', entrees: { date: S.lundi } },
-    brouillon([{ productionId: pSec, date: S.lundi, creneau: 'apres_midi' }], { hypotheses: ['service chargé le matin'], incertitudes: ['durée non mesurée'] }),
+    brouillon([{ productionId: pSec, date: S.samediPrecedent }], { hypotheses: ['service chargé le matin'], incertitudes: ['durée non mesurée'] }),
   ]);
   const { proposition, mode, avertissements } = await proposerPlanningAssiste(demande(ref, creerRegistre(), { fournisseur }));
   assert.equal(mode, 'modele');
   assert.equal(proposition.origine, ORIGINES.MODELE);
   assert.deepEqual(avertissements, []);
-  assert.equal(proposition.items[0].creneau, 'apres_midi');
+  assert.equal(proposition.items[0].date, S.samediPrecedent);
   assert.ok(proposition.items[0].quantite.libelle, 'la quantité vient du domaine');
   assert.ok(proposition.hypotheses.includes('modèle : service chargé le matin'));
   assert.ok(proposition.incertitudes.includes('modèle : durée non mesurée'));
@@ -364,7 +356,7 @@ test('modèle : son texte libre est borné (5 éléments de 200 caractères) et 
   const ref = { etat: e };
   const longues = Array.from({ length: 9 }, (_, i) => `${i}${'x'.repeat(500)}`);
   const f = fournisseurScripte([brouillon(
-    [{ productionId: pSec, date: S.lundi, creneau: 'avant_midi' }, { productionId: pCru, date: S.lundi, creneau: 'avant_midi' }],
+    [{ productionId: pSec, date: S.lundi }, { productionId: pCru, date: S.lundi }],
     { hypotheses: longues, incertitudes: longues },
   )]);
   const { proposition } = await proposerPlanningAssiste(demande(ref, creerRegistre(), { fournisseur: f }));
@@ -377,7 +369,7 @@ test('modèle : son texte libre est borné (5 éléments de 200 caractères) et 
 test('validateur : une clé de prototype n\'est jamais une production', () => {
   const { e } = lundi();
   for (const cle of ['constructor', '__proto__', 'toString']) {
-    const r = controlerBrouillon({ type: 'planning', items: [{ productionId: cle, date: S.lundi, creneau: 'avant_midi' }] }, e, { h: h(), aujourdhui: AUJOURDHUI });
+    const r = controlerBrouillon({ type: 'planning', items: [{ productionId: cle, date: S.lundi }] }, e, { h: h(), aujourdhui: AUJOURDHUI });
     assert.match(r.erreurs[0], /production inconnue/, cle);
   }
 });
@@ -395,17 +387,16 @@ test('decider : la trace est écrite avant le registre ; un refus du registre n\
 });
 
 const REFUS = [
-  ['production inconnue', (c) => [{ productionId: 'prod-fantome', date: S.lundi, creneau: 'avant_midi' }], /inconnue/],
-  ['champ inconnu', (c) => [{ productionId: c.pSec, date: S.lundi, creneau: 'avant_midi', commande: 'planifier' }], /champ inconnu/],
-  ['créneau inexistant', (c) => [{ productionId: c.pSec, date: S.lundi, creneau: 'avant_soir' }], /n'existe pas/],
-  ['créneau inconnu du vocabulaire', (c) => [{ productionId: c.pSec, date: S.lundi, creneau: 'minuit' }], /non admise/],
-  ['jour déjà passé', (c) => [{ productionId: c.pSec, date: '2026-10-01', creneau: 'avant_midi' }], /déjà passé/],
-  ['dimanche', (c) => [{ productionId: c.pSec, date: S.dimanchePrecedent, creneau: 'avant_midi' }], /non travaillé/],
-  ['après le service', (c) => [{ productionId: c.pSec, date: S.mardi, creneau: 'avant_midi' }], /après le service/],
-  ['avance hors règle (plus de deux jours, sans règle validée)', (c) => [{ productionId: c.pSec, date: S.veille, creneau: 'avant_midi' }], /non autorisée|passé|non travaillé/],
-  ['quantité annoncée fausse', (c) => [{ productionId: c.pSec, date: S.lundi, creneau: 'avant_midi', quantite: { libelle: '999 kg' } }], /différente du calcul/],
-  ['production en double', (c) => [{ productionId: c.pSec, date: S.lundi, creneau: 'avant_midi' }, { productionId: c.pSec, date: S.lundi, creneau: 'apres_midi' }], /en double/],
-  ['date invalide', (c) => [{ productionId: c.pSec, date: '2026-02-30', creneau: 'avant_midi' }], /date attendu/],
+  ['production inconnue', (c) => [{ productionId: 'prod-fantome', date: S.lundi }], /inconnue/],
+  ['champ inconnu', (c) => [{ productionId: c.pSec, date: S.lundi, commande: 'planifier' }], /champ inconnu/],
+  ['créneau (v134 : le schéma fermé le refuse)', (c) => [{ productionId: c.pSec, date: S.lundi, creneau: 'avant_midi' }], /creneau : champ inconnu/],
+  ['jour déjà passé', (c) => [{ productionId: c.pSec, date: '2026-10-01' }], /déjà passé/],
+  ['dimanche', (c) => [{ productionId: c.pSec, date: S.dimanchePrecedent }], /non travaillé/],
+  ['après le service', (c) => [{ productionId: c.pSec, date: S.mardi }], /après le service/],
+  ['avance hors règle (plus de deux jours, sans règle validée)', (c) => [{ productionId: c.pSec, date: S.veille }], /non autorisée|passé|non travaillé/],
+  ['quantité annoncée fausse', (c) => [{ productionId: c.pSec, date: S.lundi, quantite: { libelle: '999 kg' } }], /différente du calcul/],
+  ['production en double', (c) => [{ productionId: c.pSec, date: S.lundi }, { productionId: c.pSec, date: S.samediPrecedent }], /en double/],
+  ['date invalide', (c) => [{ productionId: c.pSec, date: '2026-02-30' }], /date attendu/],
 ];
 
 for (const [nom, items, motif] of REFUS) {
@@ -424,22 +415,11 @@ for (const [nom, items, motif] of REFUS) {
   });
 }
 
-test('modèle : créneau déjà chargé refusé ; jour de service chargé et capacité dépassée aussi', async () => {
-  const c = lundi();
-  definirCreneau(c.e, S.lundi, 'apres_midi', 'charge', h());
-  const ref = { etat: c.e };
-  const r = await proposerPlanningAssiste(demande(ref, creerRegistre(), {
-    fournisseur: fournisseurScripte([brouillon([{ productionId: c.pSec, date: S.lundi, creneau: 'apres_midi' }])]),
-  }));
-  assert.equal(r.mode, 'deterministe');
-  assert.match(r.avertissements[0], /pas libre/);
-});
-
 test('base du menu 1 : le modèle ne peut pas l\'avancer sans règle d\'avance validée', async () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 20);
   const base = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST, { nom: 'BASE_TEST', role: 'plat_principal' });
-  const controle = controlerBrouillon({ type: 'planning', items: [{ productionId: principaleDe(e, base), date: S.mardi, creneau: 'apres_midi' }] }, e, { h: h(), aujourdhui: AUJOURDHUI });
+  const controle = controlerBrouillon({ type: 'planning', items: [{ productionId: principaleDe(e, base), date: S.mardi }] }, e, { h: h(), aujourdhui: AUJOURDHUI });
   assert.ok(controle.erreurs.some((x) => x.includes('jour même')));
 });
 
@@ -449,9 +429,9 @@ test('modèle qui réclame une action réservée au chef : refus tracé dans l\'
   const avant = copie(e);
   const fournisseur = fournisseurScripte([
     { type: 'appel_outil', outil: 'definirRegle', entrees: { nom: 'x', avanceMaxJours: 5 } },
-    { type: 'appel_outil', outil: 'planifier_production', entrees: { productionId: pSec, date: S.lundi, creneau: 'avant_midi' } },
+    { type: 'appel_outil', outil: 'planifier_production', entrees: { productionId: pSec, date: S.lundi } },
     { type: 'appel_outil', outil: 'lire_menus', entrees: { date: 'pas une date' } },
-    brouillon([{ productionId: pSec, date: S.lundi, creneau: 'avant_midi' }]),
+    brouillon([{ productionId: pSec, date: S.lundi }]),
   ]);
   const r = await proposerPlanningAssiste(demande(ref, creerRegistre(), { fournisseur, maxIterations: 6 }));
   assert.equal(r.mode, 'modele');
@@ -533,12 +513,89 @@ test('avec le vrai magasin : agir copie, applique et remplace l\'état seulement
   assert.ok(magasin.etat().journal.some((x) => x.action === 'harness:appliquee'));
 });
 
-test('domaine : suggererCreneau sans « depuis » est inchangé, avec « depuis » il écarte le passé', () => {
+test('domaine : suggererJour sans « depuis » donne le jour du service, avec « depuis » il écarte le passé', () => {
   const { e, pSec } = lundi();
-  const sans = suggererCreneau(e, pSec);
-  assert.deepEqual([sans.date, sans.creneau], [S.lundi, 'avant_midi']);
-  assert.deepEqual(suggererCreneau(e, pSec, S.lundi).date, S.lundi);
-  assert.equal(suggererCreneau(e, pSec, S.mardi), null);
+  const sans = suggererJour(e, pSec);
+  assert.deepEqual(Object.keys(sans).sort(), ['date', 'evaluation']);
+  assert.equal(sans.date, S.lundi);
+  assert.equal(suggererJour(e, pSec, S.lundi).date, S.lundi);
+  assert.equal(suggererJour(e, pSec, S.mardi), null);
+});
+
+/** Composant à trois étapes (règle validée) : deux préparatoires et la finition, toutes à planifier. */
+function etapes() {
+  const e = etatVide();
+  prevision(e, S.lundi, 1, 40);
+  const c = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'ETAPES_TEST' });
+  definirRegle(e, { nom: 'ETAPES_TEST', etapes: [
+    { libelle: 'Couper', avanceMaxJours: 3 }, { libelle: 'Blanchir', avanceMaxJours: 3 }, { libelle: 'Finir', avanceMaxJours: 0 },
+  ] }, h());
+  const prod = (cle) => Object.values(e.productions).find((p) => p.composantId === c && p.etapeCle === cle);
+  return { e, c, couper: prod('couper'), blanchir: prod('blanchir'), finir: Object.values(e.productions).find((p) => p.composantId === c && p.genre === 'principale') };
+}
+
+test('decider avec « jours » : le chef corrige le jour d\'une ligne du brouillon ; la commande suit et jourDecide prend la nouvelle date', async () => {
+  const { e, pSec, pCru } = lundi();
+  const ref = { etat: e };
+  const executeur = executeurDe(ref);
+  const registre = creerRegistre();
+  const { proposition } = await proposerPlanningAssiste(demande(ref, registre));
+  const avantDecision = copie(ref.etat);
+  const validee = decider(registre, proposition.id, { choix: 'valider', jours: { [`item-${pSec}`]: S.samediPrecedent } }, { executeur, aujourdhui: AUJOURDHUI });
+  const corrige = validee.items.find((i) => i.productionId === pSec);
+  assert.equal(corrige.date, S.samediPrecedent);
+  assert.equal(corrige.commande.entrees.date, S.samediPrecedent, 'la commande suit la correction');
+  assert.equal(corrige.evaluation.jours, 2, 'l\'évaluation est recalculée pour le nouveau jour');
+  assert.equal(validee.items.find((i) => i.productionId === pCru).date, S.lundi, 'les autres lignes ne bougent pas');
+  assert.deepEqual(validee.decision.jours, { [`item-${pSec}`]: S.samediPrecedent });
+  assert.equal(ref.etat.productions[pSec].jourDecide, null, 'valider ne planifie pas encore');
+  assert.deepEqual(ref.etat.productions, avantDecision.productions);
+  const r = appliquerProposition(registre, proposition.id, { executeur });
+  assert.equal(r.ok, true);
+  assert.equal(ref.etat.productions[pSec].jourDecide, S.samediPrecedent);
+  assert.equal(ref.etat.productions[pCru].jourDecide, S.lundi);
+});
+
+test('decider avec « jours » : dimanche, après le service, date invalide, item inconnu refusés en nommant la préparation ; rien n\'est modifié', async () => {
+  const { e, pSec } = lundi();
+  const ref = { etat: e };
+  const executeur = executeurDe(ref);
+  const registre = creerRegistre();
+  const { proposition } = await proposerPlanningAssiste(demande(ref, registre));
+  const avant = copie(ref.etat);
+  const refus = (jours, motif) => {
+    assert.throws(() => decider(registre, proposition.id, { choix: 'valider', jours }, { executeur }), (x) => x instanceof ErreurHarness && motif.test(x.message), String(motif));
+  };
+  refus({ [`item-${pSec}`]: S.dimanchePrecedent }, /PRODUIT_SEC_TEST : .*non travaillé/);
+  refus({ [`item-${pSec}`]: S.mardi }, /PRODUIT_SEC_TEST : .*après le service/);
+  refus({ [`item-${pSec}`]: S.veille }, /PRODUIT_SEC_TEST : .*(non autorisée|hors règle)/);
+  refus({ [`item-${pSec}`]: '2026-02-30' }, /PRODUIT_SEC_TEST : date invalide/);
+  refus({ 'item-fantome': S.lundi }, /Item inconnu/);
+  assert.throws(() => decider(registre, proposition.id, { choix: 'valider', jours: ['x'] }, { executeur }), (x) => x.code === CODES.ENTREE_INVALIDE);
+  assert.equal(registre.lire(proposition.id).statut, STATUTS_PROPOSITION.BROUILLON, 'toujours un brouillon');
+  assert.equal(registre.lire(proposition.id).items.find((i) => i.productionId === pSec).date, S.lundi, 'la date d\'origine est gardée');
+  assert.deepEqual(ref.etat, avant, 'ni journal ni production touchés');
+});
+
+test('decider avec « jours » : une étape hors ordre est refusée en nommant la préparation et l\'étape', async () => {
+  const { e, couper, blanchir, finir } = etapes();
+  const ref = { etat: e };
+  const executeur = executeurDe(ref);
+  const registre = creerRegistre();
+  const { proposition } = await proposerPlanningAssiste(demande(ref, registre));
+  assert.equal(proposition.items.length, 3, 'les trois étapes sont dans le brouillon');
+  // « Blanchir » avancé au samedi alors que « Couper » reste au lundi : l'ordre des étapes est rompu (l'avance seule serait permise).
+  assert.throws(
+    () => decider(registre, proposition.id, { choix: 'valider', jours: { [`item-${blanchir.id}`]: S.samediPrecedent } }, { executeur }),
+    (x) => x instanceof ErreurHarness && /ETAPES_TEST : .*ne peut pas se faire (avant|après) l'étape .*(Couper|Blanchir)/.test(x.message),
+  );
+  assert.equal(registre.lire(proposition.id).statut, STATUTS_PROPOSITION.BROUILLON);
+  // Avancer « Couper » seul respecte l'ordre : accepté, puis appliqué.
+  decider(registre, proposition.id, { choix: 'valider', jours: { [`item-${couper.id}`]: S.samediPrecedent } }, { executeur });
+  assert.equal(appliquerProposition(registre, proposition.id, { executeur }).ok, true);
+  assert.equal(ref.etat.productions[couper.id].jourDecide, S.samediPrecedent);
+  assert.equal(ref.etat.productions[blanchir.id].jourDecide, S.lundi);
+  assert.equal(ref.etat.productions[finir.id].jourDecide, S.lundi);
 });
 
 test('export puis import : les traces du harness survivent à la sauvegarde sans nouveau format', async () => {
@@ -558,4 +615,19 @@ test('export puis import : les traces du harness survivent à la sauvegarde sans
 test('orchestrateur : sans les valeurs h et aujourdhui, la demande est refusée proprement', async () => {
   const { e } = lundi();
   await assert.rejects(proposerPlanningAssiste({ etat: e, dateDebut: S.lundi, dateFin: S.lundi, registre: creerRegistre() }), (x) => x.code === CODES.ENTREE_INVALIDE);
+});
+
+test('decider avec « jours » : une ligne écartée ne peut pas être corrigée (refus clair, rien n\'est modifié)', async () => {
+  const { e, pSec } = lundi();
+  const ref = { etat: e };
+  const executeur = executeurDe(ref);
+  const registre = creerRegistre();
+  const { proposition } = await proposerPlanningAssiste(demande(ref, registre));
+  const avant = copie(ref.etat);
+  assert.throws(
+    () => decider(registre, proposition.id, { choix: 'valider', itemsRetires: [`item-${pSec}`], jours: { [`item-${pSec}`]: S.samediPrecedent } }, { executeur }),
+    (x) => x instanceof ErreurHarness && x.code === CODES.ENTREE_INVALIDE && /PRODUIT_SEC_TEST : ligne écartée/.test(x.message),
+  );
+  assert.equal(registre.lire(proposition.id).statut, STATUTS_PROPOSITION.BROUILLON, 'toujours un brouillon');
+  assert.deepEqual(ref.etat, avant, 'ni journal ni production touchés');
 });

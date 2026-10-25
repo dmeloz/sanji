@@ -1,6 +1,6 @@
 // Vocabulaire fermé : identifiants techniques sans accent, libellés accentués pour l'écran.
 // Convention : la clé de chaque énumération est égale à sa valeur (PROVENANCE.CALCULE === 'CALCULE',
-// CRENEAU.avant_midi === 'avant_midi').
+// CHARGE.courte === 'courte').
 
 const enumeration = (valeurs) => Object.freeze(Object.fromEntries(valeurs.map((v) => [v, v])));
 
@@ -8,8 +8,6 @@ const enumeration = (valeurs) => Object.freeze(Object.fromEntries(valeurs.map((v
 // utilisée directement (décision du 2026-10-04). BASE_METIER_ESTIMATION : ancien nom, encore présent dans les données
 // enregistrées avant cette décision ; il se lit comme STANDARD_BASE.
 export const PROVENANCE = enumeration(['RESTAURANT_VALIDE', 'STANDARD_BASE', 'BASE_METIER_ESTIMATION', 'SAISI_SERVICE', 'CALCULE', 'INCONNU']);
-export const CRENEAU = enumeration(['avant_midi', 'apres_midi', 'avant_soir']);
-export const ETAT_CRENEAU = enumeration(['libre', 'charge', 'indisponible']);
 export const CHARGE = enumeration(['courte', 'moyenne', 'longue']);
 export const TYPE_COMPOSANT = enumeration(['produit_simple', 'preparation_maison', 'generique', 'a_preciser']);
 export const CATEGORIE = enumeration(['legume', 'feculent', 'proteine', 'sauce', 'autre', 'a_preciser']);
@@ -22,9 +20,6 @@ export const ETAPE = enumeration(['portionnement', 'cuisson', 'parage']);
 export const ETAT_POIDS = enumeration(['sec', 'cru_net', 'cuit']);
 export const UNITE = enumeration(['g', 'ml', 'piece']);
 export const VERIF = enumeration(['a_verifier', 'suffisant', 'a_commander']);
-
-/** Points de charge d'une production (1, 2, 3). Ce n'est jamais une durée. */
-export const POINTS_CHARGE = Object.freeze({ courte: 1, moyenne: 2, longue: 3 });
 
 /** Une valeur de provenance standard de base (ou son ancien nom) : utilisée directement, jamais « à valider ». */
 export const estStandardBase = (statut) => statut === 'STANDARD_BASE' || statut === 'BASE_METIER_ESTIMATION';
@@ -52,12 +47,6 @@ export const LIBELLES = Object.freeze({
     a_preciser: 'à préciser', a_planifier: 'à planifier', a_faire: 'à faire',
     en_cours: 'en cours', fait: 'fait', ecart: 'écart à arbitrer',
   }),
-  CRENEAU: Object.freeze({
-    avant_midi: 'avant le service de midi',
-    apres_midi: 'après le service de midi',
-    avant_soir: 'avant le service du soir',
-  }),
-  ETAT_CRENEAU: Object.freeze({ libre: 'libre', charge: 'chargé', indisponible: 'indisponible' }),
   CHARGE: Object.freeze({ courte: 'courte', moyenne: 'moyenne', longue: 'longue' }),
   TYPE_COMPOSANT: Object.freeze({
     produit_simple: 'produit simple', preparation_maison: 'préparation maison',

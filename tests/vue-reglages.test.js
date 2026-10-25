@@ -48,14 +48,12 @@ test('racine : pied neutre pendant la vérification (jamais « Fonctionne hors l
   assert.match(t, /hors ligne : vérification en cours/);
 });
 
-test('racine : la semaine type non confirmée est dite « à confirmer » en toutes lettres', () => {
+test('racine : la ligne Organisation du poste ne parle plus de semaine type (v134), seulement des règles de préparation', () => {
   const e = etatVide();
-  e.reglages.semaineTypeConfirmee = false;
-  assert.match(vue.rendre(e, null).textContent, /à confirmer/);
-  e.reglages.semaineTypeConfirmee = true;
   const lignes = vue.rendre(e, null).tous((x) => x.balise === 'a' && x.attributs.href === '#/reglages/organisation');
-  assert.doesNotMatch(lignes[0].textContent, /à confirmer[^·]*·/);
-  assert.match(lignes[0].textContent, /semaine type confirmée/);
+  assert.doesNotMatch(lignes[0].textContent, /semaine type|à confirmer|créneau/i);
+  assert.match(lignes[0].textContent, /règle de préparation/);
+  assert.doesNotMatch(vue.rendre(e, 'organisation').textContent, /semaine type|créneau|capacité/i);
 });
 
 test('sous-pages : lien « ‹ Réglages », titre propre', () => {

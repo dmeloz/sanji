@@ -47,7 +47,7 @@ test('jourDeProduction : une avance maximale de 1 jour donne J-1', () => {
 
 test('jourDeProduction : le jour décidé à la main gagne, même plus tard que le calcul', () => {
   const { e, c, p } = un(S.mercredi);
-  planifier(e, p, S.mardi, 'avant_midi', h());
+  planifier(e, p, S.mardi, h());
   assert.deepEqual(jourDeProduction(e, c, S.veille), { date: S.mardi, planifie: true });
 });
 
@@ -96,6 +96,6 @@ test('jourDeProduction : à égalité de dates, la production planifiée à la m
   definirRegle(e, { nom: 'PRODUIT_SEC_TEST', etapes: [{ libelle: 'Couper', avanceMaxJours: 0 }, { libelle: 'Finir', avanceMaxJours: 0 }] }, h());
   const prods = Object.values(e.productions).filter((x) => x.composantId === c);
   const finition = prods.find((x) => x.genre === 'principale');
-  planifier(e, finition.id, S.lundi, 'avant_midi', h());
+  planifier(e, finition.id, S.lundi, h());
   assert.deepEqual(jourDeProduction(e, c, S.veille), { date: S.lundi, planifie: true });
 });

@@ -78,7 +78,6 @@ function signesDuJour(jour) {
   const signes = [
     jour.horsRegle ? ['!', 'hors règle'] : null,
     jour.aConfirmer ? ['?', 'à confirmer'] : null,
-    jour.jourOff ? ['○', 'Jour off selon la semaine type'] : null,
   ].filter(Boolean);
   return signes.map(([icone, mot]) => h('span', { classe: 'bord-signe' }, h('span', { classe: 'bord-signe-icone', 'aria-hidden': 'true' }, icone), mot));
 }
@@ -88,7 +87,7 @@ function jourDuBord(jour) {
   const saisis = jour.menus.filter((m) => m.saisi);
   const couverts = jour.couvertsTotal !== null ? ` · ${pluriel(jour.couvertsTotal, 'couvert', 'couverts')}` : '';
   const signes = signesDuJour(jour);
-  const dits = [jour.horsRegle ? 'hors règle' : null, jour.aConfirmer ? 'à confirmer' : null, jour.jourOff ? 'jour off selon la semaine type' : null].filter(Boolean);
+  const dits = [jour.horsRegle ? 'hors règle' : null, jour.aConfirmer ? 'à confirmer' : null].filter(Boolean);
   return h('li', { classe: `bord-jour${jour.estAujourdhui ? ' bord-aujourdhui' : ''}` },
     h('a', { href: `#/production/${jour.date}`, classe: 'bord-jour-lien feutre',
       'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''}${dits.length ? `, ${dits.join(', ')}` : ''} : ouvrir la production du jour` },

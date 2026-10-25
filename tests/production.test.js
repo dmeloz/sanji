@@ -40,8 +40,8 @@ function lundi() {
   prevision(e, S.lundi, 2, 10);
   const brut = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'BRUT_TEST' });
   const recette = composantValide(e, S.lundi, 2, J.PREPARATION_TEST, { nom: 'RECETTE_TEST' });
-  planifier(e, principaleDe(e, brut), S.lundi, 'avant_midi', h());
-  planifier(e, principaleDe(e, recette), S.lundi, 'apres_midi', h());
+  planifier(e, principaleDe(e, brut), S.lundi, h());
+  planifier(e, principaleDe(e, recette), S.lundi, h());
   return { e, brut, recette };
 }
 const ligneDe = (noeud, nom) => classes(noeud, 'mep-ligne').find((l) => classes(l, 'mep-nom')[0].textContent === nom);
@@ -106,7 +106,7 @@ test('ligne Brut : seulement nom et quantité ; ni pastille « Brut », ni crén
 test('une quantité absente n\'est ni une alerte ni une décision : étiquette « à chiffrer », sans provenance', () => {
   const e = etatVide();
   const c = composantValide(e, S.lundi, 2, J.PREPARATION_TEST, { nom: 'SANS_PREVISION_TEST' });
-  planifier(e, principaleDe(e, c), S.lundi, 'avant_midi', h());
+  planifier(e, principaleDe(e, c), S.lundi, h());
   const noeud = page(e);
   const ligne = ligneDe(noeud, 'SANS_PREVISION_TEST');
   assert.match(ligne.textContent, /à chiffrer/, 'l\'étiquette dit pourquoi, sans « — » seul');

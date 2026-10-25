@@ -4,7 +4,6 @@
 // Aucune logique métier ici : tout vient de harness/ et de domaine/.
 
 import { ajouterJours, jourSemaine, libelleJour, lundiDe } from '../domaine/dates.js';
-import { libelle } from '../domaine/statuts.js';
 import { appliquerProposition, decider } from '../harness/commandes.js';
 import { proposerPlanningAssiste } from '../harness/orchestrateur.js';
 import { creerRegistre } from '../harness/propositions.js';
@@ -34,19 +33,27 @@ export function periodeDePlanning(date, aujourd) {
   return { dateDebut: debut, dateFin: ajouterJours(lundiDe(debut), 5) };
 }
 
+/** Identifiant du champ « Jour » d'une ligne du brouillon (stable : il sert à relire la date corrigée à la validation). */
+const idJour = (itemId) => `ia-jour-${itemId}`;
+
 /**
- * Une ligne du brouillon, avec son geste « Écarter » / « Rétablir ». L'état « écartée » est dit en texte et grisé
- * (classe `ec-ecartee`), jamais par la couleur seule. `ecartes` (Set d'identifiants d'items) est mis à jour ici.
+ * Une ligne du brouillon, avec son geste « Écarter » / « Rétablir » et son jour corrigeable (champ date natif, borné à
+ * aujourd'hui et au service). L'état « écartée » est dit en texte et grisé (classe `ec-ecartee`), jamais par la couleur
+ * seule. `ecartes` (Set d'identifiants d'items) est mis à jour ici.
  */
-function ligneItem(item, ecartes, surChangement) {
+function ligneItem(item, ecartes, surChangement, champsJour) {
   const valeur = item.quantite.valeur === null ? null : quantite(item.quantite.valeur, item.quantite.unite);
   const etat = h('span', { classe: 'meta ec-etat' });
   const li = h('li', { classe: 'ia-ligne' });
   const geste = h('button', { type: 'button', classe: 'btn ec-bouton' });
+  const jour = h('input', { type: 'date', id: idJour(item.id), classe: 'ia-jour', value: item.date, min: aujourdhui(), max: item.dateService ?? null,
+    'aria-label': `Jour de production : ${item.nom}` });
+  champsJour.set(item.id, jour);
   const afficher = () => {
     const ecartee = ecartes.has(item.id);
     li.className = ecartee ? 'ia-ligne ec-ecartee' : 'ia-ligne';
     etat.textContent = ecartee ? ' · écartée' : '';
+    jour.disabled = ecartee;
     geste.textContent = ecartee ? 'Rétablir' : 'Écarter';
     geste.setAttribute('aria-label', `${ecartee ? 'Rétablir' : 'Écarter'} : ${item.nom}`);
   };
@@ -62,7 +69,7 @@ function ligneItem(item, ecartes, surChangement) {
     h('span', { classe: 'meta' }, ` · service ${libelleJour(item.dateService)}`),
     item.motifs.map((m) => h('span', { classe: 'meta ia-avertissement' }, [' ', pastille('à confirmer', 'ambre'), ` ${m}`]))));
   li.appendChild(h('div', { classe: 'ia-ligne-quand' },
-    `${libelleJour(item.date)} · ${libelle('CRENEAU', item.creneau)}`,
+    h('label', { classe: 'meta', pour: idJour(item.id) }, 'Jour '), jour,
     valeur ? h('span', { classe: 'meta' }, ` · ${item.quantite.libelle} ${valeur}`) : null));
   li.appendChild(geste);
   return li;
@@ -70,14 +77,27 @@ function ligneItem(item, ecartes, surChangement) {
 
 const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
 
+/** Jours corrigés par le chef dans le brouillon : `{ itemId: date }` pour chaque ligne gardée dont le champ diffère de la
+ * proposition. `champsJour` est la table item → champ date (règle du projet : garder les champs dans une table plutôt que
+ * les retrouver par sélecteur ; une NodeList de navigateur n'a pas `find`). */
+function joursCorriges(champsJour, proposition, ecartes) {
+  const jours = {};
+  for (const item of proposition.items) {
+    if (ecartes.has(item.id)) continue;
+    const champ = champsJour.get(item.id);
+    if (champ && champ.value && champ.value !== item.date) jours[item.id] = champ.value;
+  }
+  return jours;
+}
+
 /**
  * Contenu de la feuille « Brouillon » (testable sans ouvrir de panneau).
  * @param {object} proposition
- * @param {{mode:string, avertissements:string[], periode?:object|null, ecartes?:Set<string>, surChangement?:(restantes:number)=>void}} infos
+ * @param {{mode:string, avertissements:string[], periode?:object|null, ecartes?:Set<string>, surChangement?:(restantes:number)=>void, champsJour?:Map<string,Element>}} infos
  *   `ecartes` : identifiants des lignes écartées par le chef ; `surChangement` est appelé avec le nombre de lignes restantes
  * @returns {Node[]}
  */
-export function contenuProposition(proposition, { mode, avertissements, periode = null, ecartes = new Set(), surChangement = () => {} }) {
+export function contenuProposition(proposition, { mode, avertissements, periode = null, ecartes = new Set(), surChangement = () => {}, champsJour = new Map() }) {
   const total = proposition.items.length;
   const compteur = h('span');
   const majCompteur = () => {
@@ -93,7 +113,7 @@ export function contenuProposition(proposition, { mode, avertissements, periode 
   ];
   if (periode) nodes.push(h('p', { classe: 'meta' }, `Période : du ${libelleJour(periode.dateDebut)} au ${libelleJour(periode.dateFin)}.`));
   for (const a of avertissements) nodes.push(encadre('alerte', a));
-  if (proposition.items.length > 0) nodes.push(h('ul', { classe: 'ia-liste' }, proposition.items.map((i) => ligneItem(i, ecartes, () => surChangement(majCompteur())))));
+  if (proposition.items.length > 0) nodes.push(h('ul', { classe: 'ia-liste' }, proposition.items.map((i) => ligneItem(i, ecartes, () => surChangement(majCompteur()), champsJour))));
   else nodes.push(h('p', { classe: 'vide' }, 'Rien à planifier sur cette période.'));
   if (proposition.aDecider.length > 0) {
     nodes.push(h('h3', { classe: 'section-titre' }, 'À décider'),
@@ -107,10 +127,12 @@ export function contenuProposition(proposition, { mode, avertissements, periode 
 function ouvrirBrouillon(resultat) {
   const { proposition } = resultat;
   const ecartes = new Set();
+  const champsJour = new Map();
   let boutonValider = null;
   const corps = contenuProposition(proposition, {
     ...resultat,
     ecartes,
+    champsJour,
     surChangement: (restantes) => { if (boutonValider) boutonValider.disabled = restantes === 0; },
   });
   if (proposition.items.length === 0) {
@@ -134,7 +156,12 @@ function ouvrirBrouillon(resultat) {
     surEnregistrer: (api) => {
       // Une proposition n'est validée qu'une fois : après un échec d'application, un second clic ne rejoue pas la validation.
       if (ecartes.size === proposition.items.length) throw new Error('Toutes les préparations sont écartées : rétablissez-en une ou refusez le brouillon.');
-      if (registre.lire(proposition.id).statut === 'brouillon') decider(registre, proposition.id, { choix: 'valider', itemsRetires: [...ecartes] }, { executeur: agir });
+      if (registre.lire(proposition.id).statut === 'brouillon') {
+        // Un jour corrigé refusé (dimanche, après le service…) lève : le panneau affiche le message et reste ouvert, la
+        // proposition reste un brouillon, le chef change la date et revalide.
+        const jours = joursCorriges(champsJour, proposition, ecartes);
+        decider(registre, proposition.id, { choix: 'valider', itemsRetires: [...ecartes], jours }, { executeur: agir, aujourdhui: aujourdhui() });
+      }
       const r = appliquerProposition(registre, proposition.id, { executeur: agir, aujourdhui: aujourdhui() });
       if (!r.ok) {
         // Rien n'a été écrit. Le brouillon ne peut plus servir : on le dit et on ferme, au lieu de laisser une impasse.
@@ -145,7 +172,7 @@ function ouvrirBrouillon(resultat) {
       afficherMessage(`${r.appliques.length} préparation${r.appliques.length > 1 ? 's' : ''} planifiée${r.appliques.length > 1 ? 's' : ''}.`, 'ok');
     },
   });
-  boutonValider = dialogue.querySelectorAll('button').find((b) => b.getAttribute('type') === 'submit') ?? null;
+  boutonValider = Array.from(dialogue.querySelectorAll('button')).find((b) => b.getAttribute('type') === 'submit') ?? null;
 }
 
 /** Lance le calcul puis ouvre le brouillon. Une seule demande à la fois ; fermer la fenêtre d'attente l'annule. */

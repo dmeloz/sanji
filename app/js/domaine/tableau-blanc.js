@@ -6,11 +6,11 @@ import { propositionsApprentissage } from './apprentissage.js';
 import { portionsMenu } from './calcul.js';
 import { couvertsMidiDuJour, ventesASaisir } from './couverts-midi.js';
 import { decisionsDe } from './decisions.js';
-import { ajouterJours, aMenuDuJour, creneauxDuJour, estOuvert, jourSemaine, joursEntre, lundiDe } from './dates.js';
+import { ajouterJours, aMenuDuJour, estOuvert, jourSemaine, joursEntre, lundiDe } from './dates.js';
 import { jourOuVide, normaliser } from './etat.js';
-import { etatCreneau, etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
+import { etatTache, evaluationProduction, feuilleDuJour } from './planification.js';
 import { rappelCloture } from './cloture.js';
-import { pointsAConfirmer, pointsGlobaux } from './points.js';
+import { pointsAConfirmer } from './points.js';
 import { cleStandardGroupe, grammageEffectif, lignesStandards, lignesStandardsGroupes } from './savoir.js';
 
 /**
@@ -47,12 +47,6 @@ function aUneProductionHorsRegle(etat, date) {
   });
 }
 
-/** « Jour off » : tous les créneaux du jour sont indisponibles (semaine type ou ce jour). Rien d'autre n'est présumé. */
-function estJourOff(etat, date) {
-  const creneaux = creneauxDuJour(date);
-  return estOuvert(date) && creneaux.length > 0 && creneaux.every((c) => etatCreneau(etat, date, c) === 'indisponible');
-}
-
 function jourDuTableau(etat, date, aujourdhui) {
   const jour = jourOuVide(etat, date);
   const aMenu = aMenuDuJour(date);
@@ -75,7 +69,6 @@ function jourDuTableau(etat, date, aujourdhui) {
     // Signes du jour (ancienne page de jour) : jamais sur un jour fermé.
     horsRegle: estOuvert(date) && aUneProductionHorsRegle(etat, date),
     aConfirmer: estOuvert(date) && pointsAConfirmer(etat, date).length > 0,
-    jourOff: estJourOff(etat, date),
     menus, nbFiches: Object.values(etat.fiches ?? {}).filter((f) => f.statut === 'active' && f.date === date).length,
     // Couverts du jour : somme des menus chiffrés ; null quand aucun menu n'a de chiffre (jamais un « 0 » inventé).
     couvertsTotal: menus.some((m) => m.couverts !== null) ? menus.reduce((n, m) => n + (m.couverts ?? 0), 0) : null,
@@ -238,8 +231,8 @@ function fichesDuBord(etat, dates, lundi) {
 }
 
 /**
- * « À confirmer » : seulement de vraies décisions (écarts à arbitrer, répartition provisoire, autres points,
- * semaine type). Une quantité ou une portion manquante n'y entre jamais : elle est dite dans « Production ».
+ * « À confirmer » : seulement de vraies décisions (écarts à arbitrer, répartition provisoire, autres points).
+ * Une quantité ou une portion manquante n'y entre jamais : elle est dite dans « Production ».
  * Trois lignes au plus ; le total compte tout, le détail complet reste sur la feuille du jour et le détail du jour.
  */
 function aConfirmerDuBord(etat, dates, aujourdhui) {
@@ -266,7 +259,6 @@ function aConfirmerDuBord(etat, dates, aujourdhui) {
     categories.push({ genre: 'points', n, lien: `#/production/${autres[0].date}`,
       texte: n === 1 ? '1 point à confirmer' : `${n} points à confirmer`, detail: autres[0].liste[0].texte });
   }
-  for (const point of pointsGlobaux(etat)) categories.push({ genre: 'global', n: 1, lien: '#/reglages', texte: point.texte });
   if (conservations.length > 0) {
     const n = compte(conservations);
     categories.push({ genre: 'conservation', n, lien: `#/production/${conservations[0].date}`,
@@ -342,7 +334,6 @@ export function tableauBlanc(etat, aujourdhui, lundiAffiche) {
     semainePrecedente: ajouterJours(lundi, -7),
     semaineSuivante: ajouterJours(lundi, 7),
     jours: joursDuTableau,
-    pointsGlobaux: pointsGlobaux(etat),
   };
 }
 
@@ -410,7 +401,7 @@ function maintenantDe(etat, feuille) {
   return {
     productionId: l.productionId, composantId: l.composantId, genre: l.genre,
     nom: l.genre === 'principale' ? l.nom : (l.libelle || l.nom), menu: l.menu ?? null, dateService: l.dateService,
-    cible: l.cible ?? null, unite: l.unite ?? null, creneau: l.creneau ?? null,
+    cible: l.cible ?? null, unite: l.unite ?? null,
     // Même définition que la feuille « À décider » et points.js : une exception (plus de deux jours) non autorisée.
     horsRegle: Boolean(ev) && ev.jours > 0 && ev.exception && !ev.autorisee,
   };

@@ -218,7 +218,7 @@ test('vue Production : le bouton « Proposer un planning » est présent', () =>
   assert.ok(parTexte(page, /^Proposer un planning$/));
 });
 
-test('contenu du brouillon : préparations, jour et créneau, quantité, « Rien n\'est enregistré », pourquoi', async () => {
+test('contenu du brouillon : préparations, jour (champ date corrigeable, sans créneau), quantité, « Rien n\'est enregistré », pourquoi', async () => {
   const { e } = etatLundi();
   const { proposerPlanningAssiste } = await import('../app/js/harness/orchestrateur.js');
   const { creerRegistre } = await import('../app/js/harness/propositions.js');
@@ -232,6 +232,71 @@ test('contenu du brouillon : préparations, jour et créneau, quantité, « Rien
   assert.match(texte, /PRODUIT_SEC_TEST/);
   assert.match(texte, /PRODUIT_CRU_TEST/);
   assert.match(texte, /Pourquoi cette proposition/);
+  assert.doesNotMatch(texte, /créneau|service de midi|service du soir/i, 'plus de créneau (v134)');
+  const racine = dom.document.createElement('div');
+  for (const n of noeuds) racine.appendChild(n);
+  const champs = Array.from(racine.querySelectorAll('input')).filter((i) => i.getAttribute('type') === 'date');
+  assert.equal(champs.length, 2, 'un champ date par ligne');
+  for (const item of r.proposition.items) {
+    const champ = champs.find((i) => i.getAttribute('id') === `ia-jour-${item.id}`);
+    assert.ok(champ, 'identifiant stable ia-jour-<item.id>');
+    assert.equal(champ.value, item.date);
+    assert.equal(champ.getAttribute('max'), item.dateService, 'jamais après le service');
+  }
+});
+
+/** État : un service le mercredi, deux produits ; vu du lundi, le brouillon propose le jour du service. */
+function etatMercredi() {
+  const e = etatVide();
+  prevision(e, S.mercredi, 1, 40);
+  prevision(e, S.mercredi, 2, 30);
+  const sec = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
+  const cru = composantValide(e, S.mercredi, 2, J.PRODUIT_CRU_TEST);
+  return { e, pSec: principaleDe(e, sec), pCru: principaleDe(e, cru) };
+}
+
+const champJour = (brouillon, nom) => Array.from(brouillon.querySelectorAll('input')).find((i) => (i.getAttribute('aria-label') ?? '').includes(nom));
+
+test('brouillon : le jour d\'une ligne se corrige avant de valider ; « Valider et planifier » écrit la date corrigée', async () => {
+  fermerTout();
+  const { e, pSec, pCru } = etatMercredi();
+  magasin.remplacer(e);
+  await aDate(S.lundi, () => assistant.ouvrirAssistantPlanning({ date: S.lundi }));
+  const brouillon = ouverts().find((d) => /Brouillon de planning/.test(d.textContent));
+  const champ = champJour(brouillon, 'PRODUIT_SEC_TEST');
+  assert.equal(champ.value, S.mercredi, 'proposé : le jour du service');
+  assert.match(champ.getAttribute('min'), /^\d{4}-\d{2}-\d{2}$/, 'borne basse : aujourd\'hui (horloge réelle ici, le brouillon s\'ouvre après l\'attente)');
+  champ.value = S.mardi;
+  await aDate(S.lundi, () => brouillon.querySelector('form').declencher('submit'));
+  assert.equal(magasin.etat().productions[pSec].jourDecide, S.mardi, 'la date corrigée est écrite');
+  assert.equal(magasin.etat().productions[pCru].jourDecide, S.mercredi, 'la ligne non touchée garde la date proposée');
+  assert.equal(ouverts().length, 0, 'la feuille se ferme après la validation');
+  fermerTout();
+});
+
+test('brouillon : un jour corrigé sur un dimanche est refusé en nommant la préparation ; rien n\'est enregistré, la feuille reste ouverte', async () => {
+  fermerTout();
+  const e = etatVide();
+  prevision(e, S.lundiSuivant, 1, 40);
+  const sec = composantValide(e, S.lundiSuivant, 1, J.PRODUIT_SEC_TEST);
+  const pSec = principaleDe(e, sec);
+  magasin.remplacer(e);
+  await aDate(S.lundi, () => assistant.ouvrirAssistantPlanning({ date: S.lundiSuivant }));
+  const brouillon = ouverts().find((d) => /Brouillon de planning/.test(d.textContent));
+  const champ = champJour(brouillon, 'PRODUIT_SEC_TEST');
+  champ.value = S.dimanche;
+  await aDate(S.lundi, () => brouillon.querySelector('form').declencher('submit'));
+  assert.ok(brouillon.open, 'la feuille reste ouverte');
+  const alerte = brouillon.tous((x) => x.attributs.role === 'alert' && !x.hidden).map((x) => x.textContent).join(' ');
+  assert.match(alerte, /PRODUIT_SEC_TEST/, 'le message nomme la préparation');
+  assert.match(alerte, /non travaillé/);
+  assert.equal(magasin.etat().productions[pSec].jourDecide, null, 'rien n\'est enregistré');
+  assert.ok(!magasin.etat().journal.some((j) => j.action === 'planifier' || j.action === 'harness:validee'));
+  // Le chef corrige la date : la validation passe.
+  champ.value = S.lundiSuivant;
+  await aDate(S.lundi, () => brouillon.querySelector('form').declencher('submit'));
+  assert.equal(magasin.etat().productions[pSec].jourDecide, S.lundiSuivant);
+  fermerTout();
 });
 
 test('flux sans IA : proposer, rien n\'est enregistré, « Valider et planifier » planifie et trace', async () => {
@@ -275,18 +340,18 @@ test('flux : si l\'état change avant la validation, la proposition est refusée
   magasin.remplacer(e);
   await aDate(S.lundi, () => assistant.ouvrirAssistantPlanning({ date: S.lundi }));
   const brouillon = ouverts().find((d) => /Brouillon de planning/.test(d.textContent));
-  const { definirCreneau } = await import('../app/js/domaine/actions.js');
-  magasin.agir((etat, t) => definirCreneau(etat, S.lundi, 'avant_midi', 'charge', t));
+  const { definirPrevision } = await import('../app/js/domaine/actions.js');
+  aDate(S.lundi, () => magasin.agir((etat, t) => definirPrevision(etat, S.lundi, 1, 45, t)));
   await aDate(S.lundi, () => brouillon.querySelector('form').declencher('submit'));
   assert.equal(ouverts().length, 0, 'le brouillon périmé est fermé : pas d\'impasse avec un second clic');
   const messages = dom.document.getElementById('messages').textContent;
   assert.match(messages, /L'état a changé|n'est plus valide/);
   assert.match(messages, /Rien n'a été planifié : relancez « Proposer un planning »/);
   assert.equal(magasin.etat().productions[pSec].jourDecide, null);
-  // Le bouton redevient utilisable : une nouvelle proposition tient compte du créneau devenu chargé (rien n'est forcé).
+  // Le bouton redevient utilisable : une nouvelle proposition repart de l'état courant.
   await aDate(S.lundi, () => assistant.ouvrirAssistantPlanning({ date: S.lundi }));
-  assert.match(ouverts()[0].textContent, /Rien à planifier sur cette période/);
-  assert.match(ouverts()[0].textContent, /aucun créneau libre/);
+  assert.match(ouverts()[0].textContent, /Brouillon de planning/);
+  assert.match(ouverts()[0].textContent, /2 préparations à planifier/);
   fermerTout();
 });
 
@@ -338,7 +403,7 @@ test('flux avec le modèle : la proposition affiche son origine et reste soumise
   const corpsEnvoyes = [];
   globalThis.fetch = async (url, options) => {
     corpsEnvoyes.push(options.body);
-    const items = [{ productionId: pSec, date: S.lundi, creneau: 'apres_midi' }, { productionId: pCru, date: S.lundi, creneau: 'avant_midi' }];
+    const items = [{ productionId: pSec, date: S.lundi }, { productionId: pCru, date: S.lundi }];
     return { status: 200, ok: true, json: async () => ({ stop_reason: 'tool_use', content: [{ type: 'tool_use', name: 'rendre_brouillon', input: { type: 'planning', items, incertitudes: ['charge du matin'] } }] }) };
   };
   try {
@@ -356,7 +421,8 @@ test('flux avec le modèle : la proposition affiche son origine et reste soumise
   assert.ok(!/allerg|couverts|remarque/i.test(corpsEnvoyes[0]), 'aucune fiche ni allergie dans la requête');
   assert.equal(magasin.etat().productions[pSec].jourDecide, null);
   await aDate(S.lundi, () => brouillon.querySelector('form').declencher('submit'));
-  assert.equal(magasin.etat().productions[pSec].creneauDecide, 'apres_midi');
+  assert.equal(magasin.etat().productions[pSec].jourDecide, S.lundi);
+  assert.equal('creneauDecide' in magasin.etat().productions[pSec], false);
   fermerTout();
 });
 

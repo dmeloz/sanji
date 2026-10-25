@@ -3,7 +3,7 @@
 import { aMenuDuJour, jourSemaine } from './dates.js';
 import { calculerComposant } from './calcul.js';
 import { jourOuVide, normaliser } from './etat.js';
-import { etatCreneau, etatTache, evaluationProduction } from './planification.js';
+import { etatTache, evaluationProduction } from './planification.js';
 import { statutAllergenes } from './allergenes.js';
 import { grammageEffectif } from './savoir.js';
 import { lireMemoire } from './analyse-menu.js';
@@ -15,9 +15,9 @@ const somme = (r) => (Number(r?.[1]) || 0) + (Number(r?.[2]) || 0);
  * Types : prevision_manquante, composant_inconnu (catégorie à préciser : « à classer : au poste ou non ? », tant que
  * le chef n'a rien choisi pour ce nom), composant_a_preciser (type non déterminé), grammage (composant attribué
  * sans portion connue, hors générique), repartition_provisoire, repartition_incoherente, conservation,
- * avance_hors_regle, allergenes, ecart, creneau_charge. Plus de point « transcription » ni « composants » :
+ * avance_hors_regle, allergenes, ecart. Plus de point « transcription » ni « composants » :
  * l'intitulé saisi vaut validation. Un composant inconnu ou de type indéterminé n'ouvre qu'un seul point à la fois.
- * Les points de production se rattachent à la date de service, sauf creneau_charge (jour de travail décidé).
+ * Les points de production se rattachent à la date de service.
  * @returns {{type:string, texte:string, composantId?:string, ficheId?:string}[]}
  */
 export function pointsAConfirmer(etat, date) {
@@ -87,31 +87,22 @@ export function pointsAConfirmer(etat, date) {
   for (const p of Object.values(etat.productions ?? {})) {
     const c = etat.composants?.[p.composantId];
     if (!c) continue;
-    if (p.dateService === date) {
-      const ev = evaluationProduction(etat, p.id);
-      if (ev && ev.jours > 0) {
-        if (ev.exception && !ev.autorisee) {
-          points.push({ type: 'avance_hors_regle', composantId: c.id, texte: `${c.nom} : avance hors règle, le besoin n'est pas couvert` });
-        } else if (ev.conservation === 'depassee') {
-          points.push({ type: 'avance_hors_regle', composantId: c.id, texte: `${c.nom} : limite d'utilisation dépassée, le besoin n'est pas couvert` });
-        } else if (ev.conservation === 'a_confirmer') {
-          points.push({ type: 'conservation', composantId: c.id, texte: `${c.nom} : conservation à confirmer` });
-        }
-      }
-      if (etatTache(etat, p.id) === 'ecart') {
-        points.push({ type: 'ecart', composantId: c.id, texte: `${c.nom} : écart à arbitrer` });
+    if (p.dateService !== date) continue;
+    const ev = evaluationProduction(etat, p.id);
+    if (ev && ev.jours > 0) {
+      if (ev.exception && !ev.autorisee) {
+        points.push({ type: 'avance_hors_regle', composantId: c.id, texte: `${c.nom} : avance hors règle, le besoin n'est pas couvert` });
+      } else if (ev.conservation === 'depassee') {
+        points.push({ type: 'avance_hors_regle', composantId: c.id, texte: `${c.nom} : limite d'utilisation dépassée, le besoin n'est pas couvert` });
+      } else if (ev.conservation === 'a_confirmer') {
+        points.push({ type: 'conservation', composantId: c.id, texte: `${c.nom} : conservation à confirmer` });
       }
     }
-    if (p.etat !== 'fait' && p.jourDecide === date && p.creneauDecide && etatCreneau(etat, date, p.creneauDecide) !== 'libre') {
-      points.push({ type: 'creneau_charge', composantId: c.id, texte: `${c.nom} : décidé sur un créneau signalé chargé ou indisponible` });
+    if (etatTache(etat, p.id) === 'ecart') {
+      points.push({ type: 'ecart', composantId: c.id, texte: `${c.nom} : écart à arbitrer` });
     }
   }
   return points;
-}
-
-/** Points valables pour toute l'application : la semaine type non confirmée. */
-export function pointsGlobaux(etat) {
-  return etat.reglages?.semaineTypeConfirmee ? [] : [{ type: 'semaine_type', texte: 'Semaine type à confirmer' }];
 }
 
 /**

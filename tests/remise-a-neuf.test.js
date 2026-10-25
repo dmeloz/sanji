@@ -116,7 +116,6 @@ test('estVide : journal et dernier export ne comptent pas, une donnée si', () =
 
 test('estVide : un réglage modifié ne compte pas, une donnée métier si', () => {
   const e = etatInitial();
-  e.reglages.semaineTypeConfirmee = true;
   e.reglages.margeSecurite = 3;
   assert.equal(estVide(e), true);
   const f = etatInitial();
@@ -132,7 +131,7 @@ test('remise, réglage modifié, 2e remise : la copie d\'origine survit', async 
   await repartirANeuf(m.options);
   const origine = cleSource(m);
   const presque = etatInitial();
-  presque.reglages.semaineTypeConfirmee = true;
+  presque.reglages.margeSecurite = 3;
   await repartirANeuf(montage({ etat: presque, magasin: m.magasin }).options);
   assert.equal(cleSource(m), origine);
 });

@@ -3,7 +3,7 @@
 // Invariant : aucune action (hors marquerFait et corrigerReel) ne touche à `quantiteReelle` ni à `instantane`.
 
 import {
-  aMenuDuJour, creneauxDuJour, creneauxDuJourSemaine, datesDeLaSemaine, estOuvert, estDateValide, jourSemaine, semainePassee,
+  aMenuDuJour, datesDeLaSemaine, estOuvert, estDateValide, jourSemaine, semainePassee,
 } from './dates.js';
 import {
   ajouterJournal, assurerJour, composantVide, estSauceAConfirmer, ficheVide, fournisseurVide, memoireVide, normaliser, nouvelId,
@@ -12,10 +12,10 @@ import {
 import { categoriePropose, cleMemoire, lireMemoire, proposerComposants } from './analyse-menu.js';
 import { calculerComposant } from './calcul.js';
 import { champsDeComposant, ficheEnMemoire, nomCorrect, reprendreFiche, reprendreSurAVenir, retenirFiche } from './fiches-retenues.js';
-import { chargeCreneau, cibleProduction, ecartProduction, etatTache, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
+import { cibleProduction, ecartProduction, etatTache, evaluerAvance, refusOrdreEtape, regleDe, repereConservation } from './planification.js';
 import { GROUPES, MESSAGE_PORTION_TROP_GRANDE, PORTION_MAX_G, appliquerSavoir, familleParCle, grammageEffectif, groupeDeCleStandard } from './savoir.js';
 import {
-  CATEGORIE, CHARGE, ETAPE, ETAT_CRENEAU, ETAT_POIDS, PROVENANCE, ROLE, TYPE_COMPOSANT, UNITE,
+  CATEGORIE, CHARGE, ETAPE, ETAT_POIDS, PROVENANCE, ROLE, TYPE_COMPOSANT, UNITE,
 } from './statuts.js';
 
 const valeursDe = (enumeration) => Object.values(enumeration);
@@ -580,42 +580,7 @@ export function ajouterAdaptation(etat, ficheId, texte, h) {
   return terminer(etat, h, 'ajouterAdaptation', f.numero || f.id, a);
 }
 
-// ---------------------------------------------------------------- créneaux et réglages
-
-/** État d'un créneau pour un jour précis (null : retour à la semaine type). */
-export function definirCreneau(etat, date, creneau, valeur, h) {
-  verifierH(h);
-  verifierDate(date);
-  if (!creneauxDuJour(date).includes(creneau)) throw new Error(`Ce créneau n'existe pas ce jour-là (${date}).`);
-  if (valeur !== null) verifierDans(valeur, ETAT_CRENEAU, 'État du créneau');
-  assurerJour(etat, date).creneaux[creneau] = valeur;
-  return terminer(etat, h, 'definirCreneau', `${date} ${creneau} : ${valeur ?? 'semaine type'}`, valeur);
-}
-
-/** État par défaut d'un créneau de la semaine type (numeroJour 1 = lundi … 6 = samedi). */
-export function definirSemaineType(etat, numeroJour, creneau, valeur, h) {
-  verifierH(h);
-  if (!Number.isInteger(numeroJour) || numeroJour < 1 || numeroJour > 6) throw new Error('Jour de semaine type : 1 (lundi) à 6 (samedi).');
-  if (!creneauxDuJourSemaine(numeroJour).includes(creneau)) throw new Error("Ce créneau n'existe pas ce jour-là.");
-  verifierDans(valeur, ETAT_CRENEAU, 'État du créneau');
-  etat.reglages.semaineType[numeroJour][creneau] = valeur;
-  return terminer(etat, h, 'definirSemaineType', `jour ${numeroJour} ${creneau} : ${valeur}`, valeur);
-}
-
-/** Le chef confirme la semaine type. */
-export function confirmerSemaineType(etat, h) {
-  verifierH(h);
-  etat.reglages.semaineTypeConfirmee = true;
-  return terminer(etat, h, 'confirmerSemaineType', '', true);
-}
-
-/** Capacité d'un créneau en points de charge (entier ≥ 1, ou null : aucune alerte de capacité). */
-export function definirCapacite(etat, points, h) {
-  verifierH(h);
-  verifierEntierOuNul(points, 'Capacité', 1);
-  etat.reglages.capaciteCreneau = points;
-  return terminer(etat, h, 'definirCapacite', String(points ?? 'non renseignée'), points);
-}
+// ---------------------------------------------------------------- réglages
 
 /**
  * Marge de sécurité (en %, entier de 0 à 50, ou null = aucune) : elle majore la seule quantité PROPOSÉE à commander
@@ -639,41 +604,37 @@ export function noterExport(etat, h) {
 
 // ---------------------------------------------------------------- productions
 
-function deplacer(etat, productionId, date, creneau, h, action) {
+function deplacer(etat, productionId, date, h, action) {
   verifierH(h);
   const p = exigerProduction(etat, productionId);
   if (p.etat === 'fait') throw new Error('Cette production est déjà faite : corrigez le réel plutôt que de la déplacer.');
   if (date === null) {
     p.jourDecide = null;
-    p.creneauDecide = null;
     return terminer(etat, h, action, `${libelleCourant(etat, p)} : retour à planifier`, { production: p, evaluation: null, alertes: [] });
   }
   verifierDate(date);
   if (!estOuvert(date)) throw new Error('Le dimanche est un jour non travaillé : aucune tâche.');
-  if (!creneauxDuJour(date).includes(creneau)) throw new Error("Créneau impossible ce jour-là : lundi et mardi n'ont pas de créneau avant le service du soir.");
   if (date > p.dateService) throw new Error('La production ne peut pas être décidée après son service.');
   const refus = refusOrdreEtape(etat, p, { date });
   if (refus) throw new Error(refus);
   const c = etat.composants[p.composantId];
   const evaluation = evaluerAvance(date, p.dateService, regleDe(etat, c, p.etapeCle ?? null), repereConservation(c, etat));
   p.jourDecide = date;
-  p.creneauDecide = creneau;
-  const alertes = [...evaluation.alertes, ...chargeCreneau(etat, date, creneau).alertes];
-  return terminer(etat, h, action, `${libelleCourant(etat, p)} -> ${date} ${creneau}`, { production: p, evaluation, alertes });
+  return terminer(etat, h, action, `${libelleCourant(etat, p)} -> ${date}`, { production: p, evaluation, alertes: [...evaluation.alertes] });
 }
 
 /**
- * Décide jour + créneau d'une production, même hors règle (l'évaluation et les alertes sont retournées).
- * Refus : dimanche, créneau inexistant ce jour-là, date après le service.
+ * Décide le jour d'une production (date seule), même hors règle (l'évaluation et ses alertes sont retournées).
+ * Refus : dimanche, date après le service, ordre des étapes.
  * @returns {{production:object, evaluation:object, alertes:string[]}}
  */
-export function planifier(etat, productionId, date, creneau, h) {
-  return deplacer(etat, productionId, date, creneau, h, 'planifier');
+export function planifier(etat, productionId, date, h) {
+  return deplacer(etat, productionId, date, h, 'planifier');
 }
 
-/** Reporte une production à un autre jour/créneau, ou la remet « à planifier » avec (null, null). */
-export function reporter(etat, productionId, date, creneau, h) {
-  return deplacer(etat, productionId, date, creneau, h, 'reporter');
+/** Reporte une production à un autre jour, ou la remet « à planifier » avec `null`. */
+export function reporter(etat, productionId, date, h) {
+  return deplacer(etat, productionId, date, h, 'reporter');
 }
 
 /** Démarre une production : la cible du moment est mémorisée pour détecter un changement en cours de route. */

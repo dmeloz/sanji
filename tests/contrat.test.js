@@ -21,24 +21,23 @@ const contient = (module, noms) => {
 };
 
 test('exports du contrat', () => {
-  contient(dates, ['ajouterJours', 'jourSemaine', 'lundiDe', 'joursEntre', 'estOuvert', 'aMenuDuJour', 'creneauxDuJour', 'libelleJour']);
+  contient(dates, ['ajouterJours', 'jourSemaine', 'lundiDe', 'joursEntre', 'estOuvert', 'aMenuDuJour', 'aServiceDuSoir', 'libelleJour']);
   contient(etat, ['etatInitial', 'normaliser', 'exporter', 'importer', 'nouvelId']);
   contient(analyse, ['proposerComposants', 'categoriePropose']);
   contient(savoir, ['familleParCle', 'lireNom', 'familleDe', 'appliquerSavoir', 'grammageEffectif', 'lignesStandards']);
   assert.ok(Array.isArray(savoir.FAMILLES) && Array.isArray(savoir.GROUPES));
   contient(calcul, ['portionsMenu', 'calculerComposant']);
   contient(base, ['chercherBase']);
-  contient(planification, ['etatCreneau', 'cibleProduction', 'etatTache', 'ecartProduction', 'evaluerAvance', 'regleDe',
-    'suggererCreneau', 'avancesPossibles', 'chargeCreneau', 'feuilleDuJour']);
+  contient(planification, ['cibleProduction', 'etatTache', 'ecartProduction', 'evaluerAvance', 'regleDe',
+    'suggererJour', 'avancesPossibles', 'feuilleDuJour']);
   contient(produits, ['besoinsProduits']);
   contient(allergenes, ['alertesAllergenes']);
   contient(tableauBlanc, ['tableauBlanc']);
   contient(feuille, ['analyserFeuille', 'repartirSurSemaine']);
-  contient(points, ['pointsAConfirmer', 'pointsGlobaux', 'repereVentes']);
+  contient(points, ['pointsAConfirmer', 'repereVentes']);
   contient(actions, ['definirMenu', 'ajouterComposant', 'modifierComposant',
     'supprimerComposant', 'definirPrevision', 'creerFiche', 'modifierFiche',
-    'annulerFiche', 'confirmerRepartition', 'ajouterAdaptation', 'definirCreneau', 'definirSemaineType', 'confirmerSemaineType',
-    'definirCapacite', 'planifier', 'demarrer', 'marquerFait', 'corrigerReel', 'reporter', 'deciderEcart', 'ajouterPreparatoire',
+    'annulerFiche', 'confirmerRepartition', 'ajouterAdaptation', 'planifier', 'demarrer', 'marquerFait', 'corrigerReel', 'reporter', 'deciderEcart', 'ajouterPreparatoire',
     'supprimerProduction', 'enregistrerPesee', 'memoriser', 'reprendreMemoire', 'definirRegle', 'supprimerRegle', 'creerRecette',
     'modifierRecette', 'validerRecette', 'definirFournisseur', 'supprimerFournisseur',
     'saisirVentes', 'saisirApresService', 'assurerProductions', 'definirStandard', 'supprimerStandard',

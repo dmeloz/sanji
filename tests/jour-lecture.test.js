@@ -19,9 +19,9 @@ function lundiType() {
   const m1 = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_M1_TEST' });
   const m2 = composantValide(e, S.lundi, 2, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_M2_TEST' });
   const mardi = composantValide(e, S.mardi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_MARDI_TEST' });
-  planifier(e, principaleDe(e, m1), S.lundi, 'avant_midi', h());
-  planifier(e, principaleDe(e, m2), S.lundi, 'avant_midi', h());
-  planifier(e, principaleDe(e, mardi), S.lundi, 'apres_midi', h());
+  planifier(e, principaleDe(e, m1), S.lundi, h());
+  planifier(e, principaleDe(e, m2), S.lundi, h());
+  planifier(e, principaleDe(e, mardi), S.lundi, h());
   ajouterPreparatoire(e, m1, 'ACTION_TEST', h());
   return { e, m1, m2, mardi };
 }
@@ -40,7 +40,7 @@ test('lecture : menu 1, menu 2, autres, puis après service, dans cet ordre', ()
 test('lecture : une action préparatoire est une « autre tâche » (si elle est décidée ce jour)', () => {
   const { e, m1 } = lundiType();
   const prep = Object.values(e.productions).find((p) => p.genre === 'preparatoire' && p.composantId === m1);
-  planifier(e, prep.id, S.lundi, 'avant_midi', h());
+  planifier(e, prep.id, S.lundi, h());
   const { lecture } = feuilleDuJour(e, S.lundi);
   assert.equal(lecture.autres.some((l) => l.genre === 'preparatoire'), true);
 });
@@ -85,7 +85,7 @@ test('lecture : une tâche faite aujourd\'hui reste dans sa section (marquée fa
 test('lecture : faite aujourd\'hui pour un service futur = « après service » ; faite un jour précédent pour un service futur = « prêt pour plus tard »', () => {
   const { e, mardi } = lundiType();
   const samedi = composantValide(e, S.mardi, 1, J.PRODUIT_SEC_TEST, { nom: 'ELEMENT_AVANCE_SAMEDI_TEST' });
-  planifier(e, principaleDe(e, samedi), S.samediPrecedent, 'apres_midi', h());
+  planifier(e, principaleDe(e, samedi), S.samediPrecedent, h());
   marquerFait(e, principaleDe(e, samedi), undefined, '2026-10-03T09:00:00.000Z');
   marquerFait(e, principaleDe(e, mardi), undefined, h(1));
   const { lecture, avancement } = feuilleDuJour(e, S.lundi);
