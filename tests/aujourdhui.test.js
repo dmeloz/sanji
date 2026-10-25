@@ -318,7 +318,7 @@ test('accessibilité : mots écrits pour les états, quantités en police des qu
   const bloc = css.slice(debut);
   assert.match(bloc, /\.au-qte \{[^}]*var\(--police-qte\)/);
   const tailles = [...bloc.matchAll(/font-size: (\d+)px/g)].map((m) => Number(m[1]));
-  assert.ok(tailles.every((t) => t >= 13), `texte sous 13 px : ${tailles}`);
+  assert.ok(tailles.every((t) => t >= 15), `texte sous 15 px : ${tailles}`);
   assert.match(bloc, /\.au-btn \{[^}]*min-height: var\(--haut-bouton\)/);
   assert.match(bloc, /\.au-lien-court \{[^}]*min-height: var\(--cible\)/);
   assert.doesNotMatch(bloc, /gradient|https?:\/\//);

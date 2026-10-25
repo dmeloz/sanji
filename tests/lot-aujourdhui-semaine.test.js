@@ -221,8 +221,8 @@ test('Aujourd\'hui, dimanche : « Prochaine production : lundi 12 » est un lien
   assert.match(blocLot, /\.au-lien-prochaine \{[^}]*min-height: var\(--cible\)/);
 });
 
-test('CSS du lot : en fin de fichier, dans un bloc commenté, sans texte sous 13 px ni animation', () => {
+test('CSS du lot : en fin de fichier, dans un bloc commenté, sans texte sous 15 px ni animation', () => {
   assert.ok(debutLot > 0 && blocLot.length > 0, 'bloc du lot présent');
-  assert.doesNotMatch(blocLot, /font-size: ?(1[0-2]|[0-9])px/);
+  assert.doesNotMatch(blocLot, /font-size: ?(1[0-4]|[0-9])px/);
   assert.doesNotMatch(blocLot, /transition|animation/);
 });

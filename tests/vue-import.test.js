@@ -109,12 +109,12 @@ test('« Enregistrer la semaine » : un menu suffit, les composants se créent s
   assert.equal(location.hash, `#/preparer/${S.lundi}`, 'après l\'enregistrement : l\'écran « Préparer la semaine »');
 });
 
-test('style : bloc Import en fin de style.css, légendes >= 13 px, cibles >= 44 px, mouvement réduit', () => {
+test('style : bloc Import en fin de style.css, légendes >= 15 px, cibles >= 44 px, mouvement réduit', () => {
   const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
   const debut = css.indexOf('Import des menus (refonte 1)');
   assert.ok(debut > 0);
   const bloc = css.slice(debut);
-  for (const m of bloc.matchAll(/font-size:\s*(\d+)px/g)) assert.ok(Number(m[1]) >= 13, m[0]);
+  for (const m of bloc.matchAll(/font-size:\s*(\d+)px/g)) assert.ok(Number(m[1]) >= 15, m[0]);
   assert.match(bloc, /\.imp-jour-tete[^}]*min-height: var\(--cible\)/);
   assert.match(bloc, /prefers-reduced-motion/);
   assert.doesNotMatch(bloc, /gradient/);
