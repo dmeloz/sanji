@@ -293,11 +293,16 @@ export function dialogPlanifier(productionId, mode, preset = {}) {
       noeudEvaluation(ev));
   };
   f.surChangement('date', miseAJour);
-  const zoneSuggestion = h('div', { classe: 'suggestion' },
+  const zoneSuggestion = h('section', { classe: 'suggestion planifier-etape planifier-etape-suggestion' },
+    h('h3', { classe: 'planifier-etape-titre' }, '1 · Suggestion'),
     suggestion
       ? [h('p', null, `Suggestion : ${libelleJour(suggestion.date)}.`),
         bouton('Utiliser la suggestion', () => { f.fixer('date', suggestion.date); miseAJour(); }, 'court')]
       : h('p', { classe: 'vide' }, 'Aucun jour à suggérer : choisissez-en un vous-même.'));
+  const zoneJour = h('section', { classe: 'planifier-etape planifier-etape-jour' },
+    h('h3', { classe: 'planifier-etape-titre' }, '2 · Jour'), ...f.noeuds);
+  const zoneEvaluationEtape = h('section', { classe: 'planifier-etape planifier-etape-evaluation' },
+    h('h3', { classe: 'planifier-etape-titre' }, '3 · Évaluation'), zoneEvaluation);
   miseAJour();
   const extras = mode === 'reporter' && p.jourDecide ? [{
     libelle: 'Remettre à planifier',
@@ -305,7 +310,7 @@ export function dialogPlanifier(productionId, mode, preset = {}) {
   }] : [];
   panneau({
     titre: `${mode === 'reporter' ? 'Reporter' : 'Planifier'} : ${p.libelle}`,
-    corps: [zoneSuggestion, ...f.noeuds, zoneEvaluation],
+    corps: [zoneSuggestion, zoneJour, zoneEvaluationEtape],
     extras,
     surEnregistrer: () => {
       const date = f.valeur('date');
