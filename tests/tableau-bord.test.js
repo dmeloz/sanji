@@ -63,21 +63,21 @@ test('bord : « À confirmer » ne dépasse jamais 3 lignes et ne contient jamai
   let bord = tableauBlanc(e, S.lundi).bord;
   assert.equal(bord.aConfirmer.lignes.some((l) => /quantité|portion à saisir|prévision/i.test(l.texte)), false);
   assert.equal(bord.aConfirmer.lignes.every((l) => !/portion|préciser/.test(l.texte)), true);
-  // Plusieurs vraies décisions : écart, répartition provisoire, allergènes, semaine type : 3 lignes au plus.
+  // Plusieurs vraies décisions : écart, répartition provisoire, allergènes : 3 lignes au plus.
   const s = semaine();
   creerFiche(s, { numero: 'FICHE_TEST_1', date: S.mardi, service: 'midi', horaire: '12:00', couverts: 20, mode: 'choix_libre', repartition: { 1: 12, 2: 5 } }, h());
   creerFiche(s, { numero: 'FICHE_TEST_2', date: S.mercredi, service: 'midi', horaire: '12:00', couverts: 20, mode: 'choix_libre', repartition: { 1: 12, 2: 5 } }, h());
   bord = tableauBlanc(s, S.lundi).bord;
-  assert.ok(bord.aConfirmer.total >= 3, "une ligne de répartitions provisoires, une de points, la semaine type");
-  assert.equal(bord.aConfirmer.lignes.length, 3, 'le reste n\'est pas perdu : il est compté, et dit sur le détail du jour');
-  assert.match(bord.aConfirmer.lignes.map((l) => l.texte).join(' | '), /répartition provisoire|semaine type/i);
+  assert.ok(bord.aConfirmer.total >= 2, 'une ligne de répartitions provisoires, une de points');
+  assert.ok(bord.aConfirmer.lignes.length <= 3, 'le reste n\'est pas perdu : il est compté, et dit sur le détail du jour');
+  assert.match(bord.aConfirmer.lignes.map((l) => l.texte).join(' | '), /répartitions? provisoires?/i);
 });
 
 test('bord : un écart à arbitrer est une ligne de « À confirmer » qui mène à la feuille du jour', () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
-  planifier(e, principaleDe(e, c), S.mardi, 'apres_midi', h());
+  planifier(e, principaleDe(e, c), S.mardi, h());
   marquerFait(e, principaleDe(e, c), undefined, h(1));
   prevision(e, S.mercredi, 1, 20);
   const ligne = tableauBlanc(e, S.mardi).bord.aConfirmer.lignes.find((l) => /écart/.test(l.texte));
@@ -89,7 +89,7 @@ test('bord : le repli « À confirmer » compte les mêmes écarts que le bandea
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
-  planifier(e, principaleDe(e, c), S.mardi, 'apres_midi', h());
+  planifier(e, principaleDe(e, c), S.mardi, h());
   marquerFait(e, principaleDe(e, c), undefined, h(1));
   prevision(e, S.mercredi, 1, 20);
   for (const jour of [S.mardi, S.dimanchePrecedent]) {
@@ -106,7 +106,7 @@ test('bord : production = jauge « x/y fait » vers Jour ; une avance possible e
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
   const p = principaleDe(e, c);
-  planifier(e, p, S.mardi, 'apres_midi', h());
+  planifier(e, p, S.mardi, h());
   let { production } = tableauBlanc(e, S.mardi).bord;
   assert.deepEqual(production.avancement, { faites: 0, total: 1 });
   assert.equal(production.lien, `#/production/${S.mardi}`);
@@ -117,10 +117,10 @@ test('bord : production = jauge « x/y fait » vers Jour ; une avance possible e
   assert.deepEqual(sansTache.avancement, { faites: 0, total: 0 });
 });
 
-test('bord : chaque ancienne ligne de la note a une destination (chiffrage, sauvegarde, semaine type)', () => {
+test('bord : chaque ancienne ligne de la note a une destination (chiffrage, sauvegarde) ; plus de « semaine type »', () => {
   const e = semaine();
   const bord = tableauBlanc(e, S.lundi).bord;
-  assert.ok(bord.aConfirmer.lignes.some((l) => /semaine type/i.test(l.texte)) || bord.aConfirmer.total >= 3);
+  assert.equal(bord.aConfirmer.lignes.some((l) => /semaine type/i.test(l.texte)), false);
   const vieux = tableauBlanc(e, '2026-10-30');
   assert.ok(vieux.bord.entete.sauvegarde, 'le rappel de sauvegarde garde une place (en-tête)');
   assert.equal(vieux.bord.entete.sauvegarde.lien, '#/reglages');
@@ -144,7 +144,7 @@ test('bord : « À confirmer » compte des lignes distinctes ; les « conservati
     composantValide(e, S.mercredi, 1, { ...J.PRODUIT_SEC_TEST, nom: 'PRODUIT_SEC_BIS_TEST' }),
     composantValide(e, S.jeudi, 1, { ...J.PRODUIT_SEC_TEST, nom: 'PRODUIT_SEC_TER_TEST' }),
   ];
-  for (const id of ids) planifier(e, principaleDe(e, id), S.mardi, 'apres_midi', h());
+  for (const id of ids) planifier(e, principaleDe(e, id), S.mardi, h());
   const { aConfirmer } = tableauBlanc(e, S.mardi).bord;
   const conservation = aConfirmer.lignes.filter((l) => /conservation à confirmer/.test(l.texte));
   assert.equal(conservation.length, 1, 'une seule ligne pour toutes les préparations');
@@ -166,9 +166,9 @@ test('bord : la sauce implicite d\'un plat de pâtes est marquée implicite et n
 test('bord : une autre semaine affichée a sa propre production, jamais les chiffres d\'aujourd\'hui', () => {
   const e = etatVide();
   prevision(e, S.mercredi, 1, 10);
-  planifier(e, principaleDe(e, composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST)), S.mardi, 'apres_midi', h());
+  planifier(e, principaleDe(e, composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST)), S.mardi, h());
   prevision(e, '2026-10-14', 1, 10);
-  planifier(e, principaleDe(e, composantValide(e, '2026-10-14', 1, J.PRODUIT_SEC_TEST)), '2026-10-13', 'apres_midi', h());
+  planifier(e, principaleDe(e, composantValide(e, '2026-10-14', 1, J.PRODUIT_SEC_TEST)), '2026-10-13', h());
   const courante = tableauBlanc(e, S.mardi).bord.production;
   assert.equal(courante.autreSemaine, false);
   assert.deepEqual(courante.avancement, { faites: 0, total: 1 });

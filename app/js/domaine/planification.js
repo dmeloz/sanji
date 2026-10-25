@@ -1,25 +1,14 @@
-// Planification par créneau, avances, écarts et feuille du jour.
-// Les valeurs de charge sont des points (1, 2, 3), jamais des minutes.
+// Planification par date (jour décidé), avances, écarts et feuille du jour. Plus aucun créneau horaire (v134).
 
-import { ajouterJours, creneauxDuJour, estOuvert, joursEntre, jourSemaine } from './dates.js';
+import { ajouterJours, estOuvert, joursEntre, jourSemaine } from './dates.js';
 import { valeurEffective } from './ajustements.js';
 import { calculerComposant, arrondirQuantite, portionsMenu } from './calcul.js';
 import { normaliser, jourOuVide } from './etat.js';
 import { familleParCle } from './savoir.js';
 import { reperesConservation, standardDeBase } from './standards-base.js';
-import { POINTS_CHARGE } from './statuts.js';
 
 const AVANCE_HABITUELLE = 2;
 const HORIZON_AVANCES = 4;
-const ORDRE_CRENEAUX_INVERSE = ['avant_soir', 'apres_midi', 'avant_midi'];
-
-/** État d'un créneau : valeur du jour, sinon semaine type. Un créneau qui n'existe pas ce jour-là est `indisponible`. */
-export function etatCreneau(etat, date, creneau) {
-  if (!creneauxDuJour(date).includes(creneau)) return 'indisponible';
-  const duJour = jourOuVide(etat, date).creneaux?.[creneau];
-  if (duJour) return duJour;
-  return etat.reglages?.semaineType?.[jourSemaine(date)]?.[creneau] ?? 'libre';
-}
 
 /** Règle de préparation du nom du composant (clé = nom normalisé), ou null. */
 function regleDuNom(etat, composant) {
@@ -287,71 +276,36 @@ export function etatTache(etat, productionId) {
   return p.jourDecide ? 'a_faire' : 'a_planifier';
 }
 
-/**
- * Charge d'un créneau : nombre de productions non faites par échelle courte / moyenne / longue, en points.
- * La capacité réglée est facultative ; sans elle il n'y a jamais de surcharge.
- */
-export function chargeCreneau(etat, date, creneau) {
-  const res = {
-    etatCreneau: etatCreneau(etat, date, creneau), courtes: 0, moyennes: 0, longues: 0, nonEstimees: 0,
-    points: 0, capacite: etat.reglages?.capaciteCreneau ?? null, surcharge: false, alertes: [],
-  };
-  let nombreProductions = 0;
-  for (const p of Object.values(etat.productions ?? {})) {
-    if (p.etat === 'fait' || p.jourDecide !== date || p.creneauDecide !== creneau) continue;
-    nombreProductions += 1;
-    const charge = etat.composants?.[p.composantId]?.charge;
-    if (charge === 'courte') res.courtes += 1;
-    else if (charge === 'moyenne') res.moyennes += 1;
-    else if (charge === 'longue') res.longues += 1;
-    else res.nonEstimees += 1;
-  }
-  res.points = res.courtes * POINTS_CHARGE.courte + res.moyennes * POINTS_CHARGE.moyenne + res.longues * POINTS_CHARGE.longue;
-  res.surcharge = Number.isFinite(res.capacite) && res.points > res.capacite;
-  if (nombreProductions > 0 && res.etatCreneau !== 'libre') {
-    res.alertes.push(`créneau signalé ${res.etatCreneau === 'charge' ? 'chargé' : 'indisponible'} : production décidée sur ce créneau`);
-  }
-  if (res.surcharge) res.alertes.push('charge supérieure à la capacité réglée');
-  return res;
-}
-
 /** Avance maximale d'une règle (jours) : la sienne si elle est valide, sinon l'avance habituelle de deux jours. */
 export function avanceMaxDe(regle) {
   return Number.isInteger(regle?.avanceMaxJours) && regle.avanceMaxJours >= 0 ? regle.avanceMaxJours : AVANCE_HABITUELLE;
 }
 
+/** Dates candidates : le jour du service puis J-1, J-2… jusqu'à l'avance maximale ; le dimanche est sauté. */
 function candidatsAvance(dateService, avanceMax) {
   const liste = [];
   for (let k = 0; k <= avanceMax; k += 1) {
     const date = ajouterJours(dateService, -k);
-    if (!estOuvert(date)) continue;
-    const creneaux = k === 0 ? ['avant_midi'] : ORDRE_CRENEAUX_INVERSE;
-    for (const creneau of creneaux) if (creneauxDuJour(date).includes(creneau)) liste.push({ date, creneau });
+    if (estOuvert(date)) liste.push(date);
   }
   return liste;
 }
 
 /**
- * Suggestion de jour et de créneau : le jour du service avant midi si possible, sinon on remonte créneau par
- * créneau (2 jours au plus, ou l'avance maximale de la règle). Jamais un créneau chargé ou indisponible,
- * jamais le dimanche, jamais une avance qui ne couvre pas le besoin. `depuis` (date) écarte les jours déjà passés.
- * @returns {{date:string, creneau:string, evaluation:object}|null}
+ * Suggestion de jour : le jour du service si possible, sinon on remonte jour par jour (2 jours au plus, ou l'avance
+ * maximale de la règle). Jamais le dimanche, jamais une avance qui ne couvre pas le besoin. `depuis` (date) écarte les
+ * jours déjà passés. Aucune capacité ni disponibilité : la date seule.
+ * @returns {{date:string, evaluation:object}|null}
  */
-export function suggererCreneau(etat, productionId, depuis = null) {
+export function suggererJour(etat, productionId, depuis = null) {
   const p = etat.productions?.[productionId];
   if (!p || p.etat === 'fait') return null;
   const composant = etat.composants?.[p.composantId] ?? null;
   const regle = regleDe(etat, composant, p.etapeCle ?? null);
-  const avanceMax = avanceMaxDe(regle);
-  const points = POINTS_CHARGE[composant?.charge] ?? 0;
-  for (const { date, creneau } of candidatsAvance(p.dateService, avanceMax)) {
+  for (const date of candidatsAvance(p.dateService, avanceMaxDe(regle))) {
     if (depuis && date < depuis) continue;
-    if (etatCreneau(etat, date, creneau) !== 'libre') continue;
-    const charge = chargeCreneau(etat, date, creneau);
-    const dejaLa = p.jourDecide === date && p.creneauDecide === creneau ? points : 0;
-    if (Number.isFinite(charge.capacite) && charge.points - dejaLa + points > charge.capacite) continue;
     const evaluation = evaluerAvance(date, p.dateService, regle, repereConservation(composant, etat));
-    if (evaluation.autorisee && evaluation.couvre) return { date, creneau, evaluation };
+    if (evaluation.autorisee && evaluation.couvre) return { date, evaluation };
   }
   return null;
 }
@@ -375,7 +329,7 @@ function jourDeUneProduction(etat, p, composant, depuis) {
   const regle = regleDe(etat, composant, p.etapeCle ?? null);
   const repere = repereConservation(composant, etat);
   let retenue = p.dateService;
-  for (const { date } of candidatsAvance(p.dateService, avanceMaxDe(regle))) {
+  for (const date of candidatsAvance(p.dateService, avanceMaxDe(regle))) {
     if (date < depuis || date >= retenue) continue;
     const ev = evaluerAvance(date, p.dateService, regle, repere);
     if (ev.autorisee && ev.couvre && !ev.repere?.depasse) retenue = date;
@@ -411,7 +365,7 @@ function ligne(etat, p) {
   return {
     productionId: p.id, composantId: p.composantId, nom: composant?.nom ?? p.libelle, menu: composant?.menu ?? null,
     dateService: p.dateService, genre: p.genre, libelle: p.libelle, jourDecide: p.jourDecide,
-    creneauDecide: p.creneauDecide, etat: etatTache(etat, p.id), cible: cibleProduction(etat, p.id),
+    etat: etatTache(etat, p.id), cible: cibleProduction(etat, p.id),
     unite: p.unite ?? calc?.uniteTravail ?? null, quantiteReelle: p.quantiteReelle, charge: composant?.charge ?? null,
     etatPoids: etatPoidsDe(composant, calc), hFait: p.hFait ?? null, etapeCle: p.etapeCle ?? null, ordre: p.ordre ?? null,
   };
@@ -475,12 +429,10 @@ function etatPoidsDe(composant, calc) {
 
 /**
  * Productions non faites dont le service tombe dans les 4 jours suivants et qui ne sont pas décidées pour un
- * autre jour, avec l'évaluation de l'avance depuis `aujourdhui` et le premier créneau libre du jour
- * parmi après-midi / avant-soir (null s'il n'y en a pas).
+ * autre jour, avec l'évaluation de l'avance depuis `aujourdhui`.
  */
 export function avancesPossibles(etat, aujourdhui) {
   const resultat = [];
-  const creneauxPossibles = creneauxDuJour(aujourdhui).filter((c) => c === 'apres_midi' || c === 'avant_soir');
   for (const p of Object.values(etat.productions ?? {})) {
     if (p.etat === 'fait' || !etat.composants?.[p.composantId]) continue;
     const jours = joursEntre(aujourdhui, p.dateService);
@@ -490,8 +442,7 @@ export function avancesPossibles(etat, aujourdhui) {
     // Pâtes et risotto du menu 1 : jour même. Déjà planifiée ce jour à la main : elle reste affichée, avec son évaluation.
     if (!p.jourDecide && sansAvanceParDefaut(etat, composant, p)) continue;
     const evaluation = evaluerAvance(aujourdhui, p.dateService, regleDe(etat, composant, p.etapeCle ?? null), repereConservation(composant, etat));
-    const creneau = creneauxPossibles.find((c) => etatCreneau(etat, aujourdhui, c) === 'libre') ?? null;
-    resultat.push({ ...ligne(etat, p), evaluation, creneau });
+    resultat.push({ ...ligne(etat, p), evaluation });
   }
   return resultat.sort((a, b) => a.dateService.localeCompare(b.dateService) || a.nom.localeCompare(b.nom));
 }
@@ -535,7 +486,7 @@ export function lotsPossibles(etat, aujourdhui) {
 
 /**
  * Feuille quotidienne.
- * - aFaire : par créneau du jour, productions non faites décidées ce jour (créneau null si non précisé) ;
+ * - aFaire : productions non faites décidées ce jour, à plat ;
  * - dejaPret : productions faites dont le service est ce jour ou plus tard, avec l'évaluation d'avance
  *   (couvre faux : affiché « non couvert ») ;
  * - attendus : productions non faites décidées un jour antérieur pour un service à venir (« prévu samedi ») ;
@@ -545,9 +496,6 @@ export function lotsPossibles(etat, aujourdhui) {
  * - aAvancer : avances possibles non déjà décidées ce jour, seulement pour les éléments dont la quantité est connue ;
  *   revueMiSemaine : vrai le mardi.
  */
-const ORDRE_CRENEAU_LECTURE = ['avant_midi', 'apres_midi', 'avant_soir'];
-const rangCreneau = (c) => (ORDRE_CRENEAU_LECTURE.includes(c) ? ORDRE_CRENEAU_LECTURE.indexOf(c) : ORDRE_CRENEAU_LECTURE.length);
-
 /**
  * Ordre de lecture de la feuille Jour (une seule liste, aucun filtre) : tâches pour le service du jour du menu 1,
  * du menu 2, autres tâches (préparatoires), puis « après service » = tout ce qui sert un jour suivant (avances
@@ -570,9 +518,9 @@ function lectureDuJour(etat, date, f) {
   const autres = [];
   const apres = [];
   const classees = new Set();
-  const classer = (l, source, creneau = l.creneauDecide ?? null, fait = false) => {
+  const classer = (l, source, fait = false) => {
     classees.add(l.productionId);
-    const ligneLue = { ...l, source, creneau, fait, avanceJours: Math.max(0, joursEntre(date, l.dateService)) };
+    const ligneLue = { ...l, source, fait, avanceJours: Math.max(0, joursEntre(date, l.dateService)) };
     if (l.dateService > date) apres.push(ligneLue);
     else if (l.genre === 'preparatoire') autres.push(ligneLue);
     else if (l.menu === 1) service1.push(ligneLue);
@@ -583,9 +531,9 @@ function lectureDuJour(etat, date, f) {
   for (const p of Object.values(etat.productions ?? {})) {
     if (p.etat !== 'fait' || !etat.composants?.[p.composantId]) continue;
     const faitCeJour = typeof p.hFait === 'string' && p.hFait.slice(0, 10) === date;
-    if (p.jourDecide === date || p.dateService === date || faitCeJour) classer(ligne(etat, p), 'faite', p.creneauDecide ?? null, true);
+    if (p.jourDecide === date || p.dateService === date || faitCeJour) classer(ligne(etat, p), 'faite', true);
   }
-  for (const g of f.aFaire) for (const t of g.taches) classer(t, 'decidee', g.creneau);
+  for (const t of f.aFaire) classer(t, 'decidee');
   for (const t of f.attendus) classer(t, 'attendue');
   // Un service du jour pas encore planifié reste dans la liste de travail (jamais seulement dans les décisions).
   const dejaPlacees = new Set();
@@ -595,10 +543,9 @@ function lectureDuJour(etat, date, f) {
   // Une quantité inconnue ne retire pas la ligne d'un service du jour : « quantité à compléter », sans alerte.
   // Une tâche déjà classée (planifiée aujourd'hui, quantité inconnue) n'est pas reprise : une seule ligne, comptée une fois.
   for (const q of f.quantitesManquantes) if (q.dateService <= date && !classees.has(q.productionId)) classer(q, 'a_preciser');
-  for (const a of f.aAvancer) classer(a, 'suggestion', a.creneau);
-  // À créneau et nom égaux, les étapes d'une même préparation se lisent dans l'ordre de la règle.
-  const parNom = (a, b) => rangCreneau(a.creneau) - rangCreneau(b.creneau) || String(a.nom).localeCompare(String(b.nom))
-    || (a.ordre ?? 0) - (b.ordre ?? 0);
+  for (const a of f.aAvancer) classer(a, 'suggestion');
+  // À nom égal, les étapes d'une même préparation se lisent dans l'ordre de la règle.
+  const parNom = (a, b) => String(a.nom).localeCompare(String(b.nom)) || (a.ordre ?? 0) - (b.ordre ?? 0);
   autres.sort(parNom);
   // Menus 1 et 2 : lecture par rôle (base féculent, garnitures, protéine ou poisson, herbe, sauce), puis ordre de l'intitulé.
   for (const [menu, liste] of [[1, service1], [2, service2]]) {
@@ -630,11 +577,11 @@ function lectureDuJour(etat, date, f) {
 }
 
 export function feuilleDuJour(etat, date) {
+  const aFaire = [];
   const dejaPret = [];
   const attendus = [];
   const decisions = [];
   const quantitesManquantes = [];
-  const parCreneau = new Map(creneauxDuJour(date).map((c) => [c, []]));
   const horizon = ajouterJours(date, HORIZON_AVANCES);
   for (const p of Object.values(etat.productions ?? {})) {
     const composant = etat.composants?.[p.composantId];
@@ -643,9 +590,7 @@ export function feuilleDuJour(etat, date) {
     if (p.etat === 'fait') {
       if (p.dateService >= date) dejaPret.push({ ...l, evaluation: evaluationDe(etat, p, composant) });
     } else if (p.jourDecide === date) {
-      const cle = parCreneau.has(p.creneauDecide) ? p.creneauDecide : null;
-      if (!parCreneau.has(cle)) parCreneau.set(cle, []);
-      parCreneau.get(cle).push(l);
+      aFaire.push(l);
     } else if (p.jourDecide && p.jourDecide < date && p.dateService >= date) {
       attendus.push(l);
     }
@@ -656,10 +601,6 @@ export function feuilleDuJour(etat, date) {
       else decisions.push({ ...l, motif: l.etat });
     }
   }
-  const aFaire = [...parCreneau.entries()].map(([creneau, taches]) => ({
-    creneau, etatCreneau: creneau ? etatCreneau(etat, date, creneau) : null,
-    charge: creneau ? chargeCreneau(etat, date, creneau) : null, taches,
-  }));
   // Avancement du jour : productions décidées ce jour, faites ou non (la jauge « 3 sur 7 faits »).
   const decidees = Object.values(etat.productions ?? {}).filter((p) => p.jourDecide === date && etat.composants?.[p.composantId]);
   const avancement = { faites: decidees.filter((p) => p.etat === 'fait').length, total: decidees.length };

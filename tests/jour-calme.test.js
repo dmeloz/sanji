@@ -48,7 +48,7 @@ test('jour : un élément planifié ou déjà décidé n\'est pas dans la liste 
   definirStandard(e, 'riz', 'plat_principal', { valeur: 100, unite: 'g', etat: 'cru_net' }, h());
   prevision(e, S.lundiSuivant, 1, 10);
   const riz = feuilleDuJour(e, S.samedi).aAvancer.find((a) => a.nom === 'riz');
-  planifier(e, riz.productionId, S.samedi, 'apres_midi', h());
+  planifier(e, riz.productionId, S.samedi, h());
   const f = feuilleDuJour(e, S.samedi);
   assert.equal(f.quantitesManquantes.some((q) => q.nom === 'riz'), false);
   assert.equal(f.aAvancer.some((a) => a.nom === 'riz'), false);

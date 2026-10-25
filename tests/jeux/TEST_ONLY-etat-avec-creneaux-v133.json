@@ -1,0 +1,3568 @@
+{
+  "application": "sanji-entremetier",
+  "schema": 1,
+  "exporteLe": "2026-10-12T09:00:00",
+  "etat": {
+    "application": "sanji-entremetier",
+    "schema": 1,
+    "reglages": {
+      "semaineTypeConfirmee": true,
+      "semaineType": {
+        "1": {
+          "avant_midi": "libre",
+          "apres_midi": "libre"
+        },
+        "2": {
+          "avant_midi": "libre",
+          "apres_midi": "libre"
+        },
+        "3": {
+          "avant_midi": "libre",
+          "apres_midi": "libre",
+          "avant_soir": "libre"
+        },
+        "4": {
+          "avant_midi": "libre",
+          "apres_midi": "libre",
+          "avant_soir": "libre"
+        },
+        "5": {
+          "avant_midi": "libre",
+          "apres_midi": "libre",
+          "avant_soir": "libre"
+        },
+        "6": {
+          "avant_midi": "libre",
+          "apres_midi": "libre",
+          "avant_soir": "libre"
+        }
+      },
+      "capaciteCreneau": 4,
+      "margeSecurite": null,
+      "dernierExport": null
+    },
+    "jours": {
+      "2026-10-05": {
+        "date": "2026-10-05",
+        "menus": {
+          "1": {
+            "intitule": "Penne carbonara",
+            "transcriptionValidee": true
+          },
+          "2": {
+            "intitule": "Escalope de veau, riz pilaf, carottes Vichy",
+            "transcriptionValidee": true
+          }
+        },
+        "previsions": {
+          "1": {
+            "portions": 13,
+            "h": "2026-10-05T09:00:00"
+          },
+          "2": {
+            "portions": 27,
+            "h": "2026-10-05T09:00:00"
+          }
+        },
+        "creneaux": {
+          "avant_midi": "charge",
+          "apres_midi": null,
+          "avant_soir": null
+        },
+        "ventes": {
+          "1": 20,
+          "2": 15,
+          "h": "2026-10-05T15:00:00"
+        },
+        "couverts": {
+          "total": 40,
+          "repartition": null,
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "2026-10-06": {
+        "date": "2026-10-06",
+        "menus": {
+          "1": {
+            "intitule": "Risotto aux champignons",
+            "transcriptionValidee": true
+          },
+          "2": {
+            "intitule": "Cuisse de poulet rôtie, polenta crémeuse, gratin de courgettes",
+            "transcriptionValidee": true
+          }
+        },
+        "previsions": {
+          "1": {
+            "portions": 12,
+            "h": "2026-10-05T09:00:00"
+          },
+          "2": {
+            "portions": 23,
+            "h": "2026-10-05T09:00:00"
+          }
+        },
+        "creneaux": {
+          "avant_midi": null,
+          "apres_midi": null,
+          "avant_soir": null
+        },
+        "ventes": {
+          "1": 21,
+          "2": 16,
+          "h": "2026-10-06T15:00:00"
+        },
+        "couverts": {
+          "total": 35,
+          "repartition": null,
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "2026-10-07": {
+        "date": "2026-10-07",
+        "menus": {
+          "1": {
+            "intitule": "Rösti de pommes de terre, saucisse de veau",
+            "transcriptionValidee": true
+          },
+          "2": {
+            "intitule": "Filet de cabillaud, riz basmati, épinards à la crème",
+            "transcriptionValidee": true
+          }
+        },
+        "previsions": {
+          "1": {
+            "portions": 15,
+            "h": "2026-10-05T09:00:00"
+          },
+          "2": {
+            "portions": 6,
+            "h": "2026-10-05T09:00:00"
+          }
+        },
+        "creneaux": {
+          "avant_midi": null,
+          "apres_midi": null,
+          "avant_soir": null
+        },
+        "ventes": {
+          "1": 22,
+          "2": 17,
+          "h": "2026-10-07T15:00:00"
+        },
+        "couverts": {
+          "total": 21,
+          "repartition": {
+            "1": 15,
+            "2": 6
+          },
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "2026-10-08": {
+        "date": "2026-10-08",
+        "menus": {
+          "1": {
+            "intitule": "Tagliatelles aux champignons",
+            "transcriptionValidee": true
+          },
+          "2": {
+            "intitule": "Émincé de volaille, pommes de terre sautées, haricots verts",
+            "transcriptionValidee": true
+          }
+        },
+        "previsions": {
+          "1": {
+            "portions": 9,
+            "h": "2026-10-05T09:00:00"
+          },
+          "2": {
+            "portions": 19,
+            "h": "2026-10-05T09:00:00"
+          }
+        },
+        "creneaux": {
+          "avant_midi": null,
+          "apres_midi": null,
+          "avant_soir": null
+        },
+        "ventes": {
+          "1": 23,
+          "2": 18,
+          "h": "2026-10-08T15:00:00"
+        },
+        "couverts": {
+          "total": 28,
+          "repartition": null,
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "2026-10-09": {
+        "date": "2026-10-09",
+        "menus": {
+          "1": {
+            "intitule": "Gnocchi sauce tomate",
+            "transcriptionValidee": true
+          },
+          "2": {
+            "intitule": "Poisson du marché, boulghour, ratatouille",
+            "transcriptionValidee": true
+          }
+        },
+        "previsions": {
+          "1": {
+            "portions": 10,
+            "h": "2026-10-05T09:00:00"
+          },
+          "2": {
+            "portions": 21,
+            "h": "2026-10-05T09:00:00"
+          }
+        },
+        "creneaux": {
+          "avant_midi": null,
+          "apres_midi": null,
+          "avant_soir": null
+        },
+        "ventes": {
+          "1": 24,
+          "2": 19,
+          "h": "2026-10-09T15:00:00"
+        },
+        "couverts": {
+          "total": 31,
+          "repartition": null,
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "2026-10-12": {
+        "date": "2026-10-12",
+        "menus": {
+          "1": {
+            "intitule": "Penne carbonara",
+            "transcriptionValidee": true
+          },
+          "2": {
+            "intitule": "Cuisse de poulet rôtie, polenta crémeuse, carottes Vichy",
+            "transcriptionValidee": true
+          }
+        },
+        "previsions": {
+          "1": {
+            "portions": 15,
+            "h": "2026-10-12T09:00:00"
+          },
+          "2": {
+            "portions": 30,
+            "h": "2026-10-12T09:00:00"
+          }
+        },
+        "creneaux": {
+          "avant_midi": null,
+          "apres_midi": null,
+          "avant_soir": null
+        },
+        "ventes": {
+          "1": null,
+          "2": null,
+          "h": null
+        },
+        "couverts": {
+          "total": 45,
+          "repartition": null,
+          "h": "2026-10-12T09:00:00"
+        }
+      },
+      "2026-10-13": {
+        "date": "2026-10-13",
+        "menus": {
+          "1": {
+            "intitule": "Farfalle sauce tomate",
+            "transcriptionValidee": true
+          },
+          "2": {
+            "intitule": "Filet de cabillaud, riz basmati, épinards à la crème",
+            "transcriptionValidee": true
+          }
+        },
+        "previsions": {
+          "1": {
+            "portions": 11,
+            "h": "2026-10-12T09:00:00"
+          },
+          "2": {
+            "portions": 22,
+            "h": "2026-10-12T09:00:00"
+          }
+        },
+        "creneaux": {
+          "avant_midi": null,
+          "apres_midi": null,
+          "avant_soir": null
+        },
+        "ventes": {
+          "1": null,
+          "2": null,
+          "h": null
+        },
+        "couverts": {
+          "total": 33,
+          "repartition": null,
+          "h": "2026-10-12T09:00:00"
+        }
+      },
+      "2026-10-14": {
+        "date": "2026-10-14",
+        "menus": {
+          "1": {
+            "intitule": "Risotto aux champignons",
+            "transcriptionValidee": true
+          },
+          "2": {
+            "intitule": "Escalope de veau, riz pilaf, haricots verts",
+            "transcriptionValidee": true
+          }
+        },
+        "previsions": {
+          "1": {
+            "portions": 13,
+            "h": "2026-10-12T09:00:00"
+          },
+          "2": {
+            "portions": 25,
+            "h": "2026-10-12T09:00:00"
+          }
+        },
+        "creneaux": {
+          "avant_midi": null,
+          "apres_midi": null,
+          "avant_soir": null
+        },
+        "ventes": {
+          "1": null,
+          "2": null,
+          "h": null
+        },
+        "couverts": {
+          "total": 38,
+          "repartition": null,
+          "h": "2026-10-12T09:00:00"
+        }
+      }
+    },
+    "fiches": {},
+    "composants": {
+      "comp_1e50c": {
+        "id": "comp_1e50c",
+        "date": "2026-10-05",
+        "menu": 1,
+        "nom": "Penne",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "plat_principal",
+        "produitNom": "pâtes sèches",
+        "famille": "pates_seches",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 2.65,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 2,5–2,8 × poids sec (feculents.pates.rendement.cuisson, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_2e684": {
+        "id": "comp_2e684",
+        "date": "2026-10-05",
+        "menu": 1,
+        "nom": "carbonara",
+        "categorie": "sauce",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "sauce",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_3ww8g": {
+        "id": "comp_3ww8g",
+        "date": "2026-10-05",
+        "menu": 2,
+        "nom": "Escalope de veau",
+        "categorie": "proteine",
+        "attribue": false,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_48ee3": {
+        "id": "comp_48ee3",
+        "date": "2026-10-05",
+        "menu": 2,
+        "nom": "riz pilaf",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "garniture",
+        "produitNom": "riz",
+        "famille": "riz",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 2.5,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 2–3 × poids sec (feculents.riz.rendement.cuit, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_5wmuq": {
+        "id": "comp_5wmuq",
+        "date": "2026-10-05",
+        "menu": 2,
+        "nom": "carottes Vichy",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "garniture",
+        "produitNom": "carottes",
+        "famille": "carottes",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "parage",
+            "coefficient": 0.815,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 12–25 % de perte du poids brut (legumes.parage.carotte, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_6dzcc": {
+        "id": "comp_6dzcc",
+        "date": "2026-10-06",
+        "menu": 1,
+        "nom": "Risotto",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "plat_principal",
+        "produitNom": "riz",
+        "famille": "riz",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 2.5,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 2–3 × poids sec (feculents.riz.rendement.cuit, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_7jdho": {
+        "id": "comp_7jdho",
+        "date": "2026-10-06",
+        "menu": 1,
+        "nom": "champignons",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "plat_principal",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_8hzwg": {
+        "id": "comp_8hzwg",
+        "date": "2026-10-06",
+        "menu": 1,
+        "nom": "base de risotto à confirmer",
+        "categorie": "sauce",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "sauce",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        },
+        "implicite": "base de risotto a confirmer"
+      },
+      "comp_9o9dy": {
+        "id": "comp_9o9dy",
+        "date": "2026-10-06",
+        "menu": 2,
+        "nom": "Cuisse de poulet rôtie",
+        "categorie": "proteine",
+        "attribue": false,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_ag1m5": {
+        "id": "comp_ag1m5",
+        "date": "2026-10-06",
+        "menu": 2,
+        "nom": "polenta crémeuse",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "garniture",
+        "produitNom": "polenta",
+        "famille": "polenta",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 3.5,
+            "statut": "STANDARD_BASE",
+            "source": "base métier : Polenta gain ×3–4"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_b1gox": {
+        "id": "comp_b1gox",
+        "date": "2026-10-06",
+        "menu": 2,
+        "nom": "gratin de courgettes",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "garniture",
+        "produitNom": "courgettes",
+        "famille": "courgettes",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "parage",
+            "coefficient": 0.875,
+            "statut": "STANDARD_BASE",
+            "source": "base métier : Courgettes 10–15 %"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_cpyny": {
+        "id": "comp_cpyny",
+        "date": "2026-10-07",
+        "menu": 1,
+        "nom": "Rösti de pommes de terre",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "plat_principal",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_d3287": {
+        "id": "comp_d3287",
+        "date": "2026-10-07",
+        "menu": 1,
+        "nom": "saucisse de veau",
+        "categorie": "proteine",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "composant_recette",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_elk4c": {
+        "id": "comp_elk4c",
+        "date": "2026-10-07",
+        "menu": 2,
+        "nom": "Filet de cabillaud",
+        "categorie": "proteine",
+        "attribue": false,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_f0bej": {
+        "id": "comp_f0bej",
+        "date": "2026-10-07",
+        "menu": 2,
+        "nom": "riz basmati",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "garniture",
+        "produitNom": "riz",
+        "famille": "riz",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 2.5,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 2–3 × poids sec (feculents.riz.rendement.cuit, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_gmbal": {
+        "id": "comp_gmbal",
+        "date": "2026-10-07",
+        "menu": 2,
+        "nom": "épinards",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_h05wc": {
+        "id": "comp_h05wc",
+        "date": "2026-10-07",
+        "menu": 2,
+        "nom": "crème",
+        "categorie": "sauce",
+        "attribue": false,
+        "valide": true,
+        "type": "generique",
+        "role": "sauce",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_iwrld": {
+        "id": "comp_iwrld",
+        "date": "2026-10-08",
+        "menu": 1,
+        "nom": "Tagliatelles",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "plat_principal",
+        "produitNom": "pâtes sèches",
+        "famille": "pates_seches",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 2.65,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 2,5–2,8 × poids sec (feculents.pates.rendement.cuisson, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_jjdiu": {
+        "id": "comp_jjdiu",
+        "date": "2026-10-08",
+        "menu": 1,
+        "nom": "champignons",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "plat_principal",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_kdzt6": {
+        "id": "comp_kdzt6",
+        "date": "2026-10-08",
+        "menu": 1,
+        "nom": "sauce à confirmer",
+        "categorie": "sauce",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "sauce",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        },
+        "implicite": "sauce a confirmer"
+      },
+      "comp_l9g3w": {
+        "id": "comp_l9g3w",
+        "date": "2026-10-08",
+        "menu": 2,
+        "nom": "Émincé de volaille",
+        "categorie": "proteine",
+        "attribue": false,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_mt22m": {
+        "id": "comp_mt22m",
+        "date": "2026-10-08",
+        "menu": 2,
+        "nom": "pommes de terre sautées",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "garniture",
+        "produitNom": "pommes de terre",
+        "famille": "pommes_de_terre",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "parage",
+            "coefficient": 0.815,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 15–22 % de perte du poids brut (legumes.parage.pomme-de-terre, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_nweou": {
+        "id": "comp_nweou",
+        "date": "2026-10-08",
+        "menu": 2,
+        "nom": "haricots verts",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_om4x0": {
+        "id": "comp_om4x0",
+        "date": "2026-10-09",
+        "menu": 1,
+        "nom": "Gnocchi",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "plat_principal",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 80,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_pehbr": {
+        "id": "comp_pehbr",
+        "date": "2026-10-09",
+        "menu": 1,
+        "nom": "sauce tomate",
+        "categorie": "sauce",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "sauce",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_qxtk4": {
+        "id": "comp_qxtk4",
+        "date": "2026-10-09",
+        "menu": 2,
+        "nom": "Poisson du marché",
+        "categorie": "proteine",
+        "attribue": false,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "statut": "SAISI_SERVICE",
+          "source": "corrigé pour ce plat seulement (validation de la portion)",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_rov3f": {
+        "id": "comp_rov3f",
+        "date": "2026-10-09",
+        "menu": 2,
+        "nom": "boulghour",
+        "categorie": "a_preciser",
+        "attribue": false,
+        "valide": true,
+        "type": "a_preciser",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_s4544": {
+        "id": "comp_s4544",
+        "date": "2026-10-09",
+        "menu": 2,
+        "nom": "ratatouille",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1ej52j": {
+        "id": "comp_1ej52j",
+        "date": "2026-10-12",
+        "menu": 1,
+        "nom": "Penne",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "plat_principal",
+        "produitNom": "pâtes sèches",
+        "famille": "pates_seches",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 2.65,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 2,5–2,8 × poids sec (feculents.pates.rendement.cuisson, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1fepy6": {
+        "id": "comp_1fepy6",
+        "date": "2026-10-12",
+        "menu": 1,
+        "nom": "carbonara",
+        "categorie": "sauce",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "sauce",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit",
+          "statut": "SAISI_SERVICE",
+          "source": "fiche retenue du nom (portion réglée par la propriétaire)",
+          "repris": true
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1gfthj": {
+        "id": "comp_1gfthj",
+        "date": "2026-10-12",
+        "menu": 2,
+        "nom": "Cuisse de poulet rôtie",
+        "categorie": "proteine",
+        "attribue": false,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1hk7wy": {
+        "id": "comp_1hk7wy",
+        "date": "2026-10-12",
+        "menu": 2,
+        "nom": "polenta crémeuse",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "garniture",
+        "produitNom": "polenta",
+        "famille": "polenta",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 3.5,
+            "statut": "STANDARD_BASE",
+            "source": "base métier : Polenta gain ×3–4"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1i6g1s": {
+        "id": "comp_1i6g1s",
+        "date": "2026-10-12",
+        "menu": 2,
+        "nom": "carottes Vichy",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "garniture",
+        "produitNom": "carottes",
+        "famille": "carottes",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "parage",
+            "coefficient": 0.815,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 12–25 % de perte du poids brut (legumes.parage.carotte, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1j5045": {
+        "id": "comp_1j5045",
+        "date": "2026-10-13",
+        "menu": 1,
+        "nom": "Farfalle",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "plat_principal",
+        "produitNom": "pâtes sèches",
+        "famille": "pates_seches",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 2.65,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 2,5–2,8 × poids sec (feculents.pates.rendement.cuisson, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1kty4o": {
+        "id": "comp_1kty4o",
+        "date": "2026-10-13",
+        "menu": 1,
+        "nom": "sauce tomate",
+        "categorie": "sauce",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "sauce",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit",
+          "statut": "SAISI_SERVICE",
+          "source": "fiche retenue du nom (portion réglée par la propriétaire)",
+          "repris": true
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1l6bzk": {
+        "id": "comp_1l6bzk",
+        "date": "2026-10-13",
+        "menu": 2,
+        "nom": "Filet de cabillaud",
+        "categorie": "proteine",
+        "attribue": false,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1mvet4": {
+        "id": "comp_1mvet4",
+        "date": "2026-10-13",
+        "menu": 2,
+        "nom": "riz basmati",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "garniture",
+        "produitNom": "riz",
+        "famille": "riz",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 2.5,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 2–3 × poids sec (feculents.riz.rendement.cuit, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1ng76j": {
+        "id": "comp_1ng76j",
+        "date": "2026-10-13",
+        "menu": 2,
+        "nom": "épinards",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1o4wqh": {
+        "id": "comp_1o4wqh",
+        "date": "2026-10-13",
+        "menu": 2,
+        "nom": "crème",
+        "categorie": "sauce",
+        "attribue": false,
+        "valide": true,
+        "type": "generique",
+        "role": "sauce",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1pja2l": {
+        "id": "comp_1pja2l",
+        "date": "2026-10-14",
+        "menu": 1,
+        "nom": "Risotto",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "plat_principal",
+        "produitNom": "riz",
+        "famille": "riz",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 2.5,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 2–3 × poids sec (feculents.riz.rendement.cuit, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1q0155": {
+        "id": "comp_1q0155",
+        "date": "2026-10-14",
+        "menu": 1,
+        "nom": "champignons",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "plat_principal",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1rc2pq": {
+        "id": "comp_1rc2pq",
+        "date": "2026-10-14",
+        "menu": 1,
+        "nom": "base de risotto à confirmer",
+        "categorie": "sauce",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "sauce",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        },
+        "implicite": "base de risotto a confirmer"
+      },
+      "comp_1s1ds2": {
+        "id": "comp_1s1ds2",
+        "date": "2026-10-14",
+        "menu": 2,
+        "nom": "Escalope de veau",
+        "categorie": "proteine",
+        "attribue": false,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1trv42": {
+        "id": "comp_1trv42",
+        "date": "2026-10-14",
+        "menu": 2,
+        "nom": "riz pilaf",
+        "categorie": "feculent",
+        "attribue": true,
+        "valide": true,
+        "type": "produit_simple",
+        "role": "garniture",
+        "produitNom": "riz",
+        "famille": "riz",
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [
+          {
+            "etape": "cuisson",
+            "coefficient": 2.5,
+            "statut": "STANDARD_BASE",
+            "source": "référentiel culinaire : 2–3 × poids sec (feculents.riz.rendement.cuit, confirmé à la source)"
+          }
+        ],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      },
+      "comp_1ui097": {
+        "id": "comp_1ui097",
+        "date": "2026-10-14",
+        "menu": 2,
+        "nom": "haricots verts",
+        "categorie": "legume",
+        "attribue": true,
+        "valide": true,
+        "type": "generique",
+        "role": "garniture",
+        "produitNom": "",
+        "famille": null,
+        "grammage": {
+          "valeur": null,
+          "unite": "g",
+          "statut": "INCONNU",
+          "source": "",
+          "etat": "cuit"
+        },
+        "etapes": [],
+        "recetteId": null,
+        "recetteVersion": null,
+        "charge": null,
+        "allergenes": {
+          "statut": "a_confirmer",
+          "liste": [],
+          "h": null
+        },
+        "apresService": {
+          "surplus": null,
+          "rebut": null,
+          "note": ""
+        }
+      }
+    },
+    "productions": {
+      "prod_tfmja": {
+        "id": "prod_tfmja",
+        "composantId": "comp_1e50c",
+        "dateService": "2026-10-05",
+        "genre": "principale",
+        "libelle": "Penne",
+        "jourDecide": "2026-10-05",
+        "creneauDecide": "apres_midi",
+        "etat": "fait",
+        "cibleAuDemarrage": 13000000000,
+        "quantiteReelle": 13000000000,
+        "unite": "g",
+        "hFait": "2026-10-05T10:00:00",
+        "instantane": {
+          "h": "2026-10-05T10:00:00",
+          "composant": {
+            "nom": "Penne",
+            "type": "produit_simple",
+            "role": "plat_principal",
+            "produitNom": "pâtes sèches",
+            "grammage": {
+              "valeur": 1000000000,
+              "unite": "g",
+              "etat": "sec",
+              "statut": "RESTAURANT_VALIDE",
+              "source": "standard maison",
+              "origine": "standard"
+            },
+            "etapes": [
+              {
+                "etape": "cuisson",
+                "coefficient": 2.65,
+                "statut": "STANDARD_BASE",
+                "source": "référentiel culinaire : 2,5–2,8 × poids sec (feculents.pates.rendement.cuisson, confirmé à la source)"
+              }
+            ],
+            "recetteId": null,
+            "recetteVersion": null
+          },
+          "recette": null,
+          "portions": 13,
+          "cible": 13000000000,
+          "formule": "13 portions × 1 000 000 000 g = 13 000 000 000 g (poids sec) à prévoir (portion exprimée en poids sec : le gain de cuisson n'est pas appliqué ; quantité cuite estimée 34 450 000 000 g, à titre d'information seulement)",
+          "dependances": [
+            {
+              "parametre": "grammage",
+              "valeur": 1000000000,
+              "statut": "RESTAURANT_VALIDE",
+              "unite": "g",
+              "etat": "sec",
+              "origine": "standard"
+            }
+          ],
+          "aValider": false
+        },
+        "decisionEcart": null,
+        "avantFait": {
+          "etat": "a_faire",
+          "cibleAuDemarrage": null
+        },
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_uqp63": {
+        "id": "prod_uqp63",
+        "composantId": "comp_2e684",
+        "dateService": "2026-10-05",
+        "genre": "principale",
+        "libelle": "carbonara",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "fait",
+        "cibleAuDemarrage": 1950,
+        "quantiteReelle": 1950,
+        "unite": "g",
+        "hFait": "2026-10-05T10:00:00",
+        "instantane": {
+          "h": "2026-10-05T10:00:00",
+          "composant": {
+            "nom": "carbonara",
+            "type": "generique",
+            "role": "sauce",
+            "produitNom": "",
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "etat": "cuit",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "origine": "plat"
+            },
+            "etapes": [],
+            "recetteId": null,
+            "recetteVersion": null
+          },
+          "recette": null,
+          "portions": 13,
+          "cible": 1950,
+          "formule": "13 portions × 150 g = 1 950 g, perte de parage inconnue",
+          "dependances": [
+            {
+              "parametre": "grammage",
+              "valeur": 150,
+              "statut": "SAISI_SERVICE",
+              "unite": "g",
+              "etat": "cuit",
+              "origine": "plat"
+            }
+          ],
+          "aValider": true
+        },
+        "decisionEcart": null,
+        "avantFait": {
+          "etat": "a_faire",
+          "cibleAuDemarrage": null
+        },
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_v48gv": {
+        "id": "prod_v48gv",
+        "composantId": "comp_48ee3",
+        "dateService": "2026-10-05",
+        "genre": "principale",
+        "libelle": "riz pilaf",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "fait",
+        "cibleAuDemarrage": 1620,
+        "quantiteReelle": 1620,
+        "unite": "g",
+        "hFait": "2026-10-05T10:00:00",
+        "instantane": {
+          "h": "2026-10-05T10:00:00",
+          "composant": {
+            "nom": "riz pilaf",
+            "type": "produit_simple",
+            "role": "garniture",
+            "produitNom": "riz",
+            "grammage": {
+              "valeur": 60,
+              "unite": "g",
+              "etat": "sec",
+              "statut": "STANDARD_BASE",
+              "source": "standard de base : repère validé par la propriétaire (fourchette 50–70 g, état sec)",
+              "origine": "standard_base",
+              "repere": "valide"
+            },
+            "etapes": [
+              {
+                "etape": "cuisson",
+                "coefficient": 2.5,
+                "statut": "STANDARD_BASE",
+                "source": "référentiel culinaire : 2–3 × poids sec (feculents.riz.rendement.cuit, confirmé à la source)"
+              }
+            ],
+            "recetteId": null,
+            "recetteVersion": null
+          },
+          "recette": null,
+          "portions": 27,
+          "cible": 1620,
+          "formule": "27 portions × 60 g = 1 620 g (poids sec) à prévoir (portion exprimée en poids sec : le gain de cuisson n'est pas appliqué ; quantité cuite estimée 4 050 g, à titre d'information seulement)",
+          "dependances": [
+            {
+              "parametre": "grammage",
+              "valeur": 60,
+              "statut": "STANDARD_BASE",
+              "unite": "g",
+              "etat": "sec",
+              "origine": "standard_base"
+            }
+          ],
+          "aValider": false
+        },
+        "decisionEcart": null,
+        "avantFait": {
+          "etat": "a_faire",
+          "cibleAuDemarrage": null
+        },
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_wi113": {
+        "id": "prod_wi113",
+        "composantId": "comp_5wmuq",
+        "dateService": "2026-10-05",
+        "genre": "principale",
+        "libelle": "carottes Vichy",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "fait",
+        "cibleAuDemarrage": 4969,
+        "quantiteReelle": 1500,
+        "unite": "g",
+        "hFait": "2026-10-05T10:00:00",
+        "instantane": {
+          "h": "2026-10-05T10:00:00",
+          "composant": {
+            "nom": "carottes Vichy",
+            "type": "produit_simple",
+            "role": "garniture",
+            "produitNom": "carottes",
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "etat": "cuit",
+              "statut": "RESTAURANT_VALIDE",
+              "source": "standard maison",
+              "origine": "standard"
+            },
+            "etapes": [
+              {
+                "etape": "parage",
+                "coefficient": 0.815,
+                "statut": "STANDARD_BASE",
+                "source": "référentiel culinaire : 12–25 % de perte du poids brut (legumes.parage.carotte, confirmé à la source)"
+              }
+            ],
+            "recetteId": null,
+            "recetteVersion": null
+          },
+          "recette": null,
+          "portions": 27,
+          "cible": 4969,
+          "formule": "27 portions × 150 g = 4 050 g servis ; ÷ 0,815 (parage) = 4 969 g bruts",
+          "dependances": [
+            {
+              "parametre": "grammage",
+              "valeur": 150,
+              "statut": "RESTAURANT_VALIDE",
+              "unite": "g",
+              "etat": "cuit",
+              "origine": "standard"
+            },
+            {
+              "parametre": "parage",
+              "valeur": 0.815,
+              "statut": "STANDARD_BASE"
+            }
+          ],
+          "aValider": false
+        },
+        "decisionEcart": null,
+        "avantFait": {
+          "etat": "a_faire",
+          "cibleAuDemarrage": null
+        },
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_xyepf": {
+        "id": "prod_xyepf",
+        "composantId": "comp_6dzcc",
+        "dateService": "2026-10-06",
+        "genre": "principale",
+        "libelle": "Risotto",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_ybofj": {
+        "id": "prod_ybofj",
+        "composantId": "comp_7jdho",
+        "dateService": "2026-10-06",
+        "genre": "principale",
+        "libelle": "champignons",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_ztytj": {
+        "id": "prod_ztytj",
+        "composantId": "comp_8hzwg",
+        "dateService": "2026-10-06",
+        "genre": "principale",
+        "libelle": "base de risotto à confirmer",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_10fvrp": {
+        "id": "prod_10fvrp",
+        "composantId": "comp_ag1m5",
+        "dateService": "2026-10-06",
+        "genre": "principale",
+        "libelle": "polenta crémeuse",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_11la3n": {
+        "id": "prod_11la3n",
+        "composantId": "comp_b1gox",
+        "dateService": "2026-10-06",
+        "genre": "principale",
+        "libelle": "gratin de courgettes",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_12upsc": {
+        "id": "prod_12upsc",
+        "composantId": "comp_cpyny",
+        "dateService": "2026-10-07",
+        "genre": "principale",
+        "libelle": "Rösti de pommes de terre",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_13jokg": {
+        "id": "prod_13jokg",
+        "composantId": "comp_d3287",
+        "dateService": "2026-10-07",
+        "genre": "principale",
+        "libelle": "saucisse de veau",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_14hwpv": {
+        "id": "prod_14hwpv",
+        "composantId": "comp_f0bej",
+        "dateService": "2026-10-07",
+        "genre": "principale",
+        "libelle": "riz basmati",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_15tafp": {
+        "id": "prod_15tafp",
+        "composantId": "comp_gmbal",
+        "dateService": "2026-10-07",
+        "genre": "principale",
+        "libelle": "épinards",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_1670tx": {
+        "id": "prod_1670tx",
+        "composantId": "comp_iwrld",
+        "dateService": "2026-10-08",
+        "genre": "principale",
+        "libelle": "Tagliatelles",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_17krxk": {
+        "id": "prod_17krxk",
+        "composantId": "comp_jjdiu",
+        "dateService": "2026-10-08",
+        "genre": "principale",
+        "libelle": "champignons",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_18fi2l": {
+        "id": "prod_18fi2l",
+        "composantId": "comp_kdzt6",
+        "dateService": "2026-10-08",
+        "genre": "principale",
+        "libelle": "sauce à confirmer",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_19e1mo": {
+        "id": "prod_19e1mo",
+        "composantId": "comp_mt22m",
+        "dateService": "2026-10-08",
+        "genre": "principale",
+        "libelle": "pommes de terre sautées",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_1avwui": {
+        "id": "prod_1avwui",
+        "composantId": "comp_nweou",
+        "dateService": "2026-10-08",
+        "genre": "principale",
+        "libelle": "haricots verts",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_1b7zgi": {
+        "id": "prod_1b7zgi",
+        "composantId": "comp_om4x0",
+        "dateService": "2026-10-09",
+        "genre": "principale",
+        "libelle": "Gnocchi",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_1cgnde": {
+        "id": "prod_1cgnde",
+        "composantId": "comp_pehbr",
+        "dateService": "2026-10-09",
+        "genre": "principale",
+        "libelle": "sauce tomate",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_1d1m6d": {
+        "id": "prod_1d1m6d",
+        "composantId": "comp_s4544",
+        "dateService": "2026-10-09",
+        "genre": "principale",
+        "libelle": "ratatouille",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_1vxdt2": {
+        "id": "prod_1vxdt2",
+        "composantId": "comp_1ej52j",
+        "dateService": "2026-10-12",
+        "genre": "principale",
+        "libelle": "Penne",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_1wa0tb": {
+        "id": "prod_1wa0tb",
+        "composantId": "comp_1fepy6",
+        "dateService": "2026-10-12",
+        "genre": "principale",
+        "libelle": "carbonara",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_1xp1ht": {
+        "id": "prod_1xp1ht",
+        "composantId": "comp_1hk7wy",
+        "dateService": "2026-10-12",
+        "genre": "principale",
+        "libelle": "polenta crémeuse",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_1yrmnc": {
+        "id": "prod_1yrmnc",
+        "composantId": "comp_1i6g1s",
+        "dateService": "2026-10-12",
+        "genre": "principale",
+        "libelle": "carottes Vichy",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_1z88vn": {
+        "id": "prod_1z88vn",
+        "composantId": "comp_1j5045",
+        "dateService": "2026-10-13",
+        "genre": "principale",
+        "libelle": "Farfalle",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_2065en": {
+        "id": "prod_2065en",
+        "composantId": "comp_1kty4o",
+        "dateService": "2026-10-13",
+        "genre": "principale",
+        "libelle": "sauce tomate",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_21oyjn": {
+        "id": "prod_21oyjn",
+        "composantId": "comp_1mvet4",
+        "dateService": "2026-10-13",
+        "genre": "principale",
+        "libelle": "riz basmati",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_22nvlg": {
+        "id": "prod_22nvlg",
+        "composantId": "comp_1ng76j",
+        "dateService": "2026-10-13",
+        "genre": "principale",
+        "libelle": "épinards",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_23m0pr": {
+        "id": "prod_23m0pr",
+        "composantId": "comp_1pja2l",
+        "dateService": "2026-10-14",
+        "genre": "principale",
+        "libelle": "Risotto",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_24gp84": {
+        "id": "prod_24gp84",
+        "composantId": "comp_1q0155",
+        "dateService": "2026-10-14",
+        "genre": "principale",
+        "libelle": "champignons",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_25o3bm": {
+        "id": "prod_25o3bm",
+        "composantId": "comp_1rc2pq",
+        "dateService": "2026-10-14",
+        "genre": "principale",
+        "libelle": "base de risotto à confirmer",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_26oyq3": {
+        "id": "prod_26oyq3",
+        "composantId": "comp_1trv42",
+        "dateService": "2026-10-14",
+        "genre": "principale",
+        "libelle": "riz pilaf",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      },
+      "prod_272kte": {
+        "id": "prod_272kte",
+        "composantId": "comp_1ui097",
+        "dateService": "2026-10-14",
+        "genre": "principale",
+        "libelle": "haricots verts",
+        "jourDecide": null,
+        "creneauDecide": null,
+        "etat": "a_faire",
+        "cibleAuDemarrage": null,
+        "quantiteReelle": null,
+        "unite": null,
+        "hFait": null,
+        "instantane": null,
+        "decisionEcart": null,
+        "avantFait": null,
+        "etapeCle": null,
+        "ordre": null
+      }
+    },
+    "regles": {},
+    "recettes": {},
+    "fournisseurs": {},
+    "memoire": {
+      "carbonara|1": {
+        "nom": "carbonara",
+        "attribue": true,
+        "type": "generique",
+        "categorie": "sauce",
+        "charge": null,
+        "parRole": {
+          "sauce": {
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      },
+      "escalope de veau|2": {
+        "nom": "Escalope de veau",
+        "attribue": false,
+        "type": "generique",
+        "categorie": "proteine",
+        "charge": null,
+        "parRole": {
+          "garniture": {
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      },
+      "cuisse de poulet rotie|2": {
+        "nom": "Cuisse de poulet rôtie",
+        "attribue": false,
+        "type": "generique",
+        "categorie": "proteine",
+        "charge": null,
+        "parRole": {
+          "garniture": {
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      },
+      "rosti de pommes de terre|1": {
+        "nom": "Rösti de pommes de terre",
+        "attribue": true,
+        "type": "generique",
+        "categorie": "feculent",
+        "charge": null,
+        "parRole": {
+          "plat_principal": {
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      },
+      "saucisse de veau|1": {
+        "nom": "saucisse de veau",
+        "attribue": true,
+        "type": "generique",
+        "categorie": "proteine",
+        "charge": null,
+        "parRole": {
+          "composant_recette": {
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      },
+      "filet de cabillaud|2": {
+        "nom": "Filet de cabillaud",
+        "attribue": false,
+        "type": "generique",
+        "categorie": "proteine",
+        "charge": null,
+        "parRole": {
+          "garniture": {
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      },
+      "creme|2": {
+        "nom": "crème",
+        "attribue": false,
+        "type": "generique",
+        "categorie": "sauce",
+        "charge": null,
+        "parRole": {
+          "sauce": {
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      },
+      "emince de volaille|2": {
+        "nom": "Émincé de volaille",
+        "attribue": false,
+        "type": "generique",
+        "categorie": "proteine",
+        "charge": null,
+        "parRole": {
+          "garniture": {
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      },
+      "gnocchi|1": {
+        "nom": "Gnocchi",
+        "attribue": true,
+        "type": "generique",
+        "categorie": "feculent",
+        "charge": null,
+        "parRole": {
+          "plat_principal": {
+            "grammage": {
+              "valeur": 80,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      },
+      "sauce tomate|1": {
+        "nom": "sauce tomate",
+        "attribue": true,
+        "type": "generique",
+        "categorie": "sauce",
+        "charge": null,
+        "parRole": {
+          "sauce": {
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      },
+      "poisson du marche|2": {
+        "nom": "Poisson du marché",
+        "attribue": false,
+        "type": "generique",
+        "categorie": "proteine",
+        "charge": null,
+        "parRole": {
+          "garniture": {
+            "grammage": {
+              "valeur": 150,
+              "unite": "g",
+              "statut": "SAISI_SERVICE",
+              "source": "corrigé pour ce plat seulement (validation de la portion)",
+              "etat": "cuit"
+            }
+          }
+        },
+        "etapes": {}
+      }
+    },
+    "mots": {
+      "farfalle": {
+        "categorie": "forme_pates",
+        "h": "2026-10-05T09:00:00"
+      }
+    },
+    "lignes_ignorees": {},
+    "noms": {},
+    "fiches_retenues": {
+      "carbonara": {
+        "categorie": "sauce",
+        "role": "sauce",
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit"
+        },
+        "nom": "carbonara",
+        "h": "2026-10-05T09:00:00"
+      },
+      "rosti de pommes de terre": {
+        "categorie": "feculent",
+        "role": "plat_principal",
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit"
+        },
+        "nom": "Rösti de pommes de terre",
+        "h": "2026-10-05T09:00:00"
+      },
+      "saucisse de veau": {
+        "categorie": "proteine",
+        "role": "composant_recette",
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit"
+        },
+        "nom": "saucisse de veau",
+        "h": "2026-10-05T09:00:00"
+      },
+      "gnocchi": {
+        "categorie": "feculent",
+        "role": "plat_principal",
+        "grammage": {
+          "valeur": 80,
+          "unite": "g",
+          "etat": "cuit"
+        },
+        "nom": "Gnocchi",
+        "h": "2026-10-05T09:00:00"
+      },
+      "sauce tomate": {
+        "categorie": "sauce",
+        "role": "sauce",
+        "grammage": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit"
+        },
+        "nom": "sauce tomate",
+        "h": "2026-10-05T09:00:00"
+      },
+      "penne": {
+        "categorie": "feculent",
+        "role": "plat_principal",
+        "nom": "Penne",
+        "famille": "pates_seches",
+        "h": "2026-10-05T18:30:00"
+      },
+      "riz pilaf": {
+        "categorie": "feculent",
+        "role": "garniture",
+        "attribue": true,
+        "nom": "riz pilaf",
+        "famille": "riz",
+        "h": "2026-10-05T18:30:00"
+      },
+      "carottes vichy": {
+        "categorie": "legume",
+        "role": "garniture",
+        "attribue": true,
+        "nom": "carottes Vichy",
+        "famille": "carottes",
+        "h": "2026-10-05T18:30:00"
+      },
+      "risotto": {
+        "categorie": "feculent",
+        "role": "plat_principal",
+        "nom": "Risotto",
+        "famille": "riz",
+        "h": "2026-10-05T18:30:00"
+      },
+      "champignons": {
+        "categorie": "legume",
+        "role": "plat_principal",
+        "nom": "champignons",
+        "h": "2026-10-05T18:30:00"
+      },
+      "polenta cremeuse": {
+        "categorie": "feculent",
+        "role": "garniture",
+        "attribue": true,
+        "nom": "polenta crémeuse",
+        "famille": "polenta",
+        "h": "2026-10-05T18:30:00"
+      },
+      "gratin de courgettes": {
+        "categorie": "legume",
+        "role": "garniture",
+        "attribue": true,
+        "nom": "gratin de courgettes",
+        "famille": "courgettes",
+        "h": "2026-10-05T18:30:00"
+      },
+      "riz basmati": {
+        "categorie": "feculent",
+        "role": "garniture",
+        "attribue": true,
+        "nom": "riz basmati",
+        "famille": "riz",
+        "h": "2026-10-05T18:30:00"
+      },
+      "epinards": {
+        "categorie": "legume",
+        "role": "garniture",
+        "attribue": true,
+        "nom": "épinards",
+        "h": "2026-10-05T18:30:00"
+      },
+      "tagliatelles": {
+        "categorie": "feculent",
+        "role": "plat_principal",
+        "nom": "Tagliatelles",
+        "famille": "pates_seches",
+        "h": "2026-10-05T18:30:00"
+      },
+      "pommes de terre sautees": {
+        "categorie": "feculent",
+        "role": "garniture",
+        "attribue": true,
+        "nom": "pommes de terre sautées",
+        "famille": "pommes_de_terre",
+        "h": "2026-10-05T18:30:00"
+      },
+      "haricots verts": {
+        "categorie": "legume",
+        "role": "garniture",
+        "attribue": true,
+        "nom": "haricots verts",
+        "h": "2026-10-05T18:30:00"
+      },
+      "ratatouille": {
+        "categorie": "legume",
+        "role": "garniture",
+        "attribue": true,
+        "nom": "ratatouille",
+        "h": "2026-10-05T18:30:00"
+      }
+    },
+    "standards": {
+      "carottes": {
+        "garniture": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit",
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "riz": {
+        "plat_principal": {
+          "valeur": 80,
+          "unite": "g",
+          "etat": "sec",
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "groupe:legumes": {
+        "plat_principal": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit",
+          "h": "2026-10-05T09:00:00"
+        },
+        "garniture": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit",
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "polenta": {
+        "garniture": {
+          "valeur": 80,
+          "unite": "g",
+          "etat": "sec",
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "courgettes": {
+        "garniture": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit",
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "pommes_de_terre": {
+        "garniture": {
+          "valeur": 150,
+          "unite": "g",
+          "etat": "cuit",
+          "h": "2026-10-05T09:00:00"
+        }
+      },
+      "pates_seches": {
+        "plat_principal": {
+          "valeur": 1000000000,
+          "unite": "g",
+          "etat": "sec",
+          "h": "2026-10-05T09:00:00"
+        }
+      }
+    },
+    "ajustements": {},
+    "produits": {},
+    "articlesCoches": {},
+    "lectures": {},
+    "validations": {},
+    "journal": [
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "saisirMenusSemaine",
+        "detail": "2026-10-05 : 10 menu(s), 0 prévision(s)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirCouvertsMidi",
+        "detail": "2026-10-05 : 40 couverts, menu 1 : 13, menu 2 : 27 (calculé)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirCouvertsMidi",
+        "detail": "2026-10-06 : 35 couverts, menu 1 : 12, menu 2 : 23 (calculé)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirCouvertsMidi",
+        "detail": "2026-10-07 : 0 couverts, menu 1 : 0, menu 2 : 0 (calculé)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirCouvertsMidi",
+        "detail": "2026-10-08 : 28 couverts, menu 1 : 9, menu 2 : 19 (calculé)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirCouvertsMidi",
+        "detail": "2026-10-09 : 31 couverts, menu 1 : 10, menu 2 : 21 (calculé)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirCouvertsMidi",
+        "detail": "2026-10-07 : 21 couverts, menu 1 : 15, menu 2 : 6 (décidé par vous)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "carbonara : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "carbonara"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "Escalope de veau : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "Escalope de veau"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirStandard",
+        "detail": "carottes garniture : 150 g (cuit)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirStandard",
+        "detail": "riz plat_principal : 80 g (sec)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirStandard",
+        "detail": "Légumes (catégorie) plat_principal : 150 g (cuit)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "Cuisse de poulet rôtie : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "Cuisse de poulet rôtie"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirStandard",
+        "detail": "polenta garniture : 80 g (sec)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirStandard",
+        "detail": "courgettes garniture : 150 g (cuit)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "Rösti de pommes de terre : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "Rösti de pommes de terre"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "saucisse de veau : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "saucisse de veau"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "Filet de cabillaud : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "Filet de cabillaud"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirStandard",
+        "detail": "Légumes (catégorie) garniture : 150 g (cuit)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "crème : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "crème"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "Émincé de volaille : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "Émincé de volaille"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirStandard",
+        "detail": "pommes_de_terre garniture : 150 g (cuit)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "Gnocchi : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "Gnocchi"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "sauce tomate : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "sauce tomate"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "modifierComposant",
+        "detail": "Poisson du marché : grammage"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "memoriser",
+        "detail": "Poisson du marché"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "definirStandard",
+        "detail": "pates_seches plat_principal : 1000000000 g (sec)"
+      },
+      {
+        "h": "2026-10-05T10:00:00",
+        "action": "marquerFait",
+        "detail": "Penne : 13000000000"
+      },
+      {
+        "h": "2026-10-05T10:00:00",
+        "action": "marquerFait",
+        "detail": "carbonara : 1950"
+      },
+      {
+        "h": "2026-10-05T10:00:00",
+        "action": "marquerFait",
+        "detail": "riz pilaf : 1620"
+      },
+      {
+        "h": "2026-10-05T10:00:00",
+        "action": "marquerFait",
+        "detail": "carottes Vichy : 1500"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "cocherArticle",
+        "detail": "champignons (champignons) : coché"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "cocherArticle",
+        "detail": "champignons (champignons) : décoché"
+      },
+      {
+        "h": "2026-10-05T15:00:00",
+        "action": "saisirVentes",
+        "detail": "2026-10-05 menu 1 : 20"
+      },
+      {
+        "h": "2026-10-05T15:00:00",
+        "action": "saisirVentes",
+        "detail": "2026-10-05 menu 2 : 15"
+      },
+      {
+        "h": "2026-10-06T15:00:00",
+        "action": "saisirVentes",
+        "detail": "2026-10-06 menu 1 : 21"
+      },
+      {
+        "h": "2026-10-06T15:00:00",
+        "action": "saisirVentes",
+        "detail": "2026-10-06 menu 2 : 16"
+      },
+      {
+        "h": "2026-10-07T15:00:00",
+        "action": "saisirVentes",
+        "detail": "2026-10-07 menu 1 : 22"
+      },
+      {
+        "h": "2026-10-07T15:00:00",
+        "action": "saisirVentes",
+        "detail": "2026-10-07 menu 2 : 17"
+      },
+      {
+        "h": "2026-10-08T15:00:00",
+        "action": "saisirVentes",
+        "detail": "2026-10-08 menu 1 : 23"
+      },
+      {
+        "h": "2026-10-08T15:00:00",
+        "action": "saisirVentes",
+        "detail": "2026-10-08 menu 2 : 18"
+      },
+      {
+        "h": "2026-10-09T15:00:00",
+        "action": "saisirVentes",
+        "detail": "2026-10-09 menu 1 : 24"
+      },
+      {
+        "h": "2026-10-09T15:00:00",
+        "action": "saisirVentes",
+        "detail": "2026-10-09 menu 2 : 19"
+      },
+      {
+        "h": "2026-10-05T18:30:00",
+        "action": "retenirElements",
+        "detail": "semaine du 2026-10-05 : 13 élément(s)"
+      },
+      {
+        "h": "2026-10-05T09:00:00",
+        "action": "retenirMot",
+        "detail": "farfalle = forme de pâtes (0 élément(s) reclassé(s))"
+      },
+      {
+        "h": "2026-10-12T09:00:00",
+        "action": "saisirMenusSemaine",
+        "detail": "2026-10-12 : 6 menu(s), 0 prévision(s)"
+      },
+      {
+        "h": "2026-10-12T09:00:00",
+        "action": "definirCouvertsMidi",
+        "detail": "2026-10-12 : 45 couverts, menu 1 : 15, menu 2 : 30 (calculé)"
+      },
+      {
+        "h": "2026-10-12T09:00:00",
+        "action": "definirCouvertsMidi",
+        "detail": "2026-10-13 : 33 couverts, menu 1 : 11, menu 2 : 22 (calculé)"
+      },
+      {
+        "h": "2026-10-12T09:00:00",
+        "action": "definirCouvertsMidi",
+        "detail": "2026-10-14 : 38 couverts, menu 1 : 13, menu 2 : 25 (calculé)"
+      }
+    ]
+  }
+}

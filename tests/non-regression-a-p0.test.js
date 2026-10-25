@@ -135,7 +135,7 @@ test('tâches : une quantité absente ne fait jamais disparaître une tâche du 
   const e = semaineSansQuantites();
   const f = feuilleDuJour(e, S.samedi);
   const visibles = new Set([
-    ...f.aFaire.flatMap((g) => g.taches), ...f.attendus, ...f.dejaPret, ...f.decisions, ...f.quantitesManquantes, ...f.aAvancer,
+    ...f.aFaire, ...f.attendus, ...f.dejaPret, ...f.decisions, ...f.quantitesManquantes, ...f.aAvancer,
   ].map((t) => t.productionId));
   const attendues = Object.values(e.productions).filter((p) => p.dateService === S.lundiSuivant);
   assert.ok(attendues.length >= 4, 'le jeu doit avoir des productions pour le lundi');
@@ -146,7 +146,7 @@ test('tâches : avec quantités, avance et fiche, chaque production du lundi res
   const e = semaineComplete();
   const f = feuilleDuJour(e, S.samedi);
   const visibles = new Set([
-    ...f.aFaire.flatMap((g) => g.taches), ...f.attendus, ...f.dejaPret, ...f.decisions, ...f.quantitesManquantes, ...f.aAvancer,
+    ...f.aFaire, ...f.attendus, ...f.dejaPret, ...f.decisions, ...f.quantitesManquantes, ...f.aAvancer,
   ].map((t) => t.productionId));
   for (const p of Object.values(e.productions).filter((x) => x.dateService === S.lundiSuivant)) {
     assert.ok(visibles.has(p.id), `la production ${p.libelle} a disparu de la feuille du samedi`);
@@ -157,7 +157,7 @@ test('tâches : un changement de prévision (40 à 46) ne supprime ni ne défait
   const e = etatVide();
   prevision(e, S.mercredi, 1, 40);
   const id = principaleDe(e, composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST));
-  planifier(e, id, S.mardi, 'apres_midi', h());
+  planifier(e, id, S.mardi, h());
   marquerFait(e, id, undefined, h(1));
   const avant = structuredClone(e.productions[id]);
   definirPrevision(e, S.mercredi, 1, 46, h(2));
@@ -177,9 +177,9 @@ test('tâches : tout déplacement ou retrait de tâche laisse une trace dans le 
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
   const id = principaleDe(e, c);
-  planifier(e, id, S.mardi, 'apres_midi', h(1));
-  reporter(e, id, S.lundi, 'avant_midi', h(2));
-  reporter(e, id, null, null, h(3));
+  planifier(e, id, S.mardi, h(1));
+  reporter(e, id, S.lundi, h(2));
+  reporter(e, id, null, h(3));
   const actions = e.journal.map((j) => j.action);
   for (const attendue of ['planifier', 'reporter']) assert.ok(actions.includes(attendue), `${attendue} absent du journal`);
   supprimerComposant(e, c, h(4));
@@ -191,7 +191,7 @@ test('tâches : tout déplacement ou retrait de tâche laisse une trace dans le 
 test('persistance : un « fait », une correction de réel et une annulation survivent à un export puis un import', () => {
   const e = semaineComplete();
   const fait = Object.values(e.productions).find((p) => e.composants[p.composantId]?.nom === 'riz');
-  planifier(e, fait.id, S.samedi, 'apres_midi', h(1));
+  planifier(e, fait.id, S.samedi, h(1));
   marquerFait(e, fait.id, undefined, h(2));
   corrigerReel(e, fait.id, 2900, h(3));
   const relu = importer(exporter(e, h(4)));
@@ -209,21 +209,21 @@ test('persistance : un « fait », une correction de réel et une annulation sur
 
 const RUBRIQUES_REGLAGES = ['standards-base', 'standards', 'reperes', 'organisation', 'produits', 'assistant-ia', 'apprentissage', 'donnees'];
 
-test('inventaire : les dix blocs de Réglages existent TOUS, répartis sur les sous-pages (jamais en perdre un)', () => {
+test('inventaire : les neuf blocs de Réglages existent TOUS, répartis sur les sous-pages (jamais en perdre un)', () => {
   magasin.remplacer(etatVide());
   const titresDe = (param) => vues.reglages.rendre(magasin.etat(), param).tous((x) => x.balise === 'h2').map((x) => x.textContent);
   const parPage = {
     standards: ['Standards maison', 'Références maison mémorisées'],
-    organisation: ['Semaine type des créneaux', 'Règles de préparation'],
+    organisation: ['Règles de préparation'],
     produits: ['Recettes du restaurant', 'Fournisseurs', 'Commandes'],
     donnees: ['Sauvegarde', "État de l'application", 'Journal des modifications'],
   };
-  assert.equal(Object.values(parPage).flat().length, 10);
+  assert.equal(Object.values(parPage).flat().length, 9);
   for (const [rubrique, attendus] of Object.entries(parPage)) {
     const titres = titresDe(rubrique);
     for (const attendu of attendus) assert.ok(titres.includes(attendu), `le bloc « ${attendu} » a disparu de la sous-page ${rubrique}`);
   }
-  // La racine reste courte : aucun des dix blocs, seulement des titres de section et les six rubriques (plus retour et Import des menus).
+  // La racine reste courte : aucun des neuf blocs, seulement des titres de section et les six rubriques (plus retour et Import des menus).
   const racine = vues.reglages.rendre(magasin.etat(), null);
   const blocs = Object.values(parPage).flat();
   assert.deepEqual(racine.tous((x) => x.balise === 'h2').map((x) => x.textContent).filter((t) => blocs.includes(t)), []);
@@ -262,7 +262,7 @@ test('tâches : modifier un menu qui retire un plat non fait le dit dans le jour
   prevision(e, S.lundi, 1, 40);
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h(2));
   const carottes = Object.values(e.productions).find((p) => e.composants[p.composantId]?.nom === 'carottes');
-  planifier(e, carottes.id, S.samediPrecedent, 'apres_midi', h(3));
+  planifier(e, carottes.id, S.samediPrecedent, h(3));
   const avant = e.journal.length;
   definirMenu(e, S.lundi, 1, 'riz, courgettes', h(4));
   assert.equal(Object.values(e.composants).some((c) => c.nom === 'carottes'), false, 'le composant retiré disparaît du menu');
@@ -276,7 +276,7 @@ test('tâches : modifier un menu ne supprime jamais une tâche déjà faite', ()
   prevision(e, S.lundi, 1, 40);
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h(2));
   const carottes = Object.values(e.productions).find((p) => e.composants[p.composantId]?.nom === 'carottes');
-  planifier(e, carottes.id, S.samediPrecedent, 'apres_midi', h(3));
+  planifier(e, carottes.id, S.samediPrecedent, h(3));
   marquerFait(e, carottes.id, undefined, h(4));
   definirMenu(e, S.lundi, 1, 'riz, courgettes', h(5));
   assert.equal(e.productions[carottes.id]?.etat, 'fait', 'la tâche faite est conservée');

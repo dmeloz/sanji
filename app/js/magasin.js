@@ -98,6 +98,7 @@ export async function charger() {
         const bilan = importerAvecBilan(texteBrut, aujourdhui());
         etatCourant = bilan.etat;
         if (bilan.ecartes > 0) await signalerEcartes(texteBrut, bilan.ecartes);
+        if (bilan.migrations.length > 0) { signaler('Ancienne sauvegarde mise à jour : créneaux horaires retirés.', 'info'); ecrire(); } // réenregistré : le message ne revient pas à la prochaine ouverture
       } catch (erreur) {
         statut.illisible = true;
         statut.enregistre = false;

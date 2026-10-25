@@ -15,7 +15,7 @@ function productionPlanifiee() {
   prevision(e, S.mercredi, 1, 10);
   const c = composantValide(e, S.mercredi, 1, J.PRODUIT_SEC_TEST);
   const p = principaleDe(e, c);
-  planifier(e, p, S.mardi, 'apres_midi', h());
+  planifier(e, p, S.mardi, h());
   return { e, p };
 }
 

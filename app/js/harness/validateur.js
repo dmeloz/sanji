@@ -2,13 +2,10 @@
 // structure fermée, références vérifiées dans l'état, puis rejeu à blanc sur une copie avec les fonctions du domaine.
 // Une erreur refuse le brouillon ; un manque de donnée devient un point « à décider » sans commande.
 
-import { creneauxDuJour, estOuvert, joursEntre } from '../domaine/dates.js';
+import { estOuvert, joursEntre } from '../domaine/dates.js';
 import { planifier } from '../domaine/actions.js';
 import { arrondirQuantite, calculerComposant } from '../domaine/calcul.js';
-import {
-  chargeCreneau, etatCreneau, etatTache, evaluerAvance, regleDe, repereConservation, sansAvanceParDefaut,
-} from '../domaine/planification.js';
-import { CRENEAU, POINTS_CHARGE } from '../domaine/statuts.js';
+import { etatTache, evaluerAvance, regleDe, repereConservation, sansAvanceParDefaut } from '../domaine/planification.js';
 import { verifierSchema } from './contrats.js';
 
 export const SCHEMA_BROUILLON = Object.freeze({
@@ -22,7 +19,6 @@ export const SCHEMA_BROUILLON = Object.freeze({
         champs: {
           productionId: { type: 'texte' },
           date: { type: 'date' },
-          creneau: { type: 'texte', valeurs: Object.values(CRENEAU) },
           quantite: { type: 'objet', optionnel: true, champs: { libelle: { type: 'texte' } } },
         },
       },
@@ -51,29 +47,23 @@ export function quantiteDe(etat, composantId) {
 }
 
 /**
- * Contrôle un item sur la copie de simulation `sim` (qui reçoit ensuite l'item, pour que les suivants voient la charge).
+ * Contrôle un item sur la copie de simulation `sim` (qui reçoit ensuite l'item, pour que les suivants voient son jour :
+ * ordre des étapes d'un même composant).
  * @returns {{erreurs:string[], item?:object, aDecider?:object}}
  */
 function controlerItem(sim, brut, aujourdhui, h) {
-  const { productionId, date, creneau } = brut;
+  const { productionId, date } = brut;
   const p = Object.hasOwn(sim.productions ?? {}, productionId) ? sim.productions[productionId] : null;
   const erreurs = [];
   if (!p) return { erreurs: [`production inconnue : ${productionId}`] };
   const composant = Object.hasOwn(sim.composants ?? {}, p.composantId) ? sim.composants[p.composantId] : null;
   if (!composant) return { erreurs: [`composant introuvable pour ${productionId}`] };
-  if (p.etat !== 'a_faire' || p.jourDecide || p.creneauDecide) erreurs.push(`${composant.nom} : déjà planifiée, commencée ou faite`);
+  if (p.etat !== 'a_faire' || p.jourDecide) erreurs.push(`${composant.nom} : déjà planifiée, commencée ou faite`);
   if (!estOuvert(date)) erreurs.push(`${composant.nom} : ${date} est un jour non travaillé`);
-  else if (!creneauxDuJour(date).includes(creneau)) erreurs.push(`${composant.nom} : le créneau ${creneau} n'existe pas le ${date}`);
   if (joursEntre(date, p.dateService) < 0) erreurs.push(`${composant.nom} : ${date} est après le service du ${p.dateService}`);
   if (aujourdhui && date < aujourdhui) erreurs.push(`${composant.nom} : ${date} est déjà passé`);
   if (erreurs.length) return { erreurs };
 
-  if (etatCreneau(sim, date, creneau) !== 'libre') return { erreurs: [`${composant.nom} : le créneau ${creneau} du ${date} n'est pas libre`] };
-  const charge = chargeCreneau(sim, date, creneau);
-  const points = POINTS_CHARGE[composant.charge] ?? 0;
-  if (Number.isFinite(charge.capacite) && charge.points + points > charge.capacite) {
-    return { erreurs: [`${composant.nom} : le créneau ${creneau} du ${date} dépasse sa capacité`] };
-  }
   if (sansAvanceParDefaut(sim, composant, p) && date !== p.dateService) {
     return { erreurs: [`${composant.nom} : base du menu 1, à faire le jour même du service`] };
   }
@@ -91,8 +81,9 @@ function controlerItem(sim, brut, aujourdhui, h) {
   if (brut.quantite && brut.quantite.libelle !== quantite.libelle) {
     return { erreurs: [`${composant.nom} : quantité annoncée « ${brut.quantite.libelle} » différente du calcul « ${quantite.libelle} »`] };
   }
+  // Rejeu du domaine sur la copie : attrape ce que `planifier` refuse (ordre des étapes d'un même composant).
   try {
-    planifier(sim, productionId, date, creneau, h);
+    planifier(sim, productionId, date, h);
   } catch (erreur) {
     return { erreurs: [`${composant.nom} : ${erreur.message}`] };
   }
@@ -103,8 +94,8 @@ function controlerItem(sim, brut, aujourdhui, h) {
     erreurs: [],
     item: {
       id: `item-${productionId}`, productionId, composantId: composant.id, nom: composant.nom, dateService: p.dateService,
-      date, creneau, quantite, evaluation: resumerEvaluation(evaluation), exigeConfirmation: false, motifs,
-      commande: { outil: 'planifier_production', entrees: { productionId, date, creneau } },
+      date, quantite, evaluation: resumerEvaluation(evaluation), exigeConfirmation: false, motifs,
+      commande: { outil: 'planifier_production', entrees: { productionId, date } },
     },
   };
 }
@@ -135,7 +126,7 @@ export function controlerBrouillon(brouillon, etat, { h, aujourdhui = null }) {
     if (r.aDecider) aDecider.push({ id: `decider-${r.aDecider.productionId}`, ...r.aDecider });
   }
   controles.push(
-    { nom: 'références, jours, créneaux et capacité', ok: erreurs.length === 0, detail: erreurs[0] },
+    { nom: 'références, jours et ordre des étapes', ok: erreurs.length === 0, detail: erreurs[0] },
     { nom: "règles d'avance et de conservation (rejeu du domaine)", ok: erreurs.length === 0 },
     { nom: 'quantités recalculées par le domaine', ok: true },
   );

@@ -72,18 +72,10 @@ export function aMenuDuJour(date) {
   return jourSemaine(date) <= 5;
 }
 
-/** Créneaux de travail du jour : lundi/mardi sans « avant_soir », dimanche aucun. */
-export function creneauxDuJour(date) {
+/** Service du soir du mercredi au samedi ; lundi et mardi n'en ont pas, le dimanche est fermé. Information de calendrier, sans effet sur les calculs. */
+export function aServiceDuSoir(date) {
   const j = jourSemaine(date);
-  if (j === 7) return [];
-  if (j <= 2) return ['avant_midi', 'apres_midi'];
-  return ['avant_midi', 'apres_midi', 'avant_soir'];
-}
-
-/** Créneaux d'un jour de semaine donné (1 à 7), sans date. */
-export function creneauxDuJourSemaine(numeroJour) {
-  if (numeroJour === 7) return [];
-  return numeroJour <= 2 ? ['avant_midi', 'apres_midi'] : ['avant_midi', 'apres_midi', 'avant_soir'];
+  return j >= 3 && j <= 6;
 }
 
 /** Libellé court, par exemple « lundi 5 octobre » (« 1er » pour le premier du mois). */

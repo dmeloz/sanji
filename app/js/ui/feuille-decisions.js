@@ -18,7 +18,7 @@ import { dialogAllergenes, dialogChoisirSauce, dialogModifier, texteObstacleAlle
 
 const ETIQUETTE_POINT = {
   allergenes: 'Allergènes à confirmer', conservation: 'Conservation à confirmer', composant_inconnu: 'À classer',
-  creneau_charge: 'Créneau chargé', repartition_incoherente: 'Répartition incohérente', semaine_type: 'Semaine type à confirmer', etat_poids_portion: 'État du poids à confirmer',
+  repartition_incoherente: 'Répartition incohérente', etat_poids_portion: 'État du poids à confirmer',
 };
 const ROLE_EN_CLAIR = { plat_principal: 'en plat principal', garniture: 'en garniture' };
 

@@ -9,7 +9,7 @@ import { propositionsApprentissage } from './apprentissage.js';
 import { ajouterJours, jourSemaine, lundiDe } from './dates.js';
 import { estSauceAConfirmer } from './etat.js';
 import { cibleProduction, ecartProduction, etatTache, evaluationProduction, reelNonCompte } from './planification.js';
-import { pointsAConfirmer, pointsGlobaux } from './points.js';
+import { pointsAConfirmer } from './points.js';
 import { portionsCuitesSuspectes, valeursAValider } from './validation.js';
 
 /** Points de quantité manquante : jamais une décision. */
@@ -93,7 +93,6 @@ export function decisionsDe(etat, aujourd) {
       }
     }
   }
-  for (const pt of pointsGlobaux(etat)) cartes.push({ id: `point:${pt.type}`, genre: 'point', type: pt.type, texte: pt.texte, composantId: null, ficheId: null, date: null });
 
   for (const c of Object.values(etat.composants ?? {})) {
     if (dates.includes(c.date) && estSauceAConfirmer(c)) {

@@ -145,7 +145,7 @@ test('feuille Jour : une tâche planifiée aujourd\'hui à quantité inconnue n\
   const e = etatVide();
   prevision(e, S.lundi, 1, 10);
   const c = composantValide(e, S.lundi, 1, J.PRODUIT_SEC_TEST, { grammage: { valeur: null, unite: 'g', statut: 'INCONNU', source: '' } });
-  planifier(e, principaleDe(e, c), S.lundi, 'avant_midi', h());
+  planifier(e, principaleDe(e, c), S.lundi, h());
   const { lecture } = feuilleDuJour(e, S.lundi);
   const lignes = [...lecture.service1, ...lecture.service2, ...lecture.autres, ...lecture.apres].filter((l) => l.productionId === principaleDe(e, c));
   assert.equal(lignes.length, 1, 'une seule ligne');

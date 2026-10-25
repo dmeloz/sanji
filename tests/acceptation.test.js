@@ -5,16 +5,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  ajouterAdaptation, ajouterPreparatoire, annulerFiche, confirmerRepartition, creerFiche, definirCapacite,
-  definirCreneau, definirFournisseur, definirRegle, definirStandard, deciderEcart, marquerFait,
+  ajouterAdaptation, ajouterPreparatoire, annulerFiche, confirmerRepartition, creerFiche,
+  definirFournisseur, definirRegle, definirStandard, deciderEcart, marquerFait,
   memoriser, modifierComposant, modifierFiche, planifier, reprendreMemoire, saisirMenusSemaine,
 } from '../app/js/domaine/actions.js';
 import * as allergenes from '../app/js/domaine/allergenes.js';
 import { calculerComposant, portionsMenu } from '../app/js/domaine/calcul.js';
-import { creneauxDuJour, joursEntre } from '../app/js/domaine/dates.js';
+import { aServiceDuSoir, joursEntre } from '../app/js/domaine/dates.js';
 import { exporter, importer } from '../app/js/domaine/etat.js';
 import {
-  chargeCreneau, ecartProduction, etatTache, evaluerAvance, feuilleDuJour, suggererCreneau,
+  ecartProduction, etatTache, evaluerAvance, feuilleDuJour, suggererJour,
 } from '../app/js/domaine/planification.js';
 import { pointsAConfirmer } from '../app/js/domaine/points.js';
 import { besoinsProduits } from '../app/js/domaine/produits.js';
@@ -26,7 +26,7 @@ import { JEU_MENUS as M, JEU_STANDARDS as ST } from './jeux/TEST_ONLY-savoir.js'
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, copie, etatVide, h, menuValide, prevision, principaleDe, recetteValidee } from './aide.js';
 
-const tachesDe = (feuille) => feuille.aFaire.flatMap((g) => g.taches);
+const tachesDe = (feuille) => feuille.aFaire;
 
 test('1. Un produit sec et une préparation maison du même menu affichent chacun l\'unité correspondant à leur usage ; une fiche recette absente ne masque pas une tâche simple', () => {
   const etat = etatVide();
@@ -50,7 +50,7 @@ test('1. Un produit sec et une préparation maison du même menu affichent chacu
   assert.ok(cPrep.manquants.includes('recette'));
 
   const idPrep = principaleDe(etat, prep);
-  planifier(etat, idPrep, S.lundi, 'avant_midi', h());
+  planifier(etat, idPrep, S.lundi, h());
   const tache = tachesDe(feuilleDuJour(etat, S.lundi)).find((t) => t.productionId === idPrep);
   assert.ok(tache, 'la tâche de la préparation sans recette figure sur la feuille');
   assert.equal(tache.cible, 2000);
@@ -132,7 +132,7 @@ test('4. Un composant générique reste planifiable en portions ; sa composition
 
   const prod = principaleDe(etat, id);
   assert.equal(etatTache(etat, prod), 'a_planifier');
-  planifier(etat, prod, S.lundi, 'avant_midi', h());
+  planifier(etat, prod, S.lundi, h());
   assert.equal(etatTache(etat, prod), 'a_faire');
 
   // Aucune commande détaillée : le composant est signalé à part, sans quantité inventée.
@@ -171,7 +171,7 @@ test('6. Une hausse de prévision après production conserve la quantité réell
   prevision(etat, S.lundi, 1, 40);
   const id = composantValide(etat, S.lundi, 1, J.PRODUIT_SEC_TEST);
   const prod = principaleDe(etat, id);
-  planifier(etat, prod, S.lundi, 'avant_midi', h());
+  planifier(etat, prod, S.lundi, h());
   marquerFait(etat, prod, undefined, h());
   assert.equal(etat.productions[prod].quantiteReelle, 2000);
   const figee = copie(etat.productions[prod].instantane);
@@ -187,7 +187,7 @@ test('6. Une hausse de prévision après production conserve la quantité réell
   assert.equal(etat.productions[prod].quantiteReelle, 2000);
   assert.equal(complement.genre, 'complement');
   assert.equal(etatTache(etat, prod), 'fait');
-  planifier(etat, complement.id, S.lundi, 'avant_midi', h());
+  planifier(etat, complement.id, S.lundi, h());
   marquerFait(etat, complement.id, undefined, h()); // cible du complément = 500
   assert.equal(etat.productions[complement.id].quantiteReelle, 500);
   assert.equal(ecartProduction(etat, id), 0);
@@ -202,7 +202,7 @@ test('7. Une production avancée pour la semaine suivante reste liée à son ser
   prevision(etat, S.lundiSuivant, 1, 20);
   const id = composantValide(etat, S.lundiSuivant, 1, J.PRODUIT_SEC_TEST);
   const prod = principaleDe(etat, id);
-  planifier(etat, prod, S.samedi, 'avant_soir', h());
+  planifier(etat, prod, S.samedi, h());
   assert.equal(etat.productions[prod].dateService, S.lundiSuivant, 'toujours liée à son service');
   assert.equal(etat.productions[prod].jourDecide, S.samedi);
   assert.equal(joursEntre(S.samedi, S.lundiSuivant), 2, 'le dimanche compte');
@@ -218,7 +218,7 @@ test('7. Une production avancée pour la semaine suivante reste liée à son ser
   // Jamais autorisée globalement : une règle propre à une préparation ne s'applique pas aux autres.
   definirRegle(etat, { nom: 'PREPARATION_TEST', avanceMaxJours: 3, limiteUtilisationJours: 3 }, h());
   const autre = composantValide(etat, S.mardiSuivant, 1, J.PRODUIT_CRU_TEST);
-  planifier(etat, principaleDe(etat, autre), S.samedi, 'apres_midi', h());
+  planifier(etat, principaleDe(etat, autre), S.samedi, h());
   assert.equal(pointsAConfirmer(etat, S.mardiSuivant).some((p) => p.type === 'avance_hors_regle'), true);
 });
 
@@ -254,25 +254,18 @@ test('8. Une allergie de groupe reste visible ; aucune compatibilité n\'est aff
   assert.equal(allergenes.alertesAllergenes(etat, S.mercredi).length, 1);
 });
 
-test('10. Un délai de commande dépassé ou inconnu est signalé ; la charge d\'un créneau n\'est pas présentée comme une durée de travail mesurée', () => {
+test('10. Un délai de commande dépassé ou inconnu est signalé ; la charge d\'un composant reste une simple information (courte, moyenne, longue), jamais une durée', () => {
   const etat = etatVide();
   prevision(etat, S.lundi, 1, 40);
   composantValide(etat, S.lundi, 1, J.PRODUIT_SEC_TEST);
   const ligne = besoinsProduits(etat, S.lundi).lignes[0];
   assert.equal(ligne.premiereUtilisation, S.lundi);
 
-  // La charge est exprimée en points d'échelle courte/moyenne/longue, jamais en minutes.
   const prep = composantValide(etat, S.lundi, 1, J.PREPARATION_TEST); // charge longue
-  planifier(etat, principaleDe(etat, prep), S.lundi, 'avant_midi', h());
-  const charge = chargeCreneau(etat, S.lundi, 'avant_midi');
-  assert.equal(charge.longues, 1);
-  assert.equal(charge.points, 3);
-  assert.equal(charge.capacite, null);
-  assert.equal(charge.surcharge, false, 'sans capacité réglée, aucune alerte de capacité');
-  assert.equal(Object.keys(charge).some((k) => /minute|duree|temps|heure/i.test(k)), false);
-  assert.equal(JSON.stringify(charge).toLowerCase().includes('minute'), false);
-  definirCapacite(etat, 2, h());
-  assert.equal(chargeCreneau(etat, S.lundi, 'avant_midi').surcharge, true);
+  assert.equal(etat.composants[prep].charge, 'longue');
+  const r = planifier(etat, principaleDe(etat, prep), S.lundi, h());
+  assert.deepEqual(r.alertes, [], 'aucune alerte de charge ni de capacité');
+  assert.equal(JSON.stringify(r).toLowerCase().includes('minute'), false);
 });
 
 test('11. En mode avion sur l\'appareil ciblé, lecture des menus enregistrés, saisie manuelle, calculs, statuts, sauvegarde et export restent possibles (part domaine)', () => {
@@ -284,7 +277,7 @@ test('11. En mode avion sur l\'appareil ciblé, lecture des menus enregistrés, 
   prevision(etat, S.lundi, 1, 40);
   const id = composantValide(etat, S.lundi, 1, J.PRODUIT_SEC_TEST);
   const prod = principaleDe(etat, id);
-  planifier(etat, prod, S.lundi, 'avant_midi', h());
+  planifier(etat, prod, S.lundi, h());
   marquerFait(etat, prod, undefined, h());
   creerFiche(etat, { date: S.lundi, service: 'midi', couverts: 5, mode: 'menu_fixe', menuFixe: 1 }, h());
   definirFournisseur(etat, { nom: 'FOURNISSEUR_TEST', delaiJours: 2 }, h());
@@ -298,24 +291,23 @@ test('11. En mode avion sur l\'appareil ciblé, lecture des menus enregistrés, 
   assert.equal(exporter(relu, h(9)), texte, 'second export identique');
 });
 
-test('12. Une production se planifie sur un créneau (avant midi, après midi, avant soir) et non sur une simple date ; lundi et mardi n\'ont pas de créneau avant soir, dimanche n\'en a aucun', () => {
-  assert.deepEqual(creneauxDuJour(S.lundi), ['avant_midi', 'apres_midi']);
-  assert.deepEqual(creneauxDuJour(S.mardi), ['avant_midi', 'apres_midi']);
-  assert.deepEqual(creneauxDuJour(S.jeudi), ['avant_midi', 'apres_midi', 'avant_soir']);
-  assert.deepEqual(creneauxDuJour(S.samedi), ['avant_midi', 'apres_midi', 'avant_soir']);
-  assert.deepEqual(creneauxDuJour(S.dimanche), []);
+test('12. Une production se planifie sur une DATE seule (plus de créneau) ; lundi et mardi n\'ont pas de service du soir, le dimanche est fermé', () => {
+  assert.equal(aServiceDuSoir(S.lundi), false);
+  assert.equal(aServiceDuSoir(S.mardi), false);
+  assert.equal(aServiceDuSoir(S.jeudi), true);
+  assert.equal(aServiceDuSoir(S.samedi), true);
+  assert.equal(aServiceDuSoir(S.dimanche), false);
 
   const etat = etatVide();
   prevision(etat, S.vendredi, 1, 4);
   const id = composantValide(etat, S.vendredi, 1, J.PRODUIT_SEC_TEST);
   const prod = principaleDe(etat, id);
-  assert.throws(() => planifier(etat, prod, S.jeudi, undefined, h()), /Créneau/i, 'une date seule ne suffit pas');
-  assert.throws(() => planifier(etat, prod, S.lundi, 'avant_soir', h()), /Créneau|créneau/);
-  assert.throws(() => planifier(etat, prod, S.mardi, 'avant_soir', h()), /Créneau|créneau/);
-  assert.throws(() => planifier(etat, prod, S.dimanche, 'avant_midi', h()), /dimanche/i);
-  planifier(etat, prod, S.jeudi, 'avant_soir', h());
+  assert.throws(() => planifier(etat, prod, S.dimanche, h()), /dimanche/i);
+  assert.throws(() => planifier(etat, prod, S.samedi, h()), /après son service/);
+  planifier(etat, prod, S.jeudi, h());
   assert.equal(etat.productions[prod].jourDecide, S.jeudi);
-  assert.equal(etat.productions[prod].creneauDecide, 'avant_soir');
+  assert.equal('creneauDecide' in etat.productions[prod], false);
+  assert.match(etat.journal.at(-1).detail, new RegExp(` -> ${S.jeudi}$`));
 });
 
 test('13. Une avance du samedi pour le lundi est acceptée avec « conservation à confirmer » si la limite maison manque ; une avance de plus de deux jours sans règle validée est signalée hors règle et ne couvre pas le besoin', () => {
@@ -326,7 +318,7 @@ test('13. Une avance du samedi pour le lundi est acceptée avec « conservation 
   const pourMardi = composantValide(etat, S.mardiSuivant, 1, { ...J.PRODUIT_SEC_TEST, nom: 'PRODUIT_SEC_BIS_TEST' });
 
   // Samedi -> lundi : 2 jours, acceptée, conservation à confirmer.
-  const a = planifier(etat, principaleDe(etat, pourLundi), S.samedi, 'apres_midi', h());
+  const a = planifier(etat, principaleDe(etat, pourLundi), S.samedi, h());
   assert.equal(a.evaluation.autorisee, true);
   assert.equal(a.evaluation.couvre, true);
   assert.equal(a.evaluation.conservation, 'a_confirmer');
@@ -341,7 +333,7 @@ test('13. Une avance du samedi pour le lundi est acceptée avec « conservation 
     assert.equal(ev.couvre, false);
     assert.ok(ev.alertes.some((x) => x.includes('hors règle')));
   }
-  const b = planifier(etat, principaleDe(etat, pourMardi), S.samedi, 'avant_midi', h()); // permis, mais signalé
+  const b = planifier(etat, principaleDe(etat, pourMardi), S.samedi, h()); // permis, mais signalé
   assert.equal(b.evaluation.couvre, false);
   assert.ok(pointsAConfirmer(etat, S.mardiSuivant).some((p) => p.type === 'avance_hors_regle'));
   // Fait hors règle : le besoin reste à couvrir (pas de produit fini marqué couvert).
@@ -355,46 +347,20 @@ test('13. Une avance du samedi pour le lundi est acceptée avec « conservation 
   assert.equal(ecartProduction(etat, pourLundi), 0);
 });
 
-test('14. Un créneau signalé chargé ou indisponible par la carte n\'est jamais proposé automatiquement ; ce signalement ne crée ni portion ni recette de carte', () => {
+test('14. La suggestion de jour ne planifie jamais seule et ne crée ni portion ni recette de carte', () => {
   const etat = etatVide();
   prevision(etat, S.lundiSuivant, 1, 20);
   const id = composantValide(etat, S.lundiSuivant, 1, J.PRODUIT_SEC_TEST);
   const prod = principaleDe(etat, id);
-  assert.deepEqual(suggererCreneau(etat, prod).creneau, 'avant_midi');
-  assert.equal(suggererCreneau(etat, prod).date, S.lundiSuivant);
-
-  const avant = copie(etat);
-  definirCreneau(etat, S.lundiSuivant, 'avant_midi', 'charge', h());
-  definirCreneau(etat, S.samedi, 'avant_soir', 'indisponible', h());
-  // Ni portion, ni recette, ni composant n'ont été créés par ces signalements.
-  assert.deepEqual(etat.recettes, avant.recettes);
-  assert.deepEqual(etat.composants, avant.composants);
-  assert.deepEqual(portionsMenu(etat, S.lundiSuivant, 1), portionsMenu(avant, S.lundiSuivant, 1));
-  assert.equal(Object.keys(etat.productions).length, Object.keys(avant.productions).length);
-
-  const etats = ['libre', 'charge', 'indisponible'];
-  for (const lundiAvantMidi of etats) for (const samedi1 of etats) for (const samedi2 of etats) for (const samedi3 of etats) {
-    definirCreneau(etat, S.lundiSuivant, 'avant_midi', lundiAvantMidi, h());
-    definirCreneau(etat, S.samedi, 'avant_soir', samedi1, h());
-    definirCreneau(etat, S.samedi, 'apres_midi', samedi2, h());
-    definirCreneau(etat, S.samedi, 'avant_midi', samedi3, h());
-    const figee = copie(etat);
-    const s = suggererCreneau(etat, prod);
-    assert.deepEqual(etat, figee, 'la suggestion ne modifie rien : aucune planification automatique');
-    if (s) {
-      assert.equal(['2026-10-12', '2026-10-10'].includes(s.date), true);
-      assert.equal(etat.jours[s.date].creneaux[s.creneau], 'libre');
-    } else {
-      assert.equal([lundiAvantMidi, samedi1, samedi2, samedi3].every((x) => x !== 'libre'), true);
-    }
-  }
-  // Tout est chargé ou indisponible : aucune suggestion.
-  definirCreneau(etat, S.lundiSuivant, 'avant_midi', 'charge', h());
-  for (const c of ['avant_soir', 'apres_midi', 'avant_midi']) definirCreneau(etat, S.samedi, c, 'indisponible', h());
-  assert.equal(suggererCreneau(etat, prod), null);
-  // Une production décidée à la main sur un créneau chargé reste possible, avec alerte.
-  const manuel = planifier(etat, prod, S.lundiSuivant, 'avant_midi', h());
-  assert.ok(manuel.alertes.some((a) => a.includes('chargé')));
+  const figee = copie(etat);
+  const s = suggererJour(etat, prod);
+  assert.equal(s.date, S.lundiSuivant);
+  assert.deepEqual(etat, figee, 'la suggestion ne modifie rien : aucune planification automatique');
+  assert.deepEqual(portionsMenu(etat, S.lundiSuivant, 1), portionsMenu(figee, S.lundiSuivant, 1));
+  // Décidée à la main deux jours avant : permis, avec l'évaluation de l'avance.
+  const manuel = planifier(etat, prod, S.samedi, h());
+  assert.equal(manuel.evaluation.jours, 2);
+  assert.equal(etat.productions[prod].jourDecide, S.samedi);
 });
 
 test('15. Le vendredi et le samedi, le tableau blanc montre la semaine en cours et la suivante ; une tâche du samedi pour le lundi apparaît sur les deux feuilles quotidiennes (part domaine)', () => {
@@ -404,7 +370,7 @@ test('15. Le vendredi et le samedi, le tableau blanc montre la semaine en cours 
   prevision(etat, S.lundiSuivant, 1, 20);
   const id = composantValide(etat, S.lundiSuivant, 1, J.PRODUIT_SEC_TEST);
   const prod = principaleDe(etat, id);
-  planifier(etat, prod, S.samedi, 'apres_midi', h());
+  planifier(etat, prod, S.samedi, h());
 
   const samedi = feuilleDuJour(etat, S.samedi);
   const lundi = feuilleDuJour(etat, S.lundiSuivant);
@@ -424,7 +390,7 @@ test('Part B du scénario 7 : une préparatoire reste un travail préparatoire e
   const id = composantValide(etat, S.mardiSuivant, 1, J.PRODUIT_SEC_TEST);
   const prep = ajouterPreparatoire(etat, id, 'ACTION_PREPARATOIRE_TEST', h());
   assert.equal(etat.productions[prep].genre, 'preparatoire');
-  planifier(etat, prep, S.samedi, 'avant_midi', h());
+  planifier(etat, prep, S.samedi, h());
   marquerFait(etat, prep, null, h());
   assert.equal(ecartProduction(etat, id), 1000, 'le besoin reste entier');
 });
@@ -546,7 +512,7 @@ test('18. Le tableau blanc met en avant, selon le contexte, ce qui reste à fair
   assert.equal(tableauBlanc(e, S.lundi).lundi, S.lundi);
 
   // Après le service : ce qui peut être avancé pour le lendemain.
-  placer(e, production(S.lundi), S.lundi, 'avant_midi', h());
+  placer(e, production(S.lundi), S.lundi, h());
   fait(e, production(S.lundi), null, h());
   // « pâtes aux courgettes » se lit en deux éléments (pâtes, courgettes) et une sauce à confirmer : on suit la ligne des pâtes.
   assert.deepEqual(aujourdhuiDe(e, S.lundi).aAvancer.lignes.filter((l) => l.nom === 'pâtes').map((l) => [l.dateService, l.quantite]),

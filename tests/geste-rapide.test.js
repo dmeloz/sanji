@@ -33,7 +33,7 @@ function aDate(iso, fonction) {
   };
   try { return fonction(); } finally { globalThis.Date = reelle; }
 }
-const calme = (e) => { e.reglages.semaineTypeConfirmee = true; return e; };
+const calme = (e) => e;
 const classes = (noeud, classe) => noeud.tous((x) => x.className.split(' ').includes(classe));
 const parTexte = (noeud, re) => boutons(noeud).find((b) => re.test(b.textContent));
 const cartes = (e, date = S.lundi) => decisionsDe(e, date).cartes;
@@ -69,7 +69,7 @@ function avecEcart() {
   definirPrevision(e, S.lundi, 1, 20, h());
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   const p = Object.values(e.productions).find((x) => x.genre === 'principale');
-  planifier(e, p.id, S.lundi, 'avant_midi', h());
+  planifier(e, p.id, S.lundi, h());
   marquerFait(e, p.id, 1000, h());
   return e;
 }
@@ -79,7 +79,7 @@ function avecAvanceHorsRegle() {
   definirPrevision(e, S.vendredi, 1, 20, h());
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   const p = Object.values(e.productions).find((x) => x.genre === 'principale');
-  planifier(e, p.id, S.lundi, 'avant_midi', h());
+  planifier(e, p.id, S.lundi, h());
   return e;
 }
 function avecSauce() {
@@ -168,12 +168,6 @@ test('feuille « À décider » : la carte de répartition écrit les parts en c
   d.close();
 });
 
-test('semaine type : aucun geste (le toucher ne montre pas la semaine type)', () => {
-  const carte = cartes(etatVide(), S.lundi).find((c) => c.type === 'semaine_type');
-  assert.ok(carte);
-  assert.deepEqual(geste.gestesRapides(etatVide(), carte), []);
-});
-
 test('valeur : le libellé du geste dit l\'état du poids quand il est connu', () => {
   const e = avecValeur();
   const carte = cartes(e).find((c) => c.genre === 'valeur');
@@ -208,7 +202,7 @@ test('aucun geste rapide sur allergènes, écart, avance hors règle, sauce, ni 
     assert.ok(carte, genre);
     assert.deepEqual(geste.gestesRapides(e, carte), [], genre);
   }
-  for (const type of ['allergenes', 'conservation', 'creneau_charge', 'repartition_incoherente']) {
+  for (const type of ['allergenes', 'conservation', 'repartition_incoherente']) {
     assert.deepEqual(geste.gestesRapides(etatVide(), { id: `point:${type}`, genre: 'point', type, texte: type, composantId: 'x', ficheId: null, date: S.lundi }), [], type);
   }
 });

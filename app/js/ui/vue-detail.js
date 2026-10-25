@@ -1,15 +1,14 @@
-// Détail d'un jour : menus, prévisions, fiches, allergies, créneaux, après service, points à confirmer.
+// Détail d'un jour : menus, prévisions, fiches, allergies, après service, points à confirmer.
 
 import {
-  ajouterComposant, definirCreneau, definirMenu, modifierComposant, saisirVentes, supprimerComposant,
+  ajouterComposant, definirMenu, modifierComposant, saisirVentes, supprimerComposant,
 } from '../domaine/actions.js';
-import { aMenuDuJour, creneauxDuJour, libelleJour, lundiDe } from '../domaine/dates.js';
+import { aMenuDuJour, libelleJour, lundiDe } from '../domaine/dates.js';
 import { jourOuVide } from '../domaine/etat.js';
 import { alertesAllergenes } from '../domaine/allergenes.js';
-import { chargeCreneau } from '../domaine/planification.js';
 import { couvertsMidiDuJour } from '../domaine/couverts-midi.js';
 import { pointsAConfirmer } from '../domaine/points.js';
-import { CATEGORIE, ETAT_CRENEAU, libelle } from '../domaine/statuts.js';
+import { CATEGORIE, libelle } from '../domaine/statuts.js';
 import { agir, agirStrict, etat as etatCourant, redessiner } from '../magasin.js';
 import { champs } from './champs.js';
 import { h } from './dom.js';
@@ -27,7 +26,6 @@ import { importerPhoto, retirerPhoto, urlPhoto } from './photo.js';
 import { estSemainePassee, noteSemainePassee } from './semaine-passee.js';
 import { LIBELLE_SERVICE, libelleAllergene } from './reference.js';
 import { blocBuffet } from './reperes-metier.js';
-import { pastilleCreneau, texteCharge } from './taches.js';
 
 /** Rubrique à plat de la feuille « Détail du jour » : jamais de repli, le titre reste visible. */
 const rubrique = (resume, contenu, { classe = '', ...reste } = {}) => h('section', { classe, ...reste }, resume, contenu);
@@ -246,36 +244,6 @@ function sectionAllergies(etat, date) {
   ], { classe: 'carte', id: 'allergies' });
 }
 
-// ------------------------------------------------------------------ créneaux
-
-const OPTIONS_ETAT_CRENEAU = [[null, 'selon la semaine type'], ...Object.keys(ETAT_CRENEAU).map((c) => [c, libelle('ETAT_CRENEAU', c)])];
-
-function dialogCreneau(date, creneau) {
-  const valeur = jourOuVide(etatCourant(), date).creneaux[creneau];
-  const f = champs([{ cle: 'etat', type: 'choix', libelle: `État : ${libelle('CRENEAU', creneau)}`, valeur, options: OPTIONS_ETAT_CRENEAU,
-    aide: 'Signalez ici une charge de carte ou une indisponibilité du poste. Cela ne crée ni portion ni recette de carte.' }]);
-  panneau({
-    titre: `Créneau du ${libelleJour(date)}`,
-    corps: f.noeuds,
-    surEnregistrer: () => { agirStrict((e, t) => definirCreneau(e, date, creneau, f.valeur('etat'), t)); },
-  });
-}
-
-function sectionCreneaux(etat, date) {
-  const jour = jourOuVide(etat, date);
-  const charges = creneauxDuJour(date).map((c) => [c, chargeCreneau(etat, date, c)]);
-  return rubrique(h('h2', { classe: 'section-titre' }, 'Créneaux du jour'), [
-    charges.map(([c, charge]) => h('div', { classe: 'sous-carte' },
-      h('h3', null, libelle('CRENEAU', c), ' ', pastilleCreneau(charge.etatCreneau)),
-      h('p', { classe: 'meta' }, jour.creneaux[c] === null ? 'état repris de la semaine type' : 'état défini pour ce jour'),
-      h('p', null, texteCharge(charge),
-        Number.isFinite(charge.capacite) ? ` · ${charge.points} / ${charge.capacite} points de charge` : ''),
-      charge.alertes.map((a) => h('p', { classe: 'alerte-texte' }, a)),
-      h('div', { classe: 'actions' }, bouton('Modifier l\'état', () => dialogCreneau(date, c), 'court')))),
-    h('p', { classe: 'aide' }, 'La charge compte les tâches courtes, moyennes et longues : ce n\'est pas une durée mesurée.'),
-  ], { classe: 'carte', id: 'creneaux' });
-}
-
 // ------------------------------------------------------------------ après service
 
 function dialogVentes(date) {
@@ -340,6 +308,6 @@ function sectionPoints(etat, date) {
 /** Toutes les rubriques du détail d'un jour ouvert, dans l'ordre, à plat (feuille « Détail du jour »). */
 export function sectionsDuJour(etat, date) {
   return [sectionMenus(etat, date), sectionPrevisions(etat, date), sectionFiches(etat, date),
-    sectionAllergies(etat, date), sectionCreneaux(etat, date), sectionApresService(etat, date), sectionPoints(etat, date)]
+    sectionAllergies(etat, date), sectionApresService(etat, date), sectionPoints(etat, date)]
     .filter(Boolean);
 }

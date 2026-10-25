@@ -2,10 +2,9 @@
 // de `aujourdhuiDe(...)` (domaine/tableau-blanc.js). De haut en bas : en-tête (jour, date, heure), menus sur 3 jours, cases
 // Production et Couverts midi, « À avancer » (règle des 2 jours, 3 lignes), fiche de fonction (aujourd'hui ou demain),
 // « À confirmer » (3 lignes), rappels discrets ; la carte « Prochaine » est une carte de la page (sous les chiffres), jamais fixe.
-// Retirés de l'accueil : créneaux du jour, case ambre « À confirmer » dans les chiffres, raccourci Articles. Interface commune des vues : `titre(param, sous)` et `rendre(etat, param, sous)`.
+// Retirés de l'accueil : case ambre « À confirmer » dans les chiffres, raccourci Articles ; plus aucun créneau (v134). Interface commune des vues : `titre(param, sous)` et `rendre(etat, param, sous)`.
 
 import { libelleJour, lundiDe } from '../domaine/dates.js';
-import { libelle } from '../domaine/statuts.js';
 import { alertesAllergenes } from '../domaine/allergenes.js';
 import { decisionsDe } from '../domaine/decisions.js';
 import { raisonNonChiffree } from '../domaine/mise-en-place.js';
@@ -223,7 +222,7 @@ function carteProchaine(d, aujourd, etat) {
         : d.avancement.total > 0 ? "Tout est fait pour aujourd'hui." : "Aucune tâche décidée pour aujourd'hui."));
   }
   const q = m.genre !== 'preparatoire' && m.cible !== null && m.unite !== 'portion' ? quantite(m.cible, m.unite) : null;
-  const quand = m.dateService === aujourd ? (m.creneau ? libelle('CRENEAU', m.creneau) : null) : `pour ${libelleJour(m.dateService).split(' ')[0]}`;
+  const quand = m.dateService === aujourd ? null : `pour ${libelleJour(m.dateService).split(' ')[0]}`;
   return h('section', { classe: 'prochaine', 'aria-label': 'Prochaine tâche' },
     h('div', { classe: 'prochaine-tete' },
       h('h2', { classe: 'prochaine-etiquette' }, ['Prochaine', quand ? ` · ${quand}` : null]),

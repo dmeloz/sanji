@@ -35,8 +35,7 @@ const page = (iso, etat) => aDate(iso, () => { magasin.remplacer(etat); return v
 const classes = (noeud, classe) => noeud.tous((x) => x.className.split(' ').includes(classe));
 const hrefs = (noeud) => noeud.tous((x) => x.balise === 'a').map((a) => a.attributs.href);
 const parTexte = (noeud, re) => boutons(noeud).find((b) => re.test(b.textContent));
-/** Le point « semaine type à confirmer » est global et existant : on le règle pour isoler ce que chaque test vérifie. */
-const calme = (e) => { e.reglages.semaineTypeConfirmee = true; return e; };
+const calme = (e) => e;
 const composantDe = (e, nom) => Object.values(e.composants).find((c) => c.nom === nom);
 const prodDe = (e, nom) => principaleDe(e, composantDe(e, nom).id);
 
@@ -126,9 +125,9 @@ test('dimanche : fermé, aucune tâche, aucun couvert', () => {
   assert.equal(classes(p, 'au-maintenant-actions').length, 0);
 });
 
-test('Prochaine : première tâche non faite, quantité, créneau, Ouvrir la fiche et Fait annulable', () => {
+test('Prochaine : première tâche non faite, quantité, sans créneau (v134), Ouvrir la fiche et Fait annulable', () => {
   const e = mercredi();
-  for (const nom of ['Tagliatelles', 'riz']) planifier(e, prodDe(e, nom), S.mercredi, 'avant_midi', h());
+  for (const nom of ['Tagliatelles', 'riz']) planifier(e, prodDe(e, nom), S.mercredi, h());
   const d = aujourdhuiDe(e, S.mercredi);
   assert.ok(d.maintenant);
   assert.equal(d.avancement.total, 2);
@@ -136,7 +135,7 @@ test('Prochaine : première tâche non faite, quantité, créneau, Ouvrir la fic
   const carte = classes(p, 'prochaine')[0];
   assert.match(carte.textContent, /Prochaine/);
   assert.match(carte.textContent, new RegExp(d.maintenant.nom));
-  assert.match(carte.textContent, /avant le service de midi/);
+  assert.doesNotMatch(carte.textContent, /service de midi|service du soir|créneau/);
   assert.match(carte.textContent, /menu [12]/);
   assert.ok(classes(carte, 'prochaine-qte')[0].className.includes('au-qte'), 'quantité en police des quantités');
   assert.match(classes(carte, 'prochaine-qte')[0].textContent, /\d/);
@@ -162,7 +161,7 @@ test('Prochaine : première tâche non faite, quantité, créneau, Ouvrir la fic
 
 test('Prochaine : quantité inconnue = « à chiffrer » qui ouvre la feuille de chiffrage, jamais « quantité à compléter »', () => {
   const e = mercredi();
-  for (const nom of ['Tagliatelles', 'riz']) planifier(e, prodDe(e, nom), S.mercredi, 'avant_midi', h());
+  for (const nom of ['Tagliatelles', 'riz']) planifier(e, prodDe(e, nom), S.mercredi, h());
   e.jours[S.mercredi].previsions = { 1: { portions: null }, 2: { portions: null } };
   const p = page(S.mercredi, e);
   const carte = classes(p, 'prochaine')[0];
@@ -175,7 +174,7 @@ test('Prochaine : quantité inconnue = « à chiffrer » qui ouvre la feuille de
 test('Prochaine : une quantité en « portions » n\'est jamais écrite : « à chiffrer » s\'applique', () => {
   const e = mercredi();
   const id = prodDe(e, 'Tagliatelles');
-  planifier(e, id, S.mercredi, 'avant_midi', h());
+  planifier(e, id, S.mercredi, h());
   e.productions[id].unite = 'portion';
   const d = aujourdhuiDe(e, S.mercredi, '10:00');
   assert.equal(d.maintenant.unite, 'portion');
@@ -188,7 +187,7 @@ test('Prochaine : une quantité en « portions » n\'est jamais écrite : « à 
 test('Prochaine : une fois tout fait, la carte le dit et ne propose plus rien', () => {
   const e = mercredi();
   const principales = Object.values(e.productions).filter((x) => x.genre === 'principale' && x.dateService === S.mercredi);
-  for (const x of principales) { planifier(e, x.id, S.mercredi, 'avant_midi', h()); marquerFait(e, x.id, 100, h()); }
+  for (const x of principales) { planifier(e, x.id, S.mercredi, h()); marquerFait(e, x.id, 100, h()); }
   const p = page(S.mercredi, e);
   const carte = classes(p, 'prochaine')[0];
   assert.match(carte.textContent, /Tout est fait/);
@@ -342,7 +341,7 @@ test('hors règle : même définition partout (exception ET non autorisée) ; un
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   definirRegle(e, { nom: 'carottes', etapes: [{ libelle: 'Couper', avanceMaxJours: 0 }, { libelle: 'Finir', avanceMaxJours: 0 }] }, h());
   const couper = Object.values(e.productions).find((p) => p.etapeCle === 'couper');
-  planifier(e, couper.id, S.lundi, 'avant_midi', h());
+  planifier(e, couper.id, S.lundi, h());
   const dec = aDate(S.lundi, () => decisionsDe(e, S.lundi));
   assert.ok(!dec.cartes.some((c) => c.genre === 'avance_hors_regle'), 'la feuille « À décider » ne la classe pas hors règle');
   // Aujourd'hui, « Maintenant » : la ligne n'est pas marquée.
@@ -359,7 +358,7 @@ test('hors règle : une vraie avance hors règle (plus de 2 jours sans règle) r
   definirPrevision(e, S.vendredi, 1, 20, h());
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   const p = Object.values(e.productions).find((x) => x.genre === 'principale');
-  planifier(e, p.id, S.lundi, 'avant_midi', h());
+  planifier(e, p.id, S.lundi, h());
   assert.equal(aujourdhuiDe(e, S.lundi).maintenant.horsRegle, true);
   magasin.remplacer(structuredClone(e));
   const jour = aDate(S.lundi, () => prod.rendre(magasin.etat(), S.lundi));

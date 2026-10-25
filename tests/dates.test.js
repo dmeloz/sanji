@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ajouterJours, aMenuDuJour, creneauxDuJour, creneauxDuJourSemaine, datesDeLaSemaine, estDateValide, estOuvert,
+  ajouterJours, aMenuDuJour, aServiceDuSoir, datesDeLaSemaine, estDateValide, estOuvert,
   jourSemaine, joursEntre, libelleJour, lundiDe,
 } from '../app/js/domaine/dates.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
@@ -12,15 +12,18 @@ test('jourSemaine : 1 = lundi … 7 = dimanche', () => {
   assert.equal(jourSemaine(S.dimanche), 7);
 });
 
-test('dimanche : fermé, sans menu du jour, sans créneau', () => {
+test('dimanche : fermé, sans menu du jour', () => {
   assert.equal(estOuvert(S.dimanche), false);
   assert.equal(estOuvert(S.samedi), true);
   assert.equal(aMenuDuJour(S.dimanche), false);
   assert.equal(aMenuDuJour(S.samedi), false);
   assert.equal(aMenuDuJour(S.vendredi), true);
-  assert.deepEqual(creneauxDuJour(S.dimanche), []);
-  assert.deepEqual(creneauxDuJourSemaine(7), []);
-  assert.deepEqual(creneauxDuJourSemaine(1), ['avant_midi', 'apres_midi']);
+});
+
+test('aServiceDuSoir : du mercredi au samedi seulement (information de calendrier, sans effet sur les calculs)', () => {
+  assert.deepEqual([S.lundi, S.mardi, S.mercredi, S.jeudi, S.vendredi, S.samedi, S.dimanche].map(aServiceDuSoir),
+    [false, false, true, true, true, true, false]);
+  assert.throws(() => aServiceDuSoir('2026-02-30'), /Date invalide/);
 });
 
 test('semaine à cheval sur deux mois et deux années', () => {

@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ajouterAdaptation, annulerFiche, confirmerRepartition, creerFiche, definirCreneau, definirMenu, marquerFait, modifierComposant,
-  modifierFiche, planifier, saisirVentes, confirmerSemaineType, deciderEcart,
+  ajouterAdaptation, annulerFiche, confirmerRepartition, creerFiche, definirMenu, marquerFait, modifierComposant,
+  modifierFiche, planifier, saisirVentes, deciderEcart,
 } from '../app/js/domaine/actions.js';
 import * as allergenes from '../app/js/domaine/allergenes.js';
-import { pointsAConfirmer, pointsGlobaux, repereVentes } from '../app/js/domaine/points.js';
+import { pointsAConfirmer, repereVentes } from '../app/js/domaine/points.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { composantValide, etatVide, h, menuValide, prevision, principaleDe, recetteValidee } from './aide.js';
@@ -56,9 +56,6 @@ test('points : base neuve = aucun point sur un jour sans menu saisi', () => {
   assert.deepEqual(types(e, S.lundi), []);
   assert.deepEqual(types(e, S.samedi), []);
   assert.deepEqual(types(e, S.dimanche), []);
-  assert.deepEqual(pointsGlobaux(e), [{ type: 'semaine_type', texte: 'Semaine type à confirmer' }]);
-  confirmerSemaineType(e, h());
-  assert.deepEqual(pointsGlobaux(e), []);
 });
 
 test('points : plus de transcription ni de composants à valider ; composant inconnu, composant à préciser', () => {
@@ -92,7 +89,7 @@ test('points : répartition provisoire ou dont la somme diffère des couverts', 
   assert.deepEqual(types(e, S.mardi), []);
 });
 
-test('points : allergènes à confirmer, avance, écart, créneau chargé', () => {
+test('points : allergènes à confirmer, avance, écart ; plus aucun point de créneau', () => {
   const e = etatVide();
   prevision(e, S.lundiSuivant, 1, 20);
   prevision(e, S.lundiSuivant, 2, 0);
@@ -104,15 +101,14 @@ test('points : allergènes à confirmer, avance, écart, créneau chargé', () =
   modifierComposant(e, c, { allergenes: { statut: 'valide', liste: [] } }, h());
   assert.equal(types(e, S.lundiSuivant).includes('allergenes'), false);
 
-  definirCreneau(e, S.samedi, 'avant_soir', 'charge', h());
-  planifier(e, prod, S.samedi, 'avant_soir', h());
-  assert.ok(types(e, S.samedi).includes('creneau_charge'), 'rattaché au jour de travail');
+  planifier(e, prod, S.samedi, h());
+  assert.deepEqual(types(e, S.samedi), [], 'le jour de travail ne porte plus de point de créneau');
   assert.ok(types(e, S.lundiSuivant).includes('conservation'));
-  planifier(e, prod, S.vendredi, 'avant_midi', h());
+  planifier(e, prod, S.vendredi, h());
   pts = pointsAConfirmer(e, S.lundiSuivant);
   assert.equal(pts.some((p) => p.type === 'conservation'), false);
   assert.ok(pts.some((p) => p.type === 'avance_hors_regle'));
-  planifier(e, prod, S.lundiSuivant, 'avant_midi', h());
+  planifier(e, prod, S.lundiSuivant, h());
   marquerFait(e, prod, undefined, h());
   prevision(e, S.lundiSuivant, 1, 30);
   assert.ok(types(e, S.lundiSuivant).includes('ecart'));

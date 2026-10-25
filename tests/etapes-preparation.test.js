@@ -93,14 +93,14 @@ test('scénario du lundi : couper le samedi autorisé, blanchir le samedi hors r
   const { e, c } = scenario();
   const couper = etape(e, c, 'couper');
   const blanchir = etape(e, c, 'blanchir');
-  const r1 = planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
+  const r1 = planifier(e, couper.id, S.samediPrecedent, h());
   assert.equal(r1.evaluation.autorisee, true);
   assert.equal(r1.evaluation.jours, 2);
-  const r2 = planifier(e, blanchir.id, S.samediPrecedent, 'apres_midi', h());
+  const r2 = planifier(e, blanchir.id, S.samediPrecedent, h());
   assert.equal(r2.evaluation.autorisee, false);
   assert.match(r2.evaluation.alertes.join(' '), /hors règle/);
-  assert.throws(() => planifier(e, blanchir.id, S.dimanchePrecedent, 'avant_midi', h()), /dimanche/i);
-  const r3 = planifier(e, blanchir.id, S.lundi, 'avant_midi', h());
+  assert.throws(() => planifier(e, blanchir.id, S.dimanchePrecedent, h()), /dimanche/i);
+  const r3 = planifier(e, blanchir.id, S.lundi, h());
   assert.equal(r3.evaluation.autorisee, true);
   assert.equal(evaluationProduction(e, couper.id).autorisee, true);
 });
@@ -109,11 +109,11 @@ test('une étape ne se planifie pas après l\'étape suivante, ni avant la préc
   const { e, c } = scenario();
   const couper = etape(e, c, 'couper');
   const blanchir = etape(e, c, 'blanchir');
-  planifier(e, blanchir.id, S.samediPrecedent, 'avant_midi', h());
-  assert.throws(() => planifier(e, couper.id, S.lundi, 'avant_midi', h()), /après l'étape suivante/);
+  planifier(e, blanchir.id, S.samediPrecedent, h());
+  assert.throws(() => planifier(e, couper.id, S.lundi, h()), /après l'étape suivante/);
   assert.equal(couper.jourDecide, null, 'rien n\'a été décidé');
-  planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
-  assert.throws(() => planifier(e, blanchir.id, S.veille, 'avant_midi', h()), /avant l'étape précédente/);
+  planifier(e, couper.id, S.samediPrecedent, h());
+  assert.throws(() => planifier(e, blanchir.id, S.veille, h()), /avant l'étape précédente/);
 });
 
 test('« Fait » respecte l\'ordre des étapes', () => {
@@ -131,7 +131,7 @@ test('« Fait » respecte l\'ordre des étapes', () => {
 test('une étape faite le samedi n\'est ni recréée ni supprimée quand la prévision change', () => {
   const { e, c } = scenario();
   const couper = etape(e, c, 'couper');
-  planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
+  planifier(e, couper.id, S.samediPrecedent, h());
   marquerFait(e, couper.id, null, SAMEDI);
   const avant = Object.keys(e.productions).sort();
   definirPrevision(e, S.lundi, 1, 46, h(5));
@@ -166,11 +166,11 @@ test('un changement de règle retire les étapes non faites et le journal les no
 test('étape sans avance définie : conservation à confirmer, jamais autorisée au-delà de deux jours', () => {
   const { e, c } = scenario([{ libelle: 'Couper' }, { libelle: 'Blanchir' }, { libelle: 'Finir' }]);
   const couper = etape(e, c, 'couper');
-  planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
+  planifier(e, couper.id, S.samediPrecedent, h());
   const ev2 = evaluationProduction(e, couper.id);
   assert.equal(ev2.autorisee, true);
   assert.equal(ev2.conservation, 'a_confirmer');
-  planifier(e, couper.id, S.veille, 'avant_midi', h());
+  planifier(e, couper.id, S.veille, h());
   const ev3 = evaluationProduction(e, couper.id);
   assert.equal(ev3.autorisee, false);
   assert.match(ev3.alertes.join(' '), /hors règle/);
@@ -188,7 +188,7 @@ test('la finition a 0 jour d\'avance par défaut et avancesPossibles suit chaque
 test('etapesComposant : états ordonnés pour l\'affichage', () => {
   const { e, c } = scenario();
   const couper = etape(e, c, 'couper');
-  planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
+  planifier(e, couper.id, S.samediPrecedent, h());
   marquerFait(e, couper.id, null, SAMEDI);
   const liste = etapesComposant(e, c);
   assert.deepEqual(liste.map((x) => [x.etapeCle, x.libelle, x.ordre, x.etat]), [
@@ -216,7 +216,7 @@ test('export et import conservent les étapes ; une ancienne règle sans étapes
 test('feuille Jour du lundi : l\'étape faite le samedi est dans « faites », la suivante reste à faire', () => {
   const { e, c } = scenario();
   const couper = etape(e, c, 'couper');
-  planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
+  planifier(e, couper.id, S.samediPrecedent, h());
   marquerFait(e, couper.id, null, SAMEDI);
   const feuille = feuilleDuJour(e, S.lundi);
   assert.ok(feuille.lecture.autres.some((l) => l.productionId === couper.id && l.fait === true), 'reste dans sa section, marquée faite');
@@ -243,7 +243,7 @@ after(() => dom.restaurer());
 test('vues : Jour montre « déjà avancé sam. », la fiche liste les étapes', () => {
   const { e, c } = scenario();
   const couper = etape(e, c, 'couper');
-  planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
+  planifier(e, couper.id, S.samediPrecedent, h());
   marquerFait(e, couper.id, null, SAMEDI);
   magasin.remplacer(e);
   const jour = vueJour.rendre(magasin.etat(), S.lundi).textContent;
@@ -295,7 +295,7 @@ test('Réglages : l\'éditeur d\'étapes enregistre une règle à trois étapes,
 test('Réglages : renommer « Couper » en « Tailler » garde la clé, la production et son état « fait »', async () => {
   const { e, c } = scenario();
   const couper = etape(e, c, 'couper');
-  planifier(e, couper.id, S.samediPrecedent, 'avant_midi', h());
+  planifier(e, couper.id, S.samediPrecedent, h());
   marquerFait(e, couper.id, null, SAMEDI);
   magasin.remplacer(e);
   const noeud = vueReglages.rendre(magasin.etat(), 'organisation');

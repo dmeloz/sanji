@@ -2,12 +2,14 @@
 
 Statut : socle, premier parcours vertical (planning) et intégration dans l'interface construits le 2026-10-06, version 69. Le modèle (Claude, API Anthropic) est un composant optionnel, désactivé par défaut : il ne s'active que dans Réglages > Assistant IA. Rien n'est publié.
 
+Mise à jour du 2026-10-25 (v134) : les créneaux horaires n'existent plus (décision de la propriétaire : aucune capacité, aucune garde anti-surcharge). Le harness planifie des JOURS : un item du brouillon est `{ productionId, date, quantite? }`, l'outil `suggerer_creneau` devient `suggerer_jour`, et le chef peut corriger le jour d'une ligne avant de valider (`decider`, option `jours`, voir « Décision du chef »).
+
 ## Intégration dans l'application (version 67)
 
 - **Bouton « Proposer un planning »** : en tête de Production et dans la barre d'outils de la semaine globale (`ui/assistant-planning.js`). Période : de la date affichée (ou d'aujourd'hui) au samedi ; un dimanche vise la semaine suivante.
-- **Feuille « Brouillon de planning »** : préparations proposées (jour, créneau, quantité calculée), avertissements, « À décider », et « Pourquoi cette proposition » (sources, hypothèses, incertitudes, contrôles). Trois gestes : « Valider et planifier » (validation puis application atomique), « Refuser » (seule la trace est écrite), « Fermer sans décider » (rien n'est écrit). Fermer la fenêtre « Calcul en cours » annule la demande au modèle.
+- **Feuille « Brouillon de planning »** : préparations proposées (jour, quantité calculée ; le jour est corrigeable avant validation), avertissements, « À décider », et « Pourquoi cette proposition » (sources, hypothèses, incertitudes, contrôles). Trois gestes : « Valider et planifier » (validation puis application atomique), « Refuser » (seule la trace est écrite), « Fermer sans décider » (rien n'est écrit). Fermer la fenêtre « Calcul en cours » annule la demande au modèle.
 - **Réglages > Assistant IA** : activation, clé d'API (champ masqué), choix du modèle (`claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-4-5`). Les réglages sont stockés dans le stockage local du navigateur (`sanji-assistant-ia`), **hors de l'état** : ils ne sont ni dans la sauvegarde exportée, ni dans le journal. Une clé collée est nettoyée (caractères invisibles, texte autour) ; un texte qui n'est pas une clé `sk-ant-…` est refusé.
-- **Fournisseur** : `ui/fournisseur-web.js` est le seul fichier qui parle à un service EXTERNE (un test le vérifie) ; `ui/nouvelle-version.js` relit seulement `sw.js` sur la même origine pour comparer la version. Il envoie le contexte minimal et le brouillon de départ : noms des composants, portions, créneaux ; jamais les fiches de fonction ni les allergies. En-tête `anthropic-dangerous-direct-browser-access` obligatoire pour un appel navigateur : la clé reste sur l'appareil, sous la responsabilité de la propriétaire.
+- **Fournisseur** : `ui/fournisseur-web.js` est le seul fichier qui parle à un service EXTERNE (un test le vérifie) ; `ui/nouvelle-version.js` relit seulement `sw.js` sur la même origine pour comparer la version. Il envoie le contexte minimal et le brouillon de départ : noms des composants, portions, jours ; jamais les fiches de fonction ni les allergies. En-tête `anthropic-dangerous-direct-browser-access` obligatoire pour un appel navigateur : la clé reste sur l'appareil, sous la responsabilité de la propriétaire.
 - **Sans clé ou désactivé** : Sanji calcule seul, comme avant. En cas de panne, de clé refusée ou de réponse invalide, le calcul répond avec un avertissement.
 - **Sécurité (revues du 2026-10-06)** : aucune faille critique. Atténuations en place : clé hors état/sauvegarde/journal, jamais affichée en entier ; noms transmis limités à 60 caractères et filtrés (remarques sur une personne, allergies) ; texte libre du modèle borné (5 éléments de 200 caractères) ; tout le DOM est construit en texte (jamais `innerHTML`) ; contrôles rejoués à l'application. À savoir : la clé est stockée **en clair** dans le stockage local de l'appareil ; utiliser une clé réservée à Sanji, dans un espace de travail Anthropic dédié avec une limite de dépense basse, et la renouveler en cas de perte de l'appareil.
 - **CSP (version 69)** : `index.html` déclare `script-src 'self'; connect-src 'self' https://api.anthropic.com; object-src 'none'; base-uri 'none'`. Vérifiée dans Chrome : l'application démarre sans violation, l'API Anthropic reste joignable, une connexion vers un autre site et un script en ligne sont bloqués. Elle ne restreint ni les styles (`vue-fiche.js` pose un attribut `style`), ni les polices, ni les images (`blob:` des photos). Elle limite la sortie de la clé en cas de future faille XSS. **À confirmer sur l'enveloppe iPhone** (origine `sanji://app`) : non testé dans WKWebView. Hébergement futur : une origine dédiée (le stockage local est partagé par toute page de la même origine).
@@ -24,7 +26,7 @@ demande de planning
 → [modèle optionnel]            (orchestrateur.js + fournisseur.js : outils lus, puis un brouillon)
 → controlerBrouillon            (validateur.js : structure fermée, références, rejeu du domaine sur une copie)
 → proposition en mémoire        (propositions.js : brouillon expliqué, empreinte de l'état lu)
-→ décision du chef              (commandes.js `decider` : valider, refuser, confirmer item par item)
+→ décision du chef              (commandes.js `decider` : valider, refuser, confirmer item par item, corriger le jour d'une ligne)
 → appliquerProposition          (commandes.js : empreinte revérifiée, planifier() dans UNE action `agir`)
 → journal                       (trace.js : harness:validee / harness:refusee / harness:appliquee)
 ```
@@ -39,10 +41,10 @@ Seule `appliquerProposition` écrit, et seulement à travers l'exécuteur inject
 | `contexte.js` | `construireContexte` : données rangées en confirmées, provisoires, estimées, manquantes ; règles validées ; dernières décisions du harness. Aucune fiche de fonction. |
 | `outils.js` | Registre figé des outils et `executerOutil`. Un nom hors registre est refusé (y compris `toString`, `__proto__`). |
 | `politiques.js` | `evaluerPolitique` : auto, proposition, confirmation ou interdit. Liste des actions du domaine réservées au chef. |
-| `parcours-planning.js` | Premier parcours : productions à planifier → créneau suggéré par le domaine, charge comptée sur une copie. |
-| `validateur.js` | `controlerBrouillon` : schéma fermé, références, jour ouvert, créneau libre, capacité, règle d'avance, quantités recalculées. |
+| `parcours-planning.js` | Premier parcours : productions à planifier → jour suggéré par le domaine (`suggererJour`), rejoué sur une copie (ordre des étapes). |
+| `validateur.js` | `controlerBrouillon` : schéma fermé (un champ `creneau` est refusé), références, jour ouvert, pas après le service, ordre des étapes (rejeu de `planifier`), règle d'avance, quantités recalculées. |
 | `propositions.js` | Registre en mémoire, `empreinteEtat`, `itemsAppliquables`. Lectures par copie. |
-| `commandes.js` | `decider`, `appliquerProposition` : atomique, refus en cas de conflit ou de double exécution. |
+| `commandes.js` | `decider` (avec correction des jours), `appliquerProposition` : atomique, refus en cas de conflit ou de double exécution. |
 | `fournisseur.js` | Interface d'un modèle, `fournisseurDesactive`, `interroger` (délai, annulation, réponse validée). Aucun appel réseau. |
 | `orchestrateur.js` | `proposerPlanningAssiste` : calcul d'abord, modèle ensuite (4 échanges au plus, appels répétés interdits), repli toujours possible. |
 | `trace.js` | `tracer` (journal existant, détail borné à 240 caractères), `expliquer`, `evenementsHarness`. |
@@ -52,9 +54,9 @@ Seule `appliquerProposition` écrit, et seulement à travers l'exécuteur inject
 | Outil | Niveau | Provenance | Effet |
 |---|---|---|---|
 | `lire_menus`, `lire_previsions`, `lire_planning`, `lire_regle`, `lire_decisions_en_attente` | lecture | donnée importée / référentiel | aucun |
-| `composants_du_poste`, `calculer_quantites`, `suggerer_creneau`, `evaluer_avance` | calcul | calcul déterministe | aucun |
+| `composants_du_poste`, `calculer_quantites`, `suggerer_jour` (`{ date, evaluation } | null`), `evaluer_avance` | calcul | calcul déterministe | aucun |
 | `proposer_planning` | proposition | calcul déterministe | aucun (brouillon) |
-| `planifier_production` | commande | correction humaine | modifie `jourDecide` et `creneauDecide` ; invisible du modèle ; jamais exécutable par `executerOutil` |
+| `planifier_production` | commande | correction humaine | entrées `{ productionId, date }`, modifie `jourDecide` ; invisible du modèle ; jamais exécutable par `executerOutil` |
 
 Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description de sortie, préconditions, erreurs, effets.
 
@@ -65,6 +67,17 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 - **Commande** : interdite pour le modèle et pour un calcul ; réservée à une proposition validée par le chef ; sans validation, elle demande confirmation.
 - Actions du domaine **réservées au chef** (`ACTIONS_RESERVEES_AU_CHEF` : règles de préparation, standards, valeurs apprises, recettes, statuts, écarts, saisie du réel, import…) : absentes du registre, refusées avec un message explicite.
 
+## Décision du chef : `decider` (contrat pour l'interface, v134)
+
+```
+decider(registre, id, { choix: 'valider', itemsConfirmes?: string[], itemsRetires?: string[], jours?: { [itemId]: 'AAAA-MM-JJ' } }, { executeur, aujourdhui? })
+decider(registre, id, { choix: 'refuser', raison? }, { executeur })
+```
+
+- `jours` corrige le jour d'une ligne du brouillon avant de valider (clé : `item.id`, soit `item-<productionId>`). Chaque jour corrigé est rejoué par `controlerBrouillon` sur une copie de l'état courant, avec les autres items gardés : date valide, jour ouvert (jamais un dimanche), pas après le service, ordre des étapes d'un même composant, règle d'avance et conservation, quantité connue. `aujourdhui` (facultatif) écarte en plus un jour déjà passé.
+- Accepté : la date de l'item ET de sa commande changent ; évaluation, motifs et quantité sont recalculés ; `decision.jours` garde la correction ; `appliquerProposition` écrit ensuite `jourDecide` à cette date.
+- Refusé : `ErreurHarness` (`precondition`, `entree_invalide` ou `reference_inconnue`) dont le message nomme la préparation et la raison (« PRODUIT : 2026-10-04 est un jour non travaillé ») ; rien n'est modifié, ni registre, ni journal.
+
 ## Invariants (tous testés)
 
 1. Une proposition ne modifie jamais la production réelle avant la décision du chef.
@@ -72,9 +85,9 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 3. L'application est tout ou rien. Dans la même action `agir`, l'empreinte de l'état est revérifiée puis les contrôles du brouillon sont rejoués sur l'état courant (jour devenu passé, règle changée…) ; au moindre écart : statut `conflit`, aucune écriture.
 4. Une proposition s'applique une seule fois.
 5. Les quantités affichées viennent toujours du domaine ; une quantité annoncée par un modèle qui diffère du calcul refuse le brouillon.
-6. Une avance hors règle, un jour non travaillé, un créneau chargé ou plein, un jour passé ne sont jamais proposés ; la base du menu 1 reste au jour même.
+6. Une avance hors règle, un jour non travaillé, un jour après le service, un jour passé, une étape hors de son ordre ne sont jamais proposés ni acceptés en correction ; la base du menu 1 reste au jour même.
 7. Conservation non validée (avance d'au moins un jour sans limite saisie ni repère) : avertissement léger porté par l'item (« ne doit pas être présenté comme couvert »), `couvre` faux, aucune confirmation exigée. Le mécanisme de confirmation par item (`exigeConfirmation`) reste disponible pour de futures commandes.
-8. Quantité inconnue ou absence de créneau compatible : « À décider », jamais devinée. Ce qu'un modèle omet reste « À décider ».
+8. Quantité inconnue ou absence de jour compatible : « À décider », jamais devinée. Ce qu'un modèle omet reste « À décider ».
 9. Le contexte et le journal ne contiennent ni allergies, ni remarques, ni fiches de fonction.
 10. Sans modèle, hors ligne, en panne, en délai dépassé, annulé ou incohérent : le calcul déterministe répond et l'état reste identique.
 11. Aucune écriture dans le schéma persistant : propositions en mémoire, traces dans `etat.journal` (format existant).
@@ -84,19 +97,18 @@ Chaque définition porte : nom, objectif, niveau, schéma d'entrée, description
 - Dossier `app/js/harness/`, hors `domaine/` (le harness peut recevoir un exécuteur, mais n'importe ni `magasin.js` ni le DOM).
 - Exécuteur injecté plutôt qu'import de `magasin.js` : testable sous Node, couplage minimal.
 - Propositions en mémoire : pas de migration, pas de nouveau format. Elles ne survivent pas à un rechargement ; la trace des décisions, elle, survit dans le journal.
-- Micro-modifications du domaine, comportement inchangé : `sansAvanceParDefaut` exporté ; `suggererCreneau(etat, id, depuis = null)` écarte les jours passés quand `depuis` est donné.
+- Micro-modifications du domaine, comportement inchangé : `sansAvanceParDefaut` exporté ; `suggererJour(etat, id, depuis = null)` (ex-`suggererCreneau`, v134) écarte les jours passés quand `depuis` est donné.
 - Version 66 : nouveaux fichiers ajoutés à la liste de cache du service worker.
 
 ## Décisions métier ouvertes (accord requis)
 
-- **Heures de fin de créneau** : aucune borne n'est renseignée et l'horloge interne a été retirée (v120, jamais branchée) ; un créneau du matin peut être proposé l'après-midi. À fournir par la propriétaire, puis à recâbler.
 - **Fournisseur d'IA** : en place (`ui/fournisseur-web.js`, API Anthropic, intégration à l'interface en v67). La règle « aucun envoi réseau » est levée pour cette couche optionnelle (décision du 2026-10-06) ; rien ne part tant que l'assistant n'est pas activé dans Réglages > Assistant IA avec une clé, et seules les données décrites plus haut sont transmises.
 
 ## Décisions prises (2026-10-06, la propriétaire)
 
 - Une conservation non validée donne un **avertissement léger**, jamais une confirmation, et n'est jamais présentée comme couverte (`evaluation.couvre` reste faux). Une conservation « référentiel » dépassée avertit aussi, sans confirmation.
 - **Pas de parcours « conservation »** dans le harness : il n'ajoute rien au domaine sur ce sujet.
-- **Horloge interne** (retirée en v120, jamais branchée) : elle devait écarter un créneau terminé via des bornes de fin de créneau ; `suggererCreneau`, le validateur et `appliquerProposition` ne connaissent plus d'heure.
+- **Horloge sans borne** : l'horloge interne a été retirée en v120 (jamais branchée) et les créneaux en v134 ; `suggererJour`, le validateur et `appliquerProposition` ne connaissent aucune heure, seulement des jours.
 - **Parcours suivants** (écarts à arbitrer, actions préparatoires, apprentissage des portions, allergies, liste à commander) : non commencés, un par un.
 
 ## Limites

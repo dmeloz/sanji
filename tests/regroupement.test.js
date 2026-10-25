@@ -38,7 +38,7 @@ test('lots : deux productions de la même famille et de la même unité, toutes 
 
 test('lots : une production faite, décidée un autre jour ou sans cible connue n\'entre pas dans un lot', () => {
   const { e, ids } = semaine();
-  planifier(e, ids.rizMercredi, S.mardi, 'apres_midi', h());
+  planifier(e, ids.rizMercredi, S.mardi, h());
   assert.equal(lotsPossibles(e, S.lundi).length, 0, 'décidée mardi : plus avançable lundi');
   const { e: e2, ids: ids2 } = semaine();
   marquerFait(e2, ids2.rizMardi, undefined, h(1));
@@ -51,7 +51,7 @@ test('lots : une production faite, décidée un autre jour ou sans cible connue 
 
 test('lots : le jour même, une production décidée ce jour compte avec celles qu\'on peut avancer', () => {
   const { e, ids } = semaine();
-  planifier(e, ids.rizMardi, S.lundi, 'apres_midi', h());
+  planifier(e, ids.rizMardi, S.lundi, h());
   const lots = lotsPossibles(e, S.lundi);
   assert.equal(lots.length, 1);
   assert.equal(lots[0].productions.length, 2);

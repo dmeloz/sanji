@@ -38,7 +38,7 @@ test('fusion : un intitulé modifié garde les composants inchangés avec leurs 
   modifierComposant(e, riz.id, { grammage: { valeur: 120, unite: 'g', statut: 'SAISI_SERVICE', source: 'TEST_ONLY', etat: 'sec' }, charge: 'courte' }, h());
   const prodRiz = principaleDe(e, riz.id);
   const prodCarottes = principaleDe(e, carottes.id);
-  planifier(e, prodRiz, S.lundi, 'avant_midi', h());
+  planifier(e, prodRiz, S.lundi, h());
   const rizAvant = copie(riz);
   const prodAvant = copie(e.productions[prodRiz]);
 

@@ -32,7 +32,7 @@ function aDate(iso, fonction) {
   try { return fonction(); } finally { globalThis.Date = reelle; }
 }
 const classes = (n, c) => n.tous((x) => x.className.split(' ').includes(c));
-const calme = (e) => { e.reglages.semaineTypeConfirmee = true; return e; };
+const calme = (e) => e;
 const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
 const debutLot = css.indexOf("/* ---- Lot « Aujourd'hui, Semaine, fiche de fonction");
 // Le bloc du lot s'arrête au bloc commenté suivant (d'autres lots ajoutent les leurs après lui).

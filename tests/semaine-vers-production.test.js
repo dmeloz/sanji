@@ -116,7 +116,7 @@ test('« Détail du jour » s\'ouvre depuis la première feuille et reprend les 
   await bouton.click();
   const detail = ouvertes().at(-1);
   assert.equal(detail.querySelector('h2').textContent, 'Détail du jour');
-  for (const attendu of ['Menus du jour', 'Fiches de fonction', 'Allergies du jour', 'Créneaux du jour', 'Après service', 'Points à confirmer', 'Nouvelle fiche']) {
+  for (const attendu of ['Menus du jour', 'Fiches de fonction', 'Allergies du jour', 'Après service', 'Points à confirmer', 'Nouvelle fiche']) {
     assert.ok(detail.textContent.includes(attendu), attendu);
   }
   ouvertes().forEach((d) => d.close());
@@ -206,7 +206,7 @@ test('Détail du jour : la feuille se redessine seule (un composant supprimé di
   feuille.ouvrirDetailDuJour(S.lundiSuivant);
   const d = ouvertes().at(-1);
   assert.equal(d.tous((x) => x.balise === 'details').length, 0, 'aucun details');
-  for (const titre of ['Couverts midi', 'Fiches de fonction', 'Allergies du jour', 'Créneaux du jour', 'Après service']) {
+  for (const titre of ['Couverts midi', 'Fiches de fonction', 'Allergies du jour', 'Après service']) {
     assert.ok(d.tous((x) => x.balise === 'h2').some((h2) => h2.textContent.startsWith(titre)), titre);
   }
   const c = Object.values(magasin.etat().composants).find((x) => x.date === S.lundiSuivant);

@@ -133,9 +133,9 @@ test('fiche : pastille « à mesurer », détail des portions et mentions « dé
   definirRegle(e0, { nom: 'carottes', etapes: [{ libelle: 'Couper', avanceMaxJours: 3 }, { libelle: 'Blanchir', avanceMaxJours: 1 }, { libelle: 'Finir', avanceMaxJours: 0 }] }, h());
   const couper = Object.values(e0.productions).find((p) => p.composantId === c0 && p.etapeCle === 'couper');
   const blanchir = Object.values(e0.productions).find((p) => p.composantId === c0 && p.etapeCle === 'blanchir');
-  planifier(e0, couper.id, S.samediPrecedent, 'avant_midi', h());
+  planifier(e0, couper.id, S.samediPrecedent, h());
   marquerFait(e0, couper.id, null, '2026-10-03T08:00:00.000Z');
-  planifier(e0, blanchir.id, S.samediPrecedent, 'apres_midi', h());
+  planifier(e0, blanchir.id, S.samediPrecedent, h());
   magasin.remplacer(e0);
   const e = magasin.etat();
   const calc = calculerComposant(e, c0);

@@ -45,7 +45,7 @@ const { proposition, mode, avertissements } = await proposerPlanningAssiste({
 });
 console.log(`Mode : ${mode}${mode === 'deterministe' ? " (le modèle n'a pas été retenu)" : ''}`);
 for (const a of avertissements) console.log(`Avertissement : ${a}`);
-for (const i of proposition.items) console.log(`  ${i.nom} (service ${i.dateService}) -> ${i.date} ${i.creneau} · ${i.quantite.libelle}`);
+for (const i of proposition.items) console.log(`  ${i.nom} (service ${i.dateService}) -> ${i.date} · ${i.quantite.libelle}`);
 for (const d of proposition.aDecider) console.log(`  À décider : ${d.texte}`);
 console.log(expliquer(proposition).map((l) => `  ${l}`).join('\n'));
 if (fournisseur.dernierUsage) console.log(`Jetons : ${fournisseur.dernierUsage.input_tokens} en entrée, ${fournisseur.dernierUsage.output_tokens} en sortie.`);

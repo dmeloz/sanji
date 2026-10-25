@@ -45,7 +45,6 @@ function lundi() {
   definirMenu(e, S.lundi, 2, 'riz', h());
   definirStandard(e, 'pates_seches', 'plat_principal', { valeur: 100, unite: 'g', etat: 'sec' }, h());
   definirStandard(e, 'riz', 'plat_principal', { valeur: 60, unite: 'g', etat: 'sec' }, h());
-  e.reglages.semaineTypeConfirmee = true;
   return e;
 }
 

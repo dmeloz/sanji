@@ -4,7 +4,7 @@
 
 import { portionsMenu, calculerComposant } from '../domaine/calcul.js';
 import { decisionsDe } from '../domaine/decisions.js';
-import { etatTache, evaluerAvance, regleDe, repereConservation, suggererCreneau } from '../domaine/planification.js';
+import { etatTache, evaluerAvance, regleDe, repereConservation, suggererJour } from '../domaine/planification.js';
 import { CODES, ErreurHarness, NIVEAUX, PROVENANCES, ORIGINES, verifierSchema } from './contrats.js';
 import { proposerPlanning } from './parcours-planning.js';
 import { evaluerPolitique, raisonOutilAbsent } from './politiques.js';
@@ -59,13 +59,13 @@ const DEFINITIONS = [
   {
     nom: 'lire_planning', objectif: 'Productions servies ou décidées un jour donné, avec leur état.',
     niveau: NIVEAUX.LECTURE, provenance: PROVENANCES.DONNEE_IMPORTEE, entrees: objet({ date: DATE }),
-    sorties: '[{productionId, composantId, nom, genre, dateService, jourDecide, creneauDecide, etat}]',
+    sorties: '[{productionId, composantId, nom, genre, dateService, jourDecide, etat}]',
     preconditions: [], erreurs: [CODES.ENTREE_INVALIDE], effets: 'aucun',
     executer: ({ date }, { etat }) => Object.values(etat.productions ?? {})
       .filter((p) => (p.dateService === date || p.jourDecide === date) && etat.composants?.[p.composantId])
       .map((p) => ({
         productionId: p.id, composantId: p.composantId, nom: etat.composants[p.composantId].nom, genre: p.genre,
-        dateService: p.dateService, jourDecide: p.jourDecide, creneauDecide: p.creneauDecide, etat: etatTache(etat, p.id),
+        dateService: p.dateService, jourDecide: p.jourDecide, etat: etatTache(etat, p.id),
       })),
   },
   {
@@ -112,14 +112,14 @@ const DEFINITIONS = [
     },
   },
   {
-    nom: 'suggerer_creneau', objectif: 'Premier jour et créneau compatibles avec les règles pour une production non planifiée.',
+    nom: 'suggerer_jour', objectif: 'Premier jour compatible avec les règles pour une production non planifiée.',
     niveau: NIVEAUX.CALCUL, provenance: PROVENANCES.CALCUL_DETERMINISTE, entrees: objet({ productionId: ID }),
-    sorties: '{date, creneau, evaluation}|null',
+    sorties: '{date, evaluation}|null',
     preconditions: ['la production existe'], erreurs: [CODES.REFERENCE_INCONNUE], effets: 'aucun',
     executer: ({ productionId }, { etat, aujourdhui }) => {
       exigerProduction(etat, productionId);
-      const s = suggererCreneau(etat, productionId, aujourdhui);
-      return s ? { date: s.date, creneau: s.creneau, evaluation: resumerEvaluation(s.evaluation) } : null;
+      const s = suggererJour(etat, productionId, aujourdhui);
+      return s ? { date: s.date, evaluation: resumerEvaluation(s.evaluation) } : null;
     },
   },
   {
@@ -135,7 +135,7 @@ const DEFINITIONS = [
   {
     nom: 'proposer_planning', objectif: 'Brouillon de planning des productions à planifier sur une période, sans rien enregistrer.',
     niveau: NIVEAUX.PROPOSITION, provenance: PROVENANCES.CALCUL_DETERMINISTE, entrees: objet({ dateDebut: DATE, dateFin: DATE }),
-    sorties: '{brouillon:{type:"planning", items:[{productionId,date,creneau}]}, nonPlacees:[{productionId,composantId,texte}]}',
+    sorties: '{brouillon:{type:"planning", items:[{productionId,date}]}, nonPlacees:[{productionId,composantId,texte}]}',
     preconditions: ['dateDebut <= dateFin'], erreurs: [CODES.PRECONDITION], effets: 'aucun (brouillon)',
     verifier: ({ dateDebut, dateFin }) => {
       if (dateDebut > dateFin) throw new ErreurHarness(CODES.PRECONDITION, 'dateDebut doit précéder dateFin.');
@@ -143,12 +143,12 @@ const DEFINITIONS = [
     executer: ({ dateDebut, dateFin }, { etat, aujourdhui, h }) => proposerPlanning(etat, { h, aujourdhui, dateDebut, dateFin }),
   },
   {
-    nom: 'planifier_production', objectif: 'Décide le jour et le créneau d\'une production (commande).',
+    nom: 'planifier_production', objectif: 'Décide le jour d\'une production (commande).',
     niveau: NIVEAUX.COMMANDE, provenance: PROVENANCES.CORRECTION_HUMAINE,
-    entrees: objet({ productionId: ID, date: DATE, creneau: { type: 'texte', valeurs: ['avant_midi', 'apres_midi', 'avant_soir'] } }),
+    entrees: objet({ productionId: ID, date: DATE }),
     sorties: '{production, evaluation, alertes}',
     preconditions: ['proposition validée par le chef', 'état inchangé depuis le brouillon'], erreurs: [CODES.INTERDIT, CODES.CONFLIT],
-    effets: 'modifie jourDecide et creneauDecide de la production',
+    effets: 'modifie jourDecide de la production',
     engageMetier: true,
   },
 ];

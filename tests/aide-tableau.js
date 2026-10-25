@@ -30,7 +30,7 @@ export function etatReglette() {
   // la tâche reste « faite » mais ne couvre pas le besoin.
   deciderEcart(e, principaleDe(e, ids.nonCouvert), 'aucune', h());
   demarrer(e, principaleDe(e, ids.enCours), h());
-  planifier(e, principaleDe(e, ids.aFaire), jour, 'avant_midi', h());
+  planifier(e, principaleDe(e, ids.aFaire), jour, h());
   marquerFait(e, principaleDe(e, ids.ecart), null, h());
   prevision(e, jour, 2, 14); // le besoin du menu 2 change après la production : écart à arbitrer
   return { e, ids, jour };

@@ -8,7 +8,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
-  confirmerSemaineType, creerFiche, definirMenu, definirPrevision, definirStandard, marquerFait, planifier, saisirVentes,
+  creerFiche, definirMenu, definirPrevision, definirStandard, marquerFait, planifier, saisirVentes,
 } from '../app/js/domaine/actions.js';
 import { etatInitial, exporter } from '../app/js/domaine/etat.js';
 
@@ -48,7 +48,6 @@ definirStandard(e, 'quinoa', 'garniture', S(50, 'sec'), h(SAMEDI, 8));
 // Un standard de catégorie « Légumes » : il sert aux légumes de toutes les familles sans standard, et à ceux sans famille.
 definirStandard(e, 'groupe:legumes', 'garniture', S(120, 'cru_net'), h(SAMEDI, 8));
 definirStandard(e, 'groupe:legumes', 'plat_principal', S(120, 'cru_net'), h(SAMEDI, 8));
-confirmerSemaineType(e, h(SAMEDI, 8));
 
 // Une fiche de fonction : mardi midi, 20 couverts, menu 1, une allergie.
 creerFiche(e, { numero: 'F1', date: MA, service: 'midi', horaire: '12:00', couverts: 20, mode: 'menu_fixe', menuFixe: 1,
@@ -69,10 +68,10 @@ const production = (date, famille) => Object.values(e.productions).find((p) => {
   return p.genre === 'principale' && p.dateService === date && c?.famille === famille;
 });
 const carottesLundi = production(L, 'carottes');
-planifier(e, carottesLundi.id, SAMEDI, 'apres_midi', h(SAMEDI, 13));
+planifier(e, carottesLundi.id, SAMEDI, h(SAMEDI, 13));
 marquerFait(e, carottesLundi.id, undefined, h(SAMEDI, 15));
 const pdtMardi = production(MA, 'pommes_de_terre');
-planifier(e, pdtMardi.id, SAMEDI, 'apres_midi', h(SAMEDI, 13));
+planifier(e, pdtMardi.id, SAMEDI, h(SAMEDI, 13));
 marquerFait(e, pdtMardi.id, undefined, h(SAMEDI, 16));
 
 const dossier = join(dirname(fileURLToPath(import.meta.url)), 'sorties');

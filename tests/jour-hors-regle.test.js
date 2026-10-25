@@ -65,7 +65,7 @@ test('jour : une avance d\'un jour hors règle dit sa cause sur sa ligne', async
   definirStandard(e, 'carottes', 'plat_principal', { valeur: 120, unite: 'g', etat: 'cru_net' }, h());
   definirRegle(e, { nom: 'carottes', etapes: [{ libelle: 'Couper', avanceMaxJours: 0 }, { libelle: 'Finir', avanceMaxJours: 0 }] }, h());
   const couper = Object.values(e.productions).find((p) => p.etapeCle === 'couper');
-  planifier(e, couper.id, S.lundi, 'avant_midi', h());
+  planifier(e, couper.id, S.lundi, h());
   magasin.remplacer(e);
   const noeud = vueJour.rendre(magasin.etat(), S.lundi);
   assert.equal(noeud.tous((x) => x.balise === 'details').length, 0);
