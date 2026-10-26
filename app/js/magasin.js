@@ -61,11 +61,12 @@ function noterReussite() {
 function noterEchec(erreur) {
   statut.enregistre = false;
   statut.raison = erreur?.message ?? 'écriture impossible';
-  redessiner();
-  if (minuteurNouvelEssai || !peutEcrire()) return;
-  const delai = DELAIS_NOUVEL_ESSAI_MS[Math.min(essaisRates, DELAIS_NOUVEL_ESSAI_MS.length - 1)];
-  essaisRates += 1;
-  minuteurNouvelEssai = setTimeout(() => { minuteurNouvelEssai = null; ecrire(); }, delai);
+  if (!minuteurNouvelEssai && peutEcrire()) {
+    const delai = DELAIS_NOUVEL_ESSAI_MS[Math.min(essaisRates, DELAIS_NOUVEL_ESSAI_MS.length - 1)];
+    essaisRates += 1;
+    minuteurNouvelEssai = setTimeout(() => { minuteurNouvelEssai = null; ecrire(); }, delai);
+  }
+  redessiner(); // après le minuteur : un abonné qui lève ne doit pas empêcher le nouvel essai
 }
 
 async function ecrire() {
