@@ -54,7 +54,10 @@ test('Articles : journée vide alors que la semaine a des articles propose la se
   const vide = parClasse(articles.rendre(magasin.etat()), 'art-vide-aujourdhui')[0];
   assert.ok(vide);
   assert.match(vide.textContent, /Aucun article n’est prévu pour aujourd’hui/);
-  assert.ok(vide.tous((x) => x.balise === 'a' && x.textContent === 'Voir la semaine de production').length > 0);
+  const b = vide.tous((x) => x.balise === 'button' && x.textContent === 'Voir la liste de la semaine')[0];
+  assert.ok(b, 'un bouton ramène à la liste de la semaine, dans Articles');
+  b.declencher('click');
+  assert.ok(parClasse(articles.rendre(magasin.etat()), 'art-jour').length > 0, 'la liste de la semaine est de nouveau affichée');
 });
 
 test('les nouvelles cartes et le partage gardent une cible tactile de 44 px minimum', () => {

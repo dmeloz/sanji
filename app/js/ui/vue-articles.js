@@ -134,9 +134,9 @@ export function rendre(etat) {
         ? h('section', { classe: 'art-vide-aujourdhui', 'aria-labelledby': 'art-vide-aujourdhui-titre' },
           h('h2', { id: 'art-vide-aujourdhui-titre' }, 'Aucun article n’est prévu pour aujourd’hui'),
           h('p', null, estOuvert(aujourd)
-            ? 'Les articles prévus pour les autres jours de production restent dans la vue Semaine.'
-            : 'Le dimanche est fermé. Les prochains articles restent dans la vue Semaine.'),
-          lien(`#/semaine/${lundi}/tableau`, 'Voir la semaine de production', 'btn btn-court'))
+            ? 'Les articles des autres jours de production sont dans la liste de la semaine.'
+            : 'Le dimanche est fermé. Les prochains articles sont dans la liste de la semaine.'),
+          bouton('Voir la liste de la semaine', () => { vueChoisie = 'semaine'; jourGlisse = null; redessiner(); }, 'court'))
         : ligneVide(estOuvert(aujourd) ? "Rien pour le poste aujourd'hui." : "Fermé aujourd'hui : rien pour le poste."));
   }
   for (const j of visibles) {
@@ -150,7 +150,7 @@ export function rendre(etat) {
     suivant: () => versJour(jours.find((j) => j.date > dateVue)),
     precedent: () => versJour(jours.findLast((j) => j.date < dateVue)),
   });
-  racine.appendChild(h('p', { classe: 'au-sous' }, 'Les quantités sont liées à la date de production. Une quantité inconnue reste « à chiffrer ».'));
+  racine.appendChild(h('p', { classe: 'au-sous' }, 'Quantités brutes calculées depuis les menus, rangées au jour de production. Une quantité inconnue reste « à chiffrer », sans alerte.'));
   if (visibles.length > 0) {
     racine.appendChild(h('div', { classe: 'art-pouce pas-imprime' }, bouton('Partager la liste', () => partager(texteDeLaListe(visibles)), 'large')));
   }
