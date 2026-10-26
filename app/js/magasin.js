@@ -13,6 +13,11 @@ const ecouteursMessages = new Set();
 /** Situation du stockage : `enregistre` faux => bandeau « données non enregistrées sur cet appareil ». */
 const statut = { enregistre: false, raison: 'démarrage en cours', persistant: null, illisible: false, utilisable: false };
 
+/** Délais avant un nouvel essai d'une écriture ratée ; le dernier se répète. */
+const DELAIS_NOUVEL_ESSAI_MS = [3000, 10000, 30000];
+
+let minuteurNouvelEssai = null;
+let essaisRates = 0;
 let ecritureEnCours = false;
 let ecritureEnAttente = false;
 let jourCopieTente = null;
@@ -42,8 +47,30 @@ export function redessiner() { for (const f of abonnes) f(etatCourant); }
 
 function signaler(texte, type) { for (const f of ecouteursMessages) f(texte, type); }
 
+function peutEcrire() { return statut.utilisable && !statut.illisible; }
+
+/** Écriture réussie : le bandeau se lève, le minuteur est annulé et les délais repartent du début. */
+function noterReussite() {
+  clearTimeout(minuteurNouvelEssai);
+  minuteurNouvelEssai = null;
+  essaisRates = 0;
+  if (!statut.enregistre) { statut.enregistre = true; statut.raison = ''; redessiner(); }
+}
+
+/** Écriture ratée : bandeau, et un seul minuteur pour un nouvel essai (délais croissants, plafonnés). */
+function noterEchec(erreur) {
+  statut.enregistre = false;
+  statut.raison = erreur?.message ?? 'écriture impossible';
+  if (!minuteurNouvelEssai && peutEcrire()) {
+    const delai = DELAIS_NOUVEL_ESSAI_MS[Math.min(essaisRates, DELAIS_NOUVEL_ESSAI_MS.length - 1)];
+    essaisRates += 1;
+    minuteurNouvelEssai = setTimeout(() => { minuteurNouvelEssai = null; ecrire(); }, delai);
+  }
+  redessiner(); // après le minuteur : un abonné qui lève ne doit pas empêcher le nouvel essai
+}
+
 async function ecrire() {
-  if (!statut.utilisable || statut.illisible) return;
+  if (!peutEcrire()) return;
   if (ecritureEnCours) { ecritureEnAttente = true; return; }
   ecritureEnCours = true;
   try {
@@ -51,18 +78,34 @@ async function ecrire() {
       ecritureEnAttente = false;
       try {
         await enregistrerEtat(etatCourant);
-        if (!statut.enregistre) { statut.enregistre = true; statut.raison = ''; redessiner(); }
+        noterReussite();
         copierSiBesoin();
       } catch (erreur) {
-        statut.enregistre = false;
-        statut.raison = erreur?.message ?? 'écriture impossible';
-        redessiner();
+        noterEchec(erreur);
       }
     } while (ecritureEnAttente);
   } finally {
     ecritureEnCours = false;
   }
 }
+
+/** Retour dans l'app : si la dernière écriture a échoué, on retente tout de suite. */
+function retenterSiEchec() {
+  if (statut.enregistre || !peutEcrire()) return;
+  clearTimeout(minuteurNouvelEssai);
+  minuteurNouvelEssai = null;
+  ecrire();
+}
+
+function installerRetours() {
+  if (typeof globalThis.addEventListener === 'function') globalThis.addEventListener('pageshow', retenterSiEchec);
+  if (typeof globalThis.document?.addEventListener === 'function') {
+    globalThis.document.addEventListener('visibilitychange', () => {
+      if (globalThis.document.visibilityState === 'visible') retenterSiEchec();
+    });
+  }
+}
+installerRetours();
 
 /** Des entrées abîmées ont été écartées : garde le brut d'origine avant tout enregistrement, puis le dit (une fois par copie gardée). */
 async function signalerEcartes(texteBrut, nombre) {
