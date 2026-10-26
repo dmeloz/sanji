@@ -1344,6 +1344,24 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
   .vue-production .prod-titre-ligne { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "titre date fleches"; gap: 8px; }
 }
 
+/* ===== Refonte 3 — lot 4 : Services, Détail du jour et décisions de planification en feuilles lisibles. ===== */
+.services-etape { display: grid; gap: 8px; min-width: 0; padding: 12px 0; border-top: 1px solid var(--bordure); }
+.services-etape > h2, .services-etape-fiches > h2 { margin: 0; font-size: var(--t-ligne); font-weight: 700; }
+.services-etape-menus .sem-menu + .sem-menu { border-top: 1px solid var(--bordure); }
+.services-detail { padding-top: 14px; border-top: 1px solid var(--bordure); }
+.detail-jour-entete { display: grid; gap: 4px; padding: 4px 0 12px; border-bottom: 1px solid var(--bordure); }
+.detail-jour-entete h2 { margin: 0; font-size: var(--t-section); }
+.detail-jour-entete p { margin: 0; }
+.planifier-etape, .ia-etape { display: grid; gap: 8px; min-width: 0; padding: 12px 0; border-top: 1px solid var(--bordure); }
+.planifier-etape:first-child, .ia-etape:first-child { border-top: 0; padding-top: 0; }
+.planifier-etape-titre, .ia-etape-titre { margin: 0; font-size: var(--t-ligne); font-weight: 700; color: var(--texte); }
+.planifier-etape-suggestion { padding: 12px; border: 1px solid var(--bordure); border-radius: var(--r-carte-petite); background: var(--carte); }
+.planifier-etape-jour .champ { display: grid; gap: 6px; }
+.planifier-etape-jour input[type="date"] { min-height: var(--cible); width: 100%; max-width: 100%; font: inherit; }
+.ia-etape .ia-liste { border-top: 1px solid var(--bordure); }
+.ia-etape-preparations .ia-liste > li { gap: 8px; }
+.ia-etape-explication .ia-pourquoi { margin-top: 0; }
+
 /* ===== Refonte 3 — lot 3 : parcours Import puis Préparer la semaine, sans masquer de saisie. ===== */
 .vue-import .imp-etape { display: grid; gap: 12px; min-width: 0; margin-block: 18px; padding: 14px; border: 1px solid var(--bordure); border-radius: var(--r-carte); background: var(--carte); }
 .vue-import .imp-etape-titre { display: flex; align-items: center; gap: 10px; margin: 0; font-size: var(--t-ligne); font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--texte); }

@@ -106,21 +106,28 @@ export function contenuProposition(proposition, { mode, avertissements, periode 
     return restantes;
   };
   majCompteur();
-  const nodes = [
+  const provenance = [
     h('p', { classe: 'meta' },
       mode === 'modele' ? pastille("proposé par l'IA, recontrôlé", 'gris') : pastille('calculé par Sanji', 'vert'),
       compteur),
   ];
-  if (periode) nodes.push(h('p', { classe: 'meta' }, `Période : du ${libelleJour(periode.dateDebut)} au ${libelleJour(periode.dateFin)}.`));
-  for (const a of avertissements) nodes.push(encadre('alerte', a));
-  if (proposition.items.length > 0) nodes.push(h('ul', { classe: 'ia-liste' }, proposition.items.map((i) => ligneItem(i, ecartes, () => surChangement(majCompteur()), champsJour))));
-  else nodes.push(h('p', { classe: 'vide' }, 'Rien à planifier sur cette période.'));
+  if (periode) provenance.push(h('p', { classe: 'meta' }, `Période : du ${libelleJour(periode.dateDebut)} au ${libelleJour(periode.dateFin)}.`));
+  for (const a of avertissements) provenance.push(encadre('alerte', a));
+  const nodes = [h('section', { classe: 'ia-etape ia-etape-provenance' },
+    h('h3', { classe: 'ia-etape-titre' }, 'Proposition'), ...provenance),
+  h('section', { classe: 'ia-etape ia-etape-preparations' },
+    h('h3', { classe: 'ia-etape-titre' }, 'Préparations'),
+    proposition.items.length > 0
+      ? h('ul', { classe: 'ia-liste' }, proposition.items.map((i) => ligneItem(i, ecartes, () => surChangement(majCompteur()), champsJour)))
+      : h('p', { classe: 'vide' }, 'Rien à planifier sur cette période.'))];
   if (proposition.aDecider.length > 0) {
-    nodes.push(h('h3', { classe: 'section-titre' }, 'À décider'),
-      h('ul', { classe: 'ia-liste' }, proposition.aDecider.map((d) => h('li', { classe: 'ia-ligne' }, pastille('à décider', 'ambre'), ` ${d.texte}`))));
+    nodes.push(h('section', { classe: 'ia-etape ia-etape-decisions' },
+      h('h3', { classe: 'ia-etape-titre' }, 'À décider'),
+      h('ul', { classe: 'ia-liste' }, proposition.aDecider.map((d) => h('li', { classe: 'ia-ligne' }, pastille('à décider', 'ambre'), ` ${d.texte}`)))));
   }
-  nodes.push(h('h3', { classe: 'section-titre' }, 'Pourquoi cette proposition'),
-    h('ul', { classe: 'ia-pourquoi' }, expliquer(proposition).map((l) => h('li', { classe: 'meta' }, l))));
+  nodes.push(h('section', { classe: 'ia-etape ia-etape-explication' },
+    h('h3', { classe: 'ia-etape-titre' }, 'Pourquoi cette proposition'),
+    h('ul', { classe: 'ia-pourquoi' }, expliquer(proposition).map((l) => h('li', { classe: 'meta' }, l)))));
   return nodes;
 }
 

@@ -126,8 +126,8 @@ function ficheDuJour(f, alertes) {
 function blocFiches(etat, date) {
   const fiches = fichesActives(etat, date);
   const alertes = alertesAllergenes(etat, date);
-  return h('div', { classe: 'sem-fiches' },
-    h('h3', { classe: 'sem-sous-titre' }, 'Fiches de fonction'),
+  return h('section', { classe: 'sem-fiches services-etape services-etape-fiches', 'aria-label': 'Fiches de fonction' },
+    h('h2', { classe: 'sem-sous-titre' }, 'Fiches de fonction'),
     fiches.length === 0 ? h('p', { classe: 'sem-neutre' }, 'Aucune fiche de fonction ce jour-là.')
       : h('ul', { classe: 'sem-liste' }, fiches.map((f) => ficheDuJour(f, alertes))),
     estSemainePassee(date) ? null : h('div', { classe: 'actions' },
@@ -174,7 +174,9 @@ export function ouvrirDetailDuJour(dateDepart, { ancre = null } = {}) {
   return feuilleVivante({
     titre: 'Détail du jour',
     construire: (etat) => h('div', { classe: 'vue-detail' },
-      h('p', { classe: 'aide' }, `${majuscule(libelleJour(date))}. La carte n'est qu'un contexte : aucune quantité n'en est calculée.`),
+      h('header', { classe: 'detail-jour-entete' },
+        h('h2', null, majuscule(libelleJour(date))),
+        h('p', { classe: 'aide' }, 'La carte n\'est qu\'un contexte : aucune quantité n\'en est calculée.')),
       ...vueDetail.sectionsDuJour(etat, date)),
     // Glisser change de jour (le dimanche est sauté) et redessine la feuille, comme sur Production.
     apres: (dialogue, redessiner, enHaut) => {
@@ -189,13 +191,16 @@ export function ouvrirDetailDuJour(dateDepart, { ancre = null } = {}) {
 export function ouvrirServices(date) {
   return feuilleVivante({
     titre: `Services · ${libelleJour(date)}`,
-    construire: (etat, { fermer }) => h('div', { classe: 'sem-carte' },
+    construire: (etat, { fermer }) => h('div', { classe: 'sem-carte vue-services' },
       estSemainePassee(date) ? noteSemainePassee() : null,
       bandeauPoints(etat, date, fermer),
       aDesMenus(date)
-        ? [ligneCouverts(etat, date, fermer), ...MENUS.map((m) => blocMenu(etat, date, m))]
+        ? [h('section', { classe: 'services-etape services-etape-couverts' },
+          h('h2', { classe: 'sem-sous-titre' }, 'Couverts midi'), ligneCouverts(etat, date, fermer)),
+        h('section', { classe: 'services-etape services-etape-menus' },
+          h('h2', { classe: 'sem-sous-titre' }, 'Menus'), ...MENUS.map((m) => blocMenu(etat, date, m)))]
         : h('p', { classe: 'sem-neutre' }, 'Pas de menu du jour ce jour-là.'),
       blocFiches(etat, date),
-      h('div', { classe: 'actions' }, bouton('Détail du jour', () => ouvrirApres(fermer, () => ouvrirDetailDuJour(date)), 'court'))),
+      h('div', { classe: 'actions services-detail' }, bouton('Détail du jour', () => ouvrirApres(fermer, () => ouvrirDetailDuJour(date)), 'court'))),
   });
 }
