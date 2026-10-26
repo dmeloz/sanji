@@ -184,5 +184,5 @@ test('Centre : « Partager le fichier » contient les notes (premier envoi)', as
 test('la pastille Dev se pose au-dessus de la barre « Enregistrer » quand la page en a une', async () => {
   const { readFileSync } = await import('node:fs');
   const css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
-  assert.match(css, /body:has\(\.barre-enregistrer\) \.bouton-dev \{[^}]*bottom: calc\([^}]*\+ 168px\)/);
+  assert.match(css, /body:has\(\.barre-enregistrer\) \.bouton-dev \{[^}]*bottom: calc\([^}]*\+ 84px\)/);
 });

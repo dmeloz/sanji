@@ -669,7 +669,7 @@ button.tb-couverts:focus-visible { outline: 3px solid var(--focus); outline-offs
 }
 .bouton-dev[hidden] { display: none; }
 /* Les pages à barre « Enregistrer » en bas : la pastille se pose au-dessus de la barre, jamais sur son bouton. */
-body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 168px); }
+body:has(.barre-enregistrer) .bouton-dev { bottom: calc(var(--haut-onglets) + env(safe-area-inset-bottom) + 84px); }
 .note-dev-legende { font-weight: 700; margin-bottom: 4px; }
 .note-dev-groupe + .note-dev-groupe { margin-top: 12px; }
 .note-dev { padding: 10px 0; border-top: 1px solid var(--bordure); }

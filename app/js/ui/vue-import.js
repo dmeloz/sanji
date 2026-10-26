@@ -284,7 +284,7 @@ export function rendre(etat, lundi) {
       champSaisi(champs, 'div', { id: 'feuille-retour', classe: 'saisie-retour', 'aria-live': 'polite' }))));
 
   racine.appendChild(h('section', { classe: 'imp-etape imp-etape-menus', 'aria-labelledby': 'imp-titre-menus' },
-    h('h2', { classe: 'imp-etape-titre', id: 'imp-titre-menus' }, h('span', { classe: 'imp-etape-num' }, '2'), ' Menus · 5 jours'),
+    h('h2', { classe: 'imp-etape-titre', id: 'imp-titre-menus' }, h('span', { classe: 'imp-etape-num' }, '2'), ` Menus · ${dates.length} jours`),
     h('p', { classe: 'aide' }, 'Relisez ou complétez les deux menus de chaque jour. Les champs restent modifiables.'),
     ...dates.map((date) => blocJour(champs, etat, date))));
   // La lecture suit la frappe ; les champs n'enregistrent rien avant « Enregistrer la semaine ».
