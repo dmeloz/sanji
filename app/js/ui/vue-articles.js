@@ -127,10 +127,17 @@ export function rendre(etat) {
   if (visibles.length === 0) {
     racine.appendChild(jours.length === 0
       ? etatVide({
-        titre: 'Aucun article pour l\'instant', texte: 'La liste se remplit dès que les menus de la semaine sont importés.',
+        titre: 'Aucun article sur les deux prochaines semaines', texte: 'La liste se remplit quand des éléments au poste sont prévus dans les menus.',
         actions: [{ libelle: 'Importer les menus', href: `#/import/${lundi}`, principal: true }],
       })
-      : ligneVide(estOuvert(aujourd) ? "Rien pour le poste aujourd'hui." : "Fermé aujourd'hui : rien pour le poste."));
+      : vueChoisie === 'jour'
+        ? h('section', { classe: 'art-vide-aujourdhui', 'aria-labelledby': 'art-vide-aujourdhui-titre' },
+          h('h2', { id: 'art-vide-aujourdhui-titre' }, 'Aucun article n’est prévu pour aujourd’hui'),
+          h('p', null, estOuvert(aujourd)
+            ? 'Les articles des autres jours de production sont dans la liste de la semaine.'
+            : 'Le dimanche est fermé. Les prochains articles sont dans la liste de la semaine.'),
+          bouton('Voir la liste de la semaine', () => { vueChoisie = 'semaine'; jourGlisse = null; redessiner(); }, 'court'))
+        : ligneVide(estOuvert(aujourd) ? "Rien pour le poste aujourd'hui." : "Fermé aujourd'hui : rien pour le poste."));
   }
   for (const j of visibles) {
     racine.appendChild(h('section', { classe: 'art-jour', 'aria-label': titreJour(j) },
@@ -143,7 +150,7 @@ export function rendre(etat) {
     suivant: () => versJour(jours.find((j) => j.date > dateVue)),
     precedent: () => versJour(jours.findLast((j) => j.date < dateVue)),
   });
-  racine.appendChild(h('p', { classe: 'au-sous' }, 'Quantités brutes calculées depuis les menus. Une quantité inconnue reste « à chiffrer », sans alerte.'));
+  racine.appendChild(h('p', { classe: 'au-sous' }, 'Quantités brutes calculées depuis les menus, rangées au jour de production. Une quantité inconnue reste « à chiffrer », sans alerte.'));
   if (visibles.length > 0) {
     racine.appendChild(h('div', { classe: 'art-pouce pas-imprime' }, bouton('Partager la liste', () => partager(texteDeLaListe(visibles)), 'large')));
   }
