@@ -82,10 +82,10 @@ function signesDuJour(jour) {
   return signes.map(([icone, mot]) => h('span', { classe: 'bord-signe' }, h('span', { classe: 'bord-signe-icone', 'aria-hidden': 'true' }, icone), mot));
 }
 
-/** Couverts de la tête d'un jour, toujours dits : le total, ou « couverts à saisir » (bouton vers la feuille des couverts, texte seul sur une semaine passée). */
+/** Couverts de la tête d'un jour, toujours dits : le total, ou « couverts à saisir » (bouton vers la feuille des couverts, « couverts non saisis » en texte seul sur une semaine passée). */
 function couvertsDeTete(jour) {
   if (jour.couvertsTotal !== null) return { texte: ` · ${pluriel(jour.couvertsTotal, 'couvert', 'couverts')}`, bouton: null };
-  if (estSemainePassee(jour.date)) return { texte: ' · couverts à saisir', bouton: null };
+  if (estSemainePassee(jour.date)) return { texte: ' · couverts non saisis', bouton: null };
   return { texte: '', bouton: h('button', {
     type: 'button', onClick: () => ouvrirCouvertsMidi(jour.date), classe: 'bord-jour-couverts feutre',
     'aria-label': `${libelleJour(jour.date)} : couverts à saisir, saisir les couverts`,

@@ -1397,7 +1397,9 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
   padding-block: 0;
   min-height: var(--cible);
 }
-.vue-semaine-globale .tb-intitule { min-width: 0; overflow-wrap: anywhere; }
+.vue-semaine-globale .tb-intitule { min-width: 0; overflow-wrap: anywhere; line-height: 1.35; }
+/* Liens de plat dans une phrase : cible en ligne, exemptée par WCAG 2.5.8 ; ils ne gonflent plus chaque ligne repliée à 44 px. */
+.vue-semaine-globale .tb-intitule .bord-plat { display: inline; min-height: auto; padding: 0; }
 .vue-articles .art-vide-aujourdhui {
   display: grid;
   gap: 10px;
