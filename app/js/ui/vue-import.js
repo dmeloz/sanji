@@ -270,26 +270,31 @@ export function rendre(etat, lundi) {
     repartirEtLire();
     afficherMessage(`L'IA a lu ${pluriel(lignes.length, 'ligne')}. Relisez « Ce que Sanji a lu » avant d'enregistrer.${remplace ? ' Le texte collé précédemment a été remplacé.' : ''}${illisibles > 0 ? ` ${pluriel(illisibles, 'ligne illisible', 'lignes illisibles')} : complétez à la main.` : ''}`);
   };
-  racine.appendChild(blocScanner(lundi, surLecturePhoto));
-  racine.appendChild(blocPhoto(lundi, surLecturePhoto));
-  racine.appendChild(h('p', { classe: 'aide retour-essai-lien' }, lienSignaler));
-  racine.appendChild(h('section', { classe: 'imp-section-plate' },
-    h('h2', { classe: 'imp-titre-section', id: 'titre-feuille' }, 'Coller le texte de la feuille'),
-    h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
-    h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),
-    champSaisi(champs, 'textarea', { id: 'feuille-texte', rows: 6, placeholder: 'texte copié depuis la photo de la feuille', value: '' }),
-    h('div', { classe: 'actions' }, bouton('Répartir dans la semaine', repartirEtLire)),
-    champSaisi(champs, 'div', { id: 'feuille-retour', classe: 'saisie-retour', 'aria-live': 'polite' })));
+  racine.appendChild(h('section', { classe: 'imp-etape imp-etape-source', 'aria-labelledby': 'imp-titre-source' },
+    h('h2', { classe: 'imp-etape-titre', id: 'imp-titre-source' }, h('span', { classe: 'imp-etape-num' }, '1'), ' Source du menu'),
+    blocScanner(lundi, surLecturePhoto),
+    blocPhoto(lundi, surLecturePhoto),
+    h('p', { classe: 'aide retour-essai-lien' }, lienSignaler),
+    h('section', { classe: 'imp-section-plate' },
+      h('h3', { classe: 'imp-titre-section' }, 'Coller le texte de la feuille'),
+      h('p', { classe: 'aide' }, 'Sur iPhone ou iPad : ouvrez la photo de la feuille, appuyez sur le texte, choisissez « Tout sélectionner » puis « Copier », et collez ici. Les prix, le titre et les annotations sont laissés de côté.'),
+      h('label', { pour: 'feuille-texte', classe: 'saisie-libelle' }, 'Texte de la feuille'),
+      champSaisi(champs, 'textarea', { id: 'feuille-texte', rows: 6, placeholder: 'texte copié depuis la photo de la feuille', value: '' }),
+      h('div', { classe: 'actions' }, bouton('Répartir dans la semaine', repartirEtLire)),
+      champSaisi(champs, 'div', { id: 'feuille-retour', classe: 'saisie-retour', 'aria-live': 'polite' }))));
 
-  racine.appendChild(h('h2', { classe: 'imp-titre-section imp-titre-hors' }, 'Ou taper jour par jour'));
-  for (const date of dates) racine.appendChild(blocJour(champs, etat, date));
+  racine.appendChild(h('section', { classe: 'imp-etape imp-etape-menus', 'aria-labelledby': 'imp-titre-menus' },
+    h('h2', { classe: 'imp-etape-titre', id: 'imp-titre-menus' }, h('span', { classe: 'imp-etape-num' }, '2'), ` Menus · ${dates.length} jours`),
+    h('p', { classe: 'aide' }, 'Relisez ou complétez les deux menus de chaque jour. Les champs restent modifiables.'),
+    ...dates.map((date) => blocJour(champs, etat, date))));
   // La lecture suit la frappe ; les champs n'enregistrent rien avant « Enregistrer la semaine ».
   for (const date of dates) for (const menu of [1, 2]) champs.get(`menu-${date}-${menu}`).addEventListener('input', majLecture);
 
-  racine.appendChild(h('section', { classe: 'imp-section-plate imp-lecture', 'aria-labelledby': 'titre-lecture' },
-    h('h2', { classe: 'imp-titre-section', id: 'titre-lecture' }, 'Ce que Sanji a lu · vérifie'),
+  racine.appendChild(h('section', { classe: 'imp-etape imp-etape-verification', 'aria-labelledby': 'titre-lecture' },
+    h('h2', { classe: 'imp-etape-titre', id: 'titre-lecture' }, h('span', { classe: 'imp-etape-num' }, '3'), ' Relire avant d’enregistrer'),
     h('p', { classe: 'aide' }, 'Lecture des intitulés ci-dessus. Corrigez l\'intitulé dans son champ si la lecture est fausse : elle se met à jour.'),
-    zoneLecture));
+    h('div', { classe: 'imp-section-plate imp-lecture' },
+      h('h3', { classe: 'imp-titre-section' }, 'Ce que Sanji a lu · vérifie'), zoneLecture)));
   majLecture();
 
   // Semaine à venir déjà remplie : repartir de zéro pour la re-scanner.

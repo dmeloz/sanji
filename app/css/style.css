@@ -1343,3 +1343,19 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 @media (min-width: 700px) {
   .vue-production .prod-titre-ligne { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "titre date fleches"; gap: 8px; }
 }
+
+/* ===== Refonte 3 — lot 3 : parcours Import puis Préparer la semaine, sans masquer de saisie. ===== */
+.vue-import .imp-etape { display: grid; gap: 12px; min-width: 0; margin-block: 18px; padding: 14px; border: 1px solid var(--bordure); border-radius: var(--r-carte); background: var(--carte); }
+.vue-import .imp-etape-titre { display: flex; align-items: center; gap: 10px; margin: 0; font-size: var(--t-ligne); font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--texte); }
+.imp-etape-num, .prep-etape-num { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--action); color: var(--sur-action); font-size: var(--t-corps); font-weight: 700; font-variant-numeric: tabular-nums; }
+.vue-import .imp-etape-source > .imp-section-plate, .vue-import .imp-etape-verification > .imp-section-plate { border-top: 1px solid var(--bordure); }
+.vue-import .imp-etape-source .imp-scanner { margin: 0; }
+.vue-import .imp-etape-source .retour-essai-lien { margin: 0; }
+.vue-import .imp-etape-menus { gap: 10px; }
+.vue-import .imp-etape-menus .saisie-jour { min-width: 0; margin: 0; }
+.vue-import .imp-etape-menus .saisie-jour-titre { margin-top: 0; }
+.vue-import .imp-etape-verification .imp-lecture { padding-bottom: 0; }
+.vue-preparer .prep-etape { min-width: 0; padding: 14px 0; border-top: 1px solid var(--bordure); }
+.vue-preparer .prep-etape h2 { display: flex; align-items: center; gap: 10px; }
+.vue-preparer .prep-etape-3 { border-bottom: 1px solid var(--bordure); }
+.vue-preparer .prep-etape-3 .prep-fiche { min-height: var(--cible); }

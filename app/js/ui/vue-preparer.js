@@ -91,8 +91,8 @@ function sectionAConfirmer(p, lundi) {
     const r = agir((e, t) => validerToutAvecStandards(e, lundi, t));
     if (r.ok) bilan = { lundi, ...r.valeur };
   };
-  return h('section', { classe: 'prep-section', 'aria-labelledby': 'prep-titre-confirmer' },
-    h('h2', { classe: 'sem-section', id: 'prep-titre-confirmer' }, 'À confirmer'),
+  return h('section', { classe: 'prep-section prep-etape prep-etape-2', 'aria-labelledby': 'prep-titre-confirmer' },
+    h('h2', { classe: 'sem-section', id: 'prep-titre-confirmer' }, h('span', { classe: 'prep-etape-num' }, '2'), ' À confirmer'),
     avecStandard.length > 0 ? bouton('Tout valider avec les standards', tout, 'principal prep-tout') : null,
     h('p', { classe: 'prep-bilan', role: 'status' }, bilan?.lundi === lundi ? phraseBilan(bilan) : null),
     retenus.lundi === lundi && retenus.textes.length > 0 ? h('ul', { classe: 'prep-retenus', role: 'status' }, retenus.textes.map((t) => h('li', null, t))) : null,
@@ -112,12 +112,13 @@ export function rendre(etat, lundi) {
         h('h1', { classe: 'sem-titre' }, 'Préparer la semaine'),
         h('p', { classe: 'aide' }, 'Touchez les couverts du midi, confirmez les valeurs, puis ouvrez votre fiche de production.')),
       lien(`#/semaine/${lundi}/tableau`, 'Semaine', 'btn')),
-    h('section', { classe: 'prep-section', 'aria-labelledby': 'prep-titre-couverts' },
-      h('h2', { classe: 'sem-section', id: 'prep-titre-couverts' }, 'Couverts du midi'),
+    h('section', { classe: 'prep-section prep-etape prep-etape-1', 'aria-labelledby': 'prep-titre-couverts' },
+      h('h2', { classe: 'sem-section', id: 'prep-titre-couverts' }, h('span', { classe: 'prep-etape-num' }, '1'), ' Couverts du midi'),
       p.jours.length === 0 ? etatVide({ titre: 'Aucun menu enregistré cette semaine', texte: 'Importez les menus pour préparer la semaine.', actions: [{ libelle: 'Importer les menus', href: `#/import/${lundi}`, principal: true }] })
         : h('ul', { classe: 'prep-liste' }, p.jours.map(ligneCouverts))),
     sectionAConfirmer(p, lundi),
-    h('div', { classe: 'prep-fin' },
+    h('section', { classe: 'prep-fin prep-etape prep-etape-3', 'aria-labelledby': 'prep-titre-production' },
+      h('h2', { classe: 'sem-section', id: 'prep-titre-production' }, h('span', { classe: 'prep-etape-num' }, '3'), ' Production'),
       lien(`#/production/${p.premierJour ?? lundi}`, 'Voir la fiche de production', 'btn btn-principal prep-fiche'),
       p.restantInconnu > 0 ? h('p', { classe: 'aide' }, `${pluriel(p.restantInconnu, 'valeur reste', 'valeurs restent')} à confirmer : elles resteront signalées dans la fiche.`) : null));
   return racine;
