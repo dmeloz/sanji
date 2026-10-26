@@ -127,7 +127,7 @@ function blocFiches(etat, date) {
   const fiches = fichesActives(etat, date);
   const alertes = alertesAllergenes(etat, date);
   return h('section', { classe: 'sem-fiches services-etape services-etape-fiches', 'aria-label': 'Fiches de fonction' },
-    h('h2', { classe: 'sem-sous-titre' }, '3 · Fiches de fonction'),
+    h('h2', { classe: 'sem-sous-titre' }, 'Fiches de fonction'),
     fiches.length === 0 ? h('p', { classe: 'sem-neutre' }, 'Aucune fiche de fonction ce jour-là.')
       : h('ul', { classe: 'sem-liste' }, fiches.map((f) => ficheDuJour(f, alertes))),
     estSemainePassee(date) ? null : h('div', { classe: 'actions' },
@@ -196,9 +196,9 @@ export function ouvrirServices(date) {
       bandeauPoints(etat, date, fermer),
       aDesMenus(date)
         ? [h('section', { classe: 'services-etape services-etape-couverts' },
-          h('h2', { classe: 'sem-sous-titre' }, '1 · Couverts midi'), ligneCouverts(etat, date, fermer)),
+          h('h2', { classe: 'sem-sous-titre' }, 'Couverts midi'), ligneCouverts(etat, date, fermer)),
         h('section', { classe: 'services-etape services-etape-menus' },
-          h('h2', { classe: 'sem-sous-titre' }, '2 · Menus'), ...MENUS.map((m) => blocMenu(etat, date, m)))]
+          h('h2', { classe: 'sem-sous-titre' }, 'Menus'), ...MENUS.map((m) => blocMenu(etat, date, m)))]
         : h('p', { classe: 'sem-neutre' }, 'Pas de menu du jour ce jour-là.'),
       blocFiches(etat, date),
       h('div', { classe: 'actions services-detail' }, bouton('Détail du jour', () => ouvrirApres(fermer, () => ouvrirDetailDuJour(date)), 'court'))),
