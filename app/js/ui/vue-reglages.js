@@ -793,7 +793,7 @@ export function rendre(etat, param = null) {
       h('p', { classe: 'reglages-note' }, 'Apparence : toujours claire. Écran allumé : en Production et en mode poste.'),
       h('p', { classe: 'reglages-pied' }, pastilleHorsLigne(hl), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
   }
-  return h('div', { classe: 'vue vue-reglages' },
+  return h('div', { classe: param === 'donnees' ? 'vue vue-reglages vue-reglages-donnees' : 'vue vue-reglages' },
     h('a', { href: '#/reglages', classe: 'reglage-retour' }, '‹ Réglages'),
     h('h1', { classe: 'page-titre' }, rubrique.titre),
     rubrique.blocs(etat));
