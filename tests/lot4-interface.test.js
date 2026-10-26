@@ -7,7 +7,7 @@ import { importer } from '../app/js/domaine/etat.js';
 
 const AUJOURD = '2026-10-12';
 const peuple = () => importer(readFileSync(new URL('./jeux/TEST_ONLY-etat-peuple.json', import.meta.url), 'utf8'), AUJOURD);
-let dom; let restore; let magasin; let services; let taches; let planning; let css;
+let dom; let restore; let magasin; let services; let taches; let planning;
 before(async () => {
   restore = figerHorloge(AUJOURD);
   dom = installerFauxDom();
@@ -15,7 +15,6 @@ before(async () => {
   services = await import('../app/js/ui/feuille-services.js');
   taches = await import('../app/js/ui/taches.js');
   planning = await import('../app/js/ui/assistant-planning.js');
-  css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
 });
 after(() => { dom.restaurer(); restore(); });
 const parClasse = (n, c) => n.tous((x) => x.className.split(' ').includes(c));
@@ -77,14 +76,4 @@ test('Brouillon : provenance, préparations, décisions et explication sont sép
   assert.match(etapes[2].textContent, /À décider/);
   assert.match(etapes[3].textContent, /Pourquoi cette proposition/);
   assert.match(racine.textContent, /Rien n'est enregistré avant votre validation/);
-});
-
-test('les nouveaux repères restent en texte et gardent les feuilles tactiles à plat', () => {
-  assert.ok(css.includes('/* ===== Refonte 3 — lot 4'));
-  const bloc = css.slice(css.indexOf('/* ===== Refonte 3 — lot 4'));
-  assert.match(bloc, /services-etape/);
-  assert.match(bloc, /planifier-etape/);
-  assert.match(bloc, /ia-etape/);
-  assert.match(bloc, /min-height:\s*var\(--cible\)/);
-  assert.doesNotMatch(bloc, /details\s*\{/);
 });

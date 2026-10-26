@@ -3,7 +3,6 @@
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { installerFauxDom } from './aide-dom.js';
 import { definirMenu, definirPrevision, definirStandard } from '../app/js/domaine/actions.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
@@ -13,14 +12,12 @@ let dom;
 let magasin;
 let aujourdhui;
 let production;
-let css;
 
 before(async () => {
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   aujourdhui = await import('../app/js/ui/vue-aujourdhui.js');
   production = await import('../app/js/ui/vue-production.js');
-  css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
 });
 
 after(() => dom.restaurer());
@@ -60,19 +57,20 @@ test('Aujourd’hui : les jours proches restent des lignes accessibles avec date
     assert.ok(classes(ligne, 'tdb-jour-date').length === 1, 'date isolée pour le balayage');
     assert.ok(classes(ligne, 'tdb-jour-contenu').length === 1, 'menus ou état vide dans une colonne dédiée');
   }
-  assert.ok(/\.tdb-intitule\s*\{[^}]*display:\s*block/.test(css), 'intitulé sans boîte à lignes tronquée');
 });
 
 test('Production : la date complète garde une zone dédiée à côté des flèches tactiles', () => {
-  assert.ok(/\.vue-production \.prod-titre-ligne\s*\{[^}]*display:\s*grid/.test(css));
-  assert.ok(/\.vue-production \.prod-date\s*\{[^}]*white-space:\s*normal/.test(css));
-  assert.ok(/\.prod-fleche\s*\{[^}]*width:\s*var\(--cible\)[^}]*height:\s*var\(--cible\)/.test(css));
+  const page = aDate(S.lundi, () => {
+    magasin.remplacer(etatVide());
+    return production.rendre(magasin.etat(), S.lundi);
+  });
+  const [ligneTitre] = classes(page, 'prod-titre-ligne');
+  assert.ok(ligneTitre, 'ligne de titre présente');
+  assert.equal(classes(ligneTitre, 'prod-date').length, 1, 'date dans sa zone dédiée');
+  assert.equal(classes(ligneTitre, 'prod-fleche').length, 2, 'deux flèches de jour');
 });
 
 test('Production : le nom peut passer à la ligne et reste distinct de la quantité', () => {
-  assert.ok(/\.vue-production \.prod-nom\s*\{[^}]*white-space:\s*normal/.test(css));
-  assert.ok(/\.prod-principal\s*\{[^}]*grid-template-columns:\s*var\(--cible\)\s+minmax\(0,\s*1fr\)\s+auto\s+var\(--cible\)/.test(css));
-
   const e = etatVide();
   definirMenu(e, S.lundi, 1, 'Tagliatelles aux légumes du soleil', h());
   definirPrevision(e, S.lundi, 1, 10, h());

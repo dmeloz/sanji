@@ -95,3 +95,15 @@ test('Ventes du midi d\'un jour passé : pas de « Modifier les couverts », les
   assert.ok(libellesDe(courant).includes('Modifier les couverts'));
   courant.close();
 });
+
+test('Tableau : sans prévision, « couverts à saisir » est un bouton cette semaine et « couverts non saisis » du simple texte sur une semaine passée', () => {
+  magasin.remplacer(etatDeuxSemaines());
+  const mentions = (lundi, mot) => vueTableau.rendre(magasin.etat(), lundi).tous((x) => x.className.split(' ').includes('bord-jour-couverts') && mot.test(x.textContent));
+  const passees = mentions(LUNDI_PASSE, /non saisis/);
+  assert.equal(mentions(LUNDI_PASSE, /à saisir/).length, 0);
+  assert.ok(passees.length > 0);
+  assert.ok(passees.every((x) => x.balise !== 'button' && x.balise !== 'a'));
+  const courantes = mentions('2026-10-12', /à saisir/);
+  assert.ok(courantes.length > 0);
+  assert.ok(courantes.every((x) => x.balise === 'button'));
+});

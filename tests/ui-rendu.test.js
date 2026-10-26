@@ -131,7 +131,7 @@ test('contenus attendus : tableau, détail, réglages', () => {
   const { e } = etatRiche();
   magasin.remplacer(e);
   const tab = dateDuJour(S.lundi, () => vues.tableau.rendre(magasin.etat(), S.lundi)).textContent;
-  assert.match(tab, /Semaine du 5 octobre/);
+  assert.match(tab, /Semaine · 5 octobre/);
   assert.match(tab, /INTITULE_TEST_1/);
   assert.doesNotMatch(tab, /Semaine type|créneau/i, 'plus de semaine type ni de créneau (v134)');
   assert.match(tab, /sujets? attendent? le chef/);
@@ -434,8 +434,8 @@ const textes = (noeuds) => noeuds.map((n) => n.textContent);
 function verifierTableau(noeud, contexte) {
   const texte = verifierTexte(noeud, contexte);
   assert.equal(ERREUR_DE_CODE.test(texte), false, `${contexte} : message d'erreur de code`);
-  // Seuls boutons : les nombres de couverts (ils ouvrent la feuille Couverts midi) ; tout le reste est un lien.
-  assert.equal(noeud.tous((x) => x.balise === 'button' && !x.className.split(' ').includes('tb-couverts')).length, 0, `${contexte} : liens seulement`);
+  // Seuls boutons : les nombres de couverts et « couverts à saisir » (ils ouvrent la feuille Couverts midi) ; tout le reste est un lien.
+  assert.equal(noeud.tous((x) => x.balise === 'button' && !/\btb-couverts\b|\bbord-jour-couverts\b/.test(x.className)).length, 0, `${contexte} : liens seulement`);
   assert.ok(classes(noeud, 'bord-zone').length <= 5, `${contexte} : au plus 5 zones primaires`);
   assert.equal(classes(noeud, 'note').length, 0, `${contexte} : la note multi-sujets n'existe plus`);
   return texte;
@@ -455,10 +455,12 @@ test('tableau : base vide un lundi, invitation à saisir les menus, rien de vide
   const texte = verifierTableau(noeud, 'tableau base vide');
   assert.match(texte, /Aucun menu saisi cette semaine/);
   assert.match(texte, /Saisir les menus de la semaine/);
-  assert.match(texte, /Semaine du 5 octobre/);
+  assert.match(texte, /Semaine · 5 octobre/);
   assert.doesNotMatch(texte, /menu non saisi|0 portion/);
   assert.match(texte, /Aucun banquet prévu/, 'ligne calme sans fiche');
   assert.equal(classes(noeud, 'bord-zone').length, 4, 'quatre zones sous l\'en-tête');
+  assert.deepEqual(classes(noeud, 'bord-zone').map((z) => z.querySelector('h2').textContent),
+    ['Menus de la semaine', 'À confirmer', 'Fiches de fonction', 'Production et commandes'], 'les décisions viennent après les jours');
   assert.ok(liens(noeud).some((a) => a.attributs.href === `#/import/${S.lundi}`));
   assert.ok(liens(noeud).some((a) => a.attributs.href === `#/production/${S.lundi}` && /Production du jour/.test(a.textContent)));
 });
@@ -467,7 +469,7 @@ test('tableau : le jour du service, la jauge de production et l\'écart à arbit
   const { e, jour } = etatReglette(); // service du vendredi 2 octobre
   const noeud = tableau(jour, e);
   const texte = verifierTableau(noeud, 'tableau avant service');
-  assert.match(texte, /Semaine du 28 septembre/, 'un vendredi avec des tâches à faire reste sur la semaine en cours');
+  assert.match(texte, /Semaine · 28 septembre/, 'un vendredi avec des tâches à faire reste sur la semaine en cours');
   assert.match(texte, /Aujourd'hui \d+\/\d+ fait/);
   assert.ok(liens(noeud).some((a) => a.attributs.href === `#/production/${jour}` && /fait/.test(a.textContent)), 'la jauge mène à Jour');
   assert.match(texte, /écart[s]? à arbitrer/);
@@ -480,11 +482,11 @@ test('tableau : en fin de semaine, la semaine prochaine s\'affiche ; mercredi, l
   const e = etatSemaineSaisie();
   for (const jour of [S.veille, S.samediPrecedent, S.dimanchePrecedent]) {
     const texte = verifierTableau(tableau(jour, structuredClone(e)), `tableau ${jour}`);
-    assert.match(texte, /Semaine du 5 octobre/, `${jour} : la semaine affichée est la suivante`);
+    assert.match(texte, /Semaine · 5 octobre/, `${jour} : la semaine affichée est la suivante`);
     assert.match(texte, /Revenir à aujourd'hui/);
   }
   const mercredi = verifierTableau(tableau(S.mercredi, structuredClone(e)), 'tableau mercredi');
-  assert.match(mercredi, /Semaine du 5 octobre/);
+  assert.match(mercredi, /Semaine · 5 octobre/);
   assert.doesNotMatch(mercredi, /Revenir à aujourd'hui/);
   // Semaine prochaine non saisie : l'invitation à saisir les menus mène à Menus de la semaine.
   const vide = tableau(S.samediPrecedent, etatVide());
@@ -567,7 +569,7 @@ test('tableau : un standard maison fait disparaître la portion à régler ; la 
 test('tableau : navigation de semaine et retour à aujourd\'hui', () => {
   const noeud = tableau(S.mercredi, etatSemaineSaisie(), S.lundiSuivant);
   const texte = verifierTableau(noeud, 'tableau semaine suivante');
-  assert.match(texte, /Semaine du 12 octobre/);
+  assert.match(texte, /Semaine · 12 octobre/);
   assert.match(texte, /Revenir à aujourd'hui/);
   const hrefs = liens(noeud).map((a) => a.attributs.href);
   assert.ok(hrefs.includes(`#/semaine/${S.lundi}/tableau`) && hrefs.includes('#/semaine/2026-10-19/tableau') && hrefs.includes('#/aujourdhui'));

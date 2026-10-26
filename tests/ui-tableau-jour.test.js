@@ -64,10 +64,10 @@ function semaine() {
 
 // ---------------------------------------------------------------- Tableau
 
-test('Tableau : quatre zones sous un en-tête, jamais plus de cinq, et plus de note multi-sujets', () => {
+test('Tableau : quatre zones (jours, à confirmer, fiches, production) sous un en-tête, jamais plus de cinq, et plus de note multi-sujets', () => {
   const noeud = tableau(S.mardi, semaine());
   assert.deepEqual(classes(noeud, 'bord-zone').map((z) => z.querySelector('h2').textContent),
-    ['Menus de la semaine', 'Fiches de fonction', 'À confirmer', 'Production et commandes']);
+    ['Menus de la semaine', 'À confirmer', 'Fiches de fonction', 'Production et commandes']);
   assert.equal(classes(noeud, 'note').length, 0);
   assert.equal(classes(noeud, 'bord-tete').length, 1, 'un en-tête compact');
 });
@@ -406,4 +406,64 @@ test('tableau : la légende du signe respecte les 15 px minimum', () => {
   assert.match(regle, /font-size:\s*var\(--t-1\)/);
   assert.match(css, /--t-1:\s*var\(--t-corps\)/);
   assert.match(css, /--t-corps:\s*15px/);
+});
+
+test('Tableau : le titre est daté « Semaine · 5 octobre », « Semaine N » reste en sous-titre, la ligne Aujourd\'hui est gardée', () => {
+  const noeud = tableau(S.mardi, semaine());
+  assert.equal(classes(noeud, 'bord-titre')[0].textContent, 'Semaine · 5 octobre');
+  assert.match(classes(noeud, 'bord-sous-titre')[0].textContent, /^Semaine \d+/);
+  assert.match(classes(noeud, 'bord-date')[0].textContent, /^Aujourd'hui, /);
+  assert.ok(liens(noeud).some((a) => /Production du jour/.test(a.textContent)));
+});
+
+test('Tableau : chaque tête de jour dit ses couverts ; sans prévision, « couverts à saisir » ouvre la feuille des couverts', () => {
+  const e = semaine();
+  const sansPrevision = etatVide();
+  definirMenu(sansPrevision, S.jeudi, 1, 'riz et carottes', h());
+  e.jours[S.jeudi] = sansPrevision.jours[S.jeudi];
+  const noeud = tableau(S.mardi, e);
+  const tetes = classes(noeud, 'bord-jour');
+  assert.ok(tetes.length > 0);
+  for (const t of tetes) {
+    const c = classes(t, 'bord-jour-couverts');
+    assert.equal(c.length, 1, `${t.textContent} : une mention de couverts`);
+    assert.match(c[0].textContent, /couverts?/);
+  }
+  const vides = classes(noeud, 'bord-jour-couverts').filter((x) => /à saisir/.test(x.textContent));
+  assert.ok(vides.length > 0, 'au moins un jour sans prévision');
+  for (const v of vides) assert.equal(v.balise, 'button', 'touchable');
+});
+
+test('Tableau : menus M1/M2 compacts, sans bordure entre eux, chiffre de 44 px (feuille de style)', () => {
+  const bloc = /\.vue-semaine-globale \.bord-menu\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+  assert.doesNotMatch(bloc, /border-top/, 'pas de filet entre M1 et M2');
+  assert.match(bloc, /padding-block:\s*0/);
+  assert.match(css, /\.tb-couverts\s*\{[^}]*min-height:\s*var\(--cible\)/);
+  assert.match(css, /\.bord-jour-couverts[^{]*\{[^}]*min-height:\s*var\(--cible\)/);
+});
+
+test('Tableau : dans l\'intitulé du menu, les liens de plat sont en ligne normale (interligne ~1,35), le chiffre des couverts garde 44 px (feuille de style)', () => {
+  const bloc = /\.vue-semaine-globale \.tb-intitule \.bord-plat\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+  assert.match(bloc, /display:\s*inline\b/);
+  assert.match(bloc, /min-height:\s*auto/);
+  assert.match(bloc, /padding:\s*0/);
+  assert.match(css, /\.vue-semaine-globale \.tb-intitule\s*\{[^}]*line-height:\s*1\.35/);
+  assert.match(css, /\.tb-couverts\s*\{[^}]*min-height:\s*var\(--cible\)/);
+});
+
+test('Tableau : cliquer « couverts à saisir » d\'un jour sans prévision ouvre la feuille Couverts midi de CE jour', async () => {
+  const e = semaine();
+  const sansPrevision = etatVide();
+  definirMenu(sansPrevision, S.jeudi, 1, 'riz et carottes', h());
+  e.jours[S.jeudi] = sansPrevision.jours[S.jeudi];
+  const noeud = tableau(S.mardi, e);
+  const bouton = classes(noeud, 'bord-jour-couverts').find((x) => x.balise === 'button' && /à saisir/.test(x.textContent));
+  assert.ok(bouton, 'un bouton « couverts à saisir »');
+  assert.match(bouton.attributs['aria-label'], /jeudi/i);
+  await aDate(S.mardi, () => bouton.click());
+  const feuille = dom.corps.tous((x) => x.balise === 'dialog' && x.open).at(-1);
+  assert.ok(feuille, 'une feuille est ouverte');
+  assert.equal(feuille.querySelector('h2').textContent, 'Couverts midi');
+  assert.match(feuille.textContent, /jeudi/i, 'la date affichée est celle du jour cliqué');
+  feuille.close();
 });

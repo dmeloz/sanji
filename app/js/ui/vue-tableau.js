@@ -1,5 +1,5 @@
 // Tableau : un tableau de bord, pas une note générale. Quatre zones sous un en-tête compact : Menus de la semaine,
-// Fiches de fonction, À confirmer (3 lignes au plus), Production et commandes. La vue ne calcule rien : tout vient
+// À confirmer (3 lignes au plus), Fiches de fonction, Production et commandes. La vue ne calcule rien : tout vient
 // de `tableauBlanc(...).bord`. Chaque ligne est un lien (ou le cercle de prévision) ; aucun bouton « valider ».
 
 import { libelleJour } from '../domaine/dates.js';
@@ -82,18 +82,30 @@ function signesDuJour(jour) {
   return signes.map(([icone, mot]) => h('span', { classe: 'bord-signe' }, h('span', { classe: 'bord-signe-icone', 'aria-hidden': 'true' }, icone), mot));
 }
 
+/** Couverts de la tête d'un jour, toujours dits : le total, ou « couverts à saisir » (bouton vers la feuille des couverts, « couverts non saisis » en texte seul sur une semaine passée). */
+function couvertsDeTete(jour) {
+  if (jour.couvertsTotal !== null) return { texte: ` · ${pluriel(jour.couvertsTotal, 'couvert', 'couverts')}`, bouton: null };
+  if (estSemainePassee(jour.date)) return { texte: ' · couverts non saisis', bouton: null };
+  return { texte: '', bouton: h('button', {
+    type: 'button', onClick: () => ouvrirCouvertsMidi(jour.date), classe: 'bord-jour-couverts feutre',
+    'aria-label': `${libelleJour(jour.date)} : couverts à saisir, saisir les couverts`,
+  }, 'couverts à saisir') };
+}
+
 /** Un jour : la ligne entière mène au détail du jour (l'en-tête est étiré sur la ligne), un plat à sa fiche. */
 function jourDuBord(jour) {
   const saisis = jour.menus.filter((m) => m.saisi);
-  const couverts = jour.couvertsTotal !== null ? ` · ${pluriel(jour.couvertsTotal, 'couvert', 'couverts')}` : '';
+  const couverts = couvertsDeTete(jour);
   const signes = signesDuJour(jour);
   const dits = [jour.horsRegle ? 'hors règle' : null, jour.aConfirmer ? 'à confirmer' : null].filter(Boolean);
   return h('li', { classe: `bord-jour${jour.estAujourdhui ? ' bord-aujourdhui' : ''}` },
-    h('a', { href: `#/production/${jour.date}`, classe: 'bord-jour-lien feutre',
-      'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''}${dits.length ? `, ${dits.join(', ')}` : ''} : ouvrir la production du jour` },
-    `${etiquetteJour(jour.date)}${couverts} `,
-    jour.estAujourdhui ? h('span', { classe: 'bord-badge' }, h('span', { 'aria-hidden': 'true' }, '● '), "aujourd'hui") : null,
-    signes),
+    h('div', { classe: 'bord-jour-tete' },
+      h('a', { href: `#/production/${jour.date}`, classe: 'bord-jour-lien feutre',
+        'aria-label': `${libelleJour(jour.date)}${jour.estAujourdhui ? ", aujourd'hui" : ''}${dits.length ? `, ${dits.join(', ')}` : ''} : ouvrir la production du jour` },
+      etiquetteJour(jour.date), couverts.texte ? h('span', { classe: 'bord-jour-couverts' }, couverts.texte) : null, ' ',
+      jour.estAujourdhui ? h('span', { classe: 'bord-badge' }, h('span', { 'aria-hidden': 'true' }, '● '), "aujourd'hui") : null,
+      signes),
+      couverts.bouton),
     saisis.length === 0 ? h('p', { classe: 'tb-discret' }, 'Menus non saisis') : saisis.map((m) => ligneMenu(jour, m)));
 }
 
@@ -190,7 +202,7 @@ function entete(tb, actions = null) {
     h('div', { classe: 'bord-semaine-nav' },
       h('a', { href: `#/semaine/${tb.semainePrecedente}/tableau`, classe: 'btn btn-fleche', 'aria-label': 'Semaine précédente' }, '‹'),
       h('div', { classe: 'bord-semaine' },
-        h('h1', { classe: 'bord-titre feutre' }, `Semaine du ${libelleJour(tb.lundi).replace(/^lundi\s+/, '')}`),
+        h('h1', { classe: 'bord-titre feutre' }, `Semaine · ${libelleJour(tb.lundi).replace(/^lundi\s+/, '')}`),
         h('p', { classe: 'bord-sous-titre' }, `Semaine ${e.semaine}${problemeHorsLigne() ? ` · ${problemeHorsLigne()}` : ''}`)),
       h('a', { href: `#/semaine/${tb.semaineSuivante}/tableau`, classe: 'btn btn-fleche', 'aria-label': 'Semaine suivante' }, '›')),
     h('div', { classe: 'bord-aujourdhui-ligne' },
@@ -207,8 +219,8 @@ export function rendre(etat, lundiAffiche, options = {}) {
   const racine = h('div', { classe: 'vue vue-tableau vue-bord', 'data-lundi': tb.lundi });
   racine.appendChild(entete(tb, options.actions ?? null));
   racine.appendChild(zoneMenus(tb.bord, tb.lundi));
-  racine.appendChild(zoneFiches(tb.bord, aujourd));
   racine.appendChild(zoneAConfirmer(tb.bord));
+  racine.appendChild(zoneFiches(tb.bord, aujourd));
   racine.appendChild(zoneProduction(tb.bord));
   if (!tb.estSemaineCourante) {
     racine.appendChild(h('p', { classe: 'tableau-pied' }, lien('#/aujourdhui', "Revenir à aujourd'hui", 'btn')));
