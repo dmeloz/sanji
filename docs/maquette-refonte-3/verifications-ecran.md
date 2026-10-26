@@ -17,3 +17,4 @@ Points purement visuels, retirés des tests (lecture de `style.css` par regex) :
 | Fiches des éléments | Rubriques en cartes, champ de recherche de 44 px | `.vue-fiches-elements .fe-rubrique`, `.vue-fiches-elements .fe-recherche` |
 | Historique | Semaines en cartes, colonne des quantités stable | `.vue-historique .hist-semaine`, `.vue-historique .hist-qte` |
 | Feuilles du lot 6 | Cibles de 44 px, texte au gabarit corps, pas de `details` ni de dégradé | bloc `Refonte 3 — lot 6` |
+| Semaine (v143) | Menus M1/M2 compacts (une ligne par menu, sans filet entre eux), chiffre des couverts et « couverts à saisir » de 44 px, tête datée « Semaine · 5 octobre » | `.vue-semaine-globale .bord-menu`, `.bord-jour-tete`, `button.bord-jour-couverts` |
