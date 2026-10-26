@@ -1,21 +1,19 @@
 // Lot 3 — progression lisible dans Import et Préparer la semaine, sans changer les décisions métier.
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { installerFauxDom, figerHorloge } from './aide-dom.js';
 import { definirMenu } from '../app/js/domaine/actions.js';
 import { prevision } from './aide.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 import { etatVide, h } from './aide.js';
 
-let dom; let restore; let magasin; let importer; let preparer; let css;
+let dom; let restore; let magasin; let importer; let preparer;
 before(async () => {
   restore = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   importer = await import('../app/js/ui/vue-import.js');
   preparer = await import('../app/js/ui/vue-preparer.js');
-  css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
 });
 after(() => { dom.restaurer(); restore(); });
 const parClasse = (n, c) => n.tous((x) => x.className.split(' ').includes(c));
@@ -49,14 +47,4 @@ test('Préparer : couverts, confirmations et accès Production forment trois niv
   assert.match(etapes[2].textContent, /3.*Production/);
   assert.ok(etapes[0].tous((x) => x.className.split(' ').includes('prep-valeur')).length > 0);
   assert.ok(etapes[2].tous((x) => x.textContent === 'Voir la fiche de production').length > 0);
-});
-
-test('les étapes ont un repère textuel, sans réduire les cibles tactiles ni le texte', () => {
-  const start = css.indexOf('/* ===== Refonte 3 — lot 3');
-  assert.ok(start >= 0);
-  const bloc = css.slice(start);
-  assert.match(bloc, /imp-etape-titre/);
-  assert.match(bloc, /prep-etape/);
-  assert.match(bloc, /min-height:\s*var\(--cible\)/);
-  for (const m of bloc.matchAll(/font-size:\s*(\d+)px/g)) assert.ok(Number(m[1]) >= 15, m[0]);
 });

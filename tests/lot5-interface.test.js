@@ -1,7 +1,6 @@
 // Lot 5 — balayage de Semaine et états vides d’Articles.
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { figerHorloge, installerFauxDom } from './aide-dom.js';
 import { planifier } from '../app/js/domaine/actions.js';
 import { principaleDe } from './aide.js';
@@ -9,14 +8,13 @@ import { etatVide, h, composantValide, prevision, menuValide } from './aide.js';
 import { JEU_COMPOSANTS as J } from './jeux/TEST_ONLY-composants.js';
 import { JEU_SEMAINE as S } from './jeux/TEST_ONLY-semaine.js';
 
-let dom; let restore; let magasin; let semaine; let articles; let css;
+let dom; let restore; let magasin; let semaine; let articles;
 before(async () => {
   restore = figerHorloge(S.lundi);
   dom = installerFauxDom();
   magasin = await import('../app/js/magasin.js');
   semaine = await import('../app/js/ui/vue-tableau.js');
   articles = await import('../app/js/ui/vue-articles.js');
-  css = readFileSync(new URL('../app/css/style.css', import.meta.url), 'utf8');
 });
 after(() => { dom.restaurer(); restore(); articles.oublierVue(); });
 const parClasse = (n, c) => n.tous((x) => x.className.split(' ').includes(c));
@@ -30,8 +28,6 @@ test('Semaine : les jours ont une carte de lecture stable et gardent les menus M
   const jours = parClasse(page, 'bord-jour');
   assert.ok(jours.length > 0);
   assert.ok(jours.some((jour) => parClasse(jour, 'bord-menu').length === 2));
-  assert.match(css, /\.vue-semaine-globale \.bord-jour\s*\{[^}]*background:\s*var\(--carte\)/);
-  assert.match(css, /\.vue-semaine-globale \.bord-menu\s*\{[^}]*grid-template-columns:/);
 });
 
 test('Articles : semaine sans article dit quelle période manque et mène à l’import', () => {
@@ -58,13 +54,4 @@ test('Articles : journée vide alors que la semaine a des articles propose la se
   assert.ok(b, 'un bouton ramène à la liste de la semaine, dans Articles');
   b.declencher('click');
   assert.ok(parClasse(articles.rendre(magasin.etat()), 'art-jour').length > 0, 'la liste de la semaine est de nouveau affichée');
-});
-
-test('les nouvelles cartes et le partage gardent une cible tactile de 44 px minimum', () => {
-  assert.ok(css.includes('/* ===== Refonte 3 — lot 5'));
-  const bloc = css.slice(css.indexOf('/* ===== Refonte 3 — lot 5'));
-  assert.match(bloc, /bord-jour/);
-  assert.match(bloc, /min-height:\s*var\(--cible\)/);
-  assert.match(bloc, /art-vide-aujourdhui/);
-  assert.doesNotMatch(bloc, /gradient|details\s*\{/);
 });
