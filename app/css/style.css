@@ -1409,3 +1409,45 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .vue-articles .art-vide-aujourdhui h2 { font-size: var(--t-ligne); }
 .vue-articles .art-vide-aujourdhui p { color: var(--texte-doux); }
 .vue-articles .art-vide-aujourdhui .btn { min-height: var(--cible); justify-self: start; }
+
+/* ===== Refonte 3 — lot 6 : orientation dans Réglages, Données, Fiches et Historique (rubriques en cartes, sans numéros : ce ne sont pas des étapes). ===== */
+.vue-reglages-racine .reglages-groupe {
+  margin-top: 8px;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--bordure);
+  border-radius: var(--r-carte);
+  background: var(--carte);
+}
+.vue-reglages-racine .reglages-groupe-titre {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--bordure);
+  font-size: var(--t-legende);
+  letter-spacing: 0.04em;
+}
+.vue-reglages-racine .liste-rubriques-reglages { background: transparent; border: 0; }
+.vue-reglages-racine .liste-rubriques-reglages li + li { border-top: 1px solid var(--bordure); }
+.vue-reglages-racine .reglage-rubrique { min-height: var(--cible); padding: 10px 2px; }
+.vue-reglages-racine .reglages-maj { display: grid; gap: 8px; margin: 4px 12px 8px; padding: 12px; border: 1px solid var(--bordure-forte); border-radius: var(--r-carte-petite); background: var(--carte); }
+.vue-reglages-racine .reglages-maj > button, .vue-reglages-racine .reglages-maj > .meta { margin-inline: 0; }
+
+.vue-reglages-donnees > .carte { position: relative; margin-top: 12px; }
+.vue-reglages-donnees .liste-journal { display: grid; gap: 0; }
+.vue-reglages-donnees .liste-journal > li { min-width: 0; padding: 10px 0; border-top: 1px solid var(--bordure); overflow-wrap: anywhere; }
+.vue-reglages-donnees .liste-journal .meta { display: block; }
+.vue-reglages-donnees .reglage-danger { width: 100%; min-height: var(--cible); border: 1px solid var(--bordure); border-radius: var(--r-carte-petite); background: var(--carte); font: inherit; text-align: left; cursor: pointer; } /* un <button> : sinon police 13 px et gris du navigateur */
+
+.vue-fiches-elements .fe-recherche { min-height: var(--cible); padding-inline: 12px; border: 1px solid var(--bordure-champ); border-radius: var(--r-case); background: var(--carte); font: var(--t-corps)/1.4 var(--police); }
+.vue-fiches-elements .fe-rubrique { gap: 0; padding: 10px 12px 4px; border: 1px solid var(--bordure); border-radius: var(--r-carte-petite); background: var(--carte); }
+.vue-fiches-elements .fe-rubrique > h2 { display: flex; align-items: center; min-height: var(--cible); margin: 0; font-size: var(--t-ligne); }
+.vue-fiches-elements .fe-liste { margin: 0; border: 0; border-radius: 0; background: transparent; }
+.vue-fiches-elements .fe-liste li + li { border-top: 1px solid var(--bordure); }
+.vue-fiches-elements .fe-ligne { padding-inline: 2px; }
+.vue-historique .hist-liste { display: grid; gap: 10px; border: 0; }
+.vue-historique .hist-semaine { min-width: 0; border: 1px solid var(--bordure); border-radius: var(--r-carte-petite); background: var(--carte); }
+.vue-historique .hist-semaine .ligne-feuille { min-height: var(--cible); padding: 10px 12px; border: 0; }
+.vue-historique .hist-qte { justify-content: flex-end; min-width: 9ch; }
+.vue-historique .hist-jour > :last-child { flex: none; text-align: right; }
