@@ -285,10 +285,10 @@ test('prochaine fiche : sans fiche à venir, rien n\'est affiché', () => {
   assert.equal(classes(page(S.mercredi, mercredi()), 'au-fiche').length, 0);
 });
 
-test('depuis Aujourd\'hui : Réglages et la fiche de chaque ligne restent à un toucher (Semaine est un onglet)', () => {
+test('depuis Aujourd\'hui : la fiche de chaque ligne reste à un toucher ; Réglages est dans l\'onglet Cuisine (étape 6)', () => {
   const e = mercredi();
   const liens = hrefs(page(S.mercredi, e));
-  assert.ok(liens.includes('#/reglages'));
+  assert.ok(!liens.includes('#/reglages'), 'plus de lien Réglages dans l\'en-tête');
   assert.ok(liens.includes(`#/fiche/${composantDe(e, 'Tagliatelles').id}`));
 });
 

@@ -41,7 +41,7 @@ export function rendre(etat) {
   champ.value = recherche;
   champ.addEventListener('input', () => { recherche = champ.value; zone.replaceChildren(...contenu(etatCourant()).filter(Boolean)); });
   return h('div', { classe: 'vue vue-fiches-elements' },
-    h('a', { href: '#/reglages', classe: 'reglage-retour' }, '‹ Réglages'),
+    h('a', { href: '#/cuisine', classe: 'reglage-retour' }, '‹ Cuisine'),
     h('h1', { classe: 'page-titre' }, 'Fiches des éléments'),
     champ, zone);
 }

@@ -14,11 +14,11 @@ before(async () => {
 after(() => dom.restaurer());
 const parClasse = (n, c) => n.tous((x) => x.className.split(' ').includes(c));
 
-test('Réglages : groupes lisibles en cartes, toutes les rubriques gardent leur accès', () => {
+test('Réglages : groupes lisibles en cartes ; l\'application d\'un côté, les outils avancés de l\'autre (étape 6)', () => {
   const page = reglages.rendre(etatVide());
-  assert.deepEqual(page.tous((x) => x.balise === 'h2').map((x) => x.textContent), ['Production', 'Poste', 'Assistant', 'Données']);
-  assert.equal(page.tous((x) => x.balise === 'a' && x.attributs.href?.startsWith('#/reglages/')).length, reglages.CLES_RUBRIQUES.length);
-  assert.equal(parClasse(page, 'reglages-groupe').length, 4, 'un groupe par titre');
+  assert.deepEqual(page.tous((x) => x.balise === 'h2').map((x) => x.textContent), ['Application', 'Outils avancés']);
+  assert.deepEqual(page.tous((x) => x.balise === 'a' && x.attributs.href?.startsWith('#/reglages/')).map((a) => a.attributs.href), ['#/reglages/donnees', '#/reglages/assistant-ia', '#/reglages/apprentissage']);
+  assert.equal(parClasse(page, 'reglages-groupe').length, 2, 'un groupe par titre');
 });
 
 test('Données : sauvegarde, copies, état, journal et remise à neuf ont des repères distincts', () => {

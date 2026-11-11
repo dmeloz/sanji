@@ -112,15 +112,15 @@ test('page : un toucher ouvre la petite fiche ; renommer, changer de catégorie,
   fermerFeuilles();
 });
 
-test('routeur : #/fiches est une vue, sous l\'onglet Aujourd\'hui ; Réglages > Poste a la ligne « Fiches des éléments »', () => {
+test('routeur : #/fiches est une vue, sous l\'onglet Cuisine, qui compte les fiches par rubrique', () => {
   assert.deepEqual(routeur.analyserHash('#/fiches', '2026-10-12'), { vue: 'fiches', param: null });
-  assert.equal(routeur.ONGLET_DE_VUE.fiches, 'aujourdhui');
+  assert.equal(routeur.ONGLET_DE_VUE.fiches, 'cuisine');
   assert.equal(typeof routeur.VUES.fiches.rendre, 'function');
-  const p = reglages.rendre(avecFiches());
-  const lien = p.tous((x) => x.balise === 'a' && x.attributs.href === '#/fiches')[0];
-  assert.ok(lien);
-  assert.match(lien.textContent, /Fiches des éléments/);
-  assert.match(lien.textContent, /4/);
+  const p = routeur.VUES.cuisine.rendre(avecFiches());
+  const liens = p.tous((x) => x.balise === 'a' && x.attributs.href === '#/fiches');
+  assert.ok(liens.length >= 2);
+  assert.match(p.textContent, /Fiches des éléments/);
+  assert.match(liens.at(-1).textContent, /Chercher un élément4 fiches/);
 });
 
 test('CSS : la page ne déborde pas à 390 px (min-width: 0), lignes de 44 px, rien en hex', () => {

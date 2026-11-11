@@ -8,32 +8,32 @@ import { boutons, installerFauxDom } from './aide-dom.js';
 import { etatVide } from './aide.js';
 
 let dom;
-let vue;
+let vue; let cuisine;
 before(async () => {
   dom = installerFauxDom();
   vue = await import('../app/js/ui/vue-reglages.js');
+  cuisine = await import('../app/js/ui/vue-cuisine.js');
 });
 after(() => dom.restaurer());
 
 const hrefs = (n) => n.tous((x) => x.balise === 'a').map((a) => a.attributs.href).filter((l) => typeof l === 'string');
 
-test('racine : retour « Aujourd\'hui », titre, sections, les six rubriques dans l\'ordre et Import des menus', () => {
+test('racine (étape 6) : retour « Cuisine », titre, deux sections ; les rubriques métier n\'y sont plus', () => {
   const r = vue.rendre(etatVide(), null);
-  assert.equal(r.tous((x) => x.balise === 'h1')[0].textContent, 'Réglages');
+  assert.equal(r.tous((x) => x.balise === 'h1')[0].textContent, 'Réglages de l\'app');
   const retour = r.tous((x) => x.balise === 'a')[0];
-  assert.equal(retour.attributs.href, '#/aujourdhui');
-  assert.match(retour.textContent, /Aujourd'hui/);
+  assert.equal(retour.attributs.href, '#/cuisine');
+  assert.match(retour.textContent, /Cuisine/);
   assert.deepEqual(r.tous((x) => x.balise === 'h2').map((x) => x.textContent),
-    ['Production', 'Poste', 'Assistant', 'Données']);
-  assert.deepEqual(hrefs(r).filter((l) => l.startsWith('#/reglages/')), vue.CLES_RUBRIQUES.map((c) => `#/reglages/${c}`));
-  assert.ok(hrefs(r).includes('#/import'));
-  assert.match(r.textContent, /Import des menus/);
+    ['Application', 'Outils avancés']);
+  assert.deepEqual(hrefs(r).filter((l) => l.startsWith('#/reglages/')), ['#/reglages/donnees', '#/reglages/assistant-ia', '#/reglages/apprentissage']);
+  assert.ok(hrefs(r).includes('#/historique'));
+  assert.doesNotMatch(r.textContent, /Standards maison|Import des menus/);
 });
 
 test('racine : informations seulement (ni avance −/+, ni planning, taux d\'activité, jours off, thème)', () => {
   const r = vue.rendre(etatVide(), null);
   const t = r.textContent;
-  assert.match(t, /Avance normale2 jours \(règle\)/);
   assert.match(t, /Apparence : toujours claire/);
   assert.match(t, /en Production et en mode poste/);
   assert.deepEqual(boutons(r).map((b) => b.textContent), ['Vérifier les mises à jour'], 'un seul bouton à la racine : la vérification des mises à jour');
@@ -48,18 +48,19 @@ test('racine : pied neutre pendant la vérification (jamais « Fonctionne hors l
   assert.match(t, /hors ligne : vérification en cours/);
 });
 
-test('racine : la ligne Organisation du poste ne parle plus de semaine type (v134), seulement des règles de préparation', () => {
+test('Cuisine : la ligne des avances ne parle plus de semaine type (v134), seulement des règles de préparation', () => {
   const e = etatVide();
-  const lignes = vue.rendre(e, null).tous((x) => x.balise === 'a' && x.attributs.href === '#/reglages/organisation');
+  const lignes = cuisine.rendre(e).tous((x) => x.balise === 'a' && x.attributs.href === '#/reglages/organisation');
   assert.doesNotMatch(lignes[0].textContent, /semaine type|à confirmer|créneau/i);
   assert.match(lignes[0].textContent, /règle de préparation/);
   assert.doesNotMatch(vue.rendre(e, 'organisation').textContent, /semaine type|créneau|capacité/i);
 });
 
-test('sous-pages : lien « ‹ Réglages », titre propre', () => {
+test('sous-pages : lien de retour (« ‹ Cuisine » pour le métier, « ‹ Réglages » sinon), titre propre', () => {
   for (const c of vue.CLES_RUBRIQUES) {
     const p = vue.rendre(etatVide(), c);
-    assert.equal(p.tous((x) => x.balise === 'a' && x.textContent === '‹ Réglages')[0].attributs.href, '#/reglages');
+    const metier = ['standards-base', 'standards', 'reperes', 'organisation', 'produits'].includes(c);
+    assert.equal(p.tous((x) => x.balise === 'a' && x.textContent === (metier ? '‹ Cuisine' : '‹ Réglages'))[0].attributs.href, metier ? '#/cuisine' : '#/reglages');
     assert.equal(p.tous((x) => x.balise === 'h1')[0].textContent, vue.titre(c));
   }
 });

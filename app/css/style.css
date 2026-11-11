@@ -1130,8 +1130,6 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 
 /* Aujourd'hui : l'en-tête porte le bouton Réglages (plus de barre du haut). */
 .au-tete-ligne { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.au-reglages { display: inline-flex; align-items: center; min-height: var(--cible); padding: 0 14px; border: 1px solid var(--bordure); border-radius: var(--r-bouton); background: var(--carte); color: var(--texte); font-size: var(--t-corps); font-weight: 600; text-decoration: none; }
-.au-reglages:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 /* ===== Menu du jour (Production) et sous-titres de menu (Articles), refonte 2 ===== */
 .mj-bloc { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: var(--cible); padding: 6px 2px; color: var(--texte); text-decoration: none; font-size: 15px; border-bottom: 1px solid var(--bordure); }
@@ -1515,3 +1513,25 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .vue-articles-integre .art-segments .stock-segment { min-height: var(--cible); padding: 0 14px; border-radius: 22px; border-color: var(--bordure); font-size: 15px; }
 .vue-articles-integre .art-nom { font-size: 18px; }
 .vue-articles-integre .art-menu-titre { font-weight: 500; color: var(--texte-doux); }
+
+/* ===== Onglet Cuisine, refonte étape 6 (v150) : remarques de Sanji, fiches, portions et règles, réglages de l'app. ===== */
+.vue-cuisine { display: flex; flex-direction: column; gap: 18px; }
+.cui-tete { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.cui-sur-titre { margin: 0; font-size: 15px; color: var(--texte-doux); }
+.cui-titre { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.2; }
+.cui-remarques { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px solid var(--ambre); border-radius: var(--r-carte); background: var(--ambre-fond); }
+.cui-remarques-titre { margin: 0; font-size: 15px; font-weight: 700; color: var(--ambre-texte); }
+.cui-remarque { display: flex; flex-direction: column; gap: 10px; }
+.cui-remarque + .cui-remarque { padding-top: 10px; border-top: 1px solid var(--ambre); }
+.cui-remarque-texte { margin: 0; font-size: 16px; }
+.cui-remarque-action { min-height: 48px; justify-content: center; }
+.cui-section { display: flex; flex-direction: column; gap: 2px; }
+.cui-section-titre { margin: 0; font-size: 20px; font-weight: 700; line-height: 1.2; }
+.cui-lignes { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.cui-ligne { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 6px 0; border-bottom: 1px solid var(--bordure); color: var(--texte); text-decoration: none; }
+.cui-ligne:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.cui-ligne-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.cui-ligne-nom { font-size: 17px; font-weight: 600; overflow-wrap: anywhere; }
+.cui-ligne-precision { font-size: 15px; color: var(--texte-doux); }
+.cui-ligne-nombre { flex: none; font-family: var(--police-qte); font-weight: 500; font-size: 15px; color: var(--texte-doux); }
+.cui-chevron { flex: none; font-size: 20px; line-height: 1; color: var(--texte-doux); }

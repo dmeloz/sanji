@@ -1,4 +1,5 @@
-// Réglages : une racine courte (quatre rubriques) puis une sous-page par rubrique. Standards maison, références
+// Réglages (refonte, étape 6) : la racine ne garde que l'application (mise à jour, données, historique) et, à part, les outils
+// avancés (assistant IA, apprentissage et essais) ; les rubriques métier s'ouvrent depuis l'onglet Cuisine. Une sous-page par rubrique. Standards maison, références
 // mémorisées, règles de préparation, recettes, fournisseurs, marge de commande, sauvegarde,
 // état de l'application et journal : aucun réglage n'a été retiré, seulement réparti.
 
@@ -737,6 +738,12 @@ const RUBRIQUES = [
 
 export const CLES_RUBRIQUES = RUBRIQUES.map((r) => r.cle);
 
+/** Rubriques métier : elles s'ouvrent depuis l'onglet Cuisine, et y reviennent. */
+const RUBRIQUES_CUISINE = ['standards-base', 'standards', 'reperes', 'organisation', 'produits'];
+
+/** Résumé d'une ligne pour une rubrique (sert aussi à l'onglet Cuisine). */
+export const resumeRubrique = (cle, etat) => RUBRIQUES.find((r) => r.cle === cle).resume(etat);
+
 export const titre = (param) => RUBRIQUES.find((r) => r.cle === param)?.titre ?? 'Réglages';
 
 // Racine (refonte 1) : sections de lignes ; aucune règle métier n'est réglable ici.
@@ -752,10 +759,6 @@ function ligneLien(href, titreTexte, resumeTexte, pastilleLigne = null) {
 }
 
 const ligneRubrique = (cle, etat, pastilleLigne = null) => ligneLien(`#/reglages/${cle}`, rubriqueDe(cle).titre, rubriqueDe(cle).resume(etat), pastilleLigne);
-
-/** Ligne d'information, sans réglage : ce n'est pas un lien. */
-const ligneInfo = (titreTexte, valeur) => h('li', { classe: 'reglage-info' },
-  h('span', { classe: 'reglage-rubrique-texte' }, h('strong', null, titreTexte), h('span', { classe: 'meta' }, valeur)));
 
 const groupe = (titreTexte, ...lignes) => h('section', { classe: 'reglages-groupe' },
   h('h2', { classe: 'reglages-groupe-titre' }, titreTexte),
@@ -773,28 +776,20 @@ export function rendre(etat, param = null) {
   if (!rubrique) {
     const hl = situationHorsLigne();
     return h('div', { classe: 'vue vue-reglages vue-reglages-racine' },
-      h('a', { href: '#/aujourdhui', classe: 'reglage-retour' }, '‹ Aujourd\'hui'),
-      h('h1', { classe: 'page-titre' }, 'Réglages'),
+      h('a', { href: '#/cuisine', classe: 'reglage-retour' }, '‹ Cuisine'),
+      h('h1', { classe: 'page-titre' }, 'Réglages de l\'app'),
       ligneVerifierMiseAJour(),
-      groupe('Production',
-        ligneInfo('Avance normale', '2 jours (règle)'),
-        ligneRubrique('standards-base', etat),
-        ligneRubrique('standards', etat),
-        ligneRubrique('reperes', etat)),
-      groupe('Poste',
-        ligneRubrique('organisation', etat),
-        ligneRubrique('produits', etat),
-        ligneLien('#/fiches', 'Fiches des éléments', `· ${Object.keys(etat.fiches_retenues ?? {}).length}`),
-        ligneLien('#/import', 'Import des menus', 'saisie de la semaine')),
-      groupe('Assistant', ligneRubrique('assistant-ia', etat, assistantPret(lireReglagesIA()) ? pastille('activé', 'vert') : null)),
-      groupe('Données',
-        ligneRubrique('apprentissage', etat),
-        ligneRubrique('donnees', etat)),
-      h('p', { classe: 'reglages-note' }, 'Apparence : toujours claire. Écran allumé : en Production et en mode poste.'),
+      groupe('Application',
+        ligneRubrique('donnees', etat),
+        ligneLien('#/historique', 'Historique des semaines', 'les semaines passées, en lecture')),
+      groupe('Outils avancés',
+        ligneRubrique('assistant-ia', etat, assistantPret(lireReglagesIA()) ? pastille('activé', 'vert') : null),
+        ligneRubrique('apprentissage', etat)),
+      h('p', { classe: 'reglages-note' }, 'Apparence : toujours claire. Écran allumé : sur Aujourd\'hui, en Production et en mode poste. Les portions et les règles sont dans l\'onglet Cuisine.'),
       h('p', { classe: 'reglages-pied' }, pastilleHorsLigne(hl), ' ', h('span', { classe: 'meta' }, libelleHorsLigne(hl))));
   }
   return h('div', { classe: param === 'donnees' ? 'vue vue-reglages vue-reglages-donnees' : 'vue vue-reglages' },
-    h('a', { href: '#/reglages', classe: 'reglage-retour' }, '‹ Réglages'),
+    RUBRIQUES_CUISINE.includes(param) ? h('a', { href: '#/cuisine', classe: 'reglage-retour' }, '‹ Cuisine') : h('a', { href: '#/reglages', classe: 'reglage-retour' }, '‹ Réglages'),
     h('h1', { classe: 'page-titre' }, rubrique.titre),
     rubrique.blocs(etat));
 }

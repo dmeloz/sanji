@@ -6,6 +6,8 @@ Depuis la version 148 (étape 4), ce qui suit sur l'onglet Production, la carte 
 
 Depuis la version 149 (étape 5), ce qui suit sur l'onglet Articles est de l'histoire : la liste vit dans Semaine > Achats (`#/semaine/achats`, `vue-articles.js` rendu avec `{ integre: true }`, filtre « Toute la liste / Aujourd'hui »), `#/articles`, `#/stock` et `#/produits` y mènent ; l'en-tête de Semaine (période en petit, flèches, « ⋯ »), les volets et la carte « Préparation de la semaine » sont dans `vue-semaine.js`, qui les passe à `vue-tableau.js` par `options.tete`.
 
+Depuis la version 150 (étape 6), ce qui suit sur la racine de Réglages (groupes Production, Poste, Assistant, Données, retour vers Aujourd'hui) est de l'histoire : les rubriques `standards-base`, `standards`, `reperes`, `organisation` et `produits` s'ouvrent depuis l'onglet Cuisine (`vue-cuisine.js`, résumé par `resumeRubrique` de `vue-reglages.js`) et y reviennent ; `#/fiches` et `#/reglages` allument l'onglet Cuisine.
+
 À lire quand on touche au module concerné ; les signatures réelles du code font foi.
 
 - `app/js/domaine/` : logique métier pure, sans DOM, testée. Les signatures réelles du code font foi sur la conception.

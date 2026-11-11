@@ -6,6 +6,7 @@ import { h, parId } from './dom.js';
 import { maintenirAllume } from './ecran-allume.js';
 import { encadre } from './elements.js';
 import * as vueAujourdhui from './vue-aujourdhui.js';
+import * as vueCuisine from './vue-cuisine.js';
 import * as vueFiche from './vue-fiche.js';
 import * as vueFichesElements from './vue-fiches-elements.js';
 import * as vueHistorique from './vue-historique.js';
@@ -17,7 +18,7 @@ import * as vueReglages from './vue-reglages.js';
 import * as vueSemaine from './vue-semaine.js';
 
 export const VUES = {
-  aujourdhui: vueAujourdhui, production: vueProduction, semaine: vueSemaine,
+  aujourdhui: vueAujourdhui, production: vueProduction, semaine: vueSemaine, cuisine: vueCuisine,
   fiche: vueFiche, fiches: vueFichesElements, poste: vuePoste, import: vueImport, preparer: vuePreparer, reglages: vueReglages, historique: vueHistorique,
 };
 
@@ -25,16 +26,17 @@ export const VUES = {
  * Onglet actif selon la vue. Réglages n'a plus d'onglet : il s'ouvre depuis Aujourd'hui, dont l'onglet reste marqué.
  * Refonte, étape 4 : Production n'a plus d'onglet (la liste du jour est dans Aujourd'hui) ; la page Production d'un autre jour
  * s'ouvre depuis Semaine, dont l'onglet reste marqué ; la fiche et le mode en poste s'ouvrent depuis la liste du jour.
+ * Étape 6 : l'onglet Cuisine (`#/cuisine`) porte les fiches des éléments et les Réglages.
  * Étape 5 : Articles n'a plus d'onglet non plus, la liste est dans Semaine > Achats (`#/semaine/achats`).
  */
 export const ONGLET_DE_VUE = {
-  aujourdhui: 'aujourdhui', reglages: 'aujourdhui', fiches: 'aujourdhui', fiche: 'aujourdhui', poste: 'aujourdhui',
+  aujourdhui: 'aujourdhui', fiche: 'aujourdhui', poste: 'aujourdhui', cuisine: 'cuisine', reglages: 'cuisine', fiches: 'cuisine',
   production: 'semaine', semaine: 'semaine', import: 'semaine', preparer: 'semaine', historique: 'semaine',
 };
 
 /**
  * Analyse un hash (« #/production/2026-10-05 ») : { vue, param, sous? }. Fonction pure, sans DOM.
- * Adresses : #/aujourdhui (accueil, défaut), #/production[/date], #/semaine[/date[/tableau]], #/semaine/achats,
+ * Adresses : #/aujourdhui (accueil, défaut), #/production[/date], #/semaine[/date[/tableau]], #/semaine/achats, #/cuisine,
  * #/fiche/<composantId>, #/poste/<composantId>, #/import[/date], #/preparer[/date] (lundi de la semaine), #/reglages[/rubrique], #/historique, #/fiches (fiches des éléments).
  * Défauts : production = aujourd'hui ; import = lundi de la semaine donnée ou en cours ; semaine/achats : la liste des achats (sous = 'achats') ; semaine sans date = tableau de la semaine (param null), avec date = Production de ce jour (v116),
  * « /tableau » en plus = tableau de cette semaine (ramenée au lundi). Une adresse inconnue, ou fiche/poste sans identifiant, mène à l'accueil.
@@ -66,7 +68,7 @@ export function analyserHash(hash, aujourd) {
   if (vue === 'preparer') return { vue: 'preparer', param: lundiDe(dateValide ? param : aujourd) };
   if (vue === 'articles' || vue === 'stock' || vue === 'produits') return { vue: 'semaine', param: null, sous: 'achats' };
   if ((vue === 'fiche' || vue === 'composant') && param) return { vue: 'fiche', param };
-  if (vue === 'historique' || vue === 'fiches') return { vue, param: null };
+  if (vue === 'historique' || vue === 'fiches' || vue === 'cuisine') return { vue, param: null };
   if (vue === 'poste' && param) return { vue: 'poste', param };
   if (vue === 'reglages') return { vue, param: vueReglages.CLES_RUBRIQUES.includes(morceaux[1]) ? morceaux[1] : null };
   return { vue: 'aujourdhui', param: null };
