@@ -207,7 +207,7 @@ test('aucun geste rapide sur allergènes, écart, avance hors règle, sauce, ni 
   }
 });
 
-test('accueil : le total et les lignes viennent de la même source (decisionsDe), trois lignes au plus', () => {
+test('accueil : le total et les lignes viennent de la même source (decisionsDe), une seule ligne (refonte, étape 4)', () => {
   const e = avecApprentissage();
   definirMenu(e, S.lundi, 1, 'Penne aux courgettes', h());
   definirMenu(e, S.mardi, 2, 'ELEMENT_INCONNU_TEST', h());
@@ -218,7 +218,7 @@ test('accueil : le total et les lignes viennent de la même source (decisionsDe)
   const attendu = aDate(S.lundi, () => decisionsDe(e, S.lundi));
   assert.match(section.textContent, new RegExp(`À confirmer · ${attendu.total}`));
   const lignes = classes(section, 'au-ligne');
-  assert.equal(lignes.length, Math.min(3, attendu.total));
+  assert.equal(lignes.length, 1);
   assert.ok(attendu.total > 3);
   lignes.forEach((l, i) => assert.match(l.textContent, new RegExp(geste.titreCarte(attendu.cartes[i], e).slice(0, 12))));
 });

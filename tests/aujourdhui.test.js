@@ -1,5 +1,6 @@
-// Écran Aujourd'hui (tableau de bord, refonte 2) sous faux DOM : menus sur 3 jours, cases Production et Couverts midi, « À avancer »,
-// fiche de fonction, « À confirmer », carte « Prochaine » fixe ; les données de couverts avec certitude restent au domaine.
+// Écran Aujourd'hui (refonte, étape 4) sous faux DOM : les deux menus du jour en grand et les couverts du midi, « À confirmer »,
+// « À produire » (la liste de mise en place du jour, la même que Production, « Après service » compris), fiche de fonction, rappels ;
+// les données de couverts avec certitude restent au domaine.
 // Faux DOM : ni mise en page ni tactile réels (à vérifier à l'écran à 390 px, clair et sombre). Jeux TEST_ONLY.
 
 import test, { after, before } from 'node:test';
@@ -63,8 +64,9 @@ test('base vide : la page s\'affiche, aucun état hors ligne tant que tout est n
   assert.match(texte, /Aujourd'hui/);
   assert.match(texte, /Mercredi 7 octobre · \d\d:\d\d/, 'jour, date et heure');
   assert.doesNotMatch(texte, /hors ligne/);
-  assert.match(texte, /Aucune tâche décidée/);
-  assert.match(texte, /menu à importer/, 'un jour sans menu est dit, en pointillés');
+  assert.match(texte, /Rien à produire ce jour/);
+  assert.match(texte, /non saisi/, 'un menu non saisi est dit');
+  assert.ok(hrefs(classes(p, 'auj-menus')[0]).includes(`#/import/${S.lundi}`), 'aucun menu : lien vers l\'import');
   assert.equal(classes(p, 'tdb-confirmer').length, 0, 'aucune décision : pas de carte « À confirmer »');
   assert.doesNotMatch(texte, /Synchronis|Soir|minuteur|en stock|frigo|chambre froide|Mon planning/i); // « Couverts midi » est le mot validé le 2026-10-07
 });
@@ -78,7 +80,7 @@ test('en-tête : « hors ligne » ne s\'affiche que s\'il y a un problème (text
   assert.doesNotMatch(p.textContent, /hors ligne prêt/);
 });
 
-test('couverts : le domaine garde la certitude écrite de chaque menu et des fiches ; la case « Couverts midi » dit le total et M1 · M2', () => {
+test('couverts : le domaine garde la certitude écrite de chaque menu et des fiches ; le bouton des couverts dit le total', () => {
   const e = mercredi();
   creerFiche(e, { numero: 'F_FIXE', date: S.mercredi, service: 'midi', horaire: '12:00', couverts: 8, mode: 'menu_fixe', menuFixe: 1 }, h());
   creerFiche(e, { numero: 'F_LIBRE', date: S.mercredi, service: 'midi', horaire: '12:30', couverts: 6, mode: 'choix_libre', repartition: { 1: 4, 2: 2 } }, h());
@@ -93,10 +95,9 @@ test('couverts : le domaine garde la certitude écrite de chaque menu et des fic
   // Les fiches de fonction ne comptent plus dans « Couverts midi » : les prévisions seules (10 + 12).
   assert.deepEqual(d.couvertsMidi, { total: 22, m1: 10, m2: 12, manuel: false, certitude: 'estimee', aSaisirVentes: false, ventes: null });
   const p = page(S.mercredi, e);
-  const caseCouverts = classes(p, 'tdb-case').find((c) => /Couverts midi/.test(c.textContent));
-  assert.match(caseCouverts.textContent, /22/);
-  assert.match(caseCouverts.textContent, /M1 10 · M2 12/);
-  assert.ok(classes(caseCouverts, 'tdb-chiffre')[0], 'chiffre en police des quantités');
+  const caseCouverts = classes(p, 'auj-couverts')[0];
+  assert.equal(classes(caseCouverts, 'auj-couverts-nombre')[0].textContent, '22', 'le total, en police des quantités');
+  assert.match(caseCouverts.attributs['aria-label'], /Couverts midi aujourd'hui : 22/);
   // La certitude de la fiche reste écrite sur la carte « Fiche de fonction ».
   assert.match(classes(p, 'au-fiche')[0].textContent, /répartition|menu fixe/);
 });
@@ -109,8 +110,8 @@ test('couverts : sans prévision, aucun « 0 » inventé et aucune alerte', () =
   assert.equal(d.menus[0].previsionASaisir, true);
   assert.deepEqual(d.couvertsMidi, { total: null, m1: null, m2: null, manuel: false, certitude: null, aSaisirVentes: false, ventes: null });
   const p = page(S.mercredi, e);
-  const caseCouverts = classes(p, 'tdb-case').find((c) => /Couverts midi/.test(c.textContent));
-  assert.equal(classes(caseCouverts, 'tdb-chiffre')[0].textContent, '—');
+  const caseCouverts = classes(p, 'auj-couverts')[0];
+  assert.equal(classes(caseCouverts, 'auj-couverts-nombre')[0].textContent, '—');
   assert.match(caseCouverts.textContent, /à saisir/);
   // La sauce implicite du menu 1 est une vraie décision de la feuille ; la prévision absente n'en est jamais une.
   const carte = classes(p, 'tdb-confirmer')[0];
@@ -125,53 +126,49 @@ test('dimanche : fermé, aucune tâche, aucun couvert', () => {
   assert.equal(classes(p, 'au-maintenant-actions').length, 0);
 });
 
-test('Prochaine : première tâche non faite, quantité, sans créneau (v134), Ouvrir la fiche et Fait annulable', () => {
+const production = (p) => classes(p, 'auj-production')[0];
+
+test('À produire : la liste du jour est sur Aujourd\'hui, avec son compte, les quantités et la case « fait » en un toucher', () => {
   const e = mercredi();
   for (const nom of ['Tagliatelles', 'riz']) planifier(e, prodDe(e, nom), S.mercredi, h());
   const d = aujourdhuiDe(e, S.mercredi);
-  assert.ok(d.maintenant);
-  assert.equal(d.avancement.total, 2);
   const p = page(S.mercredi, e);
-  const carte = classes(p, 'prochaine')[0];
-  assert.match(carte.textContent, /Prochaine/);
-  assert.match(carte.textContent, new RegExp(d.maintenant.nom));
-  assert.doesNotMatch(carte.textContent, /service de midi|service du soir|créneau/);
-  assert.match(carte.textContent, /menu [12]/);
-  assert.ok(classes(carte, 'prochaine-qte')[0].className.includes('au-qte'), 'quantité en police des quantités');
-  assert.match(classes(carte, 'prochaine-qte')[0].textContent, /\d/);
-  assert.equal(classes(p, 'tdb-chiffre')[0].textContent, '0/2', 'la case Production compte les tâches du jour');
+  const sec = production(p);
+  assert.ok(sec, 'section « À produire »');
+  assert.match(sec.textContent, /À produire/);
+  assert.match(classes(sec, 'auj-compte')[0].textContent, new RegExp(`^0 sur ${d.avancementJour.total} fait$`), 'même compte que Production');
+  assert.doesNotMatch(sec.textContent, /service de midi|service du soir|créneau/);
+  const lignes = classes(sec, 'mep-ligne');
+  assert.ok(lignes.length >= 2, 'une ligne par tâche du jour');
+  assert.ok(classes(sec, 'mep-qte').some((q) => /\d/.test(q.textContent)), 'quantités en police des quantités');
+  assert.ok(hrefs(sec).includes(`#/fiche/${composantDe(e, 'Tagliatelles').id}`), 'le nom ouvre la fiche');
+  // Plus de carte « Prochaine » ni de cases de chiffres : la liste suffit.
+  assert.equal(classes(p, 'prochaine').length, 0);
+  assert.equal(classes(p, 'tdb-case').length, 0);
   // Rien de planifié : comme sur Production, les lignes de travail sont comptées.
   const brut = aujourdhuiDe(mercredi(), S.mercredi);
   assert.equal(brut.avancement.total, 0);
   assert.ok(brut.avancementJour.total >= 2);
-  assert.deepEqual(hrefs(carte), [`#/fiche/${d.maintenant.composantId}`]);
-  const fait = parTexte(carte, /^Fait$/);
-  assert.ok(fait);
 
-  fait.click();
-  const apres = magasin.etat().productions[d.maintenant.productionId];
-  assert.equal(apres.etat, 'fait', 'même action que la feuille Jour : marquée faite');
-  assert.ok(Number.isFinite(apres.quantiteReelle));
-  const message = dom.document.getElementById('messages');
-  const annuler = parTexte(message, /Annuler/);
-  assert.ok(annuler, 'depuis Aujourd\'hui, pas de case à retoucher : le geste reste annulable');
-  annuler.click();
-  assert.equal(magasin.etat().productions[d.maintenant.productionId].etat, 'a_faire');
+  const cases = classes(sec, 'case-fait');
+  assert.ok(cases.length >= 2);
+  cases[0].click();
+  const faites = Object.values(magasin.etat().productions).filter((x) => x.etat === 'fait');
+  assert.equal(faites.length, 1, 'même action que Production : marquée faite');
 });
 
-test('Prochaine : quantité inconnue = « à chiffrer » qui ouvre la feuille de chiffrage, jamais « quantité à compléter »', () => {
+test('À produire : quantité inconnue = « à chiffrer » qui ouvre la feuille de chiffrage, jamais « quantité à compléter »', () => {
   const e = mercredi();
   for (const nom of ['Tagliatelles', 'riz']) planifier(e, prodDe(e, nom), S.mercredi, h());
   e.jours[S.mercredi].previsions = { 1: { portions: null }, 2: { portions: null } };
-  const p = page(S.mercredi, e);
-  const carte = classes(p, 'prochaine')[0];
-  assert.doesNotMatch(carte.textContent, /à compléter/);
-  const bouton = classes(carte, 'prod-asaisir')[0];
+  const sec = production(page(S.mercredi, e));
+  assert.doesNotMatch(sec.textContent, /à compléter/);
+  const bouton = classes(sec, 'prod-asaisir')[0];
   assert.ok(bouton, 'bouton « à chiffrer »');
   assert.match(bouton.textContent, /à chiffrer/);
 });
 
-test('Prochaine : une quantité en « portions » n\'est jamais écrite : « à chiffrer » s\'applique', () => {
+test('À produire : une quantité en « portions » n\'est jamais écrite', () => {
   const e = mercredi();
   const id = prodDe(e, 'Tagliatelles');
   planifier(e, id, S.mercredi, h());
@@ -179,20 +176,17 @@ test('Prochaine : une quantité en « portions » n\'est jamais écrite : « à 
   const d = aujourdhuiDe(e, S.mercredi, '10:00');
   assert.equal(d.maintenant.unite, 'portion');
   assert.ok(Number.isFinite(d.maintenant.cible), 'cible finie');
-  const carte = classes(page(S.mercredi, e), 'prochaine')[0];
-  assert.doesNotMatch(carte.textContent, /portions?\b/);
-  assert.match(carte.textContent, /à chiffrer/);
+  const sec = production(page(S.mercredi, e));
+  assert.doesNotMatch(sec.textContent, /\d portions?\b/);
 });
 
-test('Prochaine : une fois tout fait, la carte le dit et ne propose plus rien', () => {
+test('À produire : une fois tout fait, le compte le dit et les lignes restent, cochées', () => {
   const e = mercredi();
   const principales = Object.values(e.productions).filter((x) => x.genre === 'principale' && x.dateService === S.mercredi);
   for (const x of principales) { planifier(e, x.id, S.mercredi, h()); marquerFait(e, x.id, 100, h()); }
-  const p = page(S.mercredi, e);
-  const carte = classes(p, 'prochaine')[0];
-  assert.match(carte.textContent, /Tout est fait/);
-  assert.equal(classes(p, 'tdb-chiffre')[0].textContent, `${principales.length}/${principales.length}`);
-  assert.equal(boutons(carte).length, 0);
+  const sec = production(page(S.mercredi, e));
+  assert.equal(classes(sec, 'auj-compte')[0].textContent, `${principales.length} sur ${principales.length} faits`);
+  assert.equal(classes(sec, 'case-fait-ok').length, principales.length, 'toutes les cases sont cochées');
 });
 
 test('décisions : « À confirmer · N » compte comme la feuille « À décider », « Tout voir » l\'ouvre ; chaque ligne a son geste ou « Décider »', () => {
@@ -204,7 +198,7 @@ test('décisions : « À confirmer · N » compte comme la feuille « À décide
   const carte = classes(p, 'tdb-confirmer')[0];
   assert.ok(carte, 'carte « À confirmer » présente');
   assert.match(carte.textContent, new RegExp(`À confirmer · ${aDate(S.mercredi, () => decisionsDe(e, S.mercredi).total)}`));
-  assert.ok(classes(carte, 'au-ligne').length <= 3, 'trois lignes au plus');
+  assert.equal(classes(carte, 'au-ligne').length, 1, 'une seule ligne : la liste à produire reste en vue');
   // Une ligne = un titre et ses boutons (geste d'un toucher ou « Décider ») : rien n'est un simple lien.
   for (const ligne of classes(carte, 'au-ligne')) assert.ok(boutons(ligne).length > 0);
   globalThis.location.hash = '#/aujourdhui';
@@ -213,7 +207,7 @@ test('décisions : « À confirmer · N » compte comme la feuille « À décide
   dom.corps.tous((x) => x.balise === 'dialog').forEach((dl) => dl.remove());
 });
 
-test('« À avancer » : les avances que la règle des deux jours autorise, 3 lignes au plus, « pour mardi » et la quantité', () => {
+test('« Après service » : les avances possibles sont dans la liste du jour, avec « Pour mar. 6 » et la quantité', () => {
   const e = etatVide();
   for (const j2 of [S.mardi, S.mercredi, S.jeudi]) { definirMenu(e, j2, 2, 'riz', h()); definirPrevision(e, j2, 2, 10, h()); }
   definirStandard(e, 'riz', 'plat_principal', { valeur: 60, unite: 'g', etat: 'sec' }, h());
@@ -221,17 +215,15 @@ test('« À avancer » : les avances que la règle des deux jours autorise, 3 li
   const d = aujourdhuiDe(e, S.lundi);
   assert.ok(d.aAvancer.total >= 1);
   assert.ok(d.aAvancer.lignes.length <= 3);
-  const section = (noeud) => noeud.tous((x) => x.balise === 'section' && x.attributs['aria-label'] === 'À avancer')[0];
-  const sec = section(page(S.lundi, e));
-  assert.ok(sec, 'la section est là');
-  assert.match(sec.textContent, /À avancer/);
-  assert.match(sec.textContent, /pour mardi/);
-  assert.ok(classes(sec, 'au-qte').length >= 1, 'quantité en police des quantités');
-  assert.ok(hrefs(sec).includes(`#/production/${S.lundi}`), 'lien « Production »');
-  assert.equal(section(page(S.mercredi, mercredi())), undefined, 'rien à avancer : pas de section');
+  const sec = production(page(S.lundi, e));
+  assert.match(sec.textContent, /Après service/);
+  assert.match(sec.textContent, /Pour mar\. 6/);
+  assert.ok(classes(sec, 'mep-qte').length >= 1, 'quantité en police des quantités');
+  // Plus de section « À avancer » à part : une seule liste.
+  assert.equal(page(S.lundi, e).tous((x) => x.balise === 'section' && x.attributs['aria-label'] === 'À avancer').length, 0);
 });
 
-test('menus sur trois jours : aujourd\'hui en encre, un jour sans menu « à importer » en pointillés, toucher = Semaine ou Import', () => {
+test('menus du jour : les deux intitulés en grand, « non saisi » dit en toutes lettres ; les trois jours proches restent au domaine', () => {
   const e = mercredi();
   definirMenu(e, S.jeudi, 1, 'Poulet rôti', h());
   const d = aujourdhuiDe(calme(e), S.mercredi);
@@ -239,14 +231,18 @@ test('menus sur trois jours : aujourd\'hui en encre, un jour sans menu « à imp
   assert.equal(d.menusSurTrois[0].estAujourdhui, true);
   assert.equal(d.menusSurTrois[2].aImporter, true);
   const p = page(S.mercredi, e);
-  const jours = classes(p, 'tdb-jour');
-  assert.equal(jours.length, 3);
-  assert.ok(jours[0].className.includes('tdb-jour-auj'));
-  assert.equal(jours[0].attributs.href, `#/production/${S.mercredi}`);
-  assert.match(jours[1].textContent, /Poulet rôti/);
-  assert.ok(jours[2].className.includes('tdb-jour-vide'));
-  assert.match(jours[2].textContent, /menu à importer/);
-  assert.equal(jours[2].attributs.href, `#/import/${S.lundi}`);
+  const carte = classes(p, 'auj-menus')[0];
+  assert.ok(carte, 'carte des menus du jour');
+  assert.deepEqual(classes(carte, 'auj-plat').map((x) => x.textContent), ['Tagliatelles', 'riz, carottes']);
+  assert.deepEqual(classes(carte, 'auj-menu-etiquette').map((x) => x.textContent), ['Menu 1', 'Menu 2']);
+  assert.equal(classes(p, 'tdb-jour').length, 0, 'les jours proches se lisent dans Semaine');
+  assert.doesNotMatch(p.textContent, /Poulet rôti/, 'le menu de demain n\'est pas sur Aujourd\'hui');
+  // Un seul menu saisi : l'autre est dit « non saisi ».
+  const un = calme(etatVide());
+  definirMenu(un, S.mercredi, 1, 'Tagliatelles', h());
+  const vides = classes(page(S.mercredi, un), 'auj-plat-vide');
+  assert.equal(vides.length, 1);
+  assert.equal(vides[0].textContent, 'non saisi');
   // Le samedi et le dimanche n'ont pas de menu du jour : on saute au lundi.
   assert.deepEqual(aujourdhuiDe(e, S.vendredi).menusSurTrois.map((j) => j.date).slice(0, 2), [S.vendredi, S.lundiSuivant]);
   assert.equal(aujourdhuiDe(e, S.vendredi).menusSurTrois.length, 3);
@@ -289,11 +285,11 @@ test('prochaine fiche : sans fiche à venir, rien n\'est affiché', () => {
   assert.equal(classes(page(S.mercredi, mercredi()), 'au-fiche').length, 0);
 });
 
-test('les zones de l\'ancien tableau restent accessibles : Semaine, Production, menus de la semaine', () => {
-  const liens = hrefs(page(S.mercredi, mercredi()));
-  assert.ok(liens.includes(`#/production/${S.mercredi}`));
-  assert.ok(liens.includes('#/semaine'));
-  assert.ok(liens.includes(`#/import/${S.lundi}`));
+test('depuis Aujourd\'hui : Réglages et la fiche de chaque ligne restent à un toucher (Semaine est un onglet)', () => {
+  const e = mercredi();
+  const liens = hrefs(page(S.mercredi, e));
+  assert.ok(liens.includes('#/reglages'));
+  assert.ok(liens.includes(`#/fiche/${composantDe(e, 'Tagliatelles').id}`));
 });
 
 test('une proposition d\'apprentissage garde ses boutons Oui / Non dans « À confirmer »', async () => {
@@ -324,7 +320,12 @@ test('accessibilité : mots écrits pour les états, quantités en police des qu
   assert.doesNotMatch(bloc, /gradient|https?:\/\//);
   // L'écran ne passe jamais un état par la couleur seule : « hors règle », « provisoire », « à décider » sont écrits.
   const src = readFileSync(new URL('../app/js/ui/vue-aujourdhui.js', import.meta.url), 'utf8');
-  for (const mot of ['hors règle', "'à décider'", "provisoire: 'provisoire'"]) assert.ok(src.includes(mot), mot);
+  for (const mot of ["'à décider'", "provisoire: 'provisoire'", "'non saisi'", 'ventes à saisir']) assert.ok(src.includes(mot), mot);
+  // « hors règle » est écrit par la liste du jour (vue-jour.js), partagée avec Production.
+  assert.ok(readFileSync(new URL('../app/js/ui/vue-jour.js', import.meta.url), 'utf8').includes('hors règle'));
+  // Le bloc de l'étape 4 respecte les mêmes tailles.
+  const etape4 = css.slice(css.indexOf("Écran Aujourd'hui, refonte étape 4"));
+  assert.ok([...etape4.matchAll(/font-size: (\d+)px/g)].every((m) => Number(m[1]) >= 15));
   assert.doesNotMatch(src, /en stock|Synchronisé|Générer le bon/);
 });
 
@@ -348,7 +349,13 @@ test('hors règle : même définition partout (exception ET non autorisée) ; un
   const d = aujourdhuiDe(e, S.lundi);
   assert.equal(d.maintenant.productionId, couper.id);
   assert.equal(d.maintenant.horsRegle, false);
-  assert.doesNotMatch(classes(page(S.lundi, e), 'prochaine')[0].textContent, /hors règle/);
+  // La liste du jour dit « hors règle » pour l'étape au-delà de son maximum (comme Production), jamais la règle des deux jours ;
+  // sur Aujourd'hui la cause est dite une fois sous le titre du bloc, et « Planifier » est rangé dans la feuille de « ⋯ ».
+  const p = page(S.lundi, e);
+  assert.doesNotMatch(p.textContent, /plus de deux jours/);
+  assert.equal(classes(p, 'mep-hors-regle-resume').length, 1);
+  assert.match(classes(p, 'mep-hors-regle-resume')[0].textContent, /^\d avances? dépasse(nt)? ce que la règle autorise \(hors règle\)\.$/);
+  assert.equal(classes(p, 'prod-directes').length, 0, 'aucun bouton « Planifier » sur les lignes');
 });
 
 test('hors règle : une vraie avance hors règle (plus de 2 jours sans règle) reste signalée partout', async () => {
@@ -383,14 +390,15 @@ test('bandeau : même nombre que la feuille « À décider » (sauce implicite s
   }
 });
 
-test('samedi : pas de menu du jour, donc pas de case « Couverts midi » ; la case Production occupe la largeur', () => {
+test('samedi : pas de menu du jour, donc ni carte des menus ni couverts du midi ; la liste du jour reste', () => {
   const p = page(S.samedi, mercredi());
-  assert.equal(classes(p, 'tdb-case').filter((c) => /Couverts midi/.test(c.textContent)).length, 0);
-  assert.equal(classes(p, 'tdb-chiffres-seule').length, 1);
-  assert.equal(classes(p, 'tdb-case').filter((c) => /Production/.test(c.textContent)).length, 1);
-  // Un jour de semaine garde les deux cases.
+  assert.equal(classes(p, 'auj-menus').length, 0);
+  assert.equal(classes(p, 'auj-couverts').length, 0);
+  assert.equal(classes(p, 'auj-production').length, 1);
+  // Un jour de semaine a la carte des menus et son bouton de couverts.
   const semaine = page(S.mercredi, mercredi());
-  assert.equal(classes(semaine, 'tdb-case').length, 2);
+  assert.equal(classes(semaine, 'auj-menus').length, 1);
+  assert.equal(classes(semaine, 'auj-couverts').length, 1);
 });
 
 test('Rappels : « Préparer la semaine · N à faire » mène à l\'écran quand des couverts ou des valeurs manquent, absent quand tout est fait', () => {
