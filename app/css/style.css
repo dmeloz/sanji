@@ -1535,3 +1535,10 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .cui-ligne-precision { font-size: 15px; color: var(--texte-doux); }
 .cui-ligne-nombre { flex: none; font-family: var(--police-qte); font-weight: 500; font-size: 15px; color: var(--texte-doux); }
 .cui-chevron { flex: none; font-size: 20px; line-height: 1; color: var(--texte-doux); }
+
+/* ===== Finitions, refonte étape 7 (v151) : la page Production d'un jour suit la même hiérarchie que les onglets. ===== */
+.vue-production .prod-retour { margin-bottom: 2px; }
+.vue-production .prod-titre-ligne .page-titre { font-size: 15px; font-weight: 500; letter-spacing: 0; color: var(--texte-doux); }
+.vue-production .prod-date { font-size: 18px; font-weight: 700; color: var(--texte); }
+.vue-production .mj-ligne { white-space: normal; overflow: visible; text-overflow: clip; }
+.vue-production .mj-intitule { font-size: 17px; font-weight: 600; color: var(--texte); }

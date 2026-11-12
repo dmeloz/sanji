@@ -1,4 +1,4 @@
-// Cuisine (refonte, étape 6) : le troisième onglet, « ce que Sanji sait de ta cuisine ». Ce que Sanji a remarqué (propositions
+// Cuisine (refonte, étape 6) : le troisième onglet, « ce que Sanji sait de votre cuisine ». Ce que Sanji a remarqué (propositions
 // d'apprentissage, à accepter ou non dans leur feuille), les fiches des éléments par rubrique, les portions et les règles
 // (les rubriques métier de l'ancien Réglages), puis les réglages de l'app. Aucune règle métier ici : la page ne fait que mener.
 
@@ -41,7 +41,7 @@ function sectionFiches(etat) {
   const r = fichesParRubrique(etat);
   const pleines = r.rubriques.filter((x) => x.fiches.length > 0);
   return section('fiches', 'Fiches des éléments', pleines.length === 0
-    ? [ligne('#/fiches', 'Aucune fiche pour l\'instant', 'elles se créent quand tu règles un élément')]
+    ? [ligne('#/fiches', 'Aucune fiche pour l\'instant', 'elles se créent quand vous réglez un élément')]
     : [...pleines.map((x) => ligne('#/fiches', x.titre, null, x.fiches.length)),
       ligne('#/fiches', 'Chercher un élément', pluriel(r.total, 'fiche'))]);
 }
@@ -49,7 +49,7 @@ function sectionFiches(etat) {
 export function rendre(etat) {
   return h('div', { classe: 'vue vue-cuisine' },
     h('header', { classe: 'cui-tete' },
-      h('p', { classe: 'cui-sur-titre' }, 'Ce que Sanji sait de ta cuisine'),
+      h('p', { classe: 'cui-sur-titre' }, 'Ce que Sanji sait de votre cuisine'),
       h('h1', { classe: 'cui-titre' }, 'Cuisine')),
     carteRemarques(etat),
     sectionFiches(etat),

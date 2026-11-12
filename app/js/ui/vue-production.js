@@ -1,10 +1,10 @@
-// Production (onglet 2) : la liste de mise en place du jour (refonte minimaliste du 2026-10-09).
+// Production d'un jour (ouverte depuis Semaine ; plus un onglet depuis l'étape 4) : la liste de mise en place du jour.
 // `param` = la date (AAAA-MM-JJ) ; le routeur donne aujourd'hui par défaut. Aucune règle métier ici : les lignes viennent
 // de la feuille Jour (`feuilleDuJour`), les gestes de `taches.js`, le corps de la page de `vue-jour.js`.
-// En-tête : « Production » + la date, une ligne. On change de jour en glissant (gauche = suivant, droite = précédent) ou par
+// En-tête (étape 7) : retour « ‹ Semaine », « Production » en petit, la date en évidence. On change de jour en glissant (gauche = suivant, droite = précédent) ou par
 // les flèches ‹ › ; le dimanche est sauté.
 
-import { jourApresGeste, jourOuvertVoisin, libelleJour } from '../domaine/dates.js';
+import { jourApresGeste, jourOuvertVoisin, libelleJour, lundiDe } from '../domaine/dates.js';
 import { feuilleDuJour } from '../domaine/planification.js';
 import { boutonProposerPlanning } from './assistant-planning.js';
 import { h } from './dom.js';
@@ -22,6 +22,7 @@ const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 function entete(date) {
   const flecheJour = (sens, texte, nom) => h('a', { href: `#/production/${jourOuvertVoisin(date, sens)}`, classe: 'prod-fleche', 'aria-label': nom }, texte);
   return h('header', { classe: 'jour-tete prod-tete' },
+    h('a', { href: `#/semaine/${lundiDe(date)}/tableau`, classe: 'reglage-retour prod-retour' }, '‹ Semaine'),
     h('div', { classe: 'prod-titre-ligne' },
       h('h1', { classe: 'page-titre' }, 'Production'),
       h('span', { classe: 'prod-date' }, majuscule(libelleJour(date))),
