@@ -1,4 +1,4 @@
-// Articles (onglet 4, refonte 2) : la liste simple des articles du poste entremétier, par jour et par menu, à cocher.
+// Achats (refonte, étape 5 : l'ancien onglet Articles, affiché dans Semaine > Achats) : la liste simple des articles du poste entremétier, par jour et par menu, à cocher.
 // Décision du 2026-10-07 « Onglet Articles sans gestion de stock » : ni restes, ni DLC, ni achats, pas de stock théorique.
 // Une section par JOUR DE PRODUCTION (avances comprises) : « Samedi 10 octobre · pour lundi 12 ». Choix Semaine / Aujourd'hui
 // (gardé le temps de la session) et bouton « Partager la liste ». Aucune logique métier ici : la liste vient de
@@ -20,6 +20,7 @@ import { feuilleChiffrage } from './vue-jour.js';
 export function titre() { return 'Articles'; }
 
 const VUES = [['semaine', 'Semaine'], ['jour', "Aujourd'hui"]];
+const VUES_INTEGRE = { semaine: 'Toute la liste', jour: "Aujourd'hui" };
 const majuscule = (texte) => texte.charAt(0).toUpperCase() + texte.slice(1);
 
 /** Vue choisie, gardée le temps de la session (un simple confort : rien n'est enregistré). */
@@ -104,26 +105,27 @@ function groupesParMenu(etat, jour) {
   }));
 }
 
-function selecteur(vue) {
+function selecteur(vue, integre = false) {
   return h('div', { classe: 'art-segments', role: 'group', 'aria-label': 'Période' },
     VUES.map(([cle, texte]) => h('button', {
       type: 'button', classe: `stock-segment${cle === vue ? ' stock-segment-actif' : ''}`, 'aria-pressed': cle === vue ? 'true' : 'false',
       onClick: () => { vueChoisie = cle; jourGlisse = null; redessiner(); },
-    }, texte)));
+    }, integre ? VUES_INTEGRE[cle] : texte)));
 }
 
-export function rendre(etat) {
+/** `integre` : la liste est posée dans Semaine > Achats, qui porte déjà le titre de la page. */
+export function rendre(etat, { integre = false } = {}) {
   const aujourd = aujourdhui();
   const { lundi, jours } = articlesDuPoste(etat, aujourd);
   // Un jour glissé qui n'est plus dans la liste ou qui est passé (la liste a changé, un autre jour est venu) : retour à aujourd'hui.
   if (jourGlisse !== null && (jourGlisse < aujourd || !jours.some((j) => j.date === jourGlisse))) jourGlisse = null;
   const dateVue = jourGlisse ?? aujourd;
   const visibles = vueChoisie === 'jour' ? jours.filter((j) => j.date === dateVue) : jours;
-  const racine = h('div', { classe: 'vue vue-articles' },
-    h('header', { classe: 'art-entete' },
+  const racine = h('div', { classe: integre ? 'vue-articles vue-articles-integre' : 'vue vue-articles' },
+    integre ? null : h('header', { classe: 'art-entete' },
       h('p', { classe: 'au-date' }, 'À avoir pour chaque jour de production'),
       h('h1', { classe: 'au-titre' }, 'Articles')),
-    selecteur(vueChoisie));
+    selecteur(vueChoisie, integre));
   if (visibles.length === 0) {
     racine.appendChild(jours.length === 0
       ? etatVide({
@@ -136,7 +138,7 @@ export function rendre(etat) {
           h('p', null, estOuvert(aujourd)
             ? 'Les articles des autres jours de production sont dans la liste de la semaine.'
             : 'Le dimanche est fermé. Les prochains articles sont dans la liste de la semaine.'),
-          bouton('Voir la liste de la semaine', () => { vueChoisie = 'semaine'; jourGlisse = null; redessiner(); }, 'court'))
+          bouton(integre ? 'Voir toute la liste' : 'Voir la liste de la semaine', () => { vueChoisie = 'semaine'; jourGlisse = null; redessiner(); }, 'court'))
         : ligneVide(estOuvert(aujourd) ? "Rien pour le poste aujourd'hui." : "Fermé aujourd'hui : rien pour le poste."));
   }
   for (const j of visibles) {

@@ -42,8 +42,9 @@ function semaine() {
   return e;
 }
 
-test('l\'écran est branché au routeur sous le nom « Articles », sans gestion de stock', () => {
-  assert.equal(routeur.VUES.articles, vue);
+test('la liste est branchée dans Semaine > Achats (plus d\'onglet Articles), sans gestion de stock', () => {
+  assert.equal(routeur.VUES.articles, undefined);
+  assert.deepEqual(routeur.analyserHash('#/articles', S.lundi), { vue: 'semaine', param: null, sous: 'achats' });
   assert.equal(vue.titre(), 'Articles');
   const texte = page(S.lundi, semaine()).textContent;
   assert.doesNotMatch(texte, /en stock|stock théorique|DLC|Restes|Achats|restes/i);

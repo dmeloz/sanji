@@ -75,7 +75,7 @@ const RENDUS = (e) => {
   return [
     ['tableau', null], ['tableau', S.lundiSuivant],
     ['jour', S.samedi], ['jour', S.lundiSuivant], ['reglages', null],
-    ['aujourdhui', null], ['production', S.samedi], ['semaine', null], ['semaine', S.samedi], ['articles', null], ['import', S.lundiSuivant],
+    ['aujourdhui', null], ['production', S.samedi], ['semaine', null], ['semaine', S.samedi], ['semaine', null, 'achats'], ['import', S.lundiSuivant],
     ['reglages', 'standards'], ['reglages', 'organisation'], ['reglages', 'produits'], ['reglages', 'donnees'],
     ...composants.slice(0, 2).map((id) => ['fiche', id]),
   ];
@@ -98,9 +98,9 @@ test('liens : le premier segment d\'une adresse doit être connu (« #/fihce/x �
 
 test('liens : chaque lien interne de chaque écran mène à une vue qui existe, avec une cible qui existe', () => {
   for (const [nom, e] of [['sans quantités', semaineSansQuantites()], ['complète', semaineComplete()]]) {
-    for (const [vue, param] of RENDUS(e)) {
+    for (const [vue, param, sous] of RENDUS(e)) {
       magasin.remplacer(structuredClone(e));
-      const noeud = aDate(S.samedi, () => vues[vue].rendre(magasin.etat(), param));
+      const noeud = aDate(S.samedi, () => vues[vue].rendre(magasin.etat(), param, sous));
       for (const href of liensDe(noeud)) {
         assert.ok(adresseConnue(href), `${nom} / ${vue} ${param} : lien ${href} vers une adresse inconnue (premier segment)`);
         const { vue: cible, param: p } = routeur.analyserHash(href, S.samedi);
@@ -117,7 +117,7 @@ test('liens : les adresses historiques mènent toujours à une page, et une rout
   for (const hash of ['#/accueil', '#/tableau', '#/', '', '#/inconnu']) {
     assert.equal(routeur.analyserHash(hash, S.samedi).vue, 'aujourdhui', hash);
   }
-  const attendu = { '#/jour': 'production', '#/detail': 'production', '#/produits': 'articles', '#/stock/dlc/2026-10-05': 'articles', '#/menus': 'import', [`#/composant/${'x'}`]: 'fiche' };
+  const attendu = { '#/jour': 'production', '#/detail': 'production', '#/produits': 'semaine', '#/stock/dlc/2026-10-05': 'semaine', '#/articles': 'semaine', '#/menus': 'import', [`#/composant/${'x'}`]: 'fiche' };
   for (const [hash, vue] of Object.entries(attendu)) assert.equal(routeur.analyserHash(hash, S.samedi).vue, vue, hash);
 });
 
@@ -248,10 +248,10 @@ test('routeur : #/reglages est la racine, #/reglages/<rubrique> une sous-page, u
   }
 });
 
-test('inventaire : les trois onglets et les onze vues du routeur sont déclarés, les vues d\'origine existent encore', () => {
-  assert.deepEqual(Object.keys(routeur.VUES).sort(), ['articles', 'aujourdhui', 'fiche', 'fiches', 'historique', 'import', 'poste', 'preparer', 'production', 'reglages', 'semaine']);
+test('inventaire : les deux onglets et les dix vues du routeur sont déclarés, les vues d\'origine existent encore', () => {
+  assert.deepEqual(Object.keys(routeur.VUES).sort(), ['aujourdhui', 'fiche', 'fiches', 'historique', 'import', 'poste', 'preparer', 'production', 'reglages', 'semaine']);
   assert.deepEqual(Object.keys(vues).sort(), [...Object.keys(routeur.VUES), 'composant', 'detail', 'jour', 'menus', 'tableau'].sort());
-  assert.deepEqual([...new Set(Object.values(routeur.ONGLET_DE_VUE))].sort(), ['articles', 'aujourdhui', 'semaine']);
+  assert.deepEqual([...new Set(Object.values(routeur.ONGLET_DE_VUE))].sort(), ['aujourdhui', 'semaine']);
 });
 
 // ---------------------------------------------------------------- défaut connu, à corriger en A-P1 (test « rouge » assumé)

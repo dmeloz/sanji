@@ -1478,3 +1478,40 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .mep-hors-regle-resume { margin: 2px 0 4px; font-size: var(--t-legende); font-weight: 600; color: var(--exception); }
 .auj-production .jour-bloc-compact .prod-nom, .auj-production .jour-bloc-compact .mep-nom { font-size: 17px; font-weight: 600; }
 .auj-production .jour-bloc-compact .mep-qte { font-size: 17px; }
+
+/* ===== Écran Semaine, refonte étape 5 (v149) : deux volets (Jours, Achats), préparation de la semaine, plats en évidence. ===== */
+.smn-tete { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 4px 0 14px; }
+.smn-tete-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.smn-periode { margin: 0; font-size: 15px; color: var(--texte-doux); }
+.smn-titre { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.2; }
+.smn-tete-actions { display: flex; align-items: center; gap: 6px; flex: none; }
+.smn-tete-actions .sa-groupe { gap: 6px; }
+.smn-fleche { display: inline-flex; align-items: center; justify-content: center; width: var(--cible); height: var(--cible); border-radius: 50%; border: 1px solid var(--bordure); background: var(--carte); color: var(--texte); font-size: 22px; line-height: 1; text-decoration: none; }
+.smn-fleche:focus-visible, .smn-volet:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.smn-volets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; margin: 0 0 14px; border-radius: 12px; background: var(--carte-2); }
+.smn-volet { display: flex; align-items: center; justify-content: center; min-height: var(--cible); border-radius: 9px; border: 1px solid transparent; color: var(--texte-moyen); font-size: 15px; font-weight: 500; text-decoration: none; }
+.smn-volet-actif { background: var(--carte); border-color: var(--bordure); color: var(--texte); font-weight: 700; }
+.smn-prep { display: flex; flex-direction: column; gap: 10px; margin: 0 0 6px; padding: 14px 16px; border: 1px solid var(--bordure); border-radius: var(--r-carte); background: var(--carte); }
+.smn-prep-titre { margin: 0; font-size: 15px; font-weight: 700; }
+.smn-prep-lignes { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.smn-prep-ligne { display: flex; align-items: baseline; gap: 10px; font-size: 15px; }
+.smn-prep-signe { flex: none; width: 18px; text-align: center; font-weight: 700; color: var(--action); }
+.smn-prep-libelle { flex: 1; min-width: 0; }
+.smn-prep-etat { color: var(--texte-doux); }
+.smn-prep-a-faire .smn-prep-signe, .smn-prep-a-faire .smn-prep-etat { color: var(--ambre-texte); font-weight: 600; }
+.smn-prep-action { min-height: 48px; justify-content: center; text-align: center; }
+/* Les jours : le plat est le texte le plus fort ; le jour, les couverts et les repères passent en petit. */
+.vue-semaine-globale .bord-jour-lien { font-size: 15px; font-weight: 600; color: var(--texte-doux); }
+.vue-semaine-globale .bord-aujourdhui .bord-jour-lien { color: var(--texte-moyen); }
+.vue-semaine-globale .bord-jour-couverts { font-weight: 400; }
+.vue-semaine-globale .bord-menu { grid-template-columns: 30px minmax(0, 1fr) auto; align-items: baseline; padding-block: 4px; }
+.vue-semaine-globale .tb-rang { font-size: 15px; font-weight: 500; }
+.vue-semaine-globale .tb-poste { font-size: 18px; font-weight: 700; line-height: 1.25; }
+.vue-semaine-globale .tb-hors, .vue-semaine-globale .tb-implicite { font-size: 15px; }
+.vue-semaine-globale button.tb-couverts { font-size: 15px; font-weight: 500; color: var(--texte-doux); }
+/* Achats : la liste de l'ancien onglet Articles, sous les volets ; le choix de période est un filtre secondaire. */
+.vue-articles-integre { display: flex; flex-direction: column; gap: 14px; }
+.vue-articles-integre .art-segments { align-self: flex-start; display: flex; padding: 0; background: none; gap: 8px; }
+.vue-articles-integre .art-segments .stock-segment { min-height: var(--cible); padding: 0 14px; border-radius: 22px; border-color: var(--bordure); font-size: 15px; }
+.vue-articles-integre .art-nom { font-size: 18px; }
+.vue-articles-integre .art-menu-titre { font-weight: 500; color: var(--texte-doux); }

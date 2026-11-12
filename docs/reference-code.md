@@ -4,6 +4,8 @@ Détail module par module, déplacé ici depuis `CLAUDE.md` le 2026-11-11 (étap
 
 Depuis la version 148 (étape 4), ce qui suit sur l'onglet Production, la carte « Prochaine », les cases de chiffres, « À avancer » et les menus sur trois jours d'Aujourd'hui ne décrit plus l'écran : voir l'en-tête de `app/js/ui/vue-aujourdhui.js`.
 
+Depuis la version 149 (étape 5), ce qui suit sur l'onglet Articles est de l'histoire : la liste vit dans Semaine > Achats (`#/semaine/achats`, `vue-articles.js` rendu avec `{ integre: true }`, filtre « Toute la liste / Aujourd'hui »), `#/articles`, `#/stock` et `#/produits` y mènent ; l'en-tête de Semaine (période en petit, flèches, « ⋯ »), les volets et la carte « Préparation de la semaine » sont dans `vue-semaine.js`, qui les passe à `vue-tableau.js` par `options.tete`.
+
 À lire quand on touche au module concerné ; les signatures réelles du code font foi.
 
 - `app/js/domaine/` : logique métier pure, sans DOM, testée. Les signatures réelles du code font foi sur la conception.

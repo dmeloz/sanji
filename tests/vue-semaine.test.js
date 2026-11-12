@@ -1,4 +1,4 @@
-// Écran Semaine (onglet 3) : depuis la v116, seulement la vue d'ensemble ; le jour est dans Production (voir semaine-vers-production.test.js). Faux DOM : ni mise en page ni navigateur.
+// Écran Semaine (refonte, étape 5) : deux volets, Jours (la vue d'ensemble) et Achats ; le jour est dans Production (voir semaine-vers-production.test.js). Faux DOM : ni mise en page ni navigateur.
 
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
@@ -46,6 +46,36 @@ test('semaine globale : sans date ou /tableau, l\'ancien tableau restylé, avec 
     assert.equal(parClasse(n, 'sa-actions')[0].attributs['aria-label'], 'Actions de la semaine');
     assert.ok(liens(n).some((l) => l.startsWith('#/production/')), 'les jours mènent à Production');
   }
+});
+
+test('volets : Jours et Achats, le volet affiché est dit par aria-current ; la période est en petit au-dessus du titre', () => {
+  magasin.remplacer(semaine());
+  const jours = vue.rendre(magasin.etat(), S.lundiSuivant, 'tableau');
+  assert.deepEqual(parClasse(jours, 'smn-volet').map((a) => [a.textContent, a.attributs.href, a.attributs['aria-current'] ?? null]),
+    [['Jours', `#/semaine/${S.lundiSuivant}/tableau`, 'page'], ['Achats', '#/semaine/achats', null]]);
+  assert.match(parClasse(jours, 'smn-periode')[0].textContent, /^du \d+( \S+)? au \d+ \S+$/);
+  assert.equal(parClasse(jours, 'smn-titre')[0].textContent, 'Semaine');
+  assert.deepEqual(parClasse(jours, 'smn-fleche').map((a) => a.attributs['aria-label']), ['Semaine précédente', 'Semaine suivante']);
+  const achats = vue.rendre(magasin.etat(), null, 'achats');
+  assert.equal(vue.titre(null, 'achats'), 'Achats');
+  assert.deepEqual(parClasse(achats, 'smn-volet').map((a) => a.attributs['aria-current'] ?? null), [null, 'page']);
+  assert.equal(parClasse(achats, 'vue-articles-integre').length, 1, 'la liste des articles est dans le volet');
+  assert.equal(achats.tous((x) => x.balise === 'h1').length, 1, 'un seul titre de page');
+  assert.deepEqual(routeur.analyserHash('#/semaine/achats', S.samedi), { vue: 'semaine', param: null, sous: 'achats' });
+});
+
+test('préparation de la semaine : menus, couverts du midi et portions, chacun avec son état en mots ; rien sur une semaine passée', () => {
+  const futur = '2099-01-05'; // un lundi à venir quelle que soit l'horloge
+  const e = etatVide();
+  actions.definirMenu(e, futur, 1, 'riz, carottes', horo());
+  magasin.remplacer(e);
+  const n = vue.rendre(magasin.etat(), futur, 'tableau');
+  const lignes = parClasse(n, 'smn-prep-ligne').map((l) => [parClasse(l, 'smn-prep-libelle')[0].textContent, parClasse(l, 'smn-prep-etat')[0].textContent]);
+  assert.deepEqual(lignes.map((l) => l[0]), ['Menus', 'Couverts du midi', 'Portions']);
+  assert.equal(lignes[0][1], '1 jour');
+  assert.equal(lignes[1][1], '1 jour à saisir');
+  assert.equal(parClasse(n, 'smn-prep-action')[0].attributs.href, `#/preparer/${futur}`);
+  assert.equal(parClasse(vue.rendre(magasin.etat(), '2020-01-06', 'tableau'), 'smn-prep').length, 0, 'semaine passée : lecture seule');
 });
 
 test('le routeur envoie les anciennes adresses : détail → Production, tableau → Semaine', () => {

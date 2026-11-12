@@ -61,8 +61,8 @@ test('routeur : le titre du document suit la page affichée', async () => {
     globalThis.location.hash = '#/aujourdhui';
     routeur.rendre();
     assert.equal(globalThis.document.title, 'Aujourd\'hui — Sanji');
-    globalThis.location.hash = '#/articles';
+    globalThis.location.hash = '#/semaine/achats';
     routeur.rendre();
-    assert.match(globalThis.document.title, /^Articles — Sanji$/);
+    assert.match(globalThis.document.title, /^Achats — Sanji$/);
   } finally { dom.restaurer(); }
 });

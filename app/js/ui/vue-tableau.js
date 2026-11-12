@@ -212,12 +212,20 @@ function entete(tb, actions = null) {
       h('span', { classe: 'bord-ligne-texte' }, e.sauvegarde.texte, h('span', { classe: 'note-detail' }, e.sauvegarde.detail)))) : null);
 }
 
-/** `options.actions` : un nœud (le bouton « ⋯ » de Semaine) posé sur la ligne « Aujourd'hui, … », pour ne pas prendre une rangée de plus. */
+/**
+ * `options.actions` : un nœud (le bouton « ⋯ ») posé sur la ligne « Aujourd'hui, … ».
+ * `options.tete(tb)` (refonte, étape 5) : l'appelant (Semaine) fournit son propre en-tête et ce qui le suit ; le rappel de sauvegarde reste dit ici.
+ */
 export function rendre(etat, lundiAffiche, options = {}) {
   const aujourd = aujourdhui();
   const tb = tableauBlanc(etat, aujourd, lundiAffiche ?? undefined);
   const racine = h('div', { classe: 'vue vue-tableau vue-bord', 'data-lundi': tb.lundi });
-  racine.appendChild(entete(tb, options.actions ?? null));
+  if (options.tete) {
+    for (const n of [options.tete(tb)].flat()) if (n) racine.appendChild(n);
+    const s = tb.bord.entete.sauvegarde;
+    if (s) racine.appendChild(h('p', { classe: 'bord-rappel' }, h('a', { href: s.lien, classe: 'bord-ligne bord-neutre' },
+      h('span', { classe: 'bord-ligne-texte' }, s.texte, h('span', { classe: 'note-detail' }, s.detail)))));
+  } else racine.appendChild(entete(tb, options.actions ?? null));
   racine.appendChild(zoneMenus(tb.bord, tb.lundi));
   racine.appendChild(zoneAConfirmer(tb.bord));
   racine.appendChild(zoneFiches(tb.bord, aujourd));
