@@ -45,8 +45,7 @@ function entete(donnees) {
   const probleme = problemeHorsLigne();
   return h('header', { classe: 'au-tete' },
     h('div', { classe: 'au-tete-ligne' },
-      h('p', { classe: 'au-date' }, `${majuscule(libelleJour(donnees.date))} · ${maintenant().slice(11, 16)}`),
-      h('a', { href: '#/reglages', classe: 'au-reglages' }, 'Réglages')),
+      h('p', { classe: 'au-date' }, `${majuscule(libelleJour(donnees.date))} · ${maintenant().slice(11, 16)}`)),
     h('h1', { classe: 'au-titre' }, "Aujourd'hui"),
     probleme ? h('p', { classe: 'au-hors-ligne', role: 'status' }, h('span', { classe: 'au-point', 'aria-hidden': 'true' }), h('span', null, probleme)) : null);
 }

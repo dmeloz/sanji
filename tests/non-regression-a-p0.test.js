@@ -223,35 +223,37 @@ test('inventaire : les neuf blocs de Réglages existent TOUS, répartis sur les 
     const titres = titresDe(rubrique);
     for (const attendu of attendus) assert.ok(titres.includes(attendu), `le bloc « ${attendu} » a disparu de la sous-page ${rubrique}`);
   }
-  // La racine reste courte : aucun des neuf blocs, seulement des titres de section et les six rubriques (plus retour et Import des menus).
+  // La racine reste courte : aucun des neuf blocs ; les rubriques se répartissent entre la racine de Réglages et l'onglet Cuisine (étape 6), sans en perdre une.
   const racine = vues.reglages.rendre(magasin.etat(), null);
   const blocs = Object.values(parPage).flat();
   assert.deepEqual(racine.tous((x) => x.balise === 'h2').map((x) => x.textContent).filter((t) => blocs.includes(t)), []);
-  assert.deepEqual(liensDe(racine).filter((l) => l.startsWith('#/reglages/')), RUBRIQUES_REGLAGES.map((c) => `#/reglages/${c}`));
+  const cuisine = vues.cuisine.rendre(magasin.etat());
+  assert.deepEqual([...liensDe(cuisine), ...liensDe(racine)].filter((l) => l.startsWith('#/reglages/')).sort(), RUBRIQUES_REGLAGES.map((c) => `#/reglages/${c}`).sort());
 });
 
 test('routeur : #/reglages est la racine, #/reglages/<rubrique> une sous-page, une clé inconnue retombe sur la racine', () => {
   assert.deepEqual(routeur.analyserHash('#/reglages', S.samedi), { vue: 'reglages', param: null });
   for (const c of RUBRIQUES_REGLAGES) {
     assert.deepEqual(routeur.analyserHash(`#/reglages/${c}`, S.samedi), { vue: 'reglages', param: c });
-    assert.equal(routeur.ONGLET_DE_VUE[routeur.analyserHash(`#/reglages/${c}`, S.samedi).vue], 'aujourdhui', 'Réglages n\'a plus d\'onglet : il s\'ouvre depuis Aujourd\'hui');
+    assert.equal(routeur.ONGLET_DE_VUE[routeur.analyserHash(`#/reglages/${c}`, S.samedi).vue], 'cuisine', 'Réglages s\'ouvre depuis l\'onglet Cuisine');
   }
   assert.deepEqual(routeur.analyserHash('#/reglages/inconnue', S.samedi), { vue: 'reglages', param: null });
-  // Chaque sous-page a son titre de barre et un lien de retour « ‹ Réglages ».
+  // Chaque sous-page a son titre de barre et un lien de retour : « ‹ Cuisine » pour les rubriques métier, « ‹ Réglages » pour les autres.
   assert.equal(vues.reglages.titre(null), 'Réglages');
   magasin.remplacer(etatVide());
   for (const c of RUBRIQUES_REGLAGES) {
     assert.notEqual(vues.reglages.titre(c), 'Réglages');
-    const retour = vues.reglages.rendre(magasin.etat(), c).tous((x) => x.balise === 'a' && x.textContent === '‹ Réglages');
+    const metier = ['standards-base', 'standards', 'reperes', 'organisation', 'produits'].includes(c);
+    const retour = vues.reglages.rendre(magasin.etat(), c).tous((x) => x.balise === 'a' && x.textContent === (metier ? '‹ Cuisine' : '‹ Réglages'));
     assert.equal(retour.length, 1, c);
-    assert.equal(retour[0].attributs.href, '#/reglages');
+    assert.equal(retour[0].attributs.href, metier ? '#/cuisine' : '#/reglages');
   }
 });
 
-test('inventaire : les deux onglets et les dix vues du routeur sont déclarés, les vues d\'origine existent encore', () => {
-  assert.deepEqual(Object.keys(routeur.VUES).sort(), ['aujourdhui', 'fiche', 'fiches', 'historique', 'import', 'poste', 'preparer', 'production', 'reglages', 'semaine']);
+test('inventaire : les trois onglets et les onze vues du routeur sont déclarés, les vues d\'origine existent encore', () => {
+  assert.deepEqual(Object.keys(routeur.VUES).sort(), ['aujourdhui', 'cuisine', 'fiche', 'fiches', 'historique', 'import', 'poste', 'preparer', 'production', 'reglages', 'semaine']);
   assert.deepEqual(Object.keys(vues).sort(), [...Object.keys(routeur.VUES), 'composant', 'detail', 'jour', 'menus', 'tableau'].sort());
-  assert.deepEqual([...new Set(Object.values(routeur.ONGLET_DE_VUE))].sort(), ['aujourdhui', 'semaine']);
+  assert.deepEqual([...new Set(Object.values(routeur.ONGLET_DE_VUE))].sort(), ['aujourdhui', 'cuisine', 'semaine']);
 });
 
 // ---------------------------------------------------------------- défaut connu, à corriger en A-P1 (test « rouge » assumé)

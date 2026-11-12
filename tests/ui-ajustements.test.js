@@ -35,12 +35,12 @@ const controleDe = (d, debut) => {
 };
 const alertes = (d) => d.tous((x) => x.attributs.role === 'alert' && !x.hidden).map((x) => x.textContent);
 
-test('route : #/reglages/standards-base est une sous-page de Réglages, listée à la racine', () => {
+test('route : #/reglages/standards-base est une sous-page de Réglages, ouverte depuis l\'onglet Cuisine', () => {
   assert.ok(reglages.CLES_RUBRIQUES.includes('standards-base'));
   assert.deepEqual(routeur.analyserHash('#/reglages/standards-base', '2026-10-05'), { vue: 'reglages', param: 'standards-base' });
   assert.equal(reglages.titre('standards-base'), 'Standards de base');
   magasin.remplacer(etatVide());
-  const racine = reglages.rendre(magasin.etat(), null);
+  const racine = routeur.VUES.cuisine.rendre(magasin.etat());
   assert.ok(racine.tous((x) => x.balise === 'a').some((a) => a.attributs.href === '#/reglages/standards-base'));
 });
 
