@@ -172,7 +172,7 @@ test('Jour : en-tête « Production » + date, flèches ‹ ›, plus de barre d
     const noeud = jour(S.lundi, e, affiche);
     assert.equal(classes(noeud, 'jour-barre').length, 0, 'plus de barre de jours');
     assert.equal(classes(noeud, 'prod-jauge').length, 0);
-    assert.match(classes(noeud, 'jour-tete')[0].textContent, affiche === S.lundi ? /^Production\s*Lundi 5 octobre/ : /^Production\s*Jeudi 8 octobre/);
+    assert.match(classes(noeud, 'jour-tete')[0].textContent, affiche === S.lundi ? /^‹ SemaineProduction\s*Lundi 5 octobre/ : /^‹ SemaineProduction\s*Jeudi 8 octobre/);
     assert.equal(classes(noeud, 'prod-fleche').length, 2);
     assert.equal(classes(noeud, 'prod-services').length, 1, 'Services du jour');
     assert.ok(!hrefs(classes(noeud, 'prod-pied')[0]).some((x) => x.startsWith('#/semaine/')), 'plus de lien vers la page de jour');

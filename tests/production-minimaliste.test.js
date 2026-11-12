@@ -280,7 +280,7 @@ test('verbeDe : « Cuire » pour un féculent de base ; rien quand le nom dit d�
 test('en-tête : « Production » + date en une ligne ; ni sélecteur Aujourd\'hui / Demain, ni puce « à décider », ni compte', () => {
   const noeud = page(lundiFusilli());
   const tete = classes(noeud, 'prod-tete')[0];
-  assert.match(tete.textContent, /^Production\s*Lundi 5 octobre/);
+  assert.match(tete.textContent, /^‹ SemaineProduction\s*Lundi 5 octobre/);
   assert.doesNotMatch(texte(noeud), /Aujourd'hui|Demain|à décider/);
   assert.equal(classes(noeud, 'prod-segment').length + classes(noeud, 'prod-compte').length + classes(noeud, 'prod-adecider').length, 0);
 });

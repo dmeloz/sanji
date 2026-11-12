@@ -55,7 +55,8 @@ test('en-tête : « Production » et la date en une ligne, aucun sélecteur Aujo
   const { e } = lundi();
   const noeud = page(e, S.lundi);
   const tete = classes(noeud, 'prod-tete')[0];
-  assert.match(tete.textContent, /^Production\s*Lundi 5 octobre/);
+  assert.match(tete.textContent, /^‹ SemaineProduction\s*Lundi 5 octobre/);
+  assert.equal(classes(tete, 'prod-retour')[0].attributs.href, `#/semaine/${S.lundi}/tableau`, 'retour à la semaine du jour affiché (étape 7)');
   assert.equal(classes(noeud, 'prod-segment').length, 0, 'plus de sélecteur Aujourd\'hui / Demain');
   assert.equal(classes(noeud, 'prod-selecteur').length, 0);
   assert.equal(classes(noeud, 'jour-barre').length, 0, 'plus de barre de jours');
