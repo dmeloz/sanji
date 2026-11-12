@@ -2,6 +2,8 @@
 
 Détail module par module, déplacé ici depuis `CLAUDE.md` le 2026-11-11 (étape 3 de la refonte) pour que `CLAUDE.md` tienne en une page. Le texte est inchangé : il décrit l'application à la version 146. Depuis la version 147, `app/js/domaine/actions.js` est une façade qui réexporte `actions-socle.js`, `actions-menus.js`, `actions-services.js`, `actions-productions.js`, `actions-standards.js` et `actions-regles.js`.
 
+Depuis la version 148 (étape 4), ce qui suit sur l'onglet Production, la carte « Prochaine », les cases de chiffres, « À avancer » et les menus sur trois jours d'Aujourd'hui ne décrit plus l'écran : voir l'en-tête de `app/js/ui/vue-aujourdhui.js`.
+
 À lire quand on touche au module concerné ; les signatures réelles du code font foi.
 
 - `app/js/domaine/` : logique métier pure, sans DOM, testée. Les signatures réelles du code font foi sur la conception.

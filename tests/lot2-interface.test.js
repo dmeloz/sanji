@@ -36,26 +36,23 @@ const pageAujourdhui = (date = S.mercredi, etat = etatVide()) => aDate(date, () 
   return aujourdhui.rendre(magasin.etat());
 });
 
-test('Aujourd’hui : la prochaine action est le premier bloc après le titre', () => {
+test('Aujourd’hui : les menus du jour sont le premier bloc après le titre', () => {
   const page = pageAujourdhui();
   const directs = page.children.map((x) => x.className.split(' ').filter(Boolean));
   assert.ok(directs[0].includes('au-tete'));
-  assert.ok(directs[1].includes('prochaine'));
-  assert.ok(directs[1].includes('prochaine-vide'));
+  assert.ok(directs[1].includes('auj-menus'));
 });
 
-test('Aujourd’hui : les jours proches restent des lignes accessibles avec date et contenu séparés', () => {
+test('Aujourd’hui : chaque menu du jour a son repère discret et son plat, dans deux zones séparées', () => {
   const e = etatVide();
   definirMenu(e, S.mercredi, 1, 'Tagliatelles', h());
-  definirMenu(e, S.jeudi, 2, 'Riz et carottes', h());
+  definirMenu(e, S.mercredi, 2, 'Riz et carottes', h());
   const page = pageAujourdhui(S.mercredi, e);
-  const liste = classes(page, 'tdb-jours')[0];
-  assert.ok(liste, 'liste des jours proches visible');
-  assert.ok(liste.children.length >= 2);
-  for (const ligne of liste.children) {
-    assert.equal(ligne.balise, 'a', 'la ligne ouvre la Production ou l’Import du jour');
-    assert.ok(classes(ligne, 'tdb-jour-date').length === 1, 'date isolée pour le balayage');
-    assert.ok(classes(ligne, 'tdb-jour-contenu').length === 1, 'menus ou état vide dans une colonne dédiée');
+  const menus = classes(page, 'auj-menu');
+  assert.equal(menus.length, 2);
+  for (const ligne of menus) {
+    assert.equal(classes(ligne, 'auj-menu-etiquette').length, 1, 'repère « Menu N » isolé');
+    assert.equal(classes(ligne, 'auj-plat').length, 1, 'plat dans sa zone, en évidence');
   }
 });
 

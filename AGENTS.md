@@ -9,10 +9,10 @@ Statut : créé par délégation le 2026-10-02, allégé le 2026-11-11 (étape 3
 4. Fiche projet : `~/Atelier-Claude/Cerveau-Obsidian/01-Projets/Sanji.md`.
 
 ## Refonte en cours (depuis le 2026-11-11)
-Plan validé par la propriétaire : trois onglets (Aujourd'hui, Semaine, Cuisine) au lieu de quatre, logique métier conservée, une PR par étape. Priorité d'affichage : les plats et les productions en évidence, les dates et repères en petit. La palette sera revue plus tard. Étape 3 (nettoyage technique, sans changement à l'écran) faite en version 147.
+Plan validé par la propriétaire : trois onglets (Aujourd'hui, Semaine, Cuisine) au lieu de quatre, logique métier conservée, une PR par étape. Priorité d'affichage : les plats et les productions en évidence, les dates et repères en petit. La palette sera revue plus tard. Étape 3 (nettoyage technique, sans changement à l'écran) faite en version 147. Étape 4 faite en version 148 : l'onglet Production a disparu, sa liste du jour est dans Aujourd'hui (`ui/vue-aujourdhui.js` : menus du jour en grand, couverts, « À confirmer » sur une ligne, « À produire » = `corps` de `vue-jour.js` avec « Après service » compact) ; trois onglets pour l'instant (Aujourd'hui, Semaine, Articles) ; `#/production/<date>` reste la page d'un autre jour, ouverte depuis Semaine. Restent : Semaine (avec les achats), puis Cuisine et Réglages.
 
 ## Commandes
-- Tests : `npm test` (Node 22, aucun paquet à installer). 1761 tests au 2026-11-11 (version 147).
+- Tests : `npm test` (Node 22, aucun paquet à installer). 1761 tests au 2026-11-11 (version 148).
 - Régénérer la base métier embarquée : `npm run base`.
 - Régénérer les repères de portion validés (`app/js/donnees/savoir-metier.js`, généré depuis `savoir/reperes-portion/savoir-metier.json`) : `npm run savoir`. Ne pas éditer le module à la main.
 - Référentiel de savoir culinaire (brevet fédéral de chef de cuisine, contenu validé le 2026-10-04) : `savoir/culinaire/` (lire `LISEZ-MOI.md`) ; `npm run culinaire` valide les thèmes et `savoir/culinaire/rattachements.json` (choisi à la main, aucun chiffre), régénère l'index et le module embarqué `app/js/donnees/savoir-culinaire.js` (généré, environ 405 Ko, ne pas l'éditer) ; `npm test` échoue si une entrée ou un rattachement n'est pas conforme, ou si le module n'est pas à jour.

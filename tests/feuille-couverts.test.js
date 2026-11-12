@@ -138,17 +138,17 @@ test('Ventes du midi : M1 et M2 servis, « Plus tard » ne touche à rien, « En
   assert.deepEqual([v[1], v[2]], [1, 2]);
 });
 
-test('case « Couverts midi » : avant 14 h elle ouvre les couverts ; dès 14 h, « Ventes à saisir » ouvre les ventes ; saisies, elle dit « servis »', async () => {
+test('bouton des couverts d\'Aujourd\'hui : avant 14 h il ouvre les couverts ; dès 14 h, « ventes à saisir » ouvre les ventes ; saisies, il dit « servis »', async () => {
   magasin.remplacer(lundi());
   const rendre = (heure) => aLHeure(S.lundi, heure, () => accueil.rendre(magasin.etat()));
-  const caseDe = (page) => classes(page, 'tdb-case').find((c) => /Couverts midi/.test(c.textContent));
+  const caseDe = (page) => classes(page, 'auj-couverts')[0];
   const matin = caseDe(rendre('10:00'));
-  assert.doesNotMatch(matin.textContent, /Ventes à saisir/);
+  assert.doesNotMatch(matin.textContent, /ventes à saisir/);
   aLHeure(S.lundi, '10:00', () => matin.click());
   assert.equal(feuilleOuverte().querySelector('h2').textContent, 'Couverts midi');
   fermerTout();
   const apres = caseDe(rendre('14:00'));
-  assert.match(apres.textContent, /Ventes à saisir/);
+  assert.match(apres.textContent, /ventes à saisir/);
   assert.equal(matin.balise, 'button');
   aLHeure(S.lundi, '14:00', () => apres.click());
   assert.equal(feuilleOuverte().querySelector('h2').textContent, 'Ventes du midi');
@@ -157,7 +157,7 @@ test('case « Couverts midi » : avant 14 h elle ouvre les couverts ; dès 14 h,
   saisirVentes(e, S.lundi, 1, 18, h());
   saisirVentes(e, S.lundi, 2, 35, h());
   magasin.remplacer(e);
-  assert.match(caseDe(rendre('15:00')).textContent, /servis M1 18 · M2 35/);
+  assert.match(caseDe(rendre('15:00')).textContent, /servis ?M1 18 · M2 35/);
 });
 
 test('vrai navigateur : « close » n\'est signalé qu\'un peu plus tard ; « Modifier les couverts » rouvre quand même la feuille Couverts midi', async () => {

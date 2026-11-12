@@ -22,10 +22,14 @@ export const VUES = {
   fiche: vueFiche, fiches: vueFichesElements, poste: vuePoste, import: vueImport, preparer: vuePreparer, reglages: vueReglages, historique: vueHistorique,
 };
 
-/** Onglet actif selon la vue. Réglages n'a plus d'onglet : il s'ouvre depuis Aujourd'hui, dont l'onglet reste marqué. */
+/**
+ * Onglet actif selon la vue. Réglages n'a plus d'onglet : il s'ouvre depuis Aujourd'hui, dont l'onglet reste marqué.
+ * Refonte, étape 4 : Production n'a plus d'onglet (la liste du jour est dans Aujourd'hui) ; la page Production d'un autre jour
+ * s'ouvre depuis Semaine, dont l'onglet reste marqué ; la fiche et le mode en poste s'ouvrent depuis la liste du jour.
+ */
 export const ONGLET_DE_VUE = {
-  aujourdhui: 'aujourdhui', reglages: 'aujourdhui', fiches: 'aujourdhui', production: 'production', fiche: 'production', poste: 'production',
-  semaine: 'semaine', import: 'semaine', preparer: 'semaine', historique: 'semaine', articles: 'articles',
+  aujourdhui: 'aujourdhui', reglages: 'aujourdhui', fiches: 'aujourdhui', fiche: 'aujourdhui', poste: 'aujourdhui',
+  production: 'semaine', semaine: 'semaine', import: 'semaine', preparer: 'semaine', historique: 'semaine', articles: 'articles',
 };
 
 /**
@@ -115,7 +119,7 @@ export function rendre() {
   // Vraie nouvelle page (pas un simple redessin) : le focus passe au contenu, pour le clavier et VoiceOver.
   if (cleCourante !== null && cle !== cleCourante) racine.focus?.({ preventScroll: true });
   majOnglets(vue);
-  maintenirAllume(vue === 'production' || vue === 'poste').catch(() => {});
+  maintenirAllume(vue === 'aujourdhui' || vue === 'production' || vue === 'poste').catch(() => {});
   dessinerBandeaux();
   window.scrollTo(0, defilement);
   cleCourante = cle;

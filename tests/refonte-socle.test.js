@@ -28,11 +28,11 @@ before(async () => {
 });
 after(() => dom.restaurer());
 
-test('barre d\'onglets : quatre onglets fixes, dans l\'ordre, sans Réglages', () => {
+test('barre d\'onglets : trois onglets fixes (Production est dans Aujourd\'hui), dans l\'ordre, sans Réglages', () => {
   const html = lire('index.html');
   const nav = html.slice(html.indexOf('<nav id="onglets"'), html.indexOf('</nav>'));
-  assert.deepEqual([...nav.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ['#/aujourdhui', '#/production', '#/semaine', '#/articles']);
-  assert.deepEqual([...nav.matchAll(/data-onglet="([^"]+)"/g)].map((m) => m[1]), ['aujourdhui', 'production', 'semaine', 'articles']);
+  assert.deepEqual([...nav.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ['#/aujourdhui', '#/semaine', '#/articles']);
+  assert.deepEqual([...nav.matchAll(/data-onglet="([^"]+)"/g)].map((m) => m[1]), ['aujourdhui', 'semaine', 'articles']);
   assert.doesNotMatch(nav, /Réglages/);
   assert.doesNotMatch(html, /id="barre"|barre-titre|barre-reglages/, 'plus de barre du haut : chaque page porte son titre');
 });

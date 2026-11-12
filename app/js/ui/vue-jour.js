@@ -167,7 +167,7 @@ export function feuilleChiffrage(etat, l, nom, raison) {
  * seulement pour l'exception (voir `notesDeLigne`). Les autres gestes s'ouvrent depuis « ⋯ » (Actions : <plat>), qui porte aussi
  * l'évaluation de l'avance. Une proposition montre « Planifier » directement. Les avertissements de conservation restent dits.
  */
-function ligneTache(etat, ligneBrute, date) {
+function ligneTache(etat, ligneBrute, date, compacte = false) {
   const l = { ...ligneBrute, avanceJours: ligneBrute.avanceJours ?? Math.max(0, joursEntre(date, ligneBrute.dateService)) };
   const p = etat.productions[l.productionId];
   const fait = p?.etat === 'fait';
@@ -176,11 +176,13 @@ function ligneTache(etat, ligneBrute, date) {
   const verbe = l.genre === 'principale' ? verbeDe(etat.composants?.[l.composantId], etat) : null;
   // L'évaluation de l'avance (limite d'utilisation, règle) reste lisible, dans la feuille de « ⋯ ».
   const ev = l.evaluation ?? evaluationProduction(etat, l.productionId);
-  const notes = notesDeLigne({ ...l, fait }, ev, date);
+  // Ligne compacte (« Après service » d'Aujourd'hui) : « hors règle » en deux mots (la cause est dite une fois, sous le titre du bloc,
+  // et en entier dans la feuille de « ⋯ ») et « Planifier » rangé dans cette feuille : une avance tient sur une ou deux lignes.
+  const notes = notesDeLigne({ ...l, fait }, ev, date).map((n) => (compacte && n.texte.startsWith('hors règle') ? { ...n, texte: 'hors règle' } : n));
   const { directes, autres: autresActions } = actionsDeLigne(etat, l, date);
-  const actions = autresActions.filter(Boolean);
+  const actions = [...(compacte ? directes : []), ...autresActions].filter(Boolean);
   const evaluation = ev && ev.jours > 0 ? noeudEvaluation(ev) : null;
-  const surLaLigne = directes.filter(Boolean);
+  const surLaLigne = compacte ? [] : directes.filter(Boolean);
   // « ⋯ » ouvre une feuille : l'évaluation de l'avance puis les gestes rares (rien n'est déroulé dans la liste).
   const lignePourVerbe = l.genre === 'principale' ? ligneVerbe(etat, l.composantId) : null;
   const avecCalcul = l.genre === 'principale'; // le bloc « Comment c'est calculé » ne se construit qu'à l'ouverture de la feuille
@@ -222,12 +224,14 @@ const aideCourte = () => aideRefroidissement()?.replace(/\s*\([^)]*\)/g, '') ?? 
 const faitesEnBas = (lignes) => [...lignes.filter((l) => !l.fait), ...lignes.filter((l) => l.fait)];
 
 /** Un bloc toujours déplié : titre court (M1, M2, Autres, Après service) puis ses lignes, sans « voir plus ». */
-function bloc(titreTexte, lignes, etat, date, aide = null) {
+function bloc(titreTexte, lignes, etat, date, aide = null, compacte = false) {
   if (lignes.length === 0) return null;
-  return h('section', { classe: 'jour-bloc' },
+  const horsRegle = compacte ? lignes.filter(estHorsRegle).length : 0;
+  return h('section', { classe: `jour-bloc${compacte ? ' jour-bloc-compact' : ''}` },
     h('h2', { classe: 'section-titre prod-groupe-titre' }, titreTexte),
     aide ? h('p', { classe: 'aide mep-aide-froid' }, aide) : null,
-    h('ul', { classe: 'mep-liste' }, faitesEnBas(lignes).map((l) => ligneTache(etat, l, date))));
+    horsRegle > 0 ? h('p', { classe: 'mep-hors-regle-resume' }, `${pluriel(horsRegle, 'avance dépasse', 'avances dépassent')} ce que la règle autorise (hors règle).`) : null,
+    h('ul', { classe: 'mep-liste' }, faitesEnBas(lignes).map((l) => ligneTache(etat, l, date, compacte))));
 }
 
 /** Une ligne de résumé tappable (compte + ›) qui ouvre une feuille en lecture seule : jamais une liste à dérouler. */
@@ -264,8 +268,9 @@ function rubriquePretes(lignes) {
 /**
  * Corps de la page Production pour un jour : blocs de mise en place (M1, M2, Autres, Après service), lignes de résumé et
  * pied de page. L'en-tête, les menus en petit et le changement de jour sont dans vue-production.js.
+ * `avancesCompactes` (Aujourd'hui, étape 4 de la refonte) : les lignes d'« Après service » sont compactes (voir `ligneTache`).
  */
-export function corps(etat, date, feuille) {
+export function corps(etat, date, feuille, { avancesCompactes = false } = {}) {
   const { lecture } = feuille;
   const noeuds = [];
   if (!estOuvert(date)) {
@@ -292,7 +297,7 @@ export function corps(etat, date, feuille) {
     bloc('M1', lecture.service1, etat, date),
     bloc('M2', lecture.service2, etat, date),
     bloc('Autres', lecture.autres, etat, date),
-    bloc('Après service', apres, etat, date, aideCourte()),
+    bloc('Après service', apres, etat, date, aideCourte(), avancesCompactes),
   ]) if (b) noeuds.push(b);
   const resumes = [rubriquePretes(lecture.pretsPlusTard), rubriqueLots(feuille)].filter(Boolean);
   if (resumes.length > 0) noeuds.push(h('div', { classe: 'prod-resumes' }, resumes));

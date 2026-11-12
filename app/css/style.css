@@ -1454,3 +1454,27 @@ dialog.panneau:has(.vp-entete) .panneau-actions { background: var(--fond); margi
 .vue-historique .hist-semaine .ligne-feuille { min-height: var(--cible); padding: 10px 12px; border: 0; }
 .vue-historique .hist-qte { justify-content: flex-end; min-width: 9ch; }
 .vue-historique .hist-jour > :last-child { flex: none; text-align: right; }
+
+/* ------------------------------------------------------------ Écran Aujourd'hui, refonte étape 4 (v148)
+   Ordre d'importance : les plats et les productions en évidence ; la date, le titre de l'onglet et les repères en petit. */
+.vue-aujourdhui .au-titre { font-size: var(--t-section); letter-spacing: 0; }
+.auj-menus { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid var(--bordure); border-radius: var(--r-carte); background: var(--carte); }
+.auj-menus-plats { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.auj-menu { margin: 0; display: flex; flex-direction: column; gap: 1px; }
+.auj-menu-etiquette { font-size: var(--t-legende); color: var(--texte-doux); }
+.auj-plat { font-size: 20px; font-weight: 700; line-height: 1.2; color: var(--texte); overflow-wrap: anywhere; }
+.auj-plat-vide { font-weight: 500; color: var(--texte-doux); }
+.auj-couverts { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 76px; min-height: 64px; padding: 6px 8px; border: 1px solid var(--bordure-forte); border-radius: 12px; background: var(--fond); color: var(--texte); font: inherit; cursor: pointer; }
+.auj-couverts:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.auj-couverts-nombre { font-family: var(--police-qte); font-weight: 600; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
+.auj-couverts-mot { font-size: var(--t-legende); color: var(--texte-doux); text-align: center; }
+.auj-couverts-ligne { display: block; white-space: nowrap; }
+.auj-couverts-ventes { color: var(--exception); font-weight: 600; }
+.auj-production-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.auj-compte { font-size: var(--t-legende); color: var(--texte-doux); }
+.auj-production .prod-nom, .auj-production .mep-nom { font-size: 19px; font-weight: 700; }
+.auj-production .mep-qte { font-size: 19px; }
+.auj-production .jour-bloc { margin-top: 8px; }
+.mep-hors-regle-resume { margin: 2px 0 4px; font-size: var(--t-legende); font-weight: 600; color: var(--exception); }
+.auj-production .jour-bloc-compact .prod-nom, .auj-production .jour-bloc-compact .mep-nom { font-size: 17px; font-weight: 600; }
+.auj-production .jour-bloc-compact .mep-qte { font-size: 17px; }

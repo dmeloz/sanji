@@ -122,15 +122,16 @@ test('analyserHash : les anciennes adresses sont redirigées sans casse', () => 
   assert.deepEqual(analyserHash('#/menus/2026-10-14', j), { vue: 'import', param: '2026-10-12' });
 });
 
-test('routeur : chaque vue a un onglet, quatre onglets, Aujourd\'hui est l\'accueil', () => {
+test('routeur : chaque vue a un onglet, trois onglets (Production n\'en a plus), Aujourd\'hui est l\'accueil', () => {
   assert.equal(ONGLET_DE_VUE.aujourdhui, 'aujourdhui');
   assert.equal(ONGLET_DE_VUE.import, 'semaine');
-  assert.equal(ONGLET_DE_VUE.fiche, 'production');
+  assert.equal(ONGLET_DE_VUE.fiche, 'aujourdhui');
+  assert.equal(ONGLET_DE_VUE.production, 'semaine');
   for (const vue of Object.keys(VUES)) {
     assert.equal(typeof VUES[vue].rendre, 'function', vue);
     assert.equal(typeof VUES[vue].titre, 'function', vue);
     assert.ok(ONGLET_DE_VUE[vue], `onglet manquant : ${vue}`);
   }
   assert.equal(VUES.aujourdhui.titre(), 'Aujourd\'hui');
-  assert.deepEqual([...new Set(Object.values(ONGLET_DE_VUE))].sort(), ['articles', 'aujourdhui', 'production', 'semaine']);
+  assert.deepEqual([...new Set(Object.values(ONGLET_DE_VUE))].sort(), ['articles', 'aujourdhui', 'semaine']);
 });
